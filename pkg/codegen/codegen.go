@@ -44,7 +44,7 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 		buf.WriteString("\n")
 	}
 
-	if file.Head != nil {
+	if layout == nil && file.Head != nil {
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(head_%s)\n", baseName))
 	}
 
@@ -73,6 +73,9 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 		buf.WriteString(fmt.Sprintf("func %s(ctx *context.Context) (string, error) {\n", funcName))
 		buf.WriteString(fmt.Sprintf("\tpageContent, err := renderPage%s(ctx)\n", toPascalCase(baseName)))
 		buf.WriteString("\tif err != nil { return \"\", err }\n")
+		if file.Head != nil {
+			buf.WriteString(fmt.Sprintf("\tctx.Set(\"head\", head_%s)\n", baseName))
+		}
 		buf.WriteString("\tctx.Set(\"slot\", pageContent)\n")
 		buf.WriteString("\tvar b strings.Builder\n")
 
@@ -119,6 +122,32 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 func genLayoutNode(n ast.TemplateNode, depth int) string {
 	if n.Type == ast.NodeSlot {
 		return strings.Repeat("\t", depth) + "b.WriteString(ctx.Get(\"slot\"))\n"
+	}
+	if n.Type == ast.NodeText {
+		if strings.Contains(n.Content, "{#head}") {
+			parts := strings.SplitN(n.Content, "{#head}", 2)
+			var out string
+			if parts[0] != "" {
+				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[0]))
+			}
+			out += strings.Repeat("\t", depth) + "b.WriteString(ctx.Get(\"head\"))\n"
+			if len(parts) > 1 && parts[1] != "" {
+				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[1]))
+			}
+			return out
+		}
+		if strings.Contains(n.Content, "{#slot}") {
+			parts := strings.SplitN(n.Content, "{#slot}", 2)
+			var out string
+			if parts[0] != "" {
+				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[0]))
+			}
+			out += strings.Repeat("\t", depth) + "b.WriteString(ctx.Get(\"slot\"))\n"
+			if len(parts) > 1 && parts[1] != "" {
+				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[1]))
+			}
+			return out
+		}
 	}
 	return genTemplateNode(n, depth)
 }

@@ -12,7 +12,6 @@ func Lex(input string) ([]Token, error) {
 
 	for pos < len(input) {
 		insideDiv := len(stack) > 0 && stack[len(stack)-1] == "div"
-		_ = insideDiv
 
 		nextPos := -1
 		nextCh := byte(0)
@@ -23,7 +22,7 @@ func Lex(input string) ([]Token, error) {
 				nextCh = '<'
 				break
 			}
-			if input[i] == '{' {
+			if insideDiv && input[i] == '{' {
 				nextPos = i
 				nextCh = '{'
 				break
