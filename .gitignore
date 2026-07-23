@@ -8,7 +8,7 @@ vendor/
 .env
 .env.*
 
-_dreego.go
+*_dreego.go
 _smd/
 smd.toml
 
