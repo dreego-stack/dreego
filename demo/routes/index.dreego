@@ -1,0 +1,19 @@
+<head>
+    <title>Dreego</title>
+</head>
+
+<go>
+    message := "Hello from Dreego!"
+</go>
+
+<div>
+    <h1>{message}</h1>
+    <p>Welcome to the Dreego framework.</p>
+    <a href="/about">About</a>
+</div>
+
+<style>
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; }
+    h1 { color: #333; }
+    a { color: #06f; }
+</style>
