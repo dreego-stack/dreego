@@ -7,7 +7,7 @@ import (
 	"codeberg.org/dreego/dreego/pkg/ast"
 )
 
-func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, error) {
+func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName string) (string, error) {
 	funcName := "render" + toPascalCase(baseName)
 	handlerName := "Handle" + toPascalCase(baseName)
 
@@ -34,11 +34,10 @@ func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, e
 		buf.WriteString(fmt.Sprintf("const style_%s = %s\n\n", styleHash, goLiteral(file.Style.Code)))
 	}
 
-	buf.WriteString(fmt.Sprintf("func %s(ctx *context.Context) (string, error) {\n", funcName))
-	buf.WriteString("\tvar b strings.Builder\n")
+	buf.WriteString(fmt.Sprintf("func renderPage%s(ctx *context.Context) (string, error) {\n", toPascalCase(baseName)))
+	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if code := file.Go; code != nil && code.Code != "" {
-		buf.WriteString("\n")
 		for _, line := range strings.Split(strings.Trim(code.Code, "\n"), "\n") {
 			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
 		}
@@ -70,6 +69,27 @@ func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, e
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
 
+	if layout != nil {
+		buf.WriteString(fmt.Sprintf("func %s(ctx *context.Context) (string, error) {\n", funcName))
+		buf.WriteString(fmt.Sprintf("\tpageContent, err := renderPage%s(ctx)\n", toPascalCase(baseName)))
+		buf.WriteString("\tif err != nil { return \"\", err }\n")
+		buf.WriteString("\tctx.Set(\"slot\", pageContent)\n")
+		buf.WriteString("\tvar b strings.Builder\n")
+
+		if layout.Template != nil {
+			for _, n := range layout.Template.Nodes {
+				buf.WriteString(genLayoutNode(n, 1))
+			}
+		}
+
+		buf.WriteString("\n\treturn b.String(), nil\n")
+		buf.WriteString("}\n\n")
+	} else {
+		buf.WriteString(fmt.Sprintf("func %s(ctx *context.Context) (string, error) {\n", funcName))
+		buf.WriteString(fmt.Sprintf("\treturn renderPage%s(ctx)\n", toPascalCase(baseName)))
+		buf.WriteString("}\n\n")
+	}
+
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", handlerName))
 	buf.WriteString("\tctx := &context.Context{W: w, R: r}\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(ctx)\n", funcName))
@@ -94,4 +114,11 @@ func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, e
 	buf.WriteString("}\n")
 
 	return buf.String(), nil
+}
+
+func genLayoutNode(n ast.TemplateNode, depth int) string {
+	if n.Type == ast.NodeSlot {
+		return strings.Repeat("\t", depth) + "b.WriteString(ctx.Get(\"slot\"))\n"
+	}
+	return genTemplateNode(n, depth)
 }

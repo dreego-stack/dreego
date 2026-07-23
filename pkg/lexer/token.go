@@ -14,6 +14,7 @@ const (
 	TokenIfClose
 	TokenEachOpen
 	TokenEachClose
+	TokenSlot
 )
 
 type Token struct {

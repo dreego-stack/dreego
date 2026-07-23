@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"codeberg.org/dreego/dreego/pkg/ast"
 	"codeberg.org/dreego/dreego/pkg/codegen"
 	"codeberg.org/dreego/dreego/pkg/lexer"
 	"codeberg.org/dreego/dreego/pkg/parser"
@@ -19,6 +20,8 @@ import (
 func Run() error {
 	start := time.Now()
 	var found, generated, skipped int
+
+	layout := findLayout()
 
 	type job struct {
 		path     string
@@ -39,6 +42,9 @@ func Run() error {
 			return nil
 		}
 		if filepath.Ext(path) != ".dreego" {
+			return nil
+		}
+		if isLayout(path) {
 			return nil
 		}
 
@@ -77,7 +83,7 @@ func Run() error {
 			return fmt.Errorf("error parsing %s: %w", j.path, err)
 		}
 
-		handlerCode, err := codegen.GenerateHandler(file, j.pkgName, j.pageName)
+		handlerCode, err := codegen.GenerateHandler(file, layout, j.pkgName, j.pageName)
 		if err != nil {
 			return fmt.Errorf("error generating code for %s: %w", j.path, err)
 		}
@@ -98,6 +104,54 @@ func Run() error {
 	}
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
+}
+
+func findLayout() *ast.File {
+	candidates := []string{
+		"dreego/layouts/default.dreego",
+		"layout.dreego",
+	}
+	for _, path := range candidates {
+		data, err := os.ReadFile(path)
+		if err == nil {
+			tokens, err := lexer.Lex(string(data))
+			if err == nil {
+				p := parser.NewParser(tokens)
+				f, err := p.Parse()
+				if err == nil {
+					return f
+				}
+			}
+		}
+	}
+
+	var layout *ast.File
+	filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || layout != nil {
+			return nil
+		}
+		if filepath.Base(path) == "default.dreego" || filepath.Base(path) == "layout.dreego" {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return nil
+			}
+			tokens, err := lexer.Lex(string(data))
+			if err != nil {
+				return nil
+			}
+			p := parser.NewParser(tokens)
+			f, err := p.Parse()
+			if err == nil {
+				layout = f
+			}
+		}
+		return nil
+	})
+	return layout
+}
+
+func isLayout(path string) bool {
+	return path == "dreego/layouts/default.dreego" || filepath.Base(path) == "layout.dreego"
 }
 
 func hashContent(data []byte) string {

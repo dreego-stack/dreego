@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "codeberg.org/dreego/dreego/demo/routes"
+	_ "codeberg.org/dreego/dreego/demo/dreego/routes"
 	"codeberg.org/dreego/dreego/pkg/runtime"
 )
 

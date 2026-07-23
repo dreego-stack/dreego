@@ -65,7 +65,20 @@ func (p *Parser) parseTemplateNode(parent string) (ast.TemplateNode, error) {
 			return ast.TemplateNode{}, err
 		}
 		return ast.TemplateNode{Type: ast.NodeEach, Items: items, Item: item, Children: children}, nil
+	case lexer.TokenTagClose:
+		if parent == "root" {
+			p.advance()
+			return ast.TemplateNode{Type: ast.NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)}, nil
+		}
+		return ast.TemplateNode{}, fmt.Errorf("unexpected </%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
+	case lexer.TokenSlot:
+		p.advance()
+		return ast.TemplateNode{Type: ast.NodeSlot}, nil
 	case lexer.TokenTagOpen:
+		if parent == "root" {
+			p.advance()
+			return ast.TemplateNode{Type: ast.NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)}, nil
+		}
 		return ast.TemplateNode{}, fmt.Errorf("unexpected <%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
 	default:
 		return ast.TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)

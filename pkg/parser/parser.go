@@ -33,7 +33,15 @@ func (p *Parser) Parse() (*ast.File, error) {
 		}
 
 		if tok.Type != lexer.TokenTagOpen {
-			return nil, fmt.Errorf("expected section tag, got %s at position %d", tok.Type, tok.Pos)
+			if file.Template != nil {
+				return nil, fmt.Errorf("expected section tag, got %s at position %d", tok.Type, tok.Pos)
+			}
+			nodes, err := p.parsePlainTemplate()
+			if err != nil {
+				return nil, err
+			}
+			file.Template = &ast.TemplateSection{Nodes: nodes}
+			break
 		}
 
 		switch tok.Tag {
@@ -106,4 +114,19 @@ func (p *Parser) peek() lexer.Token {
 		return p.tokens[p.pos+1]
 	}
 	return lexer.Token{Type: lexer.TokenEOF}
+}
+
+func (p *Parser) parsePlainTemplate() ([]ast.TemplateNode, error) {
+	var nodes []ast.TemplateNode
+	for {
+		tok := p.current()
+		if tok.Type == lexer.TokenEOF {
+			return nodes, nil
+		}
+		node, err := p.parseTemplateNode("root")
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
+	}
 }

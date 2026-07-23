@@ -7,6 +7,7 @@ const (
 	NodeExpression
 	NodeIf
 	NodeEach
+	NodeSlot
 )
 
 type TemplateNode struct {
