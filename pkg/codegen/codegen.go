@@ -81,12 +81,16 @@ func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, e
 	buf.WriteString("\tw.Write([]byte(html))\n")
 	buf.WriteString("}\n\n")
 
-	buf.WriteString("func init() {\n")
 	route := "/" + baseName
 	if baseName == "index" {
 		route = "/"
 	}
-	buf.WriteString(fmt.Sprintf("\truntime.Register(\"GET\", \"%s\", %s)\n", route, handlerName))
+	pattern := route
+	if route == "/" {
+		pattern = "/{$}"
+	}
+	buf.WriteString("func init() {\n")
+	buf.WriteString(fmt.Sprintf("\truntime.Register(\"GET\", \"%s\", %s)\n", pattern, handlerName))
 	buf.WriteString("}\n")
 
 	return buf.String(), nil
