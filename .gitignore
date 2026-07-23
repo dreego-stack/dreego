@@ -14,3 +14,4 @@ smd.toml
 
 dreego_router.go
 handle_*.go
+bin/
