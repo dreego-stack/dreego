@@ -103,7 +103,7 @@ func Run(force bool) error {
 			return fmt.Errorf("error parsing %s: %w", j.path, err)
 		}
 
-		handlerCode, err := codegen.GenerateHandler(file, layout, j.pkgName, j.pageName)
+		handlerCode, err := codegen.GenerateHandler(file, layout, j.pkgName, j.pageName, srcHash[:12])
 		if err != nil {
 			return fmt.Errorf("error generating code for %s: %w", j.path, err)
 		}

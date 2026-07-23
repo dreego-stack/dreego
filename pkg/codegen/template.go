@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"strconv"
 	"strings"
@@ -47,9 +46,19 @@ func goLiteral(s string) string {
 	return "`" + s + "`"
 }
 
-func shortHash(s string) string {
-	h := sha256.Sum256([]byte(s))
-	return fmt.Sprintf("%x", h[:4])
+func scopeCSS(css string, hash string) string {
+	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
+	var result strings.Builder
+	for _, rule := range strings.Split(css, "}") {
+		rule = strings.TrimSpace(rule)
+		if rule == "" {
+			continue
+		}
+		result.WriteString(prefix)
+		result.WriteString(rule)
+		result.WriteString("}\n")
+	}
+	return strings.TrimSpace(result.String())
 }
 
 func toPascalCase(s string) string {

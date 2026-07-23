@@ -7,11 +7,10 @@ import (
 	"codeberg.org/dreego/dreego/pkg/ast"
 )
 
-func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName string) (string, error) {
+func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName string, scopeHash string) (string, error) {
 	funcName := "render" + toPascalCase(baseName)
 	handlerName := "Handle" + toPascalCase(baseName)
 
-	var styleHash string
 	var buf strings.Builder
 
 	buf.WriteString(fmt.Sprintf("package %s\n\n", pkgName))
@@ -30,8 +29,8 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 		buf.WriteString(fmt.Sprintf("const script_%s = %s\n\n", baseName, goLiteral(file.Script.Code)))
 	}
 	if file.Style != nil {
-		styleHash = shortHash(file.Style.Code)
-		buf.WriteString(fmt.Sprintf("const style_%s = %s\n\n", styleHash, goLiteral(file.Style.Code)))
+		scoped := scopeCSS(file.Style.Code, scopeHash)
+		buf.WriteString(fmt.Sprintf("const style_%s = %s\n\n", baseName, goLiteral(scoped)))
 	}
 
 	buf.WriteString(fmt.Sprintf("func renderPage%s(ctx *context.Context) (string, error) {\n", toPascalCase(baseName)))
@@ -49,9 +48,11 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 	}
 
 	if file.Template != nil {
+		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		for _, n := range file.Template.Nodes {
 			buf.WriteString(genTemplateNode(n, 1))
 		}
+		buf.WriteString("\tb.WriteString(\"</div>\")\n")
 	}
 
 	if file.Script != nil {
@@ -62,7 +63,7 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 
 	if file.Style != nil {
 		buf.WriteString("\tb.WriteString(\"<style>\")\n")
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(style_%s)\n", styleHash))
+		buf.WriteString(fmt.Sprintf("\tb.WriteString(style_%s)\n", baseName))
 		buf.WriteString("\tb.WriteString(\"</style>\")\n")
 	}
 
