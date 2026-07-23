@@ -9,37 +9,30 @@
 
 Ziel: Ein lauffähiges Mini-Projekt (Blog, Landingpage) kann damit gebaut werden.
 
-### ✅ Erledigt (Prototyp in code/transpiler/)
+### ✅ Erledigt (implementiert)
 
-- Formale Pipeline: Lexer → Parser → AST → CodeGen
-  - `lexer/` — Tokenizer
-  - `parser/` — 5 Sektions-Parser (head, go, div, script, style)
-  - `ast/` — AST-Typen
-  - `codegen/` — Go-Code-Generator + SSR-Target
+- Formale Pipeline: Lexer → Parser → AST → CodeGen (pkg/)
 - Alle 5 Sektionen: `<head>`, `<go>`, `<div>`, `<script>`, `<style>`
-- Template-Logik: `{var}`, `{#if}`, `{#each}`
-- File-based Routing: `routes/index.dreego` → `/`, `routes/about.dreego` → `/about`
-- `dreego generate` CLI
+- Template-Logik: `{var}`, `{#if}`, `{#each}`, `{#slot}`, `{#head}`
+- `dreego generate` — rekursiver Scan, Hash-Cache, `--force`, Binary-Hash
+- Layout-System: `dreego/layouts/default.dreego` mit `{#slot}` + `{#head}`
+- CSS-Scoping: `data-scope="hash"` (erste 12 Zeichen Source-Hash)
+- File-based Routing: `dreego/routes/index.dreego` → `/`, `/about`
 - Lauffähiger Server mit net/http 1.22+
+- Docker: `make up` → `localhost:8080`
+- Projekt-Konvention: `dreego/routes/`, `dreego/layouts/`, `dreego/components/`
 
 ### Offen für Phase 0
 
-- `layout.dreego` — Wrapper-Layout mit `{#slot}` für Seiteninhalt
-  - DOCTYPE, `<html>`, `<head>` aus Layout
-  - `<head>`-Inhalte pro Seite mergen (Seiten-Head + Layout-Head)
-  - Navigation, Footer im Layout
 - Dynamische Routen-Segmente: `routes/users/[id].dreego`
-- `dreego init <name>` — Projekt-Scaffolding
-  - `routes/`, `assets/`, `dreego.config.json`
-- `dreego dev` — Dev-Server via `air` (Hot Reload)
 - Recovery-Middleware (Panic → 500)
 - 404-Seite (automatisch oder `routes/404.dreego`)
-- CSS-Scoping korrekt: Scope-Hash an Klassen anhängen, nicht nur extrahieren
-- `<script>`-Blöcke in `<head>` oder vor `</body>` (konfigurierbar)
 - Error-Messages mit `.dreego`-Zeilennummern bei Parse-Fehlern
 - Snapshot-Tests für generierten Code
-- `dreego build` — `go build` Wrapper mit `//go:embed` für Assets
+- dreego dev — Dev-Server via `air` (Hot Reload)
+- dreego build — `go build` Wrapper mit `//go:embed` für Assets
 - Statische Assets ausliefern (`/static/` → `assets/` Ordner)
+- dreego init <name> — Projekt-Scaffolding (spätere Zukunft, Template-Repo clonen)
 
 ---
 

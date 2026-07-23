@@ -8,27 +8,25 @@ Package: `dreego` | Dateiendung: `.dreego` | CLI: `dreego`
 
 Ziel: Ein SSR-First Webframework für Go, das auf Augenhöhe mit Phoenix, Next.js und SvelteKit spielt — aber als Single Binary deploybar.
 
-## Aktuelle Phase: Planung / Konzeption
+## Aktuelle Phase: 0.0.x — Implementierung
 
-Dreego befindet sich in der Konzeptionsphase. Noch kein Code, nur Architektur-Planung.
+Transpiler + Routing + Layout + CSS-Scoping funktionieren. Siehe [[../ROADMAP]].
 
 **Wichtige Dokumente:**
-- [[../thinking-list]] — Offene Punkte, die vor/nach Code-Start geklärt werden müssen
-- [[concepts/gap-analysis]] — Was fehlt Dreego? Wo muss nachgebessert werden?
+- [[../ROADMAP]] — Aktuelle Roadmap mit Phasen 0–3
+- [[../CLI]] — CLI-Kommandos
+- [[thinking-list]] — Detaillierte Feature-Liste
 
 ## Knowledge Base
 
 ### Referenz-Material
-- [[KB/dreego-concept]] — Vollständiges Konzept aus dem Gemini-Chat (PDF-Quelle)
-- [[KB/ecosystem-research-2025-2026]] — React/Svelte Ecosystem Research (State of JS 2025)
-- [[KB/ecosystem-analysis]] — Was wir von React/Svelte übernehmen und was nicht
-- [[KB/solid-astro-mdx-research]] — Solid.js, Astro, MDX Deep-Dive
-- [[KB/framework-research-phoenix-laravel-django]] — Phoenix, Laravel, Django Analyse
-- [[KB/rust-frameworks-analysis]] — Rust Frontend-Frameworks (Leptos, Dioxus, Yew)
-- [[KB/blazor-research]] — C# Blazor & ASP.NET Core Analyse
-- [[KB/framework-research-phoenix-laravel-django]] — Phoenix/Laravel/Django Feature-Analyse für Dreego
-- [[KB/rust-frameworks-analysis]] — Rust-Webframeworks (Leptos, Dioxus, Yew): Patterns für Go-SSR
-- [[KB/solid-astro-mdx-research]] — Solid.js, Astro & MDX — Deep-Dive (23.07.2026)
+- [[KB/dreego-concept]] — Gemini-Chat-Konzept (PDF-Quelle)
+- [[KB/ecosystem-analysis]] — React/Svelte: Was übernehmen, was nicht
+- [[KB/ecosystem-research-2025-2026]] — State of JS 2025 Research
+- [[KB/solid-astro-mdx-research]] — Solid.js, Astro, MDX
+- [[KB/framework-research-phoenix-laravel-django]] — Phoenix, Laravel, Django
+- [[KB/rust-frameworks-analysis]] — Rust Frameworks (Leptos, Dioxus, Yew)
+- [[KB/blazor-research]] — C# Blazor & ASP.NET Core
 
 ### Konzepte
 - [[concepts/dreego-architecture]] — Architektur-Übersicht
@@ -42,35 +40,30 @@ Dreego befindet sich in der Konzeptionsphase. Noch kein Code, nur Architektur-Pl
 
 ## Decisions
 
-- [[decisions/name-dreego]] — Namensgebung: edreego / .dreego
-- [[decisions/technology-stack]] — Tech-Stack: Go, Chi, Tailwind, HTMX, Alpine.js, Datastar
-- [[decisions/transpiler-vs-runtime]] — Compile-Time Transpiler statt Runtime-Parsing
-- [[decisions/typescript-v2]] — TypeScript auf V2 verschoben, V1 nur Vanilla JS
-- [[decisions/sections-in-dreego]] — 5 Sektionen: `<head>`, `<go>`, Template, `<script>`, `<style>`
-- [[decisions/ssr-first]] — SSR-First Ansatz, kein Client-Side Framework
-- [[decisions/no-catch-tag]] — Kein `<catch>`-Tag, Fehler via Go-Idiome behandeln
-- [[decisions/file-based-routing]] — File-based Routing mit Chi
-- [[decisions/ssg-wails-v2]] — SSG & Wails erst in V2, Architektur in V1 vorbereitet
-- [[decisions/context-design]] — Context: Interface + Target-Structs (GLM-5.2 Review)
+- [[decisions/name-dreego]] — Namensgebung: dreego / .dreego
+- [[decisions/technology-stack]] — Tech-Stack: Go, net/http, Tailwind, HTMX, Alpine.js
+- [[decisions/transpiler-vs-runtime]] — Compile-Time Transpiler
+- [[decisions/transpiler-pipeline]] — 0.0.1: Single-Pass Scanner, dann formale Pipeline
+- [[decisions/typescript-v2]] — TypeScript auf V2
+- [[decisions/sections-in-dreego]] — 5 Sektionen
+- [[decisions/ssr-first]] — SSR-First
+- [[decisions/no-catch-tag]] — Kein `<catch>`-Tag
+- [[decisions/file-based-routing]] — File-based Routing mit net/http
+- [[decisions/ssg-wails-v2]] — SSG & Wails in V2
+- [[decisions/context-design]] — Context: Interface + Target-Structs
+- [[decisions/plugin-interface]] — Plugin: Capability-basiert
+- [[decisions/transpiler-pipeline]] — Lexer→Parser→AST→CodeGen
+- [[decisions/session-management]] — Session: Interface im Core
+- [[decisions/middleware-system]] — Middleware: Core vs Plugin
+- [[decisions/form-actions]] — g-action + generierte Pipeline
 
-## Guides
-
-- [[guides/architecture]] — Projektstruktur und Modul-Grenzen
-- [[guides/coding-standards]] — Coding-Regeln für Dreego
-
-## Tech Stack (V1)
+## Tech Stack (aktuell)
 
 | Bereich            | Wahl                                      |
 |--------------------|-------------------------------------------|
-| Sprache            | Go 1.26+                                  |
-| HTTP-Router        | go-chi/chi                                |
-| Template Engine    | Dreego Transpiler (.dreego → Go-Code)       |
-| Interaktivität     | HTMX + Alpine.js + Datastar (optional)    |
-| CSS                | Tailwind CLI (embedded)                   |
-| Binary Packaging   | Go `//go:embed` (Single Binary)           |
-| Validierung        | go-playground/validator                   |
-| Dev-Server         | SSE-basiertes Hot Reload                  |
-
-## Affons Ecosystem
-
-Siehe [[concepts/affons-ecosystem]] für die Planung des umgebenden Tool-Ökosystems.
+| Sprache            | Go 1.22+                                  |
+| HTTP-Router        | net/http (Go 1.22+ PathValue)            |
+| Template Engine    | Dreego Transpiler (.dreego → Go-Code)     |
+| CSS Scoping        | `data-scope` via Source-Hash             |
+| Binary Packaging   | Go `//go:embed`                          |
+| Dev-Server         | `air` (Hot Reload)                       |

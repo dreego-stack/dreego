@@ -1,16 +1,21 @@
-# Dreego Thinking List — Offene Punkte der Planungsphase
+# Dreego Thinking List
 
-**Stand:** 23.07.2026
-**Hinweis:** Phasen-Priorisierung jetzt in [[../ROADMAP]]. Diese Liste enthält die Detail-Fragen.
+**Stand:** 24.07.2026 — Phase 0.0.x aktiv, Transpiler+Layout+CSS-Scoping laufen.
+**Hinweis:** Roadmap in [[../ROADMAP]]. Diese Liste enthält Detail-Fragen zu noch offenen Punkten.
 
-**Regeln:**
-- Keine Nummerierung — erledigte Punkte werden entfernt und in [[decisions/]] dokumentiert
-- Neue Punkte werden einfach unten angehängt
-- Ein Punkt = ein Issue, das vor/nach Code-Start geklärt werden muss
+## ✅ Implementiert (aus Think-List entfernt)
 
----
+- Transpiler-Pipeline: Lexer → Parser → AST → CodeGen
+- Alle 5 Sektionen: head, go, div, script, style
+- Template-Logik: {var}, {#if}, {#each}, {#slot}, {#head}
+- Layout-System: dreego/layouts/default.dreego
+- CSS-Scoping: data-scope via Source-Hash
+- File-based Routing: dreego/routes/*.dreego
+- dreego generate: rekursiv, Hash-Cache, --force, Binary-Hash
+- Docker: make up → localhost:8080
+- net/http 1.22+ (kein Chi)
 
-## ✅ Bereits entschieden (Referenz)
+## 🔴 Noch offen in Phase 0
 
 | Entscheidung | Dokument |
 |---|---|
