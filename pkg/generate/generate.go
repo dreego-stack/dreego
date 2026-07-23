@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -17,7 +18,24 @@ import (
 	"codeberg.org/dreego/dreego/pkg/parser"
 )
 
-func Run() error {
+var binaryHash string
+
+func init() {
+	exe, err := os.Executable()
+	if err != nil {
+		return
+	}
+	f, err := os.Open(exe)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	h := sha256.New()
+	io.Copy(h, f)
+	binaryHash = hex.EncodeToString(h.Sum(nil))
+}
+
+func Run(force bool) error {
 	start := time.Now()
 	var found, generated, skipped int
 
@@ -64,12 +82,14 @@ func Run() error {
 			return fmt.Errorf("error reading %s: %w", j.path, err)
 		}
 
-		hash := hashContent(input)
+		srcHash := hashContent(input)
 		outPath := strings.TrimSuffix(j.path, ".dreego") + "_dreego.go"
 
-		if existingHash, ok := readHashFromFile(outPath); ok && existingHash == hash {
-			skipped++
-			continue
+		if !force {
+			if cSrc, cBin, ok := readHashes(outPath); ok && cSrc == srcHash && cBin == binaryHash {
+				skipped++
+				continue
+			}
 		}
 
 		tokens, err := lexer.Lex(string(input))
@@ -88,7 +108,7 @@ func Run() error {
 			return fmt.Errorf("error generating code for %s: %w", j.path, err)
 		}
 
-		out := "// hash:" + hash + "\n" + handlerCode
+		out := fmt.Sprintf("// hash:%s/%s\n%s", srcHash, binaryHash, handlerCode)
 		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
 			return fmt.Errorf("error writing %s: %w", outPath, err)
 		}
@@ -106,25 +126,29 @@ func Run() error {
 	return nil
 }
 
-func findLayout() *ast.File {
-	candidates := []string{
-		"dreego/layouts/default.dreego",
-		"layout.dreego",
+func readHashes(path string) (src, bin string, ok bool) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", "", false
 	}
-	for _, path := range candidates {
-		data, err := os.ReadFile(path)
-		if err == nil {
-			tokens, err := lexer.Lex(string(data))
-			if err == nil {
-				p := parser.NewParser(tokens)
-				f, err := p.Parse()
-				if err == nil {
-					return f
-				}
-			}
-		}
-	}
+	defer f.Close()
 
+	scanner := bufio.NewScanner(f)
+	if !scanner.Scan() {
+		return "", "", false
+	}
+	line := scanner.Text()
+	if !strings.HasPrefix(line, "// hash:") {
+		return "", "", false
+	}
+	parts := strings.SplitN(strings.TrimPrefix(line, "// hash:"), "/", 2)
+	if len(parts) != 2 {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
+}
+
+func findLayout() *ast.File {
 	var layout *ast.File
 	filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() || layout != nil {
@@ -151,28 +175,10 @@ func findLayout() *ast.File {
 }
 
 func isLayout(path string) bool {
-	return path == "dreego/layouts/default.dreego" || filepath.Base(path) == "layout.dreego"
+	return filepath.Base(path) == "default.dreego" || filepath.Base(path) == "layout.dreego"
 }
 
 func hashContent(data []byte) string {
 	h := sha256.Sum256(data)
 	return hex.EncodeToString(h[:])
-}
-
-func readHashFromFile(path string) (string, bool) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", false
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	if !scanner.Scan() {
-		return "", false
-	}
-	line := scanner.Text()
-	if !strings.HasPrefix(line, "// hash:") {
-		return "", false
-	}
-	return strings.TrimPrefix(line, "// hash:"), true
 }
