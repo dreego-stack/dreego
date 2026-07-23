@@ -1,6 +1,9 @@
 package generate
 
 import (
+	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io/fs"
 	"os"
@@ -15,7 +18,14 @@ import (
 
 func Run() error {
 	start := time.Now()
-	var found, generated int
+	var found, generated, skipped int
+
+	type job struct {
+		path     string
+		pkgName  string
+		pageName string
+	}
+	var jobs []job
 
 	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -33,62 +43,82 @@ func Run() error {
 		}
 
 		found++
-		outPath := strings.TrimSuffix(path, ".dreego") + "_dreego.go"
-
-		srcInfo, _ := os.Stat(path)
-		outInfo, _ := os.Stat(outPath)
-		if outInfo != nil && !srcInfo.ModTime().After(outInfo.ModTime()) {
-			return nil
-		}
-
 		pkgName := filepath.Base(filepath.Dir(path))
 		pageName := strings.TrimSuffix(filepath.Base(path), ".dreego")
-
-		input, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("error reading %s: %w", path, err)
-		}
-
-		tokens, err := lexer.Lex(string(input))
-		if err != nil {
-			return fmt.Errorf("error lexing %s: %w", path, err)
-		}
-
-		p := parser.NewParser(tokens)
-		file, err := p.Parse()
-		if err != nil {
-			return fmt.Errorf("error parsing %s: %w", path, err)
-		}
-
-		handlerCode, err := codegen.GenerateHandler(file, pkgName, pageName)
-		if err != nil {
-			return fmt.Errorf("error generating code for %s: %w", path, err)
-		}
-
-		if err := os.WriteFile(outPath, []byte(handlerCode), 0644); err != nil {
-			return fmt.Errorf("error writing %s: %w", outPath, err)
-		}
-
-		generated++
+		jobs = append(jobs, job{path, pkgName, pageName})
 		return nil
 	})
 	if err != nil {
 		return err
 	}
 
+	for _, j := range jobs {
+		input, err := os.ReadFile(j.path)
+		if err != nil {
+			return fmt.Errorf("error reading %s: %w", j.path, err)
+		}
+
+		hash := hashContent(input)
+		outPath := strings.TrimSuffix(j.path, ".dreego") + "_dreego.go"
+
+		if existingHash, ok := readHashFromFile(outPath); ok && existingHash == hash {
+			skipped++
+			continue
+		}
+
+		tokens, err := lexer.Lex(string(input))
+		if err != nil {
+			return fmt.Errorf("error lexing %s: %w", j.path, err)
+		}
+
+		p := parser.NewParser(tokens)
+		file, err := p.Parse()
+		if err != nil {
+			return fmt.Errorf("error parsing %s: %w", j.path, err)
+		}
+
+		handlerCode, err := codegen.GenerateHandler(file, j.pkgName, j.pageName)
+		if err != nil {
+			return fmt.Errorf("error generating code for %s: %w", j.path, err)
+		}
+
+		out := "// hash:" + hash + "\n" + handlerCode
+		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
+			return fmt.Errorf("error writing %s: %w", outPath, err)
+		}
+
+		generated++
+	}
+
 	elapsed := time.Since(start)
 	fmt.Printf("Found %d .dreego files\n", found)
-	fmt.Printf("Generated %d _dreego.go files (in %s)\n", generated, formatDuration(elapsed))
+	fmt.Printf("Generated %d _dreego.go files\n", generated)
+	if skipped > 0 {
+		fmt.Printf("Skipped %d (unchanged)\n", skipped)
+	}
+	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
 }
 
-func formatDuration(d time.Duration) string {
-	switch {
-	case d < time.Microsecond:
-		return fmt.Sprintf("%dns", d.Nanoseconds())
-	case d < time.Millisecond:
-		return fmt.Sprintf("%dµs", d.Microseconds())
-	default:
-		return fmt.Sprintf("%dms", d.Milliseconds())
+func hashContent(data []byte) string {
+	h := sha256.Sum256(data)
+	return hex.EncodeToString(h[:])
+}
+
+func readHashFromFile(path string) (string, bool) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", false
 	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	if !scanner.Scan() {
+		return "", false
+	}
+	line := scanner.Text()
+	if !strings.HasPrefix(line, "// hash:") {
+		return "", false
+	}
+	return strings.TrimPrefix(line, "// hash:"), true
 }
