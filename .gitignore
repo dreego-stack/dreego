@@ -1,0 +1,13 @@
+.kilo/
+.tmp/
+code/
+*.exe
+*.test
+vendor/
+
+.env
+.env.*
+
+_dreego.go
+_smd/
+smd.toml
