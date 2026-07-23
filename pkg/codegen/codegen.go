@@ -7,19 +7,20 @@ import (
 	"codeberg.org/dreego/dreego/pkg/ast"
 )
 
-func GenerateHandler(file *ast.File, baseName string) (string, error) {
+func GenerateHandler(file *ast.File, pkgName string, baseName string) (string, error) {
 	funcName := "render" + toPascalCase(baseName)
 	handlerName := "Handle" + toPascalCase(baseName)
 
 	var styleHash string
 	var buf strings.Builder
 
-	buf.WriteString("package main\n\n")
+	buf.WriteString(fmt.Sprintf("package %s\n\n", pkgName))
 	buf.WriteString("import (\n")
 	buf.WriteString("\t\"fmt\"\n")
 	buf.WriteString("\t\"net/http\"\n")
 	buf.WriteString("\t\"strings\"\n\n")
 	buf.WriteString("\t\"codeberg.org/dreego/dreego/pkg/context\"\n")
+	buf.WriteString("\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n")
 	buf.WriteString(")\n\n")
 
 	if file.Head != nil {
@@ -78,46 +79,15 @@ func GenerateHandler(file *ast.File, baseName string) (string, error) {
 	buf.WriteString("\t}\n")
 	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
 	buf.WriteString("\tw.Write([]byte(html))\n")
+	buf.WriteString("}\n\n")
+
+	buf.WriteString("func init() {\n")
+	route := "/" + baseName
+	if baseName == "index" {
+		route = "/"
+	}
+	buf.WriteString(fmt.Sprintf("\truntime.Register(\"GET\", \"%s\", %s)\n", route, handlerName))
 	buf.WriteString("}\n")
 
-	if file.Style != nil {
-		buf.WriteString(fmt.Sprintf("\nfunc %sCSS() string {\n", handlerName))
-		buf.WriteString(fmt.Sprintf("\treturn style_%s\n", styleHash))
-		buf.WriteString("}\n")
-	}
-	if file.Script != nil {
-		buf.WriteString(fmt.Sprintf("\nfunc %sJS() string {\n", handlerName))
-		buf.WriteString(fmt.Sprintf("\treturn script_%s\n", baseName))
-		buf.WriteString("}\n")
-	}
-
 	return buf.String(), nil
-}
-
-func Generate(file *ast.File, baseName string) (string, error) {
-	handler, err := GenerateHandler(file, baseName)
-	if err != nil {
-		return "", err
-	}
-
-	var buf strings.Builder
-	buf.WriteString(handler)
-	buf.WriteString("\nfunc main() {}\n")
-
-	return buf.String(), nil
-}
-
-func GenerateMain() string {
-	return `package main
-
-import (
-	"net/http"
-)
-
-func main() {
-	mux := http.NewServeMux()
-	RegisterRoutes(mux)
-	http.ListenAndServe(":8080", mux)
-}
-`
 }
