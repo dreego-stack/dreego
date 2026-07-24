@@ -18,13 +18,15 @@ Ziel: Ein lauffähiges Mini-Projekt (Blog, Landingpage) kann damit gebaut werden
 - Layout-System: `dreego/layouts/default.dreego` mit `{#slot}` + `{#head}`
 - CSS-Scoping: `data-scope="hash"` (erste 12 Zeichen Source-Hash)
 - File-based Routing: `dreego/routes/index.dreego` → `/`, `/about`
+- Dynamische Routen: `[id]` in Datei/Ordnernamen, `c.Param()`, `c.Query()`
+- Mehrere `<go>`-Blöcke: `<go method="post">`, `<go method="delete">` etc.
+- Route-Konflikt-Erkennung (duplicate patterns)
 - Lauffähiger Server mit net/http 1.22+
 - Docker: `make up` → `localhost:8080`
 - Projekt-Konvention: `dreego/routes/`, `dreego/layouts/`, `dreego/components/`
 
 ### Offen für Phase 0
 
-- Dynamische Routen-Segmente: `routes/users/[id].dreego`
 - Recovery-Middleware (Panic → 500)
 - 404-Seite (automatisch oder `routes/404.dreego`)
 - Error-Messages mit `.dreego`-Zeilennummern bei Parse-Fehlern
