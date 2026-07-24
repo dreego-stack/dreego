@@ -191,7 +191,7 @@ Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate`
 ```
 src/
 └── routes/
-     ├── index.dreego           →  /
+     ├── get.dreego           →  /
      ├── about.dreego           →  /about
      └── users/
          └── [id].dreego        →  /users/:id

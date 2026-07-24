@@ -1,7 +1,6 @@
 # Dreego Thinking List
 
-**Stand:** 24.07.2026 — Phase 0.0.x aktiv, Transpiler+Layout+CSS-Scoping laufen.
-**Hinweis:** Roadmap in [[../ROADMAP]]. Diese Liste enthält Detail-Fragen zu noch offenen Punkten.
+**Stand:** 25.07.2026 — v0.0.1 getaggt. Transpiler+Routing+Layout+Middleware+CLI laufen.
 
 ## ✅ Implementiert (aus Think-List entfernt)
 
@@ -11,7 +10,12 @@
 - Layout-System: dreego/layouts/default.dreego
 - CSS-Scoping: data-scope via Source-Hash
 - File-based Routing: dreego/routes/*.dreego
+- Zentrale gen/dree.go Import-Datei
 - dreego generate: rekursiv, Hash-Cache, --force, Binary-Hash
+- dreego build + dreego run (+ -d debug, -t timer)
+- dreego/config.json: Redirects, Rewrites, Logging
+- RequestLogging-Middleware (JSONL, Core-Conditional)
+- Redirect/Rewrite-Middleware
 - Docker: make up → localhost:8080
 - net/http 1.22+ (kein Chi)
 
@@ -19,40 +23,22 @@
 
 | Entscheidung | Dokument |
 |---|---|
-| Name dreego | [[decisions/name-dreego]] |
-| Tech-Stack | [[decisions/technology-stack]] |
-| Transpiler-Vorgehen | [[decisions/transpiler-pipeline]] (0.0.1: Single-Pass Scanner) |
-| TypeScript in V2 | [[decisions/typescript-v2]] |
-| 5 Sektionen | [[decisions/sections-in-dreego]] |
-| SSR-First | [[decisions/ssr-first]] |
-| Kein catch-Tag | [[decisions/no-catch-tag]] |
-| File-based Routing | [[decisions/file-based-routing]] |
-| SSG/Wails in V2 | [[decisions/ssg-wails-v2]] |
-| Context-Design | [[decisions/context-design]] |
-| Plugin-Interface | [[decisions/plugin-interface]] |
-| Session-Management | [[decisions/session-management]] |
-| Middleware-System | [[decisions/middleware-system]] |
-| Form Actions | [[decisions/form-actions]] |
+| Deployment-Strategie | noch offen |
+| Form Actions (Implementierung) | [[decisions/form-actions]] |
+| Session-Management (Implementierung) | [[decisions/session-management]] |
 
 ---
 
 ## 🔴 Architektur-Entscheidungen (müssen VOR Code-Start geklärt sein)
 
 ### Error-Handling-Strategie → [[decisions/error-handling]]
-Geklärt am 24.07.2026: Typisierte Fehler-Typen im Core (`HTTPError`, `ValidationError`, `RedirectError`). Recovery-Middleware dispatched auf Typ. Dev/Prod-Unterscheidung via APP_ENV. `slog` für Logging, Core-fixed. Kein Error-Boundary — `{#if hasError}` deckt alles ab.
+Geklart 24.07.2026: Typisierte Fehler-Typen. Recovery-Middleware. Dev/Prod via APP_ENV. slog im Core. RequestLogging Core-Conditional (config.json).
 
 ### Routing-Konventionen → [[decisions/routing-and-components]]
-Geklärt am 24.07.2026: Hybrides Routing (File-based + Plugin). `dreego/routes/` final. `[...catchall]`, `[[optional]]`, `(group)/`. Zentrales `dreego_router.go`. Komponenten via `{#use}` aus `components/`, `layouts/`, Plugin-Assets. Redirects/Rewrites in `dreego.config.json`.
+Geklart 24.07.2026: Hybrides Routing. gen/dree.go. Plugin-Routes via init(). Komponenten via {#use}. dreego/routes/ final.
 
 ### Deployment-Strategie
-Zu klären:
-- Single Binary: Wie wird das gebaut? (`dreego build`)
-- Docker-Image: Multi-Stage (test → build → deploy), FROM scratch
-- Konfiguration: Environment-Variablen, `.env`, `dreego.config.json`
-- Secrets-Management
-- Graceful Shutdown
-- Health-Check-Endpoint
-- Zero-Downtime Deployments
+Noch offen: dreego build --static, Docker-Scratch, Graceful Shutdown, Konfiguration.
 
 ---
 

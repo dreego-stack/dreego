@@ -72,13 +72,15 @@ Ablauf:
 3. Dev-Modus: Rendert Fehlerseite mit Stack-Trace
 4. Prod-Modus: Rendert generische `_error.dreego` oder fallback `500.html`
 
-### Middleware-Stapel (Core-Fixed, Reihenfolge fix)
+### Middleware-Stapel (Core-Fixed + Core-Conditional, Reihenfolge fix)
 
 ```
-[Recovery → RequestID → RealIP → RequestLogging]
+[Recovery → RequestID → RealIP → RequestLogging*]
   → [User-Middleware / Plugin-Middleware]
     → Router → Handler
 ```
+
+\* `RequestLogging` ist Core-Conditional: default an, abschaltbar via `dreego/config.json` (`logging.enabled: false`). Ein Plugin (`dreego-logging`) kann es in V2 ersetzen.
 
 - `Recovery` — Panic → 500 + log
 - `RequestID` — X-Request-ID Header, in Context und Logs

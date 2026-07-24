@@ -216,6 +216,7 @@ func genDreeFile(routes []routeInfo, settings *config.Settings) error {
 	buf.WriteString("\nfunc init() {\n")
 
 	if settings != nil {
+		buf.WriteString(fmt.Sprintf("\truntime.SetLogging(%t)\n", settings.Logging.Enabled))
 		for _, rd := range settings.Redirects {
 			buf.WriteString(fmt.Sprintf("\truntime.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
 		}

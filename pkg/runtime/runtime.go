@@ -12,6 +12,8 @@ var routes []route
 var redirects []redirectRule
 var rewrites []rewriteRule
 
+var loggingEnabled = true
+
 type route struct {
 	method  string
 	pattern string
@@ -49,7 +51,9 @@ func ServeMux() http.Handler {
 
 	var h http.Handler = mux
 	h = redirectRewriteMiddleware(h)
-	h = middleware.RequestLogging()(h)
+	if loggingEnabled {
+		h = middleware.RequestLogging()(h)
+	}
 	return h
 }
 
@@ -74,6 +78,10 @@ func redirectRewriteMiddleware(next http.Handler) http.Handler {
 
 func matchRewrite(rw rewriteRule, path string) bool {
 	return strings.HasPrefix(path, strings.TrimSuffix(rw.from, "/*"))
+}
+
+func SetLogging(enabled bool) {
+	loggingEnabled = enabled
 }
 
 func Listen(addr string) error {

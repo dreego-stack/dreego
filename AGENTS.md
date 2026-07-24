@@ -1,9 +1,9 @@
 # Agent Instructions for Dreego
 
-## Aktuelle Phase: Planung / Konzeption
+## Aktuelle Phase: v0.0.1 — Erster Prototyp
 
-Dreego befindet sich in der Konzeptionsphase. Wir planen das Framework, schreiben noch keinen Code.
-Architektur-Entscheidungen werden dokumentiert, Konzepte ausgearbeitet.
+Transpiler, File-based Routing, Layout, Middleware, CLI funktionieren.
+Version v0.0.1 ist getaggt. Jetzt: Feature-Arbeit aus ROADMAP.md und thinking-list.md.
 
 ## Knowledge Base
 
@@ -17,26 +17,11 @@ Keep notes linked with `[[wiki-style links]]` where useful.
 ```
 .agents/
 ├── _index.md              ← Start hier
-├── KB/                    ← Referenz-Material (PDF-Konvertierungen, externe Quellen)
-│   └── dreego-concept.md   ← Vollständiges Gemini-Chat-Konzept
+├── thinking-list.md        ← Detaillierte Feature-Liste & offene Fragen
+├── KB/                    ← Referenz-Material
 ├── decisions/             ← Architektur-Entscheidungen (ADR-Format)
-│   ├── name-dreego.md
-│   ├── technology-stack.md
-│   ├── transpiler-vs-runtime.md
-│   ├── typescript-v2.md
-│   ├── sections-in-dreego.md
-│   ├── ssr-first.md
-│   ├── no-catch-tag.md
-│   └── file-based-routing.md
 ├── concepts/              ← Ausgearbeitete Konzepte
-│   ├── dreego-architecture.md
-│   ├── dreego-sections.md
-│   ├── template-logic.md
-│   ├── addon-ecosystem.md
-│   └── roadmap.md
-└── guides/                ← Arbeits-Anleitungen
-    ├── architecture.md
-    └── coding-standards.md
+└── guides/                ← Coding-Standards, Architektur-Guide
 ```
 
 ## Projekt: dreego
@@ -44,107 +29,95 @@ Keep notes linked with `[[wiki-style links]]` where useful.
 - **Name:** dreego
 - **Dateiendung:** `.dreego`
 - **Package:** `dreego`
-- **Ziel:** Ein SSR-First Go-Webframework auf Augenhöhe mit Phoenix, Next.js, SvelteKit
-- **Ansatz:** Compile-Time Transpiler (.dreego → Go-Code) + Chi-Router + HTMX/Alpine.js
+- **Modul:** `codeberg.org/dreego/dreego`
+- **Org:** codeberg.org/dreego
+- **Mirror:** github.com/LukasLow/dreego
+- **Ziel:** Ein SSR-First Go-Webframework auf Augenhohe mit Phoenix, Next.js, SvelteKit
+- **Ansatz:** Compile-Time Transpiler (.dreego → Go-Code) + net/http + HTMX/Alpine.js
 - **V1:** MVP mit Transpiler, File-based Routing, `{#if}`, `{#each}`
 - **V2:** TypeScript, SSG, Wails, erweiterte Template-Logik
 
-## Architektur-Garantien für V2 (MÜSSEN in V1 beachtet werden)
+## Architektur-Garantien fur V2 (MUSSEN in V1 beachtet werden)
 
-Diese Punkte werden in V1 noch nicht umgesetzt, aber die Architektur muss von Anfang an
-darauf vorbereitet sein. Wenn einer dieser Punkte in V1 falsch designed wird, ist die
-V2-Implementierung extrem aufwändig oder unmöglich.
+Siehe unveranderte Sektion 1-8 unten.
 
-### 1. Target-Agnostische Transpiler-Pipeline
-V1 ist SSR-only, aber die Code-Generation muss ein abstraktes Target-Interface haben.
-Nicht den HTTP-Handler direkt im Code-Generator hart verdrahten.
-
-**V1:** `TargetSSR` (generiert `http.HandlerFunc`)
-**V2:** `TargetSSG` (generiert statische HTML-Dateien), `TargetWails` (generiert Wails-kompatiblen Code)
-
-→ Entscheidung: [[decisions/ssg-wails-v2]]
-
-### 2. `<go>`-Block: Kein hartes `*http.Request`
-Der `<go>`-Block bekommt in V1 den HTTP-Request. Aber für SSG gibt es keinen Request
-(Build-Zeit), und für Wails gibt es System-APIs statt HTTP.
-
-**Lösung:** Ein `dreego.Context` Interface, das:
-- In SSR: `*http.Request` wrappt
-- In SSG: Build-Time-Daten + Dateisystem-Zugriff bietet
-- In Wails: System-APIs + Fenster-Context bietet
-
-NICHT `r *http.Request` direkt in generierten Code schreiben. Immer über `dreego.Context` gehen.
-
-→ Entscheidung: [[decisions/context-design]]
-
-### 3. Transpiler-Pipeline mit Erweiterungspunkten
-Parse → AST → CodeGen. Jede Phase muss austauschbar/erweiterbar sein.
-
-- `<script>`-Verarbeitung: V1 = No-Op, V2 = esbuild-TS-Compiler
-- `<style>`-Verarbeitung: V1 = Sammeln, V2 = PostCSS/Tailwind-Integration
-- CodeGen: V1 = Go-HTTP-Handler, V2 = SSG/Wails
-
-→ Entscheidung: [[decisions/typescript-v2]]
-
-### 4. Plugin-Interface: First Release = Final Contract
-Das `dreego.Plugin` Interface aus [[concepts/addon-ecosystem]] muss vor dem ersten
-Release final sein. Spätere Änderungen sind Breaking Changes für alle Addons.
-
-**Muss abdecken:**
-- Middleware-Injection (SSR)
-- Route-Registrierung (SSR + SSG)
-- Asset-Bereitstellung (`//go:embed`)
-- Transpiler-Hooks (Custom-Tags wie `<dreego:map />`)
-- Context-Erweiterung (`c.User()`, `c.Session()`)
-
-### 5. File-based Routing: Crawlable für SSG
-Für SSG muss der Transpiler alle Routen kennen, ohne den Server zu starten.
-Route-Registrierung muss deklarativ genug sein, dass ein Static Analyzer sie findet.
-
-**NICHT:** `init()`-Funktionen mit `mux.HandleFunc()` (imperativ, nicht crawlable)
-**SONDERN:** Generierte `dreego_router.go` die alle Routen zentral listet
-
-→ Entscheidung: [[decisions/file-based-routing]]
-
-### 6. Asset-System: Dual-Mode (Embedded + Disk)
-`//go:embed` packt Assets ins Binary (SSR). Für SSG müssen Assets als Dateien auf
-Disk geschrieben werden.
-
-Beide Pfade müssen von Anfang an coexistieren können. Kein Code der annimmt, dass
-Assets NUR embedded oder NUR auf Disk sind.
-
-### 7. Template-Rendering ohne HTTP-Server
-Die Render-Funktion einer `.dreego`-Datei muss ohne laufenden HTTP-Server aufrufbar sein
-(für SSG und Tests).
-
-```go
-// SSR
-page.RenderSSR(w, r)
-
-// SSG (V2) — kein http.ResponseWriter, kein *http.Request
-html := page.RenderStatic(props)
-```
-
-### 8. CLI-Interface: Reservierte Flags
-Diese Flags in V1 bereits definieren (zeigen "Coming in V2"):
-
-```
-dreego build --static    # SSG: Statische HTML-Dateien generieren
-dreego build --wails     # Wails: Desktop-App-Code generieren
-dreego build --mobile    # Mobile: App-Code generieren (Zukunft)
-```
-
-## Coding Rules (für später, wenn Code geschrieben wird)
+## Coding Rules
 
 - Max 120 Zeilen pro Datei
 - Eine logische Sache pro Datei
 - Keine Kommentare im Code
 - Package names kurz, sauber, ohne Hyphen
-- Go 1.26+, Standard Library bevorzugen
-- Build & Start via `make` oder `dreego` CLI, nicht direkt `go build`
-- Generierte `*_dreego.go` Dateien werden nicht committed
+- Go 1.22+, Standard Library bevorzugen
+- Build & Start via `dreego` CLI, nicht direkt `go build`
+- Generierte `dree.go` Dateien werden nicht committed (`.gitignore`)
 
-Vor jedem Commit stelle sicher alle was im code geändert wurde oder seit dem gechatet wurde du nun mit den *.md in sync hälst  
+## Versioning & Tags
 
+- Version: SemVer (`v0.0.1`)
+- Tag: `git tag -a v0.0.1 -m "v0.0.1: first prototype"` nach Commit
+- Neue Version wenn:
+  - Neues Feature (MINOR bump in 0.x: `v0.0.1` → `v0.0.2`)
+  - Bug-Fix (PATCH bump: `v0.0.1` → `v0.0.2`)
+  - Doc-/Tool-Verbesserung, die das Repo besser macht
 
-Das framework sollte schon typesage sein somit erros sollten im generate oder build prozess auftreten und spätendens beim start des wegserver füher immer besser und wenn es die bei der laufzeit gibt dann sollten die so lokal wie moeglich sein
+## Docs & Changelog
+
+- `_docs/` — offentliche Dokumentation (immer aktuell halten)
+- `README.md` — Projekt-Ubersicht (bei Major-Changes updaten)
+- `CHANGELOG.md` — bei jedem Tag aktualisieren
+- `TODO.md` — offene Docs/Features
+
+Agent MUSS nach bedeutenden Changes `_docs/`, `README.md`, `CHANGELOG.md` aktualisieren.
+Nicht bei jedem Commit, aber wenn ein Feature fertig ist oder ein Tag erstellt wird.
+
+## Type Safety
+
+Das Framework muss typensicher sein. Fehler sollen so fruh wie moglich auftreten:
+1. Build-Zeit (`dreego generate`, `go build`)
+2. Start-Zeit (`server.Listen()`)
+3. Laufzeit (pro Request, so lokal wie moglich)
+
+---
+
+## Architektur-Garantien fur V2 (unverandert)
+
+### 1. Target-Agnostische Transpiler-Pipeline
+
+**V1:** `TargetSSR` (generiert `http.HandlerFunc`)
+**V2:** `TargetSSG`, `TargetWails`
+
+→ [[decisions/ssg-wails-v2]]
+
+### 2. `<go>`-Block: Kein hartes `*http.Request`
+
+Losung: `dreego.Context` Interface.
+
+→ [[decisions/context-design]]
+
+### 3. Transpiler-Pipeline mit Erweiterungspunkten
+
+Parse → AST → CodeGen. Jede Phase austauschbar.
+
+→ [[decisions/typescript-v2]]
+
+### 4. Plugin-Interface: First Release = Final Contract
+
+→ [[concepts/addon-ecosystem]]
+
+### 5. File-based Routing: Crawlable fur SSG
+
+Zentrale `dreego/gen/dree.go` listet alle Routen.
+
+→ [[decisions/routing-and-components]]
+
+### 6. Asset-System: Dual-Mode (Embedded + Disk)
+
+### 7. Template-Rendering ohne HTTP-Server
+
+### 8. CLI-Interface: Reservierte Flags
+
+```
+dreego build --static    # SSG (V2)
+dreego build --wails     # Wails (V2)
+dreego build --mobile    # Mobile (Zukunft)
+```

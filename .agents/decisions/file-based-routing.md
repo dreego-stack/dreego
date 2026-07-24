@@ -15,7 +15,7 @@ Dreego soll das auch können — aber Go-idiomatisch.
 
 ```
 routes/
-├── index.dreego           →  /
+├── get.dreego           →  /
 ├── about.dreego           →  /about
 └── users/
     └── [id].dreego        →  /users/:id
@@ -44,7 +44,7 @@ func RegisterDreegoRoutes(mux *http.ServeMux) {
 ```
 routes/
 ├── layout.dreego          → Haupt-Wrapper (Navbar, Footer)
-├── index.dreego           → Nutzt layout.dreego
+├── get.dreego           → Nutzt layout.dreego
 └── admin/
     ├── layout.dreego      → Erweitert Haupt-Layout um Admin-Sidebar
     └── settings.dreego    → Nutzt admin/layout.dreego

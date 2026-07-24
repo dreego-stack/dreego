@@ -1,6 +1,6 @@
 # Dreego Roadmap
 
-**Stand:** 23.07.2026 — Transpiler-Prototyp funktioniert.
+**Stand:** 25.07.2026 — v0.0.1 getaggt. Transpiler+Routing+Layout+Middleware+CLI funktionieren.
 **Prinzip:** Jedes Feature startet als `0.x.0` (quick & dirty, aber funktioniert) und wird in `0.x.1...n` sauber integriert. Breaking Changes bis v1.0 erlaubt.
 
 ---
@@ -17,13 +17,18 @@ Ziel: Ein lauffähiges Mini-Projekt (Blog, Landingpage) kann damit gebaut werden
 - `dreego generate` — rekursiver Scan, Hash-Cache, `--force`, Binary-Hash
 - Layout-System: `dreego/layouts/default.dreego` mit `{#slot}` + `{#head}`
 - CSS-Scoping: `data-scope="hash"` (erste 12 Zeichen Source-Hash)
-- File-based Routing: `dreego/routes/index.dreego` → `/`, `/about`
+- File-based Routing: `dreego/routes/get.dreego` → `/`, `dreego/routes/about/get.dreego` → `/about`
 - Dynamische Routen: `[id]` in Datei/Ordnernamen, `c.Param()`, `c.Query()`
 - Mehrere `<go>`-Blöcke: `<go method="post">`, `<go method="delete">` etc.
 - Route-Konflikt-Erkennung (duplicate patterns)
 - Lauffähiger Server mit net/http 1.22+
 - Docker: `make up` → `localhost:8080`
 - Projekt-Konvention: `dreego/routes/`, `dreego/layouts/`, `dreego/components/`
+- `dreego/gen/dree.go`: Zentrale Import-Datei
+- `dreego/config.json`: Redirects, Rewrites, Logging-Config
+- RequestLogging-Middleware (JSONL, Core-Conditional)
+- Redirect/Rewrite-Middleware
+- CLI: `dreego build` + `dreego run` (`-d` debug, `-t` timer)
 
 ### Offen für Phase 0
 

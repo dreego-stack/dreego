@@ -17,8 +17,13 @@ type Rewrite struct {
 }
 
 type Settings struct {
+	Logging   Logging    `json:"logging"`
 	Redirects []Redirect `json:"redirects"`
 	Rewrites  []Rewrite  `json:"rewrites"`
+}
+
+type Logging struct {
+	Enabled bool `json:"enabled"`
 }
 
 func Load(path string) (*Settings, error) {

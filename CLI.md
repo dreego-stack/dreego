@@ -10,7 +10,7 @@ dreego init myapp
 
 myapp/
 ├── routes/
-│   └── index.dreego       ← Hello-World Startseite
+│   └── get.dreego       ← Hello-World Startseite
 ├── main.go                 ← Minimaler Server
 ├── go.mod                  ← codeberg.org/dreego/dreego
 └── .gitignore
@@ -23,7 +23,7 @@ Transpiliert alle `.dreego`-Dateien in `routes/` zu `_dreego.go`.
 
 ```
 routes/
-├── index.dreego       → index_dreego.go
+├── get.dreego       → index_dreego.go
 ├── about.dreego       → about_dreego.go
 ```
 

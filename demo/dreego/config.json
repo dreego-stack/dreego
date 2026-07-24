@@ -1,4 +1,7 @@
 {
+  "logging": {
+    "enabled": true
+  },
   "redirects": [
     { "from": "/old", "to": "/", "status": 301 },
     { "from": "/codeberg", "to": "https://codeberg.org/dreego/dreego", "status": 302 }

@@ -19,7 +19,7 @@
 ```
 dreego/
 ├── routes/                    ← User schreibt hier
-│   ├── index.dreego           → dreego → init() registriert GET /
+│   ├── get.dreego           → dreego → init() registriert GET /
 │   ├── about/get.dreego       → dreego → init() registriert GET /about
 │   ├── users/[id]/get.dreego  → dreego → init() registriert GET /users/{id}
 │   └── ...
@@ -83,7 +83,7 @@ go get github.com/dreego/dreego-auth@v0.1.0
 
 | Syntax                | Pfad                    | Go-Param              |
 |-----------------------|-------------------------|-----------------------|
-| `index.dreego`        | `/`                     | —                     |
+| `get.dreego`        | `/`                     | —                     |
 | `about.dreego`        | `/about`                | —                     |
 | `[id]/get.dreego`     | `/users/{id}`           | `c.Param("id")`       |
 | `[...catchall].dreego`| `/blog/{catchall}`      | `c.Param("catchall")` |
@@ -192,7 +192,7 @@ Kein Plugin-Loading, kein Reflection, kein Import im CLI-Binary. Nur Dateisystem
 ### Komponenten-Verwendung im Template
 
 ```html
-<!-- dreego/routes/index.dreego -->
+<!-- dreego/routes/get.dreego -->
 {#use Button}              <!-- findet components/Button.dreego -->
 {#use Alert}               <!-- findet @dreego-ui/Alert (kein User-Alert) -->
 
