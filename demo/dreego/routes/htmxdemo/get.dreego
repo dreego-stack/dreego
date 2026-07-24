@@ -3,26 +3,16 @@
     <title>HTMX Demo</title>
 </head>
 
-<go>
-    count := 0
-</go>
-
 <div>
     <h1>HTMX Demo</h1>
-    <p>
-        Klicks: <span id="count">{count}</span>
-        <button hx-post="/htmxdemo"
-                hx-vals="js:{count: parseInt(document.getElementById('count').innerText)}"
-                hx-target="#count"
-                hx-swap="outerHTML">
-            +1
-        </button>
-    </p>
+    <button hx-post="/htmxdemo" hx-target="#result">
+        Klick mich
+    </button>
     <div id="result"></div>
     <a href="/">Zurück</a>
 </div>
 
 <style>
-    button { padding: 0.5rem 1rem; cursor: pointer; margin-left: 0.5rem; }
+    button { padding: 0.5rem 1rem; cursor: pointer; margin: 1rem 0; }
     #result { margin-top: 1rem; color: green; }
 </style>

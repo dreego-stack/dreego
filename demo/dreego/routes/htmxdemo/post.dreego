@@ -1,10 +1,7 @@
 <go>
-    raw := c.FormValue("count")
-    n := 0
-    fmt.Sscanf(raw, "%d", &n)
-    count := n + 1
+    _ = fmt.Sprintf("")
 </go>
 
 <div>
-    <span id="count">{count}</span>
+    <p>HTMX POST hat funktioniert!</p>
 </div>
