@@ -144,3 +144,4 @@ dreego build --mobile    # Mobile: App-Code generieren (Zukunft)
 - Build & Start via `make` oder `dreego` CLI, nicht direkt `go build`
 - Generierte `*_dreego.go` Dateien werden nicht committed
 
+Vor jedem Commit stelle sicher alle was im code geändert wurde oder seit dem gechatet wurde du nun mit den *.md in sync hälst  

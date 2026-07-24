@@ -16,3 +16,4 @@ dreego_router.go
 handle_*.go
 bin/
 *_dreego.go
+dree.go
