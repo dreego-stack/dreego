@@ -3,31 +3,176 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"time"
 
 	"codeberg.org/dreego/dreego/pkg/generate"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: dreego <command>")
-		fmt.Fprintln(os.Stderr, "  generate [--force]  Transpile .dreego files to _dreego.go")
+		printHelp()
 		os.Exit(1)
 	}
 
 	switch os.Args[1] {
 	case "generate":
-		force := false
-		for _, a := range os.Args[2:] {
-			if a == "--force" {
-				force = true
-			}
-		}
-		if err := generate.Run(force); err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
-		}
+		cmdGenerate(os.Args[2:])
+	case "build":
+		cmdBuild(os.Args[2:])
+	case "run":
+		cmdRun(os.Args[2:])
+	case "help", "--help", "-h":
+		printHelp()
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n", os.Args[1])
+		printHelp()
 		os.Exit(1)
 	}
+}
+
+func printHelp() {
+	fmt.Print(`dreego — Go-Webframework CLI (dev tools, not for production)
+
+usage: dreego <command> [flags]
+
+commands:
+  generate [--force]     transpile .dreego files to Go code
+  build                  generate + go build → build/bin/<name>
+  run [-d] [-t <seconds>] build + start server (dev only)
+  help                   show this help
+
+flags:
+  --force                force regeneration of all files
+  -d                     debug mode: write logs to build/logs/<utc>.log
+  -t <seconds>           auto-stop server after N seconds (timer)
+
+examples:
+  dreego generate              transpile changed .dreego files
+  dreego generate --force      force full regeneration
+  dreego build                 generate + build binary
+  dreego run                   build + start server (foreground)
+  dreego run -d                build + start + log to file
+  dreego run -t 60             build + start + stop after 60s
+  dreego run -d -t 60          debug log + 60s timer
+`)
+}
+
+func cmdGenerate(args []string) {
+	force := false
+	for _, a := range args {
+		if a == "--force" {
+			force = true
+		}
+	}
+	if err := generate.Run(force); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func cmdBuild(args []string) {
+	if err := generate.Run(false); err != nil {
+		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
+		os.Exit(1)
+	}
+
+	projDir, pkg, name := findMain()
+	outDir := filepath.Join(projDir, "build", "bin")
+	os.MkdirAll(outDir, 0755)
+	out := filepath.Join(outDir, name)
+
+	fmt.Printf("building %s → %s\n", pkg, out)
+	c := exec.Command("go", "build", "-o", out, "./"+pkg)
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	if err := c.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "build error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("build ok")
+}
+
+func cmdRun(args []string) {
+	debug := false
+	timer := 0
+
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "-d":
+			debug = true
+		case "-t":
+			if i+1 < len(args) {
+				timer, _ = strconv.Atoi(args[i+1])
+				i++
+			}
+		}
+	}
+
+	cmdBuild(nil)
+
+	projDir, _, name := findMain()
+	bin := filepath.Join(projDir, "build", "bin", name)
+
+	fmt.Printf("starting %s", bin)
+	if timer > 0 {
+		fmt.Printf(" (auto-stop in %ds)", timer)
+	}
+	fmt.Println()
+
+	c := exec.Command(bin)
+	c.Stderr = os.Stderr
+
+	if debug {
+		logDir := filepath.Join(projDir, "build", "logs")
+		os.MkdirAll(logDir, 0755)
+		logFile := filepath.Join(logDir, time.Now().UTC().Format("2006-01-02T150405")+".log")
+		f, err := os.Create(logFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "log error: %v\n", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		c.Stdout = f
+		c.Stderr = f
+		fmt.Printf("logging to %s\n", logFile)
+	} else {
+		c.Stdout = os.Stdout
+	}
+
+	if err := c.Start(); err != nil {
+		fmt.Fprintf(os.Stderr, "start error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if timer > 0 {
+		time.Sleep(time.Duration(timer) * time.Second)
+		c.Process.Kill()
+		fmt.Println("timer: server stopped")
+		return
+	}
+
+	c.Wait()
+}
+
+func findMain() (projDir, pkg, name string) {
+	if _, err := os.Stat("main.go"); err == nil {
+		return ".", ".", filepath.Base(wd())
+	}
+
+	for _, d := range []string{"demo", "cmd"} {
+		mp := filepath.Join(d, "main.go")
+		if _, err := os.Stat(mp); err == nil && d != "cmd" {
+			return d, d, d
+		}
+	}
+
+	return ".", ".", "server"
+}
+
+func wd() string {
+	d, _ := os.Getwd()
+	return d
 }
