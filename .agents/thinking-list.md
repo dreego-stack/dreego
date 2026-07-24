@@ -38,24 +38,11 @@
 
 ## 🔴 Architektur-Entscheidungen (müssen VOR Code-Start geklärt sein)
 
-### Error-Handling-Strategie
-Zu klären:
-- Wie fließen Fehler von Addons ins Template?
-- Stack Traces im Dev-Modus, generische Fehlerseite in Prod
-- Error Boundary auf Komponenten-Ebene?
-- Form-Validierungs-Feedback (Feld-Level-Errors, `dreego.Errors`)
-- Flash-Messages (Erfolg/Fehler nach Redirect)
-- Logging-Strategie: slog-Integration, Log-Level, strukturierte Logs
+### Error-Handling-Strategie → [[decisions/error-handling]]
+Geklärt am 24.07.2026: Typisierte Fehler-Typen im Core (`HTTPError`, `ValidationError`, `RedirectError`). Recovery-Middleware dispatched auf Typ. Dev/Prod-Unterscheidung via APP_ENV. `slog` für Logging, Core-fixed. Kein Error-Boundary — `{#if hasError}` deckt alles ab.
 
-### Routing-Konventionen
-Zu klären:
-- `/routes/` vs `/pages/` — welcher Ordnername?
-- `layout.dreego`-Konzept: Vererbung, Verschachtelung, Override
-- Dynamische Segmente: `[id]`, `[...catchall]`, `[[optional]]`
-- Route-Gruppen: `(marketing)/about.dreego`
-- API-Routen: `/routes/api/` oder eigene Struktur?
-- Middleware pro Route/Ordner
-- Redirects, Rewrites in `dreego.config.json`
+### Routing-Konventionen → [[decisions/routing-and-components]]
+Geklärt am 24.07.2026: Hybrides Routing (File-based + Plugin). `dreego/routes/` final. `[...catchall]`, `[[optional]]`, `(group)/`. Zentrales `dreego_router.go`. Komponenten via `{#use}` aus `components/`, `layouts/`, Plugin-Assets. Redirects/Rewrites in `dreego.config.json`.
 
 ### Deployment-Strategie
 Zu klären:

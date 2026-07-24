@@ -1,7 +1,7 @@
 # Entscheidung: File-based Routing mit Chi
 
 **Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Status:** Akzeptiert (erweitert durch [[routing-and-components]])
 
 ## Kontext
 

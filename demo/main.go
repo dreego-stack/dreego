@@ -1,10 +1,7 @@
 package main
 
 import (
-	_ "codeberg.org/dreego/dreego/demo/dreego/routes"
-	_ "codeberg.org/dreego/dreego/demo/dreego/routes/about"
-	_ "codeberg.org/dreego/dreego/demo/dreego/routes/users/_id_"
-	_ "codeberg.org/dreego/dreego/demo/dreego/routes/htmxdemo"
+	_ "codeberg.org/dreego/dreego/demo/dreego/gen"
 	"codeberg.org/dreego/dreego/pkg/runtime"
 )
 

@@ -35,6 +35,7 @@ Transpiler + Routing + Layout + CSS-Scoping funktionieren. Siehe [[../ROADMAP]].
 - [[concepts/addon-ecosystem]] — Addon/Plugin-Architektur
 - [[concepts/affons-ecosystem]] — Gesamtes Ecosystem (CLI, Docs, Registry, Community)
 - [[concepts/signals-and-runes]] — Signals, Svelte Runes und wie Dreego sie abbildet
+- [[concepts/output-strategy-comparison]] — Vergleich: Per-Dir dree.go vs Output-Verzeichnis
 - [[concepts/gap-analysis]] — Was fehlt Dreego? Wo muss nachgebessert werden?
 - [[concepts/roadmap]] — V1, V2, und darüber hinaus
 
@@ -49,11 +50,13 @@ Transpiler + Routing + Layout + CSS-Scoping funktionieren. Siehe [[../ROADMAP]].
 - [[decisions/ssr-first]] — SSR-First
 - [[decisions/no-catch-tag]] — Kein `<catch>`-Tag
 - [[decisions/file-based-routing]] — File-based Routing mit net/http
+- [[decisions/routing-and-components]] — Hybrides Routing, Plugin-Routes via init(), Komponenten-System
 - [[decisions/ssg-wails-v2]] — SSG & Wails in V2
 - [[decisions/context-design]] — Context: Interface + Target-Structs
 - [[decisions/plugin-interface]] — Plugin: Capability-basiert
 - [[decisions/transpiler-pipeline]] — Lexer→Parser→AST→CodeGen
 - [[decisions/session-management]] — Session: Interface im Core
+- [[decisions/error-handling]] — Error-Handling: Typisierte Fehler, Recovery, Dev/Prod
 - [[decisions/middleware-system]] — Middleware: Core vs Plugin
 - [[decisions/form-actions]] — g-action + generierte Pipeline
 

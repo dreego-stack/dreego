@@ -12,6 +12,7 @@ import (
 
 	"codeberg.org/dreego/dreego/pkg/ast"
 	"codeberg.org/dreego/dreego/pkg/codegen"
+	"codeberg.org/dreego/dreego/pkg/config"
 	"codeberg.org/dreego/dreego/pkg/lexer"
 	"codeberg.org/dreego/dreego/pkg/parser"
 )
@@ -23,6 +24,11 @@ var methodExt = map[string]string{
 	"post":   "POST",
 	"put":    "PUT",
 	"delete": "DELETE",
+}
+
+type routeInfo struct {
+	importPath string
+	dirPath    string
 }
 
 func init() {
@@ -44,7 +50,9 @@ func Run(force bool) error {
 	start := time.Now()
 	var found, generated int
 
+	modPath := readModulePath()
 	layout := findLayout()
+	var routes []routeInfo
 
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -62,6 +70,9 @@ func Run(force bool) error {
 		}
 		if isLayoutDir(path) {
 			return nil
+		}
+		if base == "gen" && strings.Contains(path, "dreego/gen") {
+			return filepath.SkipDir
 		}
 
 		entries, err := os.ReadDir(path)
@@ -145,17 +156,106 @@ func Run(force bool) error {
 			return fmt.Errorf("error writing %s: %w", outPath, err)
 		}
 		generated++
+
+		if modPath != "" {
+			importPath := modPath + "/" + filepath.ToSlash(path)
+			routes = append(routes, routeInfo{importPath: importPath, dirPath: path})
+		}
+
 		return nil
 	})
 	if err != nil {
 		return err
 	}
 
+	if len(routes) > 0 {
+		settings := findAndLoadSettings(routes)
+		if err := genDreeFile(routes, settings); err != nil {
+			return fmt.Errorf("error generating gen/dree.go: %w", err)
+		}
+	}
+
 	elapsed := time.Since(start)
 	fmt.Printf("Found %d routes\n", found)
 	fmt.Printf("Generated %d dree.go files\n", generated)
+	fmt.Printf("Generated gen/dree.go\n")
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
+}
+
+func readModulePath() string {
+	data, err := os.ReadFile("go.mod")
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "module ") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "module "))
+		}
+	}
+	return ""
+}
+
+func genDreeFile(routes []routeInfo, settings *config.Settings) error {
+	genDir := findGenDir(routes)
+	if err := os.MkdirAll(genDir, 0755); err != nil {
+		return err
+	}
+
+	var buf strings.Builder
+	buf.WriteString("package gen\n\n")
+	buf.WriteString("import (\n")
+	buf.WriteString("\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n")
+	for _, r := range routes {
+		buf.WriteString(fmt.Sprintf("\t_ \"%s\"\n", r.importPath))
+	}
+	buf.WriteString(")\n")
+
+	buf.WriteString("\nfunc init() {\n")
+
+	if settings != nil {
+		for _, rd := range settings.Redirects {
+			buf.WriteString(fmt.Sprintf("\truntime.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
+		}
+		for _, rw := range settings.Rewrites {
+			buf.WriteString(fmt.Sprintf("\truntime.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
+		}
+	}
+
+	buf.WriteString("}\n")
+
+	outPath := filepath.Join(genDir, "dree.go")
+	return os.WriteFile(outPath, []byte(buf.String()), 0644)
+}
+
+func findAndLoadSettings(routes []routeInfo) *config.Settings {
+	if len(routes) == 0 {
+		return nil
+	}
+	dir := findGenDir(routes)
+	settingsPath := filepath.Join(dir, "..", "config.json")
+	s, err := config.Load(settingsPath)
+	if err != nil {
+		return nil
+	}
+	return s
+}
+
+func findGenDir(routes []routeInfo) string {
+	if len(routes) == 0 {
+		return "dreego/gen"
+	}
+	first := routes[0].dirPath
+	idx := strings.Index(first, "dreego/routes")
+	if idx < 0 {
+		idx = strings.Index(first, "dreego"+string(filepath.Separator)+"routes")
+	}
+	if idx >= 0 {
+		return first[:idx] + "dreego/gen"
+	}
+	return "dreego/gen"
 }
 
 func isRouteDir(path string) bool {
