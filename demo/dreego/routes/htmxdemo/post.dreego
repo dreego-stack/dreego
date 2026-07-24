@@ -1,8 +1,16 @@
 <go>
-    msg := "HTMX POST funktioniert!"
+    raw := c.FormValue("count")
+    n := 0
+    fmt.Sscanf(raw, "%d", &n)
+    count := n + 1
 </go>
 
 <div>
-    <p>{msg}</p>
-    <button hx-post="/htmxdemo" hx-target="#result">Nochmal</button>
+    <span id="count">{count}</span>
+    <button hx-post="/htmxdemo"
+            hx-vals="js:{count: parseInt(document.getElementById('count').innerText)}"
+            hx-target="#count"
+            hx-swap="outerHTML">
+        +1
+    </button>
 </div>

@@ -29,3 +29,10 @@ func (c *Context) Param(key string) string {
 func (c *Context) Query(key string) string {
 	return c.R.URL.Query().Get(key)
 }
+
+func (c *Context) FormValue(key string) string {
+	if err := c.R.ParseForm(); err != nil {
+		return ""
+	}
+	return c.R.FormValue(key)
+}
