@@ -28,7 +28,12 @@ func (p *Parser) parseDivNodes() ([]ast.TemplateNode, error) {
 		if tok.Type == lexer.TokenTagOpen && tok.Tag == "div" {
 			p.advance()
 			depth++
-			nodes = append(nodes, ast.TemplateNode{Type: ast.NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)})
+			content := fmt.Sprintf("<%s", tok.Tag)
+			if tok.Attr != "" {
+				content += " " + tok.Attr
+			}
+			content += ">"
+			nodes = append(nodes, ast.TemplateNode{Type: ast.NodeText, Content: content})
 			continue
 		}
 		if tok.Type == lexer.TokenTagClose && tok.Tag == "div" {
