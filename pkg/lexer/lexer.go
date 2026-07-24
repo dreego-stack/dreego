@@ -101,12 +101,8 @@ func scanTag(input string, pos *int) Token {
 				return Token{Type: TokenText, Value: remaining, Pos: start}
 			}
 			attrs := strings.TrimSpace(remaining[len(opener):end])
-			attr := ""
-			if strings.HasPrefix(attrs, "method=") {
-				attr = strings.Trim(attrs[7:], "\"'")
-			}
 			*pos += end + 1
-			return Token{Type: TokenTagOpen, Tag: tag, Attr: attr, Pos: start}
+			return Token{Type: TokenTagOpen, Tag: tag, Attr: attrs, Pos: start}
 		}
 	}
 

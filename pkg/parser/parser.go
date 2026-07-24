@@ -50,10 +50,7 @@ func (p *Parser) Parse() (*ast.File, error) {
 			if err != nil {
 				return nil, err
 			}
-			section.Method = tok.Attr
-			if section.Method == "" {
-				section.Method = "GET"
-			}
+			section.Method = "GET"
 			file.Go = append(file.Go, *section)
 		case "div":
 			section, err := p.parseDivSection()
