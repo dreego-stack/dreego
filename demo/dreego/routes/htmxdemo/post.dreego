@@ -7,10 +7,4 @@
 
 <div>
     <span id="count">{count}</span>
-    <button hx-post="/htmxdemo"
-            hx-vals="js:{count: parseInt(document.getElementById('count').innerText)}"
-            hx-target="#count"
-            hx-swap="outerHTML">
-        +1
-    </button>
 </div>

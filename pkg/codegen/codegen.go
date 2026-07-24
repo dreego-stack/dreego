@@ -49,7 +49,7 @@ func GenerateMethodHandler(file *ast.File, layout *ast.File, pkgName string, bas
 			buf.WriteString("\tb.WriteString(\"</style>\")\n")
 		}
 
-		if layout != nil {
+		if layout != nil && g.Method == "GET" {
 			buf.WriteString("\tpageContent := b.String()\n")
 			buf.WriteString("\tb.Reset()\n")
 			if file.Head != nil {
