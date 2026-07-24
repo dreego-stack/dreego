@@ -93,10 +93,20 @@ func scanTag(input string, pos *int) Token {
 			*pos += len(closer)
 			return Token{Type: TokenTagClose, Tag: tag, Pos: start}
 		}
-		opener := "<" + tag + ">"
+		opener := "<" + tag
 		if strings.HasPrefix(remaining, opener) {
-			*pos += len(opener)
-			return Token{Type: TokenTagOpen, Tag: tag, Pos: start}
+			end := strings.IndexByte(remaining, '>')
+			if end < 0 {
+				*pos += len(remaining)
+				return Token{Type: TokenText, Value: remaining, Pos: start}
+			}
+			attrs := strings.TrimSpace(remaining[len(opener):end])
+			attr := ""
+			if strings.HasPrefix(attrs, "method=") {
+				attr = strings.Trim(attrs[7:], "\"'")
+			}
+			*pos += end + 1
+			return Token{Type: TokenTagOpen, Tag: tag, Attr: attr, Pos: start}
 		}
 	}
 

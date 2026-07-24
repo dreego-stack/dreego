@@ -21,6 +21,7 @@ type Token struct {
 	Type  TokenType
 	Value string
 	Tag   string
+	Attr  string
 	Pos   int
 }
 

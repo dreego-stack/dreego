@@ -50,10 +50,11 @@ func (p *Parser) Parse() (*ast.File, error) {
 			if err != nil {
 				return nil, err
 			}
-			if file.Go != nil {
-				return nil, fmt.Errorf("duplicate <go> section at position %d", tok.Pos)
+			section.Method = tok.Attr
+			if section.Method == "" {
+				section.Method = "GET"
 			}
-			file.Go = section
+			file.Go = append(file.Go, *section)
 		case "div":
 			section, err := p.parseDivSection()
 			if err != nil {

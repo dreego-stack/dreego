@@ -20,7 +20,16 @@ type TemplateNode struct {
 }
 
 type GoSection struct {
-	Code string
+	Code   string
+	Method string
+}
+
+type File struct {
+	Head     *HeadSection
+	Go       []GoSection
+	Template *TemplateSection
+	Script   *ScriptSection
+	Style    *StyleSection
 }
 
 type HeadSection struct {
@@ -37,12 +46,4 @@ type ScriptSection struct {
 
 type StyleSection struct {
 	Code string
-}
-
-type File struct {
-	Head     *HeadSection
-	Go       *GoSection
-	Template *TemplateSection
-	Script   *ScriptSection
-	Style    *StyleSection
 }
