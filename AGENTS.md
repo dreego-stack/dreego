@@ -145,3 +145,6 @@ dreego build --mobile    # Mobile: App-Code generieren (Zukunft)
 - Generierte `*_dreego.go` Dateien werden nicht committed
 
 Vor jedem Commit stelle sicher alle was im code geändert wurde oder seit dem gechatet wurde du nun mit den *.md in sync hälst  
+
+
+Das framework sollte schon typesage sein somit erros sollten im generate oder build prozess auftreten und spätendens beim start des wegserver füher immer besser und wenn es die bei der laufzeit gibt dann sollten die so lokal wie moeglich sein
