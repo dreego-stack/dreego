@@ -28,14 +28,18 @@ func GenerateMethodHandler(file *ast.File, layout *ast.File, pkgName string, bas
 	}
 
 	if file.Template != nil {
-		if layout == nil && file.Head != nil {
+		if layout == nil && file.Head != nil && g.Method == "GET" {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
 		}
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		if g.Method == "GET" {
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		}
 		for _, n := range file.Template.Nodes {
 			buf.WriteString(genTemplateNode(n, 1))
 		}
-		buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		if g.Method == "GET" {
+			buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		}
 
 		if file.Script != nil {
 			buf.WriteString("\tb.WriteString(\"<script>\")\n")
