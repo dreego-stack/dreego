@@ -1,0 +1,8 @@
+<go>
+    msg := "HTMX POST funktioniert!"
+</go>
+
+<div>
+    <p>{msg}</p>
+    <button hx-post="/htmxdemo" hx-target="#result">Nochmal</button>
+</div>

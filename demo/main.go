@@ -4,6 +4,7 @@ import (
 	_ "codeberg.org/dreego/dreego/demo/dreego/routes"
 	_ "codeberg.org/dreego/dreego/demo/dreego/routes/about"
 	_ "codeberg.org/dreego/dreego/demo/dreego/routes/users/_id_"
+	_ "codeberg.org/dreego/dreego/demo/dreego/routes/htmxdemo"
 	"codeberg.org/dreego/dreego/pkg/runtime"
 )
 

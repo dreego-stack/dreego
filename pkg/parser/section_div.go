@@ -18,15 +18,27 @@ func (p *Parser) parseDivSection() (*ast.TemplateSection, error) {
 
 func (p *Parser) parseDivNodes() ([]ast.TemplateNode, error) {
 	var nodes []ast.TemplateNode
+	depth := 0
 
 	for {
 		tok := p.current()
 		if tok.Type == lexer.TokenEOF {
 			return nil, fmt.Errorf("unclosed <div>")
 		}
-		if tok.Type == lexer.TokenTagClose {
+		if tok.Type == lexer.TokenTagOpen && tok.Tag == "div" {
 			p.advance()
-			return nodes, nil
+			depth++
+			nodes = append(nodes, ast.TemplateNode{Type: ast.NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)})
+			continue
+		}
+		if tok.Type == lexer.TokenTagClose && tok.Tag == "div" {
+			p.advance()
+			depth--
+			if depth < 0 {
+				return nodes, nil
+			}
+			nodes = append(nodes, ast.TemplateNode{Type: ast.NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)})
+			continue
 		}
 
 		node, err := p.parseTemplateNode("div")

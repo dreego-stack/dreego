@@ -5,10 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -19,7 +17,6 @@ import (
 )
 
 var binaryHash string
-var paramRe = regexp.MustCompile(`\[(\w+)\]|_(\w+)_`)
 
 var methodExt = map[string]string{
 	"get":    "GET",
@@ -49,7 +46,7 @@ func Run(force bool) error {
 
 	layout := findLayout()
 
-	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -61,7 +58,7 @@ func Run(force bool) error {
 			return nil
 		}
 		if strings.HasPrefix(base, ".") {
-			return fs.SkipDir
+			return filepath.SkipDir
 		}
 		if isLayoutDir(path) {
 			return nil
@@ -81,81 +78,72 @@ func Run(force bool) error {
 		if len(dreegoFiles) == 0 {
 			return nil
 		}
-
-		found++
-		pkgName := filepath.Base(path)
-		if pkgName == "routes" {
-			pkgName = "routes"
+		if !isRouteDir(path) {
+			return nil
 		}
 
-		p := buildPattern(path)
-		pageName := buildPageName(path)
+		found++
 		outPath := filepath.Join(path, "dree.go")
+		pattern := buildPattern(path)
+		pageName := buildPageName(path)
 
-		var methods []ast.GoSection
+		var hashParts []string
+		var handlerSources []string
+		hashParts = append(hashParts, fmt.Sprintf("bin:%q", binaryHash[:12]))
 
 		for _, fpath := range dreegoFiles {
-			fname := filepath.Base(fpath)
+			data, _ := os.ReadFile(fpath)
+			h := sha256.Sum256(data)
+			base := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
+			hashParts = append(hashParts, fmt.Sprintf("%s:%q", base, hex.EncodeToString(h[:])))
+
 			method := "GET"
 			for prefix, m := range methodExt {
-				if strings.HasPrefix(fname, prefix+".dreego") || strings.HasPrefix(fname, prefix+"-") {
+				if base == prefix || strings.HasPrefix(base, prefix+"-") {
 					method = m
 					break
 				}
 			}
 
-			input, err := os.ReadFile(fpath)
-			if err != nil {
-				return fmt.Errorf("error reading %s: %w", fpath, err)
-			}
-
-			tokens, err := lexer.Lex(string(input))
+			tokens, err := lexer.Lex(string(data))
 			if err != nil {
 				return fmt.Errorf("error lexing %s: %w", fpath, err)
 			}
 
-			pr := parser.NewParser(tokens)
-			file, err := pr.Parse()
+			p := parser.NewParser(tokens)
+			file, err := p.Parse()
 			if err != nil {
 				return fmt.Errorf("error parsing %s: %w", fpath, err)
 			}
 
-			for _, g := range file.Go {
-				g.Method = method
-				methods = append(methods, g)
-			}
 			if len(file.Go) == 0 {
-				methods = append(methods, ast.GoSection{Method: method})
+				file.Go = []ast.GoSection{{Method: method}}
+			}
+			for i := range file.Go {
+				file.Go[i].Method = method
+			}
+
+			scopeHash := hex.EncodeToString(h[:])[:12]
+			pkgName := filepath.Base(path)
+
+			for _, g := range file.Go {
+				src, err := codegen.GenerateMethodHandler(file, layout, pkgName, pageName, pattern, g, scopeHash)
+				if err != nil {
+					return fmt.Errorf("error generating %s: %w", fpath, err)
+				}
+				handlerSources = append(handlerSources, src)
 			}
 		}
 
-		if !force {
-			if stale, _ := isStale(dreegoFiles, outPath); !stale {
-				return nil
-			}
-		}
+		hashLine := "// hash:{" + strings.Join(hashParts, ", ") + "}"
 
-		combined := &ast.File{
-			Head:     extractHead(dreegoFiles),
-			Go:       methods,
-			Template: extractTemplate(dreegoFiles),
-			Script:   extractScript(dreegoFiles),
-			Style:    extractStyle(dreegoFiles),
-		}
+		pkgName := filepath.Base(path)
+		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"strings\"\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName)
+		out += strings.Join(handlerSources, "")
 
-		combinedHash := hashFiles(dreegoFiles)
-		scopeHash := combinedHash[:12]
-
-		handlerCode, err := codegen.GenerateHandler(combined, layout, pkgName, pageName, p, scopeHash)
-		if err != nil {
-			return fmt.Errorf("error generating %s: %w", path, err)
-		}
-
-		out := fmt.Sprintf("// hash:%s/%s\n%s", combinedHash, binaryHash, handlerCode)
 		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
 			return fmt.Errorf("error writing %s: %w", outPath, err)
 		}
-
 		generated++
 		return nil
 	})
@@ -170,82 +158,8 @@ func Run(force bool) error {
 	return nil
 }
 
-func extractHead(files []string) *ast.HeadSection {
-	for _, f := range files {
-		data, _ := os.ReadFile(f)
-		tokens, _ := lexer.Lex(string(data))
-		p := parser.NewParser(tokens)
-		file, _ := p.Parse()
-		if file != nil && file.Head != nil {
-			return file.Head
-		}
-	}
-	return nil
-}
-
-func extractTemplate(files []string) *ast.TemplateSection {
-	for _, f := range files {
-		data, _ := os.ReadFile(f)
-		tokens, _ := lexer.Lex(string(data))
-		p := parser.NewParser(tokens)
-		file, _ := p.Parse()
-		if file != nil && file.Template != nil {
-			return file.Template
-		}
-	}
-	return nil
-}
-
-func extractScript(files []string) *ast.ScriptSection {
-	for _, f := range files {
-		data, _ := os.ReadFile(f)
-		tokens, _ := lexer.Lex(string(data))
-		p := parser.NewParser(tokens)
-		file, _ := p.Parse()
-		if file != nil && file.Script != nil {
-			return file.Script
-		}
-	}
-	return nil
-}
-
-func extractStyle(files []string) *ast.StyleSection {
-	for _, f := range files {
-		data, _ := os.ReadFile(f)
-		tokens, _ := lexer.Lex(string(data))
-		p := parser.NewParser(tokens)
-		file, _ := p.Parse()
-		if file != nil && file.Style != nil {
-			return file.Style
-		}
-	}
-	return nil
-}
-
-func hashFiles(files []string) string {
-	h := sha256.New()
-	for _, f := range files {
-		data, _ := os.ReadFile(f)
-		h.Write(data)
-	}
-	return hex.EncodeToString(h.Sum(nil))
-}
-
-func isStale(files []string, outPath string) (bool, error) {
-	outInfo, err := os.Stat(outPath)
-	if err != nil {
-		return true, nil
-	}
-	for _, f := range files {
-		info, err := os.Stat(f)
-		if err != nil {
-			return true, nil
-		}
-		if info.ModTime().After(outInfo.ModTime()) {
-			return true, nil
-		}
-	}
-	return false, nil
+func isRouteDir(path string) bool {
+	return strings.Contains(path, "routes/") || strings.HasSuffix(path, "/routes") || filepath.Base(path) == "routes"
 }
 
 func buildPageName(path string) string {
@@ -274,9 +188,6 @@ func buildPattern(path string) string {
 		rel = rel[idx+len("routes/"):]
 	} else if strings.HasSuffix(rel, "/routes") || rel == "routes" {
 		rel = ""
-	}
-	if rel == "" || rel == "." {
-		return "/{$}"
 	}
 	if rel == "" || rel == "." {
 		return "/{$}"
@@ -313,7 +224,7 @@ func patternSegment(seg string) string {
 
 func findLayout() *ast.File {
 	var layout *ast.File
-	filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+	filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() || layout != nil {
 			return nil
 		}
