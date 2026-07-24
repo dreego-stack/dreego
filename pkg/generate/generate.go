@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 )
 
 var binaryHash string
+var paramRe = regexp.MustCompile(`\[(\w+)\]`)
 
 func init() {
 	exe, err := os.Executable()
@@ -39,14 +41,11 @@ func Run(force bool) error {
 	start := time.Now()
 	var found, generated, skipped int
 
-	layout := findLayout()
-
-	type job struct {
-		path     string
-		pkgName  string
-		pageName string
+	if err := checkConflicts(); err != nil {
+		return err
 	}
-	var jobs []job
+
+	layout := findLayout()
 
 	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -67,45 +66,40 @@ func Run(force bool) error {
 		}
 
 		found++
-		pkgName := filepath.Base(filepath.Dir(path))
-		pageName := strings.TrimSuffix(filepath.Base(path), ".dreego")
-		jobs = append(jobs, job{path, pkgName, pageName})
-		return nil
-	})
-	if err != nil {
-		return err
-	}
 
-	for _, j := range jobs {
-		input, err := os.ReadFile(j.path)
+		input, err := os.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("error reading %s: %w", j.path, err)
+			return fmt.Errorf("error reading %s: %w", path, err)
 		}
 
 		srcHash := hashContent(input)
-		outPath := strings.TrimSuffix(j.path, ".dreego") + "_dreego.go"
+		outPath := cleanPath(strings.TrimSuffix(path, ".dreego")) + "_dreego.go"
 
 		if !force {
 			if cSrc, cBin, ok := readHashes(outPath); ok && cSrc == srcHash && cBin == binaryHash {
 				skipped++
-				continue
+				return nil
 			}
 		}
 
+		pkgName := filepath.Base(filepath.Dir(path))
+		pageName := buildPageName(path)
+		pattern := buildPattern(path)
+
 		tokens, err := lexer.Lex(string(input))
 		if err != nil {
-			return fmt.Errorf("error lexing %s: %w", j.path, err)
+			return fmt.Errorf("error lexing %s: %w", path, err)
 		}
 
 		p := parser.NewParser(tokens)
 		file, err := p.Parse()
 		if err != nil {
-			return fmt.Errorf("error parsing %s: %w", j.path, err)
+			return fmt.Errorf("error parsing %s: %w", path, err)
 		}
 
-		handlerCode, err := codegen.GenerateHandler(file, layout, j.pkgName, j.pageName, srcHash[:12])
+		handlerCode, err := codegen.GenerateHandler(file, layout, pkgName, pageName, pattern, srcHash[:12])
 		if err != nil {
-			return fmt.Errorf("error generating code for %s: %w", j.path, err)
+			return fmt.Errorf("error generating code for %s: %w", path, err)
 		}
 
 		out := fmt.Sprintf("// hash:%s/%s\n%s", srcHash, binaryHash, handlerCode)
@@ -114,6 +108,10 @@ func Run(force bool) error {
 		}
 
 		generated++
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 
 	elapsed := time.Since(start)
@@ -124,6 +122,106 @@ func Run(force bool) error {
 	}
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
+}
+
+func buildPageName(path string) string {
+	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
+	idx := strings.Index(rel, "routes/")
+	if idx >= 0 {
+		rel = rel[idx+len("routes/"):]
+	}
+	dir, file := filepath.Split(rel)
+	baseName := strings.TrimSuffix(file, ".dreego")
+
+	parts := []string{}
+	if dir != "" && dir != "./" && dir != "." {
+		for _, seg := range strings.Split(strings.Trim(dir, "/"), "/") {
+			parts = append(parts, paramRe.ReplaceAllString(seg, "${1}"))
+		}
+	}
+
+	if baseName != "index" {
+		parts = append(parts, paramRe.ReplaceAllString(baseName, "${1}"))
+	}
+
+	if len(parts) == 0 {
+		return "index"
+	}
+	return strings.Join(parts, "_")
+}
+
+func buildPattern(path string) string {
+	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
+	idx := strings.Index(rel, "routes/")
+	if idx >= 0 {
+		rel = rel[idx+len("routes/"):]
+	}
+
+	dir, file := filepath.Split(rel)
+	baseName := strings.TrimSuffix(file, ".dreego")
+
+	segments := []string{}
+	if dir != "" && dir != "./" && dir != "." {
+		for _, seg := range strings.Split(strings.Trim(dir, "/"), "/") {
+			seg = paramRe.ReplaceAllString(seg, "{$1}")
+			segments = append(segments, seg)
+		}
+	}
+
+	if baseName == "index" {
+		if len(segments) == 0 {
+			return "/{$}"
+		}
+		return "/" + strings.Join(segments, "/") + "/"
+	}
+
+	baseName = paramRe.ReplaceAllString(baseName, "{$1}")
+	segments = append(segments, baseName)
+
+	return "/" + strings.Join(segments, "/")
+}
+
+func checkConflicts() error {
+	routes := map[string]string{}
+
+	return filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		if d.IsDir() {
+			base := filepath.Base(path)
+			if base != "." && (strings.HasPrefix(base, ".") || strings.HasPrefix(base, "_")) {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) != ".dreego" {
+			return nil
+		}
+		if isLayout(path) {
+			return nil
+		}
+
+		p := buildPattern(path)
+		if existing, ok := routes[p]; ok {
+			return fmt.Errorf("route conflict: %s and %s both resolve to %s", existing, path, p)
+		}
+		routes[p] = path
+
+		alt := strings.TrimRight(p, "/")
+		if alt != p {
+			if existing, ok := routes[alt]; ok {
+				return fmt.Errorf("route conflict: %s -> %s and %s -> %s", existing, alt, path, p)
+			}
+		}
+		alt = p + "/"
+		if alt != p {
+			if existing, ok := routes[alt]; ok {
+				return fmt.Errorf("route conflict: %s -> %s and %s -> %s", existing, alt, path, p)
+			}
+		}
+		return nil
+	})
 }
 
 func readHashes(path string) (src, bin string, ok bool) {
@@ -172,6 +270,12 @@ func findLayout() *ast.File {
 		return nil
 	})
 	return layout
+}
+
+func cleanPath(path string) string {
+	path = strings.ReplaceAll(path, "[", "p_")
+	path = strings.ReplaceAll(path, "]", "")
+	return path
 }
 
 func isLayout(path string) bool {

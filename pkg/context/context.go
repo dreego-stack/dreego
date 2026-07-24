@@ -21,3 +21,11 @@ func (c *Context) Get(key string) string {
 	}
 	return c.data[key]
 }
+
+func (c *Context) Param(key string) string {
+	return c.R.PathValue(key)
+}
+
+func (c *Context) Query(key string) string {
+	return c.R.URL.Query().Get(key)
+}

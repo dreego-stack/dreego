@@ -7,7 +7,7 @@ import (
 	"codeberg.org/dreego/dreego/pkg/ast"
 )
 
-func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName string, scopeHash string) (string, error) {
+func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName string, pattern string, scopeHash string) (string, error) {
 	funcName := "render" + toPascalCase(baseName)
 	handlerName := "Handle" + toPascalCase(baseName)
 
@@ -33,7 +33,7 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 		buf.WriteString(fmt.Sprintf("const style_%s = %s\n\n", baseName, goLiteral(scoped)))
 	}
 
-	buf.WriteString(fmt.Sprintf("func renderPage%s(ctx *context.Context) (string, error) {\n", toPascalCase(baseName)))
+	buf.WriteString(fmt.Sprintf("func renderPage%s(c *context.Context) (string, error) {\n", toPascalCase(baseName)))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if code := file.Go; code != nil && code.Code != "" {
@@ -105,14 +105,6 @@ func GenerateHandler(file *ast.File, layout *ast.File, pkgName string, baseName 
 	buf.WriteString("\tw.Write([]byte(html))\n")
 	buf.WriteString("}\n\n")
 
-	route := "/" + baseName
-	if baseName == "index" {
-		route = "/"
-	}
-	pattern := route
-	if route == "/" {
-		pattern = "/{$}"
-	}
 	buf.WriteString("func init() {\n")
 	buf.WriteString(fmt.Sprintf("\truntime.Register(\"GET\", \"%s\", %s)\n", pattern, handlerName))
 	buf.WriteString("}\n")
