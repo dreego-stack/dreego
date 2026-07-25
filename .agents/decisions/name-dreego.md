@@ -1,4 +1,12 @@
-# Entscheidung: Name "dreego" / Dateiendung ".dreego"
+---
+type: Decision
+title: Name "dreego" / Dateiendung ".dreego"
+description: Namensgebung und Package-Konvention
+tags: [naming, v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+
+# Name "dreego" / Dateiendung ".dreego"
 
 **Datum:** 23.07.2026
 **Status:** Final

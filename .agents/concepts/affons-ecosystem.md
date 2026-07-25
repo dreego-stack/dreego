@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Dreego Ecosystem (Affons)"
+description: "Tools, Services und Community-Ressourcen rund um den Dreego Core"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Ecosystem (Affons)
 
 ## Definition

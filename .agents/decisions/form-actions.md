@@ -1,8 +1,12 @@
-# Entscheidung: Form Actions — g-action + generierte Handler
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
-**Review:** GLM-5.2 (.tmp/output6.md)
+---
+type: Decision
+title: Form Actions — g-action + generierte Handler
+description: Deklarative Form-Handler via g-action mit generierter CSRF+Validierungs-Pipeline
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Form Actions — g-action + generierte Handler
 
 ## Entscheidung
 

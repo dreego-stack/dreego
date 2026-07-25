@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Dreego Roadmap"
+description: "Entwicklungsplan von V1 MVP über V2 Production-Ready bis V3 Ecosystem"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Roadmap
 
 ## V1 — MVP (Core)

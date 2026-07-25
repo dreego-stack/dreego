@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: Dreego Ecosystem Research 2025-2026
+description: Research on State of JS 2025 and current web framework trends relevant to Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Ecosystem Research 2025-2026
 
 > Research zu State of JS 2025 und aktuellen Web-Framework-Trends.
@@ -85,4 +93,4 @@
 
 ## Relevanz für Dreego
 
-Siehe [[KB/ecosystem-analysis]] für die detaillierte Relevanz-Analyse.
+Siehe [KB/ecosystem-analysis](../KB/ecosystem-analysis.md) für die detaillierte Relevanz-Analyse.

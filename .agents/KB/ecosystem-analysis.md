@@ -1,4 +1,11 @@
-# Relevanz-Analyse: React & Svelte Ecosystem 2025/2026
+
+---
+type: Reference
+title: Relevanz-Analyse: React & Svelte Ecosystem 2025/2026
+description: Relevance analysis of React & Svelte ecosystem patterns for Dreego's strategic positioning
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 
 **Datum:** 23.07.2026
 **Quelle:** State of JS 2025 Survey, Community-Analysen

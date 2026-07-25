@@ -1,4 +1,12 @@
-# Entscheidung: Kein `<catch>`-Tag — Fehler via Go-Idiome
+
+---
+type: Decision
+title: Kein `<catch>`-Tag — Fehler via Go-Idiome
+description: Fehlerbehandlung via Go-Idiome im go-Block statt speziellem catch-Tag
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Kein `<catch>`-Tag — Fehler via Go-Idiome
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

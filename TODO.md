@@ -1,19 +1,11 @@
-# TODO
+# TODO — Dreego
 
-## Docs
+Nur Dinge, die wir ALS NACHSTES im Code anfassen.
 
-- [ ] Contributing.md — How to contribute
-- [ ] Code of Conduct
-- [ ] Security Policy
+## Jetzt (v0.0.2)
 
-## Kommende Features (aus Roadmap)
-
-- [ ] Recovery-Middleware
-- [ ] 404-Seite
-- [ ] bessere Error-Messages mit `.dreego`-Zeilennummern
-- [ ] Snapshot-Tests fur generierten Code
-- [ ] `dreego dev` — Dev-Server mit Hot Reload
-- [ ] Statische Assets ausliefern
-- [ ] `dreego init <name>` — Projekt-Scaffolding
-
-Siehe [[ROADMAP]] fur vollstandige Planung.
+- [ ] Context refactoring: `map[string]string` → Interface + Embedding
+- [ ] Recovery-Middleware: Panic → 500
+- [ ] XSS-Schutz: Auto-Escaping in `{variable}`
+- [ ] CLI: farbige Ausgabe, `.dreego`-Zeilennummern in Fehlern
+- [ ] Custom `404.dreego` + `500.dreego`

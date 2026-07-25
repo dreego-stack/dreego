@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Dreego Gap-Analyse: Was fehlt, was kann besser werden?"
+description: "Systematische Analyse fehlender Features im Vergleich zu SvelteKit, Next.js, Phoenix"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Gap-Analyse: Was fehlt, was kann besser werden?
 
 **Datum:** 23.07.2026
@@ -5,7 +13,7 @@
 
 ## Svelte Runes — haben wir das abgedeckt?
 
-Siehe [[signals-and-runes]] für die vollständige Analyse.
+Siehe [Signals & Runes](signals-and-runes.md) für die vollständige Analyse.
 
 **Kurzfassung:** Svelte Runes sind ein Compiler-Feature für client-seitige Reaktivität. Dreego erreicht dasselbe Ziel (reaktive UI-Updates) durch SSR + HTMX partials + Alpine.js. Wir bilden Runes nicht 1:1 ab, aber das Ergebnis (State-Änderung → DOM-Update) ist dasselbe — nur mit anderer Architektur.
 

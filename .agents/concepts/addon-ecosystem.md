@@ -1,4 +1,11 @@
-# Addon/Plugin-Ökosystem
+
+---
+type: Concept
+title: "Addon/Plugin-Ökosystem"
+description: "Go-basiertes Plugin-System mit Compile-Time Safety und Tree-Shaking"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 
 ## Design-Philosophie
 

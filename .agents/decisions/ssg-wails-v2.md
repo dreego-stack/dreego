@@ -1,4 +1,12 @@
-# Entscheidung: SSG & Wails Integration in V2
+
+---
+type: Decision
+title: SSG & Wails Integration in V2
+description: SSG und Wails Integration als gleichwertige Output-Modi neben SSR in V2
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# SSG & Wails Integration in V2
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert (geplant für V2)

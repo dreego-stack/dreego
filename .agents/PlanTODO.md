@@ -1,4 +1,12 @@
-# Dreego Thinking List
+
+---
+type: Plan
+title: PlanTODO — Vollstandiger Plan aller Features
+description: Complete feature roadmap with architectural decisions, template engine, ecosystem features, and addon planning
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# PlanTODO — Vollstandiger Plan aller Features
 
 **Stand:** 25.07.2026 — v0.0.1 getaggt. Transpiler+Routing+Layout+Middleware+CLI laufen.
 
@@ -24,17 +32,17 @@
 | Entscheidung | Dokument |
 |---|---|
 | Deployment-Strategie | noch offen |
-| Form Actions (Implementierung) | [[decisions/form-actions]] |
-| Session-Management (Implementierung) | [[decisions/session-management]] |
+| Form Actions (Implementierung) | [decisions/form-actions](../decisions/form-actions.md) |
+| Session-Management (Implementierung) | [decisions/session-management](../decisions/session-management.md) |
 
 ---
 
 ## 🔴 Architektur-Entscheidungen (müssen VOR Code-Start geklärt sein)
 
-### Error-Handling-Strategie → [[decisions/error-handling]]
+### Error-Handling-Strategie → [decisions/error-handling](../decisions/error-handling.md)
 Geklart 24.07.2026: Typisierte Fehler-Typen. Recovery-Middleware. Dev/Prod via APP_ENV. slog im Core. RequestLogging Core-Conditional (config.json).
 
-### Routing-Konventionen → [[decisions/routing-and-components]]
+### Routing-Konventionen → [decisions/routing-and-components](../decisions/routing-and-components.md)
 Geklart 24.07.2026: Hybrides Routing. gen/dree.go. Plugin-Routes via init(). Komponenten via {#use}. dreego/routes/ final.
 
 ### Deployment-Strategie

@@ -1,4 +1,12 @@
-# Entscheidung: Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
+
+---
+type: Decision
+title: Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
+description: Compile-Time Transpiler Pipeline mit Lexer, Parser, AST und CodeGen für drei Targets
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

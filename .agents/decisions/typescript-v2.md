@@ -1,4 +1,12 @@
-# Entscheidung: TypeScript auf V2 verschoben
+
+---
+type: Decision
+title: TypeScript auf V2 verschoben
+description: TypeScript-Unterstützung im script-Block wird auf V2 verschoben, V1 nutzt Vanilla JS
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# TypeScript auf V2 verschoben
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

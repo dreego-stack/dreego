@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Dreego Architecture"
+description: "Compile-Time Webframework-Architektur mit Transpiler, Router und Plugin-System"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Architecture
 
 ## Overview

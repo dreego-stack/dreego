@@ -1,3 +1,11 @@
+
+---
+type: Guide
+title: Architektur-Guide
+description: Project structure, module boundaries, and architectural rules for Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Architektur-Guide
 
 ## Projektstruktur

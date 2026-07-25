@@ -1,3 +1,11 @@
+
+---
+type: Guide
+title: Coding Standards für Dreego
+description: Code conventions: file size limits, imports, error handling, testing for Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Coding Standards für Dreego
 
 ## Allgemein

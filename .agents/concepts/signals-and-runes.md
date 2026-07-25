@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Signals & Svelte Runes — Konzept für Dreego"
+description: "Reaktive State-Primitives und deren Entsprechung in Dreego"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Signals & Svelte Runes — Konzept für Dreego
 
 ## Was sind Signals?

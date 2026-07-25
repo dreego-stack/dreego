@@ -22,7 +22,7 @@ Erster Prototyp. Transpiler, Routing, Layout, Middleware, CLI.
 
 ### Decisions
 
-- [[.agents/decisions/error-handling]] — Typisierte Fehler, Recovery, Dev/Prod
-- [[.agents/decisions/routing-and-components]] — Hybrides Routing, Plugin-Routes, Komponenten
-- [[.agents/decisions/middleware-system]] — Core-Fixed vs Core-Conditional vs Plugin
+- [Error Handling](.agents/decisions/error-handling.md) — Typisierte Fehler, Recovery, Dev/Prod
+- [Routing & Components](.agents/decisions/routing-and-components.md) — Hybrides Routing, Plugin-Routes
+- [Middleware System](.agents/decisions/middleware-system.md) — Core-Fixed vs Core-Conditional vs Plugin
 - GLM-Review: Per-Directory `dree.go` Output-Strategie bestatigt

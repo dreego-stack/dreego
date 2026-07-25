@@ -1,4 +1,12 @@
-# Entscheidung: Technologie-Stack für Dreego V1
+---
+type: Decision
+title: Technologie-Stack fur Dreego V1
+description: Tech-Stack: Go, net/http, HTMX, Alpine.js
+tags: [stack, v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+
+# Technologie-Stack fur Dreego V1
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

@@ -1,4 +1,12 @@
-# Entscheidung: Context-Design (Interface + Target-Structs)
+
+---
+type: Decision
+title: Context-Design (Interface + Target-Structs)
+description: Schlankes Context-Interface plus drei konkrete Structs pro Rendering-Target
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Context-Design (Interface + Target-Structs)
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

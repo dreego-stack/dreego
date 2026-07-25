@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Vergleich: Zwei Output-Strategien für dreego generate"
+description: "Per-Directory dree.go vs output/-Verzeichnis mit index.json"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Vergleich: Zwei Output-Strategien für dreego generate
 
 **Datum:** 24.07.2026

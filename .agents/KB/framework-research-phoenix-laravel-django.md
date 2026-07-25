@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: Framework-Vergleich: Phoenix, Laravel, Django — Relevanz für Dreego
+description: Systematic comparison of Phoenix, Laravel, and Django — adoptable features and anti-patterns for Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Framework-Vergleich: Phoenix, Laravel, Django — Relevanz für Dreego
 
 **Datum:** 23.07.2026

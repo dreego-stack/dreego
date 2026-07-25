@@ -1,4 +1,12 @@
-# Entscheidung: Plugin-Interface (Capability-basiert)
+
+---
+type: Decision
+title: Plugin-Interface (Capability-basiert)
+description: Capability-basiertes Plugin-System mit Go-typischen impliziten Interfaces
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Plugin-Interface (Capability-basiert)
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

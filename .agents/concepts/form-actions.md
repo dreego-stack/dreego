@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Form Actions — Konzept"
+description: "Deklaratives Form-Handling mit automatischem Parsing, Validierung und CSRF-Check"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Form Actions — Konzept
 
 ## Übersicht

@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: C# Blazor & ASP.NET Core Research — Dreego-Relevanz
+description: Systematic analysis of C# Blazor & ASP.NET Core features transferable to Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # C# Blazor & ASP.NET Core Research — Dreego-Relevanz
 
 **Datum:** 23.07.2026

@@ -1,4 +1,12 @@
-# Entscheidung: Session-Management — Interface im Core, Store als Addon
+
+---
+type: Decision
+title: Session-Management — Interface im Core, Store als Addon
+description: Session-Interface im Core mit Built-in Cookie-Store und externen Store-Addons
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Session-Management — Interface im Core, Store als Addon
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

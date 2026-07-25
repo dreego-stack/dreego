@@ -1,8 +1,12 @@
-# Entscheidung: Middleware-System — Core vs Plugin
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
-**Review:** GLM-5.2 Expert Review (.tmp/output4.md)
+---
+type: Decision
+title: Middleware-System — Core vs Plugin
+description: Drei-Klassen-Middleware: Core-Fixed, Core-Conditional und Plugin-Middleware
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Middleware-System — Core vs Plugin
 
 ## Entscheidung
 

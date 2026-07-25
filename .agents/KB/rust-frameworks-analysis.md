@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: Rust Frontend Frameworks — Deep Dive & Dreego-Transfer
+description: Deep dive into Rust frontend frameworks (Leptos, Dioxus, Yew) with transferable patterns for Dreego
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Rust Frontend Frameworks — Deep Dive & Dreego-Transfer
 
 **Datum:** 23.07.2026

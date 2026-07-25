@@ -1,4 +1,12 @@
-# Entscheidung: Error-Handling-Strategie (Core, nicht Plugin)
+
+---
+type: Decision
+title: Error-Handling-Strategie (Core, nicht Plugin)
+description: Typisierte Fehler-Typen und Recovery-Middleware für Build-Start-Runtime-Fehler
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Error-Handling-Strategie (Core, nicht Plugin)
 
 **Datum:** 24.07.2026
 **Status:** Akzeptiert
@@ -120,7 +128,7 @@ Keine Error-Boundary auf Komponenten-Ebene in V1. Begründung:
 - `{#if hasError}` deckt den Use-Case ab
 - Error-Boundaries sind ein SPA-Konzept (React), nicht nötig bei SSR
 
-→ Siehe [[no-catch-tag]]: Fehler via `{#if hasError}`, kein spezielles Tag.
+→ Siehe [no-catch-tag](no-catch-tag.md): Fehler via `{#if hasError}`, kein spezielles Tag.
 
 ### Logging-Strategie
 

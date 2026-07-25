@@ -1,4 +1,12 @@
-# Entscheidung: 5 Sektionen in .dreego-Dateien
+
+---
+type: Decision
+title: 5 Sektionen in .dreego-Dateien
+description: Dreego-Dateien haben 5 klar getrennte Sektionen für Server- und Client-Code
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# 5 Sektionen in .dreego-Dateien
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

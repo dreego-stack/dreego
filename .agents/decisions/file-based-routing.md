@@ -1,7 +1,15 @@
-# Entscheidung: File-based Routing mit Chi
+
+---
+type: Decision
+title: File-based Routing mit Chi
+description: File-based Routing via Code-Generation mit Chi-kompatiblen Patterns
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# File-based Routing mit Chi
 
 **Datum:** 23.07.2026
-**Status:** Akzeptiert (erweitert durch [[routing-and-components]])
+**Status:** Akzeptiert (erweitert durch [routing-and-components](routing-and-components.md))
 
 ## Kontext
 

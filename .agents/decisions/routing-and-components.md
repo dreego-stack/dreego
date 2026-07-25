@@ -1,8 +1,16 @@
-# Entscheidung: Routing, Plugin-Routes & Komponenten-System
+
+---
+type: Decision
+title: Routing, Plugin-Routes & Komponenten-System
+description: Routing, Plugin-Routen-Registrierung und Komponenten-System mit Namespace-Hierarchie
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# Routing, Plugin-Routes & Komponenten-System
 
 **Datum:** 24.07.2026 (aktualisiert nach Review)
 **Status:** Akzeptiert
-**Ersetzt:** [[file-based-routing]] (aktualisiert)
+**Ersetzt:** [file-based-routing](file-based-routing.md) (aktualisiert)
 
 ## Kontext / Offene Fragen
 

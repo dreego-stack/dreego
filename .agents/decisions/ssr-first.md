@@ -1,4 +1,12 @@
-# Entscheidung: SSR-First Architektur
+
+---
+type: Decision
+title: SSR-First Architektur
+description: Dreego rendert HTML auf dem Server mit HTMX und Alpine.js für Interaktivität
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+# SSR-First Architektur
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

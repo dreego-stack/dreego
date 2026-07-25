@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: Dreego Concept — Gemini Chat (PDF-Quelle)
+description: Core concept of Dreego framework: transpiler, 5 sections, file-based routing, addon ecosystem
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Dreego Concept — Gemini Chat (PDF-Quelle)
 
 > Quelle: `Go-Framework wie Svelte bauen.pdf` — Gemini Chat vom 23.07.2026

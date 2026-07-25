@@ -1,3 +1,11 @@
+
+---
+type: Reference
+title: Solid.js, Astro & MDX — Deep-Dive Research
+description: Research on Solid.js Signals, Astro Islands architecture, and MDX for Dreego feature adoption
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Solid.js, Astro & MDX — Deep-Dive Research
 
 **Datum:** 23.07.2026

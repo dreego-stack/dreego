@@ -2,9 +2,8 @@
 
 ## Getting Started
 
-- [[getting-started]] — Quick Start: Projekt erstellen, erste Seite
-- [[cli]] — CLI-Referenz: generate, build, run
-- [[config]] — dreego/config.json Referenz
-- [[routing]] — File-based Routing
-- [[middleware]] — Middleware-System
-- [[architecture]] — Architektur-Ubersicht
+- [Getting Started](getting-started.md) — Quick Start
+- [CLI](cli.md) — CLI-Referenz: generate, build, run
+- [Config](config.md) — dreego/config.json Referenz
+- [Routing](routing.md) — File-based Routing
+- [Middleware](middleware.md) — Middleware-System

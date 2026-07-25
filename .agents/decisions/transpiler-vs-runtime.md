@@ -1,4 +1,12 @@
-# Entscheidung: Compile-Time Transpiler statt Runtime-Parsing
+---
+type: Decision
+title: Compile-Time Transpiler statt Runtime-Parsing
+description: Build-Zeit Code-Generation, kein Laufzeit-Parsing
+tags: [transpiler, v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
+
+# Compile-Time Transpiler statt Runtime-Parsing
 
 **Datum:** 23.07.2026
 **Status:** Akzeptiert

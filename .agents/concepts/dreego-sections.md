@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Die 5 Sektionen einer .dreego-Datei"
+description: "Aufbau und Verhalten der 5 Sektionen: head, go, Template, script, style"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Die 5 Sektionen einer .dreego-Datei
 
 ## Übersicht

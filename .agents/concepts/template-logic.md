@@ -1,3 +1,11 @@
+
+---
+type: Concept
+title: "Template-Logik in Dreego"
+description: "Template-Blöcke und deren Kompilierung zu nativem Go-Code"
+tags: [v0.0.1]
+timestamp: 2026-07-23T00:00:00Z
+---
 # Template-Logik in Dreego
 
 ## Design-Philosophie
