@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-func NewHandler(render func(*context.Context) (string, error)) http.HandlerFunc {
+func NewHandler(render func(*context.SSRContext) (string, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := &context.Context{W: w, R: r}
+		ctx := context.NewSSR(w, r)
 		html, err := render(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

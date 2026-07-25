@@ -10,6 +10,11 @@ timestamp: 2026-07-25T00:00:00Z
 
 ## 2026-07-25
 
+- Context refactoring: `map[string]string` → Interface + Embedding
+  - New `Context` interface embedding `context.Context` with `Param`, `Data`, `Render`
+  - New `SSRContext` struct with `NewSSR()`, `Set`, `Get`, `Query`, `FormValue`
+  - Updated codegen to generate `*context.SSRContext` + `context.NewSSR(w, r)`
+  - Deleted stale `demo/dreego/layouts/dree.go` (layout is now inlined per route)
 - Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
 - Added YAML frontmatter with `type` field to all files
 - Replaced `[[wiki-links]]` with standard markdown links

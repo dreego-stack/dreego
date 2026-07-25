@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.2 (unreleased)
+
+- Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
+
 ## v0.0.1 (2026-07-25)
 
 Erster Prototyp. Transpiler, Routing, Layout, Middleware, CLI.

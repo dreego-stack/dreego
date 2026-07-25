@@ -17,7 +17,7 @@ func GenerateMethodHandler(file *ast.File, layout *ast.File, pkgName string, bas
 
 	var buf strings.Builder
 
-	buf.WriteString(fmt.Sprintf("func %s(c *context.Context) (string, error) {\n", funcName))
+	buf.WriteString(fmt.Sprintf("func %s(c *context.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if g.Code != "" {
@@ -74,7 +74,7 @@ func GenerateMethodHandler(file *ast.File, layout *ast.File, pkgName string, bas
 	buf.WriteString("}\n\n")
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", handlerName))
-	buf.WriteString("\tc := &context.Context{W: w, R: r}\n")
+	buf.WriteString("\tc := context.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", funcName))
 	buf.WriteString("\tif err != nil {\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
