@@ -8,6 +8,8 @@
 
 **v0.x.0** Plugins — Plugin-Interface frozen, dreego-auth, dreego-ui, Komponenten
 
+**pre-V1** Coding Niceties — LSP/VS-Code-Addon, farbige CLI, Linter, `.dreego`-Zeilennummern in Fehlern
+
 **v1.0** Stable — Keine Breaking Changes, alle Core-APIs final
 
 **v2.0** SSG + Wails + TypeScript
