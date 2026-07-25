@@ -21,6 +21,13 @@ timestamp: 2026-07-25T00:00:00Z
 - XSS-Schutz: Auto-Escaping aller `{variable}`-Template-Ausdrücke via `html.EscapeString`
   - Expression nodes generieren jetzt `html.EscapeString(fmt.Sprintf("%v", expr))`
   - `"html"` import wird nur bei Expressions eingefügt (conditional in codegen)
+- Custom Error-Pages: `404.dreego` + `500.dreego`
+  - `GenerateErrorHandler` in codegen: kein Layout, Custom init (catch-all / SetErrorHandler)
+  - Per-Directory 404: Go Mux Pattern-Precedence selektiert spezifischsten 404
+    - `dreego/routes/users/404.dreego` → `/users/{p...}` (nur unter `/users/*`)
+    - `dreego/routes/404.dreego` → `/{p...}` (globaler Fallback)
+    - Kein 404 vorhanden → Standard-HTTP-404-Text
+  - 500: `runtime.SetErrorHandler(500, handler)` → Recovery-Middleware rendert bei Panic
 - Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
 - Added YAML frontmatter with `type` field to all files
 - Replaced `[[wiki-links]]` with standard markdown links

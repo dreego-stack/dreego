@@ -137,6 +137,20 @@ func Run(force bool) error {
 			scopeHash := hex.EncodeToString(h[:])[:12]
 			pkgName := filepath.Base(path)
 
+			if base == "404" || base == "500" {
+				errCode := 404
+				if base == "500" {
+					errCode = 500
+				}
+				catchPattern := errorCatchPattern(pattern)
+				src, err := codegen.GenerateErrorHandler(file, pkgName, errCode, catchPattern, scopeHash)
+				if err != nil {
+					return fmt.Errorf("error generating error page %s: %w", fpath, err)
+				}
+				handlerSources = append(handlerSources, src)
+				continue
+			}
+
 			for _, g := range file.Go {
 				src, err := codegen.GenerateMethodHandler(file, layout, pkgName, pageName, pattern, g, scopeHash)
 				if err != nil {
@@ -149,12 +163,18 @@ func Run(force bool) error {
 		hashLine := "// hash:{" + strings.Join(hashParts, ", ") + "}"
 
 		pkgName := filepath.Base(path)
-		imports := "\"fmt\"\n\t\"net/http\"\n\t\"strings\""
 		src := strings.Join(handlerSources, "")
-		if strings.Contains(src, "html.EscapeString") {
-			imports = "\"fmt\"\n\t\"html\"\n\t\"net/http\"\n\t\"strings\""
+		var imports []string
+		if strings.Contains(src, "fmt.") {
+			imports = append(imports, "\"fmt\"")
 		}
-		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t%s\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName, imports)
+		if strings.Contains(src, "html.EscapeString") {
+			imports = append(imports, "\"html\"")
+		}
+		imports = append(imports, "\"net/http\"")
+		imports = append(imports, "\"strings\"")
+		importLine := strings.Join(imports, "\n\t")
+		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t%s\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName, importLine)
 		out += src
 
 		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
@@ -306,6 +326,13 @@ func buildPattern(path string) string {
 		segments = append(segments, patternSegment(seg))
 	}
 	return "/" + strings.Join(segments, "/")
+}
+
+func errorCatchPattern(dirPattern string) string {
+	if strings.HasSuffix(dirPattern, "/{$}") {
+		return strings.TrimSuffix(dirPattern, "/{$}") + "/{p...}"
+	}
+	return dirPattern + "/{p...}"
 }
 
 func cleanSegment(seg string) string {

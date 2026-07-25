@@ -1,0 +1,14 @@
+<head>
+    <title>404 – Benutzer nicht gefunden</title>
+</head>
+
+<div>
+    <h1>404</h1>
+    <p>Dieser Benutzer existiert nicht.</p>
+    <a href="/users/1">Zum Beispiel-Benutzer</a>
+</div>
+
+<style>
+    h1 { color: #c00; }
+    a { color: #06f; }
+</style>

@@ -1,0 +1,14 @@
+<head>
+    <title>500 – Interner Fehler</title>
+</head>
+
+<div>
+    <h1>500</h1>
+    <p>Ein interner Fehler ist aufgetreten.</p>
+    <a href="/">Zurück zur Startseite</a>
+</div>
+
+<style>
+    h1 { color: #c00; }
+    a { color: #06f; }
+</style>

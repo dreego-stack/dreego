@@ -5,6 +5,10 @@
 - Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
 - Recovery-Middleware: Panic → 500 mit Stack-Trace-Logging via slog
 - XSS-Schutz: Auto-Escaping aller `{variable}`-Ausdrücke via `html.EscapeString`
+- Custom Error-Pages: `404.dreego` + `500.dreego`
+  - Per-Directory 404: spezifischster Catch-All greift (Go Mux Pattern-Precedence)
+  - 500 via Recovery-Middleware, optionaler Handler via `runtime.SetErrorHandler`
+  - Kein Layout-Wrapping für Error-Pages
 
 ## v0.0.1 (2026-07-25)
 

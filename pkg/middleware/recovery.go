@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 )
 
-func Recovery() func(http.Handler) http.Handler {
+func Recovery(errorHandler http.HandlerFunc) func(http.Handler) http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 
 	return func(next http.Handler) http.Handler {
@@ -20,7 +20,13 @@ func Recovery() func(http.Handler) http.Handler {
 						"method", r.Method,
 						"stack", string(debug.Stack()),
 					)
-					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					if errorHandler != nil {
+						w.Header().Set("Content-Type", "text/html; charset=utf-8")
+						w.WriteHeader(http.StatusInternalServerError)
+						errorHandler(w, r)
+					} else {
+						http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					}
 				}
 			}()
 			next.ServeHTTP(w, r)

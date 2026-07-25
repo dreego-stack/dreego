@@ -14,6 +14,8 @@ var rewrites []rewriteRule
 
 var loggingEnabled = true
 
+var errorHandlers = map[int]http.HandlerFunc{}
+
 type route struct {
 	method  string
 	pattern string
@@ -46,7 +48,11 @@ func RegisterRewrite(from, to string) {
 func ServeMux() http.Handler {
 	mux := http.NewServeMux()
 	for _, r := range routes {
-		mux.HandleFunc(r.method+" "+r.pattern, r.handler)
+		if r.method != "" {
+			mux.HandleFunc(r.method+" "+r.pattern, r.handler)
+		} else {
+			mux.HandleFunc(r.pattern, r.handler)
+		}
 	}
 
 	var h http.Handler = mux
@@ -54,7 +60,7 @@ func ServeMux() http.Handler {
 	if loggingEnabled {
 		h = middleware.RequestLogging()(h)
 	}
-	h = middleware.Recovery()(h)
+	h = middleware.Recovery(errorHandlers[500])(h)
 	return h
 }
 
@@ -83,6 +89,10 @@ func matchRewrite(rw rewriteRule, path string) bool {
 
 func SetLogging(enabled bool) {
 	loggingEnabled = enabled
+}
+
+func SetErrorHandler(code int, handler http.HandlerFunc) {
+	errorHandlers[code] = handler
 }
 
 func Listen(addr string) error {
