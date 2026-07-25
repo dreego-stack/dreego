@@ -18,6 +18,9 @@ timestamp: 2026-07-25T00:00:00Z
 - Recovery-Middleware: Panic → 500 + Stack-Trace-Logging via slog
   - New `pkg/middleware/recovery.go` — defer recover() with JSON log
   - Integrated as outermost Core-Fixed middleware in runtime pipeline
+- XSS-Schutz: Auto-Escaping aller `{variable}`-Template-Ausdrücke via `html.EscapeString`
+  - Expression nodes generieren jetzt `html.EscapeString(fmt.Sprintf("%v", expr))`
+  - `"html"` import wird nur bei Expressions eingefügt (conditional in codegen)
 - Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
 - Added YAML frontmatter with `type` field to all files
 - Replaced `[[wiki-links]]` with standard markdown links

@@ -18,7 +18,7 @@ func genTemplateNode(n ast.TemplateNode, depth int) string {
 		}
 		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content))
 	case ast.NodeExpression:
-		return fmt.Sprintf(`%sb.WriteString(fmt.Sprintf("%%v", %s))`+"\n", indent, n.Content)
+		return fmt.Sprintf(`%sb.WriteString(html.EscapeString(fmt.Sprintf("%%v", %s)))`+"\n", indent, n.Content)
 	case ast.NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))

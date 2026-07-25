@@ -4,6 +4,7 @@
 
 - Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
 - Recovery-Middleware: Panic → 500 mit Stack-Trace-Logging via slog
+- XSS-Schutz: Auto-Escaping aller `{variable}`-Ausdrücke via `html.EscapeString`
 
 ## v0.0.1 (2026-07-25)
 

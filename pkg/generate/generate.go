@@ -149,8 +149,13 @@ func Run(force bool) error {
 		hashLine := "// hash:{" + strings.Join(hashParts, ", ") + "}"
 
 		pkgName := filepath.Base(path)
-		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"strings\"\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName)
-		out += strings.Join(handlerSources, "")
+		imports := "\"fmt\"\n\t\"net/http\"\n\t\"strings\""
+		src := strings.Join(handlerSources, "")
+		if strings.Contains(src, "html.EscapeString") {
+			imports = "\"fmt\"\n\t\"html\"\n\t\"net/http\"\n\t\"strings\""
+		}
+		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t%s\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName, imports)
+		out += src
 
 		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
 			return fmt.Errorf("error writing %s: %w", outPath, err)
