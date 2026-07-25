@@ -84,3 +84,5 @@ Losung: `dreego.Context` Interface. → [decisions/context-design](.agents/decis
 
 ### 8. CLI-Interface: Reservierte Flags
 `dreego build --static | --wails | --mobile`
+
+vergesse die CLI.md nicht und dann kannst du beim demo server starten statt einfach die binary direkt starten und ausschalten wann auch immer und vergessen einfach einen timer setzen
