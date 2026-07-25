@@ -15,6 +15,9 @@ timestamp: 2026-07-25T00:00:00Z
   - New `SSRContext` struct with `NewSSR()`, `Set`, `Get`, `Query`, `FormValue`
   - Updated codegen to generate `*context.SSRContext` + `context.NewSSR(w, r)`
   - Deleted stale `demo/dreego/layouts/dree.go` (layout is now inlined per route)
+- Recovery-Middleware: Panic → 500 + Stack-Trace-Logging via slog
+  - New `pkg/middleware/recovery.go` — defer recover() with JSON log
+  - Integrated as outermost Core-Fixed middleware in runtime pipeline
 - Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
 - Added YAML frontmatter with `type` field to all files
 - Replaced `[[wiki-links]]` with standard markdown links

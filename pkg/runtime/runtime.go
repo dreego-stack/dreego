@@ -54,6 +54,7 @@ func ServeMux() http.Handler {
 	if loggingEnabled {
 		h = middleware.RequestLogging()(h)
 	}
+	h = middleware.Recovery()(h)
 	return h
 }
 

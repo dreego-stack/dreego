@@ -3,6 +3,7 @@
 ## v0.0.2 (unreleased)
 
 - Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
+- Recovery-Middleware: Panic → 500 mit Stack-Trace-Logging via slog
 
 ## v0.0.1 (2026-07-25)
 
