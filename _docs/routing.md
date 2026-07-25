@@ -4,46 +4,63 @@
 
 ```
 dreego/routes/
-├── get.dreego              → GET /
-├── about.dreego              → GET /about
+├── get.dreego                  → GET /
+├── 404.dreego                  → GET /* (catch-all)
+├── 500.dreego                  → Panic → 500
+├── about/
+│   └── get.dreego              → GET /about
 ├── users/
-│   └── [id]/get.dreego       → GET /users/{id}
+│   ├── 404.dreego              → GET /users/* (catch-all)
+│   └── [id]/
+│       └── get.dreego          → GET /users/{id}
 ├── blog/
-│   └── [...catchall].dreego  → GET /blog/{catchall}
-└── (admin)/
-    └── dashboard.dreego      → GET /dashboard (group ignored in path)
+│   └── [...catchall]/
+│       └── get.dreego          → GET /blog/{catchall...}
+└── (group)/
+    └── demo/
+        └── get.dreego          → GET /demo  (group ignoriert)
 ```
 
 ## Dynamische Segmente
 
-| Syntax               | Pfad                    | Go-Param              |
-|----------------------|-------------------------|-----------------------|
-| `[id]`               | `/users/{id}`           | `c.Param("id")`       |
-| `[...catchall]`      | `/blog/{catchall}`      | `c.Param("catchall")` |
-| `[[optional]]`       | `/docs/{optional}`      | `c.Param("optional")` |
-| `(group)/`           | unsichtbar im Pfad      | —                     |
+| Syntax               | URL-Pattern              | Go-Param              |
+|----------------------|--------------------------|-----------------------|
+| `[id]`               | `/users/{id}`            | `c.Param("id")`       |
+| `[...catchall]`      | `/blog/{catchall...}`    | `c.Param("catchall")` |
+| `[[optional]]`       | `/{optional}`            | `c.Param("optional")` |
+
+## Route-Groups `(name)/`
+
+Gruppen-Ordner erscheinen **nicht** in der URL. Sie dienen der Code-Organisation:
+
+```
+(admin)/            → Layout + Middleware nur fur Admin-Bereich
+(auth)/             → Auth-Check fur Login/Register
+```
 
 ## HTTP-Methoden
 
-Aus Dateinamen abgeleitet:
+Jede Route hat eine Methoden-Datei im Verzeichnis:
 
 ```
-users.get.dreego   → GET
-users.post.dreego  → POST
-users.put.dreego   → PUT
-users.delete.dreego → DELETE
+get.dreego     → GET
+post.dreego    → POST
+put.dreego     → PUT
+delete.dreego  → DELETE
 ```
 
-Alternativ via `<go method="post">` in der `.dreego`-Datei.
-
-## API-Routen
-
-Pfade mit `api/` rendern kein Layout (nur `<div>`-Fragment):
+Mehrere Methoden pro Verzeichnis moglich:
 
 ```
-dreego/routes/api/users.get.dreego → GET /api/users
+users/
+└── [id]/
+    ├── get.dreego      → GET /users/{id}
+    └── delete.dreego   → DELETE /users/{id}
 ```
 
-## Plugin-Routen
+## Error-Pages
 
-Plugins registrieren Routen via `init()` im eigenen Go-Package. `dreego generate` fugt den Import automatisch in `dreego/gen/dree.go` ein.
+- `404.dreego` in einem Route-Verzeichnis → Catch-All fur diesen Pfad
+- Go Mux wahlt den spezifischsten Catch-All: `users/404.dreego` vor `routes/404.dreego`
+- `500.dreego` (nur eine global) → Recovery-Middleware rendert bei Panic
+- Error-Pages bekommen **kein** Layout (Endlos-Rekursion vermeiden)

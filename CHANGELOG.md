@@ -1,14 +1,14 @@
 # Changelog
 
-## v0.0.2 (unreleased)
+## v0.0.2 (2026-07-25)
 
+- Route-Segmente: `[id]` (eckige Klammern) als Konvention für dynamische Segmente, kompatibel mit Next.js/SvelteKit/Astro
+- Route-Groups: `(group)/` — Ordner, die nicht in der URL erscheinen (Layout/Middleware-Gruppierung)
+- Flat Gen-Package: alle Route-Handler in `gen/routes.go` (keine `_ "import"` mehr), löst Go-Import-Path-Problem mit Sonderzeichen
 - Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
 - Recovery-Middleware: Panic → 500 mit Stack-Trace-Logging via slog
 - XSS-Schutz: Auto-Escaping aller `{variable}`-Ausdrücke via `html.EscapeString`
 - Custom Error-Pages: `404.dreego` + `500.dreego`
-  - Per-Directory 404: spezifischster Catch-All greift (Go Mux Pattern-Precedence)
-  - 500 via Recovery-Middleware, optionaler Handler via `runtime.SetErrorHandler`
-  - Kein Layout-Wrapping für Error-Pages
 
 ## v0.0.1 (2026-07-25)
 

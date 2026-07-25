@@ -10,6 +10,12 @@ timestamp: 2026-07-25T00:00:00Z
 
 ## 2026-07-25
 
+- Route-Segmente: `[id]` (eckige Klammern) als Konvention — Demo von `_id_` migriert
+- Route-Groups: `(group)/` — Ordner ohne URL-Präsenz, `patternSegment` gibt "" zurück
+- Flat Gen-Package: alle Handler in `gen/routes.go`, `gen/dree.go` ohne Route-Imports
+  - Löst Go-Import-Path-Problem mit `[` `(` in Verzeichnisnamen
+  - `sanitizeImportPath` entfernt, kein `_ "import"` mehr
+
 - Context refactoring: `map[string]string` → Interface + Embedding
   - New `Context` interface embedding `context.Context` with `Param`, `Data`, `Render`
   - New `SSRContext` struct with `NewSSR()`, `Set`, `Get`, `Query`, `FormValue`

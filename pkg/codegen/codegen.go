@@ -125,9 +125,14 @@ func genLayoutNode(n ast.TemplateNode, depth int) string {
 }
 
 func GenerateErrorHandler(file *ast.File, pkgName string, code int, catchPattern string, scopeHash string) (string, error) {
-	suffix := fmt.Sprintf("%d", code)
-	funcName := "renderError" + suffix
-	handlerName := "HandleError" + suffix
+	safeName := strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			return r
+		}
+		return -1
+	}, pkgName)
+	funcName := "renderError" + safeName + fmt.Sprintf("%d", code)
+	handlerName := "HandleError" + safeName + fmt.Sprintf("%d", code)
 
 	var buf strings.Builder
 

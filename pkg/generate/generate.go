@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,8 +16,6 @@ import (
 	"codeberg.org/dreego/dreego/pkg/parser"
 )
 
-var binaryHash string
-
 var methodExt = map[string]string{
 	"get":    "GET",
 	"post":   "POST",
@@ -26,33 +23,15 @@ var methodExt = map[string]string{
 	"delete": "DELETE",
 }
 
-type routeInfo struct {
-	importPath string
-	dirPath    string
-}
-
-func init() {
-	exe, err := os.Executable()
-	if err != nil {
-		return
-	}
-	f, err := os.Open(exe)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	h := sha256.New()
-	io.Copy(h, f)
-	binaryHash = hex.EncodeToString(h.Sum(nil))
-}
-
 func Run(force bool) error {
 	start := time.Now()
-	var found, generated int
+	var found int
 
-	modPath := readModulePath()
 	layout := findLayout()
-	var routes []routeInfo
+	var allSources []string
+
+	var settings *config.Settings
+	var genDir string
 
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -93,20 +72,18 @@ func Run(force bool) error {
 			return nil
 		}
 
+		if genDir == "" {
+			genDir = detectGenDir(path)
+		}
+
 		found++
-		outPath := filepath.Join(path, "dree.go")
 		pattern := buildPattern(path)
 		pageName := buildPageName(path)
-
-		var hashParts []string
-		var handlerSources []string
-		hashParts = append(hashParts, fmt.Sprintf("bin:%q", binaryHash[:12]))
 
 		for _, fpath := range dreegoFiles {
 			data, _ := os.ReadFile(fpath)
 			h := sha256.Sum256(data)
 			base := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
-			hashParts = append(hashParts, fmt.Sprintf("%s:%q", base, hex.EncodeToString(h[:])))
 
 			method := "GET"
 			for prefix, m := range methodExt {
@@ -147,7 +124,7 @@ func Run(force bool) error {
 				if err != nil {
 					return fmt.Errorf("error generating error page %s: %w", fpath, err)
 				}
-				handlerSources = append(handlerSources, src)
+				allSources = append(allSources, src)
 				continue
 			}
 
@@ -156,35 +133,8 @@ func Run(force bool) error {
 				if err != nil {
 					return fmt.Errorf("error generating %s: %w", fpath, err)
 				}
-				handlerSources = append(handlerSources, src)
+				allSources = append(allSources, src)
 			}
-		}
-
-		hashLine := "// hash:{" + strings.Join(hashParts, ", ") + "}"
-
-		pkgName := filepath.Base(path)
-		src := strings.Join(handlerSources, "")
-		var imports []string
-		if strings.Contains(src, "fmt.") {
-			imports = append(imports, "\"fmt\"")
-		}
-		if strings.Contains(src, "html.EscapeString") {
-			imports = append(imports, "\"html\"")
-		}
-		imports = append(imports, "\"net/http\"")
-		imports = append(imports, "\"strings\"")
-		importLine := strings.Join(imports, "\n\t")
-		out := fmt.Sprintf("%s\npackage %s\n\nimport (\n\t%s\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", hashLine, pkgName, importLine)
-		out += src
-
-		if err := os.WriteFile(outPath, []byte(out), 0644); err != nil {
-			return fmt.Errorf("error writing %s: %w", outPath, err)
-		}
-		generated++
-
-		if modPath != "" {
-			importPath := modPath + "/" + filepath.ToSlash(path)
-			routes = append(routes, routeInfo{importPath: importPath, dirPath: path})
 		}
 
 		return nil
@@ -193,53 +143,52 @@ func Run(force bool) error {
 		return err
 	}
 
-	if len(routes) > 0 {
-		settings := findAndLoadSettings(routes)
-		if err := genDreeFile(routes, settings); err != nil {
-			return fmt.Errorf("error generating gen/dree.go: %w", err)
-		}
+	if genDir == "" {
+		genDir = findGenDirFallback()
 	}
 
-	elapsed := time.Since(start)
-	fmt.Printf("Found %d routes\n", found)
-	fmt.Printf("Generated %d dree.go files\n", generated)
-	fmt.Printf("Generated gen/dree.go\n")
-	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
-	return nil
-}
-
-func readModulePath() string {
-	data, err := os.ReadFile("go.mod")
-	if err != nil {
-		return ""
-	}
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "module ") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "module "))
-		}
-	}
-	return ""
-}
-
-func genDreeFile(routes []routeInfo, settings *config.Settings) error {
-	genDir := findGenDir(routes)
 	if err := os.MkdirAll(genDir, 0755); err != nil {
 		return err
 	}
 
+	src := strings.Join(allSources, "")
+	var imports []string
+	if strings.Contains(src, "fmt.") {
+		imports = append(imports, "\"fmt\"")
+	}
+	if strings.Contains(src, "html.EscapeString") {
+		imports = append(imports, "\"html\"")
+	}
+	imports = append(imports, "\"net/http\"")
+	imports = append(imports, "\"strings\"")
+	importLine := strings.Join(imports, "\n\t")
+
+	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\t\"codeberg.org/dreego/dreego/pkg/context\"\n\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n)\n\n", importLine)
+	routesOut += src
+
+	if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
+		return fmt.Errorf("error writing gen/routes.go: %w", err)
+	}
+
+	settings = loadSettings(genDir)
+	if err := writeDreeGo(genDir, settings); err != nil {
+		return fmt.Errorf("error writing gen/dree.go: %w", err)
+	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("Found %d routes\n", found)
+	fmt.Printf("Generated gen/routes.go + gen/dree.go\n")
+	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
+	return nil
+}
+
+func writeDreeGo(genDir string, settings *config.Settings) error {
 	var buf strings.Builder
 	buf.WriteString("package gen\n\n")
 	buf.WriteString("import (\n")
 	buf.WriteString("\t\"codeberg.org/dreego/dreego/pkg/runtime\"\n")
-	for _, r := range routes {
-		buf.WriteString(fmt.Sprintf("\t_ \"%s\"\n", r.importPath))
-	}
-	buf.WriteString(")\n")
-
-	buf.WriteString("\nfunc init() {\n")
-
+	buf.WriteString(")\n\n")
+	buf.WriteString("func init() {\n")
 	if settings != nil {
 		buf.WriteString(fmt.Sprintf("\truntime.SetLogging(%t)\n", settings.Logging.Enabled))
 		for _, rd := range settings.Redirects {
@@ -249,19 +198,12 @@ func genDreeFile(routes []routeInfo, settings *config.Settings) error {
 			buf.WriteString(fmt.Sprintf("\truntime.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
 		}
 	}
-
 	buf.WriteString("}\n")
-
-	outPath := filepath.Join(genDir, "dree.go")
-	return os.WriteFile(outPath, []byte(buf.String()), 0644)
+	return os.WriteFile(filepath.Join(genDir, "dree.go"), []byte(buf.String()), 0644)
 }
 
-func findAndLoadSettings(routes []routeInfo) *config.Settings {
-	if len(routes) == 0 {
-		return nil
-	}
-	dir := findGenDir(routes)
-	settingsPath := filepath.Join(dir, "..", "config.json")
+func loadSettings(genDir string) *config.Settings {
+	settingsPath := filepath.Join(genDir, "..", "config.json")
 	s, err := config.Load(settingsPath)
 	if err != nil {
 		return nil
@@ -269,18 +211,18 @@ func findAndLoadSettings(routes []routeInfo) *config.Settings {
 	return s
 }
 
-func findGenDir(routes []routeInfo) string {
-	if len(routes) == 0 {
-		return "dreego/gen"
-	}
-	first := routes[0].dirPath
-	idx := strings.Index(first, "dreego/routes")
+func detectGenDir(firstRoutePath string) string {
+	idx := strings.Index(firstRoutePath, "dreego/routes")
 	if idx < 0 {
-		idx = strings.Index(first, "dreego"+string(filepath.Separator)+"routes")
+		idx = strings.Index(firstRoutePath, "dreego"+string(filepath.Separator)+"routes")
 	}
 	if idx >= 0 {
-		return first[:idx] + "dreego/gen"
+		return firstRoutePath[:idx] + "dreego/gen"
 	}
+	return "dreego/gen"
+}
+
+func findGenDirFallback() string {
 	return "dreego/gen"
 }
 
@@ -323,7 +265,13 @@ func buildPattern(path string) string {
 		if seg == "" {
 			continue
 		}
-		segments = append(segments, patternSegment(seg))
+		s := patternSegment(seg)
+		if s != "" {
+			segments = append(segments, s)
+		}
+	}
+	if len(segments) == 0 {
+		return "/{$}"
 	}
 	return "/" + strings.Join(segments, "/")
 }
@@ -342,6 +290,9 @@ func cleanSegment(seg string) string {
 	if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
 		return seg[1 : len(seg)-1]
 	}
+	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
+		return seg[1 : len(seg)-1]
+	}
 	return seg
 }
 
@@ -351,6 +302,9 @@ func patternSegment(seg string) string {
 	}
 	if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
 		return "{" + seg[1:len(seg)-1] + "}"
+	}
+	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
+		return ""
 	}
 	return seg
 }

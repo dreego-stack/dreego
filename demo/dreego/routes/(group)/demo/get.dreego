@@ -1,0 +1,14 @@
+<head>
+    <title>Route Group Demo</title>
+</head>
+
+<div>
+    <h1>Route Group: (group)</h1>
+    <p>Diese Seite liegt in <code>dreego/routes/(group)/demo/get.dreego</code></p>
+    <p>Die URL ist <strong>/demo</strong> — die Gruppe <code>(group)</code> erscheint nicht in der URL.</p>
+    <a href="/">Zurück</a>
+</div>
+
+<style>
+    code { background: #eee; padding: 0.2em 0.4em; border-radius: 3px; }
+</style>
