@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-26T04:01:30Z
+Generated: 2026-07-26T04:12:41Z
 
 Chain: 1–13 | Next status code: **14**
 
@@ -20,12 +20,18 @@ Chain: 1–13 | Next status code: **14**
 - `13` **flat-gen.1** — Flat Gen-Package (gen/routes.go statt per-dir dree.go)
 
 ## AVAILABLE NEXT
+- **api-json.1** — API-Routen + JSON Responses
+- **compression.1** — Gzip/Brotli Compression Middleware
 - **deployment.1** — Deployment-Strategie (Docker, Single-Binary, Graceful)
+- **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreegotest.1** — dreegotest — Testing-Package
 - **each-loop.1** — {#each} mit $loop-Variable
+- **health-checks.1** — /health + /ready Endpoints
 - **hot-reload.1** — Hot Reload (Dev-Server + SSE)
+- **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
 - **plugin-interface.1** — Plugin-Interface (Frozen for v1)
 - **scaffolding.1** — dreego new + Generatoren
+- **security-headers.1** — Security-Header (CSP, HSTS, X-Frame, X-Content-Type)
 - **session.1** — Session-Interface (Cookie Store im Core)
 - **static-assets.1** — Static Assets (static/ → embed.FS)
 - **template-filters.1** — Template-Filter ({var|raw}, {var|upper})
@@ -33,11 +39,13 @@ Chain: 1–13 | Next status code: **14**
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1, components.1, session.1)
+- **api-swagger.1** — Swagger/OpenAPI Auto-Generation  (missing: api-json.1)
 - **components.1** — Component-System ({#use}, props)  (missing: plugin-interface.1)
 - **csrf.1** — CSRF-Schutz (Core-Conditional)  (missing: session.1)
+- **ddos-protection.1** — DDoS-Schutz (PoW + Rate-Limiting) — Plugin  (missing: plugin-interface.1)
 - **devtools.1** — DevTools (LSP, VS Code, CLI-Niceties)  (missing: plugin-interface.1)
 - **form-actions.1** — Form Actions (g-action / g-submit)  (missing: csrf.1)
 - **ssg.1** — Static Site Generation (SSG)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 13 | web: 17 | next code: 14
+chain: 13 | web: 25 | next code: 14

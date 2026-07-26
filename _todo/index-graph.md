@@ -26,18 +26,30 @@ graph TD
     style route_groups_1 fill:#d4edda,stroke:#28a745
     flat_gen_1["13 Flat Gen-Package (gen/routes.go statt pe"]
     style flat_gen_1 fill:#d4edda,stroke:#28a745
+    api_json_1["API-Routen + JSON Responses"]
+    style api_json_1 fill:#fff3cd,stroke:#ffc107
+    compression_1["Gzip/Brotli Compression Middleware"]
+    style compression_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment-Strategie (Docker, Single-Bin"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
+    documentation_1["docs.dreego.dev + Tutorial + Examples"]
+    style documentation_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing-Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     each_loop_1["{#each} mit $loop-Variable"]
     style each_loop_1 fill:#fff3cd,stroke:#ffc107
+    health_checks_1["/health + /ready Endpoints"]
+    style health_checks_1 fill:#fff3cd,stroke:#ffc107
     hot_reload_1["Hot Reload (Dev-Server + SSE)"]
     style hot_reload_1 fill:#fff3cd,stroke:#ffc107
+    observability_1["Observability (Prometheus, OpenTelemetry"]
+    style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin-Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
     scaffolding_1["dreego new + Generatoren"]
     style scaffolding_1 fill:#fff3cd,stroke:#ffc107
+    security_headers_1["Security-Header (CSP, HSTS, X-Frame, X-C"]
+    style security_headers_1 fill:#fff3cd,stroke:#ffc107
     session_1["Session-Interface (Cookie Store im Core)"]
     style session_1 fill:#fff3cd,stroke:#ffc107
     static_assets_1["Static Assets (static/ → embed.FS)"]
@@ -48,10 +60,14 @@ graph TD
     style verbatim_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
+    api_swagger_1["Swagger/OpenAPI Auto-Generation"]
+    style api_swagger_1 fill:#f8d7da,stroke:#dc3545
     components_1["Component-System ({#use}, props)"]
     style components_1 fill:#f8d7da,stroke:#dc3545
     csrf_1["CSRF-Schutz (Core-Conditional)"]
     style csrf_1 fill:#f8d7da,stroke:#dc3545
+    ddos_protection_1["DDoS-Schutz (PoW + Rate-Limiting) — Plug"]
+    style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
     style devtools_1 fill:#f8d7da,stroke:#dc3545
     form_actions_1["Form Actions (g-action / g-submit)"]
@@ -61,6 +77,9 @@ graph TD
     wails_1["Wails Desktop Integration"]
     style wails_1 fill:#f8d7da,stroke:#dc3545
 
+    middleware_1 --> security_headers_1
+    api_json_1 --> api_swagger_1
+    middleware_1 --> compression_1
     plugin_interface_1 --> components_1
     routing_1 --> components_1
     plugin_interface_1 --> devtools_1
@@ -83,12 +102,17 @@ graph TD
     session_1 --> addon_ecosystem_1
     transpiler_1 --> template_filters_1
     xss_1 --> template_filters_1
+    routing_1 --> api_json_1
+    context_refactoring_1 --> api_json_1
     routing_1 --> wails_1
     plugin_interface_1 --> wails_1
     transpiler_1 --> verbatim_1
     context_refactoring_1 --> session_1
     cli_1 --> deployment_1
+    plugin_interface_1 --> ddos_protection_1
     cli_1 --> scaffolding_1
+    routing_1 --> health_checks_1
+    middleware_1 --> observability_1
     transpiler_1 --> flat_gen_1
     routing_1 --> flat_gen_1
     transpiler_1 --> context_refactoring_1
