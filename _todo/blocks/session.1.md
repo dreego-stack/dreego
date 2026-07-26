@@ -1,7 +1,7 @@
 ---
 id: session.1
 title: Session-Interface (Cookie Store im Core)
-status: planned
+status: in-progress
 phase: v0.0.3
 requires:
   - context-refactoring.1

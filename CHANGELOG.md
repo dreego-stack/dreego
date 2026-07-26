@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.3 (unreleased)
+
+- Session-Interface: `session.Store` im Core mit `CookieStore` (HMAC-signiert)
+
 ## v0.0.2 (2026-07-25)
 
 - Route-Segmente: `[id]` (eckige Klammern) als Konvention für dynamische Segmente, kompatibel mit Next.js/SvelteKit/Astro
