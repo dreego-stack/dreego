@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 BLOCKS_DIR = os.path.join(os.path.dirname(__file__), "blocks")
 HISTORY_DIR = os.path.join(BLOCKS_DIR, "history")
 INDEX_PATH = os.path.join(os.path.dirname(__file__), "index.md")
+GRAPH_PATH = os.path.join(os.path.dirname(__file__), "index-graph.md")
 
 
 def parse_frontmatter(path):
@@ -242,6 +243,55 @@ def write_index(blocks, available, in_progress, blocked, chain, rejected, cycles
         f.write("\n".join(lines) + "\n")
 
 
+def write_graph(blocks, available, in_progress, blocked, chain, rejected, cycles):
+    lines = ["```mermaid", "graph TD"]
+    safe = {}
+    for bid in blocks:
+        safe[bid] = bid.replace(".", "_").replace("-", "_")
+
+    chain_ids = [bid for _, bid in chain]
+
+    for n, bid in chain:
+        b = blocks[bid]
+        label = f"{n:02d} {b.get('title', bid)[:40]}"
+        lines.append(f"    {safe[bid]}[\"{label}\"]")
+        lines.append(f"    style {safe[bid]} fill:#d4edda,stroke:#28a745")
+
+    for bid in available:
+        b = blocks[bid]
+        label = b.get('title', bid)[:40]
+        lines.append(f"    {safe[bid]}[\"{label}\"]")
+        lines.append(f"    style {safe[bid]} fill:#fff3cd,stroke:#ffc107")
+
+    for bid in in_progress:
+        b = blocks[bid]
+        label = b.get('title', bid)[:40]
+        lines.append(f"    {safe[bid]}[\"{label}\"]")
+        lines.append(f"    style {safe[bid]} fill:#cce5ff,stroke:#0d6efd")
+
+    for bid in blocked:
+        b = blocks[bid]
+        label = b.get('title', bid)[:40]
+        lines.append(f"    {safe[bid]}[\"{label}\"]")
+        lines.append(f"    style {safe[bid]} fill:#f8d7da,stroke:#dc3545")
+
+    lines.append("")
+
+    for bid, b in blocks.items():
+        for req in b.get("_requires", []):
+            if req in safe:
+                lines.append(f"    {safe[req]} --> {safe[bid]}")
+
+    lines.append("")
+    for n, bid in enumerate(chain_ids):
+        if n + 1 < len(chain_ids):
+            nxt = chain_ids[n + 1]
+            lines.append(f"    {safe[bid]} -.->|chain| {safe[nxt]}")
+
+    with open(GRAPH_PATH, "w") as f:
+        f.write("\n".join(lines) + "\n```\n")
+
+
 def main():
     blocks = load_blocks()
     if not blocks:
@@ -303,6 +353,7 @@ def main():
         print(f"\nerrors: {len(errors)} — fix before proceeding")
 
     write_index(blocks, available, in_progress, blocked, chain, rejected, cycles)
+    write_graph(blocks, available, in_progress, blocked, chain, rejected, cycles)
 
 
 if __name__ == "__main__":
