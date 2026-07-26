@@ -1,10 +1,15 @@
-# TODO — Dreego
+# Blockwebchain
 
-Nur Dinge, die wir ALS NACHSTES im Code anfassen.
+Status via `python _todo/process.py`. Chain 1–13 done. Next code: **14**.
 
-## Jetzt (v0.0.2)
+## AVAILABLE NEXT (v0.0.3)
 
-- [x] Context refactoring: `map[string]string` → Interface + Embedding
-- [x] Recovery-Middleware: Panic → 500
-- [x] XSS-Schutz: Auto-Escaping in `{variable}`
-- [x] Custom `404.dreego` + `500.dreego`
+- **session.1** — Session-Interface (Cookie Store im Core)
+- **static-assets.1** — Static Assets (static/ → embed.FS)
+
+## BLOCKED
+
+- **csrf.1** — CSRF-Schutz (needs: session.1)
+- **form-actions.1** — Form Actions (needs: csrf.1)
+
+Siehe `_todo/index.md` für die vollständige Chain (History) und den Dependency-Graph.
