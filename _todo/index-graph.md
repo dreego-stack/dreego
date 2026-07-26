@@ -50,14 +50,14 @@ graph TD
     style scaffolding_1 fill:#fff3cd,stroke:#ffc107
     security_headers_1["Security-Header (CSP, HSTS, X-Frame, X-C"]
     style security_headers_1 fill:#fff3cd,stroke:#ffc107
-    session_1["Session-Interface (Cookie Store im Core)"]
-    style session_1 fill:#fff3cd,stroke:#ffc107
     static_assets_1["Static Assets (static/ → embed.FS)"]
     style static_assets_1 fill:#fff3cd,stroke:#ffc107
     template_filters_1["Template-Filter ({var|raw}, {var|upper})"]
     style template_filters_1 fill:#fff3cd,stroke:#ffc107
     verbatim_1["{#verbatim} Block (Raw-Output)"]
     style verbatim_1 fill:#fff3cd,stroke:#ffc107
+    session_1["Session-Interface (Cookie Store im Core)"]
+    style session_1 fill:#cce5ff,stroke:#0d6efd
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
@@ -78,6 +78,8 @@ graph TD
     style dreego_cache_1 fill:#f8d7da,stroke:#dc3545
     dreego_charts_1["dreego-charts (Chart.js/Canvas Component"]
     style dreego_charts_1 fill:#f8d7da,stroke:#dc3545
+    dreego_cluster_1["dreego-cluster (Multi-Node, Distributed "]
+    style dreego_cluster_1 fill:#f8d7da,stroke:#dc3545
     dreego_features_1["dreego-features (Feature-Flags, A/B-Test"]
     style dreego_features_1 fill:#f8d7da,stroke:#dc3545
     dreego_i18n_1["dreego-i18n (Internationalisierung)"]
@@ -152,6 +154,10 @@ graph TD
     middleware_1 --> middleware_hooks_1
     routing_1 --> ssg_1
     plugin_interface_1 --> ssg_1
+    plugin_interface_1 --> dreego_cluster_1
+    session_1 --> dreego_cluster_1
+    cache_interface_1 --> dreego_cluster_1
+    event_bus_1 --> dreego_cluster_1
     plugin_interface_1 --> dreego_charts_1
     components_1 --> dreego_charts_1
     routing_1 --> dreegotest_1

@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-26T04:22:37Z
+Generated: 2026-07-26T15:27:42Z
 
 Chain: 1–13 | Next status code: **14**
 
@@ -32,10 +32,12 @@ Chain: 1–13 | Next status code: **14**
 - **plugin-interface.1** — Plugin-Interface (Frozen for v1)
 - **scaffolding.1** — dreego new + Generatoren
 - **security-headers.1** — Security-Header (CSP, HSTS, X-Frame, X-Content-Type)
-- **session.1** — Session-Interface (Cookie Store im Core)
 - **static-assets.1** — Static Assets (static/ → embed.FS)
 - **template-filters.1** — Template-Filter ({var|raw}, {var|upper})
 - **verbatim.1** — {#verbatim} Block (Raw-Output)
+
+## IN PROGRESS
+- **session.1** — Session-Interface (Cookie Store im Core)  (requires: context-refactoring.1)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1, components.1, session.1)
@@ -48,6 +50,7 @@ Chain: 1–13 | Next status code: **14**
 - **dreego-analytics.1** — dreego-analytics (Privacy-friendly, Server-Side)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-cache.1** — dreego-cache (Caching: Memory, Redis)  (missing: plugin-interface.1, cache-interface.1)
 - **dreego-charts.1** — dreego-charts (Chart.js/Canvas Components)  (missing: plugin-interface.1, components.1)
+- **dreego-cluster.1** — dreego-cluster (Multi-Node, Distributed State)  (missing: plugin-interface.1, session.1, cache-interface.1, event-bus.1)
 - **dreego-features.1** — dreego-features (Feature-Flags, A/B-Testing)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-i18n.1** — dreego-i18n (Internationalisierung)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-icons.1** — dreego-icons (Lucide/Heroicons Components)  (missing: plugin-interface.1, components.1)
@@ -72,4 +75,4 @@ Chain: 1–13 | Next status code: **14**
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 13 | web: 49 | next code: 14
+chain: 13 | web: 50 | next code: 14
