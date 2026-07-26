@@ -96,6 +96,8 @@ graph TD
     style dreego_notify_1 fill:#f8d7da,stroke:#dc3545
     dreego_pdf_1["dreego-pdf (PDF-Generierung aus HTML)"]
     style dreego_pdf_1 fill:#f8d7da,stroke:#dc3545
+    dreego_polar_1["dreego-polar (Payments via Polar.sh)"]
+    style dreego_polar_1 fill:#f8d7da,stroke:#dc3545
     dreego_pwa_1["dreego-pwa (Service Worker, Offline-Cach"]
     style dreego_pwa_1 fill:#f8d7da,stroke:#dc3545
     dreego_search_1["dreego-search (Volltextsuche)"]
@@ -104,8 +106,6 @@ graph TD
     style dreego_seo_1 fill:#f8d7da,stroke:#dc3545
     dreego_storage_1["dreego-storage (File-Uploads, Progress, "]
     style dreego_storage_1 fill:#f8d7da,stroke:#dc3545
-    dreego_stripe_1["dreego-stripe (Payments, Checkout, Subsc"]
-    style dreego_stripe_1 fill:#f8d7da,stroke:#dc3545
     email_interface_1["Email-Sending Interface (SMTP, Resend, P"]
     style email_interface_1 fill:#f8d7da,stroke:#dc3545
     event_bus_1["Pub/Sub Event-Bus (Core-Interface)"]
@@ -164,6 +164,7 @@ graph TD
     plugin_interface_1 --> dreego_analytics_1
     middleware_hooks_1 --> dreego_analytics_1
     plugin_interface_1 --> email_interface_1
+    plugin_interface_1 --> dreego_polar_1
     context_refactoring_1 --> form_actions_1
     routing_1 --> form_actions_1
     csrf_1 --> form_actions_1
@@ -196,7 +197,6 @@ graph TD
     plugin_interface_1 --> route_hooks_1
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
-    plugin_interface_1 --> dreego_stripe_1
     plugin_interface_1 --> cache_interface_1
     cli_1 --> scaffolding_1
     routing_1 --> health_checks_1

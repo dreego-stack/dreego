@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-26T04:19:15Z
+Generated: 2026-07-26T04:22:37Z
 
 Chain: 1–13 | Next status code: **14**
 
@@ -57,11 +57,11 @@ Chain: 1–13 | Next status code: **14**
 - **dreego-markdown.1** — dreego-markdown (Markdown-Rendering, Frontmatter)  (missing: plugin-interface.1)
 - **dreego-notify.1** — dreego-notify (Multi-Channel Notifications)  (missing: plugin-interface.1, email-interface.1, event-bus.1)
 - **dreego-pdf.1** — dreego-pdf (PDF-Generierung aus HTML)  (missing: plugin-interface.1)
+- **dreego-polar.1** — dreego-polar (Payments via Polar.sh)  (missing: plugin-interface.1)
 - **dreego-pwa.1** — dreego-pwa (Service Worker, Offline-Caching)  (missing: plugin-interface.1)
 - **dreego-search.1** — dreego-search (Volltextsuche)  (missing: plugin-interface.1)
 - **dreego-seo.1** — dreego-seo (Meta-Tags, OG, JSON-LD, Sitemap)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-storage.1** — dreego-storage (File-Uploads, Progress, Resize)  (missing: plugin-interface.1, storage-interface.1)
-- **dreego-stripe.1** — dreego-stripe (Payments, Checkout, Subscriptions)  (missing: plugin-interface.1)
 - **email-interface.1** — Email-Sending Interface (SMTP, Resend, Postmark)  (missing: plugin-interface.1)
 - **event-bus.1** — Pub/Sub Event-Bus (Core-Interface)  (missing: plugin-interface.1)
 - **form-actions.1** — Form Actions (g-action / g-submit)  (missing: csrf.1)
