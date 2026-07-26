@@ -18,4 +18,4 @@ bin/
 build/
 *_dreego.go
 dree.go
-gen/routes.go
+**/gen/routes.go
