@@ -62,6 +62,8 @@ graph TD
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#f8d7da,stroke:#dc3545
+    cache_interface_1["Caching Interface (Memory, Redis)"]
+    style cache_interface_1 fill:#f8d7da,stroke:#dc3545
     components_1["Component-System ({#use}, props)"]
     style components_1 fill:#f8d7da,stroke:#dc3545
     csrf_1["CSRF-Schutz (Core-Conditional)"]
@@ -70,31 +72,102 @@ graph TD
     style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
     style devtools_1 fill:#f8d7da,stroke:#dc3545
+    dreego_analytics_1["dreego-analytics (Privacy-friendly, Serv"]
+    style dreego_analytics_1 fill:#f8d7da,stroke:#dc3545
+    dreego_cache_1["dreego-cache (Caching: Memory, Redis)"]
+    style dreego_cache_1 fill:#f8d7da,stroke:#dc3545
+    dreego_charts_1["dreego-charts (Chart.js/Canvas Component"]
+    style dreego_charts_1 fill:#f8d7da,stroke:#dc3545
+    dreego_features_1["dreego-features (Feature-Flags, A/B-Test"]
+    style dreego_features_1 fill:#f8d7da,stroke:#dc3545
+    dreego_i18n_1["dreego-i18n (Internationalisierung)"]
+    style dreego_i18n_1 fill:#f8d7da,stroke:#dc3545
+    dreego_icons_1["dreego-icons (Lucide/Heroicons Component"]
+    style dreego_icons_1 fill:#f8d7da,stroke:#dc3545
+    dreego_jobs_1["dreego-jobs (Background-Jobs, Cron, Queu"]
+    style dreego_jobs_1 fill:#f8d7da,stroke:#dc3545
+    dreego_mail_1["dreego-mail (E-Mail SMTP/Resend/Postmark"]
+    style dreego_mail_1 fill:#f8d7da,stroke:#dc3545
+    dreego_map_1["dreego-map (MapLibre/Leaflet Components)"]
+    style dreego_map_1 fill:#f8d7da,stroke:#dc3545
+    dreego_markdown_1["dreego-markdown (Markdown-Rendering, Fro"]
+    style dreego_markdown_1 fill:#f8d7da,stroke:#dc3545
+    dreego_notify_1["dreego-notify (Multi-Channel Notificatio"]
+    style dreego_notify_1 fill:#f8d7da,stroke:#dc3545
+    dreego_pdf_1["dreego-pdf (PDF-Generierung aus HTML)"]
+    style dreego_pdf_1 fill:#f8d7da,stroke:#dc3545
+    dreego_pwa_1["dreego-pwa (Service Worker, Offline-Cach"]
+    style dreego_pwa_1 fill:#f8d7da,stroke:#dc3545
+    dreego_search_1["dreego-search (Volltextsuche)"]
+    style dreego_search_1 fill:#f8d7da,stroke:#dc3545
+    dreego_seo_1["dreego-seo (Meta-Tags, OG, JSON-LD, Site"]
+    style dreego_seo_1 fill:#f8d7da,stroke:#dc3545
+    dreego_storage_1["dreego-storage (File-Uploads, Progress, "]
+    style dreego_storage_1 fill:#f8d7da,stroke:#dc3545
+    dreego_stripe_1["dreego-stripe (Payments, Checkout, Subsc"]
+    style dreego_stripe_1 fill:#f8d7da,stroke:#dc3545
+    email_interface_1["Email-Sending Interface (SMTP, Resend, P"]
+    style email_interface_1 fill:#f8d7da,stroke:#dc3545
+    event_bus_1["Pub/Sub Event-Bus (Core-Interface)"]
+    style event_bus_1 fill:#f8d7da,stroke:#dc3545
     form_actions_1["Form Actions (g-action / g-submit)"]
     style form_actions_1 fill:#f8d7da,stroke:#dc3545
+    middleware_hooks_1["Plugin-Middleware-Hooks (app.Use FIFO)"]
+    style middleware_hooks_1 fill:#f8d7da,stroke:#dc3545
+    queue_interface_1["Background-Job-Queue Interface"]
+    style queue_interface_1 fill:#f8d7da,stroke:#dc3545
+    route_hooks_1["Plugin-Route-Registration"]
+    style route_hooks_1 fill:#f8d7da,stroke:#dc3545
     ssg_1["Static Site Generation (SSG)"]
     style ssg_1 fill:#f8d7da,stroke:#dc3545
+    storage_interface_1["File-Storage Interface (S3, R2, Local)"]
+    style storage_interface_1 fill:#f8d7da,stroke:#dc3545
     wails_1["Wails Desktop Integration"]
     style wails_1 fill:#f8d7da,stroke:#dc3545
 
     middleware_1 --> security_headers_1
     api_json_1 --> api_swagger_1
     middleware_1 --> compression_1
+    plugin_interface_1 --> dreego_mail_1
+    email_interface_1 --> dreego_mail_1
+    plugin_interface_1 --> dreego_map_1
+    components_1 --> dreego_map_1
+    plugin_interface_1 --> dreego_icons_1
+    components_1 --> dreego_icons_1
+    plugin_interface_1 --> dreego_storage_1
+    storage_interface_1 --> dreego_storage_1
+    plugin_interface_1 --> dreego_seo_1
+    middleware_hooks_1 --> dreego_seo_1
     plugin_interface_1 --> components_1
     routing_1 --> components_1
     plugin_interface_1 --> devtools_1
+    plugin_interface_1 --> storage_interface_1
     transpiler_1 --> each_loop_1
     cli_1 --> hot_reload_1
     routing_1 --> hot_reload_1
+    plugin_interface_1 --> dreego_jobs_1
+    queue_interface_1 --> dreego_jobs_1
+    plugin_interface_1 --> dreego_pdf_1
+    plugin_interface_1 --> middleware_hooks_1
+    middleware_1 --> middleware_hooks_1
     routing_1 --> ssg_1
     plugin_interface_1 --> ssg_1
+    plugin_interface_1 --> dreego_charts_1
+    components_1 --> dreego_charts_1
     routing_1 --> dreegotest_1
     context_refactoring_1 --> dreegotest_1
     context_refactoring_1 --> plugin_interface_1
     middleware_1 --> plugin_interface_1
+    plugin_interface_1 --> dreego_notify_1
+    email_interface_1 --> dreego_notify_1
+    event_bus_1 --> dreego_notify_1
+    plugin_interface_1 --> dreego_analytics_1
+    middleware_hooks_1 --> dreego_analytics_1
+    plugin_interface_1 --> email_interface_1
     context_refactoring_1 --> form_actions_1
     routing_1 --> form_actions_1
     csrf_1 --> form_actions_1
+    plugin_interface_1 --> queue_interface_1
     session_1 --> csrf_1
     middleware_1 --> csrf_1
     plugin_interface_1 --> addon_ecosystem_1
@@ -104,12 +177,27 @@ graph TD
     xss_1 --> template_filters_1
     routing_1 --> api_json_1
     context_refactoring_1 --> api_json_1
+    plugin_interface_1 --> event_bus_1
     routing_1 --> wails_1
     plugin_interface_1 --> wails_1
     transpiler_1 --> verbatim_1
+    plugin_interface_1 --> dreego_features_1
+    middleware_hooks_1 --> dreego_features_1
     context_refactoring_1 --> session_1
+    plugin_interface_1 --> dreego_cache_1
+    cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
+    plugin_interface_1 --> dreego_i18n_1
+    middleware_hooks_1 --> dreego_i18n_1
+    plugin_interface_1 --> dreego_search_1
     plugin_interface_1 --> ddos_protection_1
+    middleware_hooks_1 --> ddos_protection_1
+    plugin_interface_1 --> dreego_pwa_1
+    plugin_interface_1 --> route_hooks_1
+    routing_1 --> route_hooks_1
+    plugin_interface_1 --> dreego_markdown_1
+    plugin_interface_1 --> dreego_stripe_1
+    plugin_interface_1 --> cache_interface_1
     cli_1 --> scaffolding_1
     routing_1 --> health_checks_1
     middleware_1 --> observability_1
