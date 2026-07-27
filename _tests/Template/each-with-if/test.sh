@@ -4,9 +4,9 @@ cd "$(dirname "$0")"
 dreego init .
 rm -rf dreego/routes dreego/components dreego/layouts 2>/dev/null
 mkdir -p dreego/routes
-cat > "dreego/routes/get.dreego" << 'DREEGO'
+cat > dreego/routes/get.dreego << 'DREEGO'
 <go>items:=[]string{"a","","c"}</go>
-<div>{#each items as item}{#if item}<span>{item}</span>{/if}{/each}</div>
+<div>{#each items as item}{#if item != ""}<span>{item}</span>{/if}{/each}</div>
 DREEGO
 go mod init t >/dev/null 2>&1
 go mod edit -replace codeberg.org/dreego/dreego=../../..

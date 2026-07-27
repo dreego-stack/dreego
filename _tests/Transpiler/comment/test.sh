@@ -6,7 +6,7 @@ rm -rf dreego/routes dreego/components dreego/layouts 2>/dev/null
 mkdir -p dreego/routes
 cat > "dreego/routes/get.dreego" << 'DREEGO'
 <head><title>T</title></head>
-<go>x:="hi"</go>
+<go>x := "hi"</go>
 <div><p>{x}</p></div>
 DREEGO
 go mod init t >/dev/null 2>&1
