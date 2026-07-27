@@ -89,6 +89,13 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 	case TokenSlot:
 		p.advance()
 		return TemplateNode{Type: NodeSlot, Content: tok.Value}, nil
+	case TokenSlotOpen:
+		p.advance()
+		children, err := p.parseSlotNodes()
+		if err != nil {
+			return TemplateNode{}, err
+		}
+		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children}, nil
 	case TokenTagOpen:
 		if parent == "root" || parent == "component" {
 			p.advance()
@@ -105,8 +112,29 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			return TemplateNode{}, err
 		}
 		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children}, nil
+	case TokenSlotClose:
+		return TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
 	default:
 		return TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)
+	}
+}
+
+func (p *Parser) parseSlotNodes() ([]TemplateNode, error) {
+	var nodes []TemplateNode
+	for {
+		tok := p.current()
+		if tok.Type == TokenEOF {
+			return nil, fmt.Errorf("unclosed {#slot}")
+		}
+		if tok.Type == TokenSlotClose {
+			p.advance()
+			return nodes, nil
+		}
+		node, err := p.parseTemplateNode("slot")
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
 	}
 }
 

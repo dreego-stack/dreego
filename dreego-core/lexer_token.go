@@ -15,6 +15,8 @@ const (
 	TokenEachOpen
 	TokenEachClose
 	TokenSlot
+	TokenSlotOpen
+	TokenSlotClose
 	TokenComponentHeader
 	TokenImport
 	TokenComponentTagOpen
