@@ -8,7 +8,7 @@
 
 <div>
     <h1>{message}</h1>
-    <p>Welcome to the Dreego framework.</p>
+    <@Card title="Welcome"/>
     <a href="/about">About</a>
 </div>
 

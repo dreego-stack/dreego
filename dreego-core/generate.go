@@ -28,6 +28,8 @@ func Run(force bool) error {
 	var settings *Settings
 	var genDir string
 
+	_, compSrcs := scanComponents()
+
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
@@ -147,11 +149,13 @@ func Run(force bool) error {
 	}
 
 	src := strings.Join(allSources, "")
+	compSrc := strings.Join(compSrcs, "")
+
 	var imports []string
-	if strings.Contains(src, "fmt.") {
+	if strings.Contains(src+compSrc, "fmt.") {
 		imports = append(imports, "\"fmt\"")
 	}
-	if strings.Contains(src, "html.EscapeString") {
+	if strings.Contains(src+compSrc, "html.EscapeString") {
 		imports = append(imports, "\"html\"")
 	}
 	imports = append(imports, "\"net/http\"")
@@ -159,7 +163,7 @@ func Run(force bool) error {
 	importLine := strings.Join(imports, "\n\t")
 
 	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", importLine)
-	routesOut += src
+	routesOut += compSrc + src
 
 	if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
 		return fmt.Errorf("error writing gen/routes.go: %w", err)
@@ -171,7 +175,7 @@ func Run(force bool) error {
 	}
 
 	elapsed := time.Since(start)
-	fmt.Printf("Found %d routes\n", found)
+	fmt.Printf("Found %d routes + %d components\n", found, len(compSrcs))
 	fmt.Printf("Generated gen/routes.go + gen/dree.go\n")
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
@@ -329,4 +333,54 @@ func findLayout() *File {
 func isLayoutDir(path string) bool {
 	return strings.HasSuffix(path, "/layouts") || strings.Contains(path, "/layouts/") ||
 		strings.HasSuffix(path, "/components") || strings.Contains(path, "/components/")
+}
+
+func scanComponents() (genDir string, sources []string) {
+	filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
+			return nil
+		}
+		if !strings.Contains(path, "components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
+			return nil
+		}
+
+		data, _ := os.ReadFile(path)
+		raw := string(data)
+
+		comp, _, body := ParseHeader(raw)
+		if comp == nil || comp.Name == "" {
+			return nil
+		}
+
+		h := sha256.Sum256(data)
+		scopeHash := hex.EncodeToString(h[:])[:12]
+
+		if genDir == "" {
+			genDir = detectGenDir(path)
+		}
+
+		tokens, _ := Lex(body)
+		if tokens == nil {
+			return nil
+		}
+
+		p := NewParser(tokens)
+		file, err := p.Parse()
+		if err != nil {
+			return nil
+		}
+		file.Component = comp
+
+		if len(file.Go) == 0 {
+			file.Go = []GoSection{{Method: ""}}
+		}
+
+		src, err := GenerateComponent(file, scopeHash)
+		if err != nil {
+			return nil
+		}
+		sources = append(sources, src)
+		return nil
+	})
+	return
 }

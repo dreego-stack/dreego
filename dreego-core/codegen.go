@@ -195,3 +195,76 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	return buf.String(), nil
 }
+
+func GenerateComponent(file *File, scopeHash string) (string, error) {
+	comp := file.Component
+	if comp == nil {
+		return "", fmt.Errorf("no component definition")
+	}
+
+	var buf strings.Builder
+
+	params := ""
+	for i, p := range comp.Props {
+		if i > 0 {
+			params += ", "
+		}
+		params += p.Name + " " + p.Type
+	}
+
+	buf.WriteString(fmt.Sprintf("func %s(%s) core.Component {\n", comp.Name, params))
+	buf.WriteString("\treturn core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {\n")
+	buf.WriteString("\t\tvar b strings.Builder\n\n")
+
+	if len(file.Go) > 0 && file.Go[0].Code != "" {
+		for _, line := range strings.Split(strings.Trim(file.Go[0].Code, "\n"), "\n") {
+			buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
+		}
+		buf.WriteString("\n")
+	}
+
+	if file.Template != nil {
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		for _, n := range file.Template.Nodes {
+			buf.WriteString("\t\t" + genTemplateNodeComp(n) + "\n")
+		}
+		buf.WriteString("\t\tb.WriteString(\"</div>\")\n")
+	}
+
+	if file.Style != nil {
+		scoped := scopeCSS(file.Style.Code, scopeHash)
+		buf.WriteString("\t\tb.WriteString(\"<style>\")\n")
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(%s)\n", goLiteral(scoped)))
+		buf.WriteString("\t\tb.WriteString(\"</style>\")\n")
+	}
+
+	buf.WriteString("\n\t\treturn b.String(), nil\n")
+	buf.WriteString("\t})\n")
+	buf.WriteString("}\n\n")
+
+	return buf.String(), nil
+}
+
+func genTemplateNodeComp(n TemplateNode) string {
+	switch n.Type {
+	case NodeText:
+		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content))
+	case NodeExpression:
+		return fmt.Sprintf("b.WriteString(html.EscapeString(fmt.Sprintf(\"%%v\", %s)))", n.Content)
+	case NodeSlot:
+		return "b.WriteString(ctx.Get(\"slot\"))"
+	case NodeComponentCall:
+		return genComponentCall(n)
+	default:
+		return ""
+	}
+}
+
+func genComponentCall(n TemplateNode) string {
+	parts := strings.SplitN(n.Tag, ".", 2)
+	funcName := parts[len(parts)-1]
+	if n.SelfClose {
+		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, n.Attrs)
+	}
+	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag)
+}

@@ -34,6 +34,22 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		}
 		buf.WriteString(indent + "}\n")
 		return buf.String()
+	case NodeSlot:
+		return fmt.Sprintf("%sb.WriteString(c.Get(\"slot\"))\n", indent)
+	case NodeComponentCall:
+		funcName := n.Tag
+		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {
+			funcName = n.Tag[idx+1:]
+		}
+		args := extractAttrValues(n.Attrs)
+		if n.SelfClose {
+			return fmt.Sprintf("%sh, _ := %s(%s).Render(c); %sb.WriteString(h)\n", indent, funcName, args, indent)
+		}
+		var buf strings.Builder
+		buf.WriteString(fmt.Sprintf("%shtml, err := %s(%s).Render(c)\n", indent, funcName, args))
+		buf.WriteString(indent + "if err != nil { return err }\n")
+		buf.WriteString(fmt.Sprintf("%sb.WriteString(html)\n", indent))
+		return buf.String()
 	}
 	return ""
 }
@@ -75,4 +91,25 @@ func toPascalCase(s string) string {
 		}
 	}
 	return result.String()
+}
+
+func extractAttrValues(attrs string) string {
+	if attrs == "" {
+		return ""
+	}
+	var vals []string
+	for _, part := range strings.Split(attrs, " ") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		eq := strings.IndexByte(part, '=')
+		if eq < 0 {
+			vals = append(vals, part)
+			continue
+		}
+		val := strings.Trim(part[eq+1:], "\"")
+		vals = append(vals, fmt.Sprintf("%q", val))
+	}
+	return strings.Join(vals, ", ")
 }

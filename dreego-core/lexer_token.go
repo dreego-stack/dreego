@@ -15,6 +15,11 @@ const (
 	TokenEachOpen
 	TokenEachClose
 	TokenSlot
+	TokenComponentHeader
+	TokenImport
+	TokenComponentTagOpen
+	TokenComponentTagClose
+	TokenComponentSelfClose
 )
 
 type Token struct {
