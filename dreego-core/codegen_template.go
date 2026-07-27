@@ -46,9 +46,18 @@ func genTemplateNode(n TemplateNode, depth int) string {
 			return fmt.Sprintf("%sh, _ := %s(%s).Render(c); %sb.WriteString(h)\n", indent, funcName, args, indent)
 		}
 		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("%shtml, err := %s(%s).Render(c)\n", indent, funcName, args))
-		buf.WriteString(indent + "if err != nil { return \"\", err }\n")
-		buf.WriteString(fmt.Sprintf("%sb.WriteString(html)\n", indent))
+		buf.WriteString(fmt.Sprintf("%s{\n", indent))
+		buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
+		for _, child := range n.Children {
+			childCode := genTemplateNode(child, depth+2)
+			childCode = strings.ReplaceAll(childCode, "b.WriteString(", "cb.WriteString(")
+			buf.WriteString(childCode)
+		}
+		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", cb.String())\n", indent))
+		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, funcName, args))
+		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
+		buf.WriteString(fmt.Sprintf("%s\tb.WriteString(html)\n", indent))
+		buf.WriteString(fmt.Sprintf("%s}\n", indent))
 		return buf.String()
 	}
 	return ""
