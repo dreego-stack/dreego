@@ -16,7 +16,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 
 	var buf strings.Builder
 
-	buf.WriteString(fmt.Sprintf("func %s(c *SSRContext) (string, error) {\n", funcName))
+	buf.WriteString(fmt.Sprintf("func %s(c *core.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if g.Code != "" {
@@ -73,7 +73,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("}\n\n")
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", handlerName))
-	buf.WriteString("\tc := NewSSR(w, r)\n")
+	buf.WriteString("\tc := core.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", funcName))
 	buf.WriteString("\tif err != nil {\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
@@ -84,7 +84,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("}\n\n")
 
 	buf.WriteString("func init() {\n")
-	buf.WriteString(fmt.Sprintf("\tRegister(\"%s\", \"%s\", %s)\n", g.Method, pattern, handlerName))
+	buf.WriteString(fmt.Sprintf("\tcore.Register(\"%s\", \"%s\", %s)\n", g.Method, pattern, handlerName))
 	buf.WriteString("}\n")
 
 	return buf.String(), nil
@@ -135,7 +135,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	var buf strings.Builder
 
-	buf.WriteString(fmt.Sprintf("func %s(c *SSRContext) (string, error) {\n", funcName))
+	buf.WriteString(fmt.Sprintf("func %s(c *core.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if len(file.Go) > 0 && file.Go[0].Code != "" {
@@ -172,7 +172,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 	buf.WriteString("}\n\n")
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", handlerName))
-	buf.WriteString("\tc := NewSSR(w, r)\n")
+	buf.WriteString("\tc := core.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", funcName))
 	buf.WriteString("\tif err != nil {\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
@@ -187,9 +187,9 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	buf.WriteString("func init() {\n")
 	if code == 404 {
-		buf.WriteString(fmt.Sprintf("\tRegister(\"\", \"%s\", %s)\n", catchPattern, handlerName))
+		buf.WriteString(fmt.Sprintf("\tcore.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
 	} else if code == 500 {
-		buf.WriteString(fmt.Sprintf("\tSetErrorHandler(%d, %s)\n", code, handlerName))
+		buf.WriteString(fmt.Sprintf("\tcore.SetErrorHandler(%d, %s)\n", code, handlerName))
 	}
 	buf.WriteString("}\n")
 
