@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.6 (unreleased) — Component Completion
+
+- Children-Slot-Passing: `<@Card>content</@Card>` → `{#slot}` im Component funktioniert
+- `dreego generate --check`: CI-Validation — exit non-zero wenn generierte Dateien stale sind
+- Named Slots: `{#slot header}` Lexer/Parser vorbereitet (v0.0.7)
+
 ## v0.0.5 (2026-07-27) — Component Model
 
 - Component-System: `Component Name (props)` in `dreego/components/`, Aufruf via `<@Name>`
