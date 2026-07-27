@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.7 (unreleased) — Test Coverage
+## v0.0.7 (2026-07-28) — Test Coverage
 
 - 41+ Integration-Tests (up from 36): edge cases, negative tests, bugs
 - `_docs/testing.md`: vollständige Test-Strategie mit 60+ Test-Ideen
