@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.0.8 (unreleased) — Named Slots
+
+- Named Slots: `{#slot header}...{/slot}` Block-Syntax in Components + Routes
+- Component: `{#slot header}{/slot}` — Platzhalter rendert `c.Get("slot_header")`
+- Route: `{#slot header}<content>{/slot}` — definiert Inhalt für benannten Slot
+- Default-Slot `{#slot}` bleibt ohne `{/slot}` (keine Änderung)
+- 4 Positiv-Tests + 2 Negativ-Tests
+
 ## v0.0.7 (2026-07-28) — Test Coverage
 
 - 41+ Integration-Tests (up from 36): edge cases, negative tests, bugs
