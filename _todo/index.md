@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-26T15:32:48Z
+Generated: 2026-07-27T09:17:22Z
 
-Chain: 1–14 | Next status code: **15**
+Chain: 1–15 | Next status code: **16**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
@@ -19,15 +19,16 @@ Chain: 1–14 | Next status code: **15**
 - `12` **route-groups.1** — (group)/ Route Groups (unsichtbar in URL)
 - `13` **flat-gen.1** — Flat Gen-Package (gen/routes.go statt per-dir dree.go)
 - `14` **session.1** — Session-Interface (Cookie Store im Core)
+- `15` **csrf.1** — CSRF-Schutz (Core-Conditional)
 
 ## AVAILABLE NEXT
 - **api-json.1** — API-Routen + JSON Responses
 - **compression.1** — Gzip/Brotli Compression Middleware
-- **csrf.1** — CSRF-Schutz (Core-Conditional)
 - **deployment.1** — Deployment-Strategie (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreegotest.1** — dreegotest — Testing-Package
 - **each-loop.1** — {#each} mit $loop-Variable
+- **form-actions.1** — Form Actions (g-action / g-submit)
 - **health-checks.1** — /health + /ready Endpoints
 - **hot-reload.1** — Hot Reload (Dev-Server + SSE)
 - **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
@@ -65,7 +66,6 @@ Chain: 1–14 | Next status code: **15**
 - **dreego-storage.1** — dreego-storage (File-Uploads, Progress, Resize)  (missing: plugin-interface.1, storage-interface.1)
 - **email-interface.1** — Email-Sending Interface (SMTP, Resend, Postmark)  (missing: plugin-interface.1)
 - **event-bus.1** — Pub/Sub Event-Bus (Core-Interface)  (missing: plugin-interface.1)
-- **form-actions.1** — Form Actions (g-action / g-submit)  (missing: csrf.1)
 - **middleware-hooks.1** — Plugin-Middleware-Hooks (app.Use FIFO)  (missing: plugin-interface.1)
 - **queue-interface.1** — Background-Job-Queue Interface  (missing: plugin-interface.1)
 - **route-hooks.1** — Plugin-Route-Registration  (missing: plugin-interface.1)
@@ -73,4 +73,4 @@ Chain: 1–14 | Next status code: **15**
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 14 | web: 49 | next code: 15
+chain: 15 | web: 48 | next code: 16

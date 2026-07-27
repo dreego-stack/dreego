@@ -5,6 +5,8 @@
 - Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
 - Session-Middleware: Context-basierte Store-Injektion pro Request
 - SSRContext: `SessionVal`/`SetSessionVal`/`DelSessionVal`/`DestroySession` mit sicheren Defaults (`HttpOnly`, `Secure` TLS-aware)
+- CSRF-Schutz: Double-Submit-Cookie (Core-Conditional, default an) — Token via X-CSRF-Token Header oder csrf_token Form-Feld
+- SSRContext: `CSRFToken()` fur Template-Rendering (Hidden-Field)
 
 ## v0.0.2 (2026-07-25)
 

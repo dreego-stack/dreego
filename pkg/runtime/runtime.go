@@ -15,6 +15,8 @@ var rewrites []rewriteRule
 
 var loggingEnabled = true
 
+var csrfEnabled = true
+
 var errorHandlers = map[int]http.HandlerFunc{}
 
 var sessionStore session.Store
@@ -60,6 +62,9 @@ func ServeMux() http.Handler {
 
 	var h http.Handler = mux
 	h = redirectRewriteMiddleware(h)
+	if sessionStore != nil && csrfEnabled {
+		h = middleware.CSRF(sessionStore)(h)
+	}
 	if sessionStore != nil {
 		h = sessionMiddleware(sessionStore)(h)
 	}
@@ -103,6 +108,10 @@ func sessionMiddleware(store session.Store) func(http.Handler) http.Handler {
 
 func SetLogging(enabled bool) {
 	loggingEnabled = enabled
+}
+
+func SetCSRF(enabled bool) {
+	csrfEnabled = enabled
 }
 
 func SetErrorHandler(code int, handler http.HandlerFunc) {

@@ -28,12 +28,12 @@ graph TD
     style flat_gen_1 fill:#d4edda,stroke:#28a745
     session_1["14 Session-Interface (Cookie Store im Core)"]
     style session_1 fill:#d4edda,stroke:#28a745
+    csrf_1["15 CSRF-Schutz (Core-Conditional)"]
+    style csrf_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
     style compression_1 fill:#fff3cd,stroke:#ffc107
-    csrf_1["CSRF-Schutz (Core-Conditional)"]
-    style csrf_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment-Strategie (Docker, Single-Bin"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
@@ -42,6 +42,8 @@ graph TD
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     each_loop_1["{#each} mit $loop-Variable"]
     style each_loop_1 fill:#fff3cd,stroke:#ffc107
+    form_actions_1["Form Actions (g-action / g-submit)"]
+    style form_actions_1 fill:#fff3cd,stroke:#ffc107
     health_checks_1["/health + /ready Endpoints"]
     style health_checks_1 fill:#fff3cd,stroke:#ffc107
     hot_reload_1["Hot Reload (Dev-Server + SSE)"]
@@ -112,8 +114,6 @@ graph TD
     style email_interface_1 fill:#f8d7da,stroke:#dc3545
     event_bus_1["Pub/Sub Event-Bus (Core-Interface)"]
     style event_bus_1 fill:#f8d7da,stroke:#dc3545
-    form_actions_1["Form Actions (g-action / g-submit)"]
-    style form_actions_1 fill:#f8d7da,stroke:#dc3545
     middleware_hooks_1["Plugin-Middleware-Hooks (app.Use FIFO)"]
     style middleware_hooks_1 fill:#f8d7da,stroke:#dc3545
     queue_interface_1["Background-Job-Queue Interface"]
@@ -175,8 +175,6 @@ graph TD
     routing_1 --> form_actions_1
     csrf_1 --> form_actions_1
     plugin_interface_1 --> queue_interface_1
-    session_1 --> csrf_1
-    middleware_1 --> csrf_1
     plugin_interface_1 --> addon_ecosystem_1
     components_1 --> addon_ecosystem_1
     session_1 --> addon_ecosystem_1
@@ -217,6 +215,8 @@ graph TD
     routing_1 --> bracket_routes_1
     routing_1 --> error_pages_1
     recovery_1 --> error_pages_1
+    session_1 --> csrf_1
+    middleware_1 --> csrf_1
     transpiler_1 --> xss_1
     context_refactoring_1 --> session_1
     middleware_1 --> config_1
@@ -236,4 +236,5 @@ graph TD
     bracket_routes_1 -.->|chain| route_groups_1
     route_groups_1 -.->|chain| flat_gen_1
     flat_gen_1 -.->|chain| session_1
+    session_1 -.->|chain| csrf_1
 ```

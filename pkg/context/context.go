@@ -104,6 +104,10 @@ func (c *SSRContext) DestroySession() {
 	s.Destroy(c.W, c.R)
 }
 
+func (c *SSRContext) CSRFToken() string {
+	return c.SessionVal("csrf_token")
+}
+
 func (c *SSRContext) Render(name string, data any) error {
 	return nil
 }
