@@ -1,0 +1,2 @@
+<go>v:="<script>alert(1)</script>"</go>
+<div><p>{v}</p></div>

@@ -1,0 +1,5 @@
+<head><title>T</title></head>
+<go>x:="ok"</go>
+<div><p>{x}</p></div>
+<script>console.log("js")</script>
+<style>p{color:red}</style>

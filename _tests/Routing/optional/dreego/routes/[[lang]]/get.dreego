@@ -1,0 +1,2 @@
+<go>lang:=c.Param("lang");if lang==""{lang="en"}</go>
+<div><p>{lang}</p></div>

@@ -1,0 +1,2 @@
+<go>x:=true</go>
+<div>{#if x}<strong>yes</strong>{/if}</div>

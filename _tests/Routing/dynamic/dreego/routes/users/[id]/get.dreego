@@ -1,0 +1,2 @@
+<go>id:=c.Param("id")</go>
+<div><p>User {id}</p></div>

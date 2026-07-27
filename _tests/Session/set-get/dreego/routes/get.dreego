@@ -1,0 +1,6 @@
+<go>
+v:=c.SessionVal("count")
+if v==""{v="0"}
+c.SetSessionVal("count","1")
+</go>
+<div><p>{v}</p></div>

@@ -1,0 +1,2 @@
+<go>path:=c.Param("path")</go>
+<div><p>{path}</p></div>
