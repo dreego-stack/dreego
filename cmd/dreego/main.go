@@ -42,7 +42,7 @@ usage: dreego <command> [flags]
 
 commands:
   init <path>             create a new dreego project from blueprint
-  generate [--force]      transpile .dreego files to Go code
+  generate [--force] [--check] transpile .dreego files to Go code
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
   help                   show this help
@@ -65,14 +65,26 @@ examples:
 
 func cmdGenerate(args []string) {
 	force := false
+	check := false
 	for _, a := range args {
 		if a == "--force" {
 			force = true
+		}
+		if a == "--check" {
+			check = true
 		}
 	}
 	if err := core.Run(force); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
+	}
+	if check {
+		cmd := exec.Command("git", "diff", "--exit-code", "--", "*/gen/routes.go", "*/gen/dree.go")
+		if out, err := cmd.CombinedOutput(); err != nil {
+			fmt.Fprintf(os.Stderr, "generated code is stale:\n%s\n", string(out))
+			os.Exit(1)
+		}
+		fmt.Println("generated code is up-to-date")
 	}
 }
 
