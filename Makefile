@@ -1,4 +1,4 @@
-.PHONY: up down build generate dev clean dx dx-clean
+.PHONY: up down build generate dev clean dx dx-clean dx-pkg
 
 up:
 	docker compose up -d
@@ -15,15 +15,19 @@ generate:
 dev:
 	go run ./cmd/dreego && go run .
 
-dx:
-	@mkdir -p $(HOME)/.vscode/extensions
-	@rm -rf $(HOME)/.vscode/extensions/dreego
-	@ln -sf $(PWD)/.vscode/dreego-extension $(HOME)/.vscode/extensions/dreego
-	@echo "dreego extension installed → ~/.vscode/extensions/dreego"
-	@echo "restart VS Code or run 'Developer: Reload Window'"
+dx: dx-pkg
+	@code --install-extension .vscode/dreego-extension/dreego.vsix 2>/dev/null && \
+		echo "dreego extension installed (reload VS Code)" || \
+		echo "dreego extension installed → reload VS Code (Developer: Reload Window)"
+
+dx-pkg:
+	@cd .vscode/dreego-extension && \
+		rm -f dreego.vsix && \
+		zip -qr dreego.vsix package.json language-configuration.json syntaxes/ icons/
 
 dx-clean:
-	rm -rf $(HOME)/.vscode/extensions/dreego
+	@code --uninstall-extension dreego 2>/dev/null
+	@rm -f .vscode/dreego-extension/dreego.vsix
 	@echo "dreego extension removed"
 
 clean:

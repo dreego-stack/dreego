@@ -19,3 +19,4 @@ build/
 *_dreego.go
 dree.go
 **/gen/routes.go
+*.vsix
