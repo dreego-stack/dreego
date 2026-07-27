@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.7 (unreleased) — Test Coverage
+
+- 41+ Integration-Tests (up from 36): edge cases, negative tests, bugs
+- `_docs/testing.md`: vollständige Test-Strategie mit 60+ Test-Ideen
+- Prop-Expressions in Components: `<@Card title={expr}/>`
+- Nested Components: `<@Outer>` ruft `<@Inner>` auf
+- Session: `DelSessionVal`, `DestroySession`, no-store
+- CSRF: `SetCSRF(false)` + disable test
+- `--check` verwendet Timestamp-Vergleich (nicht git diff)
+- Alle Tests schreiben .dreego-Dateien inline (keine Docker COPY Fixtures mehr)
+
 ## v0.0.6 (2026-07-28) — Component Completion
 
 - Children-Slot-Passing: `<@Card>content</@Card>` → `{#slot}` im Component funktioniert
