@@ -1,8 +1,8 @@
 # Changelog
 
-## v0.0.4 (unreleased)
+## v0.0.4 (unreleased) — Component Model
 
-## v0.0.3 (2026-07-27)
+## v0.0.3 (2026-07-27) — Security & Developer Experience
 
 - Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
 - Session-Middleware: Context-basierte Store-Injektion pro Request
@@ -13,7 +13,7 @@
 - **Breaking:** `pkg/` → `dreego-core/` (single package), einziger Import `import core "codeberg.org/dreego/dreego/dreego-core"`
 - `dreego-plugin/` fur zukünftige Plugins (Auth, Redis, DB, etc.)
 
-## v0.0.2 (2026-07-25)
+## v0.0.2 (2026-07-25) — Safety & Structure
 
 - Route-Segmente: `[id]` (eckige Klammern) als Konvention für dynamische Segmente, kompatibel mit Next.js/SvelteKit/Astro
 - Route-Groups: `(group)/` — Ordner, die nicht in der URL erscheinen (Layout/Middleware-Gruppierung)
@@ -23,7 +23,7 @@
 - XSS-Schutz: Auto-Escaping aller `{variable}`-Ausdrücke via `html.EscapeString`
 - Custom Error-Pages: `404.dreego` + `500.dreego`
 
-## v0.0.1 (2026-07-25)
+## v0.0.1 (2026-07-25) — The Prototype
 
 Erster Prototyp. Transpiler, Routing, Layout, Middleware, CLI.
 
