@@ -1,3 +1,5 @@
+import "dreego/components/Card"
+
 <head>
     <title>Dreego</title>
 </head>
@@ -8,8 +10,7 @@
 
 <div>
     <h1>{message}</h1>
-    <@Card title="Components with Scoped CSS"/>
-    <p>Above: a <code>&lt;@Card&gt;</code> component with its own styles.</p>
+    <@Card title="Components work!"/>
     <a href="/about">About</a>
 </div>
 

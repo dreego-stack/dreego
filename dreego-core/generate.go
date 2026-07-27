@@ -90,7 +90,9 @@ func Run(force bool) error {
 				}
 			}
 
-			tokens, err := Lex(string(data))
+			_, imports, body := ParseHeader(string(data))
+
+			tokens, err := Lex(body)
 			if err != nil {
 				return fmt.Errorf("error lexing %s: %w", fpath, err)
 			}
@@ -100,6 +102,7 @@ func Run(force bool) error {
 			if err != nil {
 				return fmt.Errorf("error parsing %s: %w", fpath, err)
 			}
+			file.Imports = imports
 
 			if len(file.Go) == 0 {
 				file.Go = []GoSection{{Method: method}}
