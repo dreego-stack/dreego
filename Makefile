@@ -1,4 +1,4 @@
-.PHONY: up down build generate dev clean dx dx-clean
+.PHONY: up down build generate dev clean dx dx-clean test
 
 up:
 	docker compose up -d
@@ -14,6 +14,9 @@ generate:
 
 dev:
 	go run ./cmd/dreego && go run .
+
+test:
+	@docker build -f _tests/Dockerfile -t dreego-test . && docker run --rm dreego-test
 
 dx:
 	@EXT_DIR="$$(pwd)/.vscode/extensions/dreego"; \

@@ -3,17 +3,15 @@
 </head>
 
 <go>
-    message := "Hello from Dreego!"
+    message := "Hello, Dreego!"
 </go>
 
 <div>
     <h1>{message}</h1>
-    <@Card title="Welcome"/>
-    <a href="/about">About</a>
+    <p>Edit <code>dreego/routes/get.dreego</code> and reload.</p>
 </div>
 
 <style>
     body { font-family: system-ui; max-width: 800px; margin: 2rem auto; }
     h1 { color: #333; }
-    a { color: #06f; }
 </style>

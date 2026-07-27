@@ -95,7 +95,41 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			return TemplateNode{Type: NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)}, nil
 		}
 		return TemplateNode{}, fmt.Errorf("unexpected <%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
+	case TokenComponentSelfClose:
+		p.advance()
+		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true}, nil
+	case TokenComponentTagOpen:
+		p.advance()
+		children, err := p.parseComponentNodes(tok.Tag)
+		if err != nil {
+			return TemplateNode{}, err
+		}
+		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children}, nil
 	default:
 		return TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)
+	}
+}
+
+func (p *Parser) parseComponentNodes(tag string) ([]TemplateNode, error) {
+	var nodes []TemplateNode
+
+	for {
+		tok := p.current()
+		if tok.Type == TokenEOF {
+			return nil, fmt.Errorf("unclosed <@%s>", tag)
+		}
+		if tok.Type == TokenComponentTagClose && tok.Tag == tag {
+			p.advance()
+			return nodes, nil
+		}
+		if tok.Type == TokenComponentTagClose {
+			return nil, fmt.Errorf("unexpected </@%s>, expected </@%s>", tok.Tag, tag)
+		}
+
+		node, err := p.parseTemplateNode("component")
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
 	}
 }

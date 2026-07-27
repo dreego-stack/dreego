@@ -8,6 +8,7 @@ const (
 	NodeIf
 	NodeEach
 	NodeSlot
+	NodeComponentCall
 )
 
 type TemplateNode struct {
@@ -17,6 +18,9 @@ type TemplateNode struct {
 	Items    string
 	Item     string
 	Children []TemplateNode
+	Tag      string
+	Attrs    string
+	SelfClose bool
 }
 
 type GoSection struct {
@@ -25,11 +29,30 @@ type GoSection struct {
 }
 
 type File struct {
-	Head     *HeadSection
-	Go       []GoSection
-	Template *TemplateSection
-	Script   *ScriptSection
-	Style    *StyleSection
+	Head      *HeadSection
+	Go        []GoSection
+	Template  *TemplateSection
+	Script    *ScriptSection
+	Style     *StyleSection
+	Component *ComponentDef
+	Imports   []Import
+}
+
+type ComponentDef struct {
+	Name  string
+	Props []Prop
+	Slots []string
+}
+
+type Prop struct {
+	Name    string
+	Type    string
+	Default string
+}
+
+type Import struct {
+	Alias string
+	Path  string
 }
 
 type HeadSection struct {
