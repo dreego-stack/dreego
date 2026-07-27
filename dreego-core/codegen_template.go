@@ -98,18 +98,30 @@ func extractAttrValues(attrs string) string {
 		return ""
 	}
 	var vals []string
-	for _, part := range strings.Split(attrs, " ") {
-		part = strings.TrimSpace(part)
-		if part == "" {
-			continue
+	inQuote := false
+	start := 0
+	for i := 0; i < len(attrs); i++ {
+		if attrs[i] == '"' {
+			inQuote = !inQuote
 		}
-		eq := strings.IndexByte(part, '=')
-		if eq < 0 {
-			vals = append(vals, part)
-			continue
+		if attrs[i] == ' ' && !inQuote {
+			if start < i {
+				vals = append(vals, attrVal(attrs[start:i]))
+			}
+			start = i + 1
 		}
-		val := strings.Trim(part[eq+1:], "\"")
-		vals = append(vals, fmt.Sprintf("%q", val))
+	}
+	if start < len(attrs) {
+		vals = append(vals, attrVal(attrs[start:]))
 	}
 	return strings.Join(vals, ", ")
+}
+
+func attrVal(part string) string {
+	eq := strings.IndexByte(part, '=')
+	if eq < 0 {
+		return fmt.Sprintf("%q", part)
+	}
+	val := strings.Trim(part[eq+1:], "\"")
+	return fmt.Sprintf("%q", val)
 }
