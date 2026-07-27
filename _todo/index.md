@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-27T15:13:06Z
+Generated: 2026-07-27T23:20:23Z
 
-Chain: 1–15 | Next status code: **16**
+Chain: 1–19 | Next status code: **20**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
@@ -20,11 +20,13 @@ Chain: 1–15 | Next status code: **16**
 - `13` **flat-gen.1** — Flat Gen-Package (gen/routes.go statt per-dir dree.go)
 - `14` **session.1** — Session-Interface (Cookie Store im Core)
 - `15` **csrf.1** — CSRF-Schutz (Core-Conditional)
+- `16` **ci-check.1** — dreego generate --check (CI Mode)
+- `17` **components.1** — Component-System ({#use}, props)
+- `18` **component-handler.1** — ComponentHandler (Buffered Mode + Functional Options)
+- `19` **named-slots.1** — Named Slots ({#slot header}...{/slot})
 
 ## AVAILABLE NEXT
 - **api-json.1** — API-Routen + JSON Responses
-- **ci-check.1** — dreego generate --check (CI Mode)
-- **component-handler.1** — ComponentHandler (Buffered Mode + Functional Options)
 - **compression.1** — Gzip/Brotli Compression Middleware
 - **deployment.1** — Deployment-Strategie (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
@@ -43,22 +45,21 @@ Chain: 1–15 | Next status code: **16**
 - **verbatim.1** — {#verbatim} Block (Raw-Output)
 
 ## BLOCKED
-- **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1, components.1)
+- **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
 - **api-swagger.1** — Swagger/OpenAPI Auto-Generation  (missing: api-json.1)
 - **cache-interface.1** — Caching Interface (Memory, Redis)  (missing: plugin-interface.1)
-- **components.1** — Component-System ({#use}, props)  (missing: plugin-interface.1)
 - **ddos-protection.1** — DDoS-Schutz (PoW + Rate-Limiting) — Plugin  (missing: plugin-interface.1, middleware-hooks.1)
 - **devtools.1** — DevTools (LSP, VS Code, CLI-Niceties)  (missing: plugin-interface.1)
 - **dreego-analytics.1** — dreego-analytics (Privacy-friendly, Server-Side)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-cache.1** — dreego-cache (Caching: Memory, Redis)  (missing: plugin-interface.1, cache-interface.1)
-- **dreego-charts.1** — dreego-charts (Chart.js/Canvas Components)  (missing: plugin-interface.1, components.1)
+- **dreego-charts.1** — dreego-charts (Chart.js/Canvas Components)  (missing: plugin-interface.1)
 - **dreego-cluster.1** — dreego-cluster (Multi-Node, Distributed State)  (missing: plugin-interface.1, cache-interface.1, event-bus.1)
 - **dreego-features.1** — dreego-features (Feature-Flags, A/B-Testing)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-i18n.1** — dreego-i18n (Internationalisierung)  (missing: plugin-interface.1, middleware-hooks.1)
-- **dreego-icons.1** — dreego-icons (Lucide/Heroicons Components)  (missing: plugin-interface.1, components.1)
+- **dreego-icons.1** — dreego-icons (Lucide/Heroicons Components)  (missing: plugin-interface.1)
 - **dreego-jobs.1** — dreego-jobs (Background-Jobs, Cron, Queue)  (missing: plugin-interface.1, queue-interface.1)
 - **dreego-mail.1** — dreego-mail (E-Mail SMTP/Resend/Postmark)  (missing: plugin-interface.1, email-interface.1)
-- **dreego-map.1** — dreego-map (MapLibre/Leaflet Components)  (missing: plugin-interface.1, components.1)
+- **dreego-map.1** — dreego-map (MapLibre/Leaflet Components)  (missing: plugin-interface.1)
 - **dreego-markdown.1** — dreego-markdown (Markdown-Rendering, Frontmatter)  (missing: plugin-interface.1)
 - **dreego-notify.1** — dreego-notify (Multi-Channel Notifications)  (missing: plugin-interface.1, email-interface.1, event-bus.1)
 - **dreego-pdf.1** — dreego-pdf (PDF-Generierung aus HTML)  (missing: plugin-interface.1)
@@ -79,4 +80,4 @@ Chain: 1–15 | Next status code: **16**
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 15 | web: 54 | next code: 16
+chain: 19 | web: 51 | next code: 20

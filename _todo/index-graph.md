@@ -30,12 +30,16 @@ graph TD
     style session_1 fill:#d4edda,stroke:#28a745
     csrf_1["15 CSRF-Schutz (Core-Conditional)"]
     style csrf_1 fill:#d4edda,stroke:#28a745
+    ci_check_1["16 dreego generate --check (CI Mode)"]
+    style ci_check_1 fill:#d4edda,stroke:#28a745
+    components_1["17 Component-System ({#use}, props)"]
+    style components_1 fill:#d4edda,stroke:#28a745
+    component_handler_1["18 ComponentHandler (Buffered Mode + Functi"]
+    style component_handler_1 fill:#d4edda,stroke:#28a745
+    named_slots_1["19 Named Slots ({#slot header}...{/slot})"]
+    style named_slots_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
-    ci_check_1["dreego generate --check (CI Mode)"]
-    style ci_check_1 fill:#fff3cd,stroke:#ffc107
-    component_handler_1["ComponentHandler (Buffered Mode + Functi"]
-    style component_handler_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
     style compression_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment-Strategie (Docker, Single-Bin"]
@@ -74,8 +78,6 @@ graph TD
     style api_swagger_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
     style cache_interface_1 fill:#f8d7da,stroke:#dc3545
-    components_1["Component-System ({#use}, props)"]
-    style components_1 fill:#f8d7da,stroke:#dc3545
     ddos_protection_1["DDoS-Schutz (PoW + Rate-Limiting) — Plug"]
     style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
@@ -152,8 +154,6 @@ graph TD
     storage_interface_1 --> dreego_storage_1
     plugin_interface_1 --> dreego_seo_1
     middleware_hooks_1 --> dreego_seo_1
-    plugin_interface_1 --> components_1
-    routing_1 --> components_1
     plugin_interface_1 --> devtools_1
     plugin_interface_1 --> storage_interface_1
     transpiler_1 --> each_loop_1
@@ -207,7 +207,6 @@ graph TD
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
-    context_refactoring_1 --> component_handler_1
     plugin_interface_1 --> dreego_i18n_1
     middleware_hooks_1 --> dreego_i18n_1
     plugin_interface_1 --> dreego_search_1
@@ -217,7 +216,6 @@ graph TD
     plugin_interface_1 --> route_hooks_1
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
-    cli_1 --> ci_check_1
     plugin_interface_1 --> cache_interface_1
     cli_1 --> scaffolding_1
     routing_1 --> health_checks_1
@@ -229,17 +227,21 @@ graph TD
     transpiler_1 --> context_refactoring_1
     transpiler_1 --> layout_1
     transpiler_1 --> middleware_1
+    routing_1 --> components_1
     routing_1 --> route_groups_1
     middleware_1 --> recovery_1
     transpiler_1 --> routing_1
     routing_1 --> bracket_routes_1
+    component_handler_1 --> named_slots_1
     routing_1 --> error_pages_1
     recovery_1 --> error_pages_1
     session_1 --> csrf_1
     middleware_1 --> csrf_1
     transpiler_1 --> xss_1
     context_refactoring_1 --> session_1
+    context_refactoring_1 --> component_handler_1
     middleware_1 --> config_1
+    cli_1 --> ci_check_1
     transpiler_1 --> cli_1
     routing_1 --> cli_1
 
@@ -257,4 +259,8 @@ graph TD
     route_groups_1 -.->|chain| flat_gen_1
     flat_gen_1 -.->|chain| session_1
     session_1 -.->|chain| csrf_1
+    csrf_1 -.->|chain| ci_check_1
+    ci_check_1 -.->|chain| components_1
+    components_1 -.->|chain| component_handler_1
+    component_handler_1 -.->|chain| named_slots_1
 ```
