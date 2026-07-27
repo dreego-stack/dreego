@@ -75,9 +75,11 @@ func cmdGenerate(args []string) {
 			check = true
 		}
 	}
-	if err := core.Run(force); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+	if !check {
+		if err := core.Run(force); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 	if check {
 		var genFile string

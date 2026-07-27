@@ -1,2 +1,0 @@
-<go>items:=[]string{"a","b","c"}</go>
-<div>{#each items as item}<span>{item}</span>{/each}</div>

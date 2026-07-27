@@ -1,10 +1,11 @@
 #!/bin/sh
+set -e
 cd "$(dirname "$0")"
 dreego init .
-rm -rf dreego/routes dreego/components
-mkdir -p dreego/routes dreego/components
+rm -rf dreego/routes dreego/components dreego/layouts 2>/dev/null
+mkdir -p dreego/routes
 cat > dreego/routes/get.dreego << 'DREEGO'
-<div><@Missing/></div>
+<div><p>{undefined}</p></div>
 DREEGO
 go mod init t >/dev/null 2>&1
 go mod edit -replace codeberg.org/dreego/dreego=../../..

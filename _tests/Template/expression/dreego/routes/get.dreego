@@ -1,3 +1,0 @@
-<head><title>T</title></head>
-<go>x:="world"</go>
-<div><h1>Hello {x}</h1></div>

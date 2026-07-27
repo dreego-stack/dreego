@@ -159,6 +159,13 @@ func attrVal(part string) string {
 	if eq < 0 {
 		return fmt.Sprintf("%q", part)
 	}
-	val := strings.Trim(part[eq+1:], "\"")
+	val := strings.TrimSpace(part[eq+1:])
+	if val == "" {
+		return fmt.Sprintf("%q", "")
+	}
+	if val[0] == '{' && val[len(val)-1] == '}' {
+		return val[1 : len(val)-1]
+	}
+	val = strings.Trim(val, "\"")
 	return fmt.Sprintf("%q", val)
 }
