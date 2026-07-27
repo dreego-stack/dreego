@@ -3,6 +3,8 @@ package context
 import (
 	gcontext "context"
 	"net/http"
+
+	"codeberg.org/dreego/dreego/pkg/session"
 )
 
 type Context interface {
@@ -63,6 +65,43 @@ func (c *SSRContext) FormValue(key string) string {
 		return ""
 	}
 	return c.R.FormValue(key)
+}
+
+func (c *SSRContext) SessionVal(key string) string {
+	s := session.StoreFromCtx(c.Context)
+	if s == nil {
+		return ""
+	}
+	v, _ := s.Get(c.R, key)
+	return v
+}
+
+func (c *SSRContext) SetSessionVal(key, value string) {
+	s := session.StoreFromCtx(c.Context)
+	if s == nil {
+		return
+	}
+	s.Set(c.W, c.R, key, value, &session.Options{
+		HttpOnly: true,
+		Secure:   c.R.TLS != nil,
+		Path:     "/",
+	})
+}
+
+func (c *SSRContext) DelSessionVal(key string) {
+	s := session.StoreFromCtx(c.Context)
+	if s == nil {
+		return
+	}
+	s.Delete(c.W, c.R, key)
+}
+
+func (c *SSRContext) DestroySession() {
+	s := session.StoreFromCtx(c.Context)
+	if s == nil {
+		return
+	}
+	s.Destroy(c.W, c.R)
 }
 
 func (c *SSRContext) Render(name string, data any) error {

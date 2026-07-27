@@ -26,10 +26,14 @@ graph TD
     style route_groups_1 fill:#d4edda,stroke:#28a745
     flat_gen_1["13 Flat Gen-Package (gen/routes.go statt pe"]
     style flat_gen_1 fill:#d4edda,stroke:#28a745
+    session_1["14 Session-Interface (Cookie Store im Core)"]
+    style session_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
     style compression_1 fill:#fff3cd,stroke:#ffc107
+    csrf_1["CSRF-Schutz (Core-Conditional)"]
+    style csrf_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment-Strategie (Docker, Single-Bin"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
@@ -56,8 +60,6 @@ graph TD
     style template_filters_1 fill:#fff3cd,stroke:#ffc107
     verbatim_1["{#verbatim} Block (Raw-Output)"]
     style verbatim_1 fill:#fff3cd,stroke:#ffc107
-    session_1["Session-Interface (Cookie Store im Core)"]
-    style session_1 fill:#cce5ff,stroke:#0d6efd
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
@@ -66,8 +68,6 @@ graph TD
     style cache_interface_1 fill:#f8d7da,stroke:#dc3545
     components_1["Component-System ({#use}, props)"]
     style components_1 fill:#f8d7da,stroke:#dc3545
-    csrf_1["CSRF-Schutz (Core-Conditional)"]
-    style csrf_1 fill:#f8d7da,stroke:#dc3545
     ddos_protection_1["DDoS-Schutz (PoW + Rate-Limiting) — Plug"]
     style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
@@ -190,7 +190,6 @@ graph TD
     transpiler_1 --> verbatim_1
     plugin_interface_1 --> dreego_features_1
     middleware_hooks_1 --> dreego_features_1
-    context_refactoring_1 --> session_1
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
@@ -219,6 +218,7 @@ graph TD
     routing_1 --> error_pages_1
     recovery_1 --> error_pages_1
     transpiler_1 --> xss_1
+    context_refactoring_1 --> session_1
     middleware_1 --> config_1
     transpiler_1 --> cli_1
     routing_1 --> cli_1
@@ -235,4 +235,5 @@ graph TD
     error_pages_1 -.->|chain| bracket_routes_1
     bracket_routes_1 -.->|chain| route_groups_1
     route_groups_1 -.->|chain| flat_gen_1
+    flat_gen_1 -.->|chain| session_1
 ```

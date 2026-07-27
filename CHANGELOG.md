@@ -2,7 +2,9 @@
 
 ## v0.0.3 (unreleased)
 
-- Session-Interface: `session.Store` im Core mit `CookieStore` (HMAC-signiert)
+- Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
+- Session-Middleware: Context-basierte Store-Injektion pro Request
+- SSRContext: `SessionVal`/`SetSessionVal`/`DelSessionVal`/`DestroySession` mit sicheren Defaults (`HttpOnly`, `Secure` TLS-aware)
 
 ## v0.0.2 (2026-07-25)
 

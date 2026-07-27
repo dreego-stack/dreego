@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"codeberg.org/dreego/dreego/pkg/middleware"
+	"codeberg.org/dreego/dreego/pkg/session"
 )
 
 var routes []route
@@ -15,6 +16,8 @@ var rewrites []rewriteRule
 var loggingEnabled = true
 
 var errorHandlers = map[int]http.HandlerFunc{}
+
+var sessionStore session.Store
 
 type route struct {
 	method  string
@@ -57,6 +60,9 @@ func ServeMux() http.Handler {
 
 	var h http.Handler = mux
 	h = redirectRewriteMiddleware(h)
+	if sessionStore != nil {
+		h = sessionMiddleware(sessionStore)(h)
+	}
 	if loggingEnabled {
 		h = middleware.RequestLogging()(h)
 	}
@@ -87,12 +93,28 @@ func matchRewrite(rw rewriteRule, path string) bool {
 	return strings.HasPrefix(path, strings.TrimSuffix(rw.from, "/*"))
 }
 
+func sessionMiddleware(store session.Store) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, session.WithStore(r, store))
+		})
+	}
+}
+
 func SetLogging(enabled bool) {
 	loggingEnabled = enabled
 }
 
 func SetErrorHandler(code int, handler http.HandlerFunc) {
 	errorHandlers[code] = handler
+}
+
+func SetSessionStore(s session.Store) {
+	sessionStore = s
+}
+
+func SessionStore() session.Store {
+	return sessionStore
 }
 
 func Listen(addr string) error {
