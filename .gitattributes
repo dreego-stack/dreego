@@ -1,0 +1,13 @@
+_tests export-ignore
+_docs export-ignore
+.agents export-ignore
+.vscode export-ignore
+.kilo export-ignore
+.tmp export-ignore
+AGENTS.md export-ignore
+TODO.md export-ignore
+Makefile export-ignore
+demo export-ignore
+docker-compose.yml export-ignore
+Dockerfile export-ignore
+Dockerfile.test export-ignore
