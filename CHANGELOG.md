@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.5 (unreleased) — Component Model
+## v0.0.5 (2026-07-27) — Component Model
 
 - Component-System: `Component Name (props)` in `dreego/components/`, Aufruf via `<@Name>`
 - Self-closing (`<@Icon name="star"/>`) und mit Children (`<@Card>...</@Card>`)
