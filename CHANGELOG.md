@@ -1,12 +1,17 @@
 # Changelog
 
-## v0.0.4 (2026-07-27) — Blueprints & Tests
+## v0.0.5 (unreleased) — Component Model
+
+- Component-System: `Component Name (props)` in `dreego/components/`, Aufruf via `<@Name>`
+- Self-closing (`<@Icon name="star"/>`) und mit Children (`<@Card>...</@Card>`)
+- Default-Slot via `{#slot}` im Component-Template
+- Scoped Styles pro Component (`data-scope`)
+- File-based Discovery: `dreego/components/Card.dreego` → `<@Card>`
+- 6 Component-Integration-Tests + Bug-Test (component-close-tag)## v0.0.4 (2026-07-27) — Blueprints & Tests
 
 - `dreego init <path>` — scaffold new project from embedded blueprint
 - Blueprints via `//go:embed` in CLI binary, keine externen Dateien nötig
 - Integration-Tests in `_tests/` via Docker-Container (`make test`)
-
-## v0.0.5 (unreleased) — Component Model
 
 ## v0.0.3 (2026-07-27) — Security & Developer Experience
 
