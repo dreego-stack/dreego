@@ -8,7 +8,8 @@
 
 <div>
     <h1>{message}</h1>
-    <@Card title="Welcome"/>
+    <@Card title="Components with Scoped CSS"/>
+    <p>Above: a <code>&lt;@Card&gt;</code> component with its own styles.</p>
     <a href="/about">About</a>
 </div>
 
