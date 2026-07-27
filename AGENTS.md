@@ -1,9 +1,8 @@
 # Agent Instructions for Dreego
 
-## Aktuelle Phase: v0.0.1 → v0.0.2
+## Aktuelle Phase: pre v0.1
 
-Transpiler, File-based Routing, Layout, Middleware, CLI funktionieren.
-Version v0.0.1 ist getaggt. Jetzt: Context-Refactoring aus TODO.md.
+Blueprint-Scaffolding + 24 Integration-Tests funktionieren. v0.0.4 getaggt. Jetzt: Component-System aus TODO.md.
 
 ## Datei-Struktur
 
@@ -15,6 +14,8 @@ repo-root/
 ├── README.md               ← Projekt-Ubersicht
 ├── LICENSE                 ← MPL-2.0
 ├── _docs/                  ← Offentliche Dokumentation
+├── _tests/                 ← Integration-Tests (Docker, `make test`)
+├── .tmp/                   ← Temporare Debug-Spaces (keine Perma-Tests)
 │
 .agents/                    ← Knowledge Base (OKF-Format)
 ├── index.md                 ← Start hier (OKF TOC)
@@ -51,6 +52,15 @@ Siehe [Changelog-Guide](.agents/guides/changelog.md) fur den vollstandigen Workf
 - Core-Code liegt in `dreego-core/` (single package), Plugins in `dreego-plugin/`
 - Build via `dreego` CLI, nicht direkt `go build`
 - Generierte `dree.go` nicht committed
+
+## Bug → Test → Fix Workflow
+
+Jeder Bug wird permanent in `_tests/Bugs/<name>/` als Integration-Test verewigt. Workflow:
+1. Bug gefunden → `_tests/Bugs/<name>/` anlegen, der den Bug reproduziert (muss FAILen)
+2. Code fixen bis `make test` den neuen Test GRÜN zeigt
+3. Bug ist dauerhaft abgedeckt — kein Regression-Risiko mehr
+
+`.tmp/<name>/` ist NUR fur temporares Debugging/Exploration — nie fur permanente Tests. Mehr Tests = stabileres Framework. Jedes Verhalten, jeder Edge-Case, jeder Bug wird ein Test.
 
 ## Type Safety
 
