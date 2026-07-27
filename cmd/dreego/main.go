@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"codeberg.org/dreego/dreego/pkg/generate"
+	core "codeberg.org/dreego/dreego/dreego-core"
 )
 
 func main() {
@@ -67,14 +67,14 @@ func cmdGenerate(args []string) {
 			force = true
 		}
 	}
-	if err := generate.Run(force); err != nil {
+	if err := core.Run(force); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
 func cmdBuild(args []string) {
-	if err := generate.Run(false); err != nil {
+	if err := core.Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
 		os.Exit(1)
 	}

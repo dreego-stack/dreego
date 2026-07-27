@@ -34,7 +34,7 @@ import (
 
     "github.com/go-chi/chi/v5"
 
-    "github.com/dreego-ecosystem/dreego/pkg/transpiler"
+    core "codeberg.org/dreego/dreego/dreego-core"
 )
 ```
 

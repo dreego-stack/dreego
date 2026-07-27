@@ -2,11 +2,11 @@ package main
 
 import (
 	_ "codeberg.org/dreego/dreego/demo/dreego/gen"
-	"codeberg.org/dreego/dreego/pkg/runtime"
-	"codeberg.org/dreego/dreego/pkg/session"
+
+	core "codeberg.org/dreego/dreego/dreego-core"
 )
 
 func main() {
-	runtime.SetSessionStore(session.NewCookieStore([]byte("demo-secret-change-me")))
-	runtime.Listen(":8080")
+	core.SetSessionStore(core.NewCookieStore([]byte("demo-secret-change-me")))
+	core.Listen(":8080")
 }

@@ -7,6 +7,9 @@
 - SSRContext: `SessionVal`/`SetSessionVal`/`DelSessionVal`/`DestroySession` mit sicheren Defaults (`HttpOnly`, `Secure` TLS-aware)
 - CSRF-Schutz: Double-Submit-Cookie (Core-Conditional, default an) — Token via X-CSRF-Token Header oder csrf_token Form-Feld
 - SSRContext: `CSRFToken()` fur Template-Rendering (Hidden-Field)
+- VS Code Extension: Syntax-Highlighting + Waschbär-Icon für `.dreego`-Dateien (`make dx`)
+- **Breaking:** `pkg/` → `dreego-core/` (single package), einziger Import `import core "codeberg.org/dreego/dreego/dreego-core"`
+- `dreego-plugin/` fur zukünftige Plugins (Auth, Redis, DB, etc.)
 
 ## v0.0.2 (2026-07-25)
 

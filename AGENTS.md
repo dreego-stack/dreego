@@ -48,6 +48,7 @@ Siehe [Changelog-Guide](.agents/guides/changelog.md) fur den vollstandigen Workf
 - Max 120 Zeilen pro Datei, eine logische Sache pro Datei
 - Keine Kommentare im Code
 - Go 1.22+, Standard Library bevorzugen
+- Core-Code liegt in `dreego-core/` (single package), Plugins in `dreego-plugin/`
 - Build via `dreego` CLI, nicht direkt `go build`
 - Generierte `dree.go` nicht committed
 

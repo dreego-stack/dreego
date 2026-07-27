@@ -27,7 +27,7 @@ Das Framework muss typensicher sein. Fehler sollen so früh wie möglich (Build 
 
 **Typisierte Fehler-Typen im Core.** Recovery-Middleware dispatcht auf Typ, Renderer entscheidet HTML/JSON/Redirect.
 
-### Fehler-Typen (neue Datei `pkg/errors/errors.go`)
+### Fehler-Typen (neue Datei `dreego-core/errors.go`)
 
 ```go
 package errors
@@ -70,7 +70,7 @@ Laufzeit:    Pro-Request, Recovery fängt alles
 ### Recovery-Middleware (Core-Fixed)
 
 ```go
-// pkg/middleware/recovery.go
+// dreego-core/recovery.go
 func Recovery(log *slog.Logger) func(http.Handler) http.Handler
 ```
 
@@ -133,7 +133,7 @@ Keine Error-Boundary auf Komponenten-Ebene in V1. Begründung:
 ### Logging-Strategie
 
 ```go
-// pkg/middleware/logging.go
+// dreego-core/logging.go
 func RequestLogging(log *slog.Logger) func(http.Handler) http.Handler
 ```
 
@@ -165,7 +165,7 @@ func (p *AuthPlugin) authMiddleware(next http.Handler) http.Handler {
 
 ## Konsequenzen
 
-- Neue Packages: `pkg/errors/`, `pkg/middleware/` (existiert als Konzept, wird befüllt)
+- Neue Files: `dreego-core/errors.go`, `dreego-core/recovery.go`, `dreego-core/logging.go` (existiert als Konzept, wird befüllt)
 - Alle Handler (auch generierte) geben `error` zurück — Recovery dispatched
 - `dreego.Context` wird um `Errors()`, `Old()`, `Flash()` erweitert
 - `dreego generate` validiert Template-Syntax → Build-Fehler vor Laufzeit

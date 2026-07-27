@@ -15,21 +15,17 @@ dreego/
 ├── cmd/
 │   └── dreego/
 │       └── main.go              # CLI Entry Point (max 120 Zeilen)
-├── pkg/
-│   ├── transpiler/               # Lexer, Parser, AST, Code-Generator
-│   │   ├── lexer.go
-│   │   ├── parser.go
-│   │   ├── ast.go
-│   │   └── codegen.go
-│   ├── router/                   # Chi-Wrapper, File-based Routing
-│   │   ├── router.go
-│   │   └── routes.go
-│   ├── plugin/                   # Plugin-Interface & Registry
-│   │   └── plugin.go
-│   ├── context/                  # Request-Context, Session
-│   │   └── context.go
-│   └── middleware/                # CSRF, Session, Auth
-│       └── middleware.go
+├── dreego-core/                  # Core library (single package)
+│   ├── lexer.go
+│   ├── parser.go
+│   ├── ast.go
+│   ├── codegen.go
+│   ├── router.go
+│   ├── routes.go
+│   ├── plugin.go
+│   ├── context.go
+│   └── middleware.go
+├── dreego-plugin/                # Plugins (future)
 ├── internal/                     # Nicht-öffentliche Pakete
 │   └── ...
 ├── testdata/                     # Test-Fixtures (.dreego-Dateien)
@@ -44,16 +40,14 @@ dreego/
 
 | Modul       | Verantwortung                                    | Abhängigkeiten        |
 |-------------|-------------------------------------------------|----------------------|
-| transpiler  | .dreego → Go-Code                                | Keine externen       |
-| router      | HTTP-Routing, Chi-Integration                    | chi, transpiler      |
-| plugin      | Plugin-Interface, Registry                       | Keine                |
-| context     | Request-Kontext, User, Session                   | net/http             |
-| middleware   | CSRF, Auth, Session, Logging                     | context              |
+| core        | .dreego → Go-Code, Router, Context, Middleware    | net/http, chi        |
+| plugin      | Plugin-Interface, Registry (future)              | core                 |
 
 ## Regeln
 
 - **Jedes Package ist eigenständig testbar**
 - **Keine zirkulären Abhängigkeiten**
 - **`internal/` für Implementierungsdetails, die nicht Teil der Public API sind**
-- **`pkg/` für stabile, öffentliche APIs**
+- **`dreego-core/` für stabile, öffentliche APIs**
+- **`dreego-plugin/` für Plugins (future)**
 - **`cmd/` nur für Einstiegspunkte**

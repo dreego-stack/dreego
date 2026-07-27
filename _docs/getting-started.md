@@ -48,10 +48,10 @@ package main
 
 import (
     _ "myapp/dreego/gen"
-    "codeberg.org/dreego/dreego/pkg/runtime"
+    core "codeberg.org/dreego/dreego/dreego-core"
 )
 
 func main() {
-    runtime.Listen(":8080")
+    core.Listen(":8080")
 }
 ```

@@ -103,13 +103,8 @@ dreego/
 ├── cmd/
 │   └── dreego/
 │       └── main.go           # CLI: dreego generate, dreego dev, dreego build
-├── pkg/
-│   ├── transpiler/            # Lexer, Parser, AST, Code-Generator
-│   ├── router/                # Chi-Wrapper, File-based Routing
-│   ├── plugin/                # Plugin-Interface & Registry
-│   ├── context/               # Request-Context, Session, User
-│   ├── middleware/             # CSRF, Session, Auth
-│   └── html/                  # HTML-Builder (optional, für Pure-Go-Weg B)
+├── dreego-core/               # Core library (single package)
+├── dreego-plugin/             # Plugins (future)
 ├── go.mod
 └── go.sum
 ```

@@ -22,7 +22,7 @@ timestamp: 2026-07-25T00:00:00Z
   - Updated codegen to generate `*context.SSRContext` + `context.NewSSR(w, r)`
   - Deleted stale `demo/dreego/layouts/dree.go` (layout is now inlined per route)
 - Recovery-Middleware: Panic → 500 + Stack-Trace-Logging via slog
-  - New `pkg/middleware/recovery.go` — defer recover() with JSON log
+  - New `dreego-core/recovery.go` — defer recover() with JSON log
   - Integrated as outermost Core-Fixed middleware in runtime pipeline
 - XSS-Schutz: Auto-Escaping aller `{variable}`-Template-Ausdrücke via `html.EscapeString`
   - Expression nodes generieren jetzt `html.EscapeString(fmt.Sprintf("%v", expr))`
