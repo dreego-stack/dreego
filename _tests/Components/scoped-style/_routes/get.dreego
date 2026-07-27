@@ -1,3 +1,0 @@
-<head><title>T</title></head>
-<div><@Box/><p class="box">unscoped</p></div>
-<style>.box{color:blue}</style>
