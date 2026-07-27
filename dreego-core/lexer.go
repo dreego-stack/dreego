@@ -195,7 +195,7 @@ func scanTag(input string, pos *int) Token {
 	start := *pos
 	remaining := input[start:]
 
-	if strings.HasPrefix(remaining, "<@") {
+	if strings.HasPrefix(remaining, "<@") || strings.HasPrefix(remaining, "</@") {
 		return scanComponentTag(input, pos)
 	}
 

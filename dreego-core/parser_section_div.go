@@ -81,7 +81,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		}
 		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children}, nil
 	case TokenTagClose:
-		if parent == "root" {
+		if parent == "root" || parent == "component" {
 			p.advance()
 			return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)}, nil
 		}
@@ -90,7 +90,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		p.advance()
 		return TemplateNode{Type: NodeSlot}, nil
 	case TokenTagOpen:
-		if parent == "root" {
+		if parent == "root" || parent == "component" {
 			p.advance()
 			return TemplateNode{Type: NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)}, nil
 		}

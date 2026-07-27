@@ -47,7 +47,7 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		}
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%shtml, err := %s(%s).Render(c)\n", indent, funcName, args))
-		buf.WriteString(indent + "if err != nil { return err }\n")
+		buf.WriteString(indent + "if err != nil { return \"\", err }\n")
 		buf.WriteString(fmt.Sprintf("%sb.WriteString(html)\n", indent))
 		return buf.String()
 	}

@@ -340,7 +340,7 @@ func scanComponents() (genDir string, sources []string) {
 		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
-		if !strings.Contains(path, "components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
+		if !strings.Contains(path, "/components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
 			return nil
 		}
 
