@@ -34,6 +34,15 @@ func scanBrace(input string, pos *int) (Token, error) {
 		return Token{Type: TokenEachOpen, Value: strings.TrimSpace(remaining[7 : 7+end]), Pos: start}, nil
 	}
 
+	if strings.HasPrefix(remaining, "{#slot ") {
+		end := strings.IndexByte(remaining[7:], '}')
+		if end < 0 {
+			return Token{}, fmt.Errorf("unclosed {#slot at position %d", start)
+		}
+		*pos += 7 + end + 1
+		return Token{Type: TokenSlot, Value: strings.TrimSpace(remaining[7 : 7+end]), Pos: start}, nil
+	}
+
 	if strings.HasPrefix(remaining, "{#slot}") {
 		*pos += 7
 		return Token{Type: TokenSlot, Pos: start}, nil

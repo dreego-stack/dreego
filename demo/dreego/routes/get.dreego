@@ -10,8 +10,8 @@ import "dreego/components/Card"
 
 <div>
     <h1>{message}</h1>
-    <@Card title="Components with Slots">
-        <p>This content is passed via <code>{#slot}</code>.</p>
+    <@Card title="Slot Demo">
+        <p>This content appears via <code>{#slot}</code> in the Card component.</p>
     </@Card>
     <a href="/about">About</a>
 </div>

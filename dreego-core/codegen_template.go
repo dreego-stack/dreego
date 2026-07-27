@@ -35,6 +35,22 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		buf.WriteString(indent + "}\n")
 		return buf.String()
 	case NodeSlot:
+		if n.Content != "" && len(n.Children) > 0 {
+			var buf strings.Builder
+			buf.WriteString(fmt.Sprintf("%s{\n", indent))
+			buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
+			for _, child := range n.Children {
+				code := genTemplateNode(child, depth+2)
+				code = strings.ReplaceAll(code, "b.WriteString(", "cb.WriteString(")
+				buf.WriteString(code)
+			}
+			buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot_%s\", cb.String())\n", indent, n.Content))
+			buf.WriteString(fmt.Sprintf("%s}\n", indent))
+			return buf.String()
+		}
+		if n.Content != "" {
+			return fmt.Sprintf("%sb.WriteString(c.Get(\"slot_%s\"))\n", indent, n.Content)
+		}
 		return fmt.Sprintf("%sb.WriteString(c.Get(\"slot\"))\n", indent)
 	case NodeComponentCall:
 		funcName := n.Tag
@@ -49,9 +65,21 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		buf.WriteString(fmt.Sprintf("%s{\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
 		for _, child := range n.Children {
-			childCode := genTemplateNode(child, depth+2)
-			childCode = strings.ReplaceAll(childCode, "b.WriteString(", "cb.WriteString(")
-			buf.WriteString(childCode)
+			if child.Type == NodeSlot && child.Content != "" && len(child.Children) > 0 {
+				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
+				buf.WriteString(fmt.Sprintf("%s\t\tvar sb strings.Builder\n", indent))
+				for _, sc := range child.Children {
+					code := genTemplateNode(sc, depth+3)
+					code = strings.ReplaceAll(code, "b.WriteString(", "sb.WriteString(")
+					buf.WriteString(code)
+				}
+				buf.WriteString(fmt.Sprintf("%s\t\tc.Set(\"slot_%s\", sb.String())\n", indent, child.Content))
+				buf.WriteString(fmt.Sprintf("%s\t}\n", indent))
+			} else {
+				code := genTemplateNode(child, depth+2)
+				code = strings.ReplaceAll(code, "b.WriteString(", "cb.WriteString(")
+				buf.WriteString(code)
+			}
 		}
 		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", cb.String())\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, funcName, args))

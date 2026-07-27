@@ -252,6 +252,9 @@ func genTemplateNodeComp(n TemplateNode) string {
 	case NodeExpression:
 		return fmt.Sprintf("b.WriteString(html.EscapeString(fmt.Sprintf(\"%%v\", %s)))", n.Content)
 	case NodeSlot:
+		if n.Content != "" {
+			return fmt.Sprintf("b.WriteString(ctx.Get(\"slot_%s\"))", n.Content)
+		}
 		return "b.WriteString(ctx.Get(\"slot\"))"
 	case NodeComponentCall:
 		return genComponentCall(n)

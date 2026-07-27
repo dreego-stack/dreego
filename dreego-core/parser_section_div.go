@@ -88,7 +88,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		return TemplateNode{}, fmt.Errorf("unexpected </%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
 	case TokenSlot:
 		p.advance()
-		return TemplateNode{Type: NodeSlot}, nil
+		return TemplateNode{Type: NodeSlot, Content: tok.Value}, nil
 	case TokenTagOpen:
 		if parent == "root" || parent == "component" {
 			p.advance()
