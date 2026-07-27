@@ -61,6 +61,34 @@ Components werden automatisch aus `dreego/components/` entdeckt. Kein `import` n
 5. **Self-closing** — `<@Icon name="star"/>` wenn kein Body.
 6. **Slots** — `{#slot}` im Component-Template = Kinder-Inhalt.
 
+## Named Slots (v0.0.8)
+
+**Component:**
+```
+Component Card (title string)
+
+<div>
+    <article>
+        {#slot header}{/slot}
+        <h2>{title}</h2>
+        {#slot}
+    </article>
+</div>
+```
+
+**Route:**
+```html
+<@Card title="Hi">
+    {#slot header}<strong>HEADER</strong>{/slot}
+    <p>Default content here</p>
+</@Card>
+```
+
+- `{#slot header}{/slot}` — Platzhalter im Component (leerer Body)
+- `{#slot header}content{/slot}` — Definition in der Route (mit Body)
+- `{#slot}` — Default-Slot (kein `{/slot}` nötig)
+- Mehrere benannte Slots pro Component möglich
+
 ## Generierter Go-Code
 
 ```go

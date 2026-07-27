@@ -17,8 +17,12 @@ myapp/
 
 Danach: `cd myapp && go mod init myapp && dreego generate && go run .`
 
-### `dreego generate`
+### `dreego generate [--force] [--check]`
 Transpiliert alle `.dreego`-Dateien. Output: `dreego/gen/routes.go` + `dreego/gen/dree.go`.
+
+Flags:
+- `--force` — Force-Regeneration aller Dateien
+- `--check` — CI-Validation: exit non-zero wenn .dreego-Dateien neuer als gen-Output (stale)
 
 ## Phase 1 Commands (geplant)
 
