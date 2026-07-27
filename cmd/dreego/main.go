@@ -18,6 +18,8 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "init":
+		cmdInit(os.Args[2:])
 	case "generate":
 		cmdGenerate(os.Args[2:])
 	case "build":
@@ -39,7 +41,8 @@ func printHelp() {
 usage: dreego <command> [flags]
 
 commands:
-  generate [--force]     transpile .dreego files to Go code
+  init <path>             create a new dreego project from blueprint
+  generate [--force]      transpile .dreego files to Go code
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
   help                   show this help

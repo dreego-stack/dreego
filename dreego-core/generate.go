@@ -180,9 +180,11 @@ func Run(force bool) error {
 func writeDreeGo(genDir string, settings *Settings) error {
 	var buf strings.Builder
 	buf.WriteString("package gen\n\n")
-	buf.WriteString("import (\n")
-	buf.WriteString("\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n")
-	buf.WriteString(")\n\n")
+	if settings != nil && (settings.Logging.Enabled || len(settings.Redirects) > 0 || len(settings.Rewrites) > 0) {
+		buf.WriteString("import (\n")
+		buf.WriteString("\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n")
+		buf.WriteString(")\n\n")
+	}
 	buf.WriteString("func init() {\n")
 	if settings != nil {
 		buf.WriteString(fmt.Sprintf("\tcore.SetLogging(%t)\n", settings.Logging.Enabled))

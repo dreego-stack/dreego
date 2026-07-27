@@ -1,0 +1,17 @@
+<head>
+    <title>Dreego</title>
+</head>
+
+<go>
+    message := "Hello, Dreego!"
+</go>
+
+<div>
+    <h1>{message}</h1>
+    <p>Edit <code>dreego/routes/get.dreego</code> and reload.</p>
+</div>
+
+<style>
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; }
+    h1 { color: #333; }
+</style>

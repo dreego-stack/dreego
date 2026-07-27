@@ -2,30 +2,23 @@
 
 ## Phase 0 Commands
 
-### `dreego init <name>`
-Scaffolding. Erstellt ein neues Dreego-Projekt mit allem was man zum Starten braucht.
+### `dreego init <path>`
+Scaffolding. Erstellt ein neues Dreego-Projekt aus embedded Blueprint.
 
 ```
 dreego init myapp
 
 myapp/
-├── routes/
-│   └── get.dreego       ← Hello-World Startseite
-├── main.go                 ← Minimaler Server
-├── go.mod                  ← codeberg.org/dreego/dreego
-└── .gitignore
+├── main.go
+└── dreego/
+    └── routes/
+        └── get.dreego
 ```
 
-Danach: `cd myapp && dreego generate && go run .` → Server läuft.
+Danach: `cd myapp && go mod init myapp && dreego generate && go run .`
 
 ### `dreego generate`
-Transpiliert alle `.dreego`-Dateien in `routes/` zu `_dreego.go`.
-
-```
-routes/
-├── get.dreego       → index_dreego.go
-├── about.dreego       → about_dreego.go
-```
+Transpiliert alle `.dreego`-Dateien. Output: `dreego/gen/routes.go` + `dreego/gen/dree.go`.
 
 ## Phase 1 Commands (geplant)
 
