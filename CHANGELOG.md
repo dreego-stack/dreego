@@ -1,10 +1,14 @@
 # Changelog
 
-## v0.0.4 (unreleased) — Blueprints & Tests
+## v0.0.4 (2026-07-27) — Blueprints & Tests
 
 - `dreego init <path>` — scaffold new project from embedded blueprint
 - Blueprints via `//go:embed` in CLI binary, keine externen Dateien nötig
-- Integration-Tests in `_tests/` via Docker-Container (`make test`)## v0.0.3 (2026-07-27) — Security & Developer Experience
+- Integration-Tests in `_tests/` via Docker-Container (`make test`)
+
+## v0.0.5 (unreleased) — Component Model
+
+## v0.0.3 (2026-07-27) — Security & Developer Experience
 
 - Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
 - Session-Middleware: Context-basierte Store-Injektion pro Request
