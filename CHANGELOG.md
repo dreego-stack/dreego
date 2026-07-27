@@ -7,7 +7,11 @@
 - Default-Slot via `{#slot}` im Component-Template
 - Scoped Styles pro Component (`data-scope`)
 - File-based Discovery: `dreego/components/Card.dreego` → `<@Card>`
-- 6 Component-Integration-Tests + Bug-Test (component-close-tag)## v0.0.4 (2026-07-27) — Blueprints & Tests
+- 6 Component-Integration-Tests + 2 Bug-Tests
+- `import "dreego/components/Name"` in Route-Dateien (ParseHeader vor Lex)
+- Multi-File Directory Import: `import "dreego/components/button"` → `<@Login/>`
+
+## v0.0.4 (2026-07-27) — Blueprints & Tests
 
 - `dreego init <path>` — scaffold new project from embedded blueprint
 - Blueprints via `//go:embed` in CLI binary, keine externen Dateien nötig
