@@ -32,12 +32,18 @@ graph TD
     style csrf_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
+    ci_check_1["dreego generate --check (CI Mode)"]
+    style ci_check_1 fill:#fff3cd,stroke:#ffc107
+    component_handler_1["ComponentHandler (Buffered Mode + Functi"]
+    style component_handler_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
     style compression_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment-Strategie (Docker, Single-Bin"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
     style documentation_1 fill:#fff3cd,stroke:#ffc107
+    dreego_fmt_1["dreego fmt (Formatter)"]
+    style dreego_fmt_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing-Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     each_loop_1["{#each} mit $loop-Variable"]
@@ -114,12 +120,18 @@ graph TD
     style email_interface_1 fill:#f8d7da,stroke:#dc3545
     event_bus_1["Pub/Sub Event-Bus (Core-Interface)"]
     style event_bus_1 fill:#f8d7da,stroke:#dc3545
+    golden_tests_1["Golden-File Tests für Generator"]
+    style golden_tests_1 fill:#f8d7da,stroke:#dc3545
+    live_reload_1["Live Reload Proxy (SSE + Script Injectio"]
+    style live_reload_1 fill:#f8d7da,stroke:#dc3545
     middleware_hooks_1["Plugin-Middleware-Hooks (app.Use FIFO)"]
     style middleware_hooks_1 fill:#f8d7da,stroke:#dc3545
     queue_interface_1["Background-Job-Queue Interface"]
     style queue_interface_1 fill:#f8d7da,stroke:#dc3545
     route_hooks_1["Plugin-Route-Registration"]
     style route_hooks_1 fill:#f8d7da,stroke:#dc3545
+    smart_recompile_1["Smart Recompile (Text-vs-Go Detection)"]
+    style smart_recompile_1 fill:#f8d7da,stroke:#dc3545
     ssg_1["Static Site Generation (SSG)"]
     style ssg_1 fill:#f8d7da,stroke:#dc3545
     storage_interface_1["File-Storage Interface (S3, R2, Local)"]
@@ -158,6 +170,8 @@ graph TD
     session_1 --> dreego_cluster_1
     cache_interface_1 --> dreego_cluster_1
     event_bus_1 --> dreego_cluster_1
+    transpiler_1 --> golden_tests_1
+    dreegotest_1 --> golden_tests_1
     plugin_interface_1 --> dreego_charts_1
     components_1 --> dreego_charts_1
     routing_1 --> dreegotest_1
@@ -167,6 +181,7 @@ graph TD
     plugin_interface_1 --> dreego_notify_1
     email_interface_1 --> dreego_notify_1
     event_bus_1 --> dreego_notify_1
+    hot_reload_1 --> live_reload_1
     plugin_interface_1 --> dreego_analytics_1
     middleware_hooks_1 --> dreego_analytics_1
     plugin_interface_1 --> email_interface_1
@@ -188,9 +203,11 @@ graph TD
     transpiler_1 --> verbatim_1
     plugin_interface_1 --> dreego_features_1
     middleware_hooks_1 --> dreego_features_1
+    transpiler_1 --> dreego_fmt_1
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
+    context_refactoring_1 --> component_handler_1
     plugin_interface_1 --> dreego_i18n_1
     middleware_hooks_1 --> dreego_i18n_1
     plugin_interface_1 --> dreego_search_1
@@ -200,9 +217,12 @@ graph TD
     plugin_interface_1 --> route_hooks_1
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
+    cli_1 --> ci_check_1
     plugin_interface_1 --> cache_interface_1
     cli_1 --> scaffolding_1
     routing_1 --> health_checks_1
+    transpiler_1 --> smart_recompile_1
+    hot_reload_1 --> smart_recompile_1
     middleware_1 --> observability_1
     transpiler_1 --> flat_gen_1
     routing_1 --> flat_gen_1

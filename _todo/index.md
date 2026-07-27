@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-27T09:17:22Z
+Generated: 2026-07-27T15:13:06Z
 
 Chain: 1–15 | Next status code: **16**
 
@@ -23,9 +23,12 @@ Chain: 1–15 | Next status code: **16**
 
 ## AVAILABLE NEXT
 - **api-json.1** — API-Routen + JSON Responses
+- **ci-check.1** — dreego generate --check (CI Mode)
+- **component-handler.1** — ComponentHandler (Buffered Mode + Functional Options)
 - **compression.1** — Gzip/Brotli Compression Middleware
 - **deployment.1** — Deployment-Strategie (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
+- **dreego-fmt.1** — dreego fmt (Formatter)
 - **dreegotest.1** — dreegotest — Testing-Package
 - **each-loop.1** — {#each} mit $loop-Variable
 - **form-actions.1** — Form Actions (g-action / g-submit)
@@ -66,11 +69,14 @@ Chain: 1–15 | Next status code: **16**
 - **dreego-storage.1** — dreego-storage (File-Uploads, Progress, Resize)  (missing: plugin-interface.1, storage-interface.1)
 - **email-interface.1** — Email-Sending Interface (SMTP, Resend, Postmark)  (missing: plugin-interface.1)
 - **event-bus.1** — Pub/Sub Event-Bus (Core-Interface)  (missing: plugin-interface.1)
+- **golden-tests.1** — Golden-File Tests für Generator  (missing: dreegotest.1)
+- **live-reload.1** — Live Reload Proxy (SSE + Script Injection)  (missing: hot-reload.1)
 - **middleware-hooks.1** — Plugin-Middleware-Hooks (app.Use FIFO)  (missing: plugin-interface.1)
 - **queue-interface.1** — Background-Job-Queue Interface  (missing: plugin-interface.1)
 - **route-hooks.1** — Plugin-Route-Registration  (missing: plugin-interface.1)
+- **smart-recompile.1** — Smart Recompile (Text-vs-Go Detection)  (missing: hot-reload.1)
 - **ssg.1** — Static Site Generation (SSG)  (missing: plugin-interface.1)
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 15 | web: 48 | next code: 16
+chain: 15 | web: 54 | next code: 16

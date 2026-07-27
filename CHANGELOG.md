@@ -1,6 +1,8 @@
 # Changelog
 
-## v0.0.3 (unreleased)
+## v0.0.4 (unreleased)
+
+## v0.0.3 (2026-07-27)
 
 - Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
 - Session-Middleware: Context-basierte Store-Injektion pro Request
