@@ -1,6 +1,6 @@
-# dreego — Go-Webframework
+# dreego — Go Web Framework
 
-Ein SSR-First Webframework fur Go. Dateiendung `.dreego`, Transpiler-Ansatz, Single Binary.
+SSR-First web framework for Go. File extension `.dreego`, transpiler approach, single binary.
 
 ```html
 <!-- dreego/routes/get.dreego -->
@@ -21,33 +21,32 @@ dreego generate && dreego run
 
 ## Features
 
-- **Compile-Time Transpiler** — `.dreego` → Go-Code, null Runtime-Overhead
+- **Compile-Time Transpiler** — `.dreego` → Go code, zero runtime overhead
 - **File-based Routing** — `dreego/routes/get.dreego` → `/`
-- **5 Sektionen** — `<head>`, `<go>`, `<div>`, `<script>`, `<style>`
-- **Template-Logik** — `{#if}`, `{#each}`, `{var}`
-- **Layout-System** — `dreego/layouts/default.dreego` mit `{#slot}`
-- **CSS-Scoping** — `data-scope` via Source-Hash
+- **5 Sections** — `<head>`, `<go>`, `<div>`, `<script>`, `<style>`
+- **Template Logic** — `{#if}`, `{#each}`, `{var}` + `{#else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- **Component System** — `dreego/components/`, `<@Name>`, named slots, scoped CSS
+- **Layout System** — `dreego/layouts/default.dreego` with `{#slot}` + `{#head}`
+- **Static Assets** — `dreego/static/` → inline handlers with MIME detection
+- **CSS Scoping** — `data-scope` via source hash
 - **Middleware** — RequestLogging (JSONL), Redirects, Rewrites
-- **Single Binary** — `dreego build` → eine Datei deployen
-- **CLI** — `dreego generate`, `dreego build`, `dreego run -d -t 60`
+- **Single Binary** — `go build` → deploy one file
+- **CLI** — `dreego init`, `dreego generate [--force] [--check]`
 
 ## Quick Start
 
 ```bash
-go install codeberg.org/dreego/dreego/cmd/dreego@v0.0.1
-mkdir myapp && cd myapp
+go install codeberg.org/dreego/dreego/cmd/dreego@latest
+dreego init myapp
+cd myapp
 go mod init myapp
-mkdir -p dreego/routes
-# ... schreibe dreego/routes/get.dreego ...
 dreego generate
-dreego run
+go run .
 ```
 
-## Dokumentation
+## Documentation
 
-Siehe [`_docs/`](_docs/index.md) und [`.agents/`](.agents/_index.md).
-
-## License
+See [`_docs/`](_docs/) and [`.agents/`](.agents/index.md).
 
 ## License
 

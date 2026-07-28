@@ -1,6 +1,6 @@
 ---
 id: queue-interface.1
-title: Background-Job-Queue Interface
+title: Background Job Queue Interface
 status: planned
 phase: v0.x.0
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Core-Interface für Background-Jobs. Abstrahiert Redis/NATS/In-Memory. Job-Middleware, Batching, Chaining, Delayed Dispatch. Plugin-Implementierungen (dreego-jobs). Wie Laravel Queues.
+Core interface for background jobs. Abstracts Redis/NATS/In-Memory. Job middleware, batching, chaining, delayed dispatch. Plugin implementations (dreego-jobs). Like Laravel Queues.

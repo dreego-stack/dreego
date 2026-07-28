@@ -1,16 +1,16 @@
 
 ---
 type: Concept
-title: "Form Actions — Konzept"
-description: "Deklaratives Form-Handling mit automatischem Parsing, Validierung und CSRF-Check"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "Form Actions — Concept"
+description: "Declarative form handling with automatic parsing, validation, and CSRF check"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Form Actions — Konzept
+# Form Actions — Concept
 
-## Übersicht
+## Overview
 
-Form Actions ersetzen manuelles `r.ParseForm()` + `r.FormValue()` durch deklarative Form-Handler. Der Entwickler definiert einen Struct und eine Go-Funktion — Dreego generiert Parsing, Validierung und CSRF-Check.
+Form Actions replace manual `r.ParseForm()` + `r.FormValue()` with declarative form handlers. The developer defines a struct and a Go function — Dreego generates parsing, validation, and CSRF check.
 
 ## Syntax
 
@@ -35,7 +35,7 @@ Form Actions ersetzen manuelles `r.ParseForm()` + `r.FormValue()` durch deklarat
     func Login(c dreego.Context, form LoginForm) error {
         user, err := db.Authenticate(form.Email, form.Password)
         if err != nil {
-            c.Flash("error", "Ungültige Anmeldedaten")
+            c.Flash("error", "Invalid credentials")
             return c.Redirect("/login")
         }
         c.Session.Set("user_id", user.ID)
@@ -44,33 +44,33 @@ Form Actions ersetzen manuelles `r.ParseForm()` + `r.FormValue()` durch deklarat
 </go>
 ```
 
-## Generierter Code (was Dreego daraus macht)
+## Generated Code (what Dreego makes out of this)
 
 ```go
 func handleLoginForm(w http.ResponseWriter, r *http.Request) {
     ctx := dreego.NewSSRContext(r, w)
 
-    // 1. CSRF-Check (automatisch)
+    // 1. CSRF check (automatic)
     if err := ctx.VerifyCSRF(r); err != nil {
         ctx.RenderError(403, "CSRF validation failed")
         return
     }
 
-    // 2. Form-Parsing
+    // 2. Form parsing
     r.ParseForm()
     var form LoginForm
     form.Email = r.FormValue("email")
     form.Password = r.FormValue("password")
 
-    // 3. Validierung (go-playground/validator)
+    // 3. Validation (go-playground/validator)
     if err := validate.Struct(form); err != nil {
-        ctx.SaveOld(form)           // Felder für old()-Wiederherstellung
-        ctx.SaveErrors(err)          // Feld-Level-Errors für Template
-        ctx.Redirect(r.Referer())    // Zurück zum Form
+        ctx.SaveOld(form)           // Fields for old() restore
+        ctx.SaveErrors(err)          // Field-level errors for template
+        ctx.Redirect(r.Referer())    // Back to form
         return
     }
 
-    // 4. Handler aufrufen
+    // 4. Call handler
     if err := Login(ctx, form); err != nil {
         ctx.HandleActionError(err)   // Flash, Redirect, etc.
         return
@@ -78,25 +78,25 @@ func handleLoginForm(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-## Progressiv — funktioniert mit und ohne JS
+## Progressive — works with and without JS
 
 ```html
-<!-- Ohne JS: normales HTML-Form, POST, Full-Page-Reload -->
+<!-- Without JS: normal HTML form, POST, full page reload -->
 <form g-action="Login" method="POST">
 </form>
 
-<!-- Mit HTMX: Fragment-Tausch, kein Reload -->
+<!-- With HTMX: fragment swap, no reload -->
 <form g-action="Login" method="POST" hx-post="/api/action/Login" hx-target="#result">
 </form>
 
-<!-- Mit Alpine.js: Client-seitige Validierung + optimistisches UI -->
+<!-- With Alpine.js: client-side validation + optimistic UI -->
 <form g-action="Login" x-data="formValidation()" @submit.prevent="submit">
 </form>
 ```
 
-Alle drei Modi funktionieren mit DEMSELBEN Form-Tag. HTMX und Alpine upgraden nur das Erlebnis.
+All three modes work with the SAME form tag. HTMX and Alpine only upgrade the experience.
 
-## Template-Helfer
+## Template Helpers
 
 ```html
 {#if errors.email}
@@ -110,28 +110,28 @@ Alle drei Modi funktionieren mit DEMSELBEN Form-Tag. HTMX und Alpine upgraden nu
 {/if}
 ```
 
-- `errors` — Feld-Level-Validierungsfehler (auto-gesetzt nach Validierung)
-- `old` — Vorherige Eingaben (nach fehlgeschlagener Validierung)
-- `flash` — Session-Flash-Messages (nach Redirect)
+- `errors` — Field-level validation errors (auto-set after validation)
+- `old` — Previous inputs (after failed validation)
+- `flash` — Session flash messages (after redirect)
 
-## Sicherheit
+## Security
 
 ### XSS (Output Encoding)
-Alle Template-Variablen `{variable}` werden HTML-escaped:
-- `{user.Name}` → `&lt;script&gt;` wird zu `&amp;lt;script&amp;gt;`
-- Verhindert Stored XSS: Schadcode in der DB wird beim Anzeigen neutralisiert
-- Primeagens Ansatz: beim DISPLAY escapen, nicht beim Speichern filtern
+All template variables `{variable}` are HTML-escaped:
+- `{user.Name}` → `&lt;script&gt;` becomes `&amp;lt;script&amp;gt;`
+- Prevents Stored XSS: malicious code in the DB is neutralized on display
+- Primeagen's approach: escape on DISPLAY, don't filter on storage
 
-Nur `{variable|raw}` erlaubt unescaped HTML — explizit, selten, bewusst riskant.
+Only `{variable|raw}` allows unescaped HTML — explicit, rare, deliberately risky.
 
-### Auto-Escaping im Core
-Kein Addon — MUSS im Template-Renderer eingebaut sein. Sonst ist jede Dreego-App unsicher.
+### Auto-Escaping in Core
+Not an addon — MUST be built into the template renderer. Otherwise every Dreego app is insecure.
 
-## Offene Design-Fragen (für GLM)
+## Open Design Questions (for GLM)
 
-1. `g-action` vs `g-submit` — Name des Attributs?
-2. Mehrere Actions pro Seite — `g-action="Login"` vs `g-action="Register"` im selben Template?
-3. File-Uploads — eigenes `g-upload` oder Teil von `g-action`?
-4. Non-SSR Actions — funktionieren Actions im SSG-Modus? (nein — Build-Zeit, kein Form-Handling)
-5. Action-Naming — `Login` ist der Go-Funktionsname — Case-sensitiv?
-6. Redirect vs Render — `return c.Redirect()` vs `return c.Render()` vs `return nil` (bleibt auf Seite)?
+1. `g-action` vs `g-submit` — name of the attribute?
+2. Multiple actions per page — `g-action="Login"` vs `g-action="Register"` in the same template?
+3. File uploads — separate `g-upload` or part of `g-action`?
+4. Non-SSR Actions — do actions work in SSG mode? (no — build time, no form handling)
+5. Action Naming — `Login` is the Go function name — case-sensitive?
+6. Redirect vs Render — `return c.Redirect()` vs `return c.Render()` vs `return nil` (stay on page)?

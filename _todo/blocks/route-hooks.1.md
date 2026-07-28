@@ -1,6 +1,6 @@
 ---
 id: route-hooks.1
-title: Plugin-Route-Registration
+title: Plugin Route Registration
 status: planned
 phase: v0.x.0
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Core-Eintrittspunkt für Plugin-Routen. Plugins registrieren eigene URL-Pfade (z.B. /admin/*, /api/auth/*). Keine Dateisystem-basierte Registrierung — programmatisch via Plugin-API. Generierte dreego/gen/dree.go sammelt alle Plugin-Routen.
+Core entry point for plugin routes. Plugins register own URL paths (e.g. /admin/*, /api/auth/*). No filesystem-based registration — programmatic via Plugin API. Generated dreego/gen/dree.go collects all plugin routes.

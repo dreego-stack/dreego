@@ -1,37 +1,38 @@
+
 ---
 type: Decision
-title: Name "dreego" / Dateiendung ".dreego"
-description: Namensgebung und Package-Konvention
-tags: [naming, v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Name "dreego" / File Extension ".dreego"
+description: Naming convention and package convention
+tags: [naming, v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 
-# Name "dreego" / Dateiendung ".dreego"
+# Name "dreego" / File Extension ".dreego"
 
-**Datum:** 23.07.2026
+**Date:** 2026-07-28
 **Status:** Final
 
-## Entscheidung (final)
+## Decision (final)
 
-**Projekt-Name:** dreego
-**Dateiendung:** `.dreego`
-**CLI-Tool:** `dreego`
-**Go-Package:** `dreego`
+**Project name:** dreego
+**File extension:** `.dreego`
+**CLI tool:** `dreego`
+**Go Package:** `dreego`
 
-## Package-Konvention
+## Package Convention
 
-| Art              | Pfad                                      |
+| Type             | Path                                      |
 |------------------|-------------------------------------------|
 | Core             | `codeberg.org/dreego/dreego`             |
-| Auth-Plugin      | `codeberg.org/dreego/dreego-auth`        |
-| Map-Plugin       | `codeberg.org/dreego/dreego-map`         |
-| UI-Plugin        | `codeberg.org/dreego/dreego-ui`          |
+| Auth Plugin      | `codeberg.org/dreego/dreego-auth`        |
+| Map Plugin       | `codeberg.org/dreego/dreego-map`         |
+| UI Plugin        | `codeberg.org/dreego/dreego-ui`          |
 
-## Konsequenzen
+## Consequences
 
-- Dateiendung `.dreego`
+- File extension `.dreego`
 - CLI: `dreego` (dreego generate, dreego dev, dreego build)
-- Package-Name: `dreego`
+- Package name: `dreego`
 - Website: dreego.dev
 - Codeberg Org: codeberg.org/dreego
 - GitHub Mirror: github.com/LukasLow/dreego

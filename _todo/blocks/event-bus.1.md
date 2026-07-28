@@ -1,6 +1,6 @@
 ---
 id: event-bus.1
-title: Pub/Sub Event-Bus (Core-Interface)
+title: Pub/Sub Event Bus (Core Interface)
 status: planned
 phase: v0.x.0
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Core-Interface für Event-Bus (Pub/Sub). Abstrahiert Redis/NATS/In-Memory. Methoden: Publish, Subscribe, Unsubscribe. Typisiert via Go-Generics. Plugin-Implementierungen. Nutzbar von Notifications, SSE, Real-Time-Features.
+Core interface for event bus (Pub/Sub). Abstracts Redis/NATS/In-Memory. Methods: Publish, Subscribe, Unsubscribe. Typed via Go generics. Plugin implementations. Usable by notifications, SSE, real-time features.

@@ -1,6 +1,6 @@
 ---
 id: dreego-search.1
-title: dreego-search (Volltextsuche)
+title: dreego-search (Full-Text Search)
 status: planned
 phase: v0.x.0
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Volltextsuche. Bleve/Meilisearch/Typesense-Backends. Index-Definition via Go-Struct-Tags. Auto-Indexierung bei Änderungen. Search-API für Templates.
+Plugin for full-text search. Bleve/Meilisearch/Typesense backends. Index definition via Go struct tags. Auto-indexing on changes. Search API for templates.

@@ -1,43 +1,43 @@
 
 ---
 type: Concept
-title: "Die 5 Sektionen einer .dreego-Datei"
-description: "Aufbau und Verhalten der 5 Sektionen: head, go, Template, script, style"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "The 5 Sections of a .dreego File"
+description: "Structure and behavior of the 5 sections: head, go, Template, script, style"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Die 5 Sektionen einer .dreego-Datei
+# The 5 Sections of a .dreego File
 
-## Übersicht
+## Overview
 
-Jede `.dreego`-Datei besteht aus bis zu 5 Sektionen. Die Reihenfolge ist:
+Every `.dreego` file consists of up to 5 sections. The order is:
 
-1. `<head>` — Komponenten-spezifische Assets
-2. `<go>` — Server-seitiger Go-Code
-3. Template (implizit, der HTML-Teil) — Das Markup
-4. `<script>` — Client-seitiges JavaScript
+1. `<head>` — Component-specific assets
+2. `<go>` — Server-side Go code
+3. Template (implicit, the HTML part) — The markup
+4. `<script>` — Client-side JavaScript
 5. `<style>` — Scoped CSS
 
-## Sektion 1: `<head>`
+## Section 1: `<head>`
 
-**Zweck:** Assets deklarieren, die nur für diese Komponente geladen werden müssen.
+**Purpose:** Declare assets that only need to be loaded for this component.
 
 ```html
 <head>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
-    <meta name="description" content="Interaktive Karte" />
+    <meta name="description" content="Interactive map" />
 </head>
 ```
 
-**Verhalten:**
-- Wird vom Transpiler gesammelt
-- Beim Rendern der Komponente dynamisch in den HTML-Head injiziert
-- Globale Skripte werden nur geladen, wenn die Komponente tatsächlich gerendert wird
+**Behavior:**
+- Collected by the transpiler
+- Dynamically injected into the HTML head when the component is rendered
+- Global scripts are only loaded when the component is actually rendered
 
-## Sektion 2: `<go>`
+## Section 2: `<go>`
 
-**Zweck:** Server-seitige Logik — Datenbank-Abfragen, Request-Verarbeitung, Business-Logik.
+**Purpose:** Server-side logic — database queries, request processing, business logic.
 
 ```html
 <go>
@@ -53,56 +53,56 @@ Jede `.dreego`-Datei besteht aus bis zu 5 Sektionen. Die Reihenfolge ist:
 </go>
 ```
 
-**Verhalten:**
-- Wird 1:1 in eine Go-Funktion kompiliert
-- Hat Zugriff auf `*http.Request`, `http.ResponseWriter`, DB-Pool, Session, etc.
-- Läuft AUSSCHLIESSLICH auf dem Server
-- Nie im Client sichtbar
+**Behavior:**
+- Compiled 1:1 into a Go function
+- Has access to `*http.Request`, `http.ResponseWriter`, DB pool, session, etc.
+- Runs EXCLUSIVELY on the server
+- Never visible to the client
 
-## Sektion 3: Template (HTML)
+## Section 3: Template (HTML)
 
-**Zweck:** Das Markup. Hier werden Daten aus `<go>` gerendert.
+**Purpose:** The markup. Data from `<go>` is rendered here.
 
 ```html
 <div class="user-card">
     {#if hasError}
-        <p class="error">Benutzer konnte nicht geladen werden.</p>
+        <p class="error">User could not be loaded.</p>
     {#else}
-        <h1>Hallo, {user.Name}!</h1>
-        <p>Alter: {user.Age}</p>
+        <h1>Hello, {user.Name}!</h1>
+        <p>Age: {user.Age}</p>
     {/if}
 </div>
 ```
 
-**Unterstützte Template-Logik:**
+**Supported Template Logic:**
 - `{#if}`, `{#else if}`, `{#else}`, `{/if}`
 - `{#each items as item, index}`, `{#else}`, `{/each}`
 - `{#switch expr}`, `{#case val}`, `{#default}`, `{/switch}`
 - `{#let name = expr}`
-- `{variable}` — escaped HTML-Output
-- `{variable|raw}` — unescaped (nur wenn sicher!)
+- `{variable}` — escaped HTML output
+- `{variable|raw}` — unescaped (only when safe!)
 
-## Sektion 4: `<script>`
+## Section 4: `<script>`
 
-**Zweck:** Client-seitiges JavaScript. V1: Vanilla JS. V2: TypeScript.
+**Purpose:** Client-side JavaScript. V1: Vanilla JS. V2: TypeScript.
 
 ```html
 <script>
     document.getElementById("map-btn")?.addEventListener("click", () => {
-        console.log("Karte wird zentriert...");
+        console.log("Centering map...");
     });
 </script>
 ```
 
-**Verhalten:**
-- V1: Wird 1:1 extrahiert und als `<script>`-Tag ins HTML eingebettet
-- V2: TypeScript via esbuild kompiliert
-- Läuft AUSSCHLIESSLICH im Browser
-- Hat keinen Zugriff auf Go-Variablen (explizite Trennung!)
+**Behavior:**
+- V1: Extracted 1:1 and embedded as `<script>` tag in the HTML
+- V2: TypeScript compiled via esbuild
+- Runs EXCLUSIVELY in the browser
+- Has no access to Go variables (explicit separation!)
 
-## Sektion 5: `<style>`
+## Section 5: `<style>`
 
-**Zweck:** Komponenten-spezifisches CSS. Wird automatisch gescoped.
+**Purpose:** Component-specific CSS. Automatically scoped.
 
 ```html
 <style>
@@ -117,15 +117,15 @@ Jede `.dreego`-Datei besteht aus bis zu 5 Sektionen. Die Reihenfolge ist:
 </style>
 ```
 
-**Verhalten:**
-- Klassen erhalten automatisch einen Hash (`.user-card-a8f3d`)
-- Im Template werden die gehashten Klassen verwendet
-- Kein globales CSS-Leaking
+**Behavior:**
+- Classes automatically receive a hash (`.user-card-a8f3d`)
+- Hashed classes are used in the template
+- No global CSS leaking
 
-## Transpiler-Output
+## Transpiler Output
 
-Der Transpiler verarbeitet eine `.dreego`-Datei in 3 Ausgaben:
+The transpiler processes a `.dreego` file into 3 outputs:
 
-1. **Go-Code:** `<go>` + Template → `_dreego.go` (Server-Rendering)
-2. **CSS:** `<style>` → gesammelt in finale CSS-Datei
-3. **JS:** `<script>` + `<head>` → in HTML eingebettet oder als separate Datei
+1. **Go Code:** `<go>` + Template → `_dreego.go` (server rendering)
+2. **CSS:** `<style>` → collected into final CSS file
+3. **JS:** `<script>` + `<head>` → embedded in HTML or as separate file

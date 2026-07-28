@@ -1,6 +1,6 @@
 # dreego/config.json
 
-Die Konfigurationsdatei liegt unter `dreego/config.json` im Projekt-Root.
+The configuration file is located at `dreego/config.json` in the project root.
 
 ## Schema
 
@@ -20,23 +20,23 @@ Die Konfigurationsdatei liegt unter `dreego/config.json` im Projekt-Root.
 
 ## logging
 
-| Feld      | Typ    | Default | Beschreibung                         |
-|-----------|--------|---------|--------------------------------------|
-| `enabled` | bool   | `true`  | RequestLogging-Middleware aktivieren |
+| Field     | Type   | Default | Description                         |
+|-----------|--------|---------|-------------------------------------|
+| `enabled` | bool   | `true`  | Enable RequestLogging middleware    |
 
-Wenn `false`, wird kein Request-Logging durchgefuhrt. Ein Plugin (`dreego-logging`) kann die Logging-Funktion in V2 ubernehmen.
+When `false`, no request logging is performed. A plugin (`dreego-logging`) can take over the logging function in V2.
 
 ## redirects
 
-| Feld     | Typ    | Beschreibung                                  |
-|----------|--------|-----------------------------------------------|
-| `from`   | string | Quell-Pfad                                    |
-| `to`     | string | Ziel-Pfad oder externe URL                    |
-| `status` | int    | HTTP-Status: `301` (permanent), `302` (temp)  |
+| Field    | Type   | Description                                 |
+|----------|--------|---------------------------------------------|
+| `from`   | string | Source path                                  |
+| `to`     | string | Target path or external URL                  |
+| `status` | int    | HTTP status: `301` (permanent), `302` (temp) |
 
 ## rewrites
 
-| Feld   | Typ    | Beschreibung                                  |
-|--------|--------|-----------------------------------------------|
-| `from` | string | Quell-Pfad-Pattern (z.B. `/api/v1/*`)         |
-| `to`   | string | Ziel-Pfad (z.B. `/api/v2/*`)                  |
+| Field  | Type   | Description                               |
+|--------|--------|-------------------------------------------|
+| `from` | string | Source path pattern (e.g. `/api/v1/*`)    |
+| `to`   | string | Target path (e.g. `/api/v2/*`)            |

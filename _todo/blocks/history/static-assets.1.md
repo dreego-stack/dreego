@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-28
 ---
 
-dreego/static/ Ordner: Files werden beim Generate eingelesen und als inline `[]byte` in `core.RegisterStatic(path, mime, bytes)` registriert. MIME via Extension. Kollision-Check: gleicher URL-Path wie Route → Error.
+dreego/static/ folder: Files are read during generate and registered as inline `[]byte` in `core.RegisterStatic(path, mime, bytes)`. MIME via extension. Collision check: same URL path as route → Error.

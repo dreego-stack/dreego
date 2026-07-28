@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Core-Interface für Caching. Abstrahiert In-Memory/Redis. Methoden: Get, Set, Delete, Has, Remember. TTL-basiert. Plugin-Implementierungen (dreego-cache). Nutzbar von Session, Templates, DB-Queries.
+Core interface for caching. Abstracts In-Memory/Redis. Methods: Get, Set, Delete, Has, Remember. TTL-based. Plugin implementations (dreego-cache). Usable by session, templates, DB queries.

@@ -1,16 +1,16 @@
 
 ---
 type: Decision
-title: Form Actions — g-action + generierte Handler
-description: Deklarative Form-Handler via g-action mit generierter CSRF+Validierungs-Pipeline
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Form Actions — g-action + Generated Handlers
+description: Declarative form handlers via g-action with generated CSRF+validation pipeline
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Form Actions — g-action + generierte Handler
+# Form Actions — g-action + Generated Handlers
 
-## Entscheidung
+## Decision
 
-**Deklarative Form-Handler via `g-action`.** Der Entwickler definiert Struct+Funktion — Dreego generiert CSRF-Check, Form-Parsing, Validierung und Handler-Aufruf.
+**Declarative form handlers via `g-action`.** The developer defines a struct + function — Dreego generates CSRF check, form parsing, validation, and handler call.
 
 ## Syntax
 
@@ -33,18 +33,18 @@ timestamp: 2026-07-23T00:00:00Z
 </go>
 ```
 
-## GLM-Korrekturen am Original-Konzept
+## GLM Corrections to the Original Concept
 
-### 1. Handler-Signatur: `dreego.Context` statt `*SSRContext`
+### 1. Handler Signature: `dreego.Context` instead of `*SSRContext`
 
-Falsch: `func Login(c *SSRContext, form LoginForm) error`
-Richtig: `func Login(c dreego.Context, form LoginForm) error`
+Wrong: `func Login(c *SSRContext, form LoginForm) error`
+Correct: `func Login(c dreego.Context, form LoginForm) error`
 
-Begründung: Target-Agnostik (AGENTS.md Garantie #2). SSG-Target übergibt `SSGContext`.
+Rationale: Target agnosticism (AGENTS.md guarantee #2). SSG target passes `SSGContext`.
 
-### 2. `errors`, `old`, `flash` über `c` beziehen
+### 2. Access `errors`, `old`, `flash` via `c`
 
-Nicht als Magic-Template-Variablen, sondern via Context:
+Not as magic template variables, but via context:
 
 ```html
 {#if c.Errors("email")}
@@ -53,58 +53,58 @@ Nicht als Magic-Template-Variablen, sondern via Context:
 <input name="email" value="{c.Old("email")}" />
 ```
 
-Begründung: Funktioniert in Tests ohne HTTP-Server (AGENTS.md Garantie #7).
+Rationale: Works in tests without an HTTP server (AGENTS.md guarantee #7).
 
-### 3. SSG: Actions werden nicht generiert
+### 3. SSG: Actions are not generated
 
-SSG-Target überspringt `g-action`-Codegen. Plain `<form action="/api/...">` bleibt als Escape-Hatch erhalten. Transpiler kapselt Action-Codegen hinter `TargetSSR`.
+SSG target skips `g-action` codegen. Plain `<form action="/api/...">` remains as an escape hatch. Transpiler encapsulates action codegen behind `TargetSSR`.
 
-### 4. Form ohne `g-action` muss funktionieren
+### 4. Forms without `g-action` must work
 
 ```html
 <form method="post" action="/api/custom">
 ```
-Kein Dreego-Handling. Der Entwickler ist selbst verantwortlich.
+No Dreego handling. The developer is responsible themselves.
 
-## Generierte Pipeline
+## Generated Pipeline
 
 ```
-CSRF-Check → r.ParseForm() → Struct-Mapping → validate.Struct(form)
-  → c.SaveOld(form) + c.SaveErrors(err) → Handler-Aufruf
+CSRF Check → r.ParseForm() → Struct Mapping → validate.Struct(form)
+  → c.SaveOld(form) + c.SaveErrors(err) → Handler Call
   → c.Redirect() | c.Render() | error
 ```
 
-## Benennung
+## Naming
 
-- Attribut: `g-action` (nicht `g-submit`)
-- Action-Name = Go-Funktionsname, case-sensitive, exported
+- Attribute: `g-action` (not `g-submit`)
+- Action name = Go function name, case-sensitive, exported
 - `Login` → `<form g-action="Login">`
 
-## Return-Semantik
+## Return Semantics
 
-Handler MUSS eines tun:
-- `return c.Redirect(url)` — PRG-Pattern
-- `return c.Render(template, data)` — Template rendern
-- `return err` — Fehlerseite oder Flash+Redirect
+Handler MUST do one of:
+- `return c.Redirect(url)` — PRG pattern
+- `return c.Render(template, data)` — Render template
+- `return err` — Error page or flash+redirect
 
-`return nil` ohne Redirect/Render ist nicht erlaubt.
+`return nil` without redirect/render is not allowed.
 
-## Progressiv
+## Progressive Enhancement
 
-| Modus         | Ohne JS           | HTMX                     | Alpine.js              |
-|---------------|-------------------|--------------------------|------------------------|
-| Form-Submit   | Full-Page-Reload  | `hx-post` Fragment-Tausch| `@submit` + fetch      |
-| Validierung    | Server-seitig     | Server-seitig            | Client + Server        |
-| CSRF          | Automatisch       | Automatisch              | Automatisch            |
+| Mode         | Without JS        | HTMX                     | Alpine.js              |
+|--------------|-------------------|--------------------------|------------------------|
+| Form Submit  | Full page reload  | `hx-post` fragment swap  | `@submit` + fetch      |
+| Validation   | Server-side       | Server-side              | Client + Server        |
+| CSRF         | Automatic         | Automatic                | Automatic              |
 
-## XSS-Schutz
+## XSS Protection
 
-Alle `{variable}` im Template werden automatisch HTML-escaped (Output Encoding).
-Nur `{variable|raw}` umgeht das Escaping — explizit, selten, bewusst riskant.
+All `{variable}` in the template are automatically HTML-escaped (output encoding).
+Only `{variable|raw}` bypasses escaping — explicit, rare, consciously risky.
 
-## Konsequenzen
+## Consequences
 
-- `go-playground/validator` ist Core-Dependency
-- CSRF-Check via Middleware, nicht hart im Action-Handler
-- File-Uploads: Teil von `g-action` via `multipart.Form` (V1)
-- `g-upload` für chunked/streaming erst in V2
+- `go-playground/validator` is a core dependency
+- CSRF check via middleware, not hardcoded in the action handler
+- File uploads: Part of `g-action` via `multipart.Form` (V1)
+- `g-upload` for chunked/streaming only in V2

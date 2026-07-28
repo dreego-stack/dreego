@@ -1,6 +1,6 @@
 ---
 id: dreegotest.1
-title: dreegotest — Testing-Package
+title: dreegotest — Testing Package
 status: planned
 phase: pre-V1
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-dreegotest package: Request-Simulation für <go>-Blöcke. HTML-Output-Validierung. Template-Logik-Tests. Snapshot-Testing. Form-Validierung testen. Playwright-Integration für E2E.
+dreegotest package: Request simulation for <go> blocks. HTML output validation. Template logic tests. Snapshot testing. Form validation testing. Playwright integration for E2E.

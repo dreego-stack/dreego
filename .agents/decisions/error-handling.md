@@ -1,45 +1,45 @@
 
 ---
 type: Decision
-title: Error-Handling-Strategie (Core, nicht Plugin)
-description: Typisierte Fehler-Typen und Recovery-Middleware für Build-Start-Runtime-Fehler
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Error Handling Strategy (Core, not Plugin)
+description: Typed error types and recovery middleware for build-start-runtime errors
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Error-Handling-Strategie (Core, nicht Plugin)
+# Error Handling Strategy (Core, not Plugin)
 
-**Datum:** 24.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-Dreego ist ein Compile-Time Transpiler. Fehler können auf drei Ebenen auftreten:
+Dreego is a compile-time transpiler. Errors can occur at three levels:
 
-1. **Build-Zeit** (`dreego generate`, `go build`) — Template-Syntax, fehlende Variablen, Typ-Fehler
-2. **Start-Zeit** (`main()`) — Fehlende Config, ungültige Plugins, Port-Konflikt
-3. **Laufzeit** (pro Request) — Validierung, DB-Fehler, Panics, Auth-Fehler
+1. **Build time** (`dreego generate`, `go build`) — Template syntax, missing variables, type errors
+2. **Start time** (`main()`) — Missing config, invalid plugins, port conflict
+3. **Runtime** (per request) — Validation, DB errors, panics, auth errors
 
-Das Framework muss typensicher sein. Fehler sollen so früh wie möglich (Build > Start > Runtime) und so lokal wie möglich (pro Handler, nicht global) auftreten.
+The framework must be type-safe. Errors should be as early as possible (Build > Start > Runtime) and as local as possible (per handler, not global).
 
-`net/http` bietet nur `http.Error(w, msg, code)`. Es gibt keine Recovery, kein strukturiertes Logging, keine typisierten Fehler, keine Flash/Redirect-Semantik.
+`net/http` only offers `http.Error(w, msg, code)`. There is no recovery, no structured logging, no typed errors, no flash/redirect semantics.
 
-## Entscheidung
+## Decision
 
-**Typisierte Fehler-Typen im Core.** Recovery-Middleware dispatcht auf Typ, Renderer entscheidet HTML/JSON/Redirect.
+**Typed error types in the core.** Recovery middleware dispatches on type, renderer decides HTML/JSON/Redirect.
 
-### Fehler-Typen (neue Datei `dreego-core/errors.go`)
+### Error Types (new file `dreego-core/errors.go`)
 
 ```go
 package errors
 
 type HTTPError struct {
     Code   int
-    Public string  // sichtbar für Endnutzer
-    Cause  error   // interner Fehler (Dev-Modus: Stack, Prod: nur Log)
+    Public string  // visible to end user
+    Cause  error   // internal error (Dev mode: Stack, Prod: only log)
 }
 
 type ValidationError struct {
-    Fields map[string]string  // Feldname → Fehlermeldung
+    Fields map[string]string  // Field name → Error message
 }
 
 type RedirectError struct {
@@ -48,52 +48,52 @@ type RedirectError struct {
 }
 ```
 
-### Error-Level-Pyramide (Build > Start > Runtime)
+### Error Level Pyramid (Build > Start > Runtime)
 
 ```
-Build-Zeit:  dreego generate bricht ab, go build schlägt fehl
-             → Template-Syntax, fehlende Variablen, ungültige Sektionen
-             → Kein Output, non-zero exit
+Build time:  dreego generate aborts, go build fails
+             → Template syntax, missing variables, invalid sections
+             → No output, non-zero exit
 
-Start-Zeit:  server.Listen() bricht ab
-             → Fehlende Config, Port belegt, Plugin-Init-Fehler
+Start time:  server.Listen() aborts
+             → Missing config, port occupied, plugin init error
              → log.Fatal / slog.Error + os.Exit(1)
 
-Laufzeit:    Pro-Request, Recovery fängt alles
+Runtime:     Per-request, recovery catches everything
              → Panic → Recovery → 500 HTML
              → ValidationError → 422 HTML/JSON
              → RedirectError → 302 + Flash-Cookie
-             → HTTPError → entsprechender Status-Code
-             → Unerwartet → 500 (Dev: Stack-Trace, Prod: generisch)
+             → HTTPError → corresponding status code
+             → Unexpected → 500 (Dev: Stack trace, Prod: generic)
 ```
 
-### Recovery-Middleware (Core-Fixed)
+### Recovery Middleware (Core-Fixed)
 
 ```go
 // dreego-core/recovery.go
 func Recovery(log *slog.Logger) func(http.Handler) http.Handler
 ```
 
-Ablauf:
-1. `defer recover()` — fängt alle Panics
-2. Loggt via `slog.Error` mit RequestID
-3. Dev-Modus: Rendert Fehlerseite mit Stack-Trace
-4. Prod-Modus: Rendert generische `_error.dreego` oder fallback `500.html`
+Flow:
+1. `defer recover()` — catches all panics
+2. Logs via `slog.Error` with RequestID
+3. Dev mode: Renders error page with stack trace
+4. Prod mode: Renders generic `_error.dreego` or fallback `500.html`
 
-### Middleware-Stapel (Core-Fixed + Core-Conditional, Reihenfolge fix)
+### Middleware Stack (Core-Fixed + Core-Conditional, fixed order)
 
 ```
 [Recovery → RequestID → RealIP → RequestLogging*]
-  → [User-Middleware / Plugin-Middleware]
+  → [User middleware / Plugin middleware]
     → Router → Handler
 ```
 
-\* `RequestLogging` ist Core-Conditional: default an, abschaltbar via `dreego/config.json` (`logging.enabled: false`). Ein Plugin (`dreego-logging`) kann es in V2 ersetzen.
+\* `RequestLogging` is Core-Conditional: on by default, can be disabled via `dreego/config.json` (`logging.enabled: false`). A plugin (`dreego-logging`) can replace it in V2.
 
 - `Recovery` — Panic → 500 + log
-- `RequestID` — X-Request-ID Header, in Context und Logs
-- `RealIP` — X-Forwarded-For / X-Real-IP Auswertung
-- `RequestLogging` — slog.Info pro Request (Methode, Pfad, Status, Dauer)
+- `RequestID` — X-Request-ID header, in context and logs
+- `RealIP` — X-Forwarded-For / X-Real-IP evaluation
+- `RequestLogging` — slog.Info per request (method, path, status, duration)
 
 ### Dev vs Prod
 
@@ -101,12 +101,12 @@ Ablauf:
 func IsDev() bool { return os.Getenv("APP_ENV") != "production" }
 ```
 
-- Dev: Stack-Traces im Browser, ausführliche Fehlermeldungen, `slog.LevelDebug`
-- Prod: Generische 500-Seite, `slog.LevelInfo`, keine internen Details
+- Dev: Stack traces in browser, detailed error messages, `slog.LevelDebug`
+- Prod: Generic 500 page, `slog.LevelInfo`, no internal details
 
-### Form-Validierungs-Feedback
+### Form Validation Feedback
 
-CodeGen erzeugt Handler, die `ValidationError` zurückgeben. Rendering:
+CodeGen generates handlers that return `ValidationError`. Rendering:
 
 ```html
 <input name="email" value="{c.Old("email")}" />
@@ -119,40 +119,40 @@ CodeGen erzeugt Handler, die `ValidationError` zurückgeben. Rendering:
 {/if}
 ```
 
-`c.Old()`, `c.Errors()`, `c.Flash()` sind Context-Methoden (nicht Magic-Variablen).
+`c.Old()`, `c.Errors()`, `c.Flash()` are context methods (not magic variables).
 
-### Error Boundary (pro Komponente)
+### Error Boundary (per component)
 
-Keine Error-Boundary auf Komponenten-Ebene in V1. Begründung:
-- `<go>`-Block läuft vor dem Template-Rendering — alle Fehler sind vorher bekannt
-- `{#if hasError}` deckt den Use-Case ab
-- Error-Boundaries sind ein SPA-Konzept (React), nicht nötig bei SSR
+No error boundary at component level in V1. Rationale:
+- `<go>` block runs before template rendering — all errors are known beforehand
+- `{#if hasError}` covers the use case
+- Error boundaries are an SPA concept (React), not needed for SSR
 
-→ Siehe [no-catch-tag](no-catch-tag.md): Fehler via `{#if hasError}`, kein spezielles Tag.
+→ See [no-catch-tag](no-catch-tag.md): errors via `{#if hasError}`, no special tag.
 
-### Logging-Strategie
+### Logging Strategy
 
 ```go
 // dreego-core/logging.go
 func RequestLogging(log *slog.Logger) func(http.Handler) http.Handler
 ```
 
-- Nutzt Go's `log/slog` (strukturiert, Level-basiert)
-- RequestID aus Context in jedem Log-Eintrag
-- Log-Level per Config: `APP_LOG_LEVEL=debug|info|warn|error`
-- Kein Plugin — Core-fixed, immer aktiv, nicht deaktivierbar
+- Uses Go's `log/slog` (structured, level-based)
+- RequestID from context in every log entry
+- Log level via config: `APP_LOG_LEVEL=debug|info|warn|error`
+- Not a plugin — Core-fixed, always active, cannot be deactivated
 
-### Integration mit Plugin-System
+### Integration with Plugin System
 
-Addons geben Fehler als typisierte Werte zurück:
+Addons return errors as typed values:
 
 ```go
-// Im Auth-Plugin
+// In auth plugin
 func (p *AuthPlugin) authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         user, err := p.validateToken(r)
         if err != nil {
-            dreego.WriteError(w, r, dreego.NewHTTPError(401, "Nicht authentifiziert", err))
+            dreego.WriteError(w, r, dreego.NewHTTPError(401, "Not authenticated", err))
             return
         }
         ctx := context.WithValue(r.Context(), "user", user)
@@ -161,13 +161,13 @@ func (p *AuthPlugin) authMiddleware(next http.Handler) http.Handler {
 }
 ```
 
-`dreego.WriteError(w, r, err)` dispatcht auf den Typ und rendert entsprechend — die Recovery-Middleware ist der zentrale Dispatcher.
+`dreego.WriteError(w, r, err)` dispatches on type and renders accordingly — the recovery middleware is the central dispatcher.
 
-## Konsequenzen
+## Consequences
 
-- Neue Files: `dreego-core/errors.go`, `dreego-core/recovery.go`, `dreego-core/logging.go` (existiert als Konzept, wird befüllt)
-- Alle Handler (auch generierte) geben `error` zurück — Recovery dispatched
-- `dreego.Context` wird um `Errors()`, `Old()`, `Flash()` erweitert
-- `dreego generate` validiert Template-Syntax → Build-Fehler vor Laufzeit
-- `slog` ist Core-Dependency (Go 1.21+ stdlib, Go 1.22+ genutzt)
-- Kein Chi — alle Middleware selbst gebaut auf `net/http`
+- New files: `dreego-core/errors.go`, `dreego-core/recovery.go`, `dreego-core/logging.go` (exists as concept, will be populated)
+- All handlers (including generated ones) return `error` — Recovery dispatches
+- `dreego.Context` is extended with `Errors()`, `Old()`, `Flash()`
+- `dreego generate` validates template syntax → build errors before runtime
+- `slog` is a core dependency (Go 1.21+ stdlib, Go 1.22+ used)
+- No Chi — all middleware built from scratch on `net/http`

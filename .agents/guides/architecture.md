@@ -1,20 +1,20 @@
 
 ---
 type: Guide
-title: Architektur-Guide
+title: Architecture Guide
 description: Project structure, module boundaries, and architectural rules for Dreego
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Architektur-Guide
+# Architecture Guide
 
-## Projektstruktur
+## Project Structure
 
 ```
 dreego/
 ├── cmd/
 │   └── dreego/
-│       └── main.go              # CLI Entry Point (max 120 Zeilen)
+│       └── main.go              # CLI entry point (max 120 lines)
 ├── dreego-core/                  # Core library (single package)
 │   ├── lexer.go
 │   ├── parser.go
@@ -26,9 +26,9 @@ dreego/
 │   ├── context.go
 │   └── middleware.go
 ├── dreego-plugin/                # Plugins (future)
-├── internal/                     # Nicht-öffentliche Pakete
+├── internal/                     # Non-public packages
 │   └── ...
-├── testdata/                     # Test-Fixtures (.dreego-Dateien)
+├── testdata/                     # Test fixtures (.dreego files)
 ├── go.mod
 ├── go.sum
 ├── Makefile
@@ -36,18 +36,18 @@ dreego/
 └── .kilo/
 ```
 
-## Modul-Grenzen
+## Module Boundaries
 
-| Modul       | Verantwortung                                    | Abhängigkeiten        |
-|-------------|-------------------------------------------------|----------------------|
-| core        | .dreego → Go-Code, Router, Context, Middleware    | net/http, chi        |
-| plugin      | Plugin-Interface, Registry (future)              | core                 |
+| Module      | Responsibility                                    | Dependencies          |
+|-------------|---------------------------------------------------|-----------------------|
+| core        | .dreego → Go code, Router, Context, Middleware     | net/http, chi         |
+| plugin      | Plugin interface, Registry (future)               | core                  |
 
-## Regeln
+## Rules
 
-- **Jedes Package ist eigenständig testbar**
-- **Keine zirkulären Abhängigkeiten**
-- **`internal/` für Implementierungsdetails, die nicht Teil der Public API sind**
-- **`dreego-core/` für stabile, öffentliche APIs**
-- **`dreego-plugin/` für Plugins (future)**
-- **`cmd/` nur für Einstiegspunkte**
+- **Every package is independently testable**
+- **No circular dependencies**
+- **`internal/` for implementation details not part of the public API**
+- **`dreego-core/` for stable, public APIs**
+- **`dreego-plugin/` for plugins (future)**
+- **`cmd/` for entry points only**

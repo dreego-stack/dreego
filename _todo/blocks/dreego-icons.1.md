@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin/Component-Library für Icons. Lucide/Heroicons als Komponenten. <Icon name="user" /> Syntax. SVG-Inline-Rendering. Tree-Shaking (nur genutzte Icons kompilieren). Kein Core-Interface — reine UI-Komponenten.
+Plugin/Component library for icons. Lucide/Heroicons as components. <Icon name="user" /> syntax. SVG inline rendering. Tree-shaking (only compile used icons). No core interface — pure UI components.

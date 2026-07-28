@@ -4,12 +4,12 @@
 
 <go>
     name := "Dreego"
-    features := []string{"SSR-First", "File-based Routing", "Single Binary", "Layout-System", "5 Sektionen"}
+    features := []string{"SSR-First", "File-based Routing", "Single Binary", "Layout System", "5 Sections"}
     version := "0.0.1"
 </go>
 
 <div>
-    <h1>Über {name}</h1>
+    <h1>About {name}</h1>
     <p>Version: {version}</p>
 
     <h2>Features</h2>
@@ -19,7 +19,7 @@
         {/each}
     </ul>
 
-    <a href="/">Zurück</a>
+    <a href="/">Back</a>
 </div>
 
 <script>

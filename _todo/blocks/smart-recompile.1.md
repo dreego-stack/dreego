@@ -1,6 +1,6 @@
 ---
 id: smart-recompile.1
-title: Smart Recompile (Text-vs-Go Detection)
+title: Smart Recompile (Text vs Go Detection)
 status: planned
 phase: v0.1.0
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-27
 changed: 2026-07-27
 ---
 
-Templ-inspiriert: Generator erkennt, ob sich nur HTML-Text oder Go-Expressions geändert haben. Text-Only: Runtime liest aktualisierte Literale aus `_dreego.txt` ohne `go build`. Go-Changes: volles Recompile. Ermöglicht <1s Hot-Reload für reine Template-Änderungen. Kern-Mechanismus aus templs Watch-Mode.
+Templ-inspired: Generator detects whether only HTML text or Go expressions changed. Text-only: Runtime reads updated literals from `_dreego.txt` without `go build`. Go changes: full recompile. Enables <1s hot reload for pure template changes. Core mechanism from templ's watch mode.

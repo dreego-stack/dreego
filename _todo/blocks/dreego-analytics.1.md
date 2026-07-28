@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Privacy-friendly Analytics. Server-seitig (kein Adblocker-Problem). Page-Views, Events, Sessions via Middleware-Hook. Dashboard im dreego-admin. Kein Cookie-Banner nötig. GDPR-konform.
+Plugin for privacy-friendly analytics. Server-side (no adblocker problem). Page views, events, sessions via middleware hook. Dashboard in dreego-admin. No cookie banner needed. GDPR-compliant.

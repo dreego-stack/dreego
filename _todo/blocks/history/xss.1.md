@@ -9,4 +9,4 @@ created: 2026-07-25
 changed: 2026-07-26
 ---
 
-Template-Expression-Nodes generieren html.EscapeString(fmt.Sprintf("%v", expr)). Conditional "html" Import nur bei Expressions.
+Template expression nodes generate html.EscapeString(fmt.Sprintf("%v", expr)). Conditional "html" import only when expressions exist.

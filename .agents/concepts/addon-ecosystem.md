@@ -1,17 +1,17 @@
 
 ---
 type: Concept
-title: "Addon/Plugin-Ökosystem"
-description: "Go-basiertes Plugin-System mit Compile-Time Safety und Tree-Shaking"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "Addon/Plugin Ecosystem"
+description: "Go-based plugin system with compile-time safety and tree-shaking"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 
-## Design-Philosophie
+## Design Philosophy
 
-Dreego-Addons sind Go-Packages, die das `dreego.Plugin`-Interface erfüllen. Keine dynamischen Plugins, keine Laufzeit-Magie — reines, kompilierungszeit-sicheres Go.
+Dreego addons are Go packages that fulfill the `dreego.Plugin` interface. No dynamic plugins, no runtime magic — pure, compile-time-safe Go.
 
-## Plugin-Interface
+## Plugin Interface
 
 ```go
 package dreego
@@ -24,17 +24,17 @@ type Plugin interface {
 }
 ```
 
-## Einklinkpunkte
+## Extension Points
 
-Ein Addon kann sich an 5 Stellen im Framework einklinken:
+An addon can hook into the framework at 5 points:
 
-1. **Middleware** — HTTP-Wrapper (z.B. Auth-Checks)
-2. **Routes** — Neue Pfade registrieren (z.B. `/auth/login`)
+1. **Middleware** — HTTP wrappers (e.g. auth checks)
+2. **Routes** — Register new paths (e.g. `/auth/login`)
 3. **Assets** — CSS/JS/Images via `//go:embed`
-4. **Transpiler** — Custom-Tags (z.B. `<dreego:map />`)
-5. **Context** — Erweiterung des Request-Kontexts (z.B. `c.User()`)
+4. **Transpiler** — Custom tags (e.g. `<dreego:map />`)
+5. **Context** — Extension of the request context (e.g. `c.User()`)
 
-## Beispiel: dreego-auth
+## Example: dreego-auth
 
 ```go
 package auth
@@ -64,7 +64,7 @@ func (p *AuthPlugin) Assets() *embed.FS {
 }
 ```
 
-## Nutzung in main.go
+## Usage in main.go
 
 ```go
 import (
@@ -79,68 +79,68 @@ func main() {
 }
 ```
 
-## Vorteile des Go-Addon-Systems
+## Advantages of the Go Addon System
 
-1. **Keine Versionierungs-Hölle:** `go.mod` löst Abhängigkeiten strikt auf
-2. **Compile-Time Safety:** Build bricht bei Inkompatibilitäten ab
-3. **Tree-Shaking:** Nicht genutzter Code wird vom Compiler entfernt
-4. **Installation:** `go get github.com/dreego-ecosystem/dreego-auth` — ein Befehl
+1. **No dependency hell:** `go.mod` resolves dependencies strictly
+2. **Compile-Time Safety:** Build breaks on incompatibilities
+3. **Tree-Shaking:** Unused code is removed by the compiler
+4. **Installation:** `go get github.com/dreego-ecosystem/dreego-auth` — one command
 
-## Addon-Ideen (vollständig)
+## Addon Ideas (complete)
 
 ### Auth & Security
-| Addon            | Beschreibung                                    |
-|------------------|------------------------------------------------|
-| dreego-auth       | Login, Register, Sessions, OAuth, Passkeys     |
-| dreego-csrf       | CSRF-Schutz (falls nicht im Core)              |
-| dreego-2fa        | Zwei-Faktor-Authentifizierung                  |
+| Addon            | Description                                      |
+|------------------|--------------------------------------------------|
+| dreego-auth       | Login, Register, Sessions, OAuth, Passkeys       |
+| dreego-csrf       | CSRF protection (if not in core)                 |
+| dreego-2fa        | Two-factor authentication                        |
 
-### UI & Komponenten
-| Addon            | Beschreibung                                    |
-|------------------|------------------------------------------------|
-| dreego-ui         | Komponenten-Bibliothek (Shadcn-ähnlich)        |
-| dreego-map        | MapLibre/Leaflet Integration                   |
-| dreego-charts     | Diagramme (Chart.js Wrapper)                   |
-| dreego-icons      | Icon-Library                                   |
-| dreego-markdown   | Markdown-Rendering                             |
+### UI & Components
+| Addon            | Description                                      |
+|------------------|--------------------------------------------------|
+| dreego-ui         | Component library (Shadcn-like)                  |
+| dreego-map        | MapLibre/Leaflet Integration                     |
+| dreego-charts     | Charts (Chart.js wrapper)                        |
+| dreego-icons      | Icon Library                                    |
+| dreego-markdown   | Markdown Rendering                               |
 
-### Daten & Backend
-| Addon            | Beschreibung                                    |
-|------------------|------------------------------------------------|
-| dreego-db         | DB-Integration (SQLite, Turso, PG)             |
-| dreego-storage    | File-Uploads (S3, R2, local)                   |
-| dreego-jobs       | Hintergrund-Jobs & Cron                        |
-| dreego-search     | Volltextsuche (Bleve/Meilisearch)              |
-| dreego-cache      | Caching (Redis, In-Memory)                     |
+### Data & Backend
+| Addon            | Description                                      |
+|------------------|--------------------------------------------------|
+| dreego-db         | DB Integration (SQLite, Turso, PG)               |
+| dreego-storage    | File Uploads (S3, R2, local)                     |
+| dreego-jobs       | Background Jobs & Cron                           |
+| dreego-search     | Full-text search (Bleve/Meilisearch)             |
+| dreego-cache      | Caching (Redis, In-Memory)                       |
 
 ### Business
-| Addon            | Beschreibung                                    |
-|------------------|------------------------------------------------|
-| dreego-stripe     | Stripe Payments & Webhooks                     |
-| dreego-mail       | E-Mail-Versand mit .dreego-Templates            |
-| dreego-pdf        | PDF-Generierung                                |
-| dreego-i18n       | Mehrsprachigkeit                               |
-| dreego-seo        | Meta-Tags, Sitemap, OpenGraph                  |
-| dreego-analytics  | Privacy-friendly Analytics                     |
+| Addon            | Description                                      |
+|------------------|--------------------------------------------------|
+| dreego-stripe     | Stripe Payments & Webhooks                       |
+| dreego-mail       | Email delivery with .dreego templates            |
+| dreego-pdf        | PDF Generation                                  |
+| dreego-i18n       | Multi-language support                          |
+| dreego-seo        | Meta-Tags, Sitemap, OpenGraph                    |
+| dreego-analytics  | Privacy-friendly Analytics                       |
 
 ### DX & Tools
-| Addon            | Beschreibung                                    |
-|------------------|------------------------------------------------|
-| dreego-admin      | Auto-generiertes Admin-Dashboard               |
-| dreego-pwa        | Progressive Web App                            |
-| dreego-sitemap    | Automatische Sitemap-Generierung               |
-| dreego-devtools   | Debug-Toolbar (wie Laravel Debugbar)           |
+| Addon            | Description                                      |
+|------------------|--------------------------------------------------|
+| dreego-admin      | Auto-generated admin dashboard                   |
+| dreego-pwa        | Progressive Web App                              |
+| dreego-sitemap    | Automatic sitemap generation                     |
+| dreego-devtools   | Debug toolbar (like Laravel Debugbar)            |
 
-## Transpiler-Hook für Custom-Tags
+## Transpiler Hook for Custom Tags
 
-Addons können eigene HTML-Tags registrieren:
+Addons can register their own HTML tags:
 
 ```html
-<!-- In einer .dreego-Datei -->
+<!-- In a .dreego file -->
 <dreego:map lat="52.52" lng="13.40" />
 ```
 
-Der Transpiler:
-1. Findet `<dreego:map />`
-2. Prüft `dreego.config.json` auf installierte Addons
-3. Ersetzt durch Go-Code: `dreegomap.RenderMap(dreegomap.Props{Lat: 52.52, Lng: 13.40})`
+The transpiler:
+1. Finds `<dreego:map />`
+2. Checks `dreego.config.json` for installed addons
+3. Replaces with Go code: `dreegomap.RenderMap(dreegomap.Props{Lat: 52.52, Lng: 13.40})`

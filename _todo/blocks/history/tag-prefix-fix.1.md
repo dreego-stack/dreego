@@ -1,6 +1,6 @@
 ---
 id: tag-prefix-fix.1
-title: scanTag: Tag-Präfix-Matching fix (head vs header)
+title: scanTag: Tag Prefix Matching Fix (head vs header)
 status: 22
 phase: v0.0.9
 requires:

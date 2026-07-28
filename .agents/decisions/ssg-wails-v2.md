@@ -2,81 +2,81 @@
 ---
 type: Decision
 title: SSG & Wails Integration in V2
-description: SSG und Wails Integration als gleichwertige Output-Modi neben SSR in V2
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+description: SSG and Wails integration as equal output modes alongside SSR in V2
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 # SSG & Wails Integration in V2
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert (geplant für V2)
+**Date:** 2026-07-28
+**Status:** Accepted (planned for V2)
 
-## Kontext
+## Context
 
-Dreego V1 ist SSR-Only (Server-Side Rendering). Für viele Use Cases ist das ausreichend. Aber zwei wichtige Szenarien brauchen statischen Output:
+Dreego V1 is SSR-only (Server-Side Rendering). For many use cases that is sufficient. But two important scenarios need static output:
 
-1. **SSG (Static Site Generation):** `.dreego`-Seiten zu statischem HTML/JS/CSS kompilieren
-2. **Wails:** `.dreego`-Komponenten in Go-Desktop-Apps verwenden
-3. **Mobile (zukünftig):** Gleiche Komponenten via Wails Mobile / Gomobile
+1. **SSG (Static Site Generation):** Compile `.dreego` pages to static HTML/JS/CSS
+2. **Wails:** Use `.dreego` components in Go desktop apps
+3. **Mobile (future):** Same components via Wails Mobile / Gomobile
 
-## Entscheidung
+## Decision
 
-**V1: SSR-Only** (kein SSG). Der Fokus liegt auf dem Transpiler + Router.
-**V2: SSG + Wails** als gleichwertige Output-Modi neben SSR.
+**V1: SSR-Only** (no SSG). The focus is on the transpiler + router.
+**V2: SSG + Wails** as equal output modes alongside SSR.
 
 ## SSG Use Cases
 
-| Use Case               | Beispiel                                  |
+| Use Case               | Example                                  |
 |------------------------|-------------------------------------------|
-| Cloudflare Pages       | Statische HTML-Dateien auf Edge deployen  |
-| GitHub Pages           | Projekt-Doku, Landing Pages               |
-| S3/Cloudflare R2       | Pure Static Sites, 0 Server-Kosten        |
-| Blog                   | Markdown → .dreego → statisches HTML       |
-| Dokumentation          | docs.dreego.dev selbst mit SSG gebaut      |
+| Cloudflare Pages       | Deploy static HTML files on Edge         |
+| GitHub Pages           | Project docs, landing pages               |
+| S3/Cloudflare R2       | Pure static sites, 0 server costs         |
+| Blog                   | Markdown → .dreego → static HTML         |
+| Documentation          | docs.dreego.dev itself built with SSG     |
 
 ## Wails Use Cases
 
-| Use Case               | Beispiel                                  |
+| Use Case               | Example                                  |
 |------------------------|-------------------------------------------|
-| Desktop-App            | Go-Backend + Dreego-Frontend = Native App  |
-| Tray-App               | Menüleisten-App mit Dreego-UI              |
-| Mobile (zukünftig)     | Gleiche Codebase für iOS/Android          |
+| Desktop App            | Go backend + Dreego frontend = Native App |
+| Tray App               | Menu bar app with Dreego UI               |
+| Mobile (future)        | Same codebase for iOS/Android             |
 
-## Vorteil: Code-Reuse
+## Advantage: Code Reuse
 
 ```
-.dreego Komponenten
+.dreego Components
        │
-       ├── SSR (Web)          — Chi-Server, HTML on-the-fly
-       ├── SSG (Static)       — Statische HTML-Dateien
-       ├── Wails (Desktop)    — Native Fenster, System-APIs
-       └── Mobile (später)    — iOS/Android via Wails Mobile
+       ├── SSR (Web)          — Chi server, HTML on-the-fly
+       ├── SSG (Static)       — Static HTML files
+       ├── Wails (Desktop)    — Native windows, system APIs
+       └── Mobile (later)     — iOS/Android via Wails Mobile
 ```
 
-Dieselbe `.dreego`-Datei rendert in vier verschiedenen Kontexten.
-Kein JS-Framework kann das — weil sie alle eine JS-Runtime brauchen.
+The same `.dreego` file renders in four different contexts.
+No JS framework can do that — because they all need a JS runtime.
 
-## Architektur-Vorbereitung in V1
+## Architecture Preparation in V1
 
-Auch wenn SSG/Wails erst in V2 kommen, muss die Architektur in V1 vorbereitet sein:
+Even though SSG/Wails come only in V2, the architecture must be prepared in V1:
 
-1. **Transpiler-Pipeline mit Output-Modi:** Der Code-Generator hat ein `Target`-Interface
-   - `TargetSSR` — Go-HTTP-Handler (V1)
-   - `TargetSSG` — Statische HTML-Dateien (V2)
-   - `TargetWails` — Wails-kompatible Go-Funktionen (V2)
-2. **`dreego build --static`** — CLI-Flag bereits in V1 reservieren (tut nichts, zeigt "Coming in V2")
-3. **Keine SSR-spezifischen Annahmen im Template:** `<go>`-Block kann in V1 nur Server-Code, aber Template ist target-agnostisch
+1. **Transpiler pipeline with output modes:** The code generator has a `Target` interface
+   - `TargetSSR` — Go HTTP handler (V1)
+   - `TargetSSG` — Static HTML files (V2)
+   - `TargetWails` — Wails-compatible Go functions (V2)
+2. **`dreego build --static`** — CLI flag already reserved in V1 (does nothing, shows "Coming in V2")
+3. **No SSR-specific assumptions in the template:** `<go>` block can only have server code in V1, but the template is target-agnostic
 
-## Inspiration aus der Rust-Welt
+## Inspiration from the Rust World
 
-- **Dioxus:** Gleiche Komponenten für Web, Desktop (Blitz), Mobile
-- **Leptos:** SSR + Hydration + Islands — zeigt, dass multi-target Architektur funktioniert
-- **Yew:** War CSR-only, hat später SSR addiert — schwieriger als von Anfang an multi-target zu designen
+- **Dioxus:** Same components for Web, Desktop (Blitz), Mobile
+- **Leptos:** SSR + Hydration + Islands — shows that multi-target architecture works
+- **Yew:** Was CSR-only, added SSR later — harder than designing multi-target from the start
 
-## Konsequenzen
+## Consequences
 
-- V1: `dreego build` erzeugt SSR-Binary (HTTP-Server)
-- V2: `dreego build --static` erzeugt `dist/` mit HTML-Dateien
-- V2: `dreego build --wails` erzeugt Wails-kompatiblen Code
-- `dreego.config.json` bekommt ein `target`-Feld: `"ssr" | "ssg" | "wails"`
-- Gleiche `.dreego`-Komponenten in allen Targets verwendbar
+- V1: `dreego build` generates SSR binary (HTTP server)
+- V2: `dreego build --static` generates `dist/` with HTML files
+- V2: `dreego build --wails` generates Wails-compatible code
+- `dreego.config.json` gets a `target` field: `"ssr" | "ssg" | "wails"`
+- Same `.dreego` components usable across all targets

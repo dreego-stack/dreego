@@ -1,62 +1,62 @@
 
 ---
 type: Decision
-title: Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
-description: Compile-Time Transpiler Pipeline mit Lexer, Parser, AST und CodeGen für drei Targets
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
+description: Compile-time transpiler pipeline with lexer, parser, AST, and CodeGen for three targets
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
+# Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
-## Kontext
+## Context
 
-Dreego ist ein Compile-Time Transpiler. `.dreego`-Dateien müssen in Go-Code umgewandelt werden — für 3 Targets (SSR, SSG, Wails).
+Dreego is a compile-time transpiler. `.dreego` files must be converted to Go code — for 3 targets (SSR, SSG, Wails).
 
-## Entscheidung
+## Decision
 
-**Phase 0: Single-Pass Scanner.** Kein Lexer/Parser/AST — nur State-Machine.
+**Phase 0: Single-Pass Scanner.** No lexer/parser/AST — only state machine.
 
 ```
-scan.go      — Hand-Scanner: erkennt Sections, {#tags}, {var}
-codegen.go   — Pattern → Go-Source-String
-target_ssr.go — Wrappt render(ctx) als http.HandlerFunc
+scan.go      — Hand scanner: recognizes sections, {#tags}, {var}
+codegen.go   — Pattern → Go source string
+target_ssr.go — Wraps render(ctx) as http.HandlerFunc
 ```
 
-~150 Zeilen, 0 Dependencies. Output: `func render(ctx dreego.Context) string` — target-agnostisch.
+~150 lines, 0 dependencies. Output: `func render(ctx dreego.Context) string` — target-agnostic.
 
-**Phase 1+: Formale Pipeline.** Wenn Features wachsen (<script> TS, SSG-Codegen) → formale Trennung Lexer→Parser→AST→CodeGen. Der Scanner wächst mit.
+**Phase 1+: Formal Pipeline.** As features grow (<script> TS, SSG codegen) → formal separation Lexer→Parser→AST→CodeGen. The scanner grows with it.
 
-## 0.0.1 Architektur (Minimal)
+## 0.0.1 Architecture (Minimal)
 
 ```go
-// scan.go — State-Machine
+// scan.go — State machine
 func scan(src []byte) (*File, error) {
-    // 1. Section-Split: <go>, <style>, Rest=Template
-    // 2. Template-Scan: {#if} → if-Block, {#each} → for-Block, {var} → Interpolation
-    // 3. Stack-basiert: []string für verschachtelte Tags
+    // 1. Section split: <go>, <style>, Rest=Template
+    // 2. Template scan: {#if} → if block, {#each} → for block, {var} → Interpolation
+    // 3. Stack-based: []string for nested tags
 }
 
-// codegen.go — Go-Code erzeugen
+// codegen.go — Generate Go code
 func codegen(f *File) string {
-    // <go>-Block → copy-paste
+    // <go> block → copy-paste
     // {var} → fmt.Sprintf("%s", var)
     // {#if cond} → if cond {
     // {#each xs as x} → for _, x := range xs {
-    // <style> → extrahieren + scope-hash
+    // <style> → extract + scope hash
 }
 ```
 
-## Fallstricke
+## Pitfalls
 
-1. `{#` vs `{` — `#` ist Discriminator. `{` lesen, peek nächstes Zeichen
-2. Verschachtelte Tags — Stack (Depth-Counter), kein AST
-3. Output: `render(ctx dreego.Context) string` — nicht direkt `http.HandlerFunc`. SSG/Wails brauchen kein HTTP
+1. `{#` vs `{` — `#` is the discriminator. Read `{`, peek next character
+2. Nested tags — Stack (depth counter), no AST
+3. Output: `render(ctx dreego.Context) string` — not directly `http.HandlerFunc`. SSG/Wails don't need HTTP
 
-## 1. Pipeline-Interfaces
+## 1. Pipeline Interfaces
 
 ```go
 type Source struct {
@@ -94,61 +94,61 @@ type Target interface {
 }
 ```
 
-## 2. Sektions-Trennung
+## 2. Section Separation
 
-Ein **Pre-Lexer (Section-Splitter)** zerlegt die Datei an Block-Tags:
+A **Pre-Lexer (Section Splitter)** splits the file at block tags:
 
 ```
-<head>...</head>    → HeadSection
-<go>...</go>        → GoSection
+<head>...</head>     → HeadSection
+<go>...</go>         → GoSection
 <script>...</script> → ScriptSection
-<style>...</style>  → StyleSection
-Alles dazwischen     → TemplateSection
+<style>...</style>   → StyleSection
+Everything in between → TemplateSection
 ```
 
-Jede Section bekommt spezialisierten Sub-Parser:
-- **Head:** HTML-Parser → `HeadSection{Metas, Scripts, Links}`
-- **Go:** Wird direkt an `go/parser` übergeben (Compiler validiert User-Go)
-- **Template:** Dreego-Template-Lexer → `{#if}`, `{#each}`, `{var}`
-- **Script:** V1 = Raw-String-Blob, V2 = TypeScript-Parser
-- **Style:** V1 = Raw-String + Scope-Hash, V2 = PostCSS-Pipe
+Each section gets a specialized sub-parser:
+- **Head:** HTML parser → `HeadSection{Metas, Scripts, Links}`
+- **Go:** Passed directly to `go/parser` (compiler validates user Go)
+- **Template:** Dreego template lexer → `{#if}`, `{#each}`, `{var}`
+- **Script:** V1 = Raw string blob, V2 = TypeScript parser
+- **Style:** V1 = Raw string + scope hash, V2 = PostCSS pipe
 
-## 3. V2-Erweiterungspunkte (Strategy-Interfaces)
+## 3. V2 Extension Points (Strategy Interfaces)
 
-Gehören in den Core, nicht in Plugins:
+Belong in the core, not in plugins:
 
 ```go
 type ScriptProcessor interface {
     Process(src []byte, scope string) ([]byte, error)
-    // V1: Identity (1:1 durchreichen)
-    // V2: esbuild-TS-Compiler
+    // V1: Identity (pass through 1:1)
+    // V2: esbuild TS compiler
 }
 
 type StyleProcessor interface {
     Process(src []byte, scope string) ([]byte, error)
-    // V1: Scope-Hash anwenden
+    // V1: Apply scope hash
     // V2: PostCSS + Tailwind
 }
 ```
 
-## 4. AST-Format
+## 4. AST Format
 
-**Eigenes AST** — nicht Go's `ast` package. Begründung: Go's `ast` ist für Source-Code-Transformation, nicht für gemischte HTML/Go-Sektionen. Der `<go>`-Block wird via `go/parser` geparst und als Identity-Pass eingebettet — so bleibt User-Go validierbar.
+**Own AST** — not Go's `ast` package. Rationale: Go's `ast` is for source code transformation, not for mixed HTML/Go sections. The `<go>` block is parsed via `go/parser` and embedded as an identity pass — so user Go remains validatable.
 
-Generator-Output geht immer durch `go/format.Source` — nie handgeschriebene Einrückungen.
+Generator output always goes through `go/format.Source` — never hand-written indentation.
 
-## 5. Error-Handling
+## 5. Error Handling
 
-Fail-loud, Compile-Time. Kein Best-Effort, keine Runtime-Panics.
+Fail-loud, compile-time. No best-effort, no runtime panics.
 
-- Lexer/Parser sammeln `Errors []Diag{Pos, Level, Msg}` bis Cap (20), dann Abbruch
-- Critical-Fehler → `dreego generate` exit ≠ 0, kein Output
-- `<go>`-Block: `go/parser`-Fehler werden via Source-Map auf `.dreego`-Zeilen gemappt
-- Template-Syntaxfehler brechen sofort ab
+- Lexer/Parser collect `Errors []Diag{Pos, Level, Msg}` up to cap (20), then abort
+- Critical errors → `dreego generate` exit ≠ 0, no output
+- `<go>` block: `go/parser` errors are mapped to `.dreego` lines via source map
+- Template syntax errors abort immediately
 
-## 6. CodeGen-Output pro Target
+## 6. CodeGen Output per Target
 
-Alle drei Targets teilen denselben `EvalTemplate`-Kern — nur Context-Factory und Dispatcher unterscheiden sich.
+All three targets share the same `EvalTemplate` core — only context factory and dispatcher differ.
 
 **SSR:**
 ```go
@@ -176,8 +176,8 @@ func IndexWails(ctx *dreego.WailsContext) (string, error) {
 }
 ```
 
-## Konsequenzen
+## Consequences
 
-- Generierte Dateien: `pages/index_dreego.go` (nicht committed)
-- `dreego generate` muss vor `go build` laufen
-- Transpiler ist target-agnostisch — Target wird via CLI-Flag gewählt
+- Generated files: `pages/index_dreego.go` (not committed)
+- `dreego generate` must run before `go build`
+- Transpiler is target-agnostic — target is selected via CLI flag

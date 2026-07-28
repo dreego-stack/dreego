@@ -9,4 +9,4 @@ created: 2026-07-27
 changed: 2026-07-28
 ---
 
-Templ-inspiriert: `ComponentHandler` mit Buffer-first-Strategie (erst in Buffer rendern, bei Erfolg Status+Headers+Body). Functional Options: `WithStatus(int)`, `WithContentType(string)`, `WithErrorHandler(fn)`, `WithStreaming()`. Entkoppelt Rendering von HTTP — `Render(ctx, io.Writer) error` statt `http.ResponseWriter`. Ermöglicht SSG/SSR/Desktop ohne HTTP-Abhängigkeit.
+Templ-inspired: `ComponentHandler` with buffer-first strategy (render to buffer first, on success Status+Headers+Body). Functional Options: `WithStatus(int)`, `WithContentType(string)`, `WithErrorHandler(fn)`, `WithStreaming()`. Decouples rendering from HTTP — `Render(ctx, io.Writer) error` instead of `http.ResponseWriter`. Enables SSG/SSR/Desktop without HTTP dependency.

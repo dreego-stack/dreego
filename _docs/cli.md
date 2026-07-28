@@ -6,9 +6,9 @@
 dreego generate [--force]
 ```
 
-Transpiliert `.dreego`-Dateien in `dreego/routes/` zu Go-Code. Erzeugt `dree.go` pro Route-Verzeichnis und `dreego/gen/dree.go` als zentrale Import-Datei.
+Transpiles `.dreego` files in `dreego/routes/` to Go code. Creates `dree.go` per route directory and `dreego/gen/dree.go` as central import file.
 
-- `--force`: Erzwingt vollstandige Regeneration (ignoriert Cache)
+- `--force`: Forces complete regeneration (ignores cache)
 
 ## dreego build
 
@@ -16,7 +16,7 @@ Transpiliert `.dreego`-Dateien in `dreego/routes/` zu Go-Code. Erzeugt `dree.go`
 dreego build
 ```
 
-Fuhrt `generate` aus, dann `go build`. Das Binary landet unter `build/bin/<name>`.
+Runs `generate`, then `go build`. The binary lands in `build/bin/<name>`.
 
 ## dreego run
 
@@ -24,12 +24,12 @@ Fuhrt `generate` aus, dann `go build`. Das Binary landet unter `build/bin/<name>
 dreego run [-d] [-t <seconds>]
 ```
 
-Fuhrt `build` aus und startet den Server.
+Runs `build` and starts the server.
 
-- `-d`: Debug-Modus. Schreibt Request-Logs (JSONL) nach `build/logs/<utc>.log`
-- `-t <seconds>`: Timer. Server stoppt automatisch nach N Sekunden
+- `-d`: Debug mode. Writes request logs (JSONL) to `build/logs/<utc>.log`
+- `-t <seconds>`: Timer. Server stops automatically after N seconds
 
-### Beispiele
+### Examples
 
 ```bash
 dreego run                  # build + start (foreground)
@@ -45,6 +45,6 @@ dreego help
 dreego --help
 ```
 
-Zeigt alle verfugbaren Commands und Flags.
+Shows all available commands and flags.
 
-> **Hinweis:** `dreego build` und `dreego run` sind Dev-Tools, nicht fur Production.
+> **Note:** `dreego build` and `dreego run` are dev tools, not for production.

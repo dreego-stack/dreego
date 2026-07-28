@@ -9,4 +9,4 @@ created: 2026-07-23
 changed: 2026-07-26
 ---
 
-Ordnerstruktur unter dreego/routes/ definiert URL-Patterns. get.dreego → GET, post.dreego → POST etc. Dynamische Segmente mit [id], Gruppen mit (group)/.
+Folder structure under dreego/routes/ defines URL patterns. get.dreego → GET, post.dreego → POST etc. Dynamic segments with [id], groups with (group)/.

@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Polar.sh-Integration. Checkout-Sessions, Webhooks, Subscription-Management. Polar-API-Key via Config. Integration mit dreego-auth (User → Customer). Kein Core-Interface nötig — standalone HTTP-Client.
+Plugin for Polar.sh integration. Checkout sessions, webhooks, subscription management. Polar API key via config. Integration with dreego-auth (User → Customer). No core interface needed — standalone HTTP client.

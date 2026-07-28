@@ -1,6 +1,6 @@
 ---
 id: session.1
-title: Session-Interface (Cookie Store im Core)
+title: Session Interface (Cookie Store in Core)
 status: 14
 phase: v0.0.3
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Session-Interface im Core: Get(key)/Set(key, value)/Delete(key)/Save(). Cookie-Store als Default-Implementierung. ADR-Entscheidung session-management.md liegt vor. Kein Redis/DB — nur In-Memory + Cookie. Plugin-System erlaubt später DB-Store.
+Session interface in Core: Get(key)/Set(key, value)/Delete(key)/Save(). Cookie store as default implementation. ADR decision session-management.md exists. No Redis/DB — only In-Memory + Cookie. Plugin system allows DB store later.

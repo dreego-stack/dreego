@@ -1,115 +1,115 @@
 
 ---
 type: Decision
-title: Routing, Plugin-Routes & Komponenten-System
-description: Routing, Plugin-Routen-Registrierung und Komponenten-System mit Namespace-Hierarchie
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Routing, Plugin Routes & Component System
+description: Routing, plugin route registration, and component system with namespace hierarchy
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Routing, Plugin-Routes & Komponenten-System
+# Routing, Plugin Routes & Component System
 
-**Datum:** 24.07.2026 (aktualisiert nach Review)
-**Status:** Akzeptiert
-**Ersetzt:** [file-based-routing](file-based-routing.md) (aktualisiert)
+**Date:** 2026-07-28 (updated after review)
+**Status:** Accepted
+**Replaces:** [file-based-routing](file-based-routing.md) (updated)
 
-## Kontext / Offene Fragen
+## Context / Open Questions
 
-1. Go-Package-System: Jedes Verzeichnis = ein Package. `dreego/routes/about/` ist Package `about`. Aktuell muss `main.go` jedes Route-Paket einzeln importieren (`demo/main.go:4-7`). Das skaliert nicht.
+1. Go package system: Each directory = one package. `dreego/routes/about/` is package `about`. Currently `main.go` must import each route package individually (`demo/main.go:4-7`). That doesn't scale.
 
-2. Plugin-Routes: `dreego generate` scannt `"."` — findet nie externe Packages im Module-Cache oder Vendor. Wie kommen Plugin-Routen ins Binary?
+2. Plugin routes: `dreego generate` scans `"."` — never finds external packages in the module cache or vendor. How do plugin routes get into the binary?
 
-3. Komponenten-Namespace: Wenn User `components/Button.dreego` hat UND `dreego-ui` auch `Button` anbietet — wie wird das aufgelost?
+3. Component namespace: If the user has `components/Button.dreego` AND `dreego-ui` also offers `Button` — how is it resolved?
 
-## Entscheidung 1: Generierte Route-Import-Datei statt manueller Imports
+## Decision 1: Generated Route Import File Instead of Manual Imports
 
-`dreego generate` erzeugt EINE zentrale Import-Datei, die alle Route-Pakete importiert. Der User importiert nur diese eine Datei.
+`dreego generate` creates ONE central import file that imports all route packages. The user only imports this one file.
 
 ```
 dreego/
-├── routes/                    ← User schreibt hier
-│   ├── get.dreego           → dreego → init() registriert GET /
-│   ├── about/get.dreego       → dreego → init() registriert GET /about
-│   ├── users/[id]/get.dreego  → dreego → init() registriert GET /users/{id}
+├── routes/                    ← User writes here
+│   ├── get.dreego           → dreego → init() registers GET /
+│   ├── about/get.dreego       → dreego → init() registers GET /about
+│   ├── users/[id]/get.dreego  → dreego → init() registers GET /users/{id}
 │   └── ...
-├── gen/                       ← GENERIERT (wird committed)
-│   └── routes.go              → importiert ALLE Route-Pakete
+├── gen/                       ← GENERATED (committed)
+│   └── routes.go              → imports ALL route packages
 │
-main.go importiert NUR `_ "myapp/dreego/gen"`
+main.go imports ONLY `_ "myapp/dreego/gen"`
 ```
 
 ```go
-// dreego/gen/routes.go  (GENERIERT)
+// dreego/gen/routes.go  (GENERATED)
 package gen
 
 import (
     _ "myapp/dreego/routes"          // index, about, ...
-    _ "myapp/dreego/routes/about"    // falls about/ ein Unterordner ist
+    _ "myapp/dreego/routes/about"    // if about/ is a subdirectory
     _ "myapp/dreego/routes/users/_id_"
-    _ "github.com/dreego/dreego-auth" // Plugin mit init()-Registrierung
+    _ "github.com/dreego/dreego-auth" // Plugin with init() registration
 )
 ```
 
-Jedes Route-Paket (auch Plugin-Pakete) registriert sich via `init()` → `runtime.Register()`. Das `gen/routes.go` importiert alle — `main.go` importiert nur `gen`.
+Each route package (including plugin packages) registers itself via `init()` → `runtime.Register()`. `gen/routes.go` imports all — `main.go` imports only `gen`.
 
-### Warum `init()` beibehalten?
+### Why Keep `init()`?
 
-- Go-idiomatisch: `database/sql` Treiber machen das genauso
-- Plugin-Pakete brauchen keine spezielle Behandlung
-- Kein Laufzeit-Scanning, kein Reflection
-- `go build` linkt nur importierte Pakete → Tree-Shaking
+- Go-idiomatic: `database/sql` drivers do exactly the same
+- Plugin packages need no special treatment
+- No runtime scanning, no reflection
+- `go build` only links imported packages → tree shaking
 
-## Entscheidung 2: Plugin-Routen via init() — Kein dreego generate nötig
+## Decision 2: Plugin Routes via init() — No dreego generate Needed
 
-Der Plugin-Author committed generierte `dree.go`-Dateien IM Plugin-Repo.
+The plugin author commits generated `dree.go` files IN the plugin repo.
 
 ```
 dreego-auth/
 ├── routes/
-│   ├── login.go          ← pre-generiert (enthält init() + runtime.Register)
+│   ├── login.go          ← pre-generated (contains init() + runtime.Register)
 │   └── ...
 ├── go.mod
 ```
 
-Plugin-Entwickler-Workflow:
+Plugin developer workflow:
 ```bash
 cd dreego-auth
-dreego generate               # erzeugt routes/*.go
+dreego generate               # generates routes/*.go
 git add routes/*.go && git commit
 git tag v0.1.0 && git push
 ```
 
-User-Workflow:
+User workflow:
 ```bash
 go get github.com/dreego/dreego-auth@v0.1.0
-# dreego generate fügt den Import in gen/routes.go ein:
+# dreego generate adds the import to gen/routes.go:
 #   _ "github.com/dreego/dreego-auth"
 ```
 
-`dreego generate` erkennt Plugin-Pakete über `go.mod` + `go list -m -json all` und fügt deren Import in `gen/routes.go` ein. Kein Scannen von Vendor/Modul-Cache nötig — `go build` holt automatisch die richtige Version.
+`dreego generate` detects plugin packages via `go.mod` + `go list -m -json all` and adds their import to `gen/routes.go`. No scanning of vendor/module cache needed — `go build` automatically fetches the correct version.
 
-## Entscheidung 3: Routing-Konventionen
+## Decision 3: Routing Conventions
 
-| Syntax                | Pfad                    | Go-Param              |
+| Syntax                | Path                    | Go Param              |
 |-----------------------|-------------------------|-----------------------|
 | `get.dreego`        | `/`                     | —                     |
 | `about.dreego`        | `/about`                | —                     |
 | `[id]/get.dreego`     | `/users/{id}`           | `c.Param("id")`       |
 | `[...catchall].dreego`| `/blog/{catchall}`      | `c.Param("catchall")` |
 | `[[lang]]/get.dreego` | `/docs/{lang}` (optional)| `c.Param("lang")`    |
-| `(auth)/login.dreego` | `/login` (Gruppe im Pfad ignoriert) |           |
+| `(auth)/login.dreego` | `/login` (group in path ignored) |               |
 
-Priorität: Statisch > Dynamisch > Optional > Catch-All
+Priority: Static > Dynamic > Optional > Catch-All
 
-Konflikt-Erkennung: `dreego generate` wirft Error, wenn zwei Routen dasselbe Pattern beanspruchen:
+Conflict detection: `dreego generate` throws an error if two routes claim the same pattern:
 ```
 error: route conflict: /auth/login
   dreego/routes/auth/login.dreego
   plugin: dreego-auth (github.com/dreego/dreego-auth)
 ```
 
-### API-Routen & HTTP-Methoden
+### API Routes & HTTP Methods
 
-HTTP-Methode wird aus dem Dateinamen abgeleitet:
+HTTP method is derived from the filename:
 
 ```
 routes/api/users.get.dreego   → GET  /api/users
@@ -118,13 +118,13 @@ routes/api/users.put.dreego   → PUT  /api/users
 routes/api/users.delete.dreego→ DELETE /api/users
 ```
 
-Alternativ via `<go method="post">` in der `.dreego`-Datei (wie aktuell).
+Alternatively via `<go method="post">` in the `.dreego` file (like current).
 
-API-Routen rendern KEIN Layout — nur das `<div>`-Fragment. Erkennung: Pfad enthält `api/` → `layout = nil`.
+API routes render NO layout — only the `<div>` fragment. Detection: path contains `api/` → `layout = nil`.
 
-### Middleware pro Route (V1)
+### Per-Route Middleware (V1)
 
-Pro Ordner eine `_middleware.go` (wird NICHT generiert — der User schreibt sie):
+One `_middleware.go` per directory (NOT generated — the user writes it):
 
 ```go
 // dreego/routes/admin/_middleware.go
@@ -151,89 +151,89 @@ func init() {
 }
 ```
 
-Wird in `gen/routes.go` als Middleware-Logik vor den File-based Routes generiert.
+Generated in `gen/routes.go` as middleware logic before the file-based routes.
 
-## Entscheidung 4: Komponenten-System
+## Decision 4: Component System
 
-### Drei Quellen — eine Namespace-Hierarchie
+### Three Sources — One Namespace Hierarchy
 
 ```
-Priorität (höchste zuerst):
-1. dreego/components/Button.dreego     ← User-Komponente (shadowed Plugin)
-2. dreego/layouts/default.dreego       ← Layouts (Spezialfall)
-3. Plugin-Assets via fs.FS             ← @dreego-ui/Button
+Priority (highest first):
+1. dreego/components/Button.dreego     ← User component (shadows plugin)
+2. dreego/layouts/default.dreego       ← Layouts (special case)
+3. Plugin assets via fs.FS             ← @dreego-ui/Button
 ```
 
-Explizite Disambiguierung:
+Explicit disambiguation:
 ```
-{#use Button from "components/Button.dreego"}     ← explizit User
-{#use Button from "@dreego-ui/Button"}            ← explizit Plugin
-```
-
-Ohne `from`-Angabe wird zuerst im User-Verzeichnis gesucht, dann in Plugins:
-```
-{#use Button}   ← sucht Button.dreego in components/, dann in plugins
+{#use Button from "components/Button.dreego"}     ← explicit user
+{#use Button from "@dreego-ui/Button"}            ← explicit plugin
 ```
 
-### Wie findet dreego generate Plugin-Komponenten?
+Without `from` specification, search user directory first, then plugins:
+```
+{#use Button}   ← searches Button.dreego in components/, then in plugins
+```
 
-Plugins legen `.dreego`-Komponenten in einem bekannten Pfad ab:
+### How Does dreego generate Find Plugin Components?
+
+Plugins place `.dreego` components in a known path:
 
 ```
 dreego-ui/
-├── components/               ← KONVENTION
+├── components/               ← CONVENTION
 │   ├── Button.dreego
 │   ├── Card.dreego
 │   └── Alert.dreego
-├── dreego.go                 ← Plugin-Interface impl
+├── dreego.go                 ← Plugin interface impl
 ├── go.mod
 ```
 
 `dreego generate`:
-1. Liest `go.mod` → findet `github.com/dreego/dreego-ui`
+1. Reads `go.mod` → finds `github.com/dreego/dreego-ui`
 2. `go list -m -json github.com/dreego/dreego-ui` → `Dir: /home/.../pkg/mod/...`
-3. Sucht `<Dir>/components/*.dreego`
-4. Bei Vendor-Mode: `vendor/github.com/dreego/dreego-ui/components/*.dreego`
+3. Searches `<Dir>/components/*.dreego`
+4. In vendor mode: `vendor/github.com/dreego/dreego-ui/components/*.dreego`
 
-Kein Plugin-Loading, kein Reflection, kein Import im CLI-Binary. Nur Dateisystem-Scan.
+No plugin loading, no reflection, no import in the CLI binary. Only filesystem scan.
 
-### Komponenten-Verwendung im Template
+### Component Usage in Templates
 
 ```html
 <!-- dreego/routes/get.dreego -->
-{#use Button}              <!-- findet components/Button.dreego -->
-{#use Alert}               <!-- findet @dreego-ui/Alert (kein User-Alert) -->
+{#use Button}              <!-- finds components/Button.dreego -->
+{#use Alert}               <!-- finds @dreego-ui/Alert (no user Alert) -->
 
 <div>
-    <Alert type="success">Geschafft!</Alert>
+    <Alert type="success">Done!</Alert>
     <Button class="primary" disabled={isLoading}>
-        Absenden
+        Submit
     </Button>
 </div>
 ```
 
-### Komponenten-CodeGen
+### Component CodeGen
 
-Der Transpiler erzeugt:
+The transpiler generates:
 ```go
-// <Button class="primary" disabled={isLoading}>Absenden</Button>
-// wird zu:
+// <Button class="primary" disabled={isLoading}>Submit</Button>
+// becomes:
 renderButton(c, ButtonProps{Class: "primary", Disabled: isLoading}, func(c *Context) string {
-    return "Absenden"
+    return "Submit"
 })
 ```
 
-- Props: Alle HTML-Attribute werden als `ComponentProps`-Struct gebündelt
-- Children: Inhalt zwischen Tags als Closure (entspricht `{#slot}`)
-- Self-closing: `<Alert type="info" />` → kein Children-Parameter
-- Scoping: Jede Komponente hat eigenen Scope-Hash (kein CSS-Leaking)
+- Props: All HTML attributes are bundled as a `ComponentProps` struct
+- Children: Content between tags as a closure (corresponds to `{#slot}`)
+- Self-closing: `<Alert type="info" />` → no children parameter
+- Scoping: Each component has its own scope hash (no CSS leaking)
 
-### Plugin-Komponenten ohne .dreego-Source (V2)
+### Plugin Components Without .dreego Source (V2)
 
-Wenn ein Plugin aus Performance-Gründen nur Go-Funktionen bereitstellt (keine `.dreego`-Transpilation nötig):
+If a plugin provides only Go functions for performance reasons (no `.dreego` transpilation needed):
 
 ```go
-// dreego-ui registriert eine Named-Components-Map
+// dreego-ui registers a named components map
 func (p *UIPlugin) Components() map[string]ComponentFunc {
     return map[string]ComponentFunc{
         "Button": renderButton,
@@ -242,25 +242,25 @@ func (p *UIPlugin) Components() map[string]ComponentFunc {
 }
 ```
 
-`{#use Button from "@dreego-ui/Button"}` → direkter Funktionsaufruf, kein Transpiler-Pass nötig.
+`{#use Button from "@dreego-ui/Button"}` → direct function call, no transpiler pass needed.
 
-## Entscheidung 5: dreego/routes/ vs dreego/pages/
+## Decision 5: dreego/routes/ vs dreego/pages/
 
-`dreego/routes/` bleibt. Der Name ist etabliert (SvelteKit, SolidStart, Next.js Pages Router). `/pages/` wäre genauso valide, aber wir bleiben bei der bestehenden Konvention.
+`dreego/routes/` stays. The name is established (SvelteKit, SolidStart, Next.js Pages Router). `/pages/` would be equally valid, but we stick with the existing convention.
 
-Konfigurierbar via `dreego.config.json`:
+Configurable via `dreego.config.json`:
 ```json
 { "routeDir": "dreego/pages" }
 ```
 
-## Konsequenzen
+## Consequences
 
-- `dreego/gen/routes.go` wird generiert und committed
-- Enthält ALLE Route-Imports (File-based + Plugin)
-- `main.go` importiert nur `_ "myapp/dreego/gen"`
-- Plugin-Entwickler committen `dree.go`-Dateien (Pre-Generated)
-- Plugin-Komponenten liegen unter `<plugin>/components/` (Konvention)
-- `dreego generate` findet sie via `go list` + Dateisystem
-- User-Komponenten shadowen Plugin-Komponenten (expliziter Namespace fallback)
-- `[...catchall]`, `[[optional]]`, `(group)/` werden im Lexer/Parser ergänzt
-- Duplicate-Route-Erkennung wirft Build-Fehler
+- `dreego/gen/routes.go` is generated and committed
+- Contains ALL route imports (file-based + plugin)
+- `main.go` imports only `_ "myapp/dreego/gen"`
+- Plugin developers commit `dree.go` files (pre-generated)
+- Plugin components are located under `<plugin>/components/` (convention)
+- `dreego generate` finds them via `go list` + filesystem
+- User components shadow plugin components (explicit namespace fallback)
+- `[...catchall]`, `[[optional]]`, `(group)/` are added in lexer/parser
+- Duplicate route detection throws build errors

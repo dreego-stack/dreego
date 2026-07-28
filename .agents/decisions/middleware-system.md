@@ -1,72 +1,72 @@
 
 ---
 type: Decision
-title: Middleware-System — Core vs Plugin
-description: Drei-Klassen-Middleware: Core-Fixed, Core-Conditional und Plugin-Middleware
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Middleware System — Core vs Plugin
+description: Three-class middleware: Core-Fixed, Core-Conditional, and Plugin middleware
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Middleware-System — Core vs Plugin
+# Middleware System — Core vs Plugin
 
-## Entscheidung
+## Decision
 
-### Core-Fixed (immer aktiv, nicht deaktivierbar)
+### Core-Fixed (always active, cannot be deactivated)
 
 ```go
 // internal/middleware/core.go
 func coreMiddleware() []func(http.Handler) http.Handler {
     return []func(http.Handler) http.Handler{
         Recovery(),       // Panic → 500 + log
-        RequestID(),      // X-Request-ID Header
-        RealIP(),         // Chi-built-in, hinter Proxy
-        RequestLogging(), // slog, nutzt RequestID
+        RequestID(),      // X-Request-ID header
+        RealIP(),         // Chi-built-in, behind proxy
+        RequestLogging(), // slog, uses RequestID
     }
 }
 ```
 
-### Core-Conditional (default an, opt-out via Config)
+### Core-Conditional (on by default, opt-out via config)
 
 ```go
-// Per dreego.config.json abschaltbar
-CSRF()        // Braucht nur Session-Interface (Core)
-CORS()        // Default: same-origin restriktiv
+// Disableable via dreego.config.json
+CSRF()        // Only needs Session interface (Core)
+CORS()        // Default: same-origin restrictive
 Compress()    // gzip/deflate via Chi
 ```
 
-### Plugin/Addon (niemals Core)
+### Plugin/Addon (never Core)
 
-| Middleware         | Warum Plugin                                   |
-|--------------------|------------------------------------------------|
-| Rate-Limiting/DDoS | Braucht Redis/Backend → Infrastruktur-abhängig |
-| Auth (OAuth/JWT)   | Policy, nicht jeder braucht Auth               |
-| Prometheus/Metrics | Monitoring-Infrastruktur                       |
-| Tracing (OTel)     | Externer Collector nötig                       |
+| Middleware         | Why Plugin                                   |
+|--------------------|----------------------------------------------|
+| Rate-Limiting/DDoS | Needs Redis/backend → Infrastructure-dependent |
+| Auth (OAuth/JWT)   | Policy, not everyone needs auth              |
+| Prometheus/Metrics | Monitoring infrastructure                     |
+| Tracing (OTel)     | External collector needed                     |
 
-## Reihenfolge-Modell
+## Order Model
 
 ```
-[Recovery → RequestID → RealIP → Logging]   ← Core-fixed
-  → [CORS → CSRF → Compress]                 ← Core-conditionals
-    → [Plugin-Middleware A, B, C…]           ← app.Use() FIFO
+[Recovery → RequestID → RealIP → Logging]      ← Core-fixed
+  → [CORS → CSRF → Compress]                    ← Core-conditionals
+    → [Plugin middleware A, B, C…]              ← app.Use() FIFO
       → [Router / Handler]
 ```
 
-**V1:** Reine Registrierungsreihenfolge (FIFO via `app.Use()`)
-**V2:** Constraint-Sortierung (`before`/`after` im Plugin-Manifest)
+**V1:** Pure registration order (FIFO via `app.Use()`)
+**V2:** Constraint-based sorting (`before`/`after` in plugin manifest)
 
-Middleware-Stack wird beim ersten `ListenAndServe` gelockt — späteres `app.Use()` → Panic (deterministisch).
+Middleware stack is locked at the first `ListenAndServe` — later `app.Use()` → Panic (deterministic).
 
-## Middleware-Signatur
+## Middleware Signature
 
 ```go
 type Middleware func(ctx Context, next http.Handler) http.Handler
 ```
 
-Nimmt `dreego.Context`, nicht rohes `*http.Request` — target-agnostisch (gilt für SSR, SSG, Wails).
+Takes `dreego.Context`, not raw `*http.Request` — target-agnostic (applies to SSR, SSG, Wails).
 
-## Konsequenzen
+## Consequences
 
-- Core kompiliert OHNE externe Dienste — deterministisch, testbar
-- CSRF ist Core weil es nur Session braucht (keine externe Infrastruktur)
-- DDoS/Rate-Limiting ist Plugin — braucht Redis/Backend
-- Plugins via `MiddlewareProvider` registrieren Middleware in `app.Use()`-Reihenfolge
+- Core compiles WITHOUT external services — deterministic, testable
+- CSRF is Core because it only needs Session (no external infrastructure)
+- DDoS/Rate-Limiting is Plugin — needs Redis/backend
+- Plugins register middleware via `MiddlewareProvider` in `app.Use()` order

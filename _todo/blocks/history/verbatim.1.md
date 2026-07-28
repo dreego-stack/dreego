@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-28
 ---
 
-{#verbatim} block für unveränderte Ausgabe. Nötig für Alpine.js-Template-Syntax und andere JS-Templates die { } verwenden. Content wird 1:1 als Go-String-Literal ausgegeben.
+{#verbatim} block for verbatim output. Needed for Alpine.js template syntax and other JS templates that use { }. Content is emitted 1:1 as Go string literal.

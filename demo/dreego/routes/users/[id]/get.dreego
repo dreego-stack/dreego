@@ -7,9 +7,9 @@
 </go>
 
 <div>
-    <h1>Benutzer: {userID}</h1>
+    <h1>User: {userID}</h1>
     <p>Query ref: {c.Query("ref")}</p>
-    <a href="/">Zurück</a>
+    <a href="/">Back</a>
 </div>
 
 <style>

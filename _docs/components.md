@@ -1,6 +1,6 @@
 # Components
 
-Component = wiederverwendbare `.dreego`-Datei mit Props und eigenem Scope.
+Component = reusable `.dreego` file with props and its own scope.
 
 ## Declaration
 
@@ -8,15 +8,15 @@ Component = wiederverwendbare `.dreego`-Datei mit Props und eigenem Scope.
 Component Name (prop Type, prop Type = default)
 ```
 
-Die erste Zeile einer Component-Datei **muss** die `Component`-Deklaration sein.
+The first line of a component file **must** be the `Component` declaration.
 
-| Element | Beschreibung |
+| Element | Description |
 |---------|-------------|
-| `Name` | Component-Name (PascalCase). Wird zu `<@Name>`. |
-| `(prop Type)` | Props mit Go-Typ. `= default` optional. |
-| `{#slot}` | Default-Slot (immer verfügbar). |
+| `Name` | Component name (PascalCase). Becomes `<@Name>`. |
+| `(prop Type)` | Props with Go type. `= default` optional. |
+| `{#slot}` | Default slot (always available). |
 
-**Beispiel:**
+**Example:**
 
 ```
 Component Card (title string)
@@ -34,7 +34,7 @@ Component Card (title string)
 
 ## Usage
 
-Components werden automatisch aus `dreego/components/` entdeckt. Kein `import` nötig.
+Components are automatically discovered from `dreego/components/`. No `import` needed.
 
 **Self-closing:**
 
@@ -42,7 +42,7 @@ Components werden automatisch aus `dreego/components/` entdeckt. Kein `import` n
 <div><@Card title="Hello"/></div>
 ```
 
-**Mit Children (Default-Slot):**
+**With children (default slot):**
 
 ```html
 <div>
@@ -52,14 +52,14 @@ Components werden automatisch aus `dreego/components/` entdeckt. Kein `import` n
 </div>
 ```
 
-## Regeln
+## Rules
 
-1. **`Component`-Zeile** — Immer Zeile 1 der Datei.
-2. **`<@Name>`** — Component-Aufruf. `@`-Prefix unterscheidet von HTML-Tags.
+1. **`Component` line** — Always line 1 of the file.
+2. **`<@Name>`** — Component call. `@` prefix distinguishes from HTML tags.
 3. **File-based Discovery** — `dreego/components/Card.dreego` → `<@Card>`.
-4. **Scoped Styles** — `data-scope` pro Component. Kein Leak in Parent.
-5. **Self-closing** — `<@Icon name="star"/>` wenn kein Body.
-6. **Slots** — `{#slot}` im Component-Template = Kinder-Inhalt.
+4. **Scoped Styles** — `data-scope` per component. No leak to parent.
+5. **Self-closing** — `<@Icon name="star"/>` when no body.
+6. **Slots** — `{#slot}` in component template = child content.
 
 ## Named Slots (v0.0.8)
 
@@ -84,12 +84,12 @@ Component Card (title string)
 </@Card>
 ```
 
-- `{#slot header}{/slot}` — Platzhalter im Component (leerer Body)
-- `{#slot header}content{/slot}` — Definition in der Route (mit Body)
-- `{#slot}` — Default-Slot (kein `{/slot}` nötig)
-- Mehrere benannte Slots pro Component möglich
+- `{#slot header}{/slot}` — Placeholder in component (empty body)
+- `{#slot header}content{/slot}` — Definition in the route (with body)
+- `{#slot}` — Default slot (no `{/slot}` needed)
+- Multiple named slots per component possible
 
-## Generierter Go-Code
+## Generated Go Code
 
 ```go
 func Card(title string) core.Component {
@@ -108,4 +108,4 @@ func Card(title string) core.Component {
 }
 ```
 
-Aufruf `<@Card title="x"/>` → `Card("x").Render(c)`.
+Call `<@Card title="x"/>` → `Card("x").Render(c)`.

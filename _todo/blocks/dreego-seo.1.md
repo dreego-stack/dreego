@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für SEO-Optimierung. Meta-Tags, OpenGraph, Twitter Cards, JSON-LD. Auto-generierte Sitemap.xml. robots.txt. Middleware-Hook für Head-Injection. c.SEO() im Template. Google-friendly by default.
+Plugin for SEO optimization. Meta tags, OpenGraph, Twitter Cards, JSON-LD. Auto-generated sitemap.xml. robots.txt. Middleware hook for head injection. c.SEO() in template. Google-friendly by default.

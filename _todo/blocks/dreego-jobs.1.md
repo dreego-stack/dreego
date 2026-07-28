@@ -1,6 +1,6 @@
 ---
 id: dreego-jobs.1
-title: dreego-jobs (Background-Jobs, Cron, Queue)
+title: dreego-jobs (Background Jobs, Cron, Queue)
 status: planned
 phase: v0.x.0
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Background-Jobs. Implementiert queue-interface.1. Redis/NATS/In-Memory-Backend. Job-Middleware, Batching, Retry, Delayed Dispatch. Cron-Scheduler. Dashboard (wie Laravel Horizon).
+Plugin for background jobs. Implements queue-interface.1. Redis/NATS/In-Memory backend. Job middleware, batching, retry, delayed dispatch. Cron scheduler. Dashboard (like Laravel Horizon).

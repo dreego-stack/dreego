@@ -12,4 +12,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für verteilte Deployments. Node-Discovery, Shared-Session-Store, PubSub-Sync, Distributed-Cache. Valkey/Redis als Backend. Loadbalancer-kompatibel — jeder Node sieht gleichen State. Kein Kubernetes nötig.
+Plugin for distributed deployments. Node discovery, shared session store, PubSub sync, distributed cache. Valkey/Redis as backend. Load balancer-compatible — every node sees same state. No Kubernetes required.

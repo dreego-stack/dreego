@@ -8,4 +8,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Offizielle Dokumentation: Getting Started, API Reference, Guides. "Build a Blog" Tutorial (max 30 Min). Examples Repo (github.com/dreego-ecosystem/examples). Migration Guides: Von Next.js/SvelteKit/Phoenix zu Dreego. Go-Doc für alle Core-Packages.
+Official documentation: Getting Started, API Reference, Guides. "Build a Blog" Tutorial (max 30 min). Examples Repo (github.com/dreego-ecosystem/examples). Migration Guides: From Next.js/SvelteKit/Phoenix to Dreego. Go-Doc for all core packages.

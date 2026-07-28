@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin/Component-Library für Charts. Chart.js/Canvas-Integration. <Chart type="line" data={...} /> Syntax. SSR-kompatibel (Server rendert Canvas-Daten als JSON, Client hydriert). Kein Core-Interface — reine UI-Komponenten.
+Plugin/Component library for charts. Chart.js/Canvas integration. <Chart type="line" data={...} /> syntax. SSR-compatible (server renders canvas data as JSON, client hydrates). No core interface — pure UI components.

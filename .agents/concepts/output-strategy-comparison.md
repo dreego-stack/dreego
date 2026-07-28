@@ -1,68 +1,68 @@
 
 ---
 type: Concept
-title: "Vergleich: Zwei Output-Strategien für dreego generate"
-description: "Per-Directory dree.go vs output/-Verzeichnis mit index.json"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "Comparison: Two Output Strategies for dreego generate"
+description: "Per-directory dree.go vs output/ directory with index.json"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Vergleich: Zwei Output-Strategien für dreego generate
+# Comparison: Two Output Strategies for dreego generate
 
-**Datum:** 24.07.2026
+**Date:** 2026-07-28
 
-## Ansatz A (implementiert): Per-Directory dree.go + gen/routes.go
+## Approach A (implemented): Per-Directory dree.go + gen/routes.go
 
 ```
 dreego/
 ├── routes/
-│   ├── get.dreego              ← User schreibt
-│   ├── dree.go                  ← generiert, gitignored
+│   ├── get.dreego              ← User writes
+│   ├── dree.go                  ← generated, gitignored
 │   ├── about/
 │   │   ├── get.dreego
-│   │   └── dree.go              ← generiert, gitignored
+│   │   └── dree.go              ← generated, gitignored
 │   └── users/_id_/
 │       ├── get.dreego
-│       └── dree.go              ← generiert, gitignored
+│       └── dree.go              ← generated, gitignored
 ├── gen/
-│   └── routes.go                ← generiert, committed
-│         importiert alle Route-Pakete (init()-basiert)
+│   └── routes.go                ← generated, committed
+│         imports all route packages (init()-based)
 │
-main.go importiert NUR _ "myapp/dreego/gen"
+main.go imports ONLY _ "myapp/dreego/gen"
 ```
 
-**Cache:** Hash-Kommentar in dree.go Kopfzeile: `// hash:{bin:"...", get:"..."}`
+**Cache:** Hash comment in dree.go header line: `// hash:{bin:"...", get:"..."}`
 
 **Pro:**
-- Go-idiomatisch: jedes Verzeichnis = ein Package
-- Inkrementelle Kompilierung: nur geanderte Packages werden neu kompiliert
-- Einfache Cache-Prufung (erste Zeile von dree.go lesen)
-- Keine extra Metadaten-Datei
-- main.go = 1 Import fur alle Routen
+- Go-idiomatic: each directory = one package
+- Incremental compilation: only changed packages are recompiled
+- Simple cache check (read first line of dree.go)
+- No extra metadata file
+- main.go = 1 import for all routes
 
-**Contra:**
-- dree.go-Dateien liegen neben .dreego-Source-Dateien
-- routes/-Verzeichnis enthalt generierte Dateien
+**Con:**
+- dree.go files sit next to .dreego source files
+- routes/ directory contains generated files
 
-## Ansatz B (User-Vorschlag): output/ Verzeichnis + index.json
+## Approach B (user suggestion): output/ Directory + index.json
 
 ```
 dreego/
 ├── routes/
-│   ├── get.dreego              ← User schreibt (NUR Source)
+│   ├── get.dreego              ← User writes (ONLY source)
 │   ├── about/
-│   │   └── get.dreego          ← NUR Source
+│   │   └── get.dreego          ← ONLY source
 │   └── users/_id_/
-│       └── get.dreego          ← NUR Source
+│       └── get.dreego          ← ONLY source
 ├── output/
-│   ├── index.json               ← generiert, committed
-│   ├── a1b2c3d4e5f6.go          ← generiert (Hash-Dateiname), gitignored
-│   ├── b2c3d4e5f6a7.go          ← generiert
+│   ├── index.json               ← generated, committed
+│   ├── a1b2c3d4e5f6.go          ← generated (hash filename), gitignored
+│   ├── b2c3d4e5f6a7.go          ← generated
 │   └── ...
 ├── gen/
-│   └── routes.go                ← generiert, committed
-│         importiert _ "myapp/dreego/output"  (EIN Import)
+│   └── routes.go                ← generated, committed
+│         imports _ "myapp/dreego/output"  (ONE import)
 │
-main.go importiert NUR _ "myapp/dreego/gen"
+main.go imports ONLY _ "myapp/dreego/gen"
 ```
 
 **index.json:**
@@ -78,48 +78,48 @@ main.go importiert NUR _ "myapp/dreego/gen"
 }
 ```
 
-**Cache-Logik:**
-1. Lade index.json
-2. Fur jede .dreego-Datei: Hash berechnen, in index.json nachschlagen
-3. Hash matcht → skip
-4. Hash neu/geandert → regenerieren, index updaten
-5. Binary-Hash geandert → ALLE regenerieren
-6. Eintrage in index ohne Source-Datei → Orphan cleanup (löschen)
+**Cache Logic:**
+1. Load index.json
+2. For each .dreego file: compute hash, look up in index.json
+3. Hash matches → skip
+4. Hash new/changed → regenerate, update index
+5. Binary hash changed → regenerate ALL
+6. Entries in index without source file → orphan cleanup (delete)
 
 **Pro:**
-- routes/-Verzeichnis bleibt 100% pur (nur .dreego + optionale _middleware.go)
-- Saubere Trennung: Source vs generierter Code
-- index.json = klare, versionierbare Cache-Metadaten
-- Orphan-Detection: geloschte .dreego → generierte Datei wird aufgeraumt
-- Keine Hash-Kommentare in Go-Dateien
-- Einfacher Reset: rm -rf output/
+- routes/ directory stays 100% pure (only .dreego + optional _middleware.go)
+- Clean separation: source vs generated code
+- index.json = clear, versionable cache metadata
+- Orphan detection: deleted .dreego → generated file is cleaned up
+- No hash comments in Go files
+- Easy reset: rm -rf output/
 
-**Contra:**
-- ALLE Dateien in einem Package (output/) → Namespace-Sharing
-- Keine inkrementelle Kompilierung: jede Anderung = gesamtes Package neu
-- Bei 100+ Routen: go build kompiliert ALLES, nicht nur Geandertes
-- Hash-Dateinamen sind nicht aussagekraftig (Debugging)
-- Extra index.json zu pflegen
-- Output/-Verzeichnis muss aufgeraumt werden
+**Con:**
+- ALL files in one package (output/) → namespace sharing
+- No incremental compilation: every change = entire package recompiled
+- With 100+ routes: go build compiles EVERYTHING, not just changed things
+- Hash filenames are not descriptive (debugging)
+- Extra index.json to maintain
+- output/ directory must be cleaned up
 
-## Entscheidender Unterschied: Go Build Performance
+## Decisive Difference: Go Build Performance
 
-| Aspekt | Ansatz A (per-dir) | Ansatz B (output/) |
+| Aspect | Approach A (per-dir) | Approach B (output/) |
 |--------|---------------------|---------------------|
-| Packages | N Packages (1 pro Route-Verzeichnis) | 1 Package (output/) |
-| Inkrem. Build | Nur geandertes Package kompiliert | Gesamtes Package neu |
-| 5 Routen | ~gleich schnell | ~gleich schnell |
-| 100 Routen | Nur geanderte Routen neu | ALLE 100 neu kompiliert |
-| Namespace-Konflikte | Pro Verzeichnis isoliert | Global im output/-Package |
-| git diff (index.json) | Keine | index.json andert sich bei jedem generate |
+| Packages | N packages (1 per route directory) | 1 package (output/) |
+| Increm. Build | Only changed package compiled | Entire package recompiled |
+| 5 Routes | ~equally fast | ~equally fast |
+| 100 Routes | Only changed routes recompiled | ALL 100 recompiled |
+| Namespace Conflicts | Isolated per directory | Global in output/ package |
+| git diff (index.json) | None | index.json changes on every generate |
 
-## Empfehlung
+## Recommendation
 
-Ansatz A fur Projekte mit >10 Routen. Ansatz B ist konzeptionell sauberer (Source/Generated-Trennung), aber der Performance-Nachteil im Go-Build-Pipeline ist signifikant fur wachsende Projekte.
+Approach A for projects with >10 routes. Approach B is conceptually cleaner (source/generated separation), but the performance penalty in the Go build pipeline is significant for growing projects.
 
-Alternative: Beide kombinieren — output/-Verzeichnis, aber mit Unterverzeichnissen pro Route:
+Alternative: Combine both — output/ directory, but with subdirectories per route:
 ```
 output/routes/a1b2.go     (package routes)
 output/about/b2c3.go      (package about)
 ```
-Das gibt Source-Trennung + inkrementelle Kompilierung. Die index.json managed die Zuordnung.
+This gives source separation + incremental compilation. The index.json manages the mapping.

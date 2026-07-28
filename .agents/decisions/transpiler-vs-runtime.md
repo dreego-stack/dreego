@@ -1,44 +1,45 @@
+
 ---
 type: Decision
-title: Compile-Time Transpiler statt Runtime-Parsing
-description: Build-Zeit Code-Generation, kein Laufzeit-Parsing
-tags: [transpiler, v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Compile-Time Transpiler Instead of Runtime Parsing
+description: Build-time code generation, no runtime parsing
+tags: [transpiler, v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 
-# Compile-Time Transpiler statt Runtime-Parsing
+# Compile-Time Transpiler Instead of Runtime Parsing
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-`.dreego`-Dateien müssen in ausführbaren Code umgewandelt werden. Zwei Ansätze stehen zur Wahl:
+`.dreego` files must be converted to executable code. Two approaches are available:
 
-1. **Runtime-Parsing:** Server liest `.dreego`-Dateien zur Laufzeit (ähnlich `html/template`)
-2. **Compile-Time Transpiler:** `dreego generate` wandelt `.dreego` → `.go` vor dem Build
+1. **Runtime parsing:** Server reads `.dreego` files at runtime (similar to `html/template`)
+2. **Compile-time transpiler:** `dreego generate` converts `.dreego` → `.go` before the build
 
-## Entscheidung
+## Decision
 
-**Compile-Time Transpiler** (Weg A aus dem Gemini-Chat).
+**Compile-Time Transpiler** (Path A from the Gemini chat).
 
-`dreego generate` liest `.dreego`-Dateien und generiert daraus Go-Code.
+`dreego generate` reads `.dreego` files and generates Go code from them.
 
-## Begründung
+## Rationale
 
-| Kriterium              | Runtime-Parsing      | Compile-Time (gewählt)     |
-|------------------------|---------------------|----------------------------|
-| Performance            | Langsamer (Parsing) | Maximal (kein Laufzeit-Overhead) |
-| Single Binary          | via `//go:embed`    | Alles im Binary, kein Parsing   |
-| Fehlererkennung        | Zur Laufzeit (Crash)| Zur Build-Zeit (`go build` bricht ab) |
-| Type-Safety            | Keine               | Volle Go-Typensicherheit   |
-| DevX                   | Kein Build-Step     | `dreego generate` im Watcher |
-| Debugging              | Schwer              | Normal (generierter Go-Code) |
+| Criterion              | Runtime Parsing      | Compile-Time (chosen)        |
+|------------------------|----------------------|------------------------------|
+| Performance            | Slower (parsing)     | Maximum (no runtime overhead) |
+| Single Binary          | via `//go:embed`     | Everything in binary, no parsing |
+| Error detection        | At runtime (crash)   | At build time (`go build` fails) |
+| Type safety            | None                 | Full Go type safety          |
+| DevX                   | No build step        | `dreego generate` in watcher  |
+| Debugging              | Difficult            | Normal (generated Go code)   |
 
-## Konsequenzen
+## Consequences
 
-- Build-Step: `dreego generate` muss vor `go build` laufen
-- Generierte `*_dreego.go`-Dateien werden nicht committed
-- 100% Compile-Time Safety: Kein Template-Fehler erreicht Production
-- Dev-Server führt `dreego generate` automatisch bei Dateiänderungen aus
-- Go hat keine Makros — Code Generation ist der Go-idiomatische Weg
+- Build step: `dreego generate` must run before `go build`
+- Generated `*_dreego.go` files are not committed
+- 100% compile-time safety: No template error reaches production
+- Dev server automatically runs `dreego generate` on file changes
+- Go has no macros — code generation is the Go-idiomatic way

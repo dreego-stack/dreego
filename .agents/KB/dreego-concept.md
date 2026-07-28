@@ -1,99 +1,99 @@
 
 ---
 type: Reference
-title: Dreego Concept — Gemini Chat (PDF-Quelle)
+title: Dreego Concept — Gemini Chat (PDF Source)
 description: Core concept of Dreego framework: transpiler, 5 sections, file-based routing, addon ecosystem
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Dreego Concept — Gemini Chat (PDF-Quelle)
+# Dreego Concept — Gemini Chat (PDF Source)
 
-> Quelle: `Go-Framework wie Svelte bauen.pdf` — Gemini Chat vom 23.07.2026
-> Die PDF wurde via pdftotext extrahiert und in diese Markdown-Datei überführt.
-
----
-
-## Einleitung
-
-Ein eigenes Framework zu bauen, das Svelte-artige Syntax, File-based Routing und Server-Side Rendering (SSR) direkt in Go vereint.
-
-Da Go eine kompilierte Sprache ist, gibt es zwei Wege:
-
-| Eigenschaft            | Weg A: Eigenes Transpiler-Tool   | Weg B: Pure-Go DSL            |
-|------------------------|----------------------------------|-------------------------------|
-| Dateiendung            | `.gvelte`                        | `.go`                         |
-| Generierungsschritt    | Ja (vor `go run`)                | Nein (rein Go-nativer Code)   |
-| Developer Experience   | Echte HTML/Svelte-Syntax         | Native Go-Typisierung & AC    |
-| Go-Ökosystem           | Benötigt Parser, AST & Generator | Funktioniert 100% Out of Box  |
+> Source: `Building a Go Framework like Svelte.pdf` — Gemini Chat from 2026-07-23
+> The PDF was extracted via pdftotext and transferred to this Markdown file.
 
 ---
 
-## Weg A: Transpiler (Compiler-Ansatz)
+## Introduction
 
-Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate` in Go-Code kompiliert.
+Building a custom framework that combines Svelte-like syntax, file-based routing, and server-side rendering (SSR) directly in Go.
 
-### Vorteile
-- **Maximale Performance:** Keine Disk-IO, kein Laufzeit-Parsing
-- **Single Binary:** Alles via `//go:embed` ins Binary
-- **Compile-Time Safety:** Fehlerhafte Templates brechen `go build` ab
-- **DevX durch KI:** KI führt `dreego generate` im Hintergrund aus
+Since Go is a compiled language, there are two paths:
 
-### Der Transpiler-Workflow
+| Feature              | Path A: Custom Transpiler Tool   | Path B: Pure-Go DSL            |
+|----------------------|----------------------------------|-------------------------------|
+| File extension       | `.gvelte`                        | `.go`                         |
+| Generation step      | Yes (before `go run`)            | No (pure Go-nativer Code)     |
+| Developer Experience  | Real HTML/Svelte syntax          | Native Go typing & autocompletion |
+| Go Ecosystem          | Needs parser, AST & generator   | Works 100% out of the box     |
+
+---
+
+## Path A: Transpiler (Compiler Approach)
+
+The chosen approach for Dreego. `.dreego` files are compiled into Go code via `dreego generate`.
+
+### Benefits
+- **Maximum Performance:** No disk IO, no runtime parsing
+- **Single Binary:** Everything via `//go:embed` into the binary
+- **Compile-Time Safety:** Faulty templates break `go build`
+- **DevX through AI:** AI runs `dreego generate` in the background
+
+### The Transpiler Workflow
 ```
-.dreego Datei  →  [Lexer/Parser]  →  [AST]  →  [Go-Code Generator]  →  .go Datei
+.dreego File  →  [Lexer/Parser]  →  [AST]  →  [Go Code Generator]  →  .go File
 ```
 
 ---
 
-## Der Name: Dreego
+## The Name: Dreego
 
-- Aussprache: Go-Ree (mit langem e)
-- Dateiendung: `.dreego`
+- Pronunciation: Go-Ree (with long e)
+- File extension: `.dreego`
 - Package: `dreego`
-- Grund: TTS-Freundlichkeit (vorher "Gvelte" wurde zu "Gor-ee" verzerrt)
+- Reason: TTS-friendliness (previously "Gvelte" was distorted to "Gor-ee")
 
 ---
 
-## Die 5 Sektionen einer .dreego-Datei
+## The 5 Sections of a .dreego File
 
-### 1. `<head>` — Komponenten-spezifische Meta-Tags & Assets
+### 1. `<head>` — Component-specific Meta Tags & Assets
 ```html
 <head>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
 </head>
 ```
-- Wird nur geladen, wenn die Komponente tatsächlich gerendert wird
-- Perfekt für Addons (dreego-map braucht Mapbox nur auf der Map-Seite)
+- Only loaded when the component is actually rendered
+- Perfect for addons (dreego-map needs Mapbox only on the map page)
 
-### 2. `<go>` — Server-seitiger Go-Code
+### 2. `<go>` — Server-side Go Code
 ```html
 <go>
     userID := c.Param("id")
     user, err := db.GetUser(userID)
 </go>
 ```
-- Läuft NUR auf dem Go-Server vor dem Rendern
-- Direkter DB-Zugriff, keine API-Schicht nötig
+- Runs ONLY on the Go server before rendering
+- Direct DB access, no API layer needed
 
-### 3. Template (HTML) — Das Markup
+### 3. Template (HTML) — The Markup
 ```html
 <div class="user-card">
-    <h1>Hallo, {user.Name}!</h1>
-    <button id="map-btn">Karte zentrieren</button>
+    <h1>Hello, {user.Name}!</h1>
+    <button id="map-btn">Center map</button>
 </div>
 ```
 
-### 4. `<script>` — Client-seitiges JavaScript
+### 4. `<script>` — Client-side JavaScript
 ```html
 <script lang="ts">
     document.getElementById("map-btn")?.addEventListener("click", () => {
-        console.log("Karte wird zentriert...");
+        console.log("Centering map...");
     });
 </script>
 ```
-- V1: Vanilla JS (kein TypeScript, kein Compiler)
-- V2: TypeScript via esbuild-Integration
+- V1: Vanilla JS (no TypeScript, no compiler)
+- V2: TypeScript via esbuild integration
 
 ### 5. `<style>` — Scoped CSS
 ```html
@@ -104,36 +104,36 @@ Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate`
     }
 </style>
 ```
-- Klassen werden automatisch mit Hashes versehen (Scoping)
+- Classes are automatically hashed for scoping
 
 ---
 
-## Template-Logik (V1)
+## Template Logic (V1)
 
 ### {#if} / {#else if} / {#else}
 ```html
 {#if user.IsAdmin}
     <a href="/admin">Dashboard</a>
 {#else if user.IsLoggedIn}
-    <a href="/profile">Mein Profil</a>
+    <a href="/profile">My Profile</a>
 {#else}
-    <a href="/login">Anmelden</a>
+    <a href="/login">Login</a>
 {/if}
 ```
-→ Kompiliert zu `if condition { ... } else { ... }`
+→ Compiles to `if condition { ... } else { ... }`
 
 ### {#switch} / {#case} / {#default}
 ```html
 {#switch order.Status}
     {#case "pending"}
-        <span class="badge yellow">In Bearbeitung</span>
+        <span class="badge yellow">Processing</span>
     {#case "shipped"}
-        <span class="badge blue">Unterwegs</span>
+        <span class="badge blue">En route</span>
     {#default}
-        <span class="badge gray">Unbekannt</span>
+        <span class="badge gray">Unknown</span>
 {/switch}
 ```
-→ Kompiliert zu nativem Go `switch`
+→ Compiles to native Go `switch`
 
 ### {#each} / {#else}
 ```html
@@ -141,31 +141,31 @@ Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate`
     {#each users as user, index}
         <li>#{index + 1}: {user.Name}</li>
     {#else}
-        <li>Keine Benutzer gefunden.</li>
+        <li>No users found.</li>
     {/each}
 </ul>
 ```
-→ {#else} bei leerer Liste — kein `if len(users) == 0` nötig
+→ {#else} on empty list — no `if len(users) == 0` needed
 
 ### {#await} (Async/Streams)
 ```html
 {#await fetchUserData()}
-    <div class="skeleton-loader">Lädt...</div>
+    <div class="skeleton-loader">Loading...</div>
 {#then user}
-    <p>Willkommen, {user.Name}!</p>
+    <p>Welcome, {user.Name}!</p>
 {#catch err}
     <p class="error">{err.Error()}</p>
 {/await}
 ```
-→ Nutzt Go-Channels oder JS Promises
+→ Uses Go channels or JS promises
 
-### {#slot} / {#fill} (Komponenten-Slots)
+### {#slot} / {#fill} (Component Slots)
 ```html
 <!-- In Card.dreego -->
 <div class="card">
     <div class="card-header">
         {#slot header}
-            <h3>Standard Titel</h3>
+            <h3>Default Title</h3>
         {/slot}
     </div>
     <div class="card-body">
@@ -176,16 +176,16 @@ Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate`
 ```
 
 ```html
-<!-- Verwendung -->
+<!-- Usage -->
 <Card>
     {#fill header}
-        <h3 class="gold">Premium Benutzer</h3>
+        <h3 class="gold">Premium User</h3>
     {/fill}
-    <p>Das ist der Inhalt.</p>
+    <p>This is the content.</p>
 </Card>
 ```
 
-### {#let} (Hilfsvariablen)
+### {#let} (Helper Variables)
 ```html
 {#let fullName = user.FirstName + " " + user.LastName}
 {#let isGoldCustomer = user.OrdersCount > 50}
@@ -193,21 +193,21 @@ Der gewählte Ansatz für Dreego. `.dreego`-Dateien werden via `dreego generate`
 
 ---
 
-## File-based Routing mit Chi
+## File-based Routing with Chi
 
-### Ordnerstruktur
+### Directory Structure
 ```
 src/
 └── routes/
      ├── get.dreego           →  /
      ├── about.dreego           →  /about
      └── users/
-         └── [id].dreego        →  /users/:id
+          └── [id].dreego        →  /users/:id
 ```
 
-### Routing-Engine
-- `dreego generate` scannt den `routes/` Ordner
-- Generiert eine zentrale `dreego_router.go`:
+### Routing Engine
+- `dreego generate` scans the `routes/` directory
+- Generates a central `dreego_router.go`:
 ```go
 // CODE GENERATED BY DREEGO. DO NOT EDIT.
 package main
@@ -219,47 +219,47 @@ func RegisterDreegoRoutes(mux *http.ServeMux) {
     mux.HandleFunc("/users/{id}", RenderUsersPage)
 }
 ```
-→ Kein Laufzeit-Scanning, keine Disk-IO, alles im Binary
+→ No runtime scanning, no disk IO, everything in the binary
 
 ---
 
-## Der Core-Stack von Dreego
+## Dreego's Core Stack
 
-| Bereich            | Wahl                      | Begründung                                    |
-|--------------------|---------------------------|-----------------------------------------------|
-| HTTP-Router        | go-chi/chi                | Schnell, 100% Go-Stdlib kompatibel            |
-| Template Engine    | Dreego Transpiler          | Herzstück — muss eigen sein                   |
-| Interaktivität     | HTMX + Alpine.js          | LiveView-Gefühl ohne SPA-Komplexität          |
-| SSE/Real-time      | Datastar (optional)       | Streamt DOM-Updates via SSE                   |
-| CSS                | Tailwind CLI (embedded)   | Kein eigener CSS-Parser nötig                 |
-| Validierung        | go-playground/validator   | Struct-Tag Validierung                        |
-| Binary Packaging   | `embed` (Go Stdlib)       | Native Go, kein Extra-Tool                    |
-| JS Bundling (V2)   | esbuild                   | Als Go-Bibliothek einbindbar                  |
-
----
-
-## Wann ist Dreego besser als die Konkurrenz?
-
-### Besser als React / Vue / Svelte (SPAs)
-- Keine JS-Build-Hölle (kein node_modules)
-- 0 MB JS-State-Synchronisierung (State nur auf Server)
-- Perfektes SEO + FCP auch auf schwachen Geräten
-
-### Besser als Phoenix (Elixir)
-- Single-Binary Deployment (keine BEAM VM, kein Node.js)
-- Kompilier- und Typensicherheit (Go-Compiler verhindert Runtime-Errors)
-- Bruchteil des RAM-Verbrauchs, Start in Millisekunden
-
-### Besser als reine Go-Templates / Templ
-- Echte Framework-Erfahrung (Routing, Actions, Layouts, Dev-Server)
-- Kein JS-Glue-Code (HTMX/Datastar direkt integriert)
+| Area               | Choice                    | Reasoning                                    |
+|--------------------|---------------------------|----------------------------------------------|
+| HTTP Router        | go-chi/chi                | Fast, 100% Go stdlib compatible              |
+| Template Engine    | Dreego Transpiler         | Centerpiece — must be custom                 |
+| Interactivity      | HTMX + Alpine.js          | LiveView feel without SPA complexity         |
+| SSE/Real-time      | Datastar (optional)       | Streams DOM updates via SSE                  |
+| CSS                | Tailwind CLI (embedded)   | No custom CSS parser needed                  |
+| Validation         | go-playground/validator   | Struct tag validation                        |
+| Binary Packaging   | `embed` (Go Stdlib)       | Native Go, no extra tool                     |
+| JS Bundling (V2)   | esbuild                   | Embeddable as Go library                     |
 
 ---
 
-## Addon/Plugin-Ökosystem
+## When is Dreego Better than the Competition?
 
-### Architektur
-Ein Goree-Addon ist ein Go-Package, das das `dreego.Plugin` Interface erfüllt:
+### Better than React / Vue / Svelte (SPAs)
+- No JS build hell (no node_modules)
+- 0 MB JS state synchronization (state only on server)
+- Perfect SEO + FCP even on weak devices
+
+### Better than Phoenix (Elixir)
+- Single binary deployment (no BEAM VM, no Node.js)
+- Compile-time and type safety (Go compiler prevents runtime errors)
+- Fraction of RAM usage, starts in milliseconds
+
+### Better than plain Go templates / Templ
+- Real framework experience (Routing, Actions, Layouts, Dev Server)
+- No JS glue code (HTMX/Datastar directly integrated)
+
+---
+
+## Addon/Plugin Ecosystem
+
+### Architecture
+A Goree addon is a Go package that fulfills the `dreego.Plugin` interface:
 
 ```go
 type Plugin interface {
@@ -270,62 +270,62 @@ type Plugin interface {
 }
 ```
 
-### Nutzung in main.go
+### Usage in main.go
 ```go
 app := dreego.New()
 app.UsePlugin(auth.New("super-secret-key"))
 app.Listen(":8080")
 ```
 
-### Addon-Ideen (vollständige Liste)
+### Addon Ideas (full list)
 
-| Addon               | Zweck                                                   |
-|---------------------|---------------------------------------------------------|
-| dreego-auth          | Sessions, OAuth, Passkeys, Login/Register               |
-| dreego-map           | MapLibre/Leaflet Integration                            |
-| dreego-admin         | Auto-generiertes Admin-Dashboard                        |
-| dreego-seo           | Meta-Tags, OpenGraph, Sitemap                           |
-| dreego-db            | DB-Integration (SQLite, Turso, PostgreSQL)              |
-| dreego-analytics     | Privacy-friendly, serverseitig                          |
-| dreego-i18n          | Mehrsprachigkeit                                        |
-| dreego-mail          | E-Mail-Versand mit .dreego-Templates                     |
-| dreego-stripe        | Stripe Checkout & Webhooks                              |
-| dreego-storage       | Dateiuploads (S3, R2, local)                            |
-| dreego-jobs          | Hintergrundaufgaben & Cronjobs                          |
-| dreego-ui            | Shadcn-ähnliche UI-Komponenten                          |
-| dreego-search        | Volltextsuche (Bleve/Meilisearch)                       |
-| dreego-pdf           | PDF-Generierung aus .dreego-Templates                    |
-| dreego-pwa           | Progressive Web App                                     |
+| Addon               | Purpose                                                  |
+|---------------------|----------------------------------------------------------|
+| dreego-auth          | Sessions, OAuth, Passkeys, Login/Register                |
+| dreego-map           | MapLibre/Leaflet Integration                             |
+| dreego-admin         | Auto-generated admin dashboard                           |
+| dreego-seo           | Meta tags, OpenGraph, Sitemap                            |
+| dreego-db            | DB integration (SQLite, Turso, PostgreSQL)               |
+| dreego-analytics     | Privacy-friendly, server-side                            |
+| dreego-i18n          | Multi-language support                                   |
+| dreego-mail          | Email delivery with .dreego templates                    |
+| dreego-stripe        | Stripe Checkout & Webhooks                               |
+| dreego-storage       | File uploads (S3, R2, local)                             |
+| dreego-jobs          | Background tasks & cron jobs                             |
+| dreego-ui            | Shadcn-like UI components                                |
+| dreego-search        | Full-text search (Bleve/Meilisearch)                     |
+| dreego-pdf           | PDF generation from .dreego templates                    |
+| dreego-pwa           | Progressive Web App                                      |
 
-### Vorteile des Go-Addon-Systems
-- Keine Dependency-Hölle (go.mod löst sauber auf)
-- Compile-Time Safety: Build bricht bei Fehlern ab
-- Tree-Shaking: Nicht genutzter Code wird rauskompiliert
+### Benefits of the Go Addon System
+- No dependency hell (go.mod resolves cleanly)
+- Compile-Time Safety: Build breaks on errors
+- Tree-Shaking: Unused code is compiled out
 
 ---
 
 ## V1 Blueprint (MVP)
 
-1. **Transpiler:** Liest `.dreego` → generiert `.go`
-2. **3 Sektionen:** `<go>`, HTML-Template, `<style>`
-3. **Template-Logik:** `{#if}` und `{#each}`
-4. **Chi-Router Wrapper:** Ordnerpfade → HTTP-Routen
-5. **Single Binary:** `//go:embed` für Assets
+1. **Transpiler:** Reads `.dreego` → generates `.go`
+2. **3 Sections:** `<go>`, HTML Template, `<style>`
+3. **Template Logic:** `{#if}` and `{#each}`
+4. **Chi Router Wrapper:** Directory paths → HTTP routes
+5. **Single Binary:** `//go:embed` for assets
 
-## V2 Ausblick
+## V2 Outlook
 
 - TypeScript Support via esbuild
 - SSG (Static Site Generation)
-- Wails Integration (Desktop-Apps)
+- Wails Integration (Desktop Apps)
 - `{#await}`, `{#slot}`, `{#switch}`
 - Auto-Form Binding
 - Inline API Endpoints
 
 ---
 
-## Fehlerbehandlung in Dreego
+## Error Handling in Dreego
 
-**Kein `<catch>`-Tag!** Fehler werden in Go-Idiomen behandelt:
+**No `<catch>` tag!** Errors are handled in Go idioms:
 
 ```html
 <go>
@@ -335,16 +335,16 @@ app.Listen(":8080")
 
 <div class="profile">
     {#if hasError}
-        <p class="error">Benutzer konnte nicht geladen werden.</p>
+        <p class="error">User could not be loaded.</p>
     {#else}
-        <h1>Hallo, {user.Name}!</h1>
+        <h1>Hello, {user.Name}!</h1>
     {/if}
 </div>
 ```
 
 ---
 
-## Tailwind Class Merging für dreego-ui
+## Tailwind Class Merging for dreego-ui
 
 ```html
 <go>
@@ -359,14 +359,14 @@ app.Listen(":8080")
 </button>
 ```
 
-Nutzung:
+Usage:
 ```html
-<Button class="bg-red-600 mt-4" disabled>Löschen</Button>
+<Button class="bg-red-600 mt-4" disabled>Delete</Button>
 ```
 
 ---
 
-## A/B Testing via Go-Logik
+## A/B Testing via Go Logic
 
 ```html
 <go>
@@ -376,24 +376,24 @@ Nutzung:
 
 <div>
     {#if showPriceVariantA}
-        <div class="price-tag">Sonderpreis: 19 Euro</div>
+        <div class="price-tag">Special price: 19 EUR</div>
     {#else}
-        <div class="price-tag">Regulärer Preis: 29 Euro</div>
+        <div class="price-tag">Regular price: 29 EUR</div>
     {/if}
 </div>
 ```
 
 ---
 
-## Dreego vs Svelte vs React — Zusammenfassung
+## Dreego vs Svelte vs React — Summary
 
-- **Fühlt sich an wie Svelte:** `.dreego`-Dateien, HTML-first Syntax
-- **Strukturiert wie React:** Komponenten, Props, Children-Slots
-- **Robuster als beide:** Kein Node.js, Single Binary, Go-Typensicherheit
+- **Feels like Svelte:** `.dreego` files, HTML-first syntax
+- **Structured like React:** Components, Props, Children-Slots
+- **More robust than both:** No Node.js, Single Binary, Go type safety
 
 ---
 
-## Quellen aus dem Chat
+## Sources from the Chat
 
 1. Cross-Platform Go: Runtime Checks vs. Build Tags
 2. Customizing Go Binaries with Build Tags - DigitalOcean

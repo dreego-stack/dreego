@@ -1,29 +1,29 @@
 
 ---
 type: Decision
-title: Kein `<catch>`-Tag — Fehler via Go-Idiome
-description: Fehlerbehandlung via Go-Idiome im go-Block statt speziellem catch-Tag
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: No `<catch>` Tag — Errors via Go Idioms
+description: Error handling via Go idioms in the go block instead of a special catch tag
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Kein `<catch>`-Tag — Fehler via Go-Idiome
+# No `<catch>` Tag — Errors via Go Idioms
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-Ursprünglich wurde ein `<catch>`-Block vorgeschlagen, um Fehler im Template abzufangen (inspiriert von JavaScripts try/catch).
+Originally, a `<catch>` block was proposed to catch errors in the template (inspired by JavaScript's try/catch).
 
 ## Problem
 
-`<catch>` ist ein Konzept aus Sprachen mit Exceptions (JavaScript, Java) und fühlt sich in der Go-Welt fremd an.
+`<catch>` is a concept from languages with exceptions (JavaScript, Java) and feels foreign in the Go world.
 
-Go-Entwickler behandeln Fehler explizit (`if err != nil`). Ein separates Error-Handling-Tag würde gegen Go-Idiome verstoßen und die Lernkurve für Go-Entwickler unnötig erhöhen.
+Go developers handle errors explicitly (`if err != nil`). A separate error handling tag would violate Go idioms and unnecessarily increase the learning curve for Go developers.
 
-## Entscheidung
+## Decision
 
-**Kein `<catch>`-Tag.** Fehler werden im `<go>`-Block behandelt und als Variablen ans Template übergeben:
+**No `<catch>` tag.** Errors are handled in the `<go>` block and passed to the template as variables:
 
 ```html
 <go>
@@ -33,22 +33,22 @@ Go-Entwickler behandeln Fehler explizit (`if err != nil`). Ein separates Error-H
 
 <div class="profile">
     {#if hasError}
-        <p class="error">Benutzer konnte nicht geladen werden.</p>
+        <p class="error">User could not be loaded.</p>
     {#else}
-        <h1>Hallo, {user.Name}!</h1>
+        <h1>Hello, {user.Name}!</h1>
     {/if}
 </div>
 ```
 
-## Begründung
+## Rationale
 
-1. Hält die Template-Sprache extrem schlank
-2. Go-Entwickler müssen nichts Neues lernen
-3. Keine Framework-Magie — nur Variablen und `{#if}`
-4. Explizite Fehlerbehandlung ist idiomatisches Go
+1. Keeps the template language extremely slim
+2. Go developers don't need to learn anything new
+3. No framework magic — just variables and `{#if}`
+4. Explicit error handling is idiomatic Go
 
-## Konsequenzen
+## Consequences
 
-- Template-Logik (`{#if}`) übernimmt auch Error-Rendering
-- Entwickler müssen Fehler selbst behandeln (wie in Go üblich)
-- Kein implizites Error-Handling im Framework
+- Template logic (`{#if}`) also handles error rendering
+- Developers must handle errors themselves (as is common in Go)
+- No implicit error handling in the framework

@@ -1,23 +1,23 @@
 
 ---
 type: Decision
-title: Session-Management — Interface im Core, Store als Addon
-description: Session-Interface im Core mit Built-in Cookie-Store und externen Store-Addons
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Session Management — Interface in Core, Store as Addon
+description: Session interface in the core with built-in cookie store and external store addons
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Session-Management — Interface im Core, Store als Addon
+# Session Management — Interface in Core, Store as Addon
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-SSR-Apps brauchen Sessions: Request-Zuordnung, CSRF-Schutz, Flash-Messages, Warenkorb, Form-Wizards. Auth (Login, `c.User()`) ist ein ANDERES Thema und gehört in dreego-auth.
+SSR apps need sessions: request mapping, CSRF protection, flash messages, shopping cart, form wizards. Auth (login, `c.User()`) is a DIFFERENT topic and belongs in dreego-auth.
 
-## Entscheidung
+## Decision
 
-**Session-Interface im Core. Konkrete Stores als Addons.**
+**Session interface in the core. Concrete stores as addons.**
 
 ```go
 // Core: dreego/session (Interface)
@@ -30,7 +30,7 @@ type Store interface {
 ```
 
 ```go
-// Core: Built-in Cookie-Store (Default, keine externe Dependency)
+// Core: Built-in Cookie Store (Default, no external dependency)
 type CookieStore struct { ... }
 func NewCookieStore(secret []byte) *CookieStore
 
@@ -38,7 +38,7 @@ func NewCookieStore(secret []byte) *CookieStore
 // Addon: dreego-session-db (PostgreSQL/SQLite)
 ```
 
-## dreego-auth baut darauf auf
+## dreego-auth Builds on This
 
 ```go
 func (p *AuthPlugin) login(w, r) {
@@ -58,22 +58,22 @@ func (p *AuthPlugin) Middlewares() []func(http.Handler) http.Handler {
 }
 ```
 
-## Warum nicht nur Addon?
+## Why Not Only Addon?
 
-- CSRF-Schutz (Core) braucht Sessions
-- Flash-Messages (Core) brauchen Sessions
-- Ohne Session-Interface im Core müsste jedes Addon eigene Session-Logik mitbringen
-- Cookie-Store ist 50 Zeilen Go — kein Grund, das auszulagern
+- CSRF protection (Core) needs sessions
+- Flash messages (Core) need sessions
+- Without session interface in the core, every addon would need its own session logic
+- Cookie store is 50 lines of Go — no reason to outsource it
 
-## Warum nicht komplett im Core?
+## Why Not Completely in Core?
 
-- Redis/DB-Stores sind optional — nicht jede App braucht sie
-- Session-Interface ist stabil, Stores können beliebig wachsen
-- Core bleibt schlank (Cookie-Store ist der einzige Built-in Store)
+- Redis/DB stores are optional — not every app needs them
+- Session interface is stable, stores can grow arbitrarily
+- Core stays slim (Cookie store is the only built-in store)
 
-## Konsequenzen
+## Consequences
 
-- `dreego.New()` erzeugt automatisch einen Cookie-Store
-- Apps können via `app.Use(session.NewRedisStore(...))` upgraden
-- dreego-auth nutzt `session.Store` Interface — kein Vendor-Lock-in
-- Alle Addons (nicht nur Auth) können Sessions nutzen
+- `dreego.New()` automatically creates a cookie store
+- Apps can upgrade via `app.Use(session.NewRedisStore(...))`
+- dreego-auth uses `session.Store` interface — no vendor lock-in
+- All addons (not just Auth) can use sessions

@@ -1,55 +1,56 @@
+
 ---
 type: Decision
-title: Technologie-Stack fur Dreego V1
-description: Tech-Stack: Go, net/http, HTMX, Alpine.js
-tags: [stack, v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Technology Stack for Dreego V1
+description: Tech stack: Go, net/http, HTMX, Alpine.js
+tags: [stack, v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 
-# Technologie-Stack fur Dreego V1
+# Technology Stack for Dreego V1
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-Dreego soll auf bewährten Go-Bibliotheken aufbauen, statt alles neu zu erfinden. Jede Dependency wurde nach dem Kriterium "Selbst bauen vs. Dependency nutzen" evaluiert.
+Dreego should build on proven Go libraries instead of reinventing everything. Each dependency was evaluated against the criterion "Build ourselves vs. use dependency."
 
-## Entscheidungen im Detail
+## Decisions in Detail
 
-### HTTP-Router: go-chi/chi
-- **Warum nicht selbst bauen?** Zeitverschwendung. Chi ist ultra-schnell, 100% Go-Stdlib kompatibel, extrem flexibel und gut getestet.
-- **Alternative:** `net/http` direkt (zu low-level für File-based Routing), gorilla/mux (nicht mehr maintained)
+### HTTP Router: go-chi/chi
+- **Why not build ourselves?** Waste of time. Chi is ultra-fast, 100% Go stdlib compatible, extremely flexible, and well tested.
+- **Alternative:** `net/http` directly (too low-level for file-based routing), gorilla/mux (no longer maintained)
 
 ### Template Engine: Dreego Custom Transpiler
-- **Warum selbst bauen?** Das ist das Herzstück von Dreego. Keine existierende Lösung bietet `.dreego` → Go-Code Transpilation.
-- **Keine Alternative:** `a-h/templ` und `gomponents` sind cool, aber nicht das, was Dreego sein soll.
+- **Why build ourselves?** This is the heart of Dreego. No existing solution offers `.dreego` → Go code transpilation.
+- **No alternative:** `a-h/templ` and `gomponents` are cool, but not what Dreego aims to be.
 
-### Interaktivität: HTMX + Alpine.js + Datastar
-- **Warum nicht selbst bauen?** Ein JS-Framework zu bauen ist ein Riesenprojekt und nicht das Ziel.
-- **Datastar** nutzt SSE für Signale — ideal für Go's Concurrency.
-- **HTMX** und **Alpine.js** sind extrem leicht und decken 95% aller Interaktivitätsfälle ab.
+### Interactivity: HTMX + Alpine.js + Datastar
+- **Why not build ourselves?** Building a JS framework is a huge project and not the goal.
+- **Datastar** uses SSE for signals — ideal for Go's concurrency.
+- **HTMX** and **Alpine.js** are extremely light and cover 95% of all interactivity cases.
 
 ### CSS: Tailwind CLI
-- **Warum nicht selbst bauen?** Einen CSS-Parser/Generator zu bauen ist unnötig komplex.
-- Dreego ruft im Dev-Server die standalone Tailwind-Binary auf.
+- **Why not build ourselves?** Building a CSS parser/generator is unnecessarily complex.
+- Dreego invokes the standalone Tailwind binary in the dev server.
 
-### Validierung: go-playground/validator
-- **Warum nicht selbst bauen?** Zu viele Edge Cases. Der Validator ist ausgereift und deckt alle gängigen Fälle ab.
+### Validation: go-playground/validator
+- **Why not build ourselves?** Too many edge cases. The validator is mature and covers all common cases.
 
 ### Binary Packaging: embed (Go Stdlib)
-- **Warum nicht selbst bauen?** Gibt es schon nativ in Go. Packt Tailwind, JS und Templates direkt ins Binary.
+- **Why not build ourselves?** Already exists natively in Go. Packs Tailwind, JS, and templates directly into the binary.
 
-## Abgelehnte Dependencies
+## Rejected Dependencies
 
-| Dependency      | Grund für Ablehnung                                  |
-|-----------------|-----------------------------------------------------|
-| Node.js / npm   | Zerstört Single-Binary-Versprechen                  |
-| esbuild (V1)    | In V1 nur Vanilla JS — kein Bundler nötig           |
-| TypeScript      | Komplexität, Scope Creep, erst in V2                |
+| Dependency      | Reason for Rejection                                  |
+|-----------------|-------------------------------------------------------|
+| Node.js / npm   | Destroys single-binary promise                        |
+| esbuild (V1)    | In V1 only Vanilla JS — no bundler needed             |
+| TypeScript      | Complexity, scope creep, first in V2                  |
 
-## Konsequenzen
+## Consequences
 
 - `go.mod` in V1: chi, validator, goree/dreego (self)
-- Tailwind wird als standalone Binary eingebunden (nicht als Go-Dependency)
-- HTMX + Alpine.js werden als embedded Assets ausgeliefert
+- Tailwind is embedded as a standalone binary (not as a Go dependency)
+- HTMX + Alpine.js are shipped as embedded assets

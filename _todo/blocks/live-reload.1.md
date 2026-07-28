@@ -9,4 +9,4 @@ created: 2026-07-27
 changed: 2026-07-27
 ---
 
-Templ-inspiriert: Reverse-Proxy (`dreego dev --proxy`) auf eigenem Port, injiziert `<script>` vor `</body>`, SSE-Endpoint `/__dreego/reload/events`. Änderungen an `.dreego`-Dateien triggern Browser-Reload. Gzip/Brotli-transparent. Pattern aus templs generatecmd/proxy/.
+Templ-inspired: Reverse proxy (`dreego dev --proxy`) on own port, injects `<script>` before `</body>`, SSE endpoint `/__dreego/reload/events`. Changes to `.dreego` files trigger browser reload. Gzip/Brotli-transparent. Pattern from templ's generatecmd/proxy/.

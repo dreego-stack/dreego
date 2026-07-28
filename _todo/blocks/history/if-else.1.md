@@ -9,4 +9,4 @@ created: 2026-07-28
 changed: 2026-07-28
 ---
 
-{#if cond}...{#else}...{/if} — else-zweig im if-block. TokenElse im Lexer, parseElseNodes() im Parser, ElseChildren im AST. Codegen: if/else Go-Block.
+{#if cond}...{#else}...{/if} — else branch in if-block. TokenElse in lexer, parseElseNodes() in parser, ElseChildren in AST. Codegen: if/else Go block.

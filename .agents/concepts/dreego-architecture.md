@@ -2,7 +2,7 @@
 ---
 type: Concept
 title: "Dreego Architecture"
-description: "Compile-Time Webframework-Architektur mit Transpiler, Router und Plugin-System"
+description: "Compile-time web framework architecture with transpiler, router, and plugin system"
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
 ---
@@ -10,27 +10,27 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Overview
 
-Dreego ist ein Compile-Time Webframework für Go. Es besteht aus zwei Hauptkomponenten:
+Dreego is a compile-time web framework for Go. It consists of two main components:
 
-1. **Dreego Transpiler** (`dreego generate`) — Wandelt `.dreego`-Dateien in Go-Code um
-2. **Dreego Runtime** (`import "github.com/.../dreego"`) — Bietet Router, Context, Plugin-System
+1. **Dreego Transpiler** (`dreego generate`) — Converts `.dreego` files into Go code
+2. **Dreego Runtime** (`import "github.com/.../dreego"`) — Provides router, context, plugin system
 
-## Architektur-Diagramm
+## Architecture Diagram
 
 ```
-                              .dreego Datei
+                              .dreego File
                                    │
           ┌────────────────────────┼────────────────────────┐
           ▼                        ▼                        ▼
       <head> Block           Template & <style>        <script> Block
-  (Meta/Assets pro Comp.)   (HTML + Scoped CSS)    (Vanilla JS für Client)
+  (Meta/Assets per Comp.)  (HTML + Scoped CSS)    (Vanilla JS for Client)
           │                        │                        │
           └────────────────────────┼────────────────────────┘
                                    ▼
                          Dreego Transpiler Engine
                                    │
                                    ▼
-                          Generierte .go Dateien
+                          Generated .go Files
                                    │
                                    ▼
                             go build
@@ -58,14 +58,14 @@ Dreego ist ein Compile-Time Webframework für Go. Es besteht aus zwei Hauptkompo
 │  │ Lexer    │ │ Parser   │ │ AST      │ │ Code Gen   │  │
 │  └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
 ├─────────────────────────────────────────────────────────┤
-│              Externe Dependencies                        │
+│              External Dependencies                        │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐  │
 │  │ chi      │ │ validator│ │ Tailwind │ │ HTMX/Alpine │  │
 │  └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Datenfluss (Request → Response)
+## Data Flow (Request → Response)
 
 ```
 Browser Request
@@ -81,14 +81,14 @@ Browser Request
                        ┌──────────┐    ┌──────────┐    ┌──────────┐
                        │ <go>     │    │ Template │    │ <head>   │
                        │ Data     │    │ Render   │    │ Assets   │
-                       │ Fetching │    │ HTML     │    │ Injektion│
+                       │ Fetching │    │ HTML     │    │ Injection│
                        └──────────┘    └──────────┘    └──────────┘
                               │                │                │
                               └────────────────┼────────────────┘
                                                ▼
                                     ┌─────────────────┐
-                                    │ Finales HTML     │
-                                    │ (inkl. <script>, │
+                                    │ Final HTML       │
+                                    │ (incl. <script>, │
                                     │  <style>, Assets)│
                                     └─────────────────┘
                                                │
@@ -96,7 +96,7 @@ Browser Request
                                        Browser Response
 ```
 
-## Projektstruktur (geplant)
+## Project Structure (planned)
 
 ```
 dreego/
@@ -112,14 +112,14 @@ dreego/
 ## V1 Scope (MVP)
 
 - [x] Transpiler: `.dreego` → `.go`
-- [x] 3 Sektionen: `<go>`, Template, `<style>`
-- [x] Template-Logik: `{#if}`, `{#each}`, `{#else}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- [x] 3 Sections: `<go>`, Template, `<style>`
+- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
-- [x] Component-System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
-- [x] Static Assets: `dreego/static/` → inline Handler + MIME-Types + Collision-Check
+- [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
+- [x] Static Assets: `dreego/static/` → inline handler + MIME types + collision check
 - [x] Single Binary via `go build`
-- [ ] Dev-Server mit Hot Reload
-- [ ] Plugin-System (minimal)
+- [ ] Dev server with hot reload
+- [ ] Plugin system (minimal)
 
 ## Components (v0.0.5+)
 
@@ -150,6 +150,6 @@ dreego/static/style.css  → GET /style.css  (text/css)
 dreego/static/logo.svg   → GET /logo.svg   (image/svg+xml)
 ```
 
-- MIME-Type via file extension
+- MIME type via file extension
 - Collision detection: if static path overlaps with route → `dreego generate` error
 - Inline `[]byte` registration via `core.RegisterStatic()`

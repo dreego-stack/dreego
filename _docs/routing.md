@@ -1,6 +1,6 @@
 # File-based Routing
 
-## Ordnerstruktur
+## Directory Structure
 
 ```
 dreego/routes/
@@ -18,10 +18,10 @@ dreego/routes/
 │       └── get.dreego          → GET /blog/{catchall...}
 └── (group)/
     └── demo/
-        └── get.dreego          → GET /demo  (group ignoriert)
+        └── get.dreego          → GET /demo  (group ignored)
 ```
 
-## Dynamische Segmente
+## Dynamic Segments
 
 | Syntax               | URL-Pattern              | Go-Param              |
 |----------------------|--------------------------|-----------------------|
@@ -29,18 +29,18 @@ dreego/routes/
 | `[...catchall]`      | `/blog/{catchall...}`    | `c.Param("catchall")` |
 | `[[optional]]`       | `/{optional}`            | `c.Param("optional")` |
 
-## Route-Groups `(name)/`
+## Route Groups `(name)/`
 
-Gruppen-Ordner erscheinen **nicht** in der URL. Sie dienen der Code-Organisation:
+Group directories do **not** appear in the URL. They serve code organization:
 
 ```
-(admin)/            → Layout + Middleware nur fur Admin-Bereich
-(auth)/             → Auth-Check fur Login/Register
+(admin)/            → Layout + middleware only for admin area
+(auth)/             → Auth check for login/register
 ```
 
-## HTTP-Methoden
+## HTTP Methods
 
-Jede Route hat eine Methoden-Datei im Verzeichnis:
+Each route has a method file in the directory:
 
 ```
 get.dreego     → GET
@@ -49,7 +49,7 @@ put.dreego     → PUT
 delete.dreego  → DELETE
 ```
 
-Mehrere Methoden pro Verzeichnis moglich:
+Multiple methods per directory possible:
 
 ```
 users/
@@ -58,9 +58,9 @@ users/
     └── delete.dreego   → DELETE /users/{id}
 ```
 
-## Error-Pages
+## Error Pages
 
-- `404.dreego` in einem Route-Verzeichnis → Catch-All fur diesen Pfad
-- Go Mux wahlt den spezifischsten Catch-All: `users/404.dreego` vor `routes/404.dreego`
-- `500.dreego` (nur eine global) → Recovery-Middleware rendert bei Panic
-- Error-Pages bekommen **kein** Layout (Endlos-Rekursion vermeiden)
+- `404.dreego` in a route directory → Catch-all for this path
+- Go mux chooses the most specific catch-all: `users/404.dreego` before `routes/404.dreego`
+- `500.dreego` (only one global) → Recovery middleware renders on panic
+- Error pages get **no** layout (avoids infinite recursion)

@@ -1,35 +1,35 @@
 
 ---
 type: Concept
-title: "Dreego Gap-Analyse: Was fehlt, was kann besser werden?"
-description: "Systematische Analyse fehlender Features im Vergleich zu SvelteKit, Next.js, Phoenix"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "Dreego Gap Analysis: What's missing, what can be improved?"
+description: "Systematic analysis of missing features compared to SvelteKit, Next.js, Phoenix"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Dreego Gap-Analyse: Was fehlt, was kann besser werden?
+# Dreego Gap Analysis: What's missing, what can be improved?
 
-**Datum:** 23.07.2026
-**Zweck:** Systematische Analyse, was Dreego im Vergleich zu SvelteKit, Next.js, Phoenix noch fehlt oder wo das Design verbessert werden kann.
+**Date:** 2026-07-28
+**Purpose:** Systematic analysis of what Dreego still lacks compared to SvelteKit, Next.js, Phoenix, or where the design can be improved.
 
-## Svelte Runes — haben wir das abgedeckt?
+## Svelte Runes — do we have this covered?
 
-Siehe [Signals & Runes](signals-and-runes.md) für die vollständige Analyse.
+See [Signals & Runes](signals-and-runes.md) for the full analysis.
 
-**Kurzfassung:** Svelte Runes sind ein Compiler-Feature für client-seitige Reaktivität. Dreego erreicht dasselbe Ziel (reaktive UI-Updates) durch SSR + HTMX partials + Alpine.js. Wir bilden Runes nicht 1:1 ab, aber das Ergebnis (State-Änderung → DOM-Update) ist dasselbe — nur mit anderer Architektur.
+**Summary:** Svelte Runes are a compiler feature for client-side reactivity. Dreego achieves the same goal (reactive UI updates) through SSR + HTMX partials + Alpine.js. We don't map runes 1:1, but the result (state change → DOM update) is the same — just with a different architecture.
 
-| Svelte Rune    | Dreego-Entsprechung                        |
+| Svelte Rune    | Dreego Equivalent                          |
 |----------------|-------------------------------------------|
-| `$state(x)`    | `<go>`-Variablen + HTMX Fragment-Updates  |
-| `$derived`     | `{#let}` im Template / Berechnung im `<go>` |
+| `$state(x)`    | `<go>` variables + HTMX fragment updates  |
+| `$derived`     | `{#let}` in template / computation in `<go>` |
 | `$effect`      | Alpine `@click`, HTMX `hx-trigger`        |
 
-## Was fehlt Dreego aktuell im Design?
+## What's currently missing in Dreego's design?
 
-### 1. Form Actions (Server-seitiges Form-Handling)
+### 1. Form Actions (Server-side form handling)
 
-**Status:** Konzept existiert (`g-submit`), aber nicht detailliert genug.
+**Status:** Concept exists (`g-submit`), but not detailed enough.
 
-**Vorbild SvelteKit:**
+**SvelteKit model:**
 ```svelte
 <form method="POST" action="?/login">
     <input name="email" />
@@ -45,7 +45,7 @@ export const actions = {
 }
 ```
 
-**Für Dreego:**
+**For Dreego:**
 ```html
 <form g-submit="login">
     <input name="email" />
@@ -66,47 +66,47 @@ export const actions = {
 </go>
 ```
 
-**Was zu klären ist:**
-- Wie mapped `g-submit="login"` auf die Go-Funktion?
-- Validierung: `go-playground/validator` Struct-Tags automatisch auswerten
-- Fehler zurück ins Template geben
-- Progressive Enhancement: `<form>` funktioniert auch ohne JS
+**What needs clarifying:**
+- How does `g-submit="login"` map to the Go function?
+- Validation: automatically evaluate `go-playground/validator` struct tags
+- Return errors to the template
+- Progressive Enhancement: `<form>` also works without JS
 
-→ [ ] **ToDo:** Detailliertes Form-Actions-Konzept schreiben
+→ [ ] **ToDo:** Write detailed Form Actions concept
 
 ### 2. Progressive Enhancement
 
-**Status:** Erwähnt, aber nicht konkret.
+**Status:** Mentioned, but not concrete.
 
-HTMX + Alpine sind per Definition Progressive Enhancement:
-- `<form>` funktioniert ohne JS (normales HTML)
-- HTMX upgraded das Erlebnis (kein Full-Page-Reload)
-- Alpine.js upgraded lokale Interaktionen (Dropdowns)
+HTMX + Alpine are by definition Progressive Enhancement:
+- `<form>` works without JS (normal HTML)
+- HTMX upgrades the experience (no full page reload)
+- Alpine.js upgrades local interactions (dropdowns)
 
-**Was zu klären ist:**
-- Was passiert, wenn JS deaktiviert ist? Funktioniert die App?
-- CSRF-Token auch ohne JS?
-- Form-Validierung ohne JS?
+**What needs clarifying:**
+- What happens when JS is disabled? Does the app work?
+- CSRF token also without JS?
+- Form validation without JS?
 
-→ [ ] **ToDo:** Progressive-Enhancement-Strategie dokumentieren
+→ [ ] **ToDo:** Document Progressive Enhancement strategy
 
-### 3. Error Handling & Validation (detallierter)
+### 3. Error Handling & Validation (more detailed)
 
-**Status:** Grundlegend entschieden (kein `<catch>`, `{#if hasError}`).
+**Status:** Basic decision made (no `<catch>`, `{#if hasError}`).
 
-**Was fehlt:**
-- Form-Validierungs-Feedback (Feld-Level-Errors)
-- Flash-Messages (Erfolg/Fehler nach Redirect)
-- Error Boundaries auf Komponenten-Ebene
-- Stack Traces im Dev-Modus, generische Fehlerseite in Prod
+**What's missing:**
+- Form validation feedback (field-level errors)
+- Flash messages (success/error after redirect)
+- Error boundaries at component level
+- Stack traces in dev mode, generic error page in prod
 
-→ [ ] **ToDo:** Error-Handling-Konzept detaillieren
+→ [ ] **ToDo:** Detail Error Handling concept
 
-### 4. Middleware-System
+### 4. Middleware System
 
-**Status:** Im Addon-Konzept erwähnt, aber kein Core-Konzept.
+**Status:** Mentioned in the addon concept, but no core concept.
 
-Jedes Framework braucht Middleware-Pipeline. Chi hat bereits Middleware, aber Dreego sollte eigene Convenience-Wrapper bieten:
+Every framework needs a middleware pipeline. Chi already has middleware, but Dreego should provide its own convenience wrappers:
 
 ```go
 app := dreego.New()
@@ -116,146 +116,146 @@ app.Use(regeo.CSRF())
 app.Use(regeo.Auth())
 ```
 
-**Was zu klären ist:**
-- Standard-Middleware, die immer dabei ist (Logger, Recovery, CSRF)
-- Reihenfolge der Middleware
-- Wie Addons eigene Middleware injizieren
+**What needs clarifying:**
+- Standard middleware that's always included (Logger, Recovery, CSRF)
+- Order of middleware
+- How addons inject their own middleware
 
-→ [ ] **ToDo:** Middleware-Konzept + Built-in Middleware Liste
+→ [ ] **ToDo:** Middleware concept + built-in middleware list
 
-### 5. Session & Auth (Core, nicht Addon)
+### 5. Session & Auth (Core, not Addon)
 
-**Status:** Nur als Addon-Idee gelistet (`regeo-auth`).
+**Status:** Only listed as addon idea (`regeo-auth`).
 
-Frage: Sollte Session-Management Teil des Core sein oder ein Addon?
+Question: Should session management be part of the core or an addon?
 
-**Argument für Core:**
-- Sessions sind fundamental (fast jede App braucht sie)
-- CSRF-Schutz braucht Sessions
-- `c.User()` im `<go>`-Block setzt Auth voraus
+**Argument for Core:**
+- Sessions are fundamental (almost every app needs them)
+- CSRF protection needs sessions
+- `c.User()` in the `<go>` block requires auth
 
-**Argument für Addon:**
-- Nicht jede App braucht Auth (Landing Pages, Blogs)
-- Core sollte minimal bleiben
-- Addons können via Plugin-Interface alles injecten
+**Argument for Addon:**
+- Not every app needs auth (landing pages, blogs)
+- Core should remain minimal
+- Addons can inject everything via plugin interface
 
-→ [ ] **Entscheidung:** Session-Management: Core oder Addon?
+→ [ ] **Decision:** Session Management: Core or Addon?
 
-### 6. Asset-Pipeline (CSS/JS Bundling)
+### 6. Asset Pipeline (CSS/JS Bundling)
 
-**Status:** Tailwind CLI erwähnt, aber kein klares Konzept.
+**Status:** Tailwind CLI mentioned, but no clear concept.
 
-**Fragen:**
-- Wie wird Tailwind im Dev-Server ausgeführt?
-- Minification für Production?
-- Wie werden mehrere `<style>`-Sektionen zu einer CSS-Datei zusammengeführt?
-- Wie werden `<script>`-Blöcke gebundled?
-- Cache-Busting (File-Hashes für Assets)
+**Questions:**
+- How is Tailwind run in the dev server?
+- Minification for production?
+- How are multiple `<style>` sections merged into one CSS file?
+- How are `<script>` blocks bundled?
+- Cache busting (file hashes for assets)
 
-→ [ ] **ToDo:** Asset-Pipeline-Konzept
+→ [ ] **ToDo:** Asset Pipeline concept
 
 ### 7. Meta-Framework Features (SEO, Sitemap)
 
-**Status:** Teilweise als Addon-Ideen (`regeo-seo`).
+**Status:** Partially as addon ideas (`regeo-seo`).
 
-**Was oft im Core erwartet wird:**
-- `<title>` pro Seite setzen
-- Meta-Description, OpenGraph-Tags
-- Automatische Sitemap-Generierung (wenn SSG in V2)
+**What is often expected in core:**
+- Set `<title>` per page
+- Meta description, OpenGraph tags
+- Automatic sitemap generation (when SSG in V2)
 - robots.txt
 
-→ [ ] **ToDo:** SEO-Konzept (Core vs Addon)
+→ [ ] **ToDo:** SEO concept (Core vs Addon)
 
-### 8. CLI & Dev-Experience im Detail
+### 8. CLI & Dev Experience in Detail
 
-**Status:** Erwähnt, aber nicht detailliert.
+**Status:** Mentioned, but not detailed.
 
-**Was die CLI können sollte:**
+**What the CLI should be able to do:**
 ```
-dreego new my-app           # Projekt scaffolden
-dreego dev                   # Dev-Server mit Hot Reload
-dreego generate              # Transpiler ausführen
-dreego build                 # Production Binary
-dreego routes                # Alle Routen anzeigen (Debug)
-dreego add <addon>           # Addon installieren
+dreego new my-app           # Scaffold project
+dreego dev                   # Dev server with hot reload
+dreego generate              # Run transpiler
+dreego build                 # Production binary
+dreego routes                # Show all routes (debug)
+dreego add <addon>           # Install addon
 ```
 
-**Dev-Server Features:**
-- File-Watcher (`.dreego` → `dreego generate` → Browser Reload)
-- Error Overlay (Compiler-Fehler direkt im Browser)
+**Dev Server Features:**
+- File watcher (`.dreego` → `dreego generate` → Browser Reload)
+- Error overlay (compiler errors directly in browser)
 - Tailwind JIT Watch
-- Proxy zu Backend-API (falls vorhanden)
+- Proxy to backend API (if present)
 
-→ [ ] **ToDo:** CLI-Spezifikation
+→ [ ] **ToDo:** CLI specification
 
-### 9. Testing-Strategie
+### 9. Testing Strategy
 
-**Status:** Kein Konzept vorhanden.
+**Status:** No concept exists.
 
-**Fragen:**
-- Wie testet man eine `.dreego`-Seite?
-- Request-Simulation für `<go>`-Blöcke?
-- HTML-Output validieren?
-- End-to-End mit Playwright?
+**Questions:**
+- How do you test a `.dreego` page?
+- Request simulation for `<go>` blocks?
+- Validate HTML output?
+- End-to-end with Playwright?
 
 ```go
 func TestIndexPage(t *testing.T) {
     rec := dreegotest.Get("/", nil)
-    assert.Contains(t, rec.Body.String(), "<h1>Willkommen</h1>")
+    assert.Contains(t, rec.Body.String(), "<h1>Welcome</h1>")
 }
 ```
 
-→ [ ] **ToDo:** Testing-Konzept
+→ [ ] **ToDo:** Testing concept
 
 ### 10. Performance & Caching
 
-**Status:** Nicht thematisiert.
+**Status:** Not addressed.
 
-- Template-Caching (gerenderte Templates wiederverwenden)
-- ETag / Last-Modified Header
-- Static-Asset-Caching
-- Datenbank-Query-Caching
+- Template caching (reuse rendered templates)
+- ETag / Last-Modified headers
+- Static asset caching
+- Database query caching
 
-→ [ ] **ToDo:** Performance-Konzept (V2)
+→ [ ] **ToDo:** Performance concept (V2)
 
-### 11. Internationalisierung (i18n)
+### 11. Internationalization (i18n)
 
-**Status:** Als Addon-Idee gelistet.
+**Status:** Listed as addon idea.
 
-Frage: Routing für Sprachen? (`/de/about`, `/en/about`)
+Question: Routing for languages? (`/de/about`, `/en/about`)
 
-→ [ ] **ToDo:** i18n-Konzept (V2, aber Routing jetzt bedenken)
+→ [ ] **ToDo:** i18n concept (V2, but consider routing now)
 
-### 12. Security (über CSRF/XSS hinaus)
+### 12. Security (beyond CSRF/XSS)
 
-**Status:** CSRF + XSS erwähnt.
+**Status:** CSRF + XSS mentioned.
 
-**Was noch fehlt:**
-- Content Security Policy (CSP) Header
+**What's still missing:**
+- Content Security Policy (CSP) headers
 - Rate Limiting
-- SQL-Injection (weniger relevant bei Go + ORM, aber trotzdem)
+- SQL Injection (less relevant with Go + ORM, but still)
 - Secure Cookie Flags (HttpOnly, SameSite)
-- CORS-Konfiguration
+- CORS configuration
 
-→ [ ] **ToDo:** Security-Konzept detaillieren
+→ [ ] **ToDo:** Detail Security concept
 
-## Architektur-Entscheidungen, die wir JETZT treffen sollten
+## Architecture Decisions we should make NOW
 
-Um uns nicht die Zukunft zu verbauen:
+So we don't close doors for the future:
 
-| Entscheidung                    | Warum jetzt wichtig                              |
-|---------------------------------|--------------------------------------------------|
-| Plugin-Interface finalisieren   | Änderungen später = Breaking Changes für Addons  |
-| Transpiler-Pipeline definieren  | Erweiterungspunkte für TS, SSG, etc.             |
-| Context-Objekt designen         | `c.User()`, `c.Session()`, `c.Param()` — API     |
-| Error-Handling-Strategie        | Wie fließen Fehler von Addons ins Template?      |
-| Routing-Konventionen            | `/routes/` vs `/pages/`, `layout.dreego`-Konzept   |
-| Asset-Pipeline-Architektur      | Wie kommen CSS/JS ins Binary?                    |
+| Decision                         | Why important now                                   |
+|----------------------------------|-----------------------------------------------------|
+| Finalize Plugin Interface        | Changes later = breaking changes for addons         |
+| Define Transpiler Pipeline       | Extension points for TS, SSG, etc.                  |
+| Design Context Object            | `c.User()`, `c.Session()`, `c.Param()` — API        |
+| Error Handling Strategy          | How do errors flow from addons into the template?   |
+| Routing Conventions              | `/routes/` vs `/pages/`, `layout.dreego` concept    |
+| Asset Pipeline Architecture      | How do CSS/JS get into the binary?                  |
 
-## Prioritäten für die nächste Planungs-Runde
+## Priorities for the Next Planning Round
 
-1. **Form Actions detailliert ausarbeiten** (höchste Priorität, Kern-Feature)
-2. **Plugin-Interface finalisieren** (damit Addons gebaut werden können)
-3. **Middleware-Konzept** (Session/CSRF/Auth Basis)
-4. **CLI-Spezifikation** (Developer Experience von Tag 1)
-5. **Testing-Strategie** (weil wir testgetrieben entwickeln wollen)
+1. **Detail Form Actions** (highest priority, core feature)
+2. **Finalize Plugin Interface** (so addons can be built)
+3. **Middleware Concept** (Session/CSRF/Auth basics)
+4. **CLI Specification** (Developer Experience from Day 1)
+5. **Testing Strategy** (because we want to develop test-driven)

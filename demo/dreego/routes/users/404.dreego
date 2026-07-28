@@ -1,11 +1,11 @@
 <head>
-    <title>404 – Benutzer nicht gefunden</title>
+    <title>404 – User Not Found</title>
 </head>
 
 <div>
     <h1>404</h1>
-    <p>Dieser Benutzer existiert nicht.</p>
-    <a href="/users/1">Zum Beispiel-Benutzer</a>
+    <p>This user does not exist.</p>
+    <a href="/users/1">Go to Example User</a>
 </div>
 
 <style>

@@ -1,6 +1,6 @@
 ---
 id: csrf.1
-title: CSRF-Schutz (Core-Conditional)
+title: CSRF Protection (Core-Conditional)
 status: 15
 phase: v0.0.3
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-27
 ---
 
-CSRF-Token via Session. Middleware validiert Token bei POST/PUT/DELETE. Auto-Injection in <form>-Tags per Codegen. Kein externes Backend — Session-basiert (Double Submit Cookie). Core-Conditional: default an, opt-out via config.json.
+CSRF token via session. Middleware validates token on POST/PUT/DELETE. Auto-injection into <form> tags via Codegen. No external backend — session-based (Double Submit Cookie). Core-Conditional: default on, opt-out via config.json.

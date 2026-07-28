@@ -1,6 +1,6 @@
 ---
 id: each-loop.1
-title: {#each} mit $loop-Variable
+title: {#each} with $loop variable
 status: 20
 phase: v0.0.9
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-28
 ---
 
-{#each}-Loop erweitern um $loop-Variable: $loop.index, $loop.first, $loop.last, $loop.even, $loop.odd. Wie Blade/Laravel. Compile-Time CodeGen für Loop-Metadaten im AST.
+Expand {#each} loop with $loop variable: $loop.index, $loop.first, $loop.last, $loop.even, $loop.odd. Like Blade/Laravel. Compile-time CodeGen for loop metadata in AST.

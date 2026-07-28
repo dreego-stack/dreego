@@ -1,6 +1,6 @@
 ---
 id: dreego-pdf.1
-title: dreego-pdf (PDF-Generierung aus HTML)
+title: dreego-pdf (PDF Generation from HTML)
 status: planned
 phase: v0.x.0
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für PDF-Generierung. HTML-to-PDF via Chromedp oder wkhtmltopdf. Template-basiert (normale .dreego-Templates als PDF-Input). Kein Core-Interface nötig — standalone.
+Plugin for PDF generation. HTML-to-PDF via Chromedp or wkhtmltopdf. Template-based (normal .dreego templates as PDF input). No core interface needed — standalone.

@@ -1,31 +1,31 @@
 
 ---
 type: Guide
-title: Coding Standards für Dreego
+title: Coding Standards for Dreego
 description: Code conventions: file size limits, imports, error handling, testing for Dreego
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Coding Standards für Dreego
+# Coding Standards for Dreego
 
-## Allgemein
+## General
 
-- **Max 120 Zeilen pro Datei** — hard limit
-- **Eine logische Sache pro Datei**
-- **Keine Kommentare** — Code spricht für sich
-- **Package names** kurz, sauber, ohne Hyphen
-- **Go 1.26+**, Standard Library bevorzugen
+- **Max 120 lines per file** — hard limit
+- **One logical thing per file**
+- **No comments** — code speaks for itself
+- **Package names** short, clean, without hyphens
+- **Go 1.26+**, prefer standard library
 
 ## Build & Run
 
-- **Niemals `go build` direkt** — Build via `make build` oder `dreego build`
-- Dev-Server: `dreego dev`
+- **Never `go build` directly** — Build via `make build` or `dreego build`
+- Dev server: `dreego dev`
 - Tests: `make test`
-- Generierte Dateien (`*_dreego.go`) werden nicht committed
+- Generated files (`*_dreego.go`) are not committed
 
 ## Imports
 
-Standard-Library zuerst, dann Externe, dann Interne. Mit Leerzeilen gruppieren:
+Standard library first, then external, then internal. Group with blank lines:
 
 ```go
 import (
@@ -38,15 +38,15 @@ import (
 )
 ```
 
-## Fehlerbehandlung
+## Error Handling
 
-- Immer explizit: `if err != nil { return err }`
-- Keine `panic()` außer in `init()` und Tests
-- `fmt.Errorf` mit `%w` für Wrapping
+- Always explicit: `if err != nil { return err }`
+- No `panic()` except in `init()` and tests
+- `fmt.Errorf` with `%w` for wrapping
 
 ## Tests
 
-- Testdateien nebem dem zu testenden Code (`foo_test.go`)
-- Table-driven Tests bevorzugen
-- Test-Fixtures in `testdata/`
-- Bei fehlschlagendem Test: Code korrigieren, nicht den Test
+- Test files next to the code being tested (`foo_test.go`)
+- Prefer table-driven tests
+- Test fixtures in `testdata/`
+- On failing test: fix code, not the test

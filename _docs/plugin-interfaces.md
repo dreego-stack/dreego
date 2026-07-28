@@ -1,6 +1,6 @@
-# Plugin-Interfaces
+# Plugin Interfaces
 
-Dreegos Plugin-System basiert auf Go-Interfaces. Jedes Interface ist ein Vertrag: der Core definiert, Plugins implementieren.
+Dreego's plugin system is based on Go interfaces. Every interface is a contract: the core defines, plugins implement.
 
 ## Core Interfaces (in `codeberg.org/dreego/dreego`)
 
@@ -27,9 +27,9 @@ type Plugin interface {
 }
 ```
 
-Jedes Plugin implementiert `Init()` zur Registrierung von Routes, Middleware, Services.
+Every plugin implements `Init()` for registering routes, middleware, services.
 
-### Middleware-Hooks (Plugin)
+### Middleware Hooks (Plugin)
 
 ```go
 type MiddlewareProvider interface {
@@ -37,9 +37,9 @@ type MiddlewareProvider interface {
 }
 ```
 
-Plugins die HTTP-Middleware injecten (CSRF, Auth, Rate-Limiting, etc.).
+Plugins that inject HTTP middleware (CSRF, auth, rate-limiting, etc.).
 
-### Route-Hooks (Plugin)
+### Route Hooks (Plugin)
 
 ```go
 type RouteProvider interface {
@@ -47,9 +47,9 @@ type RouteProvider interface {
 }
 ```
 
-Plugins die eigene URL-Pfade registrieren (`/admin/*`, `/api/auth/*`).
+Plugins that register their own URL paths (`/admin/*`, `/api/auth/*`).
 
-## Plugin-Interfaces (noch nicht implementiert)
+## Plugin Interfaces (not yet implemented)
 
 ### Storage Interface
 
@@ -62,7 +62,7 @@ type Storage interface {
 }
 ```
 
-Implementierungen: `dreego-storage-s3`, `dreego-storage-local`.
+Implementations: `dreego-storage-s3`, `dreego-storage-local`.
 
 ### Email Interface
 
@@ -72,7 +72,7 @@ type Mailer interface {
 }
 ```
 
-Implementierungen: `dreego-mail-smtp`, `dreego-mail-resend`.
+Implementations: `dreego-mail-smtp`, `dreego-mail-resend`.
 
 ### Queue Interface
 
@@ -83,7 +83,7 @@ type Queue interface {
 }
 ```
 
-Implementierungen: `dreego-jobs-redis`, `dreego-jobs-memory`.
+Implementations: `dreego-jobs-redis`, `dreego-jobs-memory`.
 
 ### Cache Interface
 
@@ -95,9 +95,9 @@ type Cache interface {
 }
 ```
 
-Implementierungen: `dreego-cache-redis`, `dreego-cache-memory`.
+Implementations: `dreego-cache-redis`, `dreego-cache-memory`.
 
-### Event-Bus Interface
+### Event Bus Interface
 
 ```go
 type EventBus interface {
@@ -106,9 +106,9 @@ type EventBus interface {
 }
 ```
 
-Implementierungen: `dreego-eventbus-redis`, `dreego-eventbus-nats`.
+Implementations: `dreego-eventbus-redis`, `dreego-eventbus-nats`.
 
-## Plugin-Repo-Struktur
+## Plugin Repo Structure
 
 ```
 codeberg.org/dreego/dreego              ← Core
@@ -116,7 +116,7 @@ codeberg.org/dreego/dreego-session-redis ← Plugin
 codeberg.org/dreego/dreego-auth          ← Plugin
 ```
 
-Oder im eigenen Projekt-Repo:
+Or in your own project repo:
 
 ```
 myapp/
@@ -124,19 +124,19 @@ myapp/
 ├── main.go          (import _ "myapp/plugins/auth")
 ├── plugins/
 │   └── auth/
-│       └── auth.go  (implementiert dreego.Plugin)
+│       └── auth.go  (implements dreego.Plugin)
 └── dreego/
     └── routes/
 ```
 
-Import dann:
+Then import:
 ```go
 import _ "myapp/plugins/auth"
 ```
 
-## Cluster-Plugin (geplant)
+## Cluster Plugin (planned)
 
-`dreego-cluster` — verteilter State für Multi-Node-Deployments. Kombiniert:
+`dreego-cluster` — distributed state for multi-node deployments. Combines:
 
 ```
 dreego-cluster
@@ -146,4 +146,4 @@ dreego-cluster
 └── Distributed-Cache    (dreego-cache-redis)
 ```
 
-Ein Loadbalancer verteilt Requests auf N Go-Instanzen. `dreego-cluster` sorgt dass alle Instanzen den gleichen State sehen. Kein Kubernetes nötig — reicht Valkey/Redis als Backend.
+A load balancer distributes requests across N Go instances. `dreego-cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.

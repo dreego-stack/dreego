@@ -1,6 +1,6 @@
 ---
 id: flat-gen.1
-title: Flat Gen-Package (gen/routes.go statt per-dir dree.go)
+title: Flat Gen Package (gen/routes.go instead of per-dir dree.go)
 status: 13
 phase: v0.0.2
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Alle Route-Handler in gen/routes.go (package gen). Kein _ "import" mehr. Löst Go-Import-Path-Problem mit [ und ( in Verzeichnisnamen.
+All route handlers in gen/routes.go (package gen). No more _ "import". Solves Go import path problem with [ and ( in directory names.

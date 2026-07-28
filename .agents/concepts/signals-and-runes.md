@@ -1,47 +1,47 @@
 
 ---
 type: Concept
-title: "Signals & Svelte Runes — Konzept für Dreego"
-description: "Reaktive State-Primitives und deren Entsprechung in Dreego"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: "Signals & Svelte Runes — Concept for Dreego"
+description: "Reactive state primitives and their equivalent in Dreego"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Signals & Svelte Runes — Konzept für Dreego
+# Signals & Svelte Runes — Concept for Dreego
 
-## Was sind Signals?
+## What are Signals?
 
-Signals sind ein reaktives State-Primitive. Vereinfacht:
+Signals are a reactive state primitive. Simplified:
 
 ```js
 const count = signal(0)
-// count.value = 5 → alles was count liest, updated sich automatisch
+// count.value = 5 → everything that reads count updates automatically
 ```
 
-Das Konzept ist framework-übergreifend:
-- **Solid.js** hat Signals erfunden (fein-granulare Reaktivität ohne Virtual DOM)
-- **Svelte 5 Runes** sind Signals als Compiler-Feature (`$state`, `$derived`, `$effect`)
-- **Angular** hat Signals eingeführt
-- **Preact** hat Signals
-- **Vue** hat `ref()` / `reactive()` — funktional ähnlich
-- **Signals sind #3 der meistgewünschten JS-Features** (State of JS 2025)
+The concept is framework-agnostic:
+- **Solid.js** invented signals (fine-grained reactivity without Virtual DOM)
+- **Svelte 5 Runes** are signals as a compiler feature (`$state`, `$derived`, `$effect`)
+- **Angular** introduced signals
+- **Preact** has signals
+- **Vue** has `ref()` / `reactive()` — functionally similar
+- **Signals are #3 of the most wanted JS features** (State of JS 2025)
 
-### Warum sind Signals so beliebt?
+### Why are signals so popular?
 
-| Ohne Signals (React)           | Mit Signals (Svelte 5)           |
+| Without Signals (React)        | With Signals (Svelte 5)          |
 |--------------------------------|----------------------------------|
 | `useState` + `useEffect`       | `let count = $state(0)`         |
-| State-Änderung → ganzer Komponentenbaum re-rendert | State-Änderung → nur betroffene DOM-Knoten updaten |
-| Virtual DOM Diffing            | Direktes DOM-Updating            |
-| Boilerplate für Memoization    | Automatisch optimiert            |
+| State change → entire component tree re-renders | State change → only affected DOM nodes update |
+| Virtual DOM Diffing            | Direct DOM updating              |
+| Boilerplate for memoization    | Automatically optimized          |
 
 ## Svelte 5 Runes
 
 ```svelte
 <script>
-    let count = $state(0)         // Reaktive Variable
-    let doubled = $derived(count * 2)  // Automatisch neu berechnet
+    let count = $state(0)              // Reactive variable
+    let doubled = $derived(count * 2)  // Automatically recalculated
     $effect(() => {
-        console.log(`Count: ${count}`)  // Läuft bei jeder Änderung
+        console.log(`Count: ${count}`) // Runs on every change
     })
 </script>
 
@@ -50,17 +50,17 @@ Das Konzept ist framework-übergreifend:
 </button>
 ```
 
-**Runes sind Compiler-Direktiven.** Der Svelte-Compiler analysiert, welche Variablen reaktiv sind, und generiert minimalen Update-Code. Kein Runtime-Overhead.
+**Runes are compiler directives.** The Svelte compiler analyzes which variables are reactive and generates minimal update code. No runtime overhead.
 
-## Dreego und Signals: Zwei Ebenen
+## Dreego and Signals: Two Levels
 
-Dreego ist SSR-First. Signals funktionieren bei uns auf zwei Ebenen:
+Dreego is SSR-First. Signals work at two levels for us:
 
-### Ebene 1: Server-Seite (im `<go>`-Block)
+### Level 1: Server-Side (in the `<go>` block)
 
-Auf dem Server gibt es keine client-seitige Reaktivität. Der `<go>`-Block läuft einmal pro Request und erzeugt HTML. Das ist performant und einfach.
+On the server, there is no client-side reactivity. The `<go>` block runs once per request and produces HTML. This is performant and simple.
 
-ABER: Das Reaktivitäts-Konzept von Svelte Runes entspricht funktional unserem Datenfluss:
+BUT: The reactivity concept of Svelte Runes functionally corresponds to our data flow:
 
 ```html
 <go>
@@ -69,33 +69,33 @@ ABER: Das Reaktivitäts-Konzept von Svelte Runes entspricht funktional unserem D
 </go>
 
 <div>
-    Count: {count} (×2 = {doubled})         <!-- wie im Svelte-Template -->
+    Count: {count} (×2 = {doubled})         <!-- like in Svelte template -->
     <button hx-post="/increment" ...>+1</button>
 </div>
 ```
 
-Bei einem Klick:
-1. HTMX sendet POST an `/increment`
-2. Go-Handler erhöht `count`, rendert HTML-Fragment neu
-3. HTMX tauscht das Fragment im DOM aus
+On click:
+1. HTMX sends POST to `/increment`
+2. Go handler increments `count`, re-renders HTML fragment
+3. HTMX swaps the fragment in the DOM
 
-Das ist im Prinzip dasselbe wie ein Signal-Update — nur dass der State auf dem Server lebt und das Update als HTML-Fragment kommt.
+This is essentially the same as a signal update — except the state lives on the server and the update comes as an HTML fragment.
 
-### Ebene 2: Client-Seite (Alpine.js / Datastar)
+### Level 2: Client-Side (Alpine.js / Datastar)
 
-Für lokale Interaktivität OHNE Server-Roundtrip nutzen wir Alpine.js:
+For local interactivity WITHOUT a server round-trip, we use Alpine.js:
 
 ```html
 <div x-data="{ count: 0 }">
     <button @click="count++">
-        Count: <span x-text="count"></span>  <!-- Reaktiv! -->
+        Count: <span x-text="count"></span>  <!-- Reactive! -->
     </button>
 </div>
 ```
 
-`x-data` ist ein client-seitiges Signal. Alpine.js updated nur das betroffene `x-text`-Element — fine-grained Reactivity.
+`x-data` is a client-side signal. Alpine.js only updates the affected `x-text` element — fine-grained reactivity.
 
-**Datastar** geht noch weiter — es bringt echte Signals mit SSE-Backend:
+**Datastar** goes even further — it brings real signals with an SSE backend:
 
 ```html
 <div data-signals="{count: 0}">
@@ -105,39 +105,39 @@ Für lokale Interaktivität OHNE Server-Roundtrip nutzen wir Alpine.js:
 </div>
 ```
 
-Der Unterschied: Alpine.js macht alles im Browser. Datastar kann State auch zum Server streamen und zurückbekommen (bidirektional).
+The difference: Alpine.js does everything in the browser. Datastar can also stream state to the server and receive it back (bidirectional).
 
-## Was Dreego von Signals lernen kann
+## What Dreego Can Learn from Signals
 
-### Jetzt umsetzbar (V1)
+### Implementable Now (V1)
 
-| Signal-Konzept      | Dreego-Entsprechung                                  |
-|---------------------|-----------------------------------------------------|
-| `$state(x)`         | `<go>`-Block Variablen + HTML-Fragment-Updates via HTMX |
-| `$derived(expr)`    | `{#let name = expr}` — im `<go>`-Block berechnen    |
-| `$effect(fn)`       | HTMX-Events + Alpine `@click`, `@change`            |
-| Reaktive DOM-Updates| HTMX partial swaps / Alpine `x-text`, `x-show`      |
+| Signal Concept       | Dreego Equivalent                                     |
+|----------------------|------------------------------------------------------|
+| `$state(x)`          | `<go>` block variables + HTML fragment updates via HTMX |
+| `$derived(expr)`     | `{#let name = expr}` — calculate in `<go>` block     |
+| `$effect(fn)`        | HTMX events + Alpine `@click`, `@change`             |
+| Reactive DOM Updates | HTMX partial swaps / Alpine `x-text`, `x-show`       |
 
-### Was Dreego NICHT braucht
+### What Dreego Does NOT Need
 
-- **Virtual DOM** — wir haben keinen. SSR + Partial HTML Swaps sind schneller.
-- **Client-seitigen Compiler** — Alpine.js ist 15 KB und macht alles nativ im Browser.
-- **Reaktiven Template-Compiler** — das ist Sveltes Job. Dreego macht SSR.
+- **Virtual DOM** — we don't have one. SSR + Partial HTML Swaps are faster.
+- **Client-side Compiler** — Alpine.js is 15 KB and does everything natively in the browser.
+- **Reactive Template Compiler** — that's Svelte's job. Dreego does SSR.
 
-### V2-Potenzial: Dreego Signals als First-Class Concept
+### V2 Potential: Dreego Signals as a First-Class Concept
 
 ```html
 <go>
     count := 0
 </go>
 
-<!-- Dreego könnte ein "reactive fragment" Konzept einführen -->
+<!-- Dreego could introduce a "reactive fragment" concept -->
 <button hx-post="/inc" hx-target="#counter" hx-swap="outerHTML">
     <span id="counter">{count}</span>
 </button>
 ```
 
-Oder via Datastar-Integration:
+Or via Datastar integration:
 
 ```html
 <go>
@@ -149,12 +149,12 @@ Oder via Datastar-Integration:
 </button>
 ```
 
-## Zusammenfassung
+## Summary
 
-Signals sind ein UX-Konzept (automatische DOM-Updates bei State-Änderung), kein Technologie-Konzept. Dreego erreicht dasselbe durch:
+Signals are a UX concept (automatic DOM updates on state change), not a technology concept. Dreego achieves the same via:
 
-1. **SSR + HTMX** für Server-getriebene Updates (wie Phoenix LiveView)
-2. **Alpine.js** für lokale, client-seitige Interaktivität
-3. **Datastar** für SSE-basierte, bidirektionale Signals (optional)
+1. **SSR + HTMX** for server-driven updates (like Phoenix LiveView)
+2. **Alpine.js** for local, client-side interactivity
+3. **Datastar** for SSE-based, bidirectional signals (optional)
 
-Svelte-Runes sind ein Spezialfall von Signals, die durch den Compiler optimiert werden. Dreego braucht diesen Compiler nicht, weil es den State auf dem Server hält und Updates als HTML schickt — ein fundamental anderer, aber ebenso valider Ansatz.
+Svelte Runes are a special case of signals optimized by the compiler. Dreego doesn't need this compiler because it keeps state on the server and sends updates as HTML — a fundamentally different but equally valid approach.

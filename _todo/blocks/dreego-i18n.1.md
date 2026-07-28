@@ -1,6 +1,6 @@
 ---
 id: dreego-i18n.1
-title: dreego-i18n (Internationalisierung)
+title: dreego-i18n (Internationalization)
 status: planned
 phase: v0.x.0
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Mehrsprachigkeit. URL-basiert (/de/about, /en/about). Übersetzungsdateien (JSON/TOML/YAML). t("key") im Template. Pluralisierung. Datum/Zeit-Formatierung. RTL-Support. Middleware-Hook für Language-Detection.
+Plugin for multi-language support. URL-based (/de/about, /en/about). Translation files (JSON/TOML/YAML). t("key") in template. Pluralization. Date/time formatting. RTL support. Middleware hook for language detection.

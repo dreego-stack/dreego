@@ -6,7 +6,7 @@
 go install codeberg.org/dreego/dreego/cmd/dreego@v0.0.1
 ```
 
-## Neues Projekt
+## New Project
 
 ```bash
 mkdir myapp && cd myapp
@@ -14,12 +14,12 @@ go mod init myapp
 mkdir -p dreego/routes
 ```
 
-## Erste Seite
+## First Page
 
 ```html
 <!-- dreego/routes/get.dreego -->
 <head>
-    <title>Meine App</title>
+    <title>My App</title>
 </head>
 
 <go>
@@ -34,11 +34,11 @@ mkdir -p dreego/routes
 ## Build & Run
 
 ```bash
-dreego generate    # transpiliert .dreego → Go-Code
+dreego generate    # transpiles .dreego → Go code
 dreego build       # generate + go build
-dreego run         # build + server starten
-dreego run -d      # mit Debug-Logging (JSONL)
-dreego run -t 30   # auto-stop nach 30 Sekunden
+dreego run         # build + start server
+dreego run -d      # with debug logging (JSONL)
+dreego run -t 30   # auto-stop after 30 seconds
 ```
 
 ## main.go

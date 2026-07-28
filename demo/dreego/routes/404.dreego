@@ -1,11 +1,11 @@
 <head>
-    <title>404 – Seite nicht gefunden</title>
+    <title>404 – Page Not Found</title>
 </head>
 
 <div>
     <h1>404</h1>
-    <p>Die Seite wurde nicht gefunden.</p>
-    <a href="/">Zurück zur Startseite</a>
+    <p>The page was not found.</p>
+    <a href="/">Back to Home</a>
 </div>
 
 <style>

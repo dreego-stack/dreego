@@ -1,80 +1,80 @@
 
 ---
 type: Reference
-title: Rust Frontend Frameworks — Deep Dive & Dreego-Transfer
+title: Rust Frontend Frameworks — Deep Dive & Dreego Transfer
 description: Deep dive into Rust frontend frameworks (Leptos, Dioxus, Yew) with transferable patterns for Dreego
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Rust Frontend Frameworks — Deep Dive & Dreego-Transfer
+# Rust Frontend Frameworks — Deep Dive & Dreego Transfer
 
-**Datum:** 23.07.2026
-**Zweck:** Systematischer Vergleich der Rust-Frontend-Frameworks mit Fokus auf übertragbare Patterns für Dreego.
+**Date:** 2026-07-28
+**Purpose:** Systematic comparison of Rust frontend frameworks focusing on transferable patterns for Dreego.
 
 ---
 
-## Warum Rust-Frameworks für Dreego relevant sind
+## Why Rust Frameworks Are Relevant for Dreego
 
-Rust und Go teilen entscheidende Eigenschaften:
-- **Compiled, statically typed** → Compile-Time-Garantien möglich
-- **Keine VM** → Direkte Code-Generierung, Single Binary
-- **Std-Library-zentriert** → Wenig externe Abhängigkeiten
-- **Kein JS-Ökosystem** → Eigenständige Lösungen für State, Routing, Templating
-- **SSR als First-Class** → Alle großen Rust-Frameworks unterstützen SSR
+Rust and Go share decisive properties:
+- **Compiled, statically typed** → Compile-time guarantees possible
+- **No VM** → Direct code generation, Single Binary
+- **Std-Library-centric** → Few external dependencies
+- **No JS ecosystem** → Standalone solutions for State, Routing, Templating
+- **SSR as First-Class** → All major Rust frameworks support SSR
 
-Dreego-Spezifischer Kontext: Dreego ist SSR-First, braucht kein client-seitiges WASM-Framework. Wir lernen von Rust, wie Compile-Time-Safety, State-Management und Typed-Templating aussehen, aber im Kern bleibt Dreego ein Transpiler (.dreego → Go) mit SSR-Output.
+Dreego-specific context: Dreego is SSR-First, needs no client-side WASM framework. We learn from Rust how compile-time safety, state management, and typed templating look, but at its core Dreego remains a transpiler (.dreego → Go) with SSR output.
 
 ---
 
 ## 1. Leptos (v0.8, 2026)
 
 **Homepage:** https://leptos.dev | **Repo:** leptos-rs/leptos
-**Ansatz:** Full-Stack, isomorphic, fine-grained reactivity
-**Rendering-Modi:** CSR, SSR, Hydrate, Islands
-**Inspiriert von:** Solid.js (Signals), Svelte (Compile-Time)
+**Approach:** Full-Stack, isomorphic, fine-grained reactivity
+**Rendering Modes:** CSR, SSR, Hydrate, Islands
+**Inspired by:** Solid.js (Signals), Svelte (Compile-Time)
 
-### 1.1 Reaktivität: Fine-Grained Signals
+### 1.1 Reactivity: Fine-Grained Signals
 
-Leptos' Kerninnovation: **Fine-grained reactivity** ohne Virtual DOM. Das reaktive System ist ein gerichteter Graph aus drei Node-Typen:
+Leptos' core innovation: **Fine-grained reactivity** without Virtual DOM. The reactive system is a directed graph of three node types:
 
 ```
 Signals (src)  →  Memos (intermediate)  →  Effects (sink)
 ```
 
-**Signals (Quellen):**
+**Signals (sources):**
 ```rust
 let (count, set_count) = signal(0);       // ReadSignal + WriteSignal
 let count = RwSignal::new(0);             // Combined read/write
 ```
 
-**Memos (abgeleitete Werte, gecached):**
+**Memos (derived values, cached):**
 ```rust
 let doubled = Memo::new(move |_| count.get() * 2);
 ```
 
-**Effects (Side Effects, z.B. DOM-Updates):**
+**Effects (side effects, e.g. DOM updates):**
 ```rust
 Effect::new(move |_| {
     log!("count changed: {}", count.get());
 });
 ```
 
-**Derived Signals (nicht gecached, leichtgewichtig):**
+**Derived Signals (not cached, lightweight):**
 ```rust
 let doubled = move || count.get() * 2;  // re-evaluated at every read
 ```
 
-**Entscheidendes Design-Detail:**
-- Signals markieren sich immer als "Dirty" (keine `PartialEq`-Prüfung)
-- Memos prüfen `PartialEq` bevor sie Subscriber benachrichtigen
-- Effects werden maximal einmal pro Update-Zyklus ausgeführt (Diamond-Problem gelöst via "push-pull"-Algorithmus)
-- Der komplette reaktive Graph arbeitet thread-safe (`Send + Sync`)
+**Critical Design Detail:**
+- Signals always mark themselves as "Dirty" (no `PartialEq` check)
+- Memos check `PartialEq` before notifying subscribers
+- Effects are executed at most once per update cycle (Diamond problem solved via "push-pull" algorithm)
+- The entire reactive graph is thread-safe (`Send + Sync`)
 
-### 1.2 Server Functions — Die Killer-App
+### 1.2 Server Functions — The Killer App
 
-**Das Problem:** Client und Server teilen Code, aber API-Contract muss dreifach geschrieben werden (Client-Fetch, Server-Handler, Typ-Definition).
+**The Problem:** Client and server share code, but API contract must be written three times (Client-Fetch, Server-Handler, Type Definition).
 
-**Leptos' Lösung: `#[server]` Makro**
+**Leptos' Solution: `#[server]` Macro**
 
 ```rust
 #[server]
@@ -86,7 +86,7 @@ pub async fn add_todo(title: String) -> Result<(), ServerFnError> {
     Ok(())
 }
 
-// Aufruf im Client — genau dieselbe Funktion!
+// Call on client — exactly the same function!
 #[component]
 fn TodoForm() -> impl IntoView {
     view! {
@@ -97,66 +97,66 @@ fn TodoForm() -> impl IntoView {
 }
 ```
 
-**Was passiert unter der Haube:**
-1. `#[server]` generiert *zwei Versionen* der Funktion via Conditional Compilation:
-   - **Server-Build (ssr):** Echter Code, HTTP-Endpoint via POST (URL-encoded args, JSON return)
-   - **Client-Build (hydrate/csr):** Stub der einen `fetch()`-Aufruf mit serialisierten Args macht
-2. Argumente werden per `serde_qs` URL-encoded (kompatibel mit `<form>`)
-3. Return-Values per `serde_json`
-4. Custom Encodings möglich (JSON, Multipart, etc.)
+**What happens under the hood:**
+1. `#[server]` generates *two versions* of the function via conditional compilation:
+   - **Server-Build (ssr):** Real code, HTTP endpoint via POST (URL-encoded args, JSON return)
+   - **Client-Build (hydrate/csr):** Stub that makes a `fetch()` call with serialized args
+2. Arguments are URL-encoded per `serde_qs` (compatible with `<form>`)
+3. Return values per `serde_json`
+4. Custom encodings possible (JSON, Multipart, etc.)
 
-**Warum ist das genial?**
-- **Co-location:** DB-Query und Click-Handler in derselben Datei
-- **Type-Safety über die Grenze:** Argument-Typen werden auf beiden Seiten geprüft
-- **Progressive Enhancement:** `<ActionForm>` funktioniert auch ohne WASM/JS — Browser `<form>` reicht
-- **Kein API-Contract:** Die Rust-Funktion *ist* der Contract
+**Why is this brilliant?**
+- **Co-location:** DB query and click handler in the same file
+- **Type-Safety across the boundary:** Argument types checked on both sides
+- **Progressive Enhancement:** `<ActionForm>` also works without WASM/JS — Browser `<form>` suffices
+- **No API Contract:** The Rust function *is* the contract
 
 ### 1.3 SSR + Hydration
 
-Leptos kompiliert die App für **zwei Targets**:
-1. **Server (ssr):** Rendert HTML, injiziert WASM-Loader
-2. **Browser (hydrate):** Nimmt existierendes HTML, hängt Event-Listener dran
+Leptos compiles the app for **two targets**:
+1. **Server (ssr):** Renders HTML, injects WASM loader
+2. **Browser (hydrate):** Takes existing HTML, attaches event listeners
 
 **Page-Load-Lifecycle:**
-1. Browser `GET` → Server matched Route → rendert `<App/>` einmal → gibt HTML zurück
-2. Browser lädt WASM parallel → WASM "wandert" das HTML ab ("hydration"), hängt Reaktivität an
-3. Danach: Alle weiteren Navigationen sind **SPA-Navigationen** (kein Page Reload)
+1. Browser `GET` → Server matches route → renders `<App/>` once → returns HTML
+2. Browser loads WASM in parallel → WASM "walks" the HTML ("hydration"), attaches reactivity
+3. After: All further navigations are **SPA navigations** (no page reload)
 
-**Wichtig:** Der komplette Komponentenbaum muss auf Server UND Client laufen können. Das ist der Preis für Isomorphie.
+**Important:** The entire component tree must run on server AND client. That's the price of isomorphism.
 
 ### 1.4 Islands Architecture (Leptos 0.5+)
 
-**Konzept:** Statt die ganze App zu hydratieren, nur kleine "Inseln" der Interaktivität aktivieren.
+**Concept:** Instead of hydrating the whole app, only activate small "islands" of interactivity.
 
 ```rust
-#[island]  // ← statt #[component]
+#[island]  // ← instead of #[component]
 fn Counter() -> impl IntoView {
     let (count, set_count) = signal(0);
     view! { <button on:click=move |_| set_count.update(|n| *n += 1)>"Count: {count}"</button> }
 }
 ```
 
-**Effekte:**
-- **WASM-Größe sinkt drastisch:** 274 KB → 24 KB (Hello World), 400 KB → 200 KB (Tabs-Demo)
-- **Server-Code in Components:** `#[component]` läuft NUR auf dem Server (kein WASM)
-- **Children aus Server-Code:** Server-Side-Content kann als Children an Islands übergeben werden ("Donut-Architektur")
-- **Context zwischen Islands:** `provide_context`/`expect_context` funktioniert island-übergreifend
+**Effects:**
+- **WASM size drops drastically:** 274 KB → 24 KB (Hello World), 400 KB → 200 KB (Tabs demo)
+- **Server code in components:** `#[component]` runs ONLY on server (no WASM)
+- **Children from server code:** Server-side content can be passed as children to islands ("Donut architecture")
+- **Context between islands:** `provide_context`/`expect_context` works across islands
 
 ### 1.5 Routing
 
 - **Declaration-based:** `<Routes>` + `<Route path=... view=...>`
-- **Nested Routes:** `<Route>` können `<Route>` children haben → Layouts
+- **Nested Routes:** `<Route>` can have `<Route>` children → Layouts
 - **Params:** `/users/:id` → `let params = use_params();`
 - **Queries:** `?search=...` → `let query = use_query();`
-- **`<A/>` und `<Form/>`:** Router-aware Links/Forms, client-seitige Navigation
+- **`<A/>` and `<Form/>`:** Router-aware links/forms, client-side navigation
 - **Fallback:** `<Routes fallback=|| view! { <NotFound/> }>`
 
-### 1.6 Komponenten-Modell
+### 1.6 Component Model
 
 ```rust
 #[component]
 fn Button(
-    #[prop(into)] class: String,     // Into<T> Konvertierung
+    #[prop(into)] class: String,     // Into<T> conversion
     #[prop(optional)] disabled: bool, // Optional
     children: Children,               // Slots/Children
 ) -> impl IntoView {
@@ -168,54 +168,54 @@ fn Button(
 }
 ```
 
-### 1.7 Was Leptos einzigartig macht
+### 1.7 What Makes Leptos Unique
 
-1. **Fine-Grained Reactivity:** Nur exakt die DOM-Knoten werden aktualisiert, die ein Signal lesen — kein VDOM Diffing
-2. **`#[server]`-Makro:** Die eleganteste Client-Server-Integration aller Rust-Frameworks
-3. **Islands-Mode:** Reduziert WASM-Größe um 50%, ermöglicht serverseitige `std::fs` in Components
-4. **Streaming SSR:** `<Suspense/>` + out-of-order Streaming
-5. **`view!`-Makro:** RSX (React-like JSX in Rust) mit Compile-Time-Checks gegen HTML-Spec
-6. **Reaktiver Graph ist `Send + Sync`:** Multi-Thread-SSR auf Tokio
+1. **Fine-Grained Reactivity:** Only exactly the DOM nodes reading a signal are updated — no VDOM Diffing
+2. **`#[server]` Macro:** The most elegant client-server integration of all Rust frameworks
+3. **Islands Mode:** Reduces WASM size by 50%, enables server-side `std::fs` in components
+4. **Streaming SSR:** `<Suspense/>` + out-of-order streaming
+5. **`view!` Macro:** RSX (React-like JSX in Rust) with compile-time checks against HTML spec
+6. **Reactive graph is `Send + Sync`:** Multi-thread SSR on Tokio
 
 ---
 
 ## 2. Dioxus (v0.6/0.7, 2026)
 
 **Homepage:** https://dioxuslabs.com | **Repo:** DioxusLabs/dioxus
-**Ansatz:** Cross-Platform (Web, Desktop, Mobile) mit React-ähnlichem Modell
-**Inspiriert von:** React, Flutter
+**Approach:** Cross-Platform (Web, Desktop, Mobile) with React-like model
+**Inspired by:** React, Flutter
 **24.5k+ GitHub Stars**
 
-### 2.1 Architektur: Virtual-DOM-basiert (anders als Leptos)
+### 2.1 Architecture: Virtual-DOM-based (unlike Leptos)
 
-Im Gegensatz zu Leptos' fine-grained Reactivity verwendet Dioxus ein Virtual DOM:
-- Komponenten re-rendern vollständig bei State-Änderung
-- VDOM wird diffed, nur Änderungen landen im echten DOM
-- Ähnlich wie React, aber mit Rust-Performance
+Unlike Leptos' fine-grained reactivity, Dioxus uses a Virtual DOM:
+- Components re-render completely on state change
+- VDOM is diffed, only changes land in the real DOM
+- Similar to React, but with Rust performance
 
 ### 2.2 Multi-Platform Rendering
 
 ```rust
-// Derselbe Code, drei Targets:
-#[cfg(target_platform = "web")]     // → WASM im Browser
-#[cfg(target_platform = "desktop")] // → WGPU-basierter Renderer (Blitz)
+// Same code, three targets:
+#[cfg(target_platform = "web")]     // → WASM in browser
+#[cfg(target_platform = "desktop")] // → WGPU-based renderer (Blitz)
 #[cfg(target_platform = "mobile")]  // → iOS/Android via WGPU
 ```
 
-**Desktop/Mobile:** Dioxus hat einen eigenen Renderer namens **Blitz** (basierend auf WGPU), der HTML/CSS nativ rendert — ohne WebView, ohne Electron. Das ist das "Flutter, but better"-Versprechen.
+**Desktop/Mobile:** Dioxus has its own renderer called **Blitz** (based on WGPU), which natively renders HTML/CSS — without WebView, without Electron. That's the "Flutter, but better" promise.
 
-### 2.3 State Management: Signals (seit v0.5)
+### 2.3 State Management: Signals (since v0.5)
 
 ```rust
 fn App() -> Element {
-    let mut count = use_signal(|| 0);       // Signal Hook
-    let half = use_memo(move || count() / 2); // Abgeleitet, gecached
-    let data = use_resource(move || async {   // Async Data
+    let mut count = use_signal(|| 0);         // Signal Hook
+    let half = use_memo(move || count() / 2); // Derived, cached
+    let data = use_resource(move || async {    // Async Data
         fetch_data(count()).await
     });
 
     use_effect(move || {
-        log!("count changed to {count}");    // Side-Effekt
+        log!("count changed to {count}");     // Side effect
     });
 
     rsx! {
@@ -225,78 +225,78 @@ fn App() -> Element {
 }
 ```
 
-**State-Weitergabe:**
+**State Passing:**
 1. **Props:** `ReadOnlySignal<T>` — Standard
-2. **Context:** `use_context_provider` / `use_context` — für Teilbäume
-3. **Globals:** `GlobalSignal<T>` als `static` — app-weit
+2. **Context:** `use_context_provider` / `use_context` — for sub-trees
+3. **Globals:** `GlobalSignal<T>` as `static` — app-wide
 
 ### 2.4 Fullstack Mode
 
 ```rust
-// Server Function (identisch zu Leptos' Konzept)
+// Server Function (identical to Leptos' concept)
 #[server]
 async fn save_user(name: String) -> Result<(), ServerFnError> {
     db::insert_user(&name).await?;
     Ok(())
 }
 
-// Im Client:
+// In client:
 rsx! { button { onclick: move |_| { spawn(async { save_user("Alice".into()).await; }); } } }
 ```
 
-**Hydration:** Server rendert HTML → serialisiert Server-Future-Daten als JSON → Client hydriert.
+**Hydration:** Server renders HTML → serializes server future data as JSON → Client hydrates.
 
-**Wichtiger Unterschied zu Leptos:**
-- Dioxus benötigt `use_server_future` für non-deterministische Daten
-- Hydration-Mismatches sind ein echtes Problem (Random-Werte, Timeouts)
-- Dioxus' VDOM-Ansatz macht Hydration aufwändiger als Leptos' Fine-Grained-Approach
+**Important difference from Leptos:**
+- Dioxus requires `use_server_future` for non-deterministic data
+- Hydration mismatches are a real problem (random values, timeouts)
+- Dioxus' VDOM approach makes hydration more complex than Leptos' fine-grained approach
 
 ### 2.5 CLI & Dev Experience
 
 ```
 dx new my-app        # Scaffolding
-dx serve             # Dev-Server + Hot Reload
-dx build             # Production Build
-dx translate         # HTML → RSX Konvertierung
+dx serve             # Dev server + Hot Reload
+dx build             # Production build
+dx translate         # HTML → RSX conversion
 ```
 
-**Hot Reload:** Änderungen an RSX werden ohne State-Verlust im Browser aktualisiert.
+**Hot Reload:** Changes to RSX are updated in the browser without state loss.
 
 ### 2.6 Static Site Generation (SSG)
 
-Dioxus unterstützt SSG via Fullstack-Mode: Der Server rendert alle Routen zu statischem HTML, das dann deployed wird.
+Dioxus supports SSG via fullstack mode: The server renders all routes to static HTML, which is then deployed.
 
-### 2.7 Was Dioxus einzigartig macht
+### 2.7 What Makes Dioxus Unique
 
-1. **True Cross-Platform:** Web, Desktop, Mobile — ein Codebase
-2. **Blitz Renderer:** HTML/CSS nativ auf GPU gerendert, kein WebView
-3. **React-Ähnlichkeit:** Entwickler von React/Flutter fühlen sich sofort zuhause
-4. **`dx` CLI:** Erstklassige Developer Experience
-5. **Ecosystem:** Größtes Rust-UI-Ökosystem (24.5k Stars)
+1. **True Cross-Platform:** Web, Desktop, Mobile — one codebase
+2. **Blitz Renderer:** HTML/CSS natively rendered on GPU, no WebView
+3. **React-Similarity:** Developers from React/Flutter feel immediately at home
+4. **`dx` CLI:** First-class developer experience
+5. **Ecosystem:** Largest Rust UI ecosystem (24.5k Stars)
 
-### 2.8 Dioxus LiveView-Mode
+### 2.8 Dioxus LiveView Mode
 
-Dioxus' SSR lässt sich als "LiveView" betreiben: Der Server hält den VirtualDom im Speicher, rendert bei Änderungen HTML-Diffs und schickt sie via WebSocket an den Client. Dies ist ähnlich zu Phoenix LiveView. Der Client muss kein WASM laden — alle Events werden per WebSocket zum Server geschickt.
+Dioxus' SSR can be operated as "LiveView": The server keeps the VirtualDom in memory, renders HTML diffs on changes, and sends them via WebSocket to the client. This is similar to Phoenix LiveView. The client doesn't need to load WASM — all events are sent to the server via WebSocket.
 
 ---
 
 ## 3. Yew (v0.23, 2026)
 
 **Homepage:** https://yew.rs | **Repo:** yewstack/yew
-**Ansatz:** Elm-inspiriertes Komponenten-Framework (CSR-first, SSR optional)
-**Ältestes Rust-Frontend-Framework** (seit 2017)
+**Approach:** Elm-inspired component framework (CSR-first, SSR optional)
+**Oldest Rust Frontend Framework** (since 2017)
 
-### 3.1 Architektur: Elm/React-Modell
+### 3.1 Architecture: Elm/React Model
 
-Yew ist der Pionier — das erste Rust-Frontend-Framework. Es folgt dem Elm/React-Modell:
+Yew is the pioneer — the first Rust frontend framework. It follows the Elm/React model:
 
-- **Virtual DOM** (wie React)
-- **Komponenten** sind Rust-Funktionen mit `#[function_component]`
-- **Message/Update-Architektur** (von Elm) via `use_reducer`
-- **Props** sind reine Rust-Structs
-- **SSR** ist additiv (nicht First-Class wie bei Leptos/Dioxus)
+- **Virtual DOM** (like React)
+- **Components** are Rust functions with `#[function_component]`
+- **Message/Update architecture** (from Elm) via `use_reducer`
+- **Props** are pure Rust structs
+- **SSR** is additive (not first-class like Leptos/Dioxus)
 
-### 3.2 Komponenten-Modell
+### 3.2 Component Model
 
 ```rust
 #[function_component]
@@ -305,54 +305,54 @@ fn HelloWorld() -> Html {
 }
 ```
 
-**Zwei Komponenten-Arten:**
-1. **Function Components** (`#[function_component]`) — empfohlen
-2. **Struct Components** (advanced, mehr Kontrolle)
+**Two Component Types:**
+1. **Function Components** (`#[function_component]`) — recommended
+2. **Struct Components** (advanced, more control)
 
 **Lifecycle:** `use_state`, `use_effect`, `use_reducer`, `use_memo`, `use_callback`
 
 ### 3.3 State Management
 
-Yew's State-Hooks sind React-ähnlich:
+Yew's state hooks are React-like:
 
-| Hook             | Verhalten                               | Scope    |
-|-------------------|-----------------------------------------|----------|
-| `use_state`       | State, re-rendert bei `set`            | Component|
-| `use_state_eq`    | Wie `use_state`, aber mit `PartialEq`  | Component|
-| `use_reducer`     | Elm-Architektur: Action → State        | Component|
+| Hook             | Behavior                                | Scope    |
+|------------------|-----------------------------------------|----------|
+| `use_state`       | State, re-renders on `set`            | Component|
+| `use_state_eq`    | Like `use_state`, but with `PartialEq` | Component|
+| `use_reducer`     | Elm architecture: Action → State       | Component|
 | `use_reducer_eq`  | Reducer + `PartialEq`                  | Component|
 | `use_memo`        | Memoized Computation                   | Component|
 | `use_callback`    | Memoized Callback (Deps-Array)         | Component|
-| `use_mut_ref`     | Mutable Ref (kein Re-Render)           | Component|
+| `use_mut_ref`     | Mutable Ref (no re-render)            | Component|
 
-**Context:** `use_context` für Baum-weite State-Weitergabe.
-**Agents:** Yew-spezifisches Konzept für Worker-Threads / Hintergrund-Tasks.
+**Context:** `use_context` for tree-wide state passing.
+**Agents:** Yew-specific concept for worker threads / background tasks.
 
 ### 3.4 SSR
 
-Yew's SSR ist funktional, aber nicht First-Class:
+Yew's SSR is functional, but not first-class:
 ```rust
 let renderer = yew::ServerRenderer::<App>::new();
 let html = renderer.render().await;
 ```
 
-Kein Hydration-Konzept, kein Server-Functions, kein File-Based Routing.
+No hydration concept, no server functions, no file-based routing.
 
-### 3.5 Yews Bedeutung heute
+### 3.5 Yew's Significance Today
 
-Historisch extrem wichtig (Go-To für Rust-WASM 2017–2021). Aber von Leptos und Dioxus in den meisten Aspekten überholt. Lehren:
+Historically extremely important (Go-To for Rust-WASM 2017–2021). But overtaken by Leptos and Dioxus in most aspects. Lessons:
 
-- **Message/Reducer-Architektur** ist für komplexe State-Maschinen gut, aber für UI zu boilerplate-lastig
-- **VDOM** ist konzeptionell einfach, aber fine-grained Reactivity (Leptos) performanter
-- **Community-getriebene Entwicklung** — Yew wurde von der Community gebaut, nicht von einem Startup
+- **Message/Reducer architecture** is good for complex state machines, but too boilerplate-heavy for UI
+- **VDOM** is conceptually simple, but fine-grained reactivity (Leptos) is more performant
+- **Community-driven development** — Yew was built by the community, not by a startup
 
 ---
 
-## 4. Andere Rust-Frameworks
+## 4. Other Rust Frameworks
 
 ### 4.1 Sycamore (v0.9, 2024)
 
-**Ansatz:** Fine-Grained Reactivity (wie Leptos, aber schlanker)
+**Approach:** Fine-Grained Reactivity (like Leptos, but leaner)
 
 ```rust
 #[component]
@@ -367,132 +367,132 @@ fn Counter(initial: i32) -> View {
 ```
 
 **Features:**
-- Fine-grained reactivity (kein VDOM)
+- Fine-grained reactivity (no VDOM)
 - SSR + Hydration
 - Async/Suspense
 - Built-in Routing (Client + Server)
-- 3.3k Stars, aktiv gepflegt
+- 3.3k Stars, actively maintained
 
-**Relevanz:** Sycamore teilt viele Ideen mit Leptos, ist aber kleiner und weniger Full-Stack-orientiert. Proof dass Fine-Grained Reactivity in Rust gut funktioniert.
+**Relevance:** Sycamore shares many ideas with Leptos, but is smaller and less full-stack oriented. Proof that fine-grained reactivity works well in Rust.
 
-### 4.2 Perseus (veraltet)
+### 4.2 Perseus (deprecated)
 
-Perseus war ein Full-Stack-Framework inspiriert von Next.js. Features:
-- SSG (Static Site Generation) als First-Class-Feature
+Perseus was a full-stack framework inspired by Next.js. Features:
+- SSG (Static Site Generation) as first-class feature
 - i18n built-in
-- State-Plugins (globaler State via Context)
+- State plugins (global state via context)
 
-Veraltet/verschmolzen. Die SSG-Ideen sind in Dioxus und Leptos aufgegangen.
+Deprecated/merged. The SSG ideas have been absorbed into Dioxus and Leptos.
 
-### 4.3 MoonZoon (veraltet)
+### 4.3 MoonZoon (deprecated)
 
-Minimalistisch, "no-JS, no-CSS, no-HTML" — komplett in Rust. War ein experimentelles Framework das Rust-APIs direkt in Browser-Elemente umsetzte.
+Minimalist, "no-JS, no-CSS, no-HTML" — completely in Rust. Was an experimental framework that mapped Rust APIs directly to browser elements.
 
 ---
 
 ## 5. Cross-Cutting Patterns
 
-### 5.1 Was Rust-Frameworks können, das JS-Frameworks nicht können
+### 5.1 What Rust Frameworks Can Do That JS Frameworks Cannot
 
-| Fähigkeit                  | Ermöglicht durch              | Relevanz für Dreego |
-|----------------------------|-------------------------------|---------------------|
-| **Single Binary Deployment**| Rust compiliert zu WASM + Server-Binary | Go kann das nativ |
-| **Compile-Time Template-Checks** | Makros + Typ-System | Transpiler macht das |
-| **Typ-Sicherheit über Client/Server-Grenze** | `#[server]` Makro generiert beide Seiten | `g-submit`-Konzept |
-| **Kein Runtime-Template-Error** | Compiler prüft alle Template-Referenzen | Transpiler-Checks |
-| **Keine node_modules** | Cargo statt npm | Go-Module |
-| **Thread-Safe Reactivity** | Rusts Ownership-System | Go-Goroutines |
-| **Shared Code ohne API-Contract** | Server Functions | Go-Funktionen als Handler |
+| Capability                   | Enabled By                     | Relevance for Dreego |
+|------------------------------|--------------------------------|----------------------|
+| **Single Binary Deployment** | Rust compiles to WASM + Server binary | Go can do this natively |
+| **Compile-Time Template Checks** | Macros + Type system | Transpiler does this |
+| **Type Safety across Client/Server boundary** | `#[server]` macro generates both sides | `g-submit` concept |
+| **No Runtime Template Error** | Compiler checks all template references | Transpiler checks |
+| **No node_modules** | Cargo instead of npm | Go modules |
+| **Thread-Safe Reactivity** | Rust's ownership system | Go goroutines |
+| **Shared code without API contract** | Server Functions | Go functions as handlers |
 
-### 5.2 Compile-Time Safety — Wie Rust-Frameworks sie nutzen
+### 5.2 Compile-Time Safety — How Rust Frameworks Use It
 
-1. **RSX-Makros (`view!`, `rsx!`, `html!`):** Alle Tags, Attribute, Event-Handler werden zur Compile-Zeit gegen HTML-Spec geprüft. Tippfehler in Attributen = Compiler-Fehler.
+1. **RSX Macros (`view!`, `rsx!`, `html!`):** All tags, attributes, event handlers are checked against HTML spec at compile time. Typos in attributes = compiler error.
 
-2. **Typ-geprüfte Props:** `#[component]`-Attribute können Rust-Typen sein. `Option<T>` für optionale Props, `Into<T>` für automatische Konvertierung.
+2. **Type-checked Props:** `#[component]` attributes can be Rust types. `Option<T>` for optional props, `Into<T>` for automatic conversion.
 
-3. **Route-Parameter als Typen:** `/:id` → `use_params()` gibt `Result<Params, _>` mit statisch abgeleiteten Typen.
+3. **Route Parameters as Types:** `/:id` → `use_params()` returns `Result<Params, _>` with statically derived types.
 
-4. **`#[server]`-Argumente:** Serialisierung wird via `serde` zur Compile-Zeit validiert.
+4. **`#[server]` Arguments:** Serialization is validated at compile time via `serde`.
 
-### 5.3 WASM-Story
+### 5.3 WASM Story
 
-Alle Rust-Frameworks nutzen WASM für Client-Side-Interaktivität. Die WASM-Binary-Größe ist der größte Pain-Point:
+All Rust frameworks use WASM for client-side interactivity. The WASM binary size is the biggest pain point:
 
-- Basis-Leptos-App: ~274 KB (CSR+Hydrate)
-- Islands-Mode: ~24 KB (nur interaktive Teile)
-- `wasm-opt` + LTO: ~30-50% Reduktion
+- Base Leptos app: ~274 KB (CSR+Hydrate)
+- Islands mode: ~24 KB (only interactive parts)
+- `wasm-opt` + LTO: ~30-50% reduction
 
-**Dreego lernt daraus:** WASM ist für Dreego nicht nötig (HTMX + Alpine.js ersetzen es), aber die **Islands-Architektur** ist das konzeptionelle Vorbild für Dreegos `<go>`-Block-Modell: Server-Code läuft OHNE Client-Bundle.
+**Dreego learns from this:** WASM is not needed for Dreego (HTMX + Alpine.js replace it), but the **Islands architecture** is the conceptual model for Dreego's `<go>` block model: Server code runs WITHOUT a client bundle.
 
-### 5.4 Emergente Patterns
+### 5.4 Emergent Patterns
 
-| Pattern                     | Wer macht's          | Dreego-Übertragung                             |
-|-----------------------------|----------------------|------------------------------------------------|
-| **Server Functions**        | Leptos, Dioxus       | `g-submit` / `g-action` im `<go>`-Block       |
-| **Fine-Grained Reactivity** | Leptos, Sycamore     | Alpine.js / Datastar (Client-Seite)            |
-| **Signals als Primitive**   | Alle                 | `{#let}` + HTMX partials (Server-Äquivalent)   |
-| **Islands Architecture**    | Leptos               | `<go>`-Block ist autark, keinerlei Client-Code |
-| **Context API**             | Alle                 | `c.Session()`, `c.User()` im `<go>`            |
-| **VDOM vs Fine-Grained**    | Dioxus/Leptos-Dualität| Dreego braucht beides nicht (SSR-only)          |
-| **Progressive Enhancement** | Leptos `<ActionForm>` | Form-Actions, `<form>` ohne JS                 |
-| **File-Based Routing**      | Leptos (manual), Dioxus (code) | File-Based via `.dreego`-Dateien       |
-| **Suspense/Streaming**      | Leptos, Sycamore     | Go-Templates + HTMX partials                   |
-
----
-
-## 6. Übertragbare Features für Dreego
-
-### 6.1 Von Leptos übernehmen
-
-| Feature                     | Dreego-Implementierung                                         | Priorität |
-|-----------------------------|---------------------------------------------------------------|-----------|
-| `#[server]` Makro           | `g-submit` / `g-action` → Go-Handler aus Form-Name generieren | **V1**    |
-| Fine-Grained Reactivity     | Nicht nötig (SSR), aber Alpine.js für Client-Seite            | V1        |
-| Islands-Architektur         | `<go>`-Block = Island, kein JS für Nicht-Interaktives         | V1 (implizit) |
-| `<ActionForm>`              | `<form g-submit="login">` mit Struct-Validierung              | **V1**    |
-| `provide_context`           | `c.Set("user", user)` im `<go>`-Block                         | V1        |
-| `Memo`/`Derived`            | `{#let name = expr}` oder Go-Variablen im `<go>`              | V1        |
-| Suspense/Streaming          | Go `http.Flusher` + HTMX SSE                                 | V2        |
-| Nested Routing              | File-Based + `layout.dreego`                                   | V1        |
-| `#[prop(into)]`             | Auto-Konvertierung via Go-Interfaces                          | V2        |
-| `#[island]` Makro           | Dreego braucht's nicht — `<script>`-Block ist die Insel        | N/A       |
-
-### 6.2 Von Dioxus übernehmen
-
-| Feature                     | Dreego-Implementierung                                         | Priorität |
-|-----------------------------|---------------------------------------------------------------|-----------|
-| `dx` CLI                    | `dreego dev`, `dreego build`, `dreego new`                      | **V1**    |
-| Hot Reload                  | File-Watcher + SSE Browser Reload                             | **V1**    |
-| Static Site Generation      | `dreego build --static` → HTML-Dateien                         | V2        |
-| `GlobalSignal`              | Go-Package-Level-Variablen (nicht empfohlen, aber möglich)    | V2        |
-| `use_memo`                  | `<go>`-Block cached Berechnungen via `sync.Once`              | V2        |
-| HTML → RSX Translator       | `dreego convert` → HTML nach `.dreego` (niedrige Prio)         | V3        |
-
-### 6.3 Von Yew übernehmen
-
-| Feature                     | Dreego-Implementierung                                         | Priorität |
-|-----------------------------|---------------------------------------------------------------|-----------|
-| Elm-Reducer                 | Nicht nötig, Go-Handler reichen                               | N/A       |
-| Agents / Worker             | Go-Goroutines sind Worker                                     | V2        |
-
-### 6.4 Was Dreego NICHT braucht (und warum)
-
-| Rust-Feature                | Warum Dreego es nicht braucht                                  |
-|-----------------------------|---------------------------------------------------------------|
-| **WASM-Compilation**        | HTMX + Alpine.js ersetzen WASM-Interaktivität, 0 KB Overhead |
-| **Client-Side Signals**     | Alpine.js `x-data` / Datastar Signals sind 15 KB              |
-| **Virtual DOM**             | SSR + HTML-Fragment-Swaps via HTMX                            |
-| **RSX/JSX-Makros**          | `.dreego`-Dateien sind HTML-nativ, kein Makro nötig            |
-| **Hydration**               | HTMX lädt HTML nach, kein Hydration-Konzept nötig             |
-| **Multi-Platform**          | Fokus auf Web, Single Binary reicht                           |
+| Pattern                      | Who does it           | Dreego Transfer                                 |
+|------------------------------|-----------------------|-------------------------------------------------|
+| **Server Functions**         | Leptos, Dioxus        | `g-submit` / `g-action` in `<go>` block        |
+| **Fine-Grained Reactivity**  | Leptos, Sycamore      | Alpine.js / Datastar (client-side)              |
+| **Signals as Primitive**     | All                   | `{#let}` + HTMX partials (server equivalent)    |
+| **Islands Architecture**     | Leptos                | `<go>` block is self-contained, zero client code |
+| **Context API**              | All                   | `c.Session()`, `c.User()` in `<go>`             |
+| **VDOM vs Fine-Grained**     | Dioxus/Leptos duality | Dreego needs neither (SSR-only)                 |
+| **Progressive Enhancement**  | Leptos `<ActionForm>` | Form actions, `<form>` without JS               |
+| **File-Based Routing**       | Leptos (manual), Dioxus (code) | File-Based via `.dreego` files        |
+| **Suspense/Streaming**       | Leptos, Sycamore      | Go templates + HTMX partials                    |
 
 ---
 
-## 7. Architektonische Lehren
+## 6. Transferable Features for Dreego
 
-### 7.1 Das Server-Functions-Pattern ist dominant
+### 6.1 Adopt from Leptos
 
-Alle großen Rust-Frameworks haben Server Functions implementiert. Es ist DER Weg, Client-Server-Interaktion zu modellieren:
+| Feature                      | Dreego Implementation                                           | Priority |
+|------------------------------|----------------------------------------------------------------|----------|
+| `#[server]` Macro            | `g-submit` / `g-action` → Generate Go handler from form name   | **V1**   |
+| Fine-Grained Reactivity      | Not needed (SSR), but Alpine.js for client-side                | V1       |
+| Islands Architecture         | `<go>` block = Island, no JS for non-interactive               | V1 (implicit) |
+| `<ActionForm>`               | `<form g-submit="login">` with struct validation               | **V1**   |
+| `provide_context`            | `c.Set("user", user)` in `<go>` block                          | V1       |
+| `Memo`/`Derived`             | `{#let name = expr}` or Go variables in `<go>`                 | V1       |
+| Suspense/Streaming           | Go `http.Flusher` + HTMX SSE                                  | V2       |
+| Nested Routing               | File-Based + `layout.dreego`                                    | V1       |
+| `#[prop(into)]`              | Auto-conversion via Go interfaces                              | V2       |
+| `#[island]` Macro            | Dreego doesn't need it — `<script>` block is the island         | N/A      |
+
+### 6.2 Adopt from Dioxus
+
+| Feature                      | Dreego Implementation                                           | Priority |
+|------------------------------|----------------------------------------------------------------|----------|
+| `dx` CLI                     | `dreego dev`, `dreego build`, `dreego new`                       | **V1**   |
+| Hot Reload                   | File watcher + SSE Browser Reload                               | **V1**   |
+| Static Site Generation       | `dreego build --static` → HTML files                            | V2       |
+| `GlobalSignal`               | Go package-level variables (not recommended, but possible)     | V2       |
+| `use_memo`                   | `<go>` block cached computations via `sync.Once`               | V2       |
+| HTML → RSX Translator        | `dreego convert` → HTML to `.dreego` (low priority)             | V3       |
+
+### 6.3 Adopt from Yew
+
+| Feature                      | Dreego Implementation                                           | Priority |
+|------------------------------|----------------------------------------------------------------|----------|
+| Elm-Reducer                  | Not needed, Go handlers suffice                                 | N/A      |
+| Agents / Worker              | Go goroutines are workers                                       | V2       |
+
+### 6.4 What Dreego Does NOT Need (and Why)
+
+| Rust Feature                 | Why Dreego Doesn't Need It                                     |
+|------------------------------|----------------------------------------------------------------|
+| **WASM Compilation**         | HTMX + Alpine.js replace WASM interactivity, 0 KB overhead    |
+| **Client-Side Signals**      | Alpine.js `x-data` / Datastar signals are 15 KB               |
+| **Virtual DOM**              | SSR + HTML fragment swaps via HTMX                             |
+| **RSX/JSX Macros**           | `.dreego` files are HTML-native, no macro needed               |
+| **Hydration**                | HTMX loads HTML afterward, no hydration concept needed         |
+| **Multi-Platform**           | Focus on Web, Single Binary suffices                           |
+
+---
+
+## 7. Architectural Lessons
+
+### 7.1 The Server Functions Pattern Is Dominant
+
+All major Rust frameworks have implemented server functions. It is THE way to model client-server interaction:
 
 ```
 Leptos:   #[server] fn add_todo()  →  <ActionForm action=add_todo>
@@ -500,37 +500,37 @@ Dioxus:   #[server] fn save_user()  →  onclick: spawn(async { save_user().awai
 Dreego:    <form g-submit="login">   →  func login(form LoginForm)
 ```
 
-**Die Kernidee:** Die Rust/Go-Funktion IST die API. Kein separater REST-Endpoint, keine manuelle Serialisierung.
+**The core idea:** The Rust/Go function IS the API. No separate REST endpoint, no manual serialization.
 
 ### 7.2 Compile-Time > Runtime
 
-Rust-Frameworks maximieren Compile-Time-Checks. Dreego macht dasselbe via Transpiler:
+Rust frameworks maximize compile-time checks. Dreego does the same via transpiler:
 
-| Rust                    | Dreego                                    |
-|-------------------------|------------------------------------------|
-| `view! { <h1>{x}</h1> }` (Makro prüft Tags) | `.dreego` → Transpiler prüft Template-Syntax |
-| `#[server]` prüft Argument-Typen | `g-submit` prüft Struct-Tags          |
-| Route-Params als Typen  | File-Based Routes werden zu Go-Handlern  |
+| Rust                     | Dreego                                     |
+|--------------------------|-------------------------------------------|
+| `view! { <h1>{x}</h1> }` (macro checks tags) | `.dreego` → Transpiler checks template syntax |
+| `#[server]` checks argument types | `g-submit` checks struct tags          |
+| Route params as types    | File-Based routes become Go handlers      |
 
-### 7.3 Islands sind die Zukunft (aber Dreego ist schon da)
+### 7.3 Islands Are the Future (But Dreego Is Already There)
 
-Rust-Frameworks entdecken gerade die Islands-Architektur (Leptos 0.5+). Dreego ist von Natur aus "Islands":
+Rust frameworks are just discovering the Islands architecture (Leptos 0.5+). Dreego is naturally "Islands":
 
-- `<go>`-Block = Server-Code, null Client
-- `<script>`-Block = Client-Interaktivität, optional
-- Template = reines HTML
+- `<go>` block = Server code, zero client
+- `<script>` block = Client interactivity, optional
+- Template = pure HTML
 
-Das ist die sauberste Trennung von Server/Client, die Rust-Frameworks erst über `#[island]`-Makros erreichen.
+That is the cleanest separation of server/client, which Rust frameworks only achieve through `#[island]` macros.
 
-### 7.4 Das Diamond-Problem in reaktiven Systemen
+### 7.4 The Diamond Problem in Reactive Systems
 
-Leptos' reaktiver Graph löst das Diamond-Problem elegant mit einem Push-Pull-Algorithmus. Für Dreego ist das akademisch interessant aber nicht direkt anwendbar — wir haben keinen client-seitigen reaktiven Graphen. Die Lehre: **Fine-grained Updates sind das Ziel**, egal ob über Signals (Leptos) oder HTML-Fragments (HTMX).
+Leptos' reactive graph elegantly solves the Diamond problem with a push-pull algorithm. For Dreego, this is academically interesting but not directly applicable — we have no client-side reactive graph. The lesson: **Fine-grained updates are the goal**, whether via signals (Leptos) or HTML fragments (HTMX).
 
 ---
 
-## 8. Konkrete Dreego-Feature-Ideen aus dieser Analyse
+## 8. Concrete Dreego Feature Ideas from This Analysis
 
-### 8.1 Server-Actions (inspiriert von Leptos `#[server]` + `<ActionForm>`)
+### 8.1 Server Actions (inspired by Leptos `#[server]` + `<ActionForm>`)
 
 ```html
 <!-- user/login.dreego -->
@@ -557,17 +557,17 @@ Leptos' reaktiver Graph löst das Diamond-Problem elegant mit einem Push-Pull-Al
 </go>
 ```
 
-### 8.2 Context-Kaskade (inspiriert von `provide_context`)
+### 8.2 Context Cascade (inspired by `provide_context`)
 
 ```html
 <go>
-    // In layout.dreego — für alle Kind-Seiten verfügbar
+    // In layout.dreego — available for all child pages
     user := c.Session.Get("user")
     c.Provide("user", user)
 </go>
 ```
 
-### 8.3 Derived Values (inspiriert von `Memo`/Derived Signals)
+### 8.3 Derived Values (inspired by `Memo`/Derived Signals)
 
 ```html
 <go>
@@ -579,35 +579,35 @@ Leptos' reaktiver Graph löst das Diamond-Problem elegant mit einem Push-Pull-Al
 <p>Total: {totalPrice} ({itemCount} items)</p>
 ```
 
-### 8.4 CLI-First Dev-Experience (inspiriert von `dx` / `cargo-leptos`)
+### 8.4 CLI-First Dev Experience (inspired by `dx` / `cargo-leptos`)
 
 ```
-dreego new my-app              # Scaffold mit layout.dreego, app.go
-dreego dev                     # Transpiler-Watch + Hot-Reload + Tailwind
-dreego build                   # Single Binary mit embed
-dreego routes                  # Liste aller generierten Routen
-dreego add auth                # Addon installieren
-dreego build --static          # SSG-Mode (V2)
+dreego new my-app              # Scaffold with layout.dreego, app.go
+dreego dev                     # Transpiler watch + Hot-Reload + Tailwind
+dreego build                   # Single Binary with embed
+dreego routes                  # List of all generated routes
+dreego add auth                # Install addon
+dreego build --static          # SSG mode (V2)
 ```
 
-### 8.5 Progressive Enhancement als First-Class (inspiriert von `<ActionForm>`)
+### 8.5 Progressive Enhancement as First-Class (inspired by `<ActionForm>`)
 
-Jedes `<form>` in Dreego funktioniert:
-1. **Ohne JS:** Normales Browser-Formular, POST, Full-Page-Reload
-2. **Mit HTMX:** `hx-post`, Fragment-Austausch, kein Reload
-3. **Mit Alpine.js/Datastar:** Client-seitige Validierung, optimistisches UI
+Every `<form>` in Dreego works:
+1. **Without JS:** Normal browser form, POST, full page reload
+2. **With HTMX:** `hx-post`, fragment swap, no reload
+3. **With Alpine.js/Datastar:** Client-side validation, optimistic UI
 
 ---
 
-## 9. Fazit
+## 9. Conclusion
 
-Rust-Frontend-Frameworks haben in den letzten 3 Jahren eine enorme Entwicklung durchgemacht. Die zentralen Innovationen sind:
+Rust frontend frameworks have undergone enormous development in the last 3 years. The central innovations are:
 
-1. **Server Functions:** Funktionen statt API-Endpoints — das eleganteste Client-Server-Modell
-2. **Fine-Grained Reactivity:** Nur das DOM-Element ändern, das sich wirklich geändert hat
-3. **Islands Architecture:** Interaktivität als Opt-in, nicht als Default
-4. **Compile-Time Safety:** Das Typ-System als Qualitätsgarant über die gesamte App
+1. **Server Functions:** Functions instead of API endpoints — the most elegant client-server model
+2. **Fine-Grained Reactivity:** Only change the DOM element that actually changed
+3. **Islands Architecture:** Interactivity as opt-in, not as default
+4. **Compile-Time Safety:** The type system as quality guarantee across the entire app
 
-Dreego kann alle diese Konzepte aufgreifen — aber in einem grundlegend anderen Modell: Statt WASM+Signals setzt Dreego auf **SSR+HTMX+Alpine.js**. Das Ergebnis ist dasselbe (reaktive, interaktive Web-Apps), aber der Weg ist einfacher: kein WASM, kein Hydration-Konzept, kein Client-Server-Isomorphie-Zwang.
+Dreego can adopt all these concepts — but in a fundamentally different model: Instead of WASM+Signals, Dreego relies on **SSR+HTMX+Alpine.js**. The result is the same (reactive, interactive web apps), but the path is simpler: no WASM, no hydration concept, no client-server isomorphism requirement.
 
-Die größte Lektion: **Das Server-Functions-Pattern ist zu gut, um es zu ignorieren.** Dreegos `g-submit`/`g-action` sollte das zentrale Interaktionsmodell werden.
+The biggest lesson: **The Server Functions pattern is too good to ignore.** Dreego's `g-submit`/`g-action` should become the central interaction model.

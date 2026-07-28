@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Core-Fixed: Request-ID (X-Request-ID Header, in Context + Logs). Core-Conditional: /metrics (Prometheus-Format). Plugin: OpenTelemetry-Tracing. Strukturiertes Logging via slog. Jeder Request bekommt trace_id + request_id.
+Core-Fixed: Request-ID (X-Request-ID header, in Context + Logs). Core-Conditional: /metrics (Prometheus format). Plugin: OpenTelemetry tracing. Structured logging via slog. Every request gets trace_id + request_id.

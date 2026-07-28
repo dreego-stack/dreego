@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-LSP-Server für .dreego-Syntax. VS Code Extension mit Syntax-Highlighting, Autocomplete, Go-To-Definition. Farbige CLI-Ausgabe. .dreego-Zeilennummern in Fehlermeldungen. Linter für Best Practices.
+LSP server for .dreego syntax. VS Code extension with syntax highlighting, autocomplete, go-to-definition. Colored CLI output. .dreego line numbers in error messages. Linter for best practices.

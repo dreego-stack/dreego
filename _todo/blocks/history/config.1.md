@@ -9,4 +9,4 @@ created: 2026-07-24
 changed: 2026-07-24
 ---
 
-Konfiguration via dreego/config.json. Redirects, Rewrites, Logging-Enabled. Core-Conditional Middleware-Toggle.
+Configuration via dreego/config.json. Redirects, Rewrites, Logging-Enabled. Core-Conditional middleware toggle.

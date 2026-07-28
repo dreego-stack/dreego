@@ -1,11 +1,11 @@
 <head>
-    <title>500 – Interner Fehler</title>
+    <title>500 – Internal Server Error</title>
 </head>
 
 <div>
     <h1>500</h1>
-    <p>Ein interner Fehler ist aufgetreten.</p>
-    <a href="/">Zurück zur Startseite</a>
+    <p>An internal error occurred.</p>
+    <a href="/">Back to Home</a>
 </div>
 
 <style>

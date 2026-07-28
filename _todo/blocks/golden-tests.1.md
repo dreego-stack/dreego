@@ -1,6 +1,6 @@
 ---
 id: golden-tests.1
-title: Golden-File Tests für Generator
+title: Golden File Tests for Generator
 status: planned
 phase: v0.0.5
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-27
 changed: 2026-07-27
 ---
 
-Templ-inspiriert: ~50 Test-Subdirectories mit `.dreego` Input + erwartetem `_dreego.go` Output. Golden-File Pattern: Parse → Generate → Compare. Jedes Template-Konstrukt ({#if}, {#each}, section, layout) bekommt eigene Test-Fixtures. Ersetzt manuelle CI-Checks.
+Templ-inspired: ~50 test subdirectories with `.dreego` input + expected `_dreego.go` output. Golden file pattern: Parse → Generate → Compare. Every template construct ({#if}, {#each}, section, layout) gets own test fixtures. Replaces manual CI checks.

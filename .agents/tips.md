@@ -1,94 +1,94 @@
 
 ---
 type: Reference
-title: 50 Tipps + Beachtungsliste
+title: 50 Tips + Checklist
 description: 50 development tips and checklist covering DX, architecture, templating, plugins, and performance
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# 50 Tipps + Beachtungsliste
+# 50 Tips + Checklist
 
-**Quelle:** Gemini-Chat, 25.07.2026
+**Source:** Gemini Chat, 2026-07-25
 
 ---
 
-## 1. Developer Experience (DX) & Ergonomie (1–10)
+## 1. Developer Experience (DX) & Ergonomics (1–10)
 
-| # | Tipp | Status |
+| # | Tip | Status |
 |---|------|--------|
-| 1 | Fehler mit `.dreego`-Zeilennummern, nie aus `dree.go` | geplant |
-| 2 | Farbiges CLI-Output (grune Haken, rote Fehler) | geplant |
-| 3 | `dreego init my-app` — funktionierendes Minimalprojekt | geplant |
-| 4 | Flache Ordnerstruktur erlauben | ✅ `dreego/routes/get.dreego` reicht |
-| 5 | Farblich hervorgehobene HTTP-Logs im Dev-Mode | geplant (aktuell: JSONL) |
-| 6 | `static/`-Ordner mit `embed.FS` ausliefern | geplant |
-| 7 | Kompaktes CLI-Output, nur Anderungen zeigen | geplant |
-| 8 | Hot-Reload in <1s | geplant (V2) |
-| 9 | `dreego build` → Single Binary | ✅ |
-| 10 | `/health`-Endpoint per Config aktivierbar | geplant |
+| 1 | Errors with `.dreego` line numbers, never from `dree.go` | planned |
+| 2 | Colored CLI output (green checkmarks, red errors) | planned |
+| 3 | `dreego init my-app` — working minimal project | planned |
+| 4 | Allow flat folder structure | ✅ `dreego/routes/get.dreego` is enough |
+| 5 | Color-highlighted HTTP logs in dev mode | planned (currently: JSONL) |
+| 6 | Serve `static/` folder via `embed.FS` | planned |
+| 7 | Compact CLI output, only show changes | planned |
+| 8 | Hot reload in <1s | planned (V2) |
+| 9 | `dreego build` → single binary | ✅ |
+| 10 | `/health` endpoint activatable via config | planned |
 
-## 2. Architekturentwurf & Routing (11–20)
+## 2. Architecture Design & Routing (11–20)
 
-| # | Tipp | Status |
+| # | Tip | Status |
 |---|------|--------|
-| 11 | Explizite HTTP-Methoden-Suffixe | ✅ `get.dreego`, `post.dreego` |
-| 12 | Typensichere Pfad-Parameter (int/string) | geplant |
-| 13 | Wildcard-Routen `[...all].dreego` | geplant (Entscheidung steht) |
-| 14 | `_middleware.go` pro Ordner | geplant (Entscheidung steht) |
-| 15 | Kein globaler State, Race-Conditions vermeiden | refactoring (runtime globals) |
-| 16 | `context.Context` durchreichen | ✅ `c.R.Context()` |
-| 17 | Custom `404.dreego` und `500.dreego` | geplant |
-| 18 | Form-Data Parser (`x-www-form-urlencoded`) | geplant |
-| 19 | SSE / Streaming aus `<go>`-Block | geplant |
-| 20 | `dreego.Redirect(ctx, "/login")` | geplant |
+| 11 | Explicit HTTP method suffixes | ✅ `get.dreego`, `post.dreego` |
+| 12 | Type-safe path parameters (int/string) | planned |
+| 13 | Wildcard routes `[...all].dreego` | planned (decision made) |
+| 14 | `_middleware.go` per folder | planned (decision made) |
+| 15 | No global state, avoid race conditions | refactoring (runtime globals) |
+| 16 | Pass through `context.Context` | ✅ `c.R.Context()` |
+| 17 | Custom `404.dreego` and `500.dreego` | planned |
+| 18 | Form data parser (`x-www-form-urlencoded`) | planned |
+| 19 | SSE / Streaming from `<go>` block | planned |
+| 20 | `dreego.Redirect(ctx, "/login")` | planned |
 
-## 3. Templating & Component-System (21–30)
+## 3. Templating & Component System (21–30)
 
-| # | Tipp | Status |
+| # | Tip | Status |
 |---|------|--------|
-| 21 | Klare Trennung: `<go>`, `<script>`, `<style>`, HTML | ✅ |
-| 22 | Typensichere Props fur Komponenten | geplant (Entscheidung steht) |
-| 23 | Automatisches XSS-Escaping | geplant |
-| 24 | Raw-HTML-Escape-Hatch | geplant |
-| 25 | CSS-Scope-Hash fur `<style>`-Block | ✅ `data-scope="hash"` |
-| 26 | JS-Inlining aus `<script>` | ✅ |
-| 27 | Slot-System fur Layouts | ✅ `{#slot}` |
-| 28 | Conditional Rendering `{#if}`, `{#each}` | ✅ |
-| 29 | Zero-JS-Mode (keine `<script>`-Sektion) | ✅ implizit (nichts = kein JS) |
-| 30 | Head-Management (`<title>`, `<meta>`) | ✅ `<head>`-Block |
+| 21 | Clear separation: `<go>`, `<script>`, `<style>`, HTML | ✅ |
+| 22 | Type-safe props for components | planned (decision made) |
+| 23 | Automatic XSS escaping | planned |
+| 24 | Raw HTML escape hatch | planned |
+| 25 | CSS scope hash for `<style>` block | ✅ `data-scope="hash"` |
+| 26 | JS inlining from `<script>` | ✅ |
+| 27 | Slot system for layouts | ✅ `{#slot}` |
+| 28 | Conditional rendering `{#if}`, `{#each}` | ✅ |
+| 29 | Zero-JS mode (no `<script>` section) | ✅ implicitly (nothing = no JS) |
+| 30 | Head management (`<title>`, `<meta>`) | ✅ `<head>` block |
 
-## 4. Plugins, Typensicherheit & Okosystem (31–40)
+## 4. Plugins, Type Safety & Ecosystem (31–40)
 
-| # | Tipp | Status |
+| # | Tip | Status |
 |---|------|--------|
-| 31 | Compile-Time Plugin-Muster (Go-Pakete) | ✅ `dreego.Plugin` Interface |
-| 32 | Interface-Driven Design | ✅ Capability-basiert |
-| 33 | Typensichere Context-Values | geplant (Entscheidung steht) |
-| 34 | Plugin-Konfiguration validieren | geplant |
-| 35 | Offizielles Auth-Plugin | geplant (dreego-auth) |
-| 36 | i18n-Plugin mit Typsicherheit | geplant (V2) |
-| 37 | Zero CGO fur Cross-Compiling | ✅ (keine CGO-Abhangigkeiten) |
-| 38 | CLI-Plugin-Hooks | geplant |
-| 39 | Plugin-Lebenszyklus (`OnStart`, `OnShutdown`) | geplant (Entscheidung steht) |
-| 40 | Plugin-Dokumentations-Vorlage | geplant |
+| 31 | Compile-time plugin pattern (Go packages) | ✅ `dreego.Plugin` Interface |
+| 32 | Interface-driven design | ✅ Capability-based |
+| 33 | Type-safe context values | planned (decision made) |
+| 34 | Validate plugin configuration | planned |
+| 35 | Official auth plugin | planned (dreego-auth) |
+| 36 | i18n plugin with type safety | planned (V2) |
+| 37 | Zero CGO for cross-compiling | ✅ (no CGO dependencies) |
+| 38 | CLI plugin hooks | planned |
+| 39 | Plugin lifecycle (`OnStart`, `OnShutdown`) | planned (decision made) |
+| 40 | Plugin documentation template | planned |
 
-## 5. Performance, Sicherheit & Barrierefreiheit (41–50)
+## 5. Performance, Security & Accessibility (41–50)
 
-| # | Tipp | Status |
+| # | Tip | Status |
 |---|------|--------|
-| 41 | Sichere HTTP-Header (CSP, X-Frame-Options) | geplant |
-| 42 | Gzip/Brotli-Komprimierung | geplant |
-| 43 | Zero-Allocation im Hot-Path | geplant (V2) |
-| 44 | CSRF-Schutz | geplant (Entscheidung steht) |
-| 45 | Graceful Shutdown | geplant |
-| 46 | VS Code Syntax Highlighting Extension | geplant |
-| 47 | ARIA-Warnungen im CLI | geplant (V3) |
-| 48 | Go-Doc Kommentare fur Core | geplant |
-| 49 | Dockerfile-Vorlage (Multi-Stage auf Scratch) | geplant |
-| 50 | Showcase-Projekte (Todo, Blog) | geplant |
+| 41 | Secure HTTP headers (CSP, X-Frame-Options) | planned |
+| 42 | Gzip/Brotli compression | planned |
+| 43 | Zero-allocation in hot path | planned (V2) |
+| 44 | CSRF protection | planned (decision made) |
+| 45 | Graceful shutdown | planned |
+| 46 | VS Code Syntax Highlighting Extension | planned |
+| 47 | ARIA warnings in CLI | planned (V3) |
+| 48 | Go doc comments for core | planned |
+| 49 | Dockerfile template (multi-stage on scratch) | planned |
+| 50 | Showcase projects (Todo, Blog) | planned |
 
-## Zusammenfassung
+## Summary
 
-- ✅ Bereits umgesetzt: 11 von 50
-- Geplant (Entscheidung steht): 22 von 50
-- Geplant (V2/V3): 17 von 50
+- ✅ Already implemented: 11 of 50
+- Planned (decision made): 22 of 50
+- Planned (V2/V3): 17 of 50

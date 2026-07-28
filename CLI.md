@@ -3,7 +3,7 @@
 ## Phase 0 Commands
 
 ### `dreego init <path>`
-Scaffolding. Erstellt ein neues Dreego-Projekt aus embedded Blueprint.
+Scaffolds a new Dreego project from embedded blueprints.
 
 ```
 dreego init myapp
@@ -15,27 +15,27 @@ myapp/
         └── get.dreego
 ```
 
-Danach: `cd myapp && go mod init myapp && dreego generate && go run .`
+Then: `cd myapp && go mod init myapp && dreego generate && go run .`
 
 ### `dreego generate [--force] [--check]`
-Transpiliert alle `.dreego`-Dateien. Output: `dreego/gen/routes.go` + `dreego/gen/dree.go`.
+Transpiles all `.dreego` files. Output: `dreego/gen/routes.go` + `dreego/gen/dree.go`.
 
 Flags:
-- `--force` — Force-Regeneration aller Dateien
-- `--check` — CI-Validation: exit non-zero wenn .dreego-Dateien neuer als gen-Output (stale)
+- `--force` — Force regeneration of all files
+- `--check` — CI validation: exit non-zero if .dreego files are newer than gen output (stale)
 
-## Phase 1 Commands (geplant)
+## Phase 1 Commands (planned)
 
-- `dreego dev` — Dev-Server mit Hot Reload (air)
-- `dreego build` — Production Binary
+- `dreego dev` — Dev server with hot reload
+- `dreego build` — Production binary
 
-## Phase 2 Commands (geplant)
+## Phase 2 Commands (planned)
 
-- `dreego add <plugin>` — Plugin installieren
-- `dreego routes` — Alle Routen anzeigen
-- `dreego tinker` — Go-REPL
+- `dreego add <plugin>` — Install plugin
+- `dreego routes` — Show all routes
+- `dreego tinker` — Go REPL
 
-## Phase 3 Commands (geplant)
+## Phase 3 Commands (planned)
 
 - `dreego build --static` — SSG
 - `dreego build --wails` — Wails Desktop

@@ -1,6 +1,6 @@
 ---
 id: addon-ecosystem.1
-title: Addon-Ökosystem (auth, ui, admin, db)
+title: Addon Ecosystem (auth, ui, admin, db)
 status: planned
 phase: v0.x.0
 requires:
@@ -11,4 +11,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Erste offizielle Addons: dreego-auth (OAuth2/Passkeys), dreego-ui (Komponenten-Bib), dreego-admin (Django-Admin-like). Plugin-Registry. dreego add/remove CLI. Dokumentations-Vorlage für Community-Addons.
+First official addons: dreego-auth (OAuth2/Passkeys), dreego-ui (component library), dreego-admin (Django-Admin-like). Plugin registry. dreego add/remove CLI. Documentation template for community addons.

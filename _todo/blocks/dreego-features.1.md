@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Feature-Flags und A/B-Testing. Flag-Definition via Config oder DB. Per-User/Per-Group Aktivierung. Middleware-Hook für Request-basierte Entscheidung. c.Flag("new-ui") im Template. Dashboard im dreego-admin.
+Plugin for feature flags and A/B testing. Flag definition via config or DB. Per-user/per-group activation. Middleware hook for request-based decision. c.Flag("new-ui") in template. Dashboard in dreego-admin.

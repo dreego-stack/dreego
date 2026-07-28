@@ -1,6 +1,6 @@
 ---
 id: dreego-mail.1
-title: dreego-mail (E-Mail SMTP/Resend/Postmark)
+title: dreego-mail (Email SMTP/Resend/Postmark)
 status: planned
 phase: v0.x.0
 requires:
@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für E-Mail-Versand. Implementiert email-interface.1. SMTP, Resend, Postmark-Backends. HTML/Text-Templates. Queue-Integration für Async-Sending. Nutzbar von dreego-auth (Verify, Reset) und dreego-notify.
+Plugin for email sending. Implements email-interface.1. SMTP, Resend, Postmark backends. HTML/Text templates. Queue integration for async sending. Usable by dreego-auth (Verify, Reset) and dreego-notify.

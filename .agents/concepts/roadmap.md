@@ -2,81 +2,81 @@
 ---
 type: Concept
 title: "Dreego Roadmap"
-description: "Entwicklungsplan von V1 MVP über V2 Production-Ready bis V3 Ecosystem"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+description: "Development plan from V1 MVP through V2 Production-Ready to V3 Ecosystem"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 # Dreego Roadmap
 
 ## V1 — MVP (Core)
 
-**Ziel:** Lauffähiger Prototyp — Transpiler + Router + Template
+**Goal:** Working prototype — Transpiler + Router + Template
 
 - [ ] **Transpiler Core**
-  - Lexer: `.dreego`-Datei parsen
-  - Parser: `<go>`, Template, `<style>` Sektionen erkennen
-  - Code Generator: Go-Code ausgeben
-  - Template-Variablen: `{variable}` Syntax
-- [ ] **Template-Logik (V1)**
+  - Lexer: Parse `.dreego` file
+  - Parser: Recognize `<go>`, Template, `<style>` sections
+  - Code Generator: Output Go code
+  - Template Variables: `{variable}` syntax
+- [ ] **Template Logic (V1)**
   - `{#if}` / `{#else}`
   - `{#each}` / `{#else}`
 - [ ] **File-based Routing**
-  - `routes/`-Ordner scannen
-  - `dreego_router.go` generieren
-  - Chi-Integration
-- [ ] **CLI-Tool**
-  - `dreego generate` — Transpiler ausführen
-  - `dreego dev` — Dev-Server mit Auto-Reload
-  - `dreego build` — Single Binary bauen
+  - Scan `routes/` directory
+  - Generate `dreego_router.go`
+  - Chi integration
+- [ ] **CLI Tool**
+  - `dreego generate` — Run transpiler
+  - `dreego dev` — Dev server with auto-reload
+  - `dreego build` — Build single binary
 - [ ] **Single Binary**
-  - `//go:embed` für statische Assets
-  - CSS/JS in Binary einbetten
+  - `//go:embed` for static assets
+  - Embed CSS/JS in binary
 
 ## V2 — Production-Ready
 
-**Ziel:** Vollwertiges Framework auf Phoenix/Next.js-Niveau
+**Goal:** Full-fledged framework at Phoenix/Next.js level
 
-- [ ] **Erweiterte Template-Logik**
+- [ ] **Advanced Template Logic**
   - `{#switch}` / `{#case}`
   - `{#slot}` / `{#fill}`
   - `{#await}` (Async/SSE)
 - [ ] **TypeScript Support**
-  - esbuild-Integration als Go-Binding
-  - Types-Sharing: Go-Struct → TS-Interface
+  - esbuild integration as Go binding
+  - Type sharing: Go struct → TS interface
 - [ ] **SSG (Static Site Generation)**
-  - `.dreego` → statisches HTML/JS exportieren
-  - Für Landing Pages, Blogs, Docs
+  - `.dreego` → export static HTML/JS
+  - For landing pages, blogs, docs
 - [ ] **Wails Integration**
-  - `.dreego`-Komponenten in Desktop-Apps verwenden
-  - Gleiche Codebase für Web + Desktop
-- [ ] **Dev-Experience**
+  - Use `.dreego` components in desktop apps
+  - Same codebase for Web + Desktop
+- [ ] **Dev Experience**
   - Hot Reload via SSE
-  - Error Overlay im Browser
-  - Tailwind JIT im Dev-Server
-- [ ] **Plugin-System**
-  - `dreego.Plugin` Interface stabilisieren
-  - Transpiler-Hooks für Custom-Tags
+  - Error overlay in browser
+  - Tailwind JIT in dev server
+- [ ] **Plugin System**
+  - Stabilize `dreego.Plugin` interface
+  - Transpiler hooks for custom tags
   - `dreego.config.json`
 
 ## V3 — Ecosystem
 
-**Ziel:** Addon-Ökosystem etablieren
+**Goal:** Establish addon ecosystem
 
 - [ ] **Core Addons**
   - dreego-auth (MVP)
   - dreego-ui (MVP)
   - dreego-db (SQLite)
-- [ ] **Dokumentation**
+- [ ] **Documentation**
   - docs.dreego.dev
-  - Tutorial-Projekt
-  - API-Referenz
+  - Tutorial project
+  - API reference
 - [ ] **Community**
   - Template Registry
   - Addon Registry
 
-## Ideen für später (Backlog)
+## Ideas for Later (Backlog)
 
-- Auto-Form Binding (`r.FormValue` ersetzen)
+- Auto-Form Binding (replace `r.FormValue`)
 - Inline API Endpoints (`<go type="api">`)
 - SSE Direct Directive (`<div g-sse="/api/live">`)
 - Automatic Image Optimization (WebP/AVIF)

@@ -2,109 +2,109 @@
 
 ## v0.0.10 (2026-07-28) — Static Assets
 
-- `dreego/static/` Ordner: Files werden beim Generate eingelesen und inline registriert
-- MIME-Type via Extension (.css, .js, .svg, .png, .ico, .html, .json, .woff2)
-- Kollision-Check: wenn statischer Pfad mit Route kollidiert → `dreego generate` Error
-- 3 Static-Tests: basic, subdir, collision
-- 71 Integration-Tests insgesamt
+- `dreego/static/` folder: files are read during generate and registered inline
+- MIME type via extension (.css, .js, .svg, .png, .ico, .html, .json, .woff2)
+- Collision check: when static path collides with route → `dreego generate` error
+- 3 static tests: basic, subdir, collision
+- 71 integration tests total
 - VS Code Extension v0.0.4: `<@Component>`-Tags, `import`, Filter `{var|raw}`, `$loop` highlighting
 
-## v0.0.9 (2026-07-28) — Template-Primitives
+## v0.0.9 (2026-07-28) — Template Primitives
 
-- `{#verbatim}` Block: Raw-Output für JS-Templates
-- `{#each}` mit `$loop`-Variable: `$loop.Index`, `$loop.First`, `$loop.Last`, `$loop.Even`, `$loop.Odd`
-- Template-Filter: `{var|raw}` (kein Escaping), `{var|upper}` (uppercase). Pipe-Syntax.
-- `{#else}` in `{#if}`-Block: `{#if cond}...{#else}...{/if}`
-- `{#each else}`: `{#each items as item}...{#each else}...{/each}` — Empty-List Fallback
-- Fix: `<header>`, `<main>`, `<footer>` prefix-match Bug in scanTag
-- Test-System: `PASS/FAIL <path>`, `DREEGO_FILTER=<pattern>`, Docker-Build-Logs unterdrückt
+- `{#verbatim}` Block: raw output for JS templates
+- `{#each}` with `$loop` variable: `$loop.Index`, `$loop.First`, `$loop.Last`, `$loop.Even`, `$loop.Odd`
+- Template filters: `{var|raw}` (no escaping), `{var|upper}` (uppercase). Pipe syntax.
+- `{#else}` in `{#if}` block: `{#if cond}...{#else}...{/if}`
+- `{#each else}`: `{#each items as item}...{#each else}...{/each}` — empty list fallback
+- Fix: `<header>`, `<main>`, `<footer>` prefix-match bug in scanTag
+- Test system: `PASS/FAIL <path>`, `DREEGO_FILTER=<pattern>`, Docker build logs suppressed
 
 ## v0.0.8 (2026-07-28) — Named Slots
 
-- Named Slots: `{#slot header}...{/slot}` Block-Syntax in Components + Routes
-- Component: `{#slot header}{/slot}` — Platzhalter rendert `c.Get("slot_header")`
-- Route: `{#slot header}<content>{/slot}` — definiert Inhalt für benannten Slot
-- Default-Slot `{#slot}` bleibt ohne `{/slot}` (keine Änderung)
-- 4 Positiv-Tests + 2 Negativ-Tests
+- Named Slots: `{#slot header}...{/slot}` block syntax in Components + Routes
+- Component: `{#slot header}{/slot}` — placeholder renders `c.Get("slot_header")`
+- Route: `{#slot header}<content>{/slot}` — defines content for named slot
+- Default-Slot `{#slot}` stays without `{/slot}` (no change)
+- 4 positive tests + 2 negative tests
 
 ## v0.0.7 (2026-07-28) — Test Coverage
 
-- 41+ Integration-Tests (up from 36): edge cases, negative tests, bugs
-- `_docs/testing.md`: vollständige Test-Strategie mit 60+ Test-Ideen
-- Prop-Expressions in Components: `<@Card title={expr}/>`
-- Nested Components: `<@Outer>` ruft `<@Inner>` auf
+- 41+ integration tests (up from 36): edge cases, negative tests, bugs
+- `_docs/testing.md`: complete test strategy with 60+ test ideas
+- Prop expressions in Components: `<@Card title={expr}/>`
+- Nested Components: `<@Outer>` calls `<@Inner>`
 - Session: `DelSessionVal`, `DestroySession`, no-store
 - CSRF: `SetCSRF(false)` + disable test
-- `--check` verwendet Timestamp-Vergleich (nicht git diff)
-- Alle Tests schreiben .dreego-Dateien inline (keine Docker COPY Fixtures mehr)
+- `--check` uses timestamp comparison (not git diff)
+- All tests write .dreego files inline (no Docker COPY fixtures anymore)
 
 ## v0.0.6 (2026-07-28) — Component Completion
 
-- Children-Slot-Passing: `<@Card>content</@Card>` → `{#slot}` im Component funktioniert
-- `dreego generate --check`: CI-Validation — exit non-zero wenn generierte Dateien stale sind
-- Named Slots: `{#slot header}` Lexer/Parser vorbereitet (v0.0.7)
+- Children slot passing: `<@Card>content</@Card>` → `{#slot}` in component works
+- `dreego generate --check`: CI validation — exit non-zero when generated files are stale
+- Named Slots: `{#slot header}` lexer/parser prepared (v0.0.7)
 
 ## v0.0.5 (2026-07-27) — Component Model
 
-- Component-System: `Component Name (props)` in `dreego/components/`, Aufruf via `<@Name>`
-- Self-closing (`<@Icon name="star"/>`) und mit Children (`<@Card>...</@Card>`)
-- Default-Slot via `{#slot}` im Component-Template
-- Scoped Styles pro Component (`data-scope`)
-- File-based Discovery: `dreego/components/Card.dreego` → `<@Card>`
-- 6 Component-Integration-Tests + 2 Bug-Tests
-- `import "dreego/components/Name"` in Route-Dateien (ParseHeader vor Lex)
-- Multi-File Directory Import: `import "dreego/components/button"` → `<@Login/>`
+- Component system: `Component Name (props)` in `dreego/components/`, call via `<@Name>`
+- Self-closing (`<@Icon name="star"/>`) and with children (`<@Card>...</@Card>`)
+- Default slot via `{#slot}` in component template
+- Scoped styles per component (`data-scope`)
+- File-based discovery: `dreego/components/Card.dreego` → `<@Card>`
+- 6 component integration tests + 2 bug tests
+- `import "dreego/components/Name"` in route files (ParseHeader before Lex)
+- Multi-file directory import: `import "dreego/components/button"` → `<@Login/>`
 
 ## v0.0.4 (2026-07-27) — Blueprints & Tests
 
 - `dreego init <path>` — scaffold new project from embedded blueprint
-- Blueprints via `//go:embed` in CLI binary, keine externen Dateien nötig
-- Integration-Tests in `_tests/` via Docker-Container (`make test`)
+- Blueprints via `//go:embed` in CLI binary, no external files needed
+- Integration tests in `_tests/` via Docker containers (`make test`)
 
 ## v0.0.3 (2026-07-27) — Security & Developer Experience
 
-- Session-Integration: `session.Store` Interface + `CookieStore` (HMAC-signiert) in Runtime eingehängt
-- Session-Middleware: Context-basierte Store-Injektion pro Request
-- SSRContext: `SessionVal`/`SetSessionVal`/`DelSessionVal`/`DestroySession` mit sicheren Defaults (`HttpOnly`, `Secure` TLS-aware)
-- CSRF-Schutz: Double-Submit-Cookie (Core-Conditional, default an) — Token via X-CSRF-Token Header oder csrf_token Form-Feld
-- SSRContext: `CSRFToken()` fur Template-Rendering (Hidden-Field)
-- VS Code Extension: Syntax-Highlighting + Waschbär-Icon für `.dreego`-Dateien (`make dx`)
-- **Breaking:** `pkg/` → `dreego-core/` (single package), einziger Import `import core "codeberg.org/dreego/dreego/dreego-core"`
-- `dreego-plugin/` fur zukünftige Plugins (Auth, Redis, DB, etc.)
+- Session integration: `session.Store` interface + `CookieStore` (HMAC-signed) hooked into runtime
+- Session middleware: context-based store injection per request
+- SSRContext: `SessionVal`/`SetSessionVal`/`DelSessionVal`/`DestroySession` with secure defaults (`HttpOnly`, `Secure` TLS-aware)
+- CSRF protection: double-submit cookie (Core-Conditional, default on) — Token via X-CSRF-Token header or csrf_token form field
+- SSRContext: `CSRFToken()` for template rendering (hidden field)
+- VS Code Extension: syntax highlighting + raccoon icon for `.dreego` files (`make dx`)
+- **Breaking:** `pkg/` → `dreego-core/` (single package), single import `import core "codeberg.org/dreego/dreego/dreego-core"`
+- `dreego-plugin/` for future plugins (Auth, Redis, DB, etc.)
 
 ## v0.0.2 (2026-07-25) — Safety & Structure
 
-- Route-Segmente: `[id]` (eckige Klammern) als Konvention für dynamische Segmente, kompatibel mit Next.js/SvelteKit/Astro
-- Route-Groups: `(group)/` — Ordner, die nicht in der URL erscheinen (Layout/Middleware-Gruppierung)
-- Flat Gen-Package: alle Route-Handler in `gen/routes.go` (keine `_ "import"` mehr), löst Go-Import-Path-Problem mit Sonderzeichen
+- Route segments: `[id]` (square brackets) as convention for dynamic segments, compatible with Next.js/SvelteKit/Astro
+- Route groups: `(group)/` — directories that do not appear in the URL (layout/middleware grouping)
+- Flat gen package: all route handlers in `gen/routes.go` (no more `_ "import"`), solves Go import path problem with special characters
 - Context refactoring: `map[string]string` → Interface + Embedding (`Context` interface + `SSRContext` struct)
-- Recovery-Middleware: Panic → 500 mit Stack-Trace-Logging via slog
-- XSS-Schutz: Auto-Escaping aller `{variable}`-Ausdrücke via `html.EscapeString`
-- Custom Error-Pages: `404.dreego` + `500.dreego`
+- Recovery middleware: Panic → 500 with stack trace logging via slog
+- XSS protection: auto-escaping of all `{variable}` expressions via `html.EscapeString`
+- Custom error pages: `404.dreego` + `500.dreego`
 
 ## v0.0.1 (2026-07-25) — The Prototype
 
-Erster Prototyp. Transpiler, Routing, Layout, Middleware, CLI.
+First prototype. Transpiler, Routing, Layout, Middleware, CLI.
 
 ### Features
 
-- Formale Transpiler-Pipeline: Lexer → Parser → AST → CodeGen
-- Alle 5 Sektionen: `<head>`, `<go>`, `<div>`, `<script>`, `<style>`
-- Template-Logik: `{var}`, `{#if}`, `{#each}`, `{#slot}`, `{#head}`
-- File-based Routing: `dreego/routes/*.dreego`
-- Dynamische Segmente: `[id]`, `[...catchall]`, `[[optional]]`, `(group)/`
-- Layout-System: `dreego/layouts/default.dreego` mit `{#slot}` + `{#head}`
-- CSS-Scoping: `data-scope` via Source-Hash (12 Zeichen)
-- Zentrale `dreego/gen/dree.go` fur Route-Imports
-- `dreego/config.json`: Redirects, Rewrites, Logging-Config
-- RequestLogging-Middleware (Core-Conditional, JSONL-Format, IP-Capture)
-- Redirect/Rewrite-Middleware
+- Formal transpiler pipeline: Lexer → Parser → AST → CodeGen
+- All 5 sections: `<head>`, `<go>`, `<div>`, `<script>`, `<style>`
+- Template logic: `{var}`, `{#if}`, `{#each}`, `{#slot}`, `{#head}`
+- File-based routing: `dreego/routes/*.dreego`
+- Dynamic segments: `[id]`, `[...catchall]`, `[[optional]]`, `(group)/`
+- Layout system: `dreego/layouts/default.dreego` with `{#slot}` + `{#head}`
+- CSS scoping: `data-scope` via source hash (12 characters)
+- Central `dreego/gen/dree.go` for route imports
+- `dreego/config.json`: redirects, rewrites, logging config
+- RequestLogging middleware (Core-Conditional, JSONL format, IP capture)
+- Redirect/Rewrite middleware
 - CLI: `dreego generate [--force]`, `dreego build`, `dreego run [-d] [-t N]`
-- Lauffahiger Demo-Server mit net/http 1.22+
+- Working demo server with net/http 1.22+
 
 ### Decisions
 
-- [Error Handling](.agents/decisions/error-handling.md) — Typisierte Fehler, Recovery, Dev/Prod
-- [Routing & Components](.agents/decisions/routing-and-components.md) — Hybrides Routing, Plugin-Routes
+- [Error Handling](.agents/decisions/error-handling.md) — Typed errors, Recovery, Dev/Prod
+- [Routing & Components](.agents/decisions/routing-and-components.md) — Hybrid routing, Plugin routes
 - [Middleware System](.agents/decisions/middleware-system.md) — Core-Fixed vs Core-Conditional vs Plugin
-- GLM-Review: Per-Directory `dree.go` Output-Strategie bestatigt
+- GLM Review: Per-directory `dree.go` output strategy confirmed

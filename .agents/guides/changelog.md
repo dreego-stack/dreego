@@ -3,8 +3,8 @@
 type: Guide
 title: Skill: changelog
 description: Conventions for maintaining CHANGELOG.md and version tagging workflow
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 # Skill: changelog
 
@@ -14,9 +14,9 @@ Keep CHANGELOG.md up to date with every meaningful change.
 
 ## When to use
 
-- Vor JEDEM Commit: eine Zeile oder kurzer Absatz in CHANGELOG.md
-- Neue Version (Tag): Agent schlagt vor (Feature=MINOR, Fix=PATCH, Doc=optional)
-- User entscheidet ob neue Version getaggt wird
+- Before EVERY commit: one line or short paragraph in CHANGELOG.md
+- New version (Tag): Agent proposes (Feature=MINOR, Fix=PATCH, Doc=optional)
+- User decides whether to tag a new version
 
 ## Format
 
@@ -31,15 +31,15 @@ Keep CHANGELOG.md up to date with every meaningful change.
 ... (existing entries)
 ```
 
-- Neueste Version OBEN
-- Ein Punkt pro Feature/Fix
-- Datum im ISO-Format
+- Newest version on TOP
+- One bullet per feature/fix
+- Date in ISO format
 
 ## Workflow
 
-1. Code andern
-2. CHANGELOG.md updaten (eine Zeile)
-3. TODO.md abhaken was erledigt wurde
+1. Change code
+2. Update CHANGELOG.md (one line)
+3. Check off completed items in TODO.md
 4. Commit
-5. Wenn Feature fertig: `git tag -a vX.Y.Z -m "vX.Y.Z: summary"`
+5. When feature is complete: `git tag -a vX.Y.Z -m "vX.Y.Z: summary"`
 6. Push: `git push origin main --tags`

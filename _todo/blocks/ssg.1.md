@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-dreego build --static. Compile-Time Generation aller Seiten als statische HTML-Dateien. Kein Server zur Laufzeit. Frontmatter-Support in .dreego. Content Collections. ADR ssg-wails-v2.md liegt vor.
+dreego build --static. Compile-time generation of all pages as static HTML files. No server at runtime. Frontmatter support in .dreego. Content Collections. ADR ssg-wails-v2.md exists.

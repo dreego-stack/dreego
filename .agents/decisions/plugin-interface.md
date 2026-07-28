@@ -1,26 +1,26 @@
 
 ---
 type: Decision
-title: Plugin-Interface (Capability-basiert)
-description: Capability-basiertes Plugin-System mit Go-typischen impliziten Interfaces
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: Plugin Interface (Capability-based)
+description: Capability-based plugin system with Go-typical implicit interfaces
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# Plugin-Interface (Capability-basiert)
+# Plugin Interface (Capability-based)
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 **Review:** GLM-5.2 Expert Review (.tmp/output2.md)
 
-## Kontext
+## Context
 
-Dreego braucht ein Plugin-System für sein Addon-Ökosystem. Das Interface muss von Anfang an stabil sein — spätere Änderungen sind Breaking Changes für alle Addons.
+Dreego needs a plugin system for its addon ecosystem. The interface must be stable from the start — later changes are breaking changes for all addons.
 
-## Entscheidung
+## Decision
 
-**Capability-basierte Interfaces.** Statt eines fetten Single-Interface implementieren Plugins nur die Fähigkeiten, die sie brauchen — über Go's implizite Interface-Satisfaction.
+**Capability-based interfaces.** Instead of a fat single interface, plugins only implement the capabilities they need — via Go's implicit interface satisfaction.
 
-## Interface-Definition
+## Interface Definition
 
 ```go
 package dreego
@@ -33,34 +33,34 @@ import (
 
 type PluginID string
 
-// Base — JEDES Plugin MUSS das implementieren
+// Base — EVERY plugin MUST implement this
 type Plugin interface {
     ID() PluginID
     Init(app *App, cfg map[string]any) error
 }
 
-// SSR-Middleware injizieren (optional)
+// Inject SSR middleware (optional)
 type MiddlewareProvider interface {
     Middlewares() []func(http.Handler) http.Handler
 }
 
-// Routen registrieren — SSR + SSG (optional)
+// Register routes — SSR + SSG (optional)
 type RouteRegistrar interface {
     RegisterRoutes(r Router) error
 }
 
-// Embedded Assets (CSS/JS/Images) — target-agnostisch via fs.FS (optional)
+// Embedded assets (CSS/JS/Images) — target-agnostic via fs.FS (optional)
 type AssetProvider interface {
     Assets() fs.FS
 }
 
-// Custom-Tags wie <dreego:map /> im Transpiler (optional)
+// Custom tags like <dreego:map /> in the transpiler (optional)
 type TranspilerHook interface {
     Namespace() string
     ParseTag(node TagNode) (TagRenderer, error)
 }
 
-// Request-Context erweitern (optional)
+// Extend request context (optional)
 type ContextExtender interface {
     BindContext(b *ContextBuilder)
 }
@@ -72,7 +72,7 @@ type Lifecycle interface {
 }
 ```
 
-## Beispiel: dreego-auth
+## Example: dreego-auth
 
 ```go
 package auth
@@ -100,22 +100,22 @@ func (p *AuthPlugin) Init(app *dreego.App, cfg map[string]any) error {
     return nil
 }
 
-// AuthPlugin implementiert MiddlewareProvider
+// AuthPlugin implements MiddlewareProvider
 func (p *AuthPlugin) Middlewares() []func(http.Handler) http.Handler {
     return []func(http.Handler) http.Handler{p.authMiddleware}
 }
 
-// AuthPlugin implementiert RouteRegistrar
+// AuthPlugin implements RouteRegistrar
 func (p *AuthPlugin) RegisterRoutes(r dreego.Router) error {
     r.Get("/auth/login", p.loginPage)
     r.Post("/api/auth/login", p.handleLogin)
     return nil
 }
 
-// AuthPlugin implementiert AssetProvider
+// AuthPlugin implements AssetProvider
 func (p *AuthPlugin) Assets() fs.FS { return assets }
 
-// AuthPlugin implementiert ContextExtender
+// AuthPlugin implements ContextExtender
 func (p *AuthPlugin) BindContext(b *dreego.ContextBuilder) {
     b.Set(UserKey, func(c dreego.Context) *User {
         return c.Get(UserKey).(*User)
@@ -123,41 +123,41 @@ func (p *AuthPlugin) BindContext(b *dreego.ContextBuilder) {
 }
 ```
 
-## Plugin-Reihenfolge
+## Plugin Order
 
-Explizit durch Registrierungsreihenfolge — keine Magic:
+Explicit via registration order — no magic:
 
 ```go
 func main() {
     app := dreego.New()
-    app.Use(session.New())   // 1. Session (MUSS vor Auth)
+    app.Use(session.New())   // 1. Session (MUST be before Auth)
     app.Use(auth.New("key")) // 2. Auth
     app.Use(admin.New())     // 3. Admin
     app.Listen(":8080")
 }
 ```
 
-Middleware wird in Durchlaufreihenfolge gewrappt (LIFO wie Chi).
+Middleware is wrapped in execution order (LIFO like Chi).
 
-## Warum Capability-basiert
+## Why Capability-based
 
-| Vorteil                                 | Erklärung                                     |
-|-----------------------------------------|-----------------------------------------------|
-| Plugins implementieren nur was sie brauchen | `dreego-map` braucht kein Middleware         |
-| Neue Capabilities additiv hinzufügbar   | `Lifecycle` kam später — kein Breaking Change |
-| Go-idiomatisch                          | `io.Reader`, `fs.FS` sind dasselbe Muster     |
-| Keine leeren Methoden                   | Kein `return nil` für ungenutzte Features     |
+| Advantage                             | Explanation                                      |
+|---------------------------------------|--------------------------------------------------|
+| Plugins only implement what they need | `dreego-map` doesn't need middleware             |
+| New capabilities can be added additively | `Lifecycle` came later — no breaking change    |
+| Go-idiomatic                          | `io.Reader`, `fs.FS` are the same pattern        |
+| No empty methods                      | No `return nil` for unused features              |
 
-## Warum `fs.FS` statt `embed.FS`
+## Why `fs.FS` instead of `embed.FS`
 
-`fs.FS` ist Go's Standard-Interface für Dateisysteme. Es funktioniert target-agnostisch:
-- SSR: `embed.FS` implementiert `fs.FS`
-- SSG: `os.DirFS` implementiert `fs.FS` (Dateien auf Disk)
-- Wails: Custom `fs.FS`-Implementierung möglich
+`fs.FS` is Go's standard interface for filesystems. It works target-agnostically:
+- SSR: `embed.FS` implements `fs.FS`
+- SSG: `os.DirFS` implements `fs.FS` (files on disk)
+- Wails: Custom `fs.FS` implementation possible
 
-## Konsequenzen
+## Consequences
 
-- `reego.Plugin` Interface im Core — nie mehr ändern
-- Neue Capabilities als separate Interfaces hinzufügbar
-- Kein zentrales Plugin-Registry nötig — Nutzer registriert explizit
-- Addons starten mit `go get` + `app.Use()`
+- `dreego.Plugin` interface in the core — never change again
+- New capabilities can be added as separate interfaces
+- No central plugin registry needed — user registers explicitly
+- Addons start with `go get` + `app.Use()`

@@ -3,75 +3,75 @@
 type: Reference
 title: Solid.js, Astro & MDX — Deep-Dive Research
 description: Research on Solid.js Signals, Astro Islands architecture, and MDX for Dreego feature adoption
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 # Solid.js, Astro & MDX — Deep-Dive Research
 
-**Datum:** 23.07.2026
-**Quellen:** docs.solidjs.com, docs.astro.build, mdxjs.com
+**Date:** 2026-07-28
+**Sources:** docs.solidjs.com, docs.astro.build, mdxjs.com
 
 ---
 
 ## 1. Solid.js
 
-### Was macht Solid anders als React/Svelte?
+### What Makes Solid Different from React/Svelte?
 
-| Aspekt | React | Svelte | Solid |
+| Aspect | React | Svelte | Solid |
 |--------|-------|--------|-------|
-| Rendering | Virtual DOM → Diff → DOM | Compiler → direktes DOM-Update | Fine-grained Reactivity → kein VDOM, kein Compiler |
-| Component Model | Components re-rendern komplett | Compiler weiß, was sich ändert | Components laufen EINMAL, nur reaktive Bindings updaten |
+| Rendering | Virtual DOM → Diff → DOM | Compiler → direct DOM update | Fine-grained Reactivity → no VDOM, no compiler |
+| Component Model | Components re-render completely | Compiler knows what changes | Components run ONCE, only reactive bindings update |
 | State | `useState` (Hook, immutable) | `$state()` (Rune, mutable via Compiler) | `createSignal()` (getter/setter, mutable) |
-| Philosophie | "UI = f(state)" | "Compiler macht's effizient" | "Jede Zelle aktualisiert sich selbst" |
+| Philosophy | "UI = f(state)" | "Compiler makes it efficient" | "Every cell updates itself" |
 
-**Kern:** Solid-Komponenten sind **keine Render-Funktionen** — sie werden einmal ausgeführt. Der Return-Wert ist echtes DOM. Nur Signal-gesteuerte Attribute/TextNodes updaten sich bei Änderungen. React-Komponenten dagegen laufen komplett neu bei jedem State-Change.
+**Core:** Solid components are **not render functions** — they are executed once. The return value is real DOM. Only signal-driven attributes/textNodes update on changes. React components, in contrast, run completely anew on each state change.
 
-### Wie funktionieren Signals in Solid (Fine-Grained Reactivity)?
+### How Signals Work in Solid (Fine-Grained Reactivity)
 
-**Mechanismus (Observer-Pattern):**
+**Mechanism (Observer Pattern):**
 
 1. `createSignal(initialValue)` → `[getter, setter]`
-2. `createEffect(fn)` registriert `fn` als Subscriber
-3. Beim Aufruf von `getter()`: fügt aktuellen Subscriber zur Signal-Subscriber-Liste hinzu
-4. `setter(newValue)`: notifiziert alle Subscriber (nur bei Wert-Änderung)
-5. **Kein Dirty-Checking, kein VDOM-Diff** — Signal weiß exakt, welche DOM-Knoten es updaten muss
+2. `createEffect(fn)` registers `fn` as subscriber
+3. On `getter()` call: adds current subscriber to signal's subscriber list
+4. `setter(newValue)`: notifies all subscribers (only on value change)
+5. **No dirty checking, no VDOM diff** — signal knows exactly which DOM nodes to update
 
-**Wichtige Eigenschaften:**
-- **Synchron:** Tracking läuft synchron. `setTimeout` im Effect → kein Tracking
-- **Memos:** `createMemo()` cached abgeleitete Werte (wie `$derived` in Svelte)
-- **Resources:** `createResource(fetcher)` wandelt Async in Sync (wie Sveltes `{#await}`)
-- **Stores:** `createStore()` erzeugt Proxy-basierte Signals für verschachtelte Objekte
-- **Kein Stale Closure-Problem:** Weil Components nur einmal laufen und Signals direkt das DOM updaten
+**Important Properties:**
+- **Synchronous:** Tracking runs synchronously. `setTimeout` in effect → no tracking
+- **Memos:** `createMemo()` caches derived values (like `$derived` in Svelte)
+- **Resources:** `createResource(fetcher)` converts async to sync (like Svelte's `{#await}`)
+- **Stores:** `createStore()` creates proxy-based signals for nested objects
+- **No Stale Closure Problem:** Because components only run once and signals directly update the DOM
 
-**Das ist relevant für Dreego, weil:**
-- Dreego's Architecture (SSR + HTMX partials) ist im Prinzip dasselbe wie Signals, nur auf Server-Ebene
-- State ändert sich → nur das betroffene HTML-Fragment wird neu gerendert und via HTMX ausgetauscht
-- Kein Virtual DOM nötig — direktes DOM-Update durch HTML-Swap
+**This is relevant for Dreego because:**
+- Dreego's Architecture (SSR + HTMX partials) is essentially the same as signals, just at the server level
+- State changes → only the affected HTML fragment is re-rendered and swapped via HTMX
+- No Virtual DOM needed — direct DOM update through HTML swap
 
 ### SolidStart Features
 
-SolidStart ist das Metaframework (wie Next.js für React, SvelteKit für Svelte):
+SolidStart is the meta-framework (like Next.js for React, SvelteKit for Svelte):
 
-- **File-based Routing** — `routes/` Verzeichnis, nested layouts, dynamic routes `[id].tsx`, catch-all `[...slug].tsx`, route groups `(groupName)/`, escaping nested routes `users(details)/`
+- **File-based Routing** — `routes/` directory, nested layouts, dynamic routes `[id].tsx`, catch-all `[...slug].tsx`, route groups `(groupName)/`, escaping nested routes `users(details)/`
 - **Multiple Rendering Modes:** CSR, SSR (Sync, Async, Streaming), SSG (Pre-rendering via `crawlLinks: true`)
-- **Server Functions** — `"use server"` Directive, Datenbank-Zugriff ohne API-Endpoint. Integriert mit `query()` (Solid Router)
-- **API Routes** — GET/POST/etc. Handler in `routes/`
-- **Middleware** — Request/Response-Interception
+- **Server Functions** — `"use server"` Directive, database access without API endpoint. Integrated with `query()` (Solid Router)
+- **API Routes** — GET/POST/etc. handlers in `routes/`
+- **Middleware** — Request/Response interception
 - **Sessions, Auth, WebSocket Endpoints**
-- **Vinxi/Nitro** — agnostischer Bundler + Server Runtime (kein Vendor Lock-in)
+- **Vinxi/Nitro** — agnostic bundler + server runtime (no vendor lock-in)
 - **Deployment Presets:** Vercel, Netlify, Cloudflare, Node
-- **Kein eigener Router** — verwendet `@solidjs/router` (trennt Meta vom Router)
+- **No own router** — uses `@solidjs/router` (separates meta from router)
 
 ### Solid's Killer Features
 
-1. **True Reactivity ohne Compiler oder VDOM** — minimalster Runtime-Code
-2. **Components laufen nur einmal** — kein re-rendering, nur punktuelle DOM-Updates
-3. **Kein Stale Closure Problem** — weil Components nicht re-rendern
-4. **Keine Dependency Arrays** — kein `useEffect([dep])`, kein `useMemo`, kein `useCallback`
-5. **SSR + Hydration ohne doppeltes Rendering** — Solid hydratisiert nur Daten-Bindings, nicht ganze Komponenten
-6. **Isomorphe Server Functions** — gleiche Funktion läuft auf Server und Client (mit `"use server"`)
-7. **Extrem kleine Bundle-Größe** — <7 KB gzipped für Solid Core
-8. **JSX ohne React** — JSX wird zu echten DOM-Operationen compiliert (nicht zu React.createElement)
+1. **True Reactivity without Compiler or VDOM** — minimal runtime code
+2. **Components run only once** — no re-rendering, only targeted DOM updates
+3. **No Stale Closure Problem** — because components don't re-render
+4. **No Dependency Arrays** — no `useEffect([dep])`, no `useMemo`, no `useCallback`
+5. **SSR + Hydration without double rendering** — Solid only hydrates data bindings, not entire components
+6. **Isomorphic Server Functions** — same function runs on server and client (with `"use server"`)
+7. **Extremely small bundle size** — <7 KB gzipped for Solid Core
+8. **JSX without React** — JSX compiles to real DOM operations (not to React.createElement)
 
 ---
 
@@ -79,65 +79,65 @@ SolidStart ist das Metaframework (wie Next.js für React, SvelteKit für Svelte)
 
 ### Islands Architecture
 
-Astro hat die **Islands Architecture** popularisiert (ursprünglich von Etsy/Katie Sylor-Miller, 2019, dann Jason Miller/Preact, 2020):
+Astro popularized the **Islands Architecture** (originally by Etsy/Katie Sylor-Miller, 2019, then Jason Miller/Preact, 2020):
 
-**Konzept:**
-- Die Seite ist ein **Meer aus statischem HTML**
-- Interaktive Komponenten sind **Inseln** von JavaScript im statischen Meer
-- Jede Insel wird **isoliert** geladen und hydratisiert
-- Inseln können **parallel** laden — eine langsame Image-Carousel blockiert nicht den Header
+**Concept:**
+- The page is a **sea of static HTML**
+- Interactive components are **islands** of JavaScript in the static sea
+- Each island is **isolated** loaded and hydrated
+- Islands can load **in parallel** — a slow image carousel doesn't block the header
 
-**Zwei Typen von Inseln:**
-1. **Client Islands** — interaktive UI-Komponenten (React/Svelte/Vue/Solid)
-2. **Server Islands** (`server:defer`) — dynamische Server-Inhalte, die parallel zum Hauptinhalt streamen (z.B. User-Avatar, Produktbewertungen)
+**Two Types of Islands:**
+1. **Client Islands** — interactive UI components (React/Svelte/Vue/Solid)
+2. **Server Islands** (`server:defer`) — dynamic server content that streams parallel to the main content (e.g. user avatar, product ratings)
 
 ### Partial Hydration — Client Directives
 
-Astro's Kern-Mechanismus: **JavaScript wird standardmäßig entfernt.** Nur explizit markierte Komponenten bekommen JS. Die Directives:
+Astro's core mechanism: **JavaScript is removed by default.** Only explicitly marked components get JS. The directives:
 
-| Directive | Verhalten |
-|-----------|-----------|
-| `client:load` | Sofort laden (höchste Priorität) |
-| `client:idle` | Wenn Browser idle ist (requestIdleCallback) |
-| `client:visible` | Wenn Komponente in Viewport kommt (IntersectionObserver) |
-| `client:media="(max-width: 50em)"` | Nur bei passender Media Query |
-| `client:only="react"` | Nur client-seitig, kein SSR |
+| Directive | Behavior |
+|-----------|----------|
+| `client:load` | Load immediately (highest priority) |
+| `client:idle` | When browser is idle (requestIdleCallback) |
+| `client:visible` | When component enters viewport (IntersectionObserver) |
+| `client:media="(max-width: 50em)"` | Only at matching media query |
+| `client:only="react"` | Client-side only, no SSR |
 
 ### Content Collections
 
-Astro's Content-Management-System:
+Astro's content management system:
 
-- **`src/content.config.ts`** — Zentrale Konfiguration aller Collections
-- **Zod-Schema** pro Collection → TypeScript Typen automatisch generiert, Editor-Intellisense
+- **`src/content.config.ts`** — Central configuration of all collections
+- **Zod Schema** per collection → TypeScript types automatically generated, editor intellisense
 - **Built-in Loaders:**
-  - `glob()` — Verzeichnis von Markdown/MDX/Markdoc/JSON/YAML/TOML-Dateien
-  - `file()` — Einzelne Datei mit Array von Einträgen
-- **Custom Loader API** — CMS, Datenbank, API → alles integrierbar
-- **Reference System** — Collections können aufeinander verweisen (`reference('authors')`)
-- **`getCollection()`, `getEntry()`** — Typisierte Query-API
-- **`render()`** — Rendert Markdown/MDX zu HTML + `<Content />` Component
-- **Filter-API** — `getCollection('blog', ({data}) => data.draft !== true)`
-- **Live Collections** — Für Echtzeit-Daten (Live-Updates ohne Rebuild)
-- **Route Generation** — Aus Collection-Einträgen automatisch Seiten generieren
+  - `glob()` — Directory of Markdown/MDX/Markdoc/JSON/YAML/TOML files
+  - `file()` — Single file with array of entries
+- **Custom Loader API** — CMS, database, API → everything integrable
+- **Reference System** — Collections can reference each other (`reference('authors')`)
+- **`getCollection()`, `getEntry()`** — Typed query API
+- **`render()`** — Renders Markdown/MDX to HTML + `<Content />` Component
+- **Filter API** — `getCollection('blog', ({data}) => data.draft !== true)`
+- **Live Collections** — For real-time data (live updates without rebuild)
+- **Route Generation** — Automatically generate pages from collection entries
 
-### Was macht Astro einzigartig (94% Satisfaction)?
+### What Makes Astro Unique (94% Satisfaction)?
 
-1. **Zero-JS Default** — Es ist unmöglich, aus Versehen JavaScript zu schicken
-2. **MPA statt SPA** — Multi-Page-Architektur statt Single-Page-App. Seitenwechsel laden neue HTML-Dokumente (schneller, einfacher, SEO)
-3. **Content-Driven Design** — Für Content-Seiten optimiert (Blog, Marketing, Docs, E-Commerce), nicht für Web-Apps
-4. **Server-First** — Rendering passiert auf dem Server, nicht im Browser (wie PHP/Laravel/Rails)
-5. **"Opt in to Complexity"** — Starte mit HTML+CSS, füge bei Bedarf Frameworks/JS hinzu
-6. **UI-Agnostisch** — React, Preact, Svelte, Vue, Solid, HTMX, Web Components — alles parallel nutzbar
-7. **`.astro` Syntax** — Superset von HTML: jedes gültige HTML ist gültiges Astro-Template
-8. **View Transitions Router** — SPA-ähnliche Animationen zwischen MPAs
-9. **Dev Toolbar** — Integrierte Dev-Tools im Browser
-10. **Adapter-System** — Trennung von Framework und Deployment-Ziel
+1. **Zero-JS Default** — It's impossible to accidentally ship JavaScript
+2. **MPA instead of SPA** — Multi-Page architecture instead of Single-Page-App. Page transitions load new HTML documents (faster, simpler, SEO)
+3. **Content-Driven Design** — Optimized for content sites (Blog, Marketing, Docs, E-Commerce), not for web apps
+4. **Server-First** — Rendering happens on the server, not in the browser (like PHP/Laravel/Rails)
+5. **"Opt in to Complexity"** — Start with HTML+CSS, add frameworks/JS as needed
+6. **UI-Agnostic** — React, Preact, Svelte, Vue, Solid, HTMX, Web Components — all usable in parallel
+7. **`.astro` Syntax** — Superset of HTML: every valid HTML is a valid Astro template
+8. **View Transitions Router** — SPA-like animations between MPAs
+9. **Dev Toolbar** — Integrated dev tools in the browser
+10. **Adapter System** — Separation of framework and deployment target
 
 ---
 
-## 3. MDX (und Astro's MDX-Integration)
+## 3. MDX (and Astro's MDX Integration)
 
-### Wie funktioniert Markdown-to-Component Rendering?
+### How Does Markdown-to-Component Rendering Work?
 
 MDX = Markdown + JSX:
 
@@ -148,108 +148,108 @@ MDX = Markdown + JSX:
 </div>
 ```
 
-**Verarbeitungskette:**
-1. **Parse** MDX-Text → MDAST (Markdown AST) + JSX-Nodes
-2. **Transform** Remark-Plugins modifizieren den MDAST
-3. **Compile** → JavaScript (JSX wird zu `createElement`-Calls, Markdown zu HTML-Strings)
-4. **Evaluate** → Ausführung im JS-Runtime (React/Preact/Vue)
+**Processing Chain:**
+1. **Parse** MDX text → MDAST (Markdown AST) + JSX nodes
+2. **Transform** Remark plugins modify the MDAST
+3. **Compile** → JavaScript (JSX becomes `createElement`-Calls, Markdown becomes HTML strings)
+4. **Evaluate** → Execute in JS runtime (React/Preact/Vue)
 
-**Wichtige Features:**
-- **Import/Export** — `import` und `export` Statements im Markdown
-- **Expressions** — `{Math.PI * 2}` im Markdown
-- **Custom Components** — HTML-Elemente durch eigene Komponenten ersetzen: `export const components = {blockquote: CustomBlockquote}`
-- **Frontmatter** — YAML/TOML am Anfang der Datei
-- **ESM Support** — Volle JavaScript-Modul-Syntax
+**Important Features:**
+- **Import/Export** — `import` and `export` statements in Markdown
+- **Expressions** — `{Math.PI * 2}` in Markdown
+- **Custom Components** — Replace HTML elements with own components: `export const components = {blockquote: CustomBlockquote}`
+- **Frontmatter** — YAML/TOML at the beginning of the file
+- **ESM Support** — Full JavaScript module syntax
 
 ### Astro's MDX Integration
 
-Astro erweitert MDX:
+Astro extends MDX:
 
-- **Content Collections + MDX** — `.mdx` als Collection-Einträge mit Zod-Schema und Typisierung
-- **Astro Components in MDX** — `.astro` Components direkt in `.mdx` importieren und nutzen
+- **Content Collections + MDX** — `.mdx` as collection entries with Zod schema and typing
+- **Astro Components in MDX** — `.astro` Components directly imported and used in `.mdx`
 - **Custom Components Mapping** — `<Content components={{h1: Heading}} />`
-- **Eigener MDX-Compiler** — `@astrojs/mdx` mit `recmaPlugins`, `optimize` Option
-- **Frontmatter als First-Class** — `{frontmatter.title}` direkt im MDX verwendbar
-- **Separate Processor** — MDX kann anderen Markdown-Processor als `.md` Dateien nutzen
-- **Hybrid-Modus** — Statische Seiten + MDX-Content: im Prinzip ein Headless CMS in Git
+- **Own MDX Compiler** — `@astrojs/mdx` with `recmaPlugins`, `optimize` option
+- **Frontmatter as First-Class** — `{frontmatter.title}` directly usable in MDX
+- **Separate Processor** — MDX can use a different Markdown processor than `.md` files
+- **Hybrid Mode** — Static pages + MDX content: essentially a headless CMS in Git
 
 ---
 
-## Für Dreego: Adopt / Don't Adopt
+## For Dreego: Adopt / Don't Adopt
 
 ### Solid.js
 
-**ADOPTIEREN:**
-- [x] **Signals als konzeptionelles Modell** — Dreego's SSR + HTMX ist funktional äquivalent: State-Änderung → nur betroffenes HTML-Fragment updaten. Das mentale Modell ist dasselbe.
-- [x] **Kein Virtual DOM** — Solid beweist, dass VDOM nicht nötig ist. Dreego macht das auf Server-Ebene genauso (direktes HTML-Rendering).
-- [x] **Server Functions Modell** — `"use server"` = Dreegos `<go>` Block. Der `<go>`-Block läuft ausschließlich serverseitig und interagiert mit DB/APIs — exakt dasselbe Konzept.
-- [x] **Isomorpher Code** — SolidStart's Design-Prinzip: Code läuft auf Server und Client. Dreego könnte `dreego generate` nutzen um Go-Code zu generieren der sowohl Server- als auch Client-Logik enthält (via GopherJS/WASM in V2).
-- [x] **Keine Dependency Arrays** — Dreego's Template-Engine braucht keine `useEffect`-Äquivalente. Das `<go>`-Block-Modell ist einfacher.
-- [x] **Resource-Pattern** — `createResource` = Dreego's `{#await}` Tag. Async-Daten als synchron behandelbar machen.
+**ADOPT:**
+- [x] **Signals as conceptual model** — Dreego's SSR + HTMX is functionally equivalent: State change → only affected HTML fragment update. The mental model is the same.
+- [x] **No Virtual DOM** — Solid proves that VDOM is not necessary. Dreego does the same at the server level (direct HTML rendering).
+- [x] **Server Functions model** — `"use server"` = Dreego's `<go>` block. The `<go>` block runs exclusively server-side and interacts with DB/APIs — exactly the same concept.
+- [x] **Isomorphic Code** — SolidStart's design principle: code runs on server and client. Dreego could use `dreego generate` to generate Go code that contains both server and client logic (via GopherJS/WASM in V2).
+- [x] **No Dependency Arrays** — Dreego's template engine doesn't need `useEffect` equivalents. The `<go>` block model is simpler.
+- [x] **Resource Pattern** — `createResource` = Dreego's `{#await}` tag. Make async data treatable as synchronous.
 
-**NICHT ADOPTIEREN:**
-- [ ] **Client-seitiges Signal-System** — Dreego setzt auf HTMX + Alpine.js. Ein eigenes JS-Signal-System wäre Redundanz und unnötiger JS-Ship.
-- [ ] **JSX-Syntax** — Dreego nutzt HTML-Template-Syntax (wie Svelte), nicht JSX. JSX ist zu stark an JavaScript/React gebunden.
-- [ ] **Vinxi/Nitro als Build-Tool** — Dreego hat Go's `go build`. Braucht kein JS-Build-Tool.
-- [ ] **SolidStart als Architektur-Vorbild** — SolidStart ist weniger etabliert als SvelteKit/Next.js/Astro. Für File-based Routing lieber SvelteKit/Astro als Vorbild nehmen.
+**DO NOT ADOPT:**
+- [ ] **Client-side Signal System** — Dreego relies on HTMX + Alpine.js. A custom JS signal system would be redundancy and unnecessary JS.
+- [ ] **JSX Syntax** — Dreego uses HTML template syntax (like Svelte), not JSX. JSX is too strongly tied to JavaScript/React.
+- [ ] **Vinxi/Nitro as Build Tool** — Dreego has Go's `go build`. Doesn't need a JS build tool.
+- [ ] **SolidStart as Architecture Model** — SolidStart is less established than SvelteKit/Next.js/Astro. For file-based routing, better to use SvelteKit/Astro as model.
 
 ### Astro
 
-**ADOPTIEREN:**
-- [x] **Islands-Architektur** — Das ist DER entscheidende Insight für Dreego. `.dreego` Seiten sind standardmäßig statisch (Null JS). Interaktive "Inseln" werden via HTMX/Alpine.js deklariert. Kein Framework-JS auf der Seite außer dem, was explizit als interaktiv markiert wurde.
-- [x] **"Zero JS by Default"** — Dieses Prinzip ist perfekt für Dreego. Kein Framework-JS Code im Output, nur das was der Entwickler explizit will.
-- [x] **Partial Hydration-Konzept → "Partial HTML Swap"** — Astro's `client:visible` etc. lassen sich auf Dreego übertragen: HTMX-Partials können lazy, on-visible, on-interaction geladen werden.
-- [x] **Content Collections** — Dreego braucht dringend ein ähnliches Konzept für `.dreego` Seiten. Eine `dreego.collections.toml` mit Schema-Definition, automatischer Typ-Generierung, Query-API. Das wäre ein Killer-Feature für Content-Seiten.
-- [x] **MPA-Ansatz (Multi-Page-App)** — Dreego ist per Definition MPA. Astro beweist, dass MPA der richtige Ansatz für Content-Seiten ist und SPAs overkill sind. Das validiert Dreegos Grund-Architektur.
-- [x] **Adapter-System** — Astro's Trennung von Framework-Core und Deployment-Adapter ist architektonisch sauber. Dreego könnte dasselbe machen: Core-Framework + Deployment-Presets (Single Binary, Docker, Fly.io, VPS).
-- [x] **".astro Syntax als HTML-Superset" → Dreegos Template-Syntax** — `.dreego` Template sollte sich an HTML anlehnen (wie es bereits der Fall ist). Jedes gültige HTML ist gültiges `.dreego` Template — das senkt die Einstiegs-Hürde massiv.
-- [x] **View Transitions** — Astro's MPA+SPA-Animationen. Dreego könnte ähnliches mit HTMX's `hx-swap` + CSS View Transitions API erreichen.
-- [x] **"Opt in to Complexity"** — Design-Phrase für Dreego übernehmen. Starte einfach, füge Komplexität nur bei Bedarf hinzu.
-- [x] **Dev Toolbar** — Ein CLI-Dev-Server mit eingebautem Debug-Toolbar (zeigt aktuelle Route, `<go>`-Block Daten, HTMX-Requests) wäre ein Differenzierungsmerkmal.
-- [x] **Server Islands (`server:defer`)** — Für Dreego hieße das: Teile einer Seite können asynchron streamen. `<div dreego:defer>` → wird separat gerendert und per SSE/HTMX nachgeladen. Ideal für langsame DB-Queries.
-- [x] **UI-Agnostizität** — Astro unterstützt parallel React, Vue, Svelte. Dreego könnte im `<script>`-Block mehrere Client-Frameworks erlauben (Alpine, Datastar, Petite-Vue). Für V2 sogar WASM-Komponenten.
-- [x] **CSR-Fallback (`client:only`)** — Manche Seiten brauchen volle Client-Interaktivität. Dreego könnte `regeo:client="true"` als Page-Level-Directive haben, um eine Seite komplett client-seitig zu machen.
+**ADOPT:**
+- [x] **Islands Architecture** — This is THE decisive insight for Dreego. `.dreego` pages are by default static (Zero JS). Interactive "islands" are declared via HTMX/Alpine.js. No framework JS on the page except what was explicitly marked as interactive.
+- [x] **"Zero JS by Default"** — This principle is perfect for Dreego. No framework JS code in the output, only what the developer explicitly wants.
+- [x] **Partial Hydration Concept → "Partial HTML Swap"** — Astro's `client:visible` etc. can be transferred to Dreego: HTMX partials can be loaded lazy, on-visible, on-interaction.
+- [x] **Content Collections** — Dreego urgently needs a similar concept for `.dreego` pages. A `dreego.collections.toml` with schema definition, automatic type generation, query API. That would be a killer feature for content sites.
+- [x] **MPA Approach (Multi-Page-App)** — Dreego is by definition MPA. Astro proves that MPA is the right approach for content sites and SPAs are overkill. This validates Dreego's basic architecture.
+- [x] **Adapter System** — Astro's separation of framework core and deployment adapter is architecturally clean. Dreego could do the same: Core Framework + Deployment Presets (Single Binary, Docker, Fly.io, VPS).
+- [x] **".astro Syntax as HTML Superset" → Dreego's Template Syntax** — `.dreego` Template should lean on HTML (as it already does). Every valid HTML is a valid `.dreego` template — this massively lowers the entry barrier.
+- [x] **View Transitions** — Astro's MPA+SPA animations. Dreego could achieve similar with HTMX's `hx-swap` + CSS View Transitions API.
+- [x] **"Opt in to Complexity"** — Adopt design phrase for Dreego. Start simple, add complexity only when needed.
+- [x] **Dev Toolbar** — A CLI dev server with built-in debug toolbar (shows current route, `<go>` block data, HTMX requests) would be a differentiating feature.
+- [x] **Server Islands (`server:defer`)** — For Dreego this would mean: Parts of a page can stream asynchronously. `<div dreego:defer>` → is separately rendered and loaded via SSE/HTMX. Ideal for slow DB queries.
+- [x] **UI-Agnosticism** — Astro supports React, Vue, Svelte in parallel. Dreego could allow multiple client frameworks in the `<script>` block (Alpine, Datastar, Petite-Vue). For V2 even WASM components.
+- [x] **CSR Fallback (`client:only`)** — Some pages need full client interactivity. Dreego could have `regeo:client="true"` as a page-level directive to make a page fully client-side.
 
-**NICHT ADOPTIEREN:**
-- [ ] **Server-First Rendering in JS** — Astro rendert das auf Node/Deno. Dreego macht das in Go. Der Mechanismus ist fundamental anders (Compiler vs. Runtime-Renderer).
-- [ ] **Vite-basierter Dev-Server** — Dreego braucht keinen JS-Bundler. Der Dev-Server ist Go-nativ.
-- [ ] **npm/Node-Ökosystem** — Dreego hat Go-Module. Astro's Stärke ist die Integration mit dem JS-Ökosystem. Dreego kann das nicht replizieren (und will es nicht).
-- [ ] **Astro Components auf Client und Server** — Dreego's `<go>`-Block und Template sind strikt getrennt (Server vs. Client). Astro's `.astro` Components sind eine Mischform.
-- [ ] **Integrations-API im JS-Stil** — Dreego braucht ein Plugin-System, aber in Go-Idiomatik (Interfaces, nicht JS-Funktionen).
+**DO NOT ADOPT:**
+- [ ] **Server-First Rendering in JS** — Astro renders that on Node/Deno. Dreego does it in Go. The mechanism is fundamentally different (Compiler vs. Runtime-Renderer).
+- [ ] **Vite-based Dev Server** — Dreego doesn't need a JS bundler. The dev server is Go-native.
+- [ ] **npm/Node Ecosystem** — Dreego has Go modules. Astro's strength is integration with the JS ecosystem. Dreego can't replicate that (and doesn't want to).
+- [ ] **Astro Components on Client and Server** — Dreego's `<go>` block and Template are strictly separated (Server vs. Client). Astro's `.astro` Components are a hybrid form.
+- [ ] **Integration API in JS style** — Dreego needs a plugin system, but in Go idioms (Interfaces, not JS functions).
 
 ### MDX
 
-**ADOPTIEREN:**
-- [x] **Markdown + Components** — Dreego könnte `.dreego` Dateien ein `{#md}` Block-Konzept geben, in dem Markdown mit Template-Komponenten gemischt wird.
-- [x] **Custom Component Mapping** — Wie MDX's `export const components = {h1: MyHeading}` → Dreego könnte Templates definieren, die HTML-Tags in `.dreego` Components umwandeln.
-- [x] **Frontmatter als First-Class** — Jede `.dreego` Datei könnte optional Frontmatter (YAML/TOML) haben, das im `<go>`-Block als `Meta`-Variable verfügbar ist.
-- [x] **Content Collections + Schema** — Wie MDX in Astro Collections: `.dreego` Seiten in einer Collection mit Zod-ähnlichem Schema (Go struct tags?), automatische Typ-Generierung.
-- [x] **Markdown in Template-Blöcken** — Template-Code (`{#if}`, `{#each}`) innerhalb von Markdown-Content. "Literate Programming" für Webseiten.
-- [x] **ESM/Import-Pattern → Dreego Addon-System** — MDX's `import` Statement → Dreego's `{#use addon}` im Template. Komponenten aus Addons importieren.
-- [x] **Remark/Rehype Plugin-System → Dreego Markdown Pipeline** — Eine Pipeline von Markdown-Transformern (Syntax Highlighting, Table of Contents, Link-Rewriting). Als Go-Pipeline implementierbar.
+**ADOPT:**
+- [x] **Markdown + Components** — Dreego could give `.dreego` files a `{#md}` block concept in which Markdown is mixed with template components.
+- [x] **Custom Component Mapping** — Like MDX's `export const components = {h1: MyHeading}` → Dreego could define templates that convert HTML tags in `.dreego` Components.
+- [x] **Frontmatter as First-Class** — Every `.dreego` file could optionally have frontmatter (YAML/TOML) that is available in the `<go>` block as a `Meta` variable.
+- [x] **Content Collections + Schema** — Like MDX in Astro Collections: `.dreego` pages in a collection with Zod-like schema (Go struct tags?), automatic type generation.
+- [x] **Markdown in Template Blocks** — Template code (`{#if}`, `{#each}`) within Markdown content. "Literate Programming" for websites.
+- [x] **ESM/Import Pattern → Dreego Addon System** — MDX's `import` Statement → Dreego's `{#use addon}` in template. Import components from addons.
+- [x] **Remark/Rehype Plugin System → Dreego Markdown Pipeline** — A pipeline of Markdown transformers (Syntax Highlighting, Table of Contents, Link Rewriting). Implementable as Go pipeline.
 
-**NICHT ADOPTIEREN:**
-- [ ] **JSX in Markdown** — Funktioniert nur mit JS-Runtime. Dreego müsste eine eigene Component-Syntax für Markdown erfinden.
-- [ ] **Evaluate-Schritt** — MDX evaluated JS-Code zur Laufzeit. Dreego compiliert alles vorher — kein Runtime-Evaluate. Sicherer, aber weniger dynamisch.
-- [ ] **npm-Plugin-Ökosystem** — MDX's Stärke ist das Remark/Rehype-Ökosystem. Dreego kann das nicht 1:1 replizieren. Eigenes Markdown-Plugin-System in Go wäre nötig.
-- [ ] **MDX als Dateiformat** — Dreego hat `.dreego` als Format. MDX wäre ein zweites, konkurrierendes Format. Besser: MDX-ähnliche Features in `.dreego` integrieren.
+**DO NOT ADOPT:**
+- [ ] **JSX in Markdown** — Only works with JS runtime. Dreego would need to invent its own component syntax for Markdown.
+- [ ] **Evaluate Step** — MDX evaluates JS code at runtime. Dreego compiles everything beforehand — no runtime evaluate. Safer, but less dynamic.
+- [ ] **npm Plugin Ecosystem** — MDX's strength is the Remark/Rehype ecosystem. Dreego can't replicate this 1:1. A custom Markdown plugin system in Go would be needed.
+- [ ] **MDX as File Format** — Dreego has `.dreego` as format. MDX would be a second, competing format. Better: Integrate MDX-like features into `.dreego`.
 
 ---
 
-## Konkrete Vorschläge für Dreego
+## Concrete Suggestions for Dreego
 
-### 1. Islands-Architektur für `.dreego`
+### 1. Islands Architecture for `.dreego`
 ```
-<!-- Seite ist standardmäßig statisch -->
+<!-- Page is static by default -->
 <div>
   <h1>{title}</h1>
-  
-  <!-- Interaktive Insel via HTMX -->
+
+  <!-- Interactive island via HTMX -->
   <div hx-get="/api/counter" hx-trigger="load">
-    <!-- lädt nach -->
+    <!-- loads afterward -->
   </div>
-  
-  <!-- Client-seitige Insel via Alpine -->
+
+  <!-- Client-side island via Alpine -->
   <div x-data="{ open: false }">
     <button @click="open = !open">Toggle</button>
   </div>
@@ -269,7 +269,7 @@ draft = "bool"
 
 ### 3. Server Islands via `dreego:defer`
 ```html
-<!-- Paralleles Server-Rendering, via SSE gestreamt -->
+<!-- Parallel server rendering, streamed via SSE -->
 <UserAvatar dreego:defer user="{userId}" />
 <ProductReviews dreego:defer product="{productId}" />
 ```
@@ -278,12 +278,12 @@ draft = "bool"
 ```html
 ---
 title: My Blog Post
-date: 2026-07-23
+date: 2026-07-28
 draft: false
 ---
 
 <go>
-    // Meta.title, Meta.date, Meta.draft verfügbar
+    // Meta.title, Meta.date, Meta.draft available
 </go>
 
 <h1>{Meta.title}</h1>
@@ -296,9 +296,9 @@ draft: false
 </go>
 
 {#md}
-# Willkommen auf meinem Blog
+# Welcome to My Blog
 
-Hier sind die neuesten Posts:
+Here are the latest posts:
 
 {#each posts as post}
 - [{post.Title}](/post/{post.Slug})

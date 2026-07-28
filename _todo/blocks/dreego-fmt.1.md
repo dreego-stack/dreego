@@ -9,4 +9,4 @@ created: 2026-07-27
 changed: 2026-07-27
 ---
 
-Templ-inspiriert: `dreego fmt .` formatiert `.dreego`-Dateien in-place. Nutzt Prettier für `<script>`/`<style>`-Blöcke wenn verfügbar. `--check`-Flag für CI-Enforcement. Stdout-Mode via `--stdout`.
+Templ-inspired: `dreego fmt .` formats `.dreego` files in-place. Uses Prettier for `<script>`/`<style>` blocks when available. `--check` flag for CI enforcement. Stdout mode via `--stdout`.

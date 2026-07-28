@@ -1,57 +1,57 @@
 
 ---
 type: Decision
-title: SSR-First Architektur
-description: Dreego rendert HTML auf dem Server mit HTMX und Alpine.js für Interaktivität
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+title: SSR-First Architecture
+description: Dreego renders HTML on the server with HTMX and Alpine.js for interactivity
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# SSR-First Architektur
+# SSR-First Architecture
 
-**Datum:** 23.07.2026
-**Status:** Akzeptiert
+**Date:** 2026-07-28
+**Status:** Accepted
 
-## Kontext
+## Context
 
-Dreego soll ein Webframework sein. Die Frage: Client-Side Rendering (CSR/SPA) oder Server-Side Rendering (SSR)?
+Dreego should be a web framework. The question: Client-Side Rendering (CSR/SPA) or Server-Side Rendering (SSR)?
 
-## Entscheidung
+## Decision
 
-**SSR-First.** Dreego rendert alles auf dem Server. Der Client bekommt fertiges HTML.
+**SSR-First.** Dreego renders everything on the server. The client receives finished HTML.
 
-Interaktivität kommt nicht durch ein Client-Side Framework, sondern durch:
-- **HTMX** für Server-Interaktionen (Partial Page Updates ohne Reload)
-- **Alpine.js** für lokale UI-Interaktionen (Dropdowns, Tabs, Modals)
-- **Datastar** (optional) für SSE-basierte Echtzeit-Updates
+Interactivity comes not through a client-side framework, but through:
+- **HTMX** for server interactions (partial page updates without reload)
+- **Alpine.js** for local UI interactions (dropdowns, tabs, modals)
+- **Datastar** (optional) for SSE-based real-time updates
 
-## Begründung
+## Rationale
 
-1. **Keine JS-Build-Hölle:** Kein node_modules, kein Webpack, kein Vite
-2. **0 MB State-Synchronisierung:** State existiert nur auf dem Go-Server
-3. **Perfektes SEO:** Alles ist statisches HTML beim First Load
-4. **Schneller FCP (First Contentful Paint):** Auch auf schwachen Mobilgeräten
-5. **Einfachere Architektur:** Kein API-Layer, keine JSON-Serialisierung, keine Client-State-Stores
-6. **Direkter DB-Zugriff:** `<go>`-Block kann direkt auf die Datenbank zugreifen
+1. **No JS build hell:** No node_modules, no Webpack, no Vite
+2. **0 MB state synchronization:** State exists only on the Go server
+3. **Perfect SEO:** Everything is static HTML on first load
+4. **Fast FCP (First Contentful Paint):** Even on weak mobile devices
+5. **Simpler architecture:** No API layer, no JSON serialization, no client state stores
+6. **Direct DB access:** `<go>` block can directly access the database
 
-## Vergleich
+## Comparison
 
-| Aspekt              | CSR (React/Svelte)        | SSR (Dreego)                  |
-|---------------------|---------------------------|------------------------------|
-| Initial Load        | JS muss laden + hydrieren | Sofort fertiges HTML         |
-| SEO                 | Schwierig (SSR nötig)     | Perfekt                      |
-| State Management    | Client + Server sync      | Nur Server                   |
-| Bundle Size         | 100+ KB JS                | ~10 KB (HTMX + Alpine)       |
-| Deployment          | Node.js + Static Files    | Single Go Binary             |
+| Aspect              | CSR (React/Svelte)         | SSR (Dreego)                  |
+|---------------------|----------------------------|-------------------------------|
+| Initial Load        | JS must load + hydrate     | Immediate finished HTML       |
+| SEO                 | Difficult (SSR needed)     | Perfect                       |
+| State Management    | Client + Server sync       | Server only                   |
+| Bundle Size         | 100+ KB JS                 | ~10 KB (HTMX + Alpine)        |
+| Deployment          | Node.js + Static Files     | Single Go Binary              |
 
-## Gegenargumente
+## Counterarguments
 
-- **"SSR fühlt sich langsam an bei Interaktionen"** → HTMX tauscht nur HTML-Fragmente aus, kein Full-Page-Reload
-- **"Kein SPA-Feeling"** → Alpine.js + View Transitions API für flüssige Übergänge
-- **"Weniger interaktiv"** → Datastar streamt DOM-Updates via SSE (wie Phoenix LiveView)
+- **"SSR feels slow on interactions"** → HTMX only swaps HTML fragments, no full page reload
+- **"No SPA feeling"** → Alpine.js + View Transitions API for smooth transitions
+- **"Less interactive"** → Datastar streams DOM updates via SSE (like Phoenix LiveView)
 
-## Konsequenzen
+## Consequences
 
-- Kein Client-Side Router nötig
-- Keine API-Schicht zwischen Template und Datenbank
-- Tailwind + HTMX + Alpine.js sind feste Core-Dependencies
-- V2: SSG (Static Site Generation) für rein statische Seiten
+- No client-side router needed
+- No API layer between template and database
+- Tailwind + HTMX + Alpine.js are fixed core dependencies
+- V2: SSG (Static Site Generation) for purely static pages

@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Auto-generierte OpenAPI 3.0 Spec aus Go-Struct-Tags und API-Routen. `c.Swagger()` endpoint. Struct-Tags: `api:"description"`, `validate:"required"`. CodeGen erzeugt /openapi.json Route. Swagger UI optional einbindbar. Keine manuelle Spec-Datei nötig.
+Auto-generated OpenAPI 3.0 Spec from Go struct tags and API routes. `c.Swagger()` endpoint. Struct-Tags: `api:"description"`, `validate:"required"`. CodeGen generates /openapi.json route. Swagger UI optionally embeddable. No manual spec file needed.

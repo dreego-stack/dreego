@@ -1,77 +1,77 @@
 
 ---
 type: Reference
-title: Relevanz-Analyse: React & Svelte Ecosystem 2025/2026
+title: Relevance Analysis: React & Svelte Ecosystem 2025/2026
 description: Relevance analysis of React & Svelte ecosystem patterns for Dreego's strategic positioning
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 
-**Datum:** 23.07.2026
-**Quelle:** State of JS 2025 Survey, Community-Analysen
+**Date:** 2026-07-28
+**Source:** State of JS 2025 Survey, Community Analyses
 
 ## State of the Ecosystem
 
 ### React
-- **Next.js dominiert (58.6%)** aber Satisfaction crasht: 68% → 55%. #1 Pain Point: "Excessive Complexity"
-- **Astro** hat höchste Satisfaction (94%), stark wachsend
-- **Remix v3** wird komplett neu gebaut, nicht mehr auf React, AI-first
-- **shadcn/ui** dominiert UI-Libraries (Copy-Paste-Modell statt npm dependency)
-- **RSC/Server Actions** sind kontrovers — Client/Server-Grenze verwirrt viele
+- **Next.js dominates (58.6%)** but satisfaction crashes: 68% → 55%. #1 Pain Point: "Excessive Complexity"
+- **Astro** has highest satisfaction (94%), growing strongly
+- **Remix v3** is being completely rebuilt, no longer on React, AI-first
+- **shadcn/ui** dominates UI libraries (Copy-Paste model instead of npm dependency)
+- **RSC/Server Actions** are controversial — Client/Server boundary confuses many
 
 ### Svelte
-- **SvelteKit: 88% Satisfaction** — File-based Routing, Form Actions, kein "use client"
-- **Svelte 5 Runes:** `$state`, `$derived`, `$effect` — Signals als Sprach-Feature
-- **shadcn-svelte** + Melt UI für Komponenten
-- Built-in Stores reichen für State Management
+- **SvelteKit: 88% Satisfaction** — File-based Routing, Form Actions, no "use client"
+- **Svelte 5 Runes:** `$state`, `$derived`, `$effect` — Signals as language feature
+- **shadcn-svelte** + Melt UI for components
+- Built-in Stores suffice for state management
 
-### Generelle Trends
-- **Signals** als Konzept setzt sich framework-übergreifend durch (#3 meistgewünschtes JS-Feature)
-- **29% des Codes ist AI-generiert** — Framework muss AI-freundlich sein
-- **Framework-Müdigkeit:** Entwickler nutzen nur 2.6 Frameworks in der Karriere
-- **Kein Vendor Lock-in** ist Top-Pain-Point (Vercel-Kritik)
+### General Trends
+- **Signals** as a concept is establishing itself framework-agnostically (#3 most wanted JS feature)
+- **29% of code is AI-generated** — Framework must be AI-friendly
+- **Framework Fatigue:** Developers use only 2.6 frameworks in their career
+- **No Vendor Lock-in** is top pain point (Vercel criticism)
 
-## Was Dreego adoptieren sollte
+## What Dreego Should Adopt
 
-| Muster                     | Quelle        | Begründung                                                     |
-|----------------------------|---------------|----------------------------------------------------------------|
-| **File-based Routing**     | SvelteKit     | SvelteKit-Style (nicht Next.js App Router). Klar, einfach, bewährt |
-| **SSR-First ohne "use client"** | SvelteKit | Explizite Scope-Sektionen statt unscharfer Grenzen              |
-| **Compiler-Modell**        | Svelte        | Kein Runtime-Overhead. Svelte macht vor, wie gut das funktioniert |
-| **Form Actions**           | SvelteKit/Next| Mappen natürlich auf Go-Handler. `g-submit` statt `r.ParseForm` |
-| **Shadcn-Prinzip**         | shadcn/ui     | Copy-Paste-Komponenten statt npm-Dependency. Für dreego-ui übernehmen |
-| **Tailwind**               | Universal     | Ist quasi Standard. Class Merging (`regeo.MergeClasses`) essenziell |
-| **Single Binary**          | Go            | Kein Vercel-Lock-in. Überall deploybar. Top-Pain-Point gelöst   |
-| **Signals-Konzept**        | Svelte/Solid  | Die `{#let}` + reaktive Updats via HTMX/Datastar abbilden       |
-
-## Was Dreego vermeiden sollte
-
-| Anti-Pattern               | Quelle        | Begründung                                                     |
+| Pattern                     | Source        | Rationale                                                      |
 |-----------------------------|---------------|----------------------------------------------------------------|
-| **"use client" / RSC-Grenze** | Next.js     | Größter Pain Point. Verwirrt Developer. Dreego löst via Sektionen klarer |
-| **Zu viele Rendering-Modi** | Next.js       | SSG, ISR, PPR, Edge... Overkill. SSR + HTMX partials reichen   |
-| **Framework als Platform**  | Next/Vercel   | Kein Abhängigkeitsverhältnis zu Hosting-Provider                |
-| **Breaking Changes**        | Next.js       | Next.js verliert Satisfaction durch ständige Brüche             |
-| **Excessive Complexity**    | Next.js       | Kleines API-Surface, wenige Konzepte, Go-Idiome                 |
-| **npm-Abhängigkeit**        | JS-Ökosystem  | Kein node_modules. Go-Module sind der Weg                       |
+| **File-based Routing**      | SvelteKit     | SvelteKit-Style (not Next.js App Router). Clear, simple, proven |
+| **SSR-First without "use client"** | SvelteKit | Explicit scope sections instead of fuzzy boundaries              |
+| **Compiler Model**          | Svelte        | No runtime overhead. Svelte demonstrates how well this works    |
+| **Form Actions**            | SvelteKit/Next| Map naturally to Go handlers. `g-submit` instead of `r.ParseForm` |
+| **Shadcn Principle**        | shadcn/ui     | Copy-paste components instead of npm dependency. Adopt for dreego-ui |
+| **Tailwind**                | Universal     | Basically standard. Class merging (`regeo.MergeClasses`) essential |
+| **Single Binary**           | Go            | No Vercel lock-in. Deployable everywhere. Top pain point solved   |
+| **Signals Concept**         | Svelte/Solid  | Map `{#let}` + reactive updates via HTMX/Datastar                |
 
-## Strategische Positionierung
+## What Dreego Should Avoid
 
-### Zielgruppe
-- Go-Entwickler, die SSR-Seiten bauen wollen ohne JS-Fatigue
-- Teams, die von Next.js/SvelteKit kommen, aber Go im Backend wollen
-- Entwickler, die ein Binary deployen wollen (Fly.io, VPS, Raspberry Pi)
+| Anti-Pattern               | Source        | Rationale                                                      |
+|-----------------------------|---------------|----------------------------------------------------------------|
+| **"use client" / RSC boundary** | Next.js     | Biggest pain point. Confuses developers. Dreego solves via sections more clearly |
+| **Too many rendering modes** | Next.js      | SSG, ISR, PPR, Edge... Overkill. SSR + HTMX partials suffice   |
+| **Framework as Platform**   | Next/Vercel   | No dependency on hosting provider                              |
+| **Breaking Changes**        | Next.js       | Next.js loses satisfaction through constant breaks             |
+| **Excessive Complexity**    | Next.js       | Small API surface, few concepts, Go idioms                     |
+| **npm Dependency**          | JS Ecosystem  | No node_modules. Go modules are the way                        |
+
+## Strategic Positioning
+
+### Target Audience
+- Go developers who want to build SSR pages without JS fatigue
+- Teams coming from Next.js/SvelteKit who want Go in the backend
+- Developers who want to deploy a single binary (Fly.io, VPS, Raspberry Pi)
 
 ### USP (Unique Selling Points)
-1. **Single Binary Deployment** — das kann kein JS-Framework
-2. **100% Compile-Time Safety** — kein Runtime-Template-Error
-3. **Kein node_modules** — Go-Module lösen das Dependency-Problem
-4. **SSR ohne Komplexität** — keine Client/Server-Grenze, klare Sektionen
-5. **Kein Vendor Lock-in** — deploye überall
+1. **Single Binary Deployment** — no JS framework can do this
+2. **100% Compile-Time Safety** — no runtime template errors
+3. **No node_modules** — Go modules solve the dependency problem
+4. **SSR without complexity** — no client/server boundary, clear sections
+5. **No Vendor Lock-in** — deploy anywhere
 
-### Was Entwickler wirklich wollen (und Dreego liefert)
-- **Static Typing** → Go nativ
-- **Standard Library** → Go exzellent
-- **SSR ohne Komplexität** → Sektionen-Modell
-- **Kein Lock-in** → Single Binary, überall deploybar
-- **Signals-Reaktivität** → HTMX + Datastar
+### What Developers Really Want (and Dreego Delivers)
+- **Static Typing** → Go natively
+- **Standard Library** → Go excellent
+- **SSR without complexity** → Section model
+- **No Lock-in** → Single Binary, deployable everywhere
+- **Signals Reactivity** → HTMX + Datastar

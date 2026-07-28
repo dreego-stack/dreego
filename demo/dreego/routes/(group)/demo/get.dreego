@@ -4,9 +4,9 @@
 
 <div>
     <h1>Route Group: (group)</h1>
-    <p>Diese Seite liegt in <code>dreego/routes/(group)/demo/get.dreego</code></p>
-    <p>Die URL ist <strong>/demo</strong> — die Gruppe <code>(group)</code> erscheint nicht in der URL.</p>
-    <a href="/">Zurück</a>
+    <p>This page is at <code>dreego/routes/(group)/demo/get.dreego</code></p>
+    <p>The URL is <strong>/demo</strong> — the group <code>(group)</code> does not appear in the URL.</p>
+    <a href="/">Back</a>
 </div>
 
 <style>

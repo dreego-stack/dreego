@@ -11,4 +11,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin für Multi-Channel Notifications. Mail, DB, Slack, Discord. Event-basiert (subscribed auf event-bus.1). Notification-Templates. User-Preferences (welcher Channel). Queue-Integration für Async-Delivery.
+Plugin for multi-channel notifications. Mail, DB, Slack, Discord. Event-based (subscribed to event-bus.1). Notification templates. User preferences (which channel). Queue integration for async delivery.

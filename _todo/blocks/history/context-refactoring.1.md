@@ -9,4 +9,4 @@ created: 2026-07-25
 changed: 2026-07-26
 ---
 
-Context-Interface mit embedding context.Context, Param, Data, Render. SSRContext als konkrete Impl. Codegen generiert *context.SSRContext + context.NewSSR. Kein map[string]string mehr.
+Context interface with embedding context.Context, Param, Data, Render. SSRContext as concrete impl. Codegen generates *context.SSRContext + context.NewSSR. No more map[string]string.

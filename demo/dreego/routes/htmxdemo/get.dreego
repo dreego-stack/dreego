@@ -6,10 +6,10 @@
 <div>
     <h1>HTMX Demo</h1>
     <button hx-post="/htmxdemo" hx-target="#result">
-        Klick mich
+        Click me
     </button>
     <div id="result"></div>
-    <a href="/">Zurück</a>
+    <a href="/">Back</a>
 </div>
 
 <style>

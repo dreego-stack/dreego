@@ -10,4 +10,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-Plugin/Component-Library für Karten. MapLibre/Leaflet-Integration. <Map center={...} markers={...} /> Syntax. SSR-kompatibel (Server rendert Config als JSON, Client hydriert). Kein Core-Interface — reine UI-Komponenten.
+Plugin/Component library for maps. MapLibre/Leaflet integration. <Map center={...} markers={...} /> syntax. SSR-compatible (server renders config as JSON, client hydrates). No core interface — pure UI components.

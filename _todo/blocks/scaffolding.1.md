@@ -1,6 +1,6 @@
 ---
 id: scaffolding.1
-title: dreego new + Generatoren
+title: dreego new + Generators
 status: planned
 phase: v0.0.x
 requires:
@@ -9,4 +9,4 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
-dreego new <name> — Projekt-Template scaffolden. dreego generate page/component/middleware/resource. Starter-Templates: blog, saas, admin. .dreego/templates/ für Custom Stubs.
+dreego new <name> — scaffold project template. dreego generate page/component/middleware/resource. Starter templates: blog, saas, admin. .dreego/templates/ for custom stubs.

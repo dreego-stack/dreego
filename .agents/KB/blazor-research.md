@@ -1,49 +1,49 @@
 
 ---
 type: Reference
-title: C# Blazor & ASP.NET Core Research — Dreego-Relevanz
+title: C# Blazor & ASP.NET Core Research — Dreego Relevance
 description: Systematic analysis of C# Blazor & ASP.NET Core features transferable to Dreego
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
-# C# Blazor & ASP.NET Core Research — Dreego-Relevanz
+# C# Blazor & ASP.NET Core Research — Dreego Relevance
 
-**Datum:** 23.07.2026
-**Zweck:** Systematische Analyse der C#/.NET Webframework-Welt. C# ist wie Go kompiliert und statisch typisiert — die architektonischen Lehren sind direkt übertragbar.
+**Date:** 2026-07-28
+**Purpose:** Systematic analysis of the C#/.NET web framework world. C# is like Go — compiled and statically typed — the architectural lessons are directly transferable.
 
-## Kernergebnisse
+## Key Findings
 
-### Was Dreego von Blazor lernen kann
+### What Dreego Can Learn from Blazor
 
-Blazor's Rendering-Modes (`Static SSR`, `Interactive Server`, `Interactive WebAssembly`, `Interactive Auto`) sind ein direktes Vorbild für Dreego. Dreego macht SSR-First was Blazor "Static SSR" nennt, und HTMX/Alpine.js entsprechen "Interactive Server" (Server-seitige Events, DOM-Updates ohne Full Reload).
+Blazor's rendering modes (`Static SSR`, `Interactive Server`, `Interactive WebAssembly`, `Interactive Auto`) are a direct model for Dreego. Dreego does SSR-First, which Blazor calls "Static SSR", and HTMX/Alpine.js correspond to "Interactive Server" (server-side events, DOM updates without full reload).
 
-### Middleware-Pipeline (ASP.NET Core)
-Eine der saubersten Middleware-Architekturen:
-- `Use()` — chainable, `await next(context)` für pre/post
+### Middleware Pipeline (ASP.NET Core)
+One of the cleanest middleware architectures:
+- `Use()` — chainable, `await next(context)` for pre/post
 - `Run()` — terminal, short-circuits
 - `Map()` — branch by path prefix
 - `UseWhen()` — conditional branch, rejoins main pipeline
-- Dokumentierte Reihenfolge: Exception → HTTPS → Static → Routing → CORS → Auth → Endpoints
+- Documented ordering: Exception → HTTPS → Static → Routing → CORS → Auth → Endpoints
 
 ### Configuration System
-Hierarchische Key-Value Pairs mit klarer Priorität:
-1. CLI-Args (höchste)
+Hierarchical key-value pairs with clear priority:
+1. CLI args (highest)
 2. Environment Variables
 3. User Secrets (Dev only)
 4. `appsettings.{Env}.json`
-5. `appsettings.json` (niedrigste)
+5. `appsettings.json` (lowest)
 
-Plus `reloadOnChange` für Live-Config-Updates.
+Plus `reloadOnChange` for live config updates.
 
-### Form-Handling
-- `EditForm` + `DataAnnotationsValidator` — deklarativ
+### Form Handling
+- `EditForm` + `DataAnnotationsValidator` — declarative
 - `OnValidSubmit`/`OnInvalidSubmit` — clean lifecycle
 - `ValidationSummary` + `ValidationMessage` — component-based
-- `[SupplyParameterFromForm]` — auto-map POST body zu Properties
-- Antiforgery: Auto-added, opt-out möglich
+- `[SupplyParameterFromForm]` — auto-map POST body to properties
+- Antiforgery: Auto-added, opt-out possible
 
 ### Dependency Injection
-Built-in, kein externes Framework:
+Built-in, no external framework:
 - Transient (new per inject), Scoped (per request/circuit), Singleton
 - Constructor Injection (preferred)
 - Keyed Services (.NET 8+)
@@ -51,34 +51,34 @@ Built-in, kein externes Framework:
 
 ### Component Model
 - Single-file: `.razor` = Markup + `@code` = Logic
-- `[Parameter]`, `[CascadingParameter]` für Props
-- `RenderFragment` für Children/Slots
-- `@typeparam` für Generics
+- `[Parameter]`, `[CascadingParameter]` for Props
+- `RenderFragment` for Children/Slots
+- `@typeparam` for Generics
 - Lifecycle: OnInit, OnParamsSet, OnAfterRender, ShouldRender, Dispose
-- `@key` für Identity in Lists
-- `@attributes` für Attribute Splatting
-- `@rendermode` für Mix von Static + Interactive
+- `@key` for Identity in Lists
+- `@attributes` for Attribute Splatting
+- `@rendermode` for mixing Static + Interactive
 
 ### Hot Reload
-Änderungen an C#, Razor, CSS ohne App-Neustart. State bleibt erhalten.
+Changes to C#, Razor, CSS without app restart. State is preserved.
 
 ### Scaffolding
-`dotnet new blazor` — interaktiv (Server/WebAssembly/Auto/None)
+`dotnet new blazor` — interactive (Server/WebAssembly/Auto/None)
 ASP.NET Core Identity Scaffolder: Login, Register, Manage Pages
-Entity Framework Scaffolder: Models aus existierender DB
+Entity Framework Scaffolder: Models from existing DB
 
-## Für Dreego: Direkt Übertragbar
+## For Dreego: Directly Transferable
 
-| .NET Feature | Dreego-Adaption |
+| .NET Feature | Dreego Adaptation |
 |---|---|
-| Convention over Configuration | Ordnerstruktur = Routing, Namespace = Dateipfad |
-| `_Imports.razor` | `_imports.dreego` pro Ordner |
-| Middleware-Ordnung + Dokumentation | Go-Middleware-Chain mit klarer Reihenfolge |
-| Configuration-Priority-System | CLI > Env > `.dreego.yaml` > Defaults |
-| `EditForm`-Pattern | `g-submit` + Struct-Validierung |
-| Component Lifecycle | `<go>`-Block = OnInit, keine weiteren Lifecycle-Phases nötig |
-| `@key` | Nicht nötig (HTMX macht DOM-Replacement) |
-| DI: Keyed Services | Go: Map-basierte Registrierung |
-| `IOptions<T>` | Go-Struct mit `dreego:"config"` Tags |
+| Convention over Configuration | Directory structure = Routing, Namespace = file path |
+| `_Imports.razor` | `_imports.dreego` per directory |
+| Middleware order + documentation | Go middleware chain with clear ordering |
+| Configuration priority system | CLI > Env > `.dreego.yaml` > Defaults |
+| `EditForm` pattern | `g-submit` + struct validation |
+| Component Lifecycle | `<go>` block = OnInit, no further lifecycle phases needed |
+| `@key` | Not needed (HTMX does DOM replacement) |
+| DI: Keyed Services | Go: map-based registration |
+| `IOptions<T>` | Go struct with `dreego:"config"` tags |
 
-*Siehe thinking-list.md für die vollständige Detail-Liste der Blazor-Features.*
+*See thinking-list.md for the full detailed list of Blazor features.*
