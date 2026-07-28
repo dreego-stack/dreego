@@ -12,8 +12,11 @@ const (
 	TokenExpression
 	TokenIfOpen
 	TokenIfClose
+	TokenElse
+	TokenElseIf
 	TokenEachOpen
 	TokenEachClose
+	TokenEachElse
 	TokenSlot
 	TokenSlotOpen
 	TokenSlotClose
@@ -51,10 +54,16 @@ func (t TokenType) String() string {
 		return "IfOpen"
 	case TokenIfClose:
 		return "IfClose"
+	case TokenElse:
+		return "Else"
+	case TokenElseIf:
+		return "ElseIf"
 	case TokenEachOpen:
 		return "EachOpen"
 	case TokenEachClose:
 		return "EachClose"
+	case TokenEachElse:
+		return "EachElse"
 	case TokenVerbatim:
 		return "Verbatim"
 	}

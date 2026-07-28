@@ -14,9 +14,8 @@ func (p *Parser) parseIfNodes() ([]TemplateNode, error) {
 		if tok.Type == TokenEOF {
 			return nil, fmt.Errorf("unclosed {#if}")
 		}
-		if tok.Type == TokenIfClose {
-			p.advance()
-			return nodes, nil
+		if tok.Type == TokenIfClose || tok.Type == TokenElse || tok.Type == TokenElseIf {
+			break
 		}
 		if tok.Type == TokenTagClose {
 			return nil, fmt.Errorf("unexpected </div> inside {#if}")
@@ -28,6 +27,34 @@ func (p *Parser) parseIfNodes() ([]TemplateNode, error) {
 		}
 		nodes = append(nodes, node)
 	}
+	return nodes, nil
+}
+
+func (p *Parser) parseElseNodes() ([]TemplateNode, error) {
+	var nodes []TemplateNode
+
+	for {
+		tok := p.current()
+		if tok.Type == TokenEOF {
+			return nil, fmt.Errorf("unclosed {#else}")
+		}
+		if tok.Type == TokenIfClose {
+			break
+		}
+		if tok.Type == TokenElse || tok.Type == TokenElseIf {
+			return nil, fmt.Errorf("unexpected {#else} or {#else if} inside {#else}")
+		}
+		if tok.Type == TokenTagClose {
+			return nil, fmt.Errorf("unexpected </div> inside {#else}")
+		}
+
+		node, err := p.parseTemplateNode("if")
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
+	}
+	return nodes, nil
 }
 
 func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
@@ -38,9 +65,8 @@ func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
 		if tok.Type == TokenEOF {
 			return nil, fmt.Errorf("unclosed {#each}")
 		}
-		if tok.Type == TokenEachClose {
-			p.advance()
-			return nodes, nil
+		if tok.Type == TokenEachClose || tok.Type == TokenEachElse {
+			break
 		}
 		if tok.Type == TokenTagClose {
 			return nil, fmt.Errorf("unexpected </div> inside {#each}")
@@ -52,6 +78,28 @@ func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
 		}
 		nodes = append(nodes, node)
 	}
+	return nodes, nil
+}
+
+func (p *Parser) parseEachElseNodes() ([]TemplateNode, error) {
+	var nodes []TemplateNode
+
+	for {
+		tok := p.current()
+		if tok.Type == TokenEOF {
+			return nil, fmt.Errorf("unclosed {#each else}")
+		}
+		if tok.Type == TokenEachClose {
+			break
+		}
+
+		node, err := p.parseTemplateNode("each")
+		if err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, node)
+	}
+	return nodes, nil
 }
 
 func parseEachClause(clause string) (items, item string, err error) {
@@ -60,4 +108,16 @@ func parseEachClause(clause string) (items, item string, err error) {
 		return "", "", fmt.Errorf("expected 'items as item', got %q", clause)
 	}
 	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]), nil
+}
+
+func parseExpression(raw string) (expr string, filters []string) {
+	if !strings.Contains(raw, "|") {
+		return raw, nil
+	}
+	parts := strings.Split(raw, "|")
+	expr = strings.TrimSpace(parts[0])
+	for _, f := range parts[1:] {
+		filters = append(filters, strings.TrimSpace(f))
+	}
+	return
 }

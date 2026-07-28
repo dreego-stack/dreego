@@ -17,26 +17,60 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		}
 		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content))
 	case NodeExpression:
-		return fmt.Sprintf(`%sb.WriteString(html.EscapeString(fmt.Sprintf("%%v", %s)))`+"\n", indent, n.Content)
+		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
+		raw := false
+		for _, f := range n.Filters {
+			switch f {
+			case "raw":
+				raw = true
+			case "upper":
+				code = fmt.Sprintf("strings.ToUpper(%s)", code)
+			}
+		}
+		if raw {
+			return fmt.Sprintf("%sb.WriteString(%s)\n", indent, code)
+		}
+		return fmt.Sprintf(`%sb.WriteString(html.EscapeString(%s))`+"\n", indent, code)
 	case NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
 			buf.WriteString(genTemplateNode(child, depth+1))
 		}
+		if len(n.ElseChildren) > 0 {
+			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
+			for _, child := range n.ElseChildren {
+				buf.WriteString(genTemplateNode(child, depth+1))
+			}
+		}
 		buf.WriteString(indent + "}\n")
 		return buf.String()
 	case NodeEach:
 		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("%sfor i, %s := range %s {\n", indent, n.Item, n.Items))
-		buf.WriteString(fmt.Sprintf("%s\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", indent, n.Items))
-		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", indent))
+		hasElse := len(n.ElseChildren) > 0
+		forDepth := depth + 1
+		forIndent := strings.Repeat("\t", forDepth)
+		if hasElse {
+			buf.WriteString(fmt.Sprintf("%sif len(%s) > 0 {\n", indent, n.Items))
+			forDepth = depth + 2
+			forIndent = strings.Repeat("\t", forDepth)
+		}
+		buf.WriteString(fmt.Sprintf("%sfor i, %s := range %s {\n", forIndent, n.Item, n.Items))
+		buf.WriteString(fmt.Sprintf("%s\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
+		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code := genTemplateNode(child, depth+1)
+			code := genTemplateNode(child, forDepth+1)
 			code = strings.ReplaceAll(code, "$loop.", "loop.")
 			buf.WriteString(code)
 		}
-		buf.WriteString(indent + "}\n")
+		buf.WriteString(forIndent + "}\n")
+		if hasElse {
+			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
+			for _, child := range n.ElseChildren {
+				buf.WriteString(genTemplateNode(child, depth+1))
+			}
+			buf.WriteString(indent + "}\n")
+		}
 		return buf.String()
 	case NodeSlot:
 		if n.Content != "" && len(n.Children) > 0 {

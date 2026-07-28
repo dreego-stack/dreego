@@ -2,10 +2,13 @@
 
 ## v0.0.9 (unreleased) — Template-Primitives
 
-- `{#verbatim}` Block: Raw-Output für JS-Templates. Content wird 1:1 ausgegeben — kein Escaping, kein Parsing.
+- `{#verbatim}` Block: Raw-Output für JS-Templates
 - `{#each}` mit `$loop`-Variable: `$loop.Index`, `$loop.First`, `$loop.Last`, `$loop.Even`, `$loop.Odd`
-- Fix: `<header>`, `<main>`, `<footer>` in Components wurden fälschlich als `<head>` erkannt (Tag-Präfix-Bug)
-- Test-System: `PASS/FAIL <path>` Format, `DREEGO_FILTER=<name>` für Einzeltest, Docker-Build-Logs unterdrückt
+- Template-Filter: `{var|raw}` (kein Escaping), `{var|upper}` (uppercase). Pipe-Syntax.
+- `{#else}` in `{#if}`-Block: `{#if cond}...{#else}...{/if}`
+- `{#each else}`: `{#each items as item}...{#each else}...{/each}` — Empty-List Fallback
+- Fix: `<header>`, `<main>`, `<footer>` prefix-match Bug in scanTag
+- Test-System: `PASS/FAIL <path>`, `DREEGO_FILTER=<pattern>`, Docker-Build-Logs unterdrückt
 
 ## v0.0.8 (2026-07-28) — Named Slots
 

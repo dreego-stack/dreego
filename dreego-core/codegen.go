@@ -250,7 +250,20 @@ func genTemplateNodeComp(n TemplateNode) string {
 	case NodeText:
 		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content))
 	case NodeExpression:
-		return fmt.Sprintf("b.WriteString(html.EscapeString(fmt.Sprintf(\"%%v\", %s)))", n.Content)
+		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
+		raw := false
+		for _, f := range n.Filters {
+			switch f {
+			case "raw":
+				raw = true
+			case "upper":
+				code = fmt.Sprintf("strings.ToUpper(%s)", code)
+			}
+		}
+		if raw {
+			return fmt.Sprintf("b.WriteString(%s)", code)
+		}
+		return fmt.Sprintf("b.WriteString(html.EscapeString(%s))", code)
 	case NodeSlot:
 		if n.Content != "" {
 			return fmt.Sprintf("b.WriteString(ctx.Get(\"slot_%s\"))", n.Content)

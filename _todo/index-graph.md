@@ -44,6 +44,12 @@ graph TD
     style verbatim_1 fill:#d4edda,stroke:#28a745
     tag_prefix_fix_1["22 scanTag: Tag-Präfix-Matching fix (head v"]
     style tag_prefix_fix_1 fill:#d4edda,stroke:#28a745
+    template_filters_1["23 Template-Filter ({var|raw}, {var|upper})"]
+    style template_filters_1 fill:#d4edda,stroke:#28a745
+    if_else_1["24 {#else} in {#if}-Block"]
+    style if_else_1 fill:#d4edda,stroke:#28a745
+    each_else_1["25 {#each else} — Empty-List Fallback"]
+    style each_else_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
@@ -72,8 +78,6 @@ graph TD
     style security_headers_1 fill:#fff3cd,stroke:#ffc107
     static_assets_1["Static Assets (static/ → embed.FS)"]
     style static_assets_1 fill:#fff3cd,stroke:#ffc107
-    template_filters_1["Template-Filter ({var|raw}, {var|upper})"]
-    style template_filters_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
@@ -194,8 +198,6 @@ graph TD
     plugin_interface_1 --> addon_ecosystem_1
     components_1 --> addon_ecosystem_1
     session_1 --> addon_ecosystem_1
-    transpiler_1 --> template_filters_1
-    xss_1 --> template_filters_1
     routing_1 --> api_json_1
     context_refactoring_1 --> api_json_1
     plugin_interface_1 --> event_bus_1
@@ -230,6 +232,7 @@ graph TD
     routing_1 --> components_1
     routing_1 --> route_groups_1
     transpiler_1 --> each_loop_1
+    transpiler_1 --> if_else_1
     transpiler_1 --> tag_prefix_fix_1
     middleware_1 --> recovery_1
     transpiler_1 --> routing_1
@@ -239,7 +242,11 @@ graph TD
     recovery_1 --> error_pages_1
     session_1 --> csrf_1
     middleware_1 --> csrf_1
+    transpiler_1 --> each_else_1
+    each_loop_1 --> each_else_1
     transpiler_1 --> xss_1
+    transpiler_1 --> template_filters_1
+    xss_1 --> template_filters_1
     transpiler_1 --> verbatim_1
     context_refactoring_1 --> session_1
     context_refactoring_1 --> component_handler_1
@@ -269,4 +276,7 @@ graph TD
     named_slots_1 -.->|chain| each_loop_1
     each_loop_1 -.->|chain| verbatim_1
     verbatim_1 -.->|chain| tag_prefix_fix_1
+    tag_prefix_fix_1 -.->|chain| template_filters_1
+    template_filters_1 -.->|chain| if_else_1
+    if_else_1 -.->|chain| each_else_1
 ```

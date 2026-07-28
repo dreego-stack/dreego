@@ -14,7 +14,7 @@ for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
 
     name="${test_dir#$DIR/}"
 
-    if [ -n "$FILTER" ] && ! echo "$name" | grep -q "$FILTER"; then
+    if [ -n "$FILTER" ] && ! echo "$name" | grep -Eq "$FILTER"; then
         continue
     fi
 

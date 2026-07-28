@@ -13,15 +13,17 @@ const (
 )
 
 type TemplateNode struct {
-	Type     TemplateNodeType
-	Content  string
-	Cond     string
-	Items    string
-	Item     string
-	Children []TemplateNode
-	Tag      string
-	Attrs    string
-	SelfClose bool
+	Type         TemplateNodeType
+	Content      string
+	Cond         string
+	Items        string
+	Item         string
+	Children     []TemplateNode
+	ElseChildren []TemplateNode
+	Tag          string
+	Attrs        string
+	SelfClose     bool
+	Filters      []string
 }
 
 type GoSection struct {

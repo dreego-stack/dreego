@@ -61,25 +61,49 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		return TemplateNode{Type: NodeText, Content: tok.Value}, nil
 	case TokenExpression:
 		p.advance()
-		return TemplateNode{Type: NodeExpression, Content: tok.Value}, nil
+		expr, filters := parseExpression(tok.Value)
+		return TemplateNode{Type: NodeExpression, Content: expr, Filters: filters}, nil
 	case TokenIfOpen:
+		cond := tok.Value
 		p.advance()
 		children, err := p.parseIfNodes()
 		if err != nil {
 			return TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeIf, Cond: tok.Value, Children: children}, nil
+		var elseChildren []TemplateNode
+		if p.current().Type == TokenElse {
+			p.advance()
+			elseChildren, err = p.parseElseNodes()
+			if err != nil {
+				return TemplateNode{}, err
+			}
+		}
+		if p.current().Type == TokenIfClose {
+			p.advance()
+		}
+		return TemplateNode{Type: NodeIf, Cond: cond, Children: children, ElseChildren: elseChildren}, nil
 	case TokenEachOpen:
-		p.advance()
 		items, item, err := parseEachClause(tok.Value)
 		if err != nil {
 			return TemplateNode{}, err
 		}
+		p.advance()
 		children, err := p.parseEachNodes()
 		if err != nil {
 			return TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children}, nil
+		var elseChildren []TemplateNode
+		if p.current().Type == TokenEachElse {
+			p.advance()
+			elseChildren, err = p.parseEachElseNodes()
+			if err != nil {
+				return TemplateNode{}, err
+			}
+		}
+		if p.current().Type == TokenEachClose {
+			p.advance()
+		}
+		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children, ElseChildren: elseChildren}, nil
 	case TokenTagClose:
 		if parent == "root" || parent == "component" {
 			p.advance()
@@ -114,6 +138,10 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children}, nil
 	case TokenSlotClose:
 		return TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
+	case TokenElse:
+		return TemplateNode{}, fmt.Errorf("unexpected {#else} outside {#if} at position %d", tok.Pos)
+	case TokenElseIf:
+		return TemplateNode{}, fmt.Errorf("unexpected {#else if} outside {#if} at position %d", tok.Pos)
 	case TokenVerbatim:
 		p.advance()
 		return TemplateNode{Type: NodeVerbatim, Content: tok.Value}, nil

@@ -1,12 +1,15 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–22 done. Next code: **23**.
+Status via `python _todo/process.py`. Chain 1–25 done. Next code: **26**.
 
 ## v0.0.9 (current)
 
 - **each-loop.1** — `{#each}` mit `$loop`-Variable ✅
-- **verbatim.1** — `{#verbatim}` Block (Raw-Output) ✅
+- **verbatim.1** — `{#verbatim}` Block ✅
 - **tag-prefix-fix.1** — scanTag: head vs header Fix ✅
+- **template-filters.1** — `{var|raw}`, `{var|upper}` ✅
+- **if-else.1** — `{#if}...{#else}...{/if}` ✅
+- **each-else.1** — `{#each}...{#each else}...{/each}` ✅
 
 ## AVAILABLE NEXT (v0.0.10+)
 
@@ -19,8 +22,6 @@ Status via `python _todo/process.py`. Chain 1–22 done. Next code: **23**.
 ## Blocker
 
 - **golden-tests.1** — Golden-File Tests (needs: dreegotest.1)
-- **smart-recompile.1** — Smart Recompile (needs: hot-reload.1)
-- **live-reload.1** — Live Reload Proxy (needs: hot-reload.1)
 - **plugin-interface.1** — Plugin-Interface (blockiert alle Addons)
 
 Siehe `_todo/index.md` für die vollständige Chain und den Dependency-Graph.
