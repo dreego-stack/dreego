@@ -9,6 +9,7 @@ const (
 	NodeEach
 	NodeSlot
 	NodeComponentCall
+	NodeVerbatim
 )
 
 type TemplateNode struct {

@@ -1,18 +1,26 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–15 done. Next code: **16**.
+Status via `python _todo/process.py`. Chain 1–22 done. Next code: **23**.
 
-## AVAILABLE NEXT (v0.0.4)
+## v0.0.9 (current)
 
-- **component-handler.1** — ComponentHandler (Buffered Mode + Functional Options)
-- **ci-check.1** — dreego generate --check (CI Mode)
+- **each-loop.1** — `{#each}` mit `$loop`-Variable ✅
+- **verbatim.1** — `{#verbatim}` Block (Raw-Output) ✅
+- **tag-prefix-fix.1** — scanTag: head vs header Fix ✅
+
+## AVAILABLE NEXT (v0.0.10+)
+
 - **static-assets.1** — Static Assets (static/ → embed.FS)
 - **form-actions.1** — Form Actions (g-action / g-submit)
+- **health-checks.1** — /health + /ready Endpoints
+- **security-headers.1** — Security-Header
+- **compression.1** — Gzip/Brotli Middleware
 
-## v0.0.5+ (blocked)
+## Blocker
 
 - **golden-tests.1** — Golden-File Tests (needs: dreegotest.1)
 - **smart-recompile.1** — Smart Recompile (needs: hot-reload.1)
 - **live-reload.1** — Live Reload Proxy (needs: hot-reload.1)
+- **plugin-interface.1** — Plugin-Interface (blockiert alle Addons)
 
-Siehe `_todo/index.md` für die vollständige Chain (History) und den Dependency-Graph.
+Siehe `_todo/index.md` für die vollständige Chain und den Dependency-Graph.

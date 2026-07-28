@@ -16,7 +16,8 @@ dev:
 	go run ./cmd/dreego && go run .
 
 test:
-	@docker build -f _tests/Dockerfile -t dreego-test . && docker run --rm dreego-test
+	@docker build -q -f _tests/Dockerfile -t dreego-test . 2>&1 | tail -1 | grep -q '^sha256:' || true
+	@docker run --rm -e DREEGO_FILTER="$${DREEGO_FILTER:-}" dreego-test
 
 dx:
 	@EXT_DIR="$$(pwd)/.vscode/extensions/dreego"; \

@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 dreego init .
-rm -rf dreego/routes dreego/components dreego/layouts 2>/dev/null
+rm -rf dreego/routes dreego/components dreego/layouts go.mod go.sum 2>/dev/null
 mkdir -p dreego/components dreego/routes
 cat > dreego/components/Page.dreego << 'DREEGO'
 Component Page (title string)

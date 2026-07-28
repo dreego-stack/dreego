@@ -28,9 +28,13 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		return buf.String()
 	case NodeEach:
 		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("%sfor _, %s := range %s {\n", indent, n.Item, n.Items))
+		buf.WriteString(fmt.Sprintf("%sfor i, %s := range %s {\n", indent, n.Item, n.Items))
+		buf.WriteString(fmt.Sprintf("%s\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", indent, n.Items))
+		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", indent))
 		for _, child := range n.Children {
-			buf.WriteString(genTemplateNode(child, depth+1))
+			code := genTemplateNode(child, depth+1)
+			code = strings.ReplaceAll(code, "$loop.", "loop.")
+			buf.WriteString(code)
 		}
 		buf.WriteString(indent + "}\n")
 		return buf.String()
@@ -52,6 +56,8 @@ func genTemplateNode(n TemplateNode, depth int) string {
 			return fmt.Sprintf("%sb.WriteString(c.Get(\"slot_%s\"))\n", indent, n.Content)
 		}
 		return fmt.Sprintf("%sb.WriteString(c.Get(\"slot\"))\n", indent)
+	case NodeVerbatim:
+		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content))
 	case NodeComponentCall:
 		funcName := n.Tag
 		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {

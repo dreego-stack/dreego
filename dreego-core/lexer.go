@@ -209,6 +209,13 @@ func scanTag(input string, pos *int) Token {
 		}
 		opener := "<" + tag
 		if strings.HasPrefix(remaining, opener) {
+			next := byte(0)
+			if len(remaining) > len(opener) {
+				next = remaining[len(opener)]
+			}
+			if next != ' ' && next != '>' && next != '/' {
+				continue
+			}
 			end := strings.IndexByte(remaining, '>')
 			if end < 0 {
 				*pos += len(remaining)

@@ -3,6 +3,7 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 PASS=0
 FAIL=0
+FILTER="${DREEGO_FILTER:-}"
 
 echo "=== dreego _tests ==="
 echo
@@ -12,17 +13,20 @@ for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
     [ -f "$test_script" ] || continue
 
     name="${test_dir#$DIR/}"
-    printf "  %-45s " "$name"
+
+    if [ -n "$FILTER" ] && ! echo "$name" | grep -q "$FILTER"; then
+        continue
+    fi
 
     out=$(cd "$test_dir" && sh test.sh 2>&1)
     rc=$?
 
     if [ $rc -eq 0 ]; then
-        echo "PASS"
+        echo "PASS $name"
         PASS=$((PASS + 1))
     else
-        echo "FAIL"
-        echo "$out" | sed 's/^/      /'
+        echo "FAIL $name"
+        echo "$out" | sed 's/^/    /'
         FAIL=$((FAIL + 1))
     fi
 done

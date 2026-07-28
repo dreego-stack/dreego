@@ -38,6 +38,12 @@ graph TD
     style component_handler_1 fill:#d4edda,stroke:#28a745
     named_slots_1["19 Named Slots ({#slot header}...{/slot})"]
     style named_slots_1 fill:#d4edda,stroke:#28a745
+    each_loop_1["20 {#each} mit $loop-Variable"]
+    style each_loop_1 fill:#d4edda,stroke:#28a745
+    verbatim_1["21 {#verbatim} Block (Raw-Output)"]
+    style verbatim_1 fill:#d4edda,stroke:#28a745
+    tag_prefix_fix_1["22 scanTag: Tag-Präfix-Matching fix (head v"]
+    style tag_prefix_fix_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
@@ -50,8 +56,6 @@ graph TD
     style dreego_fmt_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing-Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
-    each_loop_1["{#each} mit $loop-Variable"]
-    style each_loop_1 fill:#fff3cd,stroke:#ffc107
     form_actions_1["Form Actions (g-action / g-submit)"]
     style form_actions_1 fill:#fff3cd,stroke:#ffc107
     health_checks_1["/health + /ready Endpoints"]
@@ -70,8 +74,6 @@ graph TD
     style static_assets_1 fill:#fff3cd,stroke:#ffc107
     template_filters_1["Template-Filter ({var|raw}, {var|upper})"]
     style template_filters_1 fill:#fff3cd,stroke:#ffc107
-    verbatim_1["{#verbatim} Block (Raw-Output)"]
-    style verbatim_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
@@ -156,7 +158,6 @@ graph TD
     middleware_hooks_1 --> dreego_seo_1
     plugin_interface_1 --> devtools_1
     plugin_interface_1 --> storage_interface_1
-    transpiler_1 --> each_loop_1
     cli_1 --> hot_reload_1
     routing_1 --> hot_reload_1
     plugin_interface_1 --> dreego_jobs_1
@@ -200,7 +201,6 @@ graph TD
     plugin_interface_1 --> event_bus_1
     routing_1 --> wails_1
     plugin_interface_1 --> wails_1
-    transpiler_1 --> verbatim_1
     plugin_interface_1 --> dreego_features_1
     middleware_hooks_1 --> dreego_features_1
     transpiler_1 --> dreego_fmt_1
@@ -229,6 +229,8 @@ graph TD
     transpiler_1 --> middleware_1
     routing_1 --> components_1
     routing_1 --> route_groups_1
+    transpiler_1 --> each_loop_1
+    transpiler_1 --> tag_prefix_fix_1
     middleware_1 --> recovery_1
     transpiler_1 --> routing_1
     routing_1 --> bracket_routes_1
@@ -238,6 +240,7 @@ graph TD
     session_1 --> csrf_1
     middleware_1 --> csrf_1
     transpiler_1 --> xss_1
+    transpiler_1 --> verbatim_1
     context_refactoring_1 --> session_1
     context_refactoring_1 --> component_handler_1
     middleware_1 --> config_1
@@ -263,4 +266,7 @@ graph TD
     ci_check_1 -.->|chain| components_1
     components_1 -.->|chain| component_handler_1
     component_handler_1 -.->|chain| named_slots_1
+    named_slots_1 -.->|chain| each_loop_1
+    each_loop_1 -.->|chain| verbatim_1
+    verbatim_1 -.->|chain| tag_prefix_fix_1
 ```

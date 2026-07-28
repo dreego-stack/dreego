@@ -258,6 +258,8 @@ func genTemplateNodeComp(n TemplateNode) string {
 		return "b.WriteString(ctx.Get(\"slot\"))"
 	case NodeComponentCall:
 		return genComponentCall(n)
+	case NodeVerbatim:
+		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content))
 	default:
 		return ""
 	}

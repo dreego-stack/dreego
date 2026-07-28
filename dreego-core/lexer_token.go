@@ -22,6 +22,7 @@ const (
 	TokenComponentTagOpen
 	TokenComponentTagClose
 	TokenComponentSelfClose
+	TokenVerbatim
 )
 
 type Token struct {
@@ -54,6 +55,8 @@ func (t TokenType) String() string {
 		return "EachOpen"
 	case TokenEachClose:
 		return "EachClose"
+	case TokenVerbatim:
+		return "Verbatim"
 	}
 	return "UNKNOWN"
 }

@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.0.8 (unreleased) — Named Slots
+## v0.0.9 (unreleased) — Template-Primitives
+
+- `{#verbatim}` Block: Raw-Output für JS-Templates. Content wird 1:1 ausgegeben — kein Escaping, kein Parsing.
+- `{#each}` mit `$loop`-Variable: `$loop.Index`, `$loop.First`, `$loop.Last`, `$loop.Even`, `$loop.Odd`
+- Fix: `<header>`, `<main>`, `<footer>` in Components wurden fälschlich als `<head>` erkannt (Tag-Präfix-Bug)
+- Test-System: `PASS/FAIL <path>` Format, `DREEGO_FILTER=<name>` für Einzeltest, Docker-Build-Logs unterdrückt
+
+## v0.0.8 (2026-07-28) — Named Slots
 
 - Named Slots: `{#slot header}...{/slot}` Block-Syntax in Components + Routes
 - Component: `{#slot header}{/slot}` — Platzhalter rendert `c.Get("slot_header")`

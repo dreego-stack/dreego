@@ -53,6 +53,16 @@ func scanBrace(input string, pos *int) (Token, error) {
 		return Token{Type: TokenSlot, Pos: start}, nil
 	}
 
+	if strings.HasPrefix(remaining, "{#verbatim}") {
+		*pos += 11
+		closePos := strings.Index(input[*pos:], "{/verbatim}")
+		if closePos < 0 {
+			return Token{}, fmt.Errorf("unclosed {#verbatim} at position %d", start)
+		}
+		*pos += closePos + 11
+		return Token{Type: TokenVerbatim, Value: input[start+11 : start+11+closePos], Pos: start}, nil
+	}
+
 	end := strings.IndexByte(remaining[1:], '}')
 	if end < 0 {
 		return Token{}, fmt.Errorf("unclosed expression at position %d", start)

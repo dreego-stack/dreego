@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-27T23:20:23Z
+Generated: 2026-07-28T00:28:45Z
 
-Chain: 1–19 | Next status code: **20**
+Chain: 1–22 | Next status code: **23**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
@@ -24,6 +24,9 @@ Chain: 1–19 | Next status code: **20**
 - `17` **components.1** — Component-System ({#use}, props)
 - `18` **component-handler.1** — ComponentHandler (Buffered Mode + Functional Options)
 - `19` **named-slots.1** — Named Slots ({#slot header}...{/slot})
+- `20` **each-loop.1** — {#each} mit $loop-Variable
+- `21` **verbatim.1** — {#verbatim} Block (Raw-Output)
+- `22` **tag-prefix-fix.1** — scanTag: Tag-Präfix-Matching fix (head vs header)
 
 ## AVAILABLE NEXT
 - **api-json.1** — API-Routen + JSON Responses
@@ -32,7 +35,6 @@ Chain: 1–19 | Next status code: **20**
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-fmt.1** — dreego fmt (Formatter)
 - **dreegotest.1** — dreegotest — Testing-Package
-- **each-loop.1** — {#each} mit $loop-Variable
 - **form-actions.1** — Form Actions (g-action / g-submit)
 - **health-checks.1** — /health + /ready Endpoints
 - **hot-reload.1** — Hot Reload (Dev-Server + SSE)
@@ -42,7 +44,6 @@ Chain: 1–19 | Next status code: **20**
 - **security-headers.1** — Security-Header (CSP, HSTS, X-Frame, X-Content-Type)
 - **static-assets.1** — Static Assets (static/ → embed.FS)
 - **template-filters.1** — Template-Filter ({var|raw}, {var|upper})
-- **verbatim.1** — {#verbatim} Block (Raw-Output)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
@@ -80,4 +81,4 @@ Chain: 1–19 | Next status code: **20**
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 19 | web: 51 | next code: 20
+chain: 22 | web: 49 | next code: 23

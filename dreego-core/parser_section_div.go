@@ -114,6 +114,9 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children}, nil
 	case TokenSlotClose:
 		return TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
+	case TokenVerbatim:
+		p.advance()
+		return TemplateNode{Type: NodeVerbatim, Content: tok.Value}, nil
 	default:
 		return TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)
 	}
