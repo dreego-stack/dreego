@@ -1,28 +1,6 @@
-<head>
-    <title>§$name$§</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="§$name$§ — Built with Dreego">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
-</head>
+<head><meta name="description" content="§$name$§ landing page"></head>
 
-<div class="min-h-screen bg-white font-sans">
-
-    <nav class="fixed top-0 inset-x-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold text-slate-900">§$name$§</a>
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-                <a href="#features" class="hover:text-slate-900">Features</a>
-                <a href="#pricing" class="hover:text-slate-900">Pricing</a>
-                <a href="/docs" class="hover:text-slate-900">Docs</a>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="/login" class="text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:block">Sign in</a>
-                <a href="/signup" class="text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 px-4 py-2.5 rounded-lg transition-colors">Get started →</a>
-            </div>
-        </div>
-    </nav>
-
+<div>
     <@Hero
         badge="New in 2026"
         title="Build modern web apps with Go"
@@ -104,17 +82,5 @@
             </div>
         </div>
     </section>
-
-    <footer class="py-16 border-t border-slate-200">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">§$name$§</h4><p class="text-sm text-slate-500">Built with Dreego.</p></div>
-                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Product</h4><a href="#features" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Features</a><a href="#pricing" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Pricing</a></div>
-                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Resources</h4><a href="/docs" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Docs</a><a href="/blog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Blog</a></div>
-                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Company</h4><a href="/about" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">About</a><a href="/privacy" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Privacy</a></div>
-            </div>
-            <div class="border-t border-slate-200 pt-8 text-center"><p class="text-sm text-slate-400">&copy; 2026 §$name$§</p></div>
-        </div>
-    </footer>
 
 </div>

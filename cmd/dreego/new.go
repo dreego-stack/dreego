@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -58,12 +59,20 @@ func cmdNew(args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Done! Next steps:\n")
-	fmt.Printf("  cd %s\n", name)
-	fmt.Printf("  go mod init %s\n", projName)
-	fmt.Printf("  go mod edit -require codeberg.org/dreego/dreego@v0.0.13\n")
-	fmt.Printf("  go mod tidy\n")
-	fmt.Printf("  dreego generate\n")
-	fmt.Printf("  go run .\n")
-	fmt.Printf("  docker build -t %s .  # production build\n", projName)
+	dreegoCoreVersion := "v0.0.13"
+
+	c := exec.Command("go", "mod", "init", projName)
+	c.Dir = target
+	c.Stdout, c.Stderr = nil, os.Stderr
+	if err := c.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: go mod init failed: %v\n", err)
+	}
+
+	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego@"+dreegoCoreVersion)
+	c.Dir = target
+	c.Stdout, c.Stderr = nil, os.Stderr
+	c.Run()
+
+	fmt.Printf("Done!\n")
+	fmt.Printf("  cd %s && dreego generate && go run .\n", name)
 }

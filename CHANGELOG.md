@@ -1,12 +1,16 @@
 # Changelog
 
-## v0.0.13 (2026-07-28) — Scaffolding
+## v0.0.13 (2026-07-28) — Scaffolding + Split-Gen
 
-- `dreego new <name>` — create a production-ready landing page project from template
-- Landing template: Hero component, Card component, layout with nav + footer, Dockerfile (distroless)
-- Placeholder syntax `§$name$§` — auto-replaced with project name in all files
-- Template ships with: responsive CSS, `go.mod`, `Dockerfile` (multi-stage, nonroot)
-- Demo restored (undo accidental move commit)
+- `dreego new <name>` — creates landing page project with `go mod init` auto-setup
+- Landing blueprint: Hero + FeatureCard components, layout with `{#head}` + `{#slot}`, Tailwind CDN
+- Split-Gen: `gen/routes.go` + `gen/components.go` + `gen/dree.go` (config + static) — file-level caching
+- `isUpToDate()` — files only written when content changes
+- `.gitignore` fix: `/dreego` → only root binary; `dreego/gen/` covers all generated files
+- `dreego generate` timing: ns → ms display
+- 5 new tests: head-without-layout, head-dropped-by-layout, name-clash, nested-routes, fmt
+- 74 integration tests total
+- Tags v0.0.1–v0.0.13 on Codeberg
 
 ## v0.0.12 (2026-07-28) — dreego fmt
 
