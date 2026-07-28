@@ -99,7 +99,7 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		}
 		args := extractAttrValues(n.Attrs)
 		if n.SelfClose {
-			return fmt.Sprintf("%sh, _ := %s(%s).Render(c); %sb.WriteString(h)\n", indent, funcName, args, indent)
+			return fmt.Sprintf("%sb.WriteString(func() string { h, _ := %s(%s).Render(c); return h }())\n", indent, funcName, args)
 		}
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%s{\n", indent))
