@@ -1,10 +1,13 @@
 # Changelog
 
-## v0.0.10 (unreleased) — Static Assets
+## v0.0.10 (2026-07-28) — Static Assets
 
 - `dreego/static/` Ordner: Files werden beim Generate eingelesen und inline registriert
 - MIME-Type via Extension (.css, .js, .svg, .png, .ico, .html, .json, .woff2)
 - Kollision-Check: wenn statischer Pfad mit Route kollidiert → `dreego generate` Error
+- 3 Static-Tests: basic, subdir, collision
+- 71 Integration-Tests insgesamt
+- VS Code Extension v0.0.4: `<@Component>`-Tags, `import`, Filter `{var|raw}`, `$loop` highlighting
 
 ## v0.0.9 (2026-07-28) — Template-Primitives
 

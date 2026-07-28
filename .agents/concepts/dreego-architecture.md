@@ -3,8 +3,8 @@
 type: Concept
 title: "Dreego Architecture"
 description: "Compile-Time Webframework-Architektur mit Transpiler, Router und Plugin-System"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
 # Dreego Architecture
 
@@ -113,10 +113,43 @@ dreego/
 
 - [x] Transpiler: `.dreego` → `.go`
 - [x] 3 Sektionen: `<go>`, Template, `<style>`
-- [x] Template-Logik: `{#if}`, `{#each}`
-- [x] Chi-Router Integration
-- [x] File-based Routing
-- [x] Single Binary via `//go:embed`
+- [x] Template-Logik: `{#if}`, `{#each}`, `{#else}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- [x] File-based Routing (net/http 1.22+ enhanced routing)
+- [x] Component-System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
+- [x] Static Assets: `dreego/static/` → inline Handler + MIME-Types + Collision-Check
+- [x] Single Binary via `go build`
 - [ ] Dev-Server mit Hot Reload
-- [ ] Tailwind CLI Integration
 - [ ] Plugin-System (minimal)
+
+## Components (v0.0.5+)
+
+Reusable `.dreego` components with scoped styles:
+
+```
+dreego/components/Card.dreego:
+  Component Card (title string)
+  <div><h2>{title}</h2>{#slot}</div>
+
+dreego/routes/get.dreego:
+  <div><@Card title="Hello">content</@Card></div>
+```
+
+- Auto-Discovery via `scanComponents()` — no import needed
+- `<@Name>` syntax with `@`-prefix to distinguish from HTML
+- Self-closing: `<@Icon name="star"/>`
+- Children → default `{#slot}`
+- Named slots: `{#slot header}...{/slot}` via `c.Set`/`c.Get`
+- Scoped CSS: `data-scope` per component (SHA256 hash)
+
+## Static Assets (v0.0.10)
+
+Files in `dreego/static/` are inlined into generated code and served automatically:
+
+```
+dreego/static/style.css  → GET /style.css  (text/css)
+dreego/static/logo.svg   → GET /logo.svg   (image/svg+xml)
+```
+
+- MIME-Type via file extension
+- Collision detection: if static path overlaps with route → `dreego generate` error
+- Inline `[]byte` registration via `core.RegisterStatic()`

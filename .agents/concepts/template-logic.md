@@ -1,173 +1,138 @@
-
 ---
 type: Concept
 title: "Template-Logik in Dreego"
-description: "Template-Blöcke und deren Kompilierung zu nativem Go-Code"
-tags: [v0.0.1]
-timestamp: 2026-07-23T00:00:00Z
+description: "Template-Syntax und deren Codegen zu nativem Go-Code (Stand v0.0.10)"
+tags: [v0.0.10]
+timestamp: 2026-07-28T00:00:00Z
 ---
+
 # Template-Logik in Dreego
 
 ## Design-Philosophie
 
-- **Kein echtes Go im Template** — das wäre unleserlich (Razor/JSX-Falle)
-- **Komplexe Logik** → `<go>`-Block
-- **Visuelle Struktur-Logik** → Template-Syntax
+- **Kein echtes Go im Template** — komplexe Logik gehört in `<go>`-Block
 - **Alle Template-Blöcke kompilieren zu nativem Go** — null Laufzeit-Verlust
+- **Auto-Escaping**: alle `{var}` Ausdrücke werden via `html.EscapeString` escaped
 
-## Template-Blöcke (Übersicht)
+## Template-Blöcke (Stand v0.0.10)
 
-| Block                    | Einsatzzweck              | Go-Entsprechung                  |
-|--------------------------|---------------------------|----------------------------------|
-| `{#if}` / `{#else}`     | Bedingte Anzeige          | `if ... { } else { }`           |
-| `{#switch}` / `{#case}` | Mehrfach-Unterscheidung   | `switch val { case ...: }`      |
-| `{#each}` / `{#else}`   | Slices/Arrays iterieren   | `for i, item := range slice`    |
-| `{#await}` (V2)         | Async Data / SSE Streams  | Go Channels / JS Promises        |
-| `{#slot}` / `{#fill}`   | Layout-Verschachtelung    | Function Callbacks               |
-| `{#let}`                | Hilfsvariablen im Markup  | `var := expr`                    |
+| Block | Status | Go-Entsprechung |
+|---|---|---|
+| `{#if cond}` / `{#else}` / `{/if}` | ✅ | `if cond { } else { }` |
+| `{#each items as item}` / `{#each else}` / `{/each}` | ✅ | `for i, item := range items { }` + `len == 0` check |
+| `{#slot}` | ✅ | `c.Get("slot")` |
+| `{#slot name}...{/slot}` | ✅ | `c.Get("slot_name")` |
+| `{#verbatim}...{/verbatim}` | ✅ | Raw `b.WriteString()` |
+| `$loop.Index / .First / .Last / .Even / .Odd` | ✅ | Codegen-generiertes `core.EachLoop` struct |
+| `{var\|raw}` / `{var\|upper}` | ✅ | Filter-Chain im Codegen |
+| `{#switch}` / `{#case}` | ❌ V2 | — |
+| `{#await}` | ❌ V2 | — |
+| `{#let}` | ❌ V2 | — |
+| `{#each else if}` | ❌ | Noch nicht implementiert |
 
-## {#if} / {#else if} / {#else}
+## {#if} / {#else}
 
-```html
-{#if user.IsAdmin}
-    <a href="/admin">Dashboard</a>
-{#else if user.IsLoggedIn}
-    <a href="/profile">Mein Profil</a>
+```
+{#if show}
+    <p>sichtbar</p>
 {#else}
-    <a href="/login">Anmelden</a>
+    <p>versteckt</p>
 {/if}
 ```
 
 **Regeln:**
-- Unterstützt `&&`, `||`, `!`, `==`, `!=`, `<`, `>`, `<=`, `>=`
-- Variablen müssen im `<go>`-Block deklariert sein
-- Kein beliebiger Go-Code (keine Funktionsaufrufe, kein `range`)
+- Unterstützt beliebige Go-Bedingungen (Variablen aus `<go>`)
+- `{#else}` optional
+- `{#else if}` noch nicht implementiert
 
-## {#switch} / {#case} / {#default}
+## {#each} / {#each else} / $loop
 
-```html
-{#switch order.Status}
-    {#case "pending"}
-        <span class="badge yellow">In Bearbeitung</span>
-    {#case "shipped"}
-        <span class="badge blue">Unterwegs</span>
-    {#case "delivered"}
-        <span class="badge green">Zugestellt</span>
-    {#default}
-        <span class="badge gray">Unbekannt</span>
-{/switch}
+```
+{#each users as user}
+    <li>{$loop.Index}: {user.Name}</li>
+{#each else}
+    <li>Keine Daten</li>
+{/each}
 ```
 
 **Regeln:**
-- `{#case}` unterstützt String, Int, Bool-Literale
-- Kein Fallthrough (wie in Go)
-- `{#default}` ist optional
+- Iteriert über Slice/Array (Variablen aus `<go>`)
+- `{#each else}` rendert bei leerer Slice
+- `$loop.Index` (0-basiert), `.First`, `.Last`, `.Even`, `.Odd`
+- Codegen: `var loop := core.EachLoop{Index: i, ...}` mit String-Replacement `$loop.` → `loop.`
 
-## {#each} / {#else}
+## {#verbatim}
 
-```html
-<ul>
-    {#each users as user, index}
-        <li>#{index + 1}: {user.Name} ({user.Email})</li>
-    {#else}
-        <li>Keine Benutzer gefunden.</li>
-    {/each}
-</ul>
+```
+{#verbatim}
+    <script>var x = {a: 1};</script>
+{/verbatim}
 ```
 
 **Regeln:**
-- `{#else}` wird angezeigt, wenn die Slice leer oder nil ist
-- `index` ist optional (`{#each users as user}`)
-- Der Index startet bei 0
+- Alles zwischen `{#verbatim}` und `{/verbatim}` wird 1:1 ausgegeben
+- Kein Parsing, kein Escaping — perfekt für JS-Templates
+- Lexer scanned als einzelnes `TokenVerbatim` mit Raw-Content
 
-## {#let}
+## Filter
 
-```html
-{#let fullName = user.FirstName + " " + user.LastName}
-{#let isGoldCustomer = user.OrdersCount > 50}
+```
+<p>{html|raw}</p>
+<div>{name|upper}</div>
+```
 
-<div class="profile">
-    <h2>{fullName}</h2>
-    {#if isGoldCustomer}
-        <span class="badge">VIP Kunde</span>
-    {/if}
+**Regeln:**
+- `|raw` — kein HTML-Escaping (für vertrauenswürdiges HTML)
+- `|upper` — `strings.ToUpper()` für Text
+- `parseExpression()` splittet am `|` im Parser
+- Codegen baut Filter-Chain: `strings.ToUpper(fmt.Sprintf("%v", name))`
+
+## {#slot} / Named Slots
+
+**Default-Slot (kein Name, kein `{/slot}`):**
+
+```
+<div>{#slot}</div>
+```
+
+**Named Slots (mit `{/slot}` closing):**
+
+Component:
+```
+Component Card (title string)
+<div>
+  {#slot header}{/slot}
+  <h2>{title}</h2>
+  {#slot}
 </div>
 ```
 
-**Regeln:**
-- Nur String-Konkatenation und einfache Vergleiche
-- Für komplexe Berechnungen → `<go>`-Block verwenden
-
-## {#slot} / {#fill} (V2)
-
-```html
-<!-- Card.dreego -->
-<div class="card">
-    <div class="card-header">
-        {#slot header}
-            <h3>Standard Titel</h3>
-        {/slot}
-    </div>
-    <div class="card-body">
-        {#slot}
-        {/slot}
-    </div>
-</div>
+Route:
+```
+<@Card title="Hi">
+  {#slot header}<nav>menu</nav>{/slot}
+  <p>body content</p>
+</@Card>
 ```
 
-```html
-<!-- Verwendung -->
-<Card>
-    {#fill header}
-        <h3 class="gold">Premium Benutzer</h3>
-    {/fill}
-    <p>Das ist der Inhalt der Karte.</p>
-</Card>
-```
-
-## {#await} (V2)
-
-```html
-{#await fetchUserData()}
-    <div class="skeleton-loader">Daten werden geladen...</div>
-{#then user}
-    <p>Willkommen zurück, {user.Name}!</p>
-{#catch err}
-    <p class="error">Fehler: {err.Error()}</p>
-{/await}
-```
-
-## Tailwind Class Merging
-
-```html
-<!-- Button.dreego -->
-<go>
-    finalClasses := dreego.MergeClasses(
-        "bg-blue-500 text-white font-bold py-2 px-4 rounded",
-        props.Class,
-    )
-</go>
-
-<button class="{finalClasses}" {attrs}>
-    {#slot}Button Text{/slot}
-</button>
-```
-
-`MergeClasses()` überschreibt konfliktierende Tailwind-Klassen intelligent (z.B. `bg-red-600` überschreibt `bg-blue-500`).
+**Codegen:**
+- Route: `c.Set("slot_header", sb.String())`, `c.Set("slot", cb.String())`
+- Component: `b.WriteString(ctx.Get("slot_header"))`, `b.WriteString(ctx.Get("slot"))`
+- Components mit Kindern: `cb.WriteString` / `sb.WriteString` Puffer-Umleitung
 
 ## Fehlerbehandlung
 
-Kein spezielles Error-Tag. Fehler werden im `<go>`-Block behandelt:
+Kein spezielles Error-Tag. Fehler via `<go>`-Block und `{#if}`:
 
-```html
+```
 <go>
     user, err := db.GetUser(id)
     hasError := err != nil
 </go>
 
 {#if hasError}
-    <p class="error">Benutzer konnte nicht geladen werden.</p>
+    <p>Fehler beim Laden.</p>
 {#else}
-    <h1>Hallo, {user.Name}!</h1>
+    <h1>{user.Name}</h1>
 {/if}
 ```

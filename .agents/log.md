@@ -34,7 +34,57 @@ timestamp: 2026-07-25T00:00:00Z
     - `dreego/routes/404.dreego` → `/{p...}` (globaler Fallback)
     - Kein 404 vorhanden → Standard-HTTP-404-Text
   - 500: `runtime.SetErrorHandler(500, handler)` → Recovery-Middleware rendert bei Panic
-- Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
+ - Converted entire knowledge base to Open Knowledge Format (OKF) v0.1
+
+## 2026-07-28
+
+### v0.0.10 — Static Assets
+- `dreego/static/` Ordner: Files werden beim Generate eingelesen und inline als `[]byte` registriert
+- MIME-Type via Extension (.css, .js, .svg, .png, .ico, .html, .json, .woff2)
+- Kollision-Check: statischer Pfad vs Route-Pattern → Error
+- `core.RegisterStatic(path, mime, content)` in Runtime
+- 3 Static-Tests (basic, subdir, collision), 71 Integration-Tests total
+
+### v0.0.9 — Template-Primitives
+- `{#verbatim}` Block: Raw-Output für JS-Templates, Content 1:1 ausgegeben
+- `{#each}` mit `$loop`-Variable: `$loop.Index`, `.First`, `.Last`, `.Even`, `.Odd`
+- Template-Filter: `{var|raw}` (kein Escaping), `{var|upper}` (uppercase). Pipe-Syntax.
+- `{#else}` in `{#if}`-Block
+- `{#each else}`: Empty-List Fallback — `if len(items) > 0 { for } else { }`
+- Fix: `<header>`, `<main>`, `<footer>` prefix-match Bug in scanTag (tag terminator check)
+- Test-System: `PASS/FAIL <path>` Format, `DREEGO_FILTER=<pattern>`, Docker-Build-Logs suppressed
+
+### v0.0.8 — Named Slots
+- Named Slots: `{#slot header}...{/slot}` Block-Syntax
+- Component: `{#slot header}{/slot}` — Platzhalter, Route: `{#slot header}<content>{/slot}` — Definition
+- `c.Set("slot_name", ...)` / `c.Get("slot_name")` in Codegen
+- Default-Slot `{#slot}` bleibt ohne `{/slot}`
+- 4 Positiv-Tests + 2 Negativ-Tests
+
+### v0.0.7 — Test Coverage
+- 41+ Integration-Tests (up from 36): edge cases, negative tests
+- `_docs/testing.md`: 60+ Test-Ideen
+- Bugfixes: `extractAttrValues` für `{expr}` Props, `scanComponents` path filter
+
+### v0.0.6 — Component Children
+- Children slot passing: `<@Card>content</@Card>` → `{#slot}`
+- `dreego generate --check`: timestamp comparison, exit non-zero if stale
+- 36 Tests
+
+### v0.0.5 — Component System
+- `Component Name (props)` Declaration in `dreego/components/`
+- `<@Name>` self-closing + children
+- Auto-discovery via `scanComponents()`
+- Scoped CSS per Component (data-scope)
+- `import` statement parsing in `ParseHeader`
+- 35 Tests
+
+### v0.0.4 — Blueprints + Scaffolding
+- `dreego init <path>` mit `//go:embed` Blueprints in `cmd/dreego/blueprints/default/`
+- Docker-Integration-Tests: `_tests/Dockerfile` + `_tests/test.sh` Orchestrator
+- 24 Integration-Tests, `make test` target
+- Repo restructured: `pkg/` → `dreego-core/` (single package)
+- `.gitattributes` `export-ignore` für `go get`
 - Added YAML frontmatter with `type` field to all files
 - Replaced `[[wiki-links]]` with standard markdown links
 - Renamed `_index.md` to `index.md` with OKF child-list format
