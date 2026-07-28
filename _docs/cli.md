@@ -66,5 +66,5 @@ Shows all available commands and flags.
 
 ## See Also
 
-- [Docs Index](/_docs/index.md)
-- [Getting Started](/_docs/getting-started.md)
+- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
+- [Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)

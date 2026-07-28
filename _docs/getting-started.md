@@ -58,6 +58,6 @@ func main() {
 
 ## See Also
 
-- [CLI Reference](/_docs/cli.md) — all CLI commands
-- [Routing](/_docs/routing.md) — file-based routing
-- [Docs Index](/_docs/index.md)
+- [CLI Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/cli.md) — all CLI commands
+- [Routing](https://codeberg.org/dreego/dreego/src/branch/main/_docs/routing.md) — file-based routing
+- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)

@@ -6,7 +6,7 @@
 - AGENTS.md: documented language rule (chat=DE, repo=EN)
 - `dreego docs [--web] [path]` — fetches repo docs from Codeberg (raw for CLI, src for browser)
 - `dreego feedback` — opens Codeberg issues page for feedback submission
-- URL filtering: full Codeberg URLs stripped from CLI output for cleaner terminal display
+- URL filtering: full Codeberg URLs in source → stripped in CLI, resolve correctly in browser (--web)
 - `_docs/` restructured with cross-links: all pages link to each other via repo paths
 - Knowledge base fully synced with v0.0.10 state
 - Demo templates translated (404, 500, about, htmxdemo, users, route-groups)
