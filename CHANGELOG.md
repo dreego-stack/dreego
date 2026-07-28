@@ -4,12 +4,13 @@
 
 - `<go type="json">` — JSON endpoints with `c.JSON()`, `c.Bind()`, auto Content-Type
 - `<go type="xml">` — XML endpoints with `c.XML()`, auto Content-Type
+- `<go type="custom">` — developer manages Content-Type + response via `c.Write()`
 - Multiple `<go>` blocks merged: shared `<go>` runs always, typed blocks check `Accept` header
 - Pure JSON/XML routes (no `<div>`) skip template rendering entirely
 - `c.Write(status, contentType, body)` for arbitrary formats (FlatBuffers, Protobuf, etc.)
 - `c.Wants(mime)` for manual content negotiation
 - `dreego-core/response.go`: `JSON()`, `XML()`, `Bind()`, `Write()`, `Wants()`
-- 5 new tests (86 total)
+- 6 new tests (87 total)
 
 ## v0.0.14 (2026-07-28) — Production Middleware
 
