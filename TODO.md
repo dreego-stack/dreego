@@ -2,7 +2,11 @@
 
 Status via `python _todo/process.py`. Chain 1–26 done. Next code: **27**.
 
-## v0.0.10 (current)
+## v0.0.11 (current)
+
+- **i18n.1** — Repo translated to English (130+ files) ✅
+
+## v0.0.10
 
 - **static-assets.1** — dreego/static/ → inline handler + collision check ✅
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.11 (2026-07-28) — English + KB Sync
+
+- Entire repository translated to English: 130+ files (docs, agents, blocks, demo, guides)
+- AGENTS.md: documented language rule (chat=DE, repo=EN)
+- Knowledge base fully synced with v0.0.10 state (concepts, decisions, references)
+- Demo templates translated (404, 500, about, htmxdemo, users, route-groups)
+
 ## v0.0.10 (2026-07-28) — Static Assets
 
 - `dreego/static/` folder: files are read during generate and registered inline
