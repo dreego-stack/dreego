@@ -120,6 +120,9 @@ dreego/
 - [x] Formatter: `dreego fmt` (v0.0.12)
 - [x] Scaffolding: `dreego new` with landing blueprint (v0.0.13)
 - [x] Split-Gen: `routes.go` + `components.go` + `dree.go` with `isUpToDate()` caching (v0.0.13)
+- [x] Health Checks: `/health` + `/ready` endpoints (v0.0.14)
+- [x] Security Headers: CSP, nosniff, frame-options (v0.0.14)
+- [x] Gzip Compression: compress/gzip middleware (v0.0.14)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
 - [ ] Plugin system (minimal)
