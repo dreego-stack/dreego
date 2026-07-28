@@ -29,6 +29,8 @@ func main() {
 		cmdRun(os.Args[2:])
 	case "docs":
 		cmdDocs(os.Args[2:])
+	case "fmt":
+		cmdFmt(os.Args[2:])
 	case "feedback":
 		cmdFeedback()
 	case "help", "--help", "-h":
@@ -48,6 +50,7 @@ usage: dreego <command> [flags]
 commands:
   init <path>             create a new dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
+  fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
   docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
