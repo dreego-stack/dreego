@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.0.12 (2026-07-28) — dreego fmt
+
+- `dreego fmt` — formats `.dreego` files in-place (section ordering, template expressions, control flow)
+- `dreego fmt --check` — CI mode: exit non-zero if files need formatting
+- `dreego fmt --stdout` — print formatted output to stdout
+- `core.Format()` — reusable formatting function
+- Formats: `{ var }` → `{var}`, `{#if  cond}` → `{#if cond}`, Component header normalization
+- Tagged all releases v0.0.1–v0.0.12
+
 ## v0.0.11 (2026-07-28) — English + KB Sync + CLI Docs
 
 - Entire repository translated to English: 130+ files (docs, agents, blocks, demo, guides)
