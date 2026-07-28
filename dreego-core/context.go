@@ -2,6 +2,7 @@ package core
 
 import (
 	gcontext "context"
+	"errors"
 	"net/http"
 
 )
@@ -11,7 +12,13 @@ type Context interface {
 	Param(name string) string
 	Data(key string) any
 	Render(name string, data any) error
+	Errors(field string) string
+	Old(field string) string
+	Redirect(url string, code int) error
 }
+
+var ErrRedirect = errors.New("redirect")
+var ErrRender = errors.New("render")
 
 type SSRContext struct {
 	gcontext.Context
@@ -109,4 +116,17 @@ func (c *SSRContext) CSRFToken() string {
 
 func (c *SSRContext) Render(name string, data any) error {
 	return nil
+}
+
+func (c *SSRContext) Errors(field string) string {
+	return c.Get("error_" + field)
+}
+
+func (c *SSRContext) Old(field string) string {
+	return c.Get("old_" + field)
+}
+
+func (c *SSRContext) Redirect(url string, code int) error {
+	http.Redirect(c.W, c.R, url, code)
+	return ErrRedirect
 }

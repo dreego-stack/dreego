@@ -56,10 +56,16 @@ graph TD
     style dreego_fmt_1 fill:#d4edda,stroke:#28a745
     scaffolding_1["28 dreego new + Generators"]
     style scaffolding_1 fill:#d4edda,stroke:#28a745
-    api_json_1["API Routes + JSON Responses"]
-    style api_json_1 fill:#fff3cd,stroke:#ffc107
-    compression_1["Gzip/Brotli Compression Middleware"]
-    style compression_1 fill:#fff3cd,stroke:#ffc107
+    health_checks_1["29 /health + /ready Endpoints"]
+    style health_checks_1 fill:#d4edda,stroke:#28a745
+    security_headers_1["30 Security Headers (nosniff, frame, referr"]
+    style security_headers_1 fill:#d4edda,stroke:#28a745
+    compression_1["31 Gzip Compression Middleware"]
+    style compression_1 fill:#d4edda,stroke:#28a745
+    api_json_1["32 Content-Type Routing (JSON, XML, Custom)"]
+    style api_json_1 fill:#d4edda,stroke:#28a745
+    api_swagger_1["Swagger/OpenAPI Auto-Generation"]
+    style api_swagger_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment Strategy (Docker, Single-Bina"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
@@ -70,20 +76,14 @@ graph TD
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     form_actions_1["Form Actions (g-action / g-submit)"]
     style form_actions_1 fill:#fff3cd,stroke:#ffc107
-    health_checks_1["/health + /ready Endpoints"]
-    style health_checks_1 fill:#fff3cd,stroke:#ffc107
     hot_reload_1["Hot Reload (Dev Server + SSE)"]
     style hot_reload_1 fill:#fff3cd,stroke:#ffc107
     observability_1["Observability (Prometheus, OpenTelemetry"]
     style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
-    security_headers_1["Security Headers (CSP, HSTS, X-Frame, X-"]
-    style security_headers_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
-    api_swagger_1["Swagger/OpenAPI Auto-Generation"]
-    style api_swagger_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
     style cache_interface_1 fill:#f8d7da,stroke:#dc3545
     ddos_protection_1["DDoS Protection (PoW + Rate-Limiting) — "]
@@ -149,9 +149,7 @@ graph TD
     wails_1["Wails Desktop Integration"]
     style wails_1 fill:#f8d7da,stroke:#dc3545
 
-    middleware_1 --> security_headers_1
     api_json_1 --> api_swagger_1
-    middleware_1 --> compression_1
     plugin_interface_1 --> dreego_mail_1
     email_interface_1 --> dreego_mail_1
     plugin_interface_1 --> dreego_map_1
@@ -196,12 +194,11 @@ graph TD
     context_refactoring_1 --> form_actions_1
     routing_1 --> form_actions_1
     csrf_1 --> form_actions_1
+    session_1 --> form_actions_1
     plugin_interface_1 --> queue_interface_1
     plugin_interface_1 --> addon_ecosystem_1
     components_1 --> addon_ecosystem_1
     session_1 --> addon_ecosystem_1
-    routing_1 --> api_json_1
-    context_refactoring_1 --> api_json_1
     plugin_interface_1 --> event_bus_1
     routing_1 --> wails_1
     plugin_interface_1 --> wails_1
@@ -220,10 +217,11 @@ graph TD
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
     plugin_interface_1 --> cache_interface_1
-    routing_1 --> health_checks_1
     transpiler_1 --> smart_recompile_1
     hot_reload_1 --> smart_recompile_1
     middleware_1 --> observability_1
+    middleware_1 --> security_headers_1
+    middleware_1 --> compression_1
     transpiler_1 --> flat_gen_1
     routing_1 --> flat_gen_1
     transpiler_1 --> context_refactoring_1
@@ -249,6 +247,8 @@ graph TD
     transpiler_1 --> xss_1
     transpiler_1 --> template_filters_1
     xss_1 --> template_filters_1
+    routing_1 --> api_json_1
+    context_refactoring_1 --> api_json_1
     transpiler_1 --> verbatim_1
     transpiler_1 --> dreego_fmt_1
     context_refactoring_1 --> session_1
@@ -258,6 +258,7 @@ graph TD
     cli_1 --> scaffolding_1
     transpiler_1 --> cli_1
     routing_1 --> cli_1
+    routing_1 --> health_checks_1
 
     transpiler_1 -.->|chain| routing_1
     routing_1 -.->|chain| layout_1
@@ -286,4 +287,8 @@ graph TD
     each_else_1 -.->|chain| static_assets_1
     static_assets_1 -.->|chain| dreego_fmt_1
     dreego_fmt_1 -.->|chain| scaffolding_1
+    scaffolding_1 -.->|chain| health_checks_1
+    health_checks_1 -.->|chain| security_headers_1
+    security_headers_1 -.->|chain| compression_1
+    compression_1 -.->|chain| api_json_1
 ```

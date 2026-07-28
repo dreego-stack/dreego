@@ -4,6 +4,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 PASS=0
 FAIL=0
 FILTER="${DREEGO_FILTER:-}"
+FAILS=""
 
 echo "=== dreego _tests ==="
 echo
@@ -22,14 +23,20 @@ for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
     rc=$?
 
     if [ $rc -eq 0 ]; then
-        echo "PASS $name"
+        echo "  PASS  $name"
         PASS=$((PASS + 1))
     else
-        echo "FAIL $name"
-        echo "$out" | sed 's/^/    /'
+        echo "  FAIL  $name"
+        FAILS="$FAILS\n  FAIL  $name\n$(echo "$out" | sed 's/^/         /')\n"
         FAIL=$((FAIL + 1))
     fi
 done
+
+if [ $FAIL -gt 0 ]; then
+    echo
+    echo "FAILURES:"
+    echo -e "$FAILS"
+fi
 
 echo
 echo "=== $PASS passed, $FAIL failed ==="

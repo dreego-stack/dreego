@@ -30,16 +30,18 @@ type GoSection struct {
 	Code        string
 	Method      string
 	ContentType string
+	Action      string
 }
 
 type File struct {
-	Head      *HeadSection
-	Go        []GoSection
-	Template  *TemplateSection
-	Script    *ScriptSection
-	Style     *StyleSection
-	Component *ComponentDef
-	Imports   []Import
+	Head        *HeadSection
+	Go          []GoSection
+	Template    *TemplateSection
+	Script      *ScriptSection
+	Style       *StyleSection
+	Component   *ComponentDef
+	Imports     []Import
+	FormActions []string
 }
 
 type ComponentDef struct {

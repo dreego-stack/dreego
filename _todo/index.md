@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-28T12:19:19Z
+Generated: 2026-07-28T23:08:44Z
 
-Chain: 1–28 | Next status code: **29**
+Chain: 1–32 | Next status code: **33**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -33,24 +33,24 @@ Chain: 1–28 | Next status code: **29**
 - `26` **static-assets.1** — Static Assets (dreego/static/ → inline Handler)
 - `27` **dreego-fmt.1** — dreego fmt (Formatter)
 - `28` **scaffolding.1** — dreego new + Generators
+- `29` **health-checks.1** — /health + /ready Endpoints
+- `30` **security-headers.1** — Security Headers (nosniff, frame, referrer, permissions)
+- `31` **compression.1** — Gzip Compression Middleware
+- `32` **api-json.1** — Content-Type Routing (JSON, XML, Custom)
 
 ## AVAILABLE NEXT
-- **api-json.1** — API Routes + JSON Responses
-- **compression.1** — Gzip/Brotli Compression Middleware
+- **api-swagger.1** — Swagger/OpenAPI Auto-Generation
 - **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-feedback.1** — dreego feedback (POST endpoint)
 - **dreegotest.1** — dreegotest — Testing Package
 - **form-actions.1** — Form Actions (g-action / g-submit)
-- **health-checks.1** — /health + /ready Endpoints
 - **hot-reload.1** — Hot Reload (Dev Server + SSE)
 - **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
-- **security-headers.1** — Security Headers (CSP, HSTS, X-Frame, X-Content-Type)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon Ecosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
-- **api-swagger.1** — Swagger/OpenAPI Auto-Generation  (missing: api-json.1)
 - **cache-interface.1** — Caching Interface (Memory, Redis)  (missing: plugin-interface.1)
 - **ddos-protection.1** — DDoS Protection (PoW + Rate-Limiting) — Plugin  (missing: plugin-interface.1, middleware-hooks.1)
 - **devtools.1** — DevTools (LSP, VS Code, CLI-Niceties)  (missing: plugin-interface.1)
@@ -84,4 +84,4 @@ Chain: 1–28 | Next status code: **29**
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 28 | web: 46 | next code: 29
+chain: 32 | web: 42 | next code: 33

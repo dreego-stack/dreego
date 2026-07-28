@@ -107,6 +107,10 @@ func Run(force bool) error {
 			}
 			file.Imports = imports
 
+			if file.Template != nil {
+				file.FormActions = scanFormActions(file.Template.Nodes)
+			}
+
 			if len(file.Go) == 0 {
 				file.Go = []GoSection{{Method: method}}
 			}
