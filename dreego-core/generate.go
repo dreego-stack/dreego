@@ -28,6 +28,8 @@ func Run(force bool) error {
 	var settings *Settings
 	var genDir string
 
+	routePatterns := map[string]bool{}
+
 	_, compSrcs := scanComponents()
 
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
@@ -75,6 +77,7 @@ func Run(force bool) error {
 
 		found++
 		pattern := buildPattern(path)
+		routePatterns["GET"+" "+pattern] = true
 		pageName := buildPageName(path)
 
 		for _, fpath := range dreegoFiles {
@@ -129,6 +132,7 @@ func Run(force bool) error {
 			}
 
 			for _, g := range file.Go {
+				routePatterns[g.Method+" "+pattern] = true
 				src, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, g, scopeHash)
 				if err != nil {
 					return fmt.Errorf("error generating %s: %w", fpath, err)
@@ -151,6 +155,11 @@ func Run(force bool) error {
 		return err
 	}
 
+	staticSrc, staticCount, err := generateStaticAssets(routePatterns)
+	if err != nil {
+		return fmt.Errorf("static assets: %w", err)
+	}
+
 	src := strings.Join(allSources, "")
 	compSrc := strings.Join(compSrcs, "")
 
@@ -166,7 +175,7 @@ func Run(force bool) error {
 	importLine := strings.Join(imports, "\n\t")
 
 	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", importLine)
-	routesOut += compSrc + src
+	routesOut += compSrc + src + staticSrc
 
 	if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
 		return fmt.Errorf("error writing gen/routes.go: %w", err)
@@ -178,7 +187,7 @@ func Run(force bool) error {
 	}
 
 	elapsed := time.Since(start)
-	fmt.Printf("Found %d routes + %d components\n", found, len(compSrcs))
+	fmt.Printf("Found %d routes + %d components + %d static\n", found, len(compSrcs), staticCount)
 	fmt.Printf("Generated gen/routes.go + gen/dree.go\n")
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
@@ -386,4 +395,48 @@ func scanComponents() (genDir string, sources []string) {
 		return nil
 	})
 	return
+}
+
+func generateStaticAssets(routePatterns map[string]bool) (src string, count int, err error) {
+	staticDir := filepath.Join("dreego", "static")
+	if _, e := os.Stat(staticDir); os.IsNotExist(e) {
+		return "", 0, nil
+	}
+
+	var buf strings.Builder
+	buf.WriteString("\nfunc init() {\n")
+
+	err = filepath.WalkDir(staticDir, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return nil
+		}
+
+		rel, _ := filepath.Rel(staticDir, path)
+		urlPath := "/" + filepath.ToSlash(rel)
+
+		methodPattern := "GET" + " " + urlPath
+		if routePatterns[methodPattern] {
+			return fmt.Errorf("static file %q conflicts with existing route %q", path, urlPath)
+		}
+
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+
+		ext := filepath.Ext(path)
+		mime := MimeByExt(ext)
+
+		content := []byte(data)
+		buf.WriteString(fmt.Sprintf("\tcore.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
+		count++
+		return nil
+	})
+
+	if err != nil {
+		return "", 0, err
+	}
+
+	buf.WriteString("}\n")
+	return buf.String(), count, nil
 }

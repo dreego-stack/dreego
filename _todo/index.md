@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-28T01:14:38Z
+Generated: 2026-07-28T01:34:28Z
 
-Chain: 1–25 | Next status code: **26**
+Chain: 1–26 | Next status code: **27**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler-Pipeline (Lexer → Parser → AST → CodeGen)
@@ -30,6 +30,7 @@ Chain: 1–25 | Next status code: **26**
 - `23` **template-filters.1** — Template-Filter ({var|raw}, {var|upper})
 - `24` **if-else.1** — {#else} in {#if}-Block
 - `25` **each-else.1** — {#each else} — Empty-List Fallback
+- `26` **static-assets.1** — Static Assets (dreego/static/ → inline Handler)
 
 ## AVAILABLE NEXT
 - **api-json.1** — API-Routen + JSON Responses
@@ -45,7 +46,6 @@ Chain: 1–25 | Next status code: **26**
 - **plugin-interface.1** — Plugin-Interface (Frozen for v1)
 - **scaffolding.1** — dreego new + Generatoren
 - **security-headers.1** — Security-Header (CSP, HSTS, X-Frame, X-Content-Type)
-- **static-assets.1** — Static Assets (static/ → embed.FS)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon-Ökosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
@@ -83,4 +83,4 @@ Chain: 1–25 | Next status code: **26**
 - **storage-interface.1** — File-Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 25 | web: 48 | next code: 26
+chain: 26 | web: 47 | next code: 27

@@ -50,6 +50,8 @@ graph TD
     style if_else_1 fill:#d4edda,stroke:#28a745
     each_else_1["25 {#each else} — Empty-List Fallback"]
     style each_else_1 fill:#d4edda,stroke:#28a745
+    static_assets_1["26 Static Assets (dreego/static/ → inline H"]
+    style static_assets_1 fill:#d4edda,stroke:#28a745
     api_json_1["API-Routen + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
@@ -76,8 +78,6 @@ graph TD
     style scaffolding_1 fill:#fff3cd,stroke:#ffc107
     security_headers_1["Security-Header (CSP, HSTS, X-Frame, X-C"]
     style security_headers_1 fill:#fff3cd,stroke:#ffc107
-    static_assets_1["Static Assets (static/ → embed.FS)"]
-    style static_assets_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
@@ -237,6 +237,8 @@ graph TD
     middleware_1 --> recovery_1
     transpiler_1 --> routing_1
     routing_1 --> bracket_routes_1
+    transpiler_1 --> static_assets_1
+    routing_1 --> static_assets_1
     component_handler_1 --> named_slots_1
     routing_1 --> error_pages_1
     recovery_1 --> error_pages_1
@@ -279,4 +281,5 @@ graph TD
     tag_prefix_fix_1 -.->|chain| template_filters_1
     template_filters_1 -.->|chain| if_else_1
     if_else_1 -.->|chain| each_else_1
+    each_else_1 -.->|chain| static_assets_1
 ```
