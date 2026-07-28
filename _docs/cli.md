@@ -38,6 +38,21 @@ dreego run -t 60            # build + start + stop after 60s
 dreego run -d -t 60         # debug log + 60s timer
 ```
 
+## dreego docs
+
+```bash
+dreego docs [path]
+```
+
+Fetches and displays repo documentation from Codeberg. Without arguments, shows `/_docs/index.md`.
+
+Examples:
+```bash
+dreego docs                    show docs index
+dreego docs /README.md         show readme
+dreego docs /_docs/cli.md      show CLI docs
+```
+
 ## dreego help
 
 ```bash
@@ -48,3 +63,8 @@ dreego --help
 Shows all available commands and flags.
 
 > **Note:** `dreego build` and `dreego run` are dev tools, not for production.
+
+## See Also
+
+- [Docs Index](/_docs/index.md)
+- [Getting Started](/_docs/getting-started.md)

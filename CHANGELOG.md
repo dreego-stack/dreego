@@ -1,10 +1,12 @@
 # Changelog
 
-## v0.0.11 (2026-07-28) — English + KB Sync
+## v0.0.11 (2026-07-28) — English + KB Sync + CLI Docs
 
 - Entire repository translated to English: 130+ files (docs, agents, blocks, demo, guides)
 - AGENTS.md: documented language rule (chat=DE, repo=EN)
-- Knowledge base fully synced with v0.0.10 state (concepts, decisions, references)
+- `dreego docs [path]` — fetches repo docs from Codeberg raw URL, defaults to `/_docs/index.md`
+- `_docs/` restructured with cross-links: all pages link to each other via repo paths
+- Knowledge base fully synced with v0.0.10 state
 - Demo templates translated (404, 500, about, htmxdemo, users, route-groups)
 
 ## v0.0.10 (2026-07-28) — Static Assets

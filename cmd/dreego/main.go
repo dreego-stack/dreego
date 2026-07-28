@@ -27,6 +27,8 @@ func main() {
 		cmdBuild(os.Args[2:])
 	case "run":
 		cmdRun(os.Args[2:])
+	case "docs":
+		cmdDocs(os.Args[2:])
 	case "help", "--help", "-h":
 		printHelp()
 	default:
@@ -37,7 +39,7 @@ func main() {
 }
 
 func printHelp() {
-	fmt.Print(`dreego — Go-Webframework CLI (dev tools, not for production)
+	fmt.Print(`dreego — Go Web Framework CLI (dev tools, not for production)
 
 usage: dreego <command> [flags]
 
@@ -46,6 +48,7 @@ commands:
   generate [--force] [--check] transpile .dreego files to Go code
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
+  docs [path]            fetch and display repo docs (default: /_docs/index.md)
   help                   show this help
 
 flags:
@@ -61,6 +64,9 @@ examples:
   dreego run -d                build + start + log to file
   dreego run -t 60             build + start + stop after 60s
   dreego run -d -t 60          debug log + 60s timer
+  dreego docs                  show docs index
+  dreego docs /README.md       show readme
+  dreego docs /_docs/cli.md    show CLI docs
 `)
 }
 
