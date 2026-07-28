@@ -43,7 +43,10 @@ timestamp: 2026-07-28T21:33:00Z
 - Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` — core-fixed middleware
 - Gzip compression: `compress/gzip` wrapping ResponseWriter, checks `Accept-Encoding`, core-fixed
 - Middleware chain: Recovery → SecurityHeaders → Compression → RequestLogging → Session → CSRF → Redirect/Rewrite → Router
-- 79 integration tests total (3 new)
+- Bugfix: `layout.Head.Content` now rendered in codegen — `{#head}` inside `<head>` section processed correctly
+- Bugfix: `genLayoutNode` handles both `{#head}` and `{#slot}` in same NodeText (splitLayoutText function)
+- `dreego new`: force `go 1.22` in `go.mod` for Docker compatibility, bump core dep to v0.0.14
+- 81 integration tests total (2 new regression tests + 1 updated)
 
 ### Recent Fixes (post v0.0.13)
 - `.gitattributes`: Added `_todo export-ignore` — exclude `_todo/` from `go get` downloads
