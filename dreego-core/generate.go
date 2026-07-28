@@ -211,7 +211,7 @@ func Run(force bool) error {
 	elapsed := time.Since(start)
 	fmt.Printf("Found %d routes + %d components + %d static\n", found, len(compSrcs), staticCount)
 	fmt.Printf("Generated gen/routes.go + gen/components.go + gen/dree.go\n")
-	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
+	fmt.Printf("in %.2fms\n", float64(elapsed.Microseconds())/1000.0)
 	return nil
 }
 
