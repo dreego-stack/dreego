@@ -12,7 +12,7 @@
 
 ## Current Phase: pre v0.1
 
-Blueprint scaffolding + integration tests working. v0.0.10 tagged. See TODO.md for next steps.
+v0.0.13 tagged — split-gen, scaffolding, landing blueprint complete. v0.0.14 adds production middleware (health checks, security headers, compression). See TODO.md for next steps.
 
 ## File Structure
 
@@ -70,6 +70,19 @@ Every bug gets a permanent test in `_tests/Bugs/<name>/`. Workflow:
 3. Bug is permanently covered — no regression risk
 
 `.tmp/<name>/` is ONLY for temporary debugging/exploration — never for permanent tests.
+
+## Feature Workflow
+
+Every feature follows this cycle:
+
+1. **`_tests/`** — Create integration test in `_tests/<FeatureGroup>/<name>/test.sh`
+2. **Code** — Implement in `dreego-core/` (one logical thing per file, max 120 lines)
+3. **`_docs/`** — Update relevant documentation
+4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
+5. **Changelog** — Add entry to `CHANGELOG.md`
+6. **KB** — Update `.agents/log.md` + relevant concept/decision docs
+
+For multi-step features, repeat the cycle for each step. Commit after each step.
 
 ## Type Safety
 

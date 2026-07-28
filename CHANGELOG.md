@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.14 (2026-07-28) — Production Middleware
+
+- `GET /health` → 200 `ok` — process liveness probe, always available
+- `GET /ready` → 200 `ready` / 503 `not ready` — traffic readiness via `core.SetReady(bool)`
+- Health endpoints registered before user routes (cannot be overridden)
+- Security Headers middleware: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` — core-fixed
+- Gzip compression middleware: compresses responses when client accepts gzip (`Accept-Encoding`) — core-fixed
+- Middleware chain: Recovery → SecurityHeaders → Compression → RequestLogging → Session → CSRF → Redirect/Rewrite → Router
+- 3 new tests: health-checks, security-headers, compression
+- 79 integration tests total
+
 ## v0.0.13 (2026-07-28) — Scaffolding + Split-Gen
 
 - `dreego new <name>` — creates landing page project with `go mod init` auto-setup

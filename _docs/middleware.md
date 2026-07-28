@@ -5,12 +5,50 @@
 Dreego has a middleware chain with fixed order:
 
 ```
-[Recovery → RequestID → RealIP → RequestLogging*]
-  → Redirect/Rewrite
-    → Router → Handler
+[Recovery → SecurityHeaders → Compression → RequestLogging*]
+  → Session → CSRF
+    → Redirect/Rewrite
+      → Router (mux)
 ```
 
 \* `RequestLogging` is Core-Conditional: default on, deactivatable via `dreego/config.json`.
+
+## Health Checks (v0.0.14)
+
+Built-in `GET /health` and `GET /ready` endpoints, always available:
+
+- `GET /health` → 200 `ok` — process is alive
+- `GET /ready` → 200 `ready` or 503 `not ready` — traffic readiness
+
+```go
+core.SetReady(false) // signal not ready (e.g., during startup)
+core.SetReady(true)  // signal ready
+```
+
+Health endpoints are registered before user routes — they cannot be overridden.
+
+## Security Headers (v0.0.14)
+
+Core-fixed middleware that sets security headers on every response:
+
+| Header | Value |
+|--------|-------|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` |
+
+Always on. Applied after Recovery, before Compression.
+
+## Compression (v0.0.14)
+
+Gzip compression for all responses, core-fixed:
+
+- Checks `Accept-Encoding: gzip` header
+- Compresses response body via `compress/gzip`
+- Sets `Content-Encoding: gzip`
+
+Applied after Security Headers, before RequestLogging.
 
 ## RequestLogging
 
@@ -37,10 +75,3 @@ Configured in `dreego/config.json` → `redirects` and `rewrites`.
 ## Plugin Middleware
 
 Plugins implement `MiddlewareProvider` and inject their own middleware into the chain. Order = `app.Use()` order.
-
-## Planned (V1)
-
-- `Recovery`: Panic → 500 (Core-Fixed)
-- `RequestID`: X-Request-ID Header (Core-Fixed)
-- `RealIP`: X-Forwarded-For evaluation (Core-Fixed)
-- `CSRF`: CSRF protection (Core-Conditional)

@@ -50,6 +50,10 @@ func RegisterRewrite(from, to string) {
 
 func ServeMux() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /health", healthHandler())
+	mux.HandleFunc("GET /ready", readyHandler())
+
 	for _, r := range routes {
 		if r.method != "" {
 			mux.HandleFunc(r.method+" "+r.pattern, r.handler)
@@ -69,6 +73,8 @@ func ServeMux() http.Handler {
 	if loggingEnabled {
 		h = RequestLogging()(h)
 	}
+	h = Compress()(h)
+	h = SecurityHeaders()(h)
 	h = Recovery(errorHandlers[500])(h)
 	return h
 }

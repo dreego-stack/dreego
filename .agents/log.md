@@ -38,6 +38,13 @@ timestamp: 2026-07-28T21:33:00Z
 
 ## 2026-07-28
 
+### v0.0.14 — Production Middleware
+- Health checks: `GET /health` (liveness) + `GET /ready` (readiness via `core.SetReady(bool)`), core-fixed, registered before user routes
+- Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` — core-fixed middleware
+- Gzip compression: `compress/gzip` wrapping ResponseWriter, checks `Accept-Encoding`, core-fixed
+- Middleware chain: Recovery → SecurityHeaders → Compression → RequestLogging → Session → CSRF → Redirect/Rewrite → Router
+- 79 integration tests total (3 new)
+
 ### Recent Fixes (post v0.0.13)
 - `.gitattributes`: Added `_todo export-ignore` — exclude `_todo/` from `go get` downloads
 - `.gitignore`: Fixed `/dreego` (root binary only, not `cmd/dreego/` directory)
