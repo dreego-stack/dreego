@@ -1,6 +1,12 @@
 # Changelog
 
-## v0.0.9 (unreleased) — Template-Primitives
+## v0.0.10 (unreleased) — Static Assets
+
+- `dreego/static/` Ordner: Files werden beim Generate eingelesen und inline registriert
+- MIME-Type via Extension (.css, .js, .svg, .png, .ico, .html, .json, .woff2)
+- Kollision-Check: wenn statischer Pfad mit Route kollidiert → `dreego generate` Error
+
+## v0.0.9 (2026-07-28) — Template-Primitives
 
 - `{#verbatim}` Block: Raw-Output für JS-Templates
 - `{#each}` mit `$loop`-Variable: `$loop.Index`, `$loop.First`, `$loop.Last`, `$loop.Even`, `$loop.Odd`
