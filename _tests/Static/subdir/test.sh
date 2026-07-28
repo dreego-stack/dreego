@@ -13,6 +13,6 @@ go mod edit -replace codeberg.org/dreego/dreego=../../..
 go mod edit -require codeberg.org/dreego/dreego@v0.0.0
 sed -i "s|_ \"gen\"|_ \"t/dreego/gen\"|" main.go
 dreego generate
-grep -q 'RegisterStatic("/images/logo.svg"' dreego/gen/routes.go
+grep -q 'RegisterStatic("/images/logo.svg"' dreego/gen/dree.go
 go build -o /dev/null .
 echo ok

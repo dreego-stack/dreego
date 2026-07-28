@@ -163,44 +163,69 @@ func Run(force bool) error {
 	src := strings.Join(allSources, "")
 	compSrc := strings.Join(compSrcs, "")
 
-	var imports []string
-	if strings.Contains(src+compSrc, "fmt.") {
-		imports = append(imports, "\"fmt\"")
+	routeImports := []string{}
+	if strings.Contains(src, "fmt.") {
+		routeImports = append(routeImports, "\"fmt\"")
 	}
-	if strings.Contains(src+compSrc, "html.EscapeString") {
-		imports = append(imports, "\"html\"")
+	if strings.Contains(src, "html.EscapeString") {
+		routeImports = append(routeImports, "\"html\"")
 	}
-	imports = append(imports, "\"net/http\"")
-	imports = append(imports, "\"strings\"")
-	importLine := strings.Join(imports, "\n\t")
+	routeImports = append(routeImports, "\"net/http\"")
+	routeImports = append(routeImports, "\"strings\"")
+	routeImportLine := strings.Join(routeImports, "\n\t")
 
-	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", importLine)
-	routesOut += compSrc + src + staticSrc
+	compImports := []string{}
+	if strings.Contains(compSrc, "fmt.") {
+		compImports = append(compImports, "\"fmt\"")
+	}
+	if strings.Contains(compSrc, "html.EscapeString") {
+		compImports = append(compImports, "\"html\"")
+	}
+	compImports = append(compImports, "\"strings\"")
+	compImportLine := strings.Join(compImports, "\n\t")
 
-	if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
-		return fmt.Errorf("error writing gen/routes.go: %w", err)
+	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", routeImportLine)
+	routesOut += src
+
+	if !isUpToDate(filepath.Join(genDir, "routes.go"), routesOut) {
+		if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
+			return fmt.Errorf("error writing gen/routes.go: %w", err)
+		}
+	}
+
+	if compSrc != "" {
+		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", compImportLine)
+		compOut += compSrc
+		if !isUpToDate(filepath.Join(genDir, "components.go"), compOut) {
+			if err := os.WriteFile(filepath.Join(genDir, "components.go"), []byte(compOut), 0644); err != nil {
+				return fmt.Errorf("error writing gen/components.go: %w", err)
+			}
+		}
 	}
 
 	settings = loadSettings(genDir)
-	if err := writeDreeGo(genDir, settings); err != nil {
+	if err := writeDreeGo(genDir, settings, staticSrc); err != nil {
 		return fmt.Errorf("error writing gen/dree.go: %w", err)
 	}
 
 	elapsed := time.Since(start)
 	fmt.Printf("Found %d routes + %d components + %d static\n", found, len(compSrcs), staticCount)
-	fmt.Printf("Generated gen/routes.go + gen/dree.go\n")
+	fmt.Printf("Generated gen/routes.go + gen/components.go + gen/dree.go\n")
 	fmt.Printf("in %dns\n", elapsed.Nanoseconds())
 	return nil
 }
 
-func writeDreeGo(genDir string, settings *Settings) error {
+func writeDreeGo(genDir string, settings *Settings, staticSrc string) error {
 	var buf strings.Builder
 	buf.WriteString("package gen\n\n")
-	if settings != nil && (settings.Logging.Enabled || len(settings.Redirects) > 0 || len(settings.Rewrites) > 0) {
+
+	hasCore := settings != nil || staticSrc != ""
+	if hasCore || staticSrc != "" {
 		buf.WriteString("import (\n")
 		buf.WriteString("\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n")
 		buf.WriteString(")\n\n")
 	}
+
 	buf.WriteString("func init() {\n")
 	if settings != nil {
 		buf.WriteString(fmt.Sprintf("\tcore.SetLogging(%t)\n", settings.Logging.Enabled))
@@ -212,7 +237,26 @@ func writeDreeGo(genDir string, settings *Settings) error {
 		}
 	}
 	buf.WriteString("}\n")
-	return os.WriteFile(filepath.Join(genDir, "dree.go"), []byte(buf.String()), 0644)
+	if staticSrc != "" {
+		buf.WriteString("\n")
+		buf.WriteString(staticSrc)
+	}
+
+	out := buf.String()
+	if !isUpToDate(filepath.Join(genDir, "dree.go"), out) {
+		if err := os.WriteFile(filepath.Join(genDir, "dree.go"), []byte(out), 0644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func isUpToDate(path, content string) bool {
+	existing, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	return string(existing) == content
 }
 
 func loadSettings(genDir string) *Settings {

@@ -1,7 +1,0 @@
-<go>
-    _ = fmt.Sprintf("")
-</go>
-
-<div>
-    <p>HTMX POST worked!</p>
-</div>

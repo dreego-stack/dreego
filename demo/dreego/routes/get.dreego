@@ -1,23 +1,120 @@
-import "dreego/components/Card"
-
 <head>
-    <title>Dreego</title>
+    <title>demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="demo — Built with Dreego">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
 </head>
 
-<go>
-    message := "Hello from Dreego!"
-</go>
+<div class="min-h-screen bg-white font-sans">
 
-<div>
-    <h1>{message}</h1>
-    <@Card title="Slot Demo">
-        <p>This content appears via <code>{#slot}</code> in the Card component.</p>
-    </@Card>
-    <a href="/about">About</a>
+    <nav class="fixed top-0 inset-x-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 z-50">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold text-slate-900">demo</a>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                <a href="#features" class="hover:text-slate-900">Features</a>
+                <a href="#pricing" class="hover:text-slate-900">Pricing</a>
+                <a href="/docs" class="hover:text-slate-900">Docs</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/login" class="text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:block">Sign in</a>
+                <a href="/signup" class="text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 px-4 py-2.5 rounded-lg transition-colors">Get started →</a>
+            </div>
+        </div>
+    </nav>
+
+    <@Hero
+        badge="New in 2026"
+        title="Build modern web apps with Go"
+        subtitle="Dreego compiles .dreego templates into native Go code — zero runtime overhead, single binary deploy, SSR-first."
+        cta1="Start building free"
+        cta2="Documentation →"
+    />
+
+    <section id="features" class="py-24 bg-slate-50/50">
+        <div class="max-w-6xl mx-auto px-6">
+            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">Why Dreego</p>
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Everything you need</h2>
+            <div class="grid md:grid-cols-3 gap-px bg-slate-200 rounded-2xl overflow-hidden">
+                <@FeatureCard icon="⚡" title="Compile-Time" text=".dreego files become native Go code. No runtime template engine, no reflection, zero overhead." />
+                <@FeatureCard icon="📦" title="Single Binary" text="One file. Assets, templates, server — all compiled into a single deployable binary." />
+                <@FeatureCard icon="🎨" title="Components" text="Reusable, typed, scoped — build your UI library with .dreego components." />
+                <@FeatureCard icon="🔒" title="Type-Safe" text="Go catches errors at build time, not runtime. No stringly-typed anything." />
+                <@FeatureCard icon="🚀" title="SSR-First" text="Server-rendered HTML with auto XSS escaping. Fast, SEO-friendly, accessible." />
+                <@FeatureCard icon="🛠️" title="CLI Tooling" text="Scaffold, generate, format, build, deploy — everything from the terminal." />
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">Pricing</p>
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Simple, transparent pricing</h2>
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+
+                <div class="bg-white rounded-2xl p-8 ring-1 ring-slate-200 flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-900">Free</h3>
+                    <p class="text-sm text-slate-500 mt-1 mb-4">For side projects and learning.</p>
+                    <div class="mb-6"><span class="text-4xl font-extrabold">$0</span><span class="text-slate-400">/mo</span></div>
+                    <ul class="space-y-3 text-sm text-slate-600 mb-8 flex-1">
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Unlimited routes</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Community support</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> MIT License</li>
+                    </ul>
+                    <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">Get started</a>
+                </div>
+
+                <div class="bg-slate-900 rounded-2xl p-8 ring-1 ring-slate-900 flex flex-col relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+                    <h3 class="text-lg font-bold text-white">Pro</h3>
+                    <p class="text-sm text-slate-400 mt-1 mb-4">For professional developers.</p>
+                    <div class="mb-6"><span class="text-4xl font-extrabold text-white">$29</span><span class="text-slate-400">/mo</span></div>
+                    <ul class="space-y-3 text-sm text-slate-300 mb-8 flex-1">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Everything in Free</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Priority support</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Commercial license</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Advanced components</li>
+                    </ul>
+                    <a href="/signup" class="block text-center py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">Start free trial</a>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 ring-1 ring-slate-200 flex flex-col">
+                    <h3 class="text-lg font-bold text-slate-900">Enterprise</h3>
+                    <p class="text-sm text-slate-500 mt-1 mb-4">For teams and organizations.</p>
+                    <div class="mb-6"><span class="text-4xl font-extrabold">$99</span><span class="text-slate-400">/mo</span></div>
+                    <ul class="space-y-3 text-sm text-slate-600 mb-8 flex-1">
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Everything in Pro</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Dedicated support</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> SSO + Audit logs</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> SLA guarantee</li>
+                    </ul>
+                    <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">Contact sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-slate-900">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <h2 class="text-4xl font-extrabold text-white mb-4 tracking-tight">Ready to build something great?</h2>
+            <p class="text-lg text-slate-400 mb-10">Start building with Dreego today — it's free and open source.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/signup" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors text-lg shadow-xl shadow-blue-600/25">Get started free →</a>
+                <a href="/docs" class="px-8 py-3.5 ring-1 ring-slate-600 hover:ring-slate-400 text-slate-300 hover:text-white font-semibold rounded-xl transition-all text-lg">Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-16 border-t border-slate-200">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">demo</h4><p class="text-sm text-slate-500">Built with Dreego.</p></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Product</h4><a href="#features" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Features</a><a href="#pricing" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Pricing</a></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Resources</h4><a href="/docs" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Docs</a><a href="/blog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Blog</a></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Company</h4><a href="/about" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">About</a><a href="/privacy" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Privacy</a></div>
+            </div>
+            <div class="border-t border-slate-200 pt-8 text-center"><p class="text-sm text-slate-400">&copy; 2026 demo</p></div>
+        </div>
+    </footer>
+
 </div>
-
-<style>
-    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; }
-    h1 { color: #333; }
-    a { color: #06f; }
-</style>
