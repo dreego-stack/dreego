@@ -38,6 +38,14 @@ timestamp: 2026-07-28T21:33:00Z
 
 ## 2026-07-28
 
+### v0.0.15 — Content-Type Routing
+- `<go type="json">` / `<go type="xml">` — typed Go blocks with `c.JSON()`, `c.XML()`, `c.Bind()`
+- Multiple `<go>` blocks merged: shared runs always, typed checks `Accept` header via `c.Wants()`
+- Pure typed routes skip template rendering (no `<div>` needed)
+- `c.Write(status, contentType, body)` for arbitrary formats (FlatBuffers, Protobuf, etc.)
+- `dreego-core/response.go`: 55 lines, stdlib-only (encoding/json, encoding/xml, net/http, strings)
+- 86 integration tests total (5 new)
+
 ### v0.0.14 — Production Middleware
 - Health checks: `GET /health` (liveness) + `GET /ready` (readiness via `core.SetReady(bool)`), core-fixed, registered before user routes
 - Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` — core-fixed middleware

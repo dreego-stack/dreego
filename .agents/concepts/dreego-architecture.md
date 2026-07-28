@@ -123,6 +123,7 @@ dreego/
 - [x] Health Checks: `/health` + `/ready` endpoints (v0.0.14)
 - [x] Security Headers: CSP, nosniff, frame-options (v0.0.14)
 - [x] Gzip Compression: compress/gzip middleware (v0.0.14)
+- [x] Content-Type Routing: `<go type="json|xml">` with c.JSON/XML/Bind/Write (v0.0.15)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
 - [ ] Plugin system (minimal)
