@@ -19,6 +19,9 @@ SSR-First web framework for Go. File extension `.dreego`, transpiler approach, s
 dreego generate && dreego run
 ```
 
+→ **[Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)**
+&nbsp;&nbsp;or `dreego docs /_docs/getting-started.md`
+
 ## Features
 
 - **Compile-Time Transpiler** — `.dreego` → Go code, zero runtime overhead

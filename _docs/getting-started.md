@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-go install codeberg.org/dreego/dreego/cmd/dreego@v0.0.1
+go install codeberg.org/dreego/dreego/cmd/dreego@latest
 ```
 
 ## New Project
