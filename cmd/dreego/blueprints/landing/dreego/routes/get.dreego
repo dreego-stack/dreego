@@ -23,39 +23,25 @@
         </div>
     </nav>
 
-    <main class="pt-28 pb-20 px-6 max-w-4xl mx-auto text-center relative">
-        <div class="absolute inset-0 bg-grid opacity-40 -z-10"></div>
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold mb-8 ring-1 ring-blue-200/60">✨ New in 2026</div>
-        <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.05] mb-6 max-w-3xl mx-auto">Build modern web apps<br>with <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Go</span></h1>
-        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">Dreego compiles .dreego templates into native Go code — zero runtime overhead, single binary deploy, SSR-first.</p>
-        <div class="flex flex-wrap justify-center gap-4 mb-16">
-            <a href="/signup" class="px-8 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors text-lg shadow-xl shadow-slate-900/20">Start building free</a>
-            <a href="/docs" class="px-8 py-3.5 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors text-lg shadow-sm">Documentation →</a>
-        </div>
-
-        <div class="inline-block bg-slate-900 rounded-2xl p-0.5 shadow-2xl shadow-slate-900/20">
-            <div class="bg-slate-950 rounded-2xl px-6 py-5 text-left">
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div class="w-3 h-3 rounded-full bg-amber-400"></div>
-                    <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
-                </div>
-                <code class="text-sm text-emerald-400 font-mono leading-relaxed">$ dreego new myapp<br>$ dreego generate &amp;&amp; go run .<br><span class="text-slate-500">→ Server listening on :8080</span></code>
-            </div>
-        </div>
-    </main>
+    <@Hero
+        badge="New in 2026"
+        title="Build modern web apps with Go"
+        subtitle="Dreego compiles .dreego templates into native Go code — zero runtime overhead, single binary deploy, SSR-first."
+        cta1="Start building free"
+        cta2="Documentation →"
+    />
 
     <section id="features" class="py-24 bg-slate-50/50">
         <div class="max-w-6xl mx-auto px-6">
             <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">Why Dreego</p>
-            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Everything you need to ship fast</h2>
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Everything you need</h2>
             <div class="grid md:grid-cols-3 gap-px bg-slate-200 rounded-2xl overflow-hidden">
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">⚡</div><h3 class="text-lg font-bold text-slate-900 mb-2">Compile-Time</h3><p class="text-slate-500 text-sm leading-relaxed">.dreego files become native Go code. No runtime template engine, no reflection, zero overhead.</p></div>
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">📦</div><h3 class="text-lg font-bold text-slate-900 mb-2">Single Binary</h3><p class="text-slate-500 text-sm leading-relaxed">One file. Assets, templates, server — all compiled into a single deployable binary.</p></div>
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">🎨</div><h3 class="text-lg font-bold text-slate-900 mb-2">Components</h3><p class="text-slate-500 text-sm leading-relaxed">Reusable, typed, scoped — build your UI library with .dreego components.</p></div>
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">🔒</div><h3 class="text-lg font-bold text-slate-900 mb-2">Type-Safe</h3><p class="text-slate-500 text-sm leading-relaxed">Go catches errors at build time, not runtime. No stringly-typed anything.</p></div>
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">🚀</div><h3 class="text-lg font-bold text-slate-900 mb-2">SSR-First</h3><p class="text-slate-500 text-sm leading-relaxed">Server-rendered HTML with auto XSS escaping. Fast, SEO-friendly, accessible.</p></div>
-                <div class="bg-white p-8 group hover:bg-slate-50 transition-colors"><div class="text-3xl mb-4">🛠️</div><h3 class="text-lg font-bold text-slate-900 mb-2">CLI Tooling</h3><p class="text-slate-500 text-sm leading-relaxed">Scaffold, generate, format, build, deploy — everything from the terminal.</p></div>
+                <@FeatureCard icon="⚡" title="Compile-Time" text=".dreego files become native Go code. No runtime template engine, no reflection, zero overhead." />
+                <@FeatureCard icon="📦" title="Single Binary" text="One file. Assets, templates, server — all compiled into a single deployable binary." />
+                <@FeatureCard icon="🎨" title="Components" text="Reusable, typed, scoped — build your UI library with .dreego components." />
+                <@FeatureCard icon="🔒" title="Type-Safe" text="Go catches errors at build time, not runtime. No stringly-typed anything." />
+                <@FeatureCard icon="🚀" title="SSR-First" text="Server-rendered HTML with auto XSS escaping. Fast, SEO-friendly, accessible." />
+                <@FeatureCard icon="🛠️" title="CLI Tooling" text="Scaffold, generate, format, build, deploy — everything from the terminal." />
             </div>
         </div>
     </section>
@@ -122,32 +108,12 @@
     <footer class="py-16 border-t border-slate-200">
         <div class="max-w-6xl mx-auto px-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">§$name$§</h4>
-                    <p class="text-sm text-slate-500">Built with Dreego — the Go web framework.</p>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Product</h4>
-                    <a href="#features" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Features</a>
-                    <a href="#pricing" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Pricing</a>
-                    <a href="/changelog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Changelog</a>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Resources</h4>
-                    <a href="/docs" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Documentation</a>
-                    <a href="/blog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Blog</a>
-                    <a href="/community" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Community</a>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Company</h4>
-                    <a href="/about" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">About</a>
-                    <a href="/privacy" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Privacy</a>
-                    <a href="/terms" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Terms</a>
-                </div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">§$name$§</h4><p class="text-sm text-slate-500">Built with Dreego.</p></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Product</h4><a href="#features" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Features</a><a href="#pricing" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Pricing</a></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Resources</h4><a href="/docs" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Docs</a><a href="/blog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Blog</a></div>
+                <div><h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Company</h4><a href="/about" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">About</a><a href="/privacy" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">Privacy</a></div>
             </div>
-            <div class="border-t border-slate-200 pt-8 text-center">
-                <p class="text-sm text-slate-400">&copy; 2026 §$name$§. All rights reserved.</p>
-            </div>
+            <div class="border-t border-slate-200 pt-8 text-center"><p class="text-sm text-slate-400">&copy; 2026 §$name$§</p></div>
         </div>
     </footer>
 

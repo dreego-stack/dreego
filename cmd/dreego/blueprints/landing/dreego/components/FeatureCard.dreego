@@ -1,0 +1,9 @@
+Component FeatureCard (icon string, title string, text string)
+
+<div>
+    <div class="bg-white p-8 group hover:bg-slate-50 transition-colors">
+        <div class="text-3xl mb-4">{icon}</div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">{title}</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">{text}</p>
+    </div>
+</div>
