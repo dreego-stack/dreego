@@ -2,9 +2,9 @@
 ---
 type: Concept
 title: "Template Logic in Dreego"
-description: "Template syntax and its codegen to native Go code (as of v0.0.10)"
-tags: [v0.0.10]
-timestamp: 2026-07-28T00:00:00Z
+description: "Template syntax and its codegen to native Go code (as of v0.0.13)"
+tags: [v0.0.13]
+timestamp: 2026-07-28T21:33:00Z
 ---
 
 # Template Logic in Dreego
@@ -15,7 +15,7 @@ timestamp: 2026-07-28T00:00:00Z
 - **All template blocks compile to native Go** — zero runtime cost
 - **Auto-escaping**: all `{var}` expressions are escaped via `html.EscapeString`
 
-## Template Blocks (as of v0.0.10)
+## Template Blocks (as of v0.0.13)
 
 | Block | Status | Go Equivalent |
 |---|---|---|

@@ -3,8 +3,8 @@
 type: Concept
 title: "Dreego Architecture"
 description: "Compile-time web framework architecture with transpiler, router, and plugin system"
-tags: [v0.0.10]
-timestamp: 2026-07-28T00:00:00Z
+tags: [v0.0.13]
+timestamp: 2026-07-28T21:33:00Z
 ---
 # Dreego Architecture
 
@@ -117,6 +117,9 @@ dreego/
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
 - [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
 - [x] Static Assets: `dreego/static/` → inline handler + MIME types + collision check
+- [x] Formatter: `dreego fmt` (v0.0.12)
+- [x] Scaffolding: `dreego new` with landing blueprint (v0.0.13)
+- [x] Split-Gen: `routes.go` + `components.go` + `dree.go` with `isUpToDate()` caching (v0.0.13)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
 - [ ] Plugin system (minimal)
@@ -153,3 +156,31 @@ dreego/static/logo.svg   → GET /logo.svg   (image/svg+xml)
 - MIME type via file extension
 - Collision detection: if static path overlaps with route → `dreego generate` error
 - Inline `[]byte` registration via `core.RegisterStatic()`
+
+## Formatter (v0.0.12)
+
+`dreego fmt` formats `.dreego` files in-place, `--check` for CI, `--stdout` for piping:
+
+- Normalizes component headers, expressions, control flow spacing
+- Section ordering: `<go>`, `<head>`, template, `<style>`, `<script>`
+- Idempotent: formatting twice produces same output
+
+## Scaffolding + Split-Gen (v0.0.13)
+
+**Scaffolding:**
+- `dreego new <name>` copies landing blueprint with `§$name$§` placeholders
+- Auto-runs `go mod init` + `go mod edit` — project ready in seconds
+
+**Split-Gen:**
+- `dreego generate` now produces three files:
+  - `gen/routes.go` — HTTP handler registration (one handler per route)
+  - `gen/components.go` — component functions
+  - `gen/dree.go` — config loading + static asset registration
+- `isUpToDate()` per-file caching: file written only when content changes
+- All in `gen` package for single-import compatibility
+
+**Landing Blueprint:**
+- Tailwind CDN, Hero + FeatureCard components, layout with `{#head}` + `{#slot}`
+- Nav, pricing, CTA, footer sections
+- Dockerfile (golang:1.22-alpine → distroless nonroot)
+- `.gitignore` configured for Dreego project
