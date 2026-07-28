@@ -27,8 +27,9 @@ type TemplateNode struct {
 }
 
 type GoSection struct {
-	Code   string
-	Method string
+	Code        string
+	Method      string
+	ContentType string
 }
 
 type File struct {

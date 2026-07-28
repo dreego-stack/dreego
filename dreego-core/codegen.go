@@ -6,10 +6,22 @@ import (
 
 )
 
-func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, g GoSection, scopeHash string) (string, error) {
+func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, error) {
 	methodSuffix := ""
-	if g.Method != "GET" {
-		methodSuffix = strings.ToUpper(g.Method)
+	firstMethod := "GET"
+	hasTypedBlocks := false
+	for _, g := range file.Go {
+		if g.ContentType != "" {
+			hasTypedBlocks = true
+		}
+	}
+	for _, g := range file.Go {
+		if g.Method != "GET" {
+			firstMethod = g.Method
+		}
+	}
+	if firstMethod != "GET" {
+		methodSuffix = strings.ToUpper(firstMethod)
 	}
 	funcName := "render" + toPascalCase(baseName) + methodSuffix
 	handlerName := "Handle" + toPascalCase(baseName) + methodSuffix
@@ -19,24 +31,51 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString(fmt.Sprintf("func %s(c *core.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
-	if g.Code != "" {
-		for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
-			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
+	for _, g := range file.Go {
+		if g.ContentType == "" && g.Code != "" {
+			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+				buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\n")
 		}
-		buf.WriteString("\n")
 	}
 
-	if file.Template != nil {
-		if layout == nil && file.Head != nil && g.Method == "GET" {
+	if hasTypedBlocks {
+		buf.WriteString("\tif true {\n")
+		for _, g := range file.Go {
+			if g.ContentType == "json" {
+				buf.WriteString("\t\tif c.Wants(\"application/json\") {\n")
+				buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n")
+				for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+					buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
+				}
+				buf.WriteString("\t\t\treturn \"\", nil\n")
+				buf.WriteString("\t\t}\n")
+			}
+			if g.ContentType == "xml" {
+				buf.WriteString("\t\tif c.Wants(\"application/xml\") {\n")
+				buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/xml; charset=utf-8\")\n")
+				for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+					buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
+				}
+				buf.WriteString("\t\t\treturn \"\", nil\n")
+				buf.WriteString("\t\t}\n")
+			}
+		}
+		buf.WriteString("\t}\n\n")
+	}
+
+	if file.Template != nil && len(file.Template.Nodes) > 0 {
+		if layout == nil && file.Head != nil && firstMethod == "GET" {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
 		}
-		if g.Method == "GET" {
+		if firstMethod == "GET" {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Template.Nodes {
 			buf.WriteString(genTemplateNode(n, 1))
 		}
-		if g.Method == "GET" {
+		if firstMethod == "GET" {
 			buf.WriteString("\tb.WriteString(\"</div>\")\n")
 		}
 
@@ -52,7 +91,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 			buf.WriteString("\tb.WriteString(\"</style>\")\n")
 		}
 
-		if layout != nil && g.Method == "GET" {
+		if layout != nil && firstMethod == "GET" {
 			buf.WriteString("\tpageContent := b.String()\n")
 			buf.WriteString("\tb.Reset()\n")
 
@@ -86,7 +125,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 				}
 			}
 		}
-	} else if g.Code != "" {
+	} else if firstMethod != "GET" {
 		buf.WriteString("\tb.WriteString(\"OK\")\n")
 	}
 
@@ -105,7 +144,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("}\n\n")
 
 	buf.WriteString("func init() {\n")
-	buf.WriteString(fmt.Sprintf("\tcore.Register(\"%s\", \"%s\", %s)\n", g.Method, pattern, handlerName))
+	buf.WriteString(fmt.Sprintf("\tcore.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, handlerName))
 	buf.WriteString("}\n")
 
 	return buf.String(), nil

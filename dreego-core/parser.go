@@ -49,6 +49,7 @@ func (p *Parser) Parse() (*File, error) {
 				return nil, err
 			}
 			section.Method = "GET"
+			section.ContentType = parseGoAttrs(tok.Attr)
 			file.Go = append(file.Go, *section)
 		case "div":
 			section, err := p.parseDivSection()
@@ -125,4 +126,17 @@ func (p *Parser) parsePlainTemplate() ([]TemplateNode, error) {
 		}
 		nodes = append(nodes, node)
 	}
+}
+
+func parseGoAttrs(attrs string) string {
+	if attrs == "" {
+		return ""
+	}
+	for _, part := range strings.Fields(attrs) {
+		if strings.HasPrefix(part, "type=") {
+			v := strings.TrimPrefix(part, "type=")
+			return strings.Trim(v, "\"'")
+		}
+	}
+	return ""
 }

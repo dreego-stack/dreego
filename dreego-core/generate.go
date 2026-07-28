@@ -133,12 +133,12 @@ func Run(force bool) error {
 
 			for _, g := range file.Go {
 				routePatterns[g.Method+" "+pattern] = true
-				src, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, g, scopeHash)
-				if err != nil {
-					return fmt.Errorf("error generating %s: %w", fpath, err)
-				}
-				allSources = append(allSources, src)
 			}
+			src, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
+			if err != nil {
+				return fmt.Errorf("error generating %s: %w", fpath, err)
+			}
+			allSources = append(allSources, src)
 		}
 
 		return nil
