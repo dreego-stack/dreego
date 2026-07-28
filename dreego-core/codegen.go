@@ -11,7 +11,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	firstMethod := "GET"
 	hasTypedBlocks := false
 	for _, g := range file.Go {
-		if g.ContentType != "" {
+		if g.ContentType != "" && g.ContentType != "custom" {
 			hasTypedBlocks = true
 		}
 	}
@@ -32,11 +32,13 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	for _, g := range file.Go {
-		if g.ContentType == "" && g.Code != "" {
-			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
-				buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
+		if g.ContentType == "" || g.ContentType == "custom" {
+			if g.Code != "" {
+				for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+					buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
+				}
+				buf.WriteString("\n")
 			}
-			buf.WriteString("\n")
 		}
 	}
 
@@ -60,12 +62,6 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 				}
 				buf.WriteString("\t\t\treturn \"\", nil\n")
 				buf.WriteString("\t\t}\n")
-			}
-			if g.ContentType == "custom" {
-				for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
-					buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
-				}
-				buf.WriteString("\t\treturn \"\", nil\n")
 			}
 		}
 		buf.WriteString("\t}\n\n")

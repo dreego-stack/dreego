@@ -35,8 +35,8 @@ func (c *SSRContext) Write(status int, contentType string, body []byte) {
 
 func (c *SSRContext) Wants(mime string) bool {
 	accept := c.R.Header.Get("Accept")
-	if accept == "*/*" || accept == "" {
-		return true
+	if accept == "" {
+		return false
 	}
 	return stringsContainsMime(accept, mime)
 }
@@ -47,7 +47,7 @@ func stringsContainsMime(accept, mime string) bool {
 		if idx := strings.IndexByte(t, ';'); idx >= 0 {
 			t = t[:idx]
 		}
-		if t == mime || t == "*/*" {
+		if t == mime {
 			return true
 		}
 	}
