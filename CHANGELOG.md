@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.0.13 (2026-07-28) — Scaffolding
+
+- `dreego new <name>` — create a production-ready landing page project from template
+- Landing template: Hero component, Card component, layout with nav + footer, Dockerfile (distroless)
+- Placeholder syntax `§$name$§` — auto-replaced with project name in all files
+- Template ships with: responsive CSS, `go.mod`, `Dockerfile` (multi-stage, nonroot)
+- Demo restored (undo accidental move commit)
+
 ## v0.0.12 (2026-07-28) — dreego fmt
 
 - `dreego fmt` — formats `.dreego` files in-place (section ordering, template expressions, control flow)

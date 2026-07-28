@@ -19,6 +19,8 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "new":
+		cmdNew(os.Args[2:])
 	case "init":
 		cmdInit(os.Args[2:])
 	case "generate":
@@ -48,7 +50,8 @@ func printHelp() {
 usage: dreego <command> [flags]
 
 commands:
-  init <path>             create a new dreego project from blueprint
+  new <name>             create a new project from landing template
+  init <path>            create a minimal dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
   build                  generate + go build → build/bin/<name>
@@ -64,19 +67,19 @@ flags:
   -t <seconds>           auto-stop server after N seconds (timer)
 
 examples:
-  dreego generate              transpile changed .dreego files
-  dreego generate --force      force full regeneration
-  dreego build                 generate + build binary
-  dreego run                   build + start server (foreground)
-  dreego run -d                build + start + log to file
-  dreego run -t 60             build + start + stop after 60s
-  dreego run -d -t 60          debug log + 60s timer
-  dreego docs                  show docs index (terminal)
-  dreego docs --web            open docs index in browser
-  dreego docs --json           structured JSON for AI agents
-  dreego docs --dump           all docs for LLM context
-  dreego docs /README.md       show readme
-  dreego feedback              submit issue / feedback
+  dreego new myapp            create project with landing page
+  dreego generate             transpile changed .dreego files
+  dreego generate --force     force full regeneration
+  dreego build                generate + build binary
+  dreego run                  build + start server (foreground)
+  dreego run -d               build + start + log to file
+  dreego run -t 60            build + start + stop after 60s
+  dreego run -d -t 60         debug log + 60s timer
+  dreego docs                 show docs index (terminal)
+  dreego docs --web           open docs index in browser
+  dreego docs --json          structured JSON for AI agents
+  dreego docs --dump          all docs for LLM context
+  dreego feedback             submit issue / feedback
 `)
 }
 

@@ -52,6 +52,10 @@ graph TD
     style each_else_1 fill:#d4edda,stroke:#28a745
     static_assets_1["26 Static Assets (dreego/static/ → inline H"]
     style static_assets_1 fill:#d4edda,stroke:#28a745
+    dreego_fmt_1["27 dreego fmt (Formatter)"]
+    style dreego_fmt_1 fill:#d4edda,stroke:#28a745
+    scaffolding_1["28 dreego new + Generators"]
+    style scaffolding_1 fill:#d4edda,stroke:#28a745
     api_json_1["API Routes + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
@@ -62,8 +66,6 @@ graph TD
     style documentation_1 fill:#fff3cd,stroke:#ffc107
     dreego_feedback_1["dreego feedback (POST endpoint)"]
     style dreego_feedback_1 fill:#fff3cd,stroke:#ffc107
-    dreego_fmt_1["dreego fmt (Formatter)"]
-    style dreego_fmt_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     form_actions_1["Form Actions (g-action / g-submit)"]
@@ -76,8 +78,6 @@ graph TD
     style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
-    scaffolding_1["dreego new + Generators"]
-    style scaffolding_1 fill:#fff3cd,stroke:#ffc107
     security_headers_1["Security Headers (CSP, HSTS, X-Frame, X-"]
     style security_headers_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
@@ -207,7 +207,6 @@ graph TD
     plugin_interface_1 --> wails_1
     plugin_interface_1 --> dreego_features_1
     middleware_hooks_1 --> dreego_features_1
-    transpiler_1 --> dreego_fmt_1
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
@@ -221,7 +220,6 @@ graph TD
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
     plugin_interface_1 --> cache_interface_1
-    cli_1 --> scaffolding_1
     routing_1 --> health_checks_1
     transpiler_1 --> smart_recompile_1
     hot_reload_1 --> smart_recompile_1
@@ -252,10 +250,12 @@ graph TD
     transpiler_1 --> template_filters_1
     xss_1 --> template_filters_1
     transpiler_1 --> verbatim_1
+    transpiler_1 --> dreego_fmt_1
     context_refactoring_1 --> session_1
     context_refactoring_1 --> component_handler_1
     middleware_1 --> config_1
     cli_1 --> ci_check_1
+    cli_1 --> scaffolding_1
     transpiler_1 --> cli_1
     routing_1 --> cli_1
 
@@ -284,4 +284,6 @@ graph TD
     template_filters_1 -.->|chain| if_else_1
     if_else_1 -.->|chain| each_else_1
     each_else_1 -.->|chain| static_assets_1
+    static_assets_1 -.->|chain| dreego_fmt_1
+    dreego_fmt_1 -.->|chain| scaffolding_1
 ```

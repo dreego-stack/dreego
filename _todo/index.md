@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-28T09:33:52Z
+Generated: 2026-07-28T12:19:19Z
 
-Chain: 1–26 | Next status code: **27**
+Chain: 1–28 | Next status code: **29**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -31,6 +31,8 @@ Chain: 1–26 | Next status code: **27**
 - `24` **if-else.1** — {#else} in {#if}-Block
 - `25` **each-else.1** — {#each else} — Empty List Fallback
 - `26` **static-assets.1** — Static Assets (dreego/static/ → inline Handler)
+- `27` **dreego-fmt.1** — dreego fmt (Formatter)
+- `28` **scaffolding.1** — dreego new + Generators
 
 ## AVAILABLE NEXT
 - **api-json.1** — API Routes + JSON Responses
@@ -38,14 +40,12 @@ Chain: 1–26 | Next status code: **27**
 - **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-feedback.1** — dreego feedback (POST endpoint)
-- **dreego-fmt.1** — dreego fmt (Formatter)
 - **dreegotest.1** — dreegotest — Testing Package
 - **form-actions.1** — Form Actions (g-action / g-submit)
 - **health-checks.1** — /health + /ready Endpoints
 - **hot-reload.1** — Hot Reload (Dev Server + SSE)
 - **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
-- **scaffolding.1** — dreego new + Generators
 - **security-headers.1** — Security Headers (CSP, HSTS, X-Frame, X-Content-Type)
 
 ## BLOCKED
@@ -84,4 +84,4 @@ Chain: 1–26 | Next status code: **27**
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 26 | web: 48 | next code: 27
+chain: 28 | web: 46 | next code: 29
