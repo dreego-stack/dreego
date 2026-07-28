@@ -9,7 +9,10 @@
 - Gzip compression middleware: compresses responses when client accepts gzip (`Accept-Encoding`) — core-fixed
 - Middleware chain: Recovery → SecurityHeaders → Compression → RequestLogging → Session → CSRF → Redirect/Rewrite → Router
 - 3 new tests: health-checks, security-headers, compression
-- 79 integration tests total
+- Fix: `layout.Head.Content` now rendered in codegen — `{#head}` inside `<head>` section processed correctly
+- Fix: `genLayoutNode` handles both `{#head}` and `{#slot}` in same NodeText (was dropping `{#slot}` after `{#head}`)
+- 3 new regression tests: layout-head-lost, layout-head-ok, head-dropped-by-layout (content verification)
+- 81 integration tests total
 
 ## v0.0.13 (2026-07-28) — Scaffolding + Split-Gen
 

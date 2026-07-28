@@ -19,6 +19,7 @@ go mod edit -replace codeberg.org/dreego/dreego=../../..
 go mod edit -require codeberg.org/dreego/dreego@v0.0.0
 sed -i "s|_ \"gen\"|_ \"t/dreego/gen\"|" main.go
 dreego generate 2>&1
+grep -q "Layout Title" dreego/gen/routes.go || { echo "FAIL: layout head dropped — title not in generated code"; exit 1; }
+grep -q "route-script.js" dreego/gen/routes.go || { echo "FAIL: route head dropped — script not in generated code"; exit 1; }
 go build -o /dev/null .
 echo ok
-

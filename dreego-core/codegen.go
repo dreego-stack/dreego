@@ -55,6 +55,27 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 		if layout != nil && g.Method == "GET" {
 			buf.WriteString("\tpageContent := b.String()\n")
 			buf.WriteString("\tb.Reset()\n")
+
+			if layout.Head != nil && layout.Head.Content != "" {
+				headContent := layout.Head.Content
+				if strings.Contains(headContent, "{#head}") {
+					parts := strings.SplitN(headContent, "{#head}", 2)
+					if parts[0] != "" {
+						buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[0])))
+					}
+					if file.Head != nil {
+						buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
+					} else {
+						buf.WriteString("\tb.WriteString(\"\")\n")
+					}
+					if len(parts) > 1 && parts[1] != "" {
+						buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[1])))
+					}
+				} else {
+					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headContent)))
+				}
+			}
+
 			if file.Head != nil {
 				buf.WriteString(fmt.Sprintf("\tc.Set(\"head\", %s)\n", goLiteral(file.Head.Content)))
 			}
@@ -91,36 +112,60 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 }
 
 func genLayoutNode(n TemplateNode, depth int) string {
+	indent := strings.Repeat("\t", depth)
 	if n.Type == NodeSlot {
-		return strings.Repeat("\t", depth) + "b.WriteString(c.Get(\"slot\"))\n"
+		if n.Content != "" {
+			return indent + fmt.Sprintf("b.WriteString(c.Get(\"slot_%s\"))\n", n.Content)
+		}
+		return indent + "b.WriteString(c.Get(\"slot\"))\n"
 	}
-	if n.Type == NodeText {
-		if strings.Contains(n.Content, "{#head}") {
-			parts := strings.SplitN(n.Content, "{#head}", 2)
-			var out string
-			if parts[0] != "" {
-				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[0]))
+	if n.Type == NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
+		parts := splitLayoutText(n.Content)
+		var out string
+		for _, p := range parts {
+			switch p {
+			case "{#head}":
+				out += indent + "b.WriteString(c.Get(\"head\"))\n"
+			case "{#slot}":
+				out += indent + "b.WriteString(c.Get(\"slot\"))\n"
+			default:
+				out += indent + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(p))
 			}
-			out += strings.Repeat("\t", depth) + "b.WriteString(c.Get(\"head\"))\n"
-			if len(parts) > 1 && parts[1] != "" {
-				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[1]))
-			}
-			return out
 		}
-		if strings.Contains(n.Content, "{#slot}") {
-			parts := strings.SplitN(n.Content, "{#slot}", 2)
-			var out string
-			if parts[0] != "" {
-				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[0]))
-			}
-			out += strings.Repeat("\t", depth) + "b.WriteString(c.Get(\"slot\"))\n"
-			if len(parts) > 1 && parts[1] != "" {
-				out += strings.Repeat("\t", depth) + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(parts[1]))
-			}
-			return out
-		}
+		return out
 	}
 	return genTemplateNode(n, depth)
+}
+
+func splitLayoutText(s string) []string {
+	var result []string
+	for s != "" {
+		headIdx := strings.Index(s, "{#head}")
+		slotIdx := strings.Index(s, "{#slot}")
+
+		next := -1
+		nextLen := 0
+		if headIdx >= 0 && (slotIdx < 0 || headIdx <= slotIdx) {
+			next = headIdx
+			nextLen = 7
+		} else if slotIdx >= 0 {
+			next = slotIdx
+			nextLen = 7
+		}
+
+		if next < 0 {
+			if s != "" {
+				result = append(result, s)
+			}
+			break
+		}
+		if next > 0 {
+			result = append(result, s[:next])
+		}
+		result = append(result, s[next:next+nextLen])
+		s = s[next+nextLen:]
+	}
+	return result
 }
 
 func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, error) {

@@ -59,7 +59,7 @@ func cmdNew(args []string) {
 		os.Exit(1)
 	}
 
-	dreegoCoreVersion := "v0.0.13"
+	dreegoCoreVersion := "v0.0.14"
 
 	c := exec.Command("go", "mod", "init", projName)
 	c.Dir = target
@@ -67,6 +67,10 @@ func cmdNew(args []string) {
 	if err := c.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "warning: go mod init failed: %v\n", err)
 	}
+
+	c = exec.Command("go", "mod", "edit", "-go=1.22")
+	c.Dir = target
+	c.Run()
 
 	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego@"+dreegoCoreVersion)
 	c.Dir = target
