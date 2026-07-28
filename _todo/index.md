@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-28T01:34:28Z
+Generated: 2026-07-28T09:25:29Z
 
 Chain: 1–26 | Next status code: **27**
 
@@ -37,6 +37,7 @@ Chain: 1–26 | Next status code: **27**
 - **compression.1** — Gzip/Brotli Compression Middleware
 - **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
+- **dreego-feedback.1** — dreego feedback (POST endpoint)
 - **dreego-fmt.1** — dreego fmt (Formatter)
 - **dreegotest.1** — dreegotest — Testing Package
 - **form-actions.1** — Form Actions (g-action / g-submit)
@@ -83,4 +84,4 @@ Chain: 1–26 | Next status code: **27**
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 26 | web: 47 | next code: 27
+chain: 26 | web: 48 | next code: 27

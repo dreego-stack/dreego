@@ -4,12 +4,15 @@
 
 - Entire repository translated to English: 130+ files (docs, agents, blocks, demo, guides)
 - AGENTS.md: documented language rule (chat=DE, repo=EN)
-- `dreego docs [--web] [path]` — fetches repo docs from Codeberg (raw for CLI, src for browser)
-- `dreego feedback` — opens Codeberg issues page for feedback submission
-- URL filtering: full Codeberg URLs in source → stripped in CLI, resolve correctly in browser (--web)
-- `_docs/` restructured with cross-links: all pages link to each other via repo paths
+- `dreego docs [--web] [--json] [--dump] [path]` — CLI doc browser
+  - `--web`: open in browser with Codeberg-rendered markdown
+  - `--json`: structured JSON output (headings, code blocks, links) for AI agents
+  - `--dump`: concatenate all docs for LLM context
+  - URL filtering: full Codeberg URLs in source → stripped in CLI, resolve correctly in browser
+- `dreego feedback` — opens Codeberg issues page
+- New docs: `_docs/runtime.md` (full API reference), expanded `_docs/getting-started.md` (components, layouts, dynamic routes)
+- `_docs/` restructured with cross-links using full Codeberg URLs (browser-compatible)
 - Knowledge base fully synced with v0.0.10 state
-- Demo templates translated (404, 500, about, htmxdemo, users, route-groups)
 - Block created for future `dreego feedback` POST endpoint
 
 ## v0.0.10 (2026-07-28) — Static Assets

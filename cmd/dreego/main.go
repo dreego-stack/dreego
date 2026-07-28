@@ -50,7 +50,7 @@ commands:
   generate [--force] [--check] transpile .dreego files to Go code
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
-  docs [--web] [path]    fetch repo docs (default: /_docs/index.md)
+  docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
   feedback               open browser to submit feedback/issue
   help                   show this help
 
@@ -70,6 +70,8 @@ examples:
   dreego run -d -t 60          debug log + 60s timer
   dreego docs                  show docs index (terminal)
   dreego docs --web            open docs index in browser
+  dreego docs --json           structured JSON for AI agents
+  dreego docs --dump           all docs for LLM context
   dreego docs /README.md       show readme
   dreego feedback              submit issue / feedback
 `)

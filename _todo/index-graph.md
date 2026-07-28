@@ -1,12 +1,12 @@
 ```mermaid
 graph TD
-    transpiler_1["01 Transpiler-Pipeline (Lexer → Parser → AS"]
+    transpiler_1["01 Transpiler Pipeline (Lexer → Parser → AS"]
     style transpiler_1 fill:#d4edda,stroke:#28a745
     routing_1["02 File-based Routing"]
     style routing_1 fill:#d4edda,stroke:#28a745
-    layout_1["03 Layout-System ({#slot} + {#head})"]
+    layout_1["03 Layout System ({#slot} + {#head})"]
     style layout_1 fill:#d4edda,stroke:#28a745
-    middleware_1["04 Middleware-System (RequestLogging + Redi"]
+    middleware_1["04 Middleware System (RequestLogging + Redi"]
     style middleware_1 fill:#d4edda,stroke:#28a745
     cli_1["05 dreego CLI (generate, build, run)"]
     style cli_1 fill:#d4edda,stroke:#28a745
@@ -14,77 +14,79 @@ graph TD
     style config_1 fill:#d4edda,stroke:#28a745
     context_refactoring_1["07 Context Interface + SSRContext (map[stri"]
     style context_refactoring_1 fill:#d4edda,stroke:#28a745
-    recovery_1["08 Recovery-Middleware (Panic → 500)"]
+    recovery_1["08 Recovery Middleware (Panic → 500)"]
     style recovery_1 fill:#d4edda,stroke:#28a745
     xss_1["09 XSS Auto-Escaping ({variable} → html.Esc"]
     style xss_1 fill:#d4edda,stroke:#28a745
-    error_pages_1["10 Custom Error-Pages (404.dreego + 500.dre"]
+    error_pages_1["10 Custom Error Pages (404.dreego + 500.dre"]
     style error_pages_1 fill:#d4edda,stroke:#28a745
-    bracket_routes_1["11 [id] Brackets für dynamische Segmente"]
+    bracket_routes_1["11 [id] Brackets for Dynamic Segments"]
     style bracket_routes_1 fill:#d4edda,stroke:#28a745
-    route_groups_1["12 (group)/ Route Groups (unsichtbar in URL"]
+    route_groups_1["12 (group)/ Route Groups (invisible in URL)"]
     style route_groups_1 fill:#d4edda,stroke:#28a745
-    flat_gen_1["13 Flat Gen-Package (gen/routes.go statt pe"]
+    flat_gen_1["13 Flat Gen Package (gen/routes.go instead "]
     style flat_gen_1 fill:#d4edda,stroke:#28a745
-    session_1["14 Session-Interface (Cookie Store im Core)"]
+    session_1["14 Session Interface (Cookie Store in Core)"]
     style session_1 fill:#d4edda,stroke:#28a745
-    csrf_1["15 CSRF-Schutz (Core-Conditional)"]
+    csrf_1["15 CSRF Protection (Core-Conditional)"]
     style csrf_1 fill:#d4edda,stroke:#28a745
     ci_check_1["16 dreego generate --check (CI Mode)"]
     style ci_check_1 fill:#d4edda,stroke:#28a745
-    components_1["17 Component-System ({#use}, props)"]
+    components_1["17 Component System ({#use}, props)"]
     style components_1 fill:#d4edda,stroke:#28a745
     component_handler_1["18 ComponentHandler (Buffered Mode + Functi"]
     style component_handler_1 fill:#d4edda,stroke:#28a745
     named_slots_1["19 Named Slots ({#slot header}...{/slot})"]
     style named_slots_1 fill:#d4edda,stroke:#28a745
-    each_loop_1["20 {#each} mit $loop-Variable"]
+    each_loop_1["20 {#each} with $loop variable"]
     style each_loop_1 fill:#d4edda,stroke:#28a745
     verbatim_1["21 {#verbatim} Block (Raw-Output)"]
     style verbatim_1 fill:#d4edda,stroke:#28a745
-    tag_prefix_fix_1["22 scanTag: Tag-Präfix-Matching fix (head v"]
+    tag_prefix_fix_1["22 scanTag: Tag Prefix Matching Fix (head v"]
     style tag_prefix_fix_1 fill:#d4edda,stroke:#28a745
-    template_filters_1["23 Template-Filter ({var|raw}, {var|upper})"]
+    template_filters_1["23 Template Filters ({var|raw}, {var|upper}"]
     style template_filters_1 fill:#d4edda,stroke:#28a745
     if_else_1["24 {#else} in {#if}-Block"]
     style if_else_1 fill:#d4edda,stroke:#28a745
-    each_else_1["25 {#each else} — Empty-List Fallback"]
+    each_else_1["25 {#each else} — Empty List Fallback"]
     style each_else_1 fill:#d4edda,stroke:#28a745
     static_assets_1["26 Static Assets (dreego/static/ → inline H"]
     style static_assets_1 fill:#d4edda,stroke:#28a745
-    api_json_1["API-Routen + JSON Responses"]
+    api_json_1["API Routes + JSON Responses"]
     style api_json_1 fill:#fff3cd,stroke:#ffc107
     compression_1["Gzip/Brotli Compression Middleware"]
     style compression_1 fill:#fff3cd,stroke:#ffc107
-    deployment_1["Deployment-Strategie (Docker, Single-Bin"]
+    deployment_1["Deployment Strategy (Docker, Single-Bina"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
     style documentation_1 fill:#fff3cd,stroke:#ffc107
+    dreego_feedback_1["dreego feedback (POST endpoint)"]
+    style dreego_feedback_1 fill:#fff3cd,stroke:#ffc107
     dreego_fmt_1["dreego fmt (Formatter)"]
     style dreego_fmt_1 fill:#fff3cd,stroke:#ffc107
-    dreegotest_1["dreegotest — Testing-Package"]
+    dreegotest_1["dreegotest — Testing Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
     form_actions_1["Form Actions (g-action / g-submit)"]
     style form_actions_1 fill:#fff3cd,stroke:#ffc107
     health_checks_1["/health + /ready Endpoints"]
     style health_checks_1 fill:#fff3cd,stroke:#ffc107
-    hot_reload_1["Hot Reload (Dev-Server + SSE)"]
+    hot_reload_1["Hot Reload (Dev Server + SSE)"]
     style hot_reload_1 fill:#fff3cd,stroke:#ffc107
     observability_1["Observability (Prometheus, OpenTelemetry"]
     style observability_1 fill:#fff3cd,stroke:#ffc107
-    plugin_interface_1["Plugin-Interface (Frozen for v1)"]
+    plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
-    scaffolding_1["dreego new + Generatoren"]
+    scaffolding_1["dreego new + Generators"]
     style scaffolding_1 fill:#fff3cd,stroke:#ffc107
-    security_headers_1["Security-Header (CSP, HSTS, X-Frame, X-C"]
+    security_headers_1["Security Headers (CSP, HSTS, X-Frame, X-"]
     style security_headers_1 fill:#fff3cd,stroke:#ffc107
-    addon_ecosystem_1["Addon-Ökosystem (auth, ui, admin, db)"]
+    addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
     style cache_interface_1 fill:#f8d7da,stroke:#dc3545
-    ddos_protection_1["DDoS-Schutz (PoW + Rate-Limiting) — Plug"]
+    ddos_protection_1["DDoS Protection (PoW + Rate-Limiting) — "]
     style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
     style devtools_1 fill:#f8d7da,stroke:#dc3545
@@ -98,51 +100,51 @@ graph TD
     style dreego_cluster_1 fill:#f8d7da,stroke:#dc3545
     dreego_features_1["dreego-features (Feature-Flags, A/B-Test"]
     style dreego_features_1 fill:#f8d7da,stroke:#dc3545
-    dreego_i18n_1["dreego-i18n (Internationalisierung)"]
+    dreego_i18n_1["dreego-i18n (Internationalization)"]
     style dreego_i18n_1 fill:#f8d7da,stroke:#dc3545
     dreego_icons_1["dreego-icons (Lucide/Heroicons Component"]
     style dreego_icons_1 fill:#f8d7da,stroke:#dc3545
-    dreego_jobs_1["dreego-jobs (Background-Jobs, Cron, Queu"]
+    dreego_jobs_1["dreego-jobs (Background Jobs, Cron, Queu"]
     style dreego_jobs_1 fill:#f8d7da,stroke:#dc3545
-    dreego_mail_1["dreego-mail (E-Mail SMTP/Resend/Postmark"]
+    dreego_mail_1["dreego-mail (Email SMTP/Resend/Postmark)"]
     style dreego_mail_1 fill:#f8d7da,stroke:#dc3545
     dreego_map_1["dreego-map (MapLibre/Leaflet Components)"]
     style dreego_map_1 fill:#f8d7da,stroke:#dc3545
-    dreego_markdown_1["dreego-markdown (Markdown-Rendering, Fro"]
+    dreego_markdown_1["dreego-markdown (Markdown Rendering, Fro"]
     style dreego_markdown_1 fill:#f8d7da,stroke:#dc3545
     dreego_notify_1["dreego-notify (Multi-Channel Notificatio"]
     style dreego_notify_1 fill:#f8d7da,stroke:#dc3545
-    dreego_pdf_1["dreego-pdf (PDF-Generierung aus HTML)"]
+    dreego_pdf_1["dreego-pdf (PDF Generation from HTML)"]
     style dreego_pdf_1 fill:#f8d7da,stroke:#dc3545
     dreego_polar_1["dreego-polar (Payments via Polar.sh)"]
     style dreego_polar_1 fill:#f8d7da,stroke:#dc3545
     dreego_pwa_1["dreego-pwa (Service Worker, Offline-Cach"]
     style dreego_pwa_1 fill:#f8d7da,stroke:#dc3545
-    dreego_search_1["dreego-search (Volltextsuche)"]
+    dreego_search_1["dreego-search (Full-Text Search)"]
     style dreego_search_1 fill:#f8d7da,stroke:#dc3545
     dreego_seo_1["dreego-seo (Meta-Tags, OG, JSON-LD, Site"]
     style dreego_seo_1 fill:#f8d7da,stroke:#dc3545
-    dreego_storage_1["dreego-storage (File-Uploads, Progress, "]
+    dreego_storage_1["dreego-storage (File Uploads, Progress, "]
     style dreego_storage_1 fill:#f8d7da,stroke:#dc3545
-    email_interface_1["Email-Sending Interface (SMTP, Resend, P"]
+    email_interface_1["Email Sending Interface (SMTP, Resend, P"]
     style email_interface_1 fill:#f8d7da,stroke:#dc3545
-    event_bus_1["Pub/Sub Event-Bus (Core-Interface)"]
+    event_bus_1["Pub/Sub Event Bus (Core Interface)"]
     style event_bus_1 fill:#f8d7da,stroke:#dc3545
-    golden_tests_1["Golden-File Tests für Generator"]
+    golden_tests_1["Golden File Tests for Generator"]
     style golden_tests_1 fill:#f8d7da,stroke:#dc3545
     live_reload_1["Live Reload Proxy (SSE + Script Injectio"]
     style live_reload_1 fill:#f8d7da,stroke:#dc3545
-    middleware_hooks_1["Plugin-Middleware-Hooks (app.Use FIFO)"]
+    middleware_hooks_1["Plugin Middleware Hooks (app.Use FIFO)"]
     style middleware_hooks_1 fill:#f8d7da,stroke:#dc3545
-    queue_interface_1["Background-Job-Queue Interface"]
+    queue_interface_1["Background Job Queue Interface"]
     style queue_interface_1 fill:#f8d7da,stroke:#dc3545
-    route_hooks_1["Plugin-Route-Registration"]
+    route_hooks_1["Plugin Route Registration"]
     style route_hooks_1 fill:#f8d7da,stroke:#dc3545
-    smart_recompile_1["Smart Recompile (Text-vs-Go Detection)"]
+    smart_recompile_1["Smart Recompile (Text vs Go Detection)"]
     style smart_recompile_1 fill:#f8d7da,stroke:#dc3545
     ssg_1["Static Site Generation (SSG)"]
     style ssg_1 fill:#f8d7da,stroke:#dc3545
-    storage_interface_1["File-Storage Interface (S3, R2, Local)"]
+    storage_interface_1["File Storage Interface (S3, R2, Local)"]
     style storage_interface_1 fill:#f8d7da,stroke:#dc3545
     wails_1["Wails Desktop Integration"]
     style wails_1 fill:#f8d7da,stroke:#dc3545

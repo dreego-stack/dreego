@@ -56,8 +56,75 @@ func main() {
 }
 ```
 
+## Adding a Layout
+
+Create `dreego/layouts/default.dreego` — wraps all pages:
+
+```html
+<head><title>My App</title></head>
+
+<div>
+    <nav><a href="/">Home</a> | <a href="/about">About</a></nav>
+    <main>{#slot}</main>
+</div>
+
+<style>
+    nav { padding: 1rem; background: #1e293b; }
+    nav a { color: #e2e8f0; margin-right: 1rem; }
+</style>
+```
+
+## Creating a Component
+
+Create `dreego/components/Card.dreego`:
+
+```
+Component Card (title string)
+
+<div>
+    <article class="card">
+        <h2>{title}</h2>
+        <div>{#slot}</div>
+    </article>
+</div>
+
+<style>
+.card { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; }
+</style>
+```
+
+Use it in any route or layout:
+
+```html
+<@Card title="Welcome">
+    <p>This is the card body.</p>
+</@Card>
+```
+
+Components are auto-discovered — no import needed.
+
+## Dynamic Routes
+
+Create `dreego/routes/users/[id]/get.dreego`:
+
+```html
+<head><title>User {c.Param("id")}</title></head>
+
+<go>
+    userID := c.Param("id")
+</go>
+
+<div>
+    <h1>User: {userID}</h1>
+</div>
+```
+
+Visiting `/users/42` shows "User: 42".
+
 ## See Also
 
-- [CLI Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/cli.md) — all CLI commands
-- [Routing](https://codeberg.org/dreego/dreego/src/branch/main/_docs/routing.md) — file-based routing
+- [Components](https://codeberg.org/dreego/dreego/src/branch/main/_docs/components.md) — full component docs
+- [Routing](https://codeberg.org/dreego/dreego/src/branch/main/_docs/routing.md) — dynamic segments, groups, methods
+- [Runtime API](https://codeberg.org/dreego/dreego/src/branch/main/_docs/runtime.md) — SSRContext, sessions, config
+- [CLI Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/cli.md)
 - [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
