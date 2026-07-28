@@ -29,6 +29,8 @@ func main() {
 		cmdRun(os.Args[2:])
 	case "docs":
 		cmdDocs(os.Args[2:])
+	case "feedback":
+		cmdFeedback()
 	case "help", "--help", "-h":
 		printHelp()
 	default:
@@ -48,11 +50,13 @@ commands:
   generate [--force] [--check] transpile .dreego files to Go code
   build                  generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
-  docs [path]            fetch and display repo docs (default: /_docs/index.md)
+  docs [--web] [path]    fetch repo docs (default: /_docs/index.md)
+  feedback               open browser to submit feedback/issue
   help                   show this help
 
 flags:
   --force                force regeneration of all files
+  --web                  open docs in browser instead of terminal
   -d                     debug mode: write logs to build/logs/<utc>.log
   -t <seconds>           auto-stop server after N seconds (timer)
 
@@ -64,9 +68,10 @@ examples:
   dreego run -d                build + start + log to file
   dreego run -t 60             build + start + stop after 60s
   dreego run -d -t 60          debug log + 60s timer
-  dreego docs                  show docs index
+  dreego docs                  show docs index (terminal)
+  dreego docs --web            open docs index in browser
   dreego docs /README.md       show readme
-  dreego docs /_docs/cli.md    show CLI docs
+  dreego feedback              submit issue / feedback
 `)
 }
 
