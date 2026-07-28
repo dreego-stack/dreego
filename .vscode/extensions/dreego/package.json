@@ -2,7 +2,7 @@
   "name": "dreego",
   "displayName": "Dreego Syntax Highlighting",
   "description": "Syntax highlighting for Dreego (.dreego) files",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "dreego.svg",
   "engines": { "vscode": "^1.80.0" },
   "categories": ["Programming Languages"],
