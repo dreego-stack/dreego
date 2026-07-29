@@ -1,13 +1,14 @@
 # Changelog
 
-## v0.0.17 (2026-07-29) — Production Deployment
+## v0.0.17 (2026-07-29) — Production Deployment + Request-ID
 
 - **Graceful Shutdown**: `core.Listen()` uses `http.Server` with SIGINT/SIGTERM handling, 10s drain timeout
 - **Cross-Compile**: `dreego build --target linux/amd64` sets GOOS/GOARCH for target platform
+- **Request-ID Middleware**: `X-Request-ID` header on every request — client-supplied or auto-generated (16-char hex), injected into context + JSONL logs (`rid` field), accessible via `c.RequestID()`
 - **Production Dockerfile**: `FROM scratch` — 3-stage build, `CGO_ENABLED=0`, static binary
 - **Hot Reload**: `_docs/hot-reload.md` — Air config with `.air.toml` + `entr` alternative
 - **Rejected**: hot-reload.1, live-reload.1, smart-recompile.1 — replaced by Air documentation
-- observability split: request-id.1 (core), metrics/tracing (plugins)
+- Block: request-id.1 completed (chain 34)
 
 ## v0.0.16 (2026-07-29) — Form Actions
 

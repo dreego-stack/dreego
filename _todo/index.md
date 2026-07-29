@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-29T20:44:58Z
+Generated: 2026-07-29T20:55:13Z
 
-Chain: 1–33 | Next status code: **34**
+Chain: 1–34 | Next status code: **35**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -38,6 +38,7 @@ Chain: 1–33 | Next status code: **34**
 - `31` **compression.1** — Gzip Compression Middleware
 - `32` **api-json.1** — Content-Type Routing (JSON, XML, Custom)
 - `33` **form-actions.1** — Form Actions (g-action / g-submit)
+- `34` **request-id.1** — Request-ID Middleware (X-Request-ID)
 
 ## AVAILABLE NEXT
 - **api-swagger.1** — Swagger/OpenAPI Auto-Generation
@@ -47,7 +48,6 @@ Chain: 1–33 | Next status code: **34**
 - **dreegotest.1** — dreegotest — Testing Package
 - **observability.1** — Observability (Request-ID, Metrics, Tracing)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
-- **request-id.1** — Request-ID Middleware (X-Request-ID)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon Ecosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
@@ -87,4 +87,4 @@ Chain: 1–33 | Next status code: **34**
 - **live-reload.1** — Live Reload Proxy (SSE + Script Injection)
 - **smart-recompile.1** — Smart Recompile (Text vs Go Detection)
 
-chain: 33 | web: 42 | next code: 34
+chain: 34 | web: 41 | next code: 35

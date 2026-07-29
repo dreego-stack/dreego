@@ -66,6 +66,8 @@ graph TD
     style api_json_1 fill:#d4edda,stroke:#28a745
     form_actions_1["33 Form Actions (g-action / g-submit)"]
     style form_actions_1 fill:#d4edda,stroke:#28a745
+    request_id_1["34 Request-ID Middleware (X-Request-ID)"]
+    style request_id_1 fill:#d4edda,stroke:#28a745
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment Strategy (Docker, Single-Bina"]
@@ -80,8 +82,6 @@ graph TD
     style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
-    request_id_1["Request-ID Middleware (X-Request-ID)"]
-    style request_id_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
@@ -288,4 +288,5 @@ graph TD
     security_headers_1 -.->|chain| compression_1
     compression_1 -.->|chain| api_json_1
     api_json_1 -.->|chain| form_actions_1
+    form_actions_1 -.->|chain| request_id_1
 ```

@@ -19,6 +19,7 @@ type Context interface {
 	SetSessionVal(key, value string)
 	DelSessionVal(key string)
 	CSRFToken() string
+	RequestID() string
 }
 
 var ErrRedirect = errors.New("redirect")
@@ -116,6 +117,10 @@ func (c *SSRContext) DestroySession() {
 
 func (c *SSRContext) CSRFToken() string {
 	return c.SessionVal("csrf_token")
+}
+
+func (c *SSRContext) RequestID() string {
+	return RequestIDFromCtx(c.Context)
 }
 
 func (c *SSRContext) Render(name string, data any) error {

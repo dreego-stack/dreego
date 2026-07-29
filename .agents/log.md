@@ -8,14 +8,16 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
-## 2026-07-29 — v0.0.17 Production Deployment
+## 2026-07-29 — v0.0.17 Production Deployment + Request-ID
 
 - Graceful shutdown: `http.Server` + SIGINT/SIGTERM in `core.Listen`, 10s drain timeout
 - `dreego build --target linux/amd64` — cross-compile with GOOS/GOARCH
+- Request-ID middleware: `X-Request-ID` header (16-char hex), context injection, JSONL log field `rid`
+- `c.RequestID()` accessor on Context interface + SSRContext
 - Production Dockerfile: `FROM scratch`, multi-stage, CGO_ENABLED=0, static binary
 - `_docs/hot-reload.md`: Air config + entr alternative
 - Rejected: hot-reload.1, live-reload.1, smart-recompile.1 — replaced by Air docs
-- observability.1 split: request-id.1 (core) | metrics (plugin) | tracing (V2 plugin)
+- Block: request-id.1 completed (chain 34)
 
 ## 2026-07-29 — v0.0.16 Form Actions
 

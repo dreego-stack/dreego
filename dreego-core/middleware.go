@@ -30,6 +30,7 @@ func RequestLogging() func(http.Handler) http.Handler {
 			rw := &responseWriter{ResponseWriter: w, status: 200}
 			next.ServeHTTP(rw, r)
 			logger.Info("request",
+				"rid", RequestIDFromCtx(r.Context()),
 				"method", r.Method,
 				"path", r.URL.Path,
 				"status", rw.status,

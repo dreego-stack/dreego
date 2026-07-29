@@ -78,6 +78,7 @@ func ServeMux() http.Handler {
 	if loggingEnabled {
 		h = RequestLogging()(h)
 	}
+	h = RequestID()(h)
 	h = Compress()(h)
 	h = SecurityHeaders()(h)
 	h = Recovery(errorHandlers[500])(h)

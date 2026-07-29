@@ -1,8 +1,13 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–33 done. Next code: **34**.
+Status via `python _todo/process.py`. Chain 1–34 done. Next code: **35**.
 
-## v0.0.16 (current)
+## v0.0.17 (current)
+
+- **deployment.1** — Production Deployment (Graceful Shutdown, Cross-Compile, Docker) ✅
+- **request-id.1** — Request-ID Middleware (X-Request-ID → Context + Logs) ✅
+
+## v0.0.16
 
 - **form-actions.1** — Form Actions (g-action + auto-validation + redirect) ✅
 
@@ -18,10 +23,8 @@ Status via `python _todo/process.py`. Chain 1–33 done. Next code: **34**.
 
 ## Available Next
 
-- **deployment.1** — Production Deployment (Graceful Shutdown, Cross-Compile, Docker)
-- **request-id.1** — Request-ID Middleware (X-Request-ID → Context + Logs)
-- **observability.1** — Metrics + Tracing (Plugin: Prometheus, OpenTelemetry)
 - **dreegotest.1** — Testing Package
+- **observability.1** — Metrics + Tracing (Plugin: Prometheus, OpenTelemetry)
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 
 ## Rejected

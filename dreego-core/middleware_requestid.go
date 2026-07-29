@@ -1,0 +1,41 @@
+package core
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"net/http"
+)
+
+type ridCtxKey string
+
+const requestIDKey ridCtxKey = "request_id"
+
+func RequestID() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			id := r.Header.Get("X-Request-ID")
+			if id == "" {
+				id = newID()
+			}
+			w.Header().Set("X-Request-ID", id)
+			ctx := context.WithValue(r.Context(), requestIDKey, id)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func newID() string {
+	b := make([]byte, 8)
+	rand.Read(b)
+	dst := make([]byte, 16)
+	hex.Encode(dst, b)
+	return string(dst)
+}
+
+func RequestIDFromCtx(ctx context.Context) string {
+	if v, ok := ctx.Value(requestIDKey).(string); ok {
+		return v
+	}
+	return ""
+}
