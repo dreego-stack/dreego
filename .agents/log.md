@@ -8,6 +8,27 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-07-29 — v0.0.16 Form Actions
+
+- `<form g-action="Login">` — declarative server-side form handling
+- Generated POST handler pipeline: BindForm → ValidateForm → Handler → Redirect
+- `c.Redirect(url, code)` — PRG pattern with ErrRedirect sentinel
+- `c.Errors(field)` / `c.Old(field)` — template accessors for validation state
+- `BindForm()`, `ValidateForm()`, `SaveOld()`, `SaveErrors()` — no external deps
+- `form:` and `validate:` struct tags — automatic form mapping and validation
+- `splitGoSections` separates type/func declarations from inline code in codegen
+- Context interface extended with session + redirect methods
+- `scanFormActions` detects g-action in template, wires matching handlers
+- 15 new tests (11 parser/codegen + 4 runtime HTTP), 112 total
+- `_docs/forms.md` created, README expanded
+
+## 2026-07-28 — v0.0.14–v0.0.15 Production Middleware + Content-Type Routing
+
+- Health checks, security headers, gzip compression middleware
+- Content-type routing: `<go type="json|xml|custom">` with `c.JSON()`, `c.XML()`, `c.Write()`
+- 10 new runtime HTTP tests, curl-based Docker requests
+- Fix: layout.Head.Content rendering, c.Wants() empty Accept handling
+
 ## 2026-07-25
 
 - Route segments: `[id]` (square brackets) as convention — Demo migrated from `_id_`

@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.0.16 (2026-07-29) — Form Actions
+
+- `<form g-action="Login">` — declarative server-side form handling with auto-generated pipeline
+- Generated POST handler: `r.ParseForm()` → struct mapping via `form:"email"` tags → validation via `validate:"required,email"` tags → handler call → redirect
+- `c.Redirect(url, code)` — PRG pattern (Post-Redirect-Get) with `ErrRedirect` sentinel
+- `c.Errors(field)` / `c.Old(field)` — validation error and old value access in templates
+- `BindForm(r, target)` — maps form values to struct fields (explicit `form:` tag or lowercase field name)
+- `ValidateForm(form)` — validates struct via `validate:` tags (required, email, min, max) — no external deps
+- `SaveErrors(c, errs)` / `SaveOld(c, form)` — automatically stores validation state for template re-render
+- Codegen: `splitGoSections` separates type/func declarations from inline code — form structs and handlers at package level
+- Context interface extended: `SessionVal`, `SetSessionVal`, `DelSessionVal`, `CSRFToken`, `Redirect`
+- `scanFormActions` detects `<form g-action>` in templates, wires matching handlers in POST dispatch
+- 15 new tests: 11 parser/codegen + 4 runtime HTTP (valid submit, invalid re-render, CSRF, plain form)
+- 112 integration tests total
+
 ## v0.0.15 (2026-07-28) — Content-Type Routing
 
 - `<go type="json">` — JSON endpoints with `c.JSON()`, `c.Bind()`, auto Content-Type
