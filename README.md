@@ -95,6 +95,10 @@ go mod init myapp
 go mod edit -replace codeberg.org/dreego/dreego=../dreego  # or use go get
 dreego generate
 go run .
+
+# or build for production
+dreego build --target linux/amd64
+docker build -t myapp .
 ```
 
 ## Architecture
@@ -126,6 +130,7 @@ dreego/
 | `_docs/middleware.md` | Health, security, compression, session, CSRF |
 | `_docs/forms.md` | g-action forms, validation, redirects, error handling |
 | `_docs/components.md` | Component system, slots, scoped CSS |
+| `_docs/hot-reload.md` | Hot reload with Air (.air.toml config) |
 | `_docs/runtime.md` | Full Go API reference |
 | `_docs/getting-started.md` | Step-by-step tutorial |
 

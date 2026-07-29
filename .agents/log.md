@@ -8,6 +8,15 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-07-29 — v0.0.17 Production Deployment
+
+- Graceful shutdown: `http.Server` + SIGINT/SIGTERM in `core.Listen`, 10s drain timeout
+- `dreego build --target linux/amd64` — cross-compile with GOOS/GOARCH
+- Production Dockerfile: `FROM scratch`, multi-stage, CGO_ENABLED=0, static binary
+- `_docs/hot-reload.md`: Air config + entr alternative
+- Rejected: hot-reload.1, live-reload.1, smart-recompile.1 — replaced by Air docs
+- observability.1 split: request-id.1 (core) | metrics (plugin) | tracing (V2 plugin)
+
 ## 2026-07-29 — v0.0.16 Form Actions
 
 - `<form g-action="Login">` — declarative server-side form handling
