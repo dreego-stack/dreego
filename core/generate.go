@@ -188,7 +188,7 @@ func Run(force bool) error {
 	compImports = append(compImports, "\"strings\"")
 	compImportLine := strings.Join(compImports, "\n\t")
 
-	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", routeImportLine)
+	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/core\"\n)\n\n", routeImportLine)
 	routesOut += src
 
 	if !isUpToDate(filepath.Join(genDir, "routes.go"), routesOut) {
@@ -198,7 +198,7 @@ func Run(force bool) error {
 	}
 
 	if compSrc != "" {
-		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n)\n\n", compImportLine)
+		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/core\"\n)\n\n", compImportLine)
 		compOut += compSrc
 		if !isUpToDate(filepath.Join(genDir, "components.go"), compOut) {
 			if err := os.WriteFile(filepath.Join(genDir, "components.go"), []byte(compOut), 0644); err != nil {
@@ -226,7 +226,7 @@ func writeDreeGo(genDir string, settings *Settings, staticSrc string) error {
 	hasCore := settings != nil || staticSrc != ""
 	if hasCore || staticSrc != "" {
 		buf.WriteString("import (\n")
-		buf.WriteString("\tcore \"codeberg.org/dreego/dreego/dreego-core\"\n")
+		buf.WriteString("\tcore \"codeberg.org/dreego/dreego/core\"\n")
 		buf.WriteString(")\n\n")
 	}
 

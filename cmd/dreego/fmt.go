@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	core "codeberg.org/dreego/dreego/dreego-core"
+	core "codeberg.org/dreego/dreego/core"
 
 )
 

@@ -10,7 +10,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/dreego-core")
+import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":8080") }
 GO
 go mod init t >/dev/null 2>&1

@@ -18,7 +18,7 @@ go mod edit -replace codeberg.org/dreego/dreego=../../..
 go mod edit -require codeberg.org/dreego/dreego@v0.0.0
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/dreego-core")
+import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":0") }
 GO
 dreego generate 2>&1

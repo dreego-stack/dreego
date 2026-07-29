@@ -1,6 +1,6 @@
 # Runtime API
 
-Full API surface available after `import core "codeberg.org/dreego/dreego/dreego-core"`.
+Full API surface available after `import core "codeberg.org/dreego/dreego/core"`.
 
 ## SSRContext
 
@@ -77,7 +77,7 @@ package main
 
 import (
     _ "myapp/dreego/gen"
-    core "codeberg.org/dreego/dreego/dreego-core"
+    core "codeberg.org/dreego/dreego/core"
 )
 
 func main() {

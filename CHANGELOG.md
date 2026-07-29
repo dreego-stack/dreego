@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.18 (2026-07-29) — Package Restructuring
+
+- **BREAKING**: `dreego-core/` → `core/` — import path changes from `codeberg.org/dreego/dreego/dreego-core` to `codeberg.org/dreego/dreego/core`
+- **BREAKING**: `dreego-plugin/` removed — plugins live in separate repos under `codeberg.org/dreego/<name>`
+- `_docs/ plugins.md`: plugin architecture overview, planned plugins, interface contracts
+- AGENTS.md updated to reflect new directory structure
+
 ## v0.0.17 (2026-07-29) — Production Deployment + Request-ID
 
 - **Graceful Shutdown**: `core.Listen()` uses `http.Server` with SIGINT/SIGTERM handling, 10s drain timeout
@@ -34,7 +41,7 @@
 - Pure JSON/XML routes (no `<div>`) skip template rendering entirely
 - `c.Write(status, contentType, body)` for arbitrary formats (FlatBuffers, Protobuf, etc.)
 - `c.Wants(mime)` for manual content negotiation
-- `dreego-core/response.go`: `JSON()`, `XML()`, `Bind()`, `Write()`, `Wants()`
+- `core/response.go`: `JSON()`, `XML()`, `Bind()`, `Write()`, `Wants()`
 - 6 new tests (87 total)
 
 ## v0.0.14 (2026-07-28) — Production Middleware
@@ -156,8 +163,8 @@
 - CSRF protection: double-submit cookie (Core-Conditional, default on) — Token via X-CSRF-Token header or csrf_token form field
 - SSRContext: `CSRFToken()` for template rendering (hidden field)
 - VS Code Extension: syntax highlighting + raccoon icon for `.dreego` files (`make dx`)
-- **Breaking:** `pkg/` → `dreego-core/` (single package), single import `import core "codeberg.org/dreego/dreego/dreego-core"`
-- `dreego-plugin/` for future plugins (Auth, Redis, DB, etc.)
+- **Breaking:** `pkg/` → `core/` (single package), single import `import "codeberg.org/dreego/dreego/core"`
+- Plugins in separate repos (see `_docs/plugins.md`)
 
 ## v0.0.2 (2026-07-25) — Safety & Structure
 

@@ -58,7 +58,7 @@ See [Changelog Guide](.agents/guides/changelog.md) for the full workflow.
 - Max 120 lines per file, one logical thing per file
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
-- Core code in `dreego-core/` (single package), plugins in `dreego-plugin/`
+- Core code in `` (single package), plugins in separate repos
 - Build via `dreego` CLI, not directly `go build`
 - Generated `dree.go` not committed
 
@@ -76,7 +76,7 @@ Every bug gets a permanent test in `_tests/Bugs/<name>/`. Workflow:
 Every feature follows this cycle:
 
 1. **`_tests/`** — Create integration test in `_tests/<FeatureGroup>/<name>/test.sh`
-2. **Code** — Implement in `dreego-core/` (one logical thing per file, max 120 lines)
+2. **Code** — Implement in `` (one logical thing per file, max 120 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
 5. **Changelog** — Add entry to `CHANGELOG.md`

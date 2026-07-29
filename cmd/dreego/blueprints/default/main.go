@@ -3,7 +3,7 @@ package main
 import (
 	_ "gen"
 
-	core "codeberg.org/dreego/dreego/dreego-core"
+	core "codeberg.org/dreego/dreego/core"
 )
 
 func main() {

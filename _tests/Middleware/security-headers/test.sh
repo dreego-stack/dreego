@@ -11,7 +11,7 @@ cat > main.go << 'GO'
 package main
 import (
 	_ "t/dreego/gen"
-	core "codeberg.org/dreego/dreego/dreego-core"
+	core "codeberg.org/dreego/dreego/core"
 )
 func main() { core.Listen(":0") }
 GO
