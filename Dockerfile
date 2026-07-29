@@ -1,11 +1,11 @@
-FROM golang:1.22-alpine
-
-WORKDIR /app
+FROM golang:1.22-alpine AS build
+WORKDIR /src
 COPY . .
+RUN go build -o /dreego ./cmd/dreego
+RUN cd demo && /dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
 
-RUN go build -o /usr/local/bin/dreego ./cmd/dreego
-RUN cd demo && dreego generate
-RUN go build -o /server ./demo
-
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /app /app
 EXPOSE 8080
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/app"]

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.0.17 (2026-07-29) — Production Deployment
+
+- **Graceful Shutdown**: `core.Listen()` uses `http.Server` with SIGINT/SIGTERM handling, 10s drain timeout
+- **Cross-Compile**: `dreego build --target linux/amd64` sets GOOS/GOARCH for target platform
+- **Production Dockerfile**: `FROM scratch` — 3-stage build, `CGO_ENABLED=0`, static binary
+- **Hot Reload**: `_docs/hot-reload.md` — Air config with `.air.toml` + `entr` alternative
+- **Rejected**: hot-reload.1, live-reload.1, smart-recompile.1 — replaced by Air documentation
+- observability split: request-id.1 (core), metrics/tracing (plugins)
+
 ## v0.0.16 (2026-07-29) — Form Actions
 
 - `<form g-action="Login">` — declarative server-side form handling with auto-generated pipeline

@@ -1,7 +1,7 @@
 ---
 id: form-actions.1
 title: Form Actions (g-action / g-submit)
-status: planned
+status: 33
 phase: v0.0.16
 requires:
   - context-refactoring.1
@@ -12,5 +12,5 @@ created: 2026-07-26
 changed: 2026-07-29
 ---
 
-Form handler in `<go method="post">` block with `g-action="Login"` on `<form>`. Generated handler: CSRF check, r.ParseForm(), struct mapping via form tags, validation via go-playground/validator, then calls handler function `func Login(c dreego.Context, form LoginForm) error`. c.Errors("email"), c.Old("email") for template access. Progressive Enhancement: works without JS, HTMX upgrades it. ADR decision form-actions.md exists. Blocks without g-action remain plain forms.
+`<form g-action="Login">` generates full handler pipeline: BindForm → ValidateForm → Handler → Redirect. `validate:"required,email,min,max"` struct tags with no external deps. `c.Errors(field)` and `c.Old(field)` for template re-render. `c.Redirect(url, code)` for PRG pattern. 112 tests total.
 

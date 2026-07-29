@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-28T23:08:44Z
+Generated: 2026-07-29T20:44:58Z
 
-Chain: 1–32 | Next status code: **33**
+Chain: 1–33 | Next status code: **34**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -37,6 +37,7 @@ Chain: 1–32 | Next status code: **33**
 - `30` **security-headers.1** — Security Headers (nosniff, frame, referrer, permissions)
 - `31` **compression.1** — Gzip Compression Middleware
 - `32` **api-json.1** — Content-Type Routing (JSON, XML, Custom)
+- `33` **form-actions.1** — Form Actions (g-action / g-submit)
 
 ## AVAILABLE NEXT
 - **api-swagger.1** — Swagger/OpenAPI Auto-Generation
@@ -44,10 +45,9 @@ Chain: 1–32 | Next status code: **33**
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-feedback.1** — dreego feedback (POST endpoint)
 - **dreegotest.1** — dreegotest — Testing Package
-- **form-actions.1** — Form Actions (g-action / g-submit)
-- **hot-reload.1** — Hot Reload (Dev Server + SSE)
-- **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
+- **observability.1** — Observability (Request-ID, Metrics, Tracing)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
+- **request-id.1** — Request-ID Middleware (X-Request-ID)
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon Ecosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
@@ -75,13 +75,16 @@ Chain: 1–32 | Next status code: **33**
 - **email-interface.1** — Email Sending Interface (SMTP, Resend, Postmark)  (missing: plugin-interface.1)
 - **event-bus.1** — Pub/Sub Event Bus (Core Interface)  (missing: plugin-interface.1)
 - **golden-tests.1** — Golden File Tests for Generator  (missing: dreegotest.1)
-- **live-reload.1** — Live Reload Proxy (SSE + Script Injection)  (missing: hot-reload.1)
 - **middleware-hooks.1** — Plugin Middleware Hooks (app.Use FIFO)  (missing: plugin-interface.1)
 - **queue-interface.1** — Background Job Queue Interface  (missing: plugin-interface.1)
 - **route-hooks.1** — Plugin Route Registration  (missing: plugin-interface.1)
-- **smart-recompile.1** — Smart Recompile (Text vs Go Detection)  (missing: hot-reload.1)
 - **ssg.1** — Static Site Generation (SSG)  (missing: plugin-interface.1)
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
 
-chain: 32 | web: 42 | next code: 33
+## REJECTED
+- **hot-reload.1** — Hot Reload (Dev Server + SSE)
+- **live-reload.1** — Live Reload Proxy (SSE + Script Injection)
+- **smart-recompile.1** — Smart Recompile (Text vs Go Detection)
+
+chain: 33 | web: 42 | next code: 34

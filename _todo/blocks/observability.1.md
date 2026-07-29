@@ -1,12 +1,15 @@
 ---
 id: observability.1
-title: Observability (Prometheus, OpenTelemetry, Request-ID)
+title: Observability (Request-ID, Metrics, Tracing)
 status: planned
 phase: v0.0.x
 requires:
   - middleware.1
 created: 2026-07-26
-changed: 2026-07-26
+changed: 2026-07-29
 ---
 
-Core-Fixed: Request-ID (X-Request-ID header, in Context + Logs). Core-Conditional: /metrics (Prometheus format). Plugin: OpenTelemetry tracing. Structured logging via slog. Every request gets trace_id + request_id.
+Split into Core + Plugins:
+- **Core-Fixed** (`request-id.1`): X-Request-ID header middleware, inject into context + logs
+- **Plugin** (`dreego-metrics`): Prometheus /metrics endpoint — blocked on plugin-interface.1
+- **Plugin** (`dreego-tracing`): OpenTelemetry spans — V2, blocked on plugin-interface.1

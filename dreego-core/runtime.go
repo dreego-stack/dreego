@@ -1,8 +1,13 @@
 package core
 
 import (
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 )
 
@@ -131,5 +136,24 @@ func SessionStore() Store {
 }
 
 func Listen(addr string) error {
-	return http.ListenAndServe(addr, ServeMux())
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: ServeMux(),
+	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-quit
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		srv.Shutdown(ctx)
+	}()
+
+	err := srv.ListenAndServe()
+	if err == http.ErrServerClosed {
+		return nil
+	}
+	return err
 }

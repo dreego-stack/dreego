@@ -1,6 +1,6 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–32 done. Next code: **33**.
+Status via `python _todo/process.py`. Chain 1–33 done. Next code: **34**.
 
 ## v0.0.16 (current)
 
@@ -18,10 +18,16 @@ Status via `python _todo/process.py`. Chain 1–32 done. Next code: **33**.
 
 ## Available Next
 
-- **deployment.1** — Deployment Strategy (Single-Binary, Graceful, Docker-Prod)
-- **observability.1** — Observability (Prometheus, OpenTelemetry, Request-ID)
+- **deployment.1** — Production Deployment (Graceful Shutdown, Cross-Compile, Docker)
+- **request-id.1** — Request-ID Middleware (X-Request-ID → Context + Logs)
+- **observability.1** — Metrics + Tracing (Plugin: Prometheus, OpenTelemetry)
 - **dreegotest.1** — Testing Package
-- **hot-reload.1** — Hot Reload Dev Server
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
+
+## Rejected
+
+- **hot-reload.1** — Replaced by Air (`_docs/hot-reload.md`)
+- **live-reload.1** — Replaced by Air
+- **smart-recompile.1** — Replaced by Air
 
 See `_todo/index.md` for the full chain and dependency graph.

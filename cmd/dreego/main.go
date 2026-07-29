@@ -54,7 +54,7 @@ commands:
   init <path>            create a minimal dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
-  build                  generate + go build → build/bin/<name>
+  build [--target <os/arch>] generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
   docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
   feedback               open browser to submit feedback/issue
@@ -62,6 +62,7 @@ commands:
 
 flags:
   --force                force regeneration of all files
+  --target <os/arch>     cross-compile target (e.g. linux/amd64, darwin/arm64)
   --web                  open docs in browser instead of terminal
   -d                     debug mode: write logs to build/logs/<utc>.log
   -t <seconds>           auto-stop server after N seconds (timer)
@@ -70,7 +71,8 @@ examples:
   dreego new myapp            create project with landing page
   dreego generate             transpile changed .dreego files
   dreego generate --force     force full regeneration
-  dreego build                generate + build binary
+  dreego build                generate + build binary (local platform)
+  dreego build --target linux/amd64  cross-compile for Docker
   dreego run                  build + start server (foreground)
   dreego run -d               build + start + log to file
   dreego run -t 60            build + start + stop after 60s
@@ -131,6 +133,16 @@ func cmdGenerate(args []string) {
 }
 
 func cmdBuild(args []string) {
+	target := ""
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--target" && i+1 < len(args) {
+			target = args[i+1]
+			i++
+		} else if strings.HasPrefix(args[i], "--target=") {
+			target = strings.TrimPrefix(args[i], "--target=")
+		}
+	}
+
 	if err := core.Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
 		os.Exit(1)
@@ -140,6 +152,25 @@ func cmdBuild(args []string) {
 	outDir := filepath.Join(projDir, "build", "bin")
 	os.MkdirAll(outDir, 0755)
 	out := filepath.Join(outDir, name)
+
+	if target != "" {
+		parts := strings.SplitN(target, "/", 2)
+		out += "-" + strings.ReplaceAll(target, "/", "-")
+		fmt.Printf("cross-compiling %s → %s (target %s)\n", pkg, out, target)
+		c := exec.Command("go", "build", "-o", out, "./"+pkg)
+		c.Env = os.Environ()
+		if len(parts) == 2 {
+			c.Env = append(c.Env, "GOOS="+parts[0], "GOARCH="+parts[1])
+		}
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+		if err := c.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "build error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("build ok")
+		return
+	}
 
 	fmt.Printf("building %s → %s\n", pkg, out)
 	c := exec.Command("go", "build", "-o", out, "./"+pkg)

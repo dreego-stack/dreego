@@ -64,6 +64,8 @@ graph TD
     style compression_1 fill:#d4edda,stroke:#28a745
     api_json_1["32 Content-Type Routing (JSON, XML, Custom)"]
     style api_json_1 fill:#d4edda,stroke:#28a745
+    form_actions_1["33 Form Actions (g-action / g-submit)"]
+    style form_actions_1 fill:#d4edda,stroke:#28a745
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment Strategy (Docker, Single-Bina"]
@@ -74,14 +76,12 @@ graph TD
     style dreego_feedback_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
-    form_actions_1["Form Actions (g-action / g-submit)"]
-    style form_actions_1 fill:#fff3cd,stroke:#ffc107
-    hot_reload_1["Hot Reload (Dev Server + SSE)"]
-    style hot_reload_1 fill:#fff3cd,stroke:#ffc107
-    observability_1["Observability (Prometheus, OpenTelemetry"]
+    observability_1["Observability (Request-ID, Metrics, Trac"]
     style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
+    request_id_1["Request-ID Middleware (X-Request-ID)"]
+    style request_id_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
@@ -132,16 +132,12 @@ graph TD
     style event_bus_1 fill:#f8d7da,stroke:#dc3545
     golden_tests_1["Golden File Tests for Generator"]
     style golden_tests_1 fill:#f8d7da,stroke:#dc3545
-    live_reload_1["Live Reload Proxy (SSE + Script Injectio"]
-    style live_reload_1 fill:#f8d7da,stroke:#dc3545
     middleware_hooks_1["Plugin Middleware Hooks (app.Use FIFO)"]
     style middleware_hooks_1 fill:#f8d7da,stroke:#dc3545
     queue_interface_1["Background Job Queue Interface"]
     style queue_interface_1 fill:#f8d7da,stroke:#dc3545
     route_hooks_1["Plugin Route Registration"]
     style route_hooks_1 fill:#f8d7da,stroke:#dc3545
-    smart_recompile_1["Smart Recompile (Text vs Go Detection)"]
-    style smart_recompile_1 fill:#f8d7da,stroke:#dc3545
     ssg_1["Static Site Generation (SSG)"]
     style ssg_1 fill:#f8d7da,stroke:#dc3545
     storage_interface_1["File Storage Interface (S3, R2, Local)"]
@@ -158,6 +154,7 @@ graph TD
     components_1 --> dreego_icons_1
     plugin_interface_1 --> dreego_storage_1
     storage_interface_1 --> dreego_storage_1
+    middleware_1 --> request_id_1
     plugin_interface_1 --> dreego_seo_1
     middleware_hooks_1 --> dreego_seo_1
     plugin_interface_1 --> devtools_1
@@ -217,7 +214,6 @@ graph TD
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
     plugin_interface_1 --> cache_interface_1
-    transpiler_1 --> smart_recompile_1
     hot_reload_1 --> smart_recompile_1
     middleware_1 --> observability_1
     middleware_1 --> security_headers_1
@@ -291,4 +287,5 @@ graph TD
     health_checks_1 -.->|chain| security_headers_1
     security_headers_1 -.->|chain| compression_1
     compression_1 -.->|chain| api_json_1
+    api_json_1 -.->|chain| form_actions_1
 ```
