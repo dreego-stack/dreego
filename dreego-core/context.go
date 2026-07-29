@@ -15,6 +15,10 @@ type Context interface {
 	Errors(field string) string
 	Old(field string) string
 	Redirect(url string, code int) error
+	SessionVal(key string) string
+	SetSessionVal(key, value string)
+	DelSessionVal(key string)
+	CSRFToken() string
 }
 
 var ErrRedirect = errors.New("redirect")

@@ -22,7 +22,7 @@ func BindForm(r *http.Request, target any) error {
 		field := t.Field(i)
 		tag := field.Tag.Get("form")
 		if tag == "" {
-			continue
+			tag = strings.ToLower(field.Name)
 		}
 		val := r.FormValue(tag)
 		if val != "" {
