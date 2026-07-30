@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B5 | `splitGoSections` misclassifies type with comment prefix | `core/codegen.go:211-216` |
 | B6 | `findMain` never matches `cmd/` directory | `cmd/dreego/main.go:272` |
 | B8 | Landing blueprint `config.json` wrong type | `cmd/dreego/blueprints/landing/dreego/config.json:2` |
 | B11 | `SetReady`/`readyHandler` data race | `core/middleware_health.go:5-8` |

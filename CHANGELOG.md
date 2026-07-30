@@ -6,6 +6,7 @@
 - Fix B2: `BindForm` returns an error instead of panicking on non-string fields
 - Fix B3: `scopeCSS` preserves nested CSS blocks (e.g. `@media` queries) and scopes their inner selectors
 - Fix B4: `hasValidateTag`/`hasFormTag` now only match tags inside the target struct body
+- Fix B5: `splitGoSections` skips leading comments before deciding if a <go> block is a declaration
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
@@ -14,6 +15,7 @@
 - Test: `_tests/Bugs/bindform-non-string` covers B2
 - Test: `_tests/Bugs/scoped-css-media` covers B3
 - Test: `_tests/Bugs/form-tag-struct-name` covers B4
+- Test: `_tests/Bugs/splitgo-comment-prefix` covers B5
 - Test: `_tests/Template/each-loop` converted from expected-failure to expected-success for route-level `{#each}`
 
 ## v0.0.18 (2026-07-29) — Package Restructuring

@@ -208,7 +208,15 @@ func splitGoSections(sections []GoSection, hasFormActions bool) (pkgCode string,
 		if trimmed == "" {
 			continue
 		}
-		firstLine := strings.TrimSpace(strings.SplitN(trimmed, "\n", 2)[0])
+		firstLine := ""
+		for _, line := range strings.Split(trimmed, "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "//") {
+				continue
+			}
+			firstLine = line
+			break
+		}
 		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
 		if isDeclaration && hasFormActions {
 			pkg = append(pkg, unindent(trimmed))

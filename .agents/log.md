@@ -40,6 +40,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/form-tag-struct-name`
 - Full suite: 127 passed, 0 failed
 
+## 2026-07-30 — B5: `splitGoSections` comment prefix
+
+- Fix B5: `core/codegen.go` `splitGoSections` skips leading `//` comments when determining the first non-empty line
+- Declarations with doc comments are now correctly classified as package-level code
+- Integration test added: `_tests/Bugs/splitgo-comment-prefix`
+- Full suite: 128 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
