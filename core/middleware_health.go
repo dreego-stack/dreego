@@ -1,11 +1,18 @@
 package core
 
-import "net/http"
+import (
+	"net/http"
+	"sync/atomic"
+)
 
-var ready = true
+var ready atomic.Bool
+
+func init() {
+	ready.Store(true)
+}
 
 func SetReady(r bool) {
-	ready = r
+	ready.Store(r)
 }
 
 func healthHandler() http.HandlerFunc {
@@ -18,7 +25,7 @@ func healthHandler() http.HandlerFunc {
 
 func readyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		if ready {
+		if ready.Load() {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("ready"))
