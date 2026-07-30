@@ -19,6 +19,7 @@
 - Fix B18: `unindent` handles both tabs and spaces; `splitGoSections` passes raw go code to unindent
 - Fix B19: `findFormStruct` regex now handles complex parameter types and named returns
 - Fix B20: `dreego run -t` sends SIGTERM instead of SIGKILL for graceful shutdown
+- Fix B21: `RequestID` panics on `crypto/rand.Read` errors instead of ignoring them
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
