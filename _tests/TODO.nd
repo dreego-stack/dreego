@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B13 | `scanComponents`/`findLayout` swallow all errors | `core/generate.go:375-446` |
 | B14 | `GenerateComponent` ignores `<go>` after `Go[0]` | `core/codegen.go:448` |
 | B15 | `cleanSegment("[[opt]]")` returns `"[opt]"` | `core/generate.go:348-350` |
 | B16 | `extractAttrValues` splits on spaces in brace expressions | `core/codegen_template.go:173-195` |

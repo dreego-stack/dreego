@@ -22,7 +22,10 @@ func Run(force bool) error {
 	start := time.Now()
 	var found int
 
-	layout := findLayout()
+	layout, err := findLayout()
+	if err != nil {
+		return err
+	}
 	var allSources []string
 
 	var settings *Settings
@@ -30,10 +33,13 @@ func Run(force bool) error {
 
 	routePatterns := map[string]bool{}
 
-	_, compSrcs := scanComponents()
+	_, compSrcs, err := scanComponents()
+	if err != nil {
+		return err
+	}
 
-	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-		if err != nil {
+	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
 			return nil
 		}
 		if !d.IsDir() {
@@ -370,24 +376,36 @@ func patternSegment(seg string) string {
 	return seg
 }
 
-func findLayout() *File {
+func findLayout() (*File, error) {
 	var layout *File
-	filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() || layout != nil {
 			return nil
 		}
 		if filepath.Base(path) == "default.dreego" || filepath.Base(path) == "layout.dreego" {
-			data, _ := os.ReadFile(path)
-			tokens, _ := Lex(string(data))
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("error reading layout %s: %w", path, err)
+			}
+			tokens, err := Lex(string(data))
+			if err != nil {
+				return fmt.Errorf("error lexing layout %s: %w", path, err)
+			}
 			p := NewParser(tokens)
-			f, _ := p.Parse()
+			f, err := p.Parse()
+			if err != nil {
+				return fmt.Errorf("error parsing layout %s: %w", path, err)
+			}
 			if f != nil {
 				layout = f
 			}
 		}
 		return nil
 	})
-	return layout
+	if err != nil {
+		return nil, err
+	}
+	return layout, nil
 }
 
 func isLayoutDir(path string) bool {
@@ -395,16 +413,19 @@ func isLayoutDir(path string) bool {
 		strings.HasSuffix(path, "/components") || strings.Contains(path, "/components/")
 }
 
-func scanComponents() (genDir string, sources []string) {
-	filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
+func scanComponents() (genDir string, sources []string, err error) {
+	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
 		if !strings.Contains(path, "/components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
 			return nil
 		}
 
-		data, _ := os.ReadFile(path)
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("error reading component %s: %w", path, err)
+		}
 		raw := string(data)
 
 		comp, _, body := ParseHeader(raw)
@@ -419,15 +440,15 @@ func scanComponents() (genDir string, sources []string) {
 			genDir = detectGenDir(path)
 		}
 
-		tokens, _ := Lex(body)
-		if tokens == nil {
-			return nil
+		tokens, err := Lex(body)
+		if err != nil {
+			return fmt.Errorf("error lexing component %s: %w", path, err)
 		}
 
 		p := NewParser(tokens)
 		file, err := p.Parse()
 		if err != nil {
-			return nil
+			return fmt.Errorf("error parsing component %s: %w", path, err)
 		}
 		file.Component = comp
 
@@ -437,7 +458,7 @@ func scanComponents() (genDir string, sources []string) {
 
 		src, err := GenerateComponent(file, scopeHash)
 		if err != nil {
-			return nil
+			return fmt.Errorf("error generating component %s: %w", path, err)
 		}
 		sources = append(sources, src)
 		return nil

@@ -11,6 +11,7 @@
 - Fix B8: landing blueprint `config.json` uses `{"logging": {"enabled": true}}` instead of boolean
 - Fix B11: `SetReady`/`readyHandler` use `atomic.Bool` to eliminate data race
 - Fix B12: `generateCSRFToken` panics on `crypto/rand.Read` errors instead of ignoring them
+- Fix B13: `findLayout` and `scanComponents` now propagate read/lex/parse/generate errors instead of swallowing them
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path

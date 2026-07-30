@@ -73,6 +73,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Panics with clear message on failure instead of silently using weak entropy
 - Full suite: 130 passed, 0 failed
 
+## 2026-07-30 — B13: `findLayout`/`scanComponents` error swallowing
+
+- Fix B13: `core/generate.go` `findLayout` now returns `(*File, error)` and propagates read/lex/parse errors
+- Fix B13: `core/generate.go` `scanComponents` now returns `(genDir, sources, error)` and propagates read/lex/parse/generate errors
+- Callers in `Run()` updated to return early on component/layout errors
+- Full suite: 130 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
