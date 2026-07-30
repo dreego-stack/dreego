@@ -109,3 +109,21 @@ func TestFindFormStructMissing(t *testing.T) {
 		t.Errorf("expected '', got '%s'", result)
 	}
 }
+
+func TestFindFormHandler(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "func save(w http.ResponseWriter, f MyForm) {}"},
+	}
+	if !findFormHandler(goSections, "save") {
+		t.Error("expected handler to be found")
+	}
+}
+
+func TestFindFormHandlerMissing(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "func other(w http.ResponseWriter) {}"},
+	}
+	if findFormHandler(goSections, "save") {
+		t.Error("expected handler to not be found")
+	}
+}

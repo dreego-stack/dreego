@@ -7,8 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 15 | `TestFindFormHandler` | Handler detection |
-| 16 | `TestFindFormHandlerMissing` | Missing handler returns false |
 | 17 | `TestHasValidateTagScoped` | Scoped validate tag detection |
 | 18 | `TestHasFormTagScoped` | Scoped form tag detection |
 
