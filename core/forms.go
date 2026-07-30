@@ -61,19 +61,38 @@ func findFormHandler(goSections []GoSection, action string) bool {
 }
 
 func hasValidateTag(goSections []GoSection, structName string) bool {
-	combined := ""
-	for _, g := range goSections {
-		combined += g.Code + "\n"
-	}
-	tagRE := regexp.MustCompile(`validate:"[^"]*"`)
-	return tagRE.MatchString(combined)
+	return hasTagInStruct(goSections, structName, "validate")
 }
 
 func hasFormTag(goSections []GoSection, structName string) bool {
+	return hasTagInStruct(goSections, structName, "form")
+}
+
+func hasTagInStruct(goSections []GoSection, structName, tagName string) bool {
 	combined := ""
 	for _, g := range goSections {
 		combined += g.Code + "\n"
 	}
-	tagRE := regexp.MustCompile(`form:"[^"]*"`)
+	startRE := regexp.MustCompile(`type\s+` + regexp.QuoteMeta(structName) + `\s+struct\s*\{`)
+	loc := startRE.FindStringIndex(combined)
+	if loc == nil {
+		return false
+	}
+	idx := loc[1]
+	depth := 1
+	for i := idx; i < len(combined) && depth > 0; i++ {
+		if combined[i] == '{' {
+			depth++
+			continue
+		}
+		if combined[i] == '}' {
+			depth--
+			if depth == 0 {
+				combined = combined[idx:i]
+				break
+			}
+		}
+	}
+	tagRE := regexp.MustCompile(tagName + `:"[^"]*"`)
 	return tagRE.MatchString(combined)
 }

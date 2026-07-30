@@ -32,6 +32,14 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/scoped-css-media`
 - Full suite: 125 passed, 0 failed
 
+## 2026-07-30 — B4: `hasValidateTag`/`hasFormTag` respect `structName`
+
+- Fix B4: `core/forms.go` `hasValidateTag`/`hasFormTag` now locate the target struct body via `type <structName> struct {`
+- Only tags inside that struct's fields are matched, avoiding false positives from unrelated structs
+- Added helper `hasTagInStruct` with brace-depth extraction
+- Integration test added: `_tests/Bugs/form-tag-struct-name`
+- Full suite: 127 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
