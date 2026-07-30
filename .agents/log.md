@@ -131,6 +131,34 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/run-timer-sigterm`
 - Full suite: 137 passed, 0 failed
 
+## 2026-07-31 — B21: Request-ID middleware handles `rand.Read` errors
+
+- Fix B21: `core/middleware_requestid.go` `newID` now checks `crypto/rand.Read` error
+- Panics with clear message on failure instead of silently using weak entropy
+- Full suite: 138 passed, 0 failed
+
+## 2026-07-31 — `{#else if}` template support
+
+- Fix: `core/lexer_brace.go` emits `TokenElseIf` for `{#else if expr}` / `{#elseif expr}`
+- Fix: `core/parser_section_div.go` parses `ElseIf` branches and nests them inside `NodeIf`
+- Fix: `core/codegen.go` and `core/codegen_template.go` generate Go `else if` for route and component templates
+- Integration test added: `_tests/Bugs/template-else-if`
+- Full suite: 138 passed, 0 failed
+
+## 2026-07-31 — `go test` support for `cmd/dreego`
+
+- Refactor: `cmd/dreego/main.go` `findMain` extracted into testable `findMainIn(dir string)`
+- Test: `cmd/dreego/main_test.go` with `TestFindMainInRoot`, `TestFindMainInCmdDir`, `TestFindMainInDemoDir`
+- Fix: blueprint `main.go` files renamed to `main.go.tmpl` and stripped during `dreego init`/`new`
+- Enables `go test ./cmd/dreego/...` to compile without placeholder imports
+- Full suite: 138 passed, 0 failed
+
+## 2026-07-31 — Test runner runs Go unit tests
+
+- `_tests/test.sh` now runs `go test ./core/... ./cmd/dreego/...` before integration tests
+- Reports `==> PASS/FAIL <=> GO Tests <=========` and `==> PASS/FAIL <=> X Passed <=> Y Failed ===`
+- Full suite: 138 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
