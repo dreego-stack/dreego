@@ -9,7 +9,7 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 |---|------|---------------|
 | ~~1~~ | ~~`Config/redirect`~~ | ~~`config.json` redirect rule works~~ |
 | ~~2~~ | ~~`Config/rewrite`~~ | ~~`config.json` rewrite rule works~~ |
-| 3 | `Config/invalid-json` | Broken `config.json` doesn't crash generate |
+| ~~3~~ | ~~`Config/invalid-json`~~ | ~~Broken `config.json` doesn't crash generate~~ |
 
 ## CLI Tests
 
