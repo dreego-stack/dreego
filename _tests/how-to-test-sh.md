@@ -40,7 +40,7 @@ echo "ok"
 1. **`realrepo`** — absolute path to repo root, always `../../..` from `_tests/<Group>/<name>/` (3 levels up)
 2. **`workdir`** — always `mktemp -d`, never create files inside `_tests/`
 3. **`trap "rm -rf $workdir" EXIT`** — mandatory cleanup on success *and* failure
-4. **CLI** — always `go run "$realrepo/cmd/dreego"`, never a pre-built binary
+4. **CLI** — always `go run codeberg.org/dreego/dreego/cmd/dreego` (module path, requires `go.mod` with `replace`), never a pre-built binary
 5. **`go.mod`** — always fresh with `require` + `replace` to `$realrepo` (use `cat > go.mod`, never `go mod init`)
 6. **`mkdir -p dreego/routes`** — scaffold minimal project structure as needed
 7. **No files left behind** — test does all I/O inside `$workdir`

@@ -15,7 +15,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 4 | `CLI/no-args` | `dreego` without args shows help |
 | 5 | `CLI/unknown-cmd` | `dreego bogus` exits non-zero |
 | 6 | `CLI/help` | `dreego --help` and `dreego -h` show help |
 | 7 | `CLI/new` | `dreego new testapp` creates project |
