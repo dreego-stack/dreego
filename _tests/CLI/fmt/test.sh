@@ -1,6 +1,19 @@
 #!/bin/sh
+# Using standard: _tests/how-to-test-sh.md
 set -e
-cd "$(dirname "$0")"
+
+realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
+workdir="$(mktemp -d)"
+trap "rm -rf $workdir" EXIT
+
+cd "$workdir"
+
+cat > go.mod << EOF
+module t
+go 1.22
+require codeberg.org/dreego/dreego v0.0.0
+replace codeberg.org/dreego/dreego => $realrepo
+EOF
 
 cat > messy.dreego << 'DREEGO'
 <head>
@@ -37,7 +50,7 @@ cat > expected.dreego << 'DREEGO'
 </div>
 DREEGO
 
-dreego fmt --stdout messy.dreego > actual.dreego
+go run codeberg.org/dreego/dreego/cmd/dreego fmt --stdout messy.dreego > actual.dreego
 
 if diff expected.dreego actual.dreego > /dev/null 2>&1; then
     echo "ok: basic formatting"
@@ -47,7 +60,7 @@ else
     exit 1
 fi
 
-dreego fmt --stdout actual.dreego > formatted_twice.dreego
+go run codeberg.org/dreego/dreego/cmd/dreego fmt --stdout actual.dreego > formatted_twice.dreego
 if diff actual.dreego formatted_twice.dreego > /dev/null 2>&1; then
     echo "ok: idempotent"
 else

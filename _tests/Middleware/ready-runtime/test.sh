@@ -1,21 +1,33 @@
 #!/bin/sh
+# Using standard: _tests/how-to-test-sh.md
 set -e
-cd "$(dirname "$0")"
-rm -rf dreego/* 2>/dev/null || true
-mkdir -p dreego/routes
-cat > dreego/routes/get.dreego << 'DREEGO'
-<div><p>root</p></div>
-DREEGO
+
+realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
+workdir="$(mktemp -d)"
+trap "rm -rf $workdir" EXIT
+
+cd "$workdir"
+
+cat > go.mod << EOF
+module t
+go 1.22
+require codeberg.org/dreego/dreego v0.0.0
+replace codeberg.org/dreego/dreego => $realrepo
+EOF
+
 cat > main.go << 'GO'
 package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.SetReady(false); core.Listen(":8080") }
 GO
-go mod init t >/dev/null 2>&1
-go mod edit -replace codeberg.org/dreego/dreego=../../..
-go mod edit -require codeberg.org/dreego/dreego@v0.0.0
-sed -i 's|_ "gen"|_ "t/dreego/gen"|' main.go
-dreego generate 2>&1
+
+mkdir -p dreego/routes
+
+cat > dreego/routes/get.dreego << 'DREEGO'
+<div><p>root</p></div>
+DREEGO
+
+go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
 go build -o /tmp/srv .
 /tmp/srv &
 PID=$!
