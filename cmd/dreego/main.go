@@ -252,7 +252,7 @@ func findMain() (projDir, pkg, name string) {
 
 	for _, d := range []string{"demo", "cmd"} {
 		mp := filepath.Join(d, "main.go")
-		if _, err := os.Stat(mp); err == nil && d != "cmd" {
+		if _, err := os.Stat(mp); err == nil {
 			return d, d, d
 		}
 	}
