@@ -124,6 +124,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/form-handler-named-return`
 - Full suite: 136 passed, 0 failed
 
+## 2026-07-30 — B20: `dreego run -t` graceful shutdown
+
+- Fix B20: `cmd/dreego/main.go` `dreego run -t` now sends `syscall.SIGTERM`
+- Falls back to `Process.Kill()` only if signal fails
+- Integration test added: `_tests/Bugs/run-timer-sigterm`
+- Full suite: 137 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

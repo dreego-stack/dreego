@@ -7,4 +7,4 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B20 | `dreego run -t` uses SIGKILL not SIGTERM | `cmd/dreego/main.go:243` |
+| (all v0.0.19 bugs fixed) |  |  |

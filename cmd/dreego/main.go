@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
-	core "codeberg.org/dreego/dreego/core"
+	"codeberg.org/dreego/dreego/core"
 )
 
 func main() {
@@ -237,7 +238,10 @@ func cmdRun(args []string) {
 
 	if timer > 0 {
 		time.Sleep(time.Duration(timer) * time.Second)
-		c.Process.Kill()
+		if err := c.Process.Signal(syscall.SIGTERM); err != nil {
+			fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
+			c.Process.Kill()
+		}
 		fmt.Println("timer: server stopped")
 		return
 	}

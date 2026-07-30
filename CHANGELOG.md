@@ -18,6 +18,7 @@
 - Fix B17: `atoi` now returns an error for non-digit input; `min=`/`max=` validation reports invalid numbers
 - Fix B18: `unindent` handles both tabs and spaces; `splitGoSections` passes raw go code to unindent
 - Fix B19: `findFormStruct` regex now handles complex parameter types and named returns
+- Fix B20: `dreego run -t` sends SIGTERM instead of SIGKILL for graceful shutdown
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
@@ -35,6 +36,7 @@
 - Test: `_tests/Bugs/validate-atoi-non-digit` covers B17
 - Test: `_tests/Bugs/unindent-spaces` covers B18
 - Test: `_tests/Bugs/form-handler-named-return` covers B19
+- Test: `_tests/Bugs/run-timer-sigterm` covers B20
 - Test: `_tests/Template/each-loop` converted from expected-failure to expected-success for route-level `{#each}`
 
 ## v0.0.18 (2026-07-29) — Package Restructuring
