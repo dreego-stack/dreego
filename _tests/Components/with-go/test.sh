@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that a component with a <go> block compiles
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

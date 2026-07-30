@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify the verbatim block preserves raw JavaScript content in generated code
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

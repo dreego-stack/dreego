@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that using a missing component causes a build failure
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
 workdir="$(mktemp -d)"

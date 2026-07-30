@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that a multi-type route (JSON, XML, HTML) works at runtime
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

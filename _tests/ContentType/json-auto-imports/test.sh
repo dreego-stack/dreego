@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that JSON routes with auto-imports compile
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

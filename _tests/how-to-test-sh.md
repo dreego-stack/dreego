@@ -7,6 +7,7 @@ Every integration test in `_tests/` follows the same pattern.
 ```sh
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: <one-line summary of what this test verifies>
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
@@ -37,6 +38,7 @@ echo "ok"
 ## Rules
 
 0. **First line** after `#!/bin/sh` must be `# Using standard: _tests/how-to-test-sh.md` — makes non-compliant files discoverable via `head -1`
+0a. **Second line** must be `# What: <summary>` — one-line description of what this test verifies
 1. **`realrepo`** — absolute path to repo root, always `../../..` from `_tests/<Group>/<name>/` (3 levels up)
 2. **`workdir`** — always `mktemp -d`, never create files inside `_tests/`
 3. **`trap "rm -rf $workdir" EXIT`** — mandatory cleanup on success *and* failure

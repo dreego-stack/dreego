@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that duplicate root <div> produces a compile error
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
 workdir="$(mktemp -d)"

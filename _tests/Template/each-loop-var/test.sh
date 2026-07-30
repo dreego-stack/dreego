@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that an each-loop with the $loop variable compiles
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify HTML with script tags is properly escaped in generated code
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

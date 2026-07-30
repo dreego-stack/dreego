@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that dreego init creates main.go and a default route
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

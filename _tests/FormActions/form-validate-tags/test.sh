@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that form validation tags generate validation code
 set -e
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
 workdir="$(mktemp -d)"

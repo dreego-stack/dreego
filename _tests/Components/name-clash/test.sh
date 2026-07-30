@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that components with the same name in different directories compile
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

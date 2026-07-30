@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that a JSON route falls back to HTML without an Accept header
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

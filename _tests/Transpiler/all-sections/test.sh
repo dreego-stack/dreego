@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a page containing head, Go, div, script, and style sections
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

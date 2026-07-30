@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a head block works in a standalone page without a layout
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that a stray {/slot} close tag produces a compile error
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
 workdir="$(mktemp -d)"

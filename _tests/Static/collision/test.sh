@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that route and static path collision produces an error
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests the /ready endpoint with readiness flag
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

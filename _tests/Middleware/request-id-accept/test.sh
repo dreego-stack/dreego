@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that a custom X-Request-ID header is echoed back
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

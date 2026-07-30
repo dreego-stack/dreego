@@ -1,6 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
-
+# What: Verify an unclosed div tag produces a parse error
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
 workdir="$(mktemp -d)"
 trap "rm -rf $workdir" EXIT

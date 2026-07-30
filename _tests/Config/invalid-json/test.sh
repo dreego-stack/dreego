@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that the server runs despite invalid config.json
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

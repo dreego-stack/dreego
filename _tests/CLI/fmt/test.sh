@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests the dreego fmt command for formatting correctness and idempotency
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

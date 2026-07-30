@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that multiple named slots in a component compile
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

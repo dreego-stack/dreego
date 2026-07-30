@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify the #if conditional block renders when the condition is true
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

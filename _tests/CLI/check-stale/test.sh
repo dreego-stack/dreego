@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Tests that dreego generate --check reports stale after file modification
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

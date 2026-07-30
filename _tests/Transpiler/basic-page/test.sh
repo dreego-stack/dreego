@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a basic page with Go variable and expression interpolation
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

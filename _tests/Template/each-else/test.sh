@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify each/else renders fallback content for empty collections
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a page with no Go blocks compiles successfully
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

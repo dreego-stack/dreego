@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a component with quoted string attributes parses correctly
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

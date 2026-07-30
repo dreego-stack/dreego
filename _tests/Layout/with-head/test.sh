@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify a layout with a head block generates correctly
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

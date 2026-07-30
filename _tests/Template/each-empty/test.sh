@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify an each loop over an empty slice generates valid code
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"

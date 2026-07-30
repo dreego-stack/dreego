@@ -1,5 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
+# What: Verify the raw filter outputs unescaped HTML while default escaping is applied
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
