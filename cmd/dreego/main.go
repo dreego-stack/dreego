@@ -250,12 +250,16 @@ func cmdRun(args []string) {
 }
 
 func findMain() (projDir, pkg, name string) {
-	if _, err := os.Stat("main.go"); err == nil {
-		return ".", ".", filepath.Base(wd())
+	return findMainIn(wd())
+}
+
+func findMainIn(dir string) (projDir, pkg, name string) {
+	if _, err := os.Stat(filepath.Join(dir, "main.go")); err == nil {
+		return ".", ".", filepath.Base(dir)
 	}
 
 	for _, d := range []string{"demo", "cmd"} {
-		mp := filepath.Join(d, "main.go")
+		mp := filepath.Join(dir, d, "main.go")
 		if _, err := os.Stat(mp); err == nil {
 			return d, d, d
 		}

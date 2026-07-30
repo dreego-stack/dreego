@@ -7,4 +7,5 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| (all v0.0.19 bugs fixed) |  |  |
+| — | discovered: `{#else if}` not supported | core/lexer_brace.go, core/parser_section_div.go, core/codegen.go, core/codegen_template.go |
+| — | discovered: `import` inside `<go>` blocks not preserved for package-level declarations | core/codegen.go splitGoSections |

@@ -9,6 +9,14 @@ func scanBrace(input string, pos *int) (Token, error) {
 	start := *pos
 	remaining := input[start:]
 
+	if strings.HasPrefix(remaining, "{#else if ") {
+		end := strings.IndexByte(remaining[10:], '}')
+		if end < 0 {
+			return Token{}, fmt.Errorf("unclosed {#else if at position %d", start)
+		}
+		*pos += 10 + end + 1
+		return Token{Type: TokenElseIf, Value: strings.TrimSpace(remaining[10 : 10+end]), Pos: start}, nil
+	}
 	if strings.HasPrefix(remaining, "{#else}") {
 		*pos += 7
 		return Token{Type: TokenElse, Pos: start}, nil

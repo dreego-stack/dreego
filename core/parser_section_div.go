@@ -71,11 +71,33 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			return TemplateNode{}, err
 		}
 		var elseChildren []TemplateNode
-		if p.current().Type == TokenElse {
+		for p.current().Type == TokenElse || p.current().Type == TokenElseIf {
+			if p.current().Type == TokenElse {
+				p.advance()
+				elseChildren, err = p.parseElseNodes()
+				if err != nil {
+					return TemplateNode{}, err
+				}
+				break
+			}
+			elseCond := p.current().Value
 			p.advance()
-			elseChildren, err = p.parseElseNodes()
+			elseIfChildren, err := p.parseIfNodes()
 			if err != nil {
 				return TemplateNode{}, err
+			}
+			nested := TemplateNode{Type: NodeIf, Cond: elseCond, Children: elseIfChildren}
+			if p.current().Type == TokenElse {
+				p.advance()
+				nested.ElseChildren, err = p.parseElseNodes()
+				if err != nil {
+					return TemplateNode{}, err
+				}
+			}
+			elseChildren = append(elseChildren, nested)
+			if p.current().Type == TokenIfClose {
+				p.advance()
+				break
 			}
 		}
 		if p.current().Type == TokenIfClose {

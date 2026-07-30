@@ -509,10 +509,26 @@ func genTemplateNodeComp(n TemplateNode) string {
 		for _, child := range n.Children {
 			buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
 		}
-		if len(n.ElseChildren) > 0 {
-			buf.WriteString("\t} else {\n")
-			for _, child := range n.ElseChildren {
-				buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+		for i, ec := range n.ElseChildren {
+			if ec.Type == NodeIf {
+				buf.WriteString(fmt.Sprintf("\t} else if %s {\n", ec.Cond))
+				for _, child := range ec.Children {
+					buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+				}
+				if len(ec.ElseChildren) > 0 {
+					if i != len(n.ElseChildren)-1 {
+						return ""
+					}
+					buf.WriteString("\t} else {\n")
+					for _, child := range ec.ElseChildren {
+						buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+					}
+				}
+			} else {
+				if i == 0 {
+					buf.WriteString("\t} else {\n")
+				}
+				buf.WriteString("\t\t" + genTemplateNodeComp(ec) + "\n")
 			}
 		}
 		buf.WriteString("\t}")

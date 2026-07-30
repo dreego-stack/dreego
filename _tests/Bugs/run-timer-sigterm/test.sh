@@ -16,7 +16,10 @@ require codeberg.org/dreego/dreego v0.0.0
 replace codeberg.org/dreego/dreego => $realrepo
 EOF
 
-cat > main.go << 'GO'
+port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
+port=$((port % 50000 + 10000))
+
+cat > main.go << GO
 package main
 import (
 	"fmt"
@@ -36,7 +39,7 @@ func main() {
 		os.Exit(0)
 	}()
 	core.SetLogging(false)
-	core.Listen(":8080")
+	core.Listen(":$port")
 }
 GO
 
@@ -46,5 +49,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 DREEGO
 
 go run $realrepo/cmd/dreego generate
-go run $realrepo/cmd/dreego run -t 1 2>&1 | grep -q "SIGTERM received" || { echo "FAIL: server did not receive SIGTERM (B20)"; exit 1; }
+outfile="$workdir/run.out"
+go run $realrepo/cmd/dreego run -t 1 > "$outfile" 2>&1
+grep -q "SIGTERM received" "$outfile" || { echo "FAIL: server did not receive SIGTERM (B20)"; cat "$outfile"; exit 1; }
 echo ok

@@ -52,6 +52,7 @@ func cmdNew(args []string) {
 		content := strings.ReplaceAll(string(data), "§$name$§", projName)
 
 		os.MkdirAll(filepath.Dir(dest), 0755)
+		dest = strings.TrimSuffix(dest, ".tmpl")
 		return os.WriteFile(dest, []byte(content), 0644)
 	})
 	if err != nil {

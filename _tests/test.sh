@@ -9,6 +9,23 @@ RESULTDIR="$(mktemp -d)"
 trap "rm -rf $RESULTDIR" EXIT
 RUNNING=0
 
+REPO_DIR="$(cd "$DIR/.." && pwd)"
+
+go_failed=0
+for pkg in ./core/... ./cmd/dreego/...; do
+    if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then
+        go_failed=$((go_failed + 1))
+        echo "FAIL $pkg"
+    fi
+done
+
+if [ "$go_failed" -gt 0 ]; then
+    echo "==> FAIL <=> GO Tests <========="
+    FAIL=$((FAIL + go_failed))
+else
+    echo "==> PASS <=> GO Tests <========="
+fi
+
 for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
     test_script="$test_dir/test.sh"
     [ -f "$test_script" ] || continue
@@ -42,5 +59,5 @@ for f in "$RESULTDIR"/*; do
     esac
 done
 
-echo "=== $PASS passed, $FAIL failed ==="
+echo "==> $([ "$FAIL" -eq 0 ] && echo PASS || echo FAIL) <=> $PASS Passed <=> $FAIL Failed ==="
 [ $FAIL -eq 0 ] || exit 1

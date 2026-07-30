@@ -37,10 +37,26 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		for _, child := range n.Children {
 			buf.WriteString(genTemplateNode(child, depth+1))
 		}
-		if len(n.ElseChildren) > 0 {
-			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
-			for _, child := range n.ElseChildren {
-				buf.WriteString(genTemplateNode(child, depth+1))
+		for i, ec := range n.ElseChildren {
+			if ec.Type == NodeIf {
+				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
+				for _, child := range ec.Children {
+					buf.WriteString(genTemplateNode(child, depth+1))
+				}
+				if len(ec.ElseChildren) > 0 {
+					if i != len(n.ElseChildren)-1 {
+						return ""
+					}
+					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
+					for _, child := range ec.ElseChildren {
+						buf.WriteString(genTemplateNode(child, depth+1))
+					}
+				}
+			} else {
+				if i == 0 {
+					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
+				}
+				buf.WriteString(genTemplateNode(ec, depth+1))
 			}
 		}
 		buf.WriteString(indent + "}\n")

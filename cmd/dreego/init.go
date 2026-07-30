@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed all:blueprints
@@ -39,6 +40,7 @@ func cmdInit(args []string) {
 		if err != nil {
 			return err
 		}
+		dest = strings.TrimSuffix(dest, ".tmpl")
 		return os.WriteFile(dest, data, 0644)
 	})
 	if err != nil {
