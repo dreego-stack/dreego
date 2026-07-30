@@ -1,0 +1,8 @@
+#!/bin/sh
+# Block push if tests fail
+make test
+if [ $? -ne 0 ]; then
+	echo ""
+	echo "Push aborted: make test failed"
+	exit 1
+fi

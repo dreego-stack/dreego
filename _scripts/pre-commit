@@ -1,0 +1,3 @@
+#!/bin/sh
+# Auto-format Go files before commit
+gofmt -w core/ cmd/dreego/

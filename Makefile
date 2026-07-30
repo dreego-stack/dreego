@@ -1,4 +1,4 @@
-.PHONY: up down build generate dev clean dx dx-clean test
+.PHONY: up down build generate dev clean dx dx-clean test install-hooks
 
 up:
 	docker compose up -d
@@ -32,3 +32,10 @@ dx-clean:
 clean:
 	rm -f *_dreego.go
 	rm -rf bin/
+
+install-hooks:
+	@cp _scripts/pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@cp _scripts/pre-push .git/hooks/pre-push
+	@chmod +x .git/hooks/pre-push
+	@echo "git hooks installed: pre-commit, pre-push"
