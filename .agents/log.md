@@ -80,6 +80,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Callers in `Run()` updated to return early on component/layout errors
 - Full suite: 130 passed, 0 failed
 
+## 2026-07-30 — B14: `GenerateComponent` ignores `<go>` after `Go[0]`
+
+- Fix B14: `core/codegen.go` `GenerateComponent` now iterates over all `file.Go` sections
+- Previously only `file.Go[0].Code` was emitted into the component render function
+- Integration test added: `_tests/Bugs/component-multi-go`
+- Full suite: 131 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

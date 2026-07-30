@@ -453,11 +453,13 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 	buf.WriteString("\treturn core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {\n")
 	buf.WriteString("\t\tvar b strings.Builder\n\n")
 
-	if len(file.Go) > 0 && file.Go[0].Code != "" {
-		for _, line := range strings.Split(strings.Trim(file.Go[0].Code, "\n"), "\n") {
-			buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
+	for _, g := range file.Go {
+		if g.Code != "" {
+			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\n")
 		}
-		buf.WriteString("\n")
 	}
 
 	if file.Template != nil {
