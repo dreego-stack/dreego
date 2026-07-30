@@ -24,7 +24,7 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 | # | Name | What it tests |
 |---|------|---------------|
 | ~~8~~ | ~~`TestScanFormActionsSingle`~~ | ~~Single g-action extraction~~ |
-| 9 | `TestScanFormActionsMultiple` | Multiple g-actions |
+| ~~9~~ | ~~`TestScanFormActionsMultiple`~~ | ~~Multiple g-actions~~ |
 | 10 | `TestScanFormActionsDeduplicate` | Duplicate g-action dedup |
 | 11 | `TestScanFormActionsNested` | g-action in nested `{#if}` |
 | 12 | `TestScanFormActionsNoAction` | Form without g-action |
