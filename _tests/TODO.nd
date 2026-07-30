@@ -17,7 +17,7 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 |---|------|---------------|
 | ~~5~~ | ~~`CLI/unknown-cmd`~~ | ~~`dreego bogus` exits non-zero~~ |
 | ~~6~~ | ~~`CLI/help`~~ | ~~`dreego --help` and `dreego -h` show help~~ |
-| 7 | `CLI/new` | `dreego new testapp` creates project |
+| ~~7~~ | ~~`CLI/new`~~ | ~~`dreego new testapp` creates project~~ |
 
 ## Forms Unit Tests (core/forms_test.go)
 
