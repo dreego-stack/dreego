@@ -7,6 +7,8 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
+port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+
 cat > go.mod << EOF
 module t
 go 1.22
@@ -33,12 +35,13 @@ func main() {
     core.Listen(":8080")
 }
 GO
+sed -i "s/8080/$port/" main.go
 go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
 go build -o /tmp/srv .
 /tmp/srv &
 PID=$!
 trap "kill $PID 2>/dev/null" EXIT
 sleep 1
-RESP=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/x-www-form-urlencoded" -d "email=hello@test.com" http://localhost:8080/)
+RESP=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/x-www-form-urlencoded" -d "email=hello@test.com" http://localhost:$port/)
 [ "$RESP" = "200" ] || { echo "FAIL: expected 200 for plain POST, got $RESP"; exit 1; }
 echo ok

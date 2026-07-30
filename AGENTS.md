@@ -92,6 +92,10 @@ See [Changelog Guide](.agents/guides/changelog.md) for the full workflow.
 - **Org:** codeberg.org/dreego | **Mirror:** github.com/LukasLow/dreego
 - **Approach:** Compile-Time Transpiler (.dreego → Go-Code) + net/http + HTMX/Alpine.js
 
+## Note: make test vs smd
+
+`make test` runs locally (Go + make are on the host). The `smd` Docker container (nixos/nix) has a macOS symlink issue (`/var/folders` → `/private/var/...`) that causes `openat etc/group: path escapes from parent`. Always run `make test` directly, not via `smd`.
+
 ## Coding Rules
 
 - Max 120 lines per file, one logical thing per file

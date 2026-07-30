@@ -7,6 +7,8 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
+port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+
 cat > go.mod << EOF
 module t
 go 1.22
@@ -23,13 +25,14 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.SetLogging(false); core.Listen(":8080") }
 GO
+sed -i "s/8080/$port/" main.go
 go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
 go build -o /tmp/srv .
 /tmp/srv &
 PID=$!
 sleep 1
 # verify server is running
-RESP=$(curl -s http://localhost:8080/health)
+RESP=$(curl -s http://localhost:$port/health)
 [ "$RESP" = "ok" ] || { echo "FAIL: health check failed, got: $RESP"; exit 1; }
 # send SIGTERM and verify graceful shutdown
 kill -TERM $PID 2>/dev/null

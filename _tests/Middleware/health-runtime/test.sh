@@ -8,6 +8,8 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
+port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+
 cat > go.mod << EOF
 module t
 go 1.22
@@ -20,6 +22,7 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":8080") }
 GO
+sed -i "s/8080/$port/" main.go
 
 mkdir -p dreego/routes
 
@@ -33,6 +36,6 @@ go build -o /tmp/srv .
 PID=$!
 trap "kill $PID 2>/dev/null" EXIT
 sleep 1
-RESP=$(curl -s http://localhost:8080/health)
+RESP=$(curl -s http://localhost:$port/health)
 [ "$RESP" = "ok" ] || { echo "FAIL: /health not ok, got: $RESP"; exit 1; }
 echo ok

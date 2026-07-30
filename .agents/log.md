@@ -8,6 +8,13 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-07-30 — Random ports + test cleanup standard
+
+- All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
+- `_tests/how-to-test-sh.md` created with template and rules
+- 17 server tests migrated from `:8080` to random ports (5-digit via `awk`), flaky port conflicts eliminated
+- Known issue: `smd` Docker container fails on macOS due to `/var/folders` symlink — run `make test` directly
+
 ## 2026-07-29 — v0.0.17 Production Deployment + Request-ID
 
 - Graceful shutdown: `http.Server` + SIGINT/SIGTERM in `core.Listen`, 10s drain timeout

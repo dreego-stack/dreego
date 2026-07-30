@@ -8,6 +8,8 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
+port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+
 cat > go.mod << EOF
 module t
 go 1.22
@@ -20,6 +22,7 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":8080") }
 GO
+sed -i "s/8080/$port/" main.go
 
 mkdir -p dreego/routes
 
@@ -33,7 +36,7 @@ go build -o /tmp/srv .
 PID=$!
 trap "kill $PID 2>/dev/null" EXIT
 sleep 1
-HEADERS=$(curl -s -I http://localhost:8080/)
+HEADERS=$(curl -s -I http://localhost:$port/)
 echo "$HEADERS" | grep -q "X-Content-Type-Options: nosniff" || { echo "FAIL: X-Content-Type-Options missing"; exit 1; }
 echo "$HEADERS" | grep -q "X-Frame-Options: DENY" || { echo "FAIL: X-Frame-Options missing"; exit 1; }
 echo "$HEADERS" | grep -q "Referrer-Policy: strict-origin-when-cross-origin" || { echo "FAIL: Referrer-Policy missing"; exit 1; }

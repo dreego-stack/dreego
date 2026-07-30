@@ -18,7 +18,6 @@ for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
         echo "FAIL $name"
         FAIL=$((FAIL + 1))
     fi
-    sleep 0.15
 done
 
 echo "=== $PASS passed, $FAIL failed ==="

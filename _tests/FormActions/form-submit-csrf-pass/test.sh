@@ -7,6 +7,8 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
+port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+
 cat > go.mod << EOF
 module t
 go 1.22
@@ -38,6 +40,7 @@ func main() {
     core.Listen(":8080")
 }
 GO
+sed -i "s/8080/$port/" main.go
 go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
 go build -o /tmp/srv .
 /tmp/srv &
@@ -45,9 +48,9 @@ PID=$!
 trap "kill $PID 2>/dev/null" EXIT
 sleep 1
 COOKIE_JAR=$(mktemp)
-curl -s -c "$COOKIE_JAR" http://localhost:8080/health > /dev/null
+curl -s -c "$COOKIE_JAR" http://localhost:$port/health > /dev/null
 CSRF=$(grep csrf_token "$COOKIE_JAR" | awk '{print $NF}')
-CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -H "Content-Type: application/x-www-form-urlencoded" -d "email=test@dreego.dev&csrf_token=$CSRF" http://localhost:8080/)
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -H "Content-Type: application/x-www-form-urlencoded" -d "email=test@dreego.dev&csrf_token=$CSRF" http://localhost:$port/)
 [ "$CODE" = "303" ] || { echo "FAIL: expected 303 with valid CSRF, got $CODE"; exit 1; }
 rm "$COOKIE_JAR"
 echo ok
