@@ -89,3 +89,13 @@ func TestScanFormActionsNoAction(t *testing.T) {
 		t.Fatalf("expected 0 actions, got %d", len(actions))
 	}
 }
+
+func TestFindFormStruct(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "func save(w http.ResponseWriter, f MyForm) {}"},
+	}
+	result := findFormStruct(goSections, "save")
+	if result != "MyForm" {
+		t.Errorf("expected 'MyForm', got '%s'", result)
+	}
+}
