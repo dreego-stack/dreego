@@ -10,9 +10,44 @@
   - All test files and scripts
   - All configuration files
 
+## Model Strategy (Pro + Flash)
+
+Two models share the work with strict role separation:
+
+| Role | Model | Strengths | Cost |
+|------|-------|-----------|------|
+| **Architect** | `deepseek-v4-pro` | Decisions, architecture, spec design, code review, quality gates | $$$ |
+| **Worker** | `deepseek-v4-flash` | Executes defined tasks: read files, write code, run tests, return diffs | $ |
+
+**Rules:**
+
+1. **Pro (Architect):**
+   - Human-facing: all chat messages go through Pro
+   - Decides *what* to build and *how* — design, architecture, specs, task breakdown
+   - Reviews Flash output before it reaches the user
+   - Never delegates ambiguous, creative, or decision-heavy tasks to Flash
+   - Verifies Flash-generated code against specs, coding rules, and test results
+
+2. **Flash (Worker):**
+   - Receives fully-specified, self-contained tasks from Pro
+   - Reads files, searches codebase, returns structured summaries
+   - Writes code and test files according to exact specifications
+   - Returns diffs and test results — no interpretation, no decisions
+   - No direct user interaction; all output passes through Pro
+
+3. **Token Efficiency:**
+   - Batch independent Flash tasks in parallel (e.g. read 3 files at once)
+   - Flash reads large files and returns summaries — Pro sees summary, not full content
+   - Flash writes boilerplate/tests/diffs — Pro reviews the result once
+   - Pro makes a decision → Flash executes → Pro verifies → User sees final result
+
+4. **Quality Gate:**
+   - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 120), coding rules, no comments unless needed
+   - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
+
 ## Current Phase: pre v0.1
 
-v0.0.13 tagged — split-gen, scaffolding, landing blueprint complete. v0.0.14 adds production middleware (health checks, security headers, compression). See TODO.md for next steps.
+v0.0.18 tagged — core package renamed (`dreego-core/` → `core/`), plugins moved to separate repos. See TODO.md for next steps.
 
 ## File Structure
 
@@ -26,6 +61,10 @@ repo-root/
 ├── _docs/                  ← Public documentation
 ├── _tests/                 ← Integration tests (Docker, `make test`)
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
+│
+├── core/                   ← Core package (single package, no external deps)
+├── cmd/dreego/             ← CLI binary
+├── dreegotest/             ← Testing package (go test integration)
 │
 .agents/                    ← Knowledge Base (OKF format)
 ├── index.md                 ← Start here (OKF TOC)
@@ -76,7 +115,7 @@ Every bug gets a permanent test in `_tests/Bugs/<name>/`. Workflow:
 Every feature follows this cycle:
 
 1. **`_tests/`** — Create integration test in `_tests/<FeatureGroup>/<name>/test.sh`
-2. **Code** — Implement in `` (one logical thing per file, max 120 lines)
+2. **Code** — Implement in `core/` (one logical thing per file, max 120 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
 5. **Changelog** — Add entry to `CHANGELOG.md`
