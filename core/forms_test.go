@@ -99,3 +99,13 @@ func TestFindFormStruct(t *testing.T) {
 		t.Errorf("expected 'MyForm', got '%s'", result)
 	}
 }
+
+func TestFindFormStructMissing(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "func save(w http.ResponseWriter) {}"},
+	}
+	result := findFormStruct(goSections, "save")
+	if result != "" {
+		t.Errorf("expected '', got '%s'", result)
+	}
+}
