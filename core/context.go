@@ -4,7 +4,6 @@ import (
 	gcontext "context"
 	"errors"
 	"net/http"
-
 )
 
 type Context interface {

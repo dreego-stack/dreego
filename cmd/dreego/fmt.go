@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	core "codeberg.org/dreego/dreego/core"
-
 )
 
 func cmdFmt(args []string) {

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-
 )
 
 func RegisterStatic(path, mime string, content []byte) {

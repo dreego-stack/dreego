@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
-
 )
 
 func CSRF(store Store) func(http.Handler) http.Handler {

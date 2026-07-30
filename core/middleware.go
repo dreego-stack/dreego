@@ -62,4 +62,4 @@ func (h *jsonlHandler) Handle(_ context.Context, r slog.Record) error {
 }
 
 func (h *jsonlHandler) WithAttrs(_ []slog.Attr) slog.Handler { return h }
-func (h *jsonlHandler) WithGroup(_ string) slog.Handler       { return h }
+func (h *jsonlHandler) WithGroup(_ string) slog.Handler      { return h }

@@ -22,7 +22,7 @@ type TemplateNode struct {
 	ElseChildren []TemplateNode
 	Tag          string
 	Attrs        string
-	SelfClose     bool
+	SelfClose    bool
 	Filters      []string
 }
 

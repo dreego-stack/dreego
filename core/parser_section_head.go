@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"strings"
-
 )
 
 func (p *Parser) parseHeadSection() (*HeadSection, error) {

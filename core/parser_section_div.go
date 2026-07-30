@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-
 )
 
 func (p *Parser) parseDivSection() (*TemplateSection, error) {

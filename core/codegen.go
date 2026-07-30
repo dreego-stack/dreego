@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"strings"
-
 )
 
 func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, error) {

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-
 )
 
 func genTemplateNode(n TemplateNode, depth int) string {

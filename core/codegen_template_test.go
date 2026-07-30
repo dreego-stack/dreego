@@ -3,7 +3,6 @@ package core
 import (
 	"strings"
 	"testing"
-
 )
 
 func TestGenTemplateNodeExpressionEscapesHTML(t *testing.T) {

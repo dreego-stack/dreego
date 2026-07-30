@@ -3,7 +3,6 @@ package core
 import (
 	"regexp"
 	"strings"
-
 )
 
 var expressions = regexp.MustCompile(`\{([^!#/][^}]*?)\}`)

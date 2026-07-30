@@ -2,7 +2,6 @@ package core
 
 import (
 	"strings"
-
 )
 
 func (p *Parser) parseStyleSection() (*StyleSection, error) {

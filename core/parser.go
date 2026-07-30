@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"strings"
-
 )
 
 type Parser struct {
