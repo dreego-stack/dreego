@@ -29,5 +29,5 @@ DREEGO
 
 printf 'text' > dreego/static/about
 
-if go run codeberg.org/dreego/dreego/cmd/dreego generate 2>/dev/null; then echo "expected collision error but succeeded"; exit 1; fi
+if go run $realrepo/cmd/dreego generate 2>/dev/null; then echo "expected collision error but succeeded"; exit 1; fi
 echo ok

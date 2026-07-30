@@ -23,6 +23,6 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.SetSessionStore(core.NewCookieStore([]byte("test"))); core.SetCSRF(false); core.Listen(":0") }
 GO
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

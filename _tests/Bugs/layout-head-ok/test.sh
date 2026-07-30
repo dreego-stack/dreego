@@ -37,7 +37,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><h1>Page</h1></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 
 grep -q "cdn.tailwindcss.com" dreego/gen/routes.go || { echo "FAIL: tailwind CDN not in generated code"; exit 1; }
 grep -q "Layout Title" dreego/gen/routes.go || { echo "FAIL: title not in generated code"; exit 1; }

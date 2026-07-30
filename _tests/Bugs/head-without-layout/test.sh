@@ -31,7 +31,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>hello</p></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 
 grep -q 'script.js' dreego/gen/routes.go
 go build -o /dev/null .

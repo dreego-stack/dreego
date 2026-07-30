@@ -29,6 +29,6 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><h1>Hello {x}</h1></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

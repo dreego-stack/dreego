@@ -30,7 +30,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><h1>hello</h1></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 go build -o /tmp/srv .
 /tmp/srv &
 PID=$!

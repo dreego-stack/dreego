@@ -34,7 +34,7 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":0") }
 GO
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 grep -q "application/json" dreego/gen/routes.go || { echo "FAIL: no application/json content-type"; exit 1; }
 grep -q "c.JSON" dreego/gen/routes.go || { echo "FAIL: c.JSON not in generated code"; exit 1; }
 grep -q "Lukas" dreego/gen/routes.go || { echo "FAIL: shared var not in output"; exit 1; }

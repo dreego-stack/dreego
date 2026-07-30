@@ -15,7 +15,7 @@ require codeberg.org/dreego/dreego v0.0.0
 replace codeberg.org/dreego/dreego => $realrepo
 EOF
 
-go run codeberg.org/dreego/dreego/cmd/dreego init .
+go run $realrepo/cmd/dreego init .
 [ -f main.go ] || { echo "missing main.go"; exit 1; }
 [ -f dreego/routes/get.dreego ] || { echo "missing get.dreego"; exit 1; }
 echo ok

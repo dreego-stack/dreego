@@ -35,7 +35,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>hello</p></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 
 grep -q "Layout Title" dreego/gen/routes.go || { echo "FAIL: layout head dropped — title not in generated code"; exit 1; }
 grep -q "route-script.js" dreego/gen/routes.go || { echo "FAIL: route head dropped — script not in generated code"; exit 1; }

@@ -50,7 +50,7 @@ cat > expected.dreego << 'DREEGO'
 </div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego fmt --stdout messy.dreego > actual.dreego
+go run $realrepo/cmd/dreego fmt --stdout messy.dreego > actual.dreego
 
 if diff expected.dreego actual.dreego > /dev/null 2>&1; then
     echo "ok: basic formatting"
@@ -60,7 +60,7 @@ else
     exit 1
 fi
 
-go run codeberg.org/dreego/dreego/cmd/dreego fmt --stdout actual.dreego > formatted_twice.dreego
+go run $realrepo/cmd/dreego fmt --stdout actual.dreego > formatted_twice.dreego
 if diff actual.dreego formatted_twice.dreego > /dev/null 2>&1; then
     echo "ok: idempotent"
 else

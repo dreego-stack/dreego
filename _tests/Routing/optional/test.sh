@@ -15,8 +15,8 @@ require codeberg.org/dreego/dreego v0.0.0
 replace codeberg.org/dreego/dreego => $realrepo
 EOF
 
-go run codeberg.org/dreego/dreego/cmd/dreego init .
+go run $realrepo/cmd/dreego init .
 sed -i 's|_ "gen"|_ "t/dreego/gen"|' main.go
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

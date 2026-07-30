@@ -25,6 +25,6 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><@Missing/></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 if go build -o /dev/null . 2>/dev/null; then echo "expected build failure but succeeded"; exit 1; fi
 echo ok

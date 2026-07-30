@@ -23,7 +23,7 @@ DREEGO
 
 printf '<svg></svg>' > dreego/static/images/logo.svg
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 
 grep -q 'RegisterStatic("/images/logo.svg"' dreego/gen/dree.go
 echo "ok"

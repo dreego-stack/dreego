@@ -42,7 +42,7 @@ func main() { core.Listen(":8080") }
 GO
 sed -i "s/8080/$port/" main.go
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 go build -o "$workdir/srv" .
 "$workdir/srv" &
 PID=$!

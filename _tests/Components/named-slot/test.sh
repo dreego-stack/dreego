@@ -26,6 +26,6 @@ mkdir -p dreego/components dreego/routes
 printf 'Component Card (title string)\n<div><article>{#slot header}{/slot}<h2>{title}</h2><div>{#slot}</div></article></div>\n' > dreego/components/Card.dreego
 printf '<div><@Card title="Hi">{#slot header}<strong>HEADER</strong>{/slot}<p>body</p></@Card></div>\n' > dreego/routes/get.dreego
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

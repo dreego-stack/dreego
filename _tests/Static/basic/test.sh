@@ -29,7 +29,7 @@ DREEGO
 
 printf 'body{color:red}' > dreego/static/style.css
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 grep -q 'RegisterStatic("/style.css"' dreego/gen/dree.go
 go build -o /dev/null .
 echo ok

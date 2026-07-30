@@ -28,7 +28,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>{rawHtml|raw}</p><p>{rawHtml}</p></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 grep -q 'b.WriteString(fmt.Sprintf("%v", rawHtml))' dreego/gen/routes.go
 grep -q 'b.WriteString(html.EscapeString(fmt.Sprintf("%v", rawHtml)))' dreego/gen/routes.go

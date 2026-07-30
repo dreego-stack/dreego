@@ -27,7 +27,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>before</p>{#verbatim}<script>var x = {a: 1};</script>{/verbatim}<p>after</p></div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 grep -q 'var x = {a: 1}' dreego/gen/routes.go
 echo ok

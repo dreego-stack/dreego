@@ -32,6 +32,6 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><@Box/><p class="box">unscoped</p></div>
 <style>.box{color:blue}</style>
 DREEGO
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

@@ -35,7 +35,7 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":0") }
 GO
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 grep -q "core.BindForm" dreego/gen/routes.go || { echo "FAIL: BindForm not in generated code"; exit 1; }
 go build -o /dev/null .
 echo ok

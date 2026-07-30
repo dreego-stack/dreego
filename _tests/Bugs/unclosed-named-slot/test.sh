@@ -25,5 +25,5 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><@Card>{#slot header}no close</@Card></div>
 DREEGO
 
-if go run codeberg.org/dreego/dreego/cmd/dreego generate 2>/dev/null; then echo "expected failure but succeeded"; exit 1; fi
+if go run $realrepo/cmd/dreego generate 2>/dev/null; then echo "expected failure but succeeded"; exit 1; fi
 echo ok

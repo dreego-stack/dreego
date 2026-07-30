@@ -28,6 +28,6 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div>{#each items as item}{#if item != ""}<span>{item}</span>{/if}{/each}</div>
 DREEGO
 
-go run codeberg.org/dreego/dreego/cmd/dreego generate
+go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

@@ -34,6 +34,6 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":0") }
 GO
-go run codeberg.org/dreego/dreego/cmd/dreego generate 2>&1
+go run $realrepo/cmd/dreego generate 2>&1
 go build -o /dev/null . 2>&1 && { echo "FAIL: should not build with wrong return type"; exit 1; }
 echo ok
