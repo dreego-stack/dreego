@@ -3,30 +3,10 @@
 Tests identified by 10 subagent audits, filtered for v0.0.19 relevance.
 Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test-cmd (no subcommand), B7/B9/B10 (fixed or package missing).
 
-## Config Tests
-
-| # | Name | What it tests |
-|---|------|---------------|
-| ~~1~~ | ~~`Config/redirect`~~ | ~~`config.json` redirect rule works~~ |
-| ~~2~~ | ~~`Config/rewrite`~~ | ~~`config.json` rewrite rule works~~ |
-| ~~3~~ | ~~`Config/invalid-json`~~ | ~~Broken `config.json` doesn't crash generate~~ |
-
-## CLI Tests
-
-| # | Name | What it tests |
-|---|------|---------------|
-| ~~5~~ | ~~`CLI/unknown-cmd`~~ | ~~`dreego bogus` exits non-zero~~ |
-| ~~6~~ | ~~`CLI/help`~~ | ~~`dreego --help` and `dreego -h` show help~~ |
-| ~~7~~ | ~~`CLI/new`~~ | ~~`dreego new testapp` creates project~~ |
-
 ## Forms Unit Tests (core/forms_test.go)
 
 | # | Name | What it tests |
 |---|------|---------------|
-| ~~8~~ | ~~`TestScanFormActionsSingle`~~ | ~~Single g-action extraction~~ |
-| ~~9~~ | ~~`TestScanFormActionsMultiple`~~ | ~~Multiple g-actions~~ |
-| ~~10~~ | ~~`TestScanFormActionsDeduplicate`~~ | ~~Duplicate g-action dedup~~ |
-| 11 | `TestScanFormActionsNested` | g-action in nested `{#if}` |
 | 12 | `TestScanFormActionsNoAction` | Form without g-action |
 | 13 | `TestFindFormStruct` | Struct name extraction from handler |
 | 14 | `TestFindFormStructMissing` | Missing struct returns "" |

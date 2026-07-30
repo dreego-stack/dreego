@@ -39,16 +39,22 @@ func TestScanFormActionsMultiple(t *testing.T) {
 	}
 }
 
-func TestScanFormActionsDeduplicate(t *testing.T) {
+func TestScanFormActionsNested(t *testing.T) {
 	nodes := []TemplateNode{
 		{
-			Type:    NodeText,
-			Content: `<form g-action="save"><input g-action="save">`,
+			Type: NodeIf,
+			Cond: "show",
+			Children: []TemplateNode{
+				{
+					Type:    NodeText,
+					Content: `<form g-action="save">`,
+				},
+			},
 		},
 	}
 	actions := scanFormActions(nodes)
 	if len(actions) != 1 {
-		t.Fatalf("expected 1 action after dedup, got %d", len(actions))
+		t.Fatalf("expected 1 action in nested {#if}, got %d", len(actions))
 	}
 	if actions[0] != "save" {
 		t.Errorf("expected 'save', got '%s'", actions[0])
