@@ -53,6 +53,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/findmain-cmd-dir`
 - Full suite: 129 passed, 0 failed
 
+## 2026-07-30 — B8: landing blueprint `config.json` logging type
+
+- Fix B8: `cmd/dreego/blueprints/landing/dreego/config.json` changed `"logging": true` to `"logging": {"enabled": true}`
+- Matches `core.Settings.Logging` struct shape
+- Integration test added: `_tests/Bugs/landing-config-type`
+- Full suite: 130 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

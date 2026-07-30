@@ -8,6 +8,7 @@
 - Fix B4: `hasValidateTag`/`hasFormTag` now only match tags inside the target struct body
 - Fix B5: `splitGoSections` skips leading comments before deciding if a <go> block is a declaration
 - Fix B6: `findMain` now matches `cmd/main.go` in addition to `demo/main.go`
+- Fix B8: landing blueprint `config.json` uses `{"logging": {"enabled": true}}` instead of boolean
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
@@ -18,6 +19,7 @@
 - Test: `_tests/Bugs/form-tag-struct-name` covers B4
 - Test: `_tests/Bugs/splitgo-comment-prefix` covers B5
 - Test: `_tests/Bugs/findmain-cmd-dir` covers B6
+- Test: `_tests/Bugs/landing-config-type` covers B8
 - Test: `_tests/Template/each-loop` converted from expected-failure to expected-success for route-level `{#each}`
 
 ## v0.0.18 (2026-07-29) — Package Restructuring

@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B8 | Landing blueprint `config.json` wrong type | `cmd/dreego/blueprints/landing/dreego/config.json:2` |
 | B11 | `SetReady`/`readyHandler` data race | `core/middleware_health.go:5-8` |
 | B12 | `crypto/rand.Read` errors ignored | `core/middleware_csrf.go:47` |
 | B13 | `scanComponents`/`findLayout` swallow all errors | `core/generate.go:375-446` |
