@@ -1,93 +1,58 @@
-# Test TODO — v0.0.20+
+# Test TODO — v0.0.19
 
-Tests identified by 10 subagent audits. To be implemented incrementally in future sessions.
-
-## Golden Tests (core/testdata/)
-
-| # | Name | What it tests |
-|---|------|---------------|
-| 1 | `component_if` | `{#if}` inside component template |
-| 2 | `component_each` | `{#each}` inside component template |
-| 3 | `error_full` | Error page with `<go>`, `<head>`, `<script>`, `<style>` |
-| 4 | `loop_full` | All `$loop` fields (First, Last, Even, Odd) |
-| 5 | `go_multiple` | Two `<go>` sections |
-| 6 | `go_typed_both` | `<go type="json">` + `<go type="xml">` together |
-| 7 | `go_custom_type` | `<go type="custom">` |
-| 8 | `if_in_each` | `{#if}` nested inside `{#each}` |
-| 9 | `each_in_if` | `{#each}` nested inside `{#if}` |
-| 10 | `form_missing_struct` | `g-action` with no matching struct |
-| 11 | `component_go` | Component with `<go>` block |
-| 12 | `component_style` | Component with `<style>` section |
-| 13 | `slot_bare` | Bare `{#slot}` in component |
-| 14 | `slot_named_default` | Named slot with default content in component |
-| 15 | `component_call_children` | `<@Card>child</@Card>` in route template |
-
-## CSRF Tests
-
-| # | Name | What it tests |
-|---|------|---------------|
-| 16 | `Middleware/csrf-post-pass` | POST with valid CSRF token → 303 |
-| 17 | `Middleware/csrf-post-fail` | POST without CSRF token → 403 |
-| 18 | `Middleware/csrf-disabled-runtime` | `SetCSRF(false)` → POST without token works |
-
-## Session Runtime Tests
-
-| # | Name | What it tests |
-|---|------|---------------|
-| 19 | `Session/set-get-runtime` | Set session value, read it back via HTTP |
-| 20 | `Session/destroy-runtime` | Destroy session, verify value is gone |
+Tests identified by 10 subagent audits, filtered for v0.0.19 relevance.
+Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test-cmd (no subcommand), B7/B9/B10 (fixed or package missing).
 
 ## Config Tests
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 21 | `Config/redirect` | `config.json` redirect rule works |
-| 22 | `Config/rewrite` | `config.json` rewrite rule works |
-| 23 | `Config/invalid-json` | Broken `config.json` doesn't crash generate |
+| 1 | `Config/redirect` | `config.json` redirect rule works |
+| 2 | `Config/rewrite` | `config.json` rewrite rule works |
+| 3 | `Config/invalid-json` | Broken `config.json` doesn't crash generate |
 
 ## CLI Tests
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 24 | `CLI/no-args` | `dreego` without args shows help |
-| 25 | `CLI/unknown-cmd` | `dreego bogus` exits non-zero |
-| 26 | `CLI/help` | `dreego --help` and `dreego -h` show help |
-| 27 | `CLI/new` | `dreego new testapp` creates project |
-| 28 | `CLI/test-cmd` | `dreego test` runs generate + go test |
+| 4 | `CLI/no-args` | `dreego` without args shows help |
+| 5 | `CLI/unknown-cmd` | `dreego bogus` exits non-zero |
+| 6 | `CLI/help` | `dreego --help` and `dreego -h` show help |
+| 7 | `CLI/new` | `dreego new testapp` creates project |
 
 ## Forms Unit Tests (core/forms_test.go)
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 29 | `TestScanFormActionsSingle` | Single g-action extraction |
-| 30 | `TestScanFormActionsMultiple` | Multiple g-actions |
-| 31 | `TestScanFormActionsDeduplicate` | Duplicate g-action dedup |
-| 32 | `TestScanFormActionsNested` | g-action in nested `{#if}` |
-| 33 | `TestScanFormActionsNoAction` | Form without g-action |
-| 34 | `TestFindFormStruct` | Struct name extraction from handler |
-| 35 | `TestFindFormStructMissing` | Missing struct returns "" |
-| 36 | `TestFindFormHandler` | Handler detection |
-| 37 | `TestFindFormHandlerMissing` | Missing handler returns false |
-| 38 | `TestHasValidateTagScoped` | Scoped validate tag detection |
-| 39 | `TestHasFormTagScoped` | Scoped form tag detection |
+| 8 | `TestScanFormActionsSingle` | Single g-action extraction |
+| 9 | `TestScanFormActionsMultiple` | Multiple g-actions |
+| 10 | `TestScanFormActionsDeduplicate` | Duplicate g-action dedup |
+| 11 | `TestScanFormActionsNested` | g-action in nested `{#if}` |
+| 12 | `TestScanFormActionsNoAction` | Form without g-action |
+| 13 | `TestFindFormStruct` | Struct name extraction from handler |
+| 14 | `TestFindFormStructMissing` | Missing struct returns "" |
+| 15 | `TestFindFormHandler` | Handler detection |
+| 16 | `TestFindFormHandlerMissing` | Missing handler returns false |
+| 17 | `TestHasValidateTagScoped` | Scoped validate tag detection |
+| 18 | `TestHasFormTagScoped` | Scoped form tag detection |
 
 ## Validate Unit Tests (core/validate_test.go)
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 40 | `TestApplyRuleRequired` | Required rule |
-| 41 | `TestApplyRuleEmail` | Email rule |
-| 42 | `TestApplyRuleMin` | Min length rule |
-| 43 | `TestApplyRuleMax` | Max length rule |
-| 44 | `TestApplyRuleUnknown` | Unknown rule silently ignored |
-| 45 | `TestAtoi` | Custom atoi function |
-| 46 | `TestValidateFormRequired` | ValidateForm with required |
-| 47 | `TestValidateFormEmail` | ValidateForm with email |
-| 48 | `TestValidateFormMultipleRules` | Multiple rules on one field |
-| 49 | `TestValidateFormNoTag` | Field without validate tag |
-| 50 | `TestBindFormStringField` | BindForm with string field |
-| 51 | `TestBindFormFallbackToLowercase` | BindForm fallback to lowercase |
-| 52 | `TestBindFormNonStringFieldSkipped` | BindForm skips non-string fields |
+| 19 | `TestApplyRuleRequired` | Required rule |
+| 20 | `TestApplyRuleEmail` | Email rule |
+| 21 | `TestApplyRuleMin` | Min length rule |
+| 22 | `TestApplyRuleMax` | Max length rule |
+| 23 | `TestApplyRuleUnknown` | Unknown rule silently ignored |
+| 24 | `TestAtoi` | Custom atoi function |
+| 25 | `TestValidateFormRequired` | ValidateForm with required |
+| 26 | `TestValidateFormEmail` | ValidateForm with email |
+| 27 | `TestValidateFormMultipleRules` | Multiple rules on one field |
+| 28 | `TestValidateFormNoTag` | Field without validate tag |
+| 29 | `TestBindFormStringField` | BindForm with string field |
+| 30 | `TestBindFormFallbackToLowercase` | BindForm fallback to lowercase |
+| 31 | `TestBindFormNonStringFieldSkipped` | BindForm skips non-string fields |
 
 ## Bugs to Fix (before tests)
 
@@ -99,10 +64,7 @@ Tests identified by 10 subagent audits. To be implemented incrementally in futur
 | B4 | `hasValidateTag`/`hasFormTag` ignore `structName` param | `core/forms.go:63-79` |
 | B5 | `splitGoSections` misclassifies type with comment prefix | `core/codegen.go:211-216` |
 | B6 | `findMain` never matches `cmd/` directory | `cmd/dreego/main.go:272` |
-| B7 | `make generate`/`make dev` broken | `Makefile:12,15` |
 | B8 | Landing blueprint `config.json` wrong type | `cmd/dreego/blueprints/landing/dreego/config.json:2` |
-| B9 | `AssertRedirect` uses `strings.Contains` | `dreegotest/dreegotest.go:85` |
-| B10 | `Body()` swallows read errors | `dreegotest/dreegotest.go:61` |
 | B11 | `SetReady`/`readyHandler` data race | `core/middleware_health.go:5-8` |
 | B12 | `crypto/rand.Read` errors ignored | `core/middleware_csrf.go:47` |
 | B13 | `scanComponents`/`findLayout` swallow all errors | `core/generate.go:375-446` |
