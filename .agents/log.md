@@ -8,6 +8,16 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-07-30 — B1: `{#if}`/`{#each}` transpilation in components and routes
+
+- Fix B1: `core/codegen.go` `genTemplateNodeComp` now handles `NodeIf`/`NodeEach`
+- Lexer: `{` treated as template control-flow outside `<go>`/`<head>`/`<script>`/`<style>` only; arbitrary HTML tags tokenized without forced balancing
+- New token `TokenTagSelfClose`; self-closing tags render as `/>`
+- Parser: `TokenTagSelfClose` and arbitrary `TokenTagOpen`/`TokenTagClose` allowed inside `{#if}`/`{#each}`/`{#slot}` nodes
+- Test added: `_tests/Bugs/component-if-each` (B1 regression test)
+- Test updated: `_tests/Template/each-loop` now expects route-level `{#each}` to transpile and build successfully
+- Full suite: 124 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

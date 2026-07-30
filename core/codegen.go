@@ -493,6 +493,43 @@ func genTemplateNodeComp(n TemplateNode) string {
 			return fmt.Sprintf("b.WriteString(%s)", code)
 		}
 		return fmt.Sprintf("b.WriteString(html.EscapeString(%s))", code)
+	case NodeIf:
+		var buf strings.Builder
+		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
+		for _, child := range n.Children {
+			buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+		}
+		if len(n.ElseChildren) > 0 {
+			buf.WriteString("\t} else {\n")
+			for _, child := range n.ElseChildren {
+				buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+			}
+		}
+		buf.WriteString("\t}")
+		return buf.String()
+	case NodeEach:
+		var buf strings.Builder
+		hasElse := len(n.ElseChildren) > 0
+		if hasElse {
+			buf.WriteString(fmt.Sprintf("if len(%s) > 0 {\n", n.Items))
+		}
+		buf.WriteString(fmt.Sprintf("\tfor i, %s := range %s {\n", n.Item, n.Items))
+		buf.WriteString(fmt.Sprintf("\t\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", n.Items))
+		buf.WriteString("\t\t_ = loop\n")
+		for _, child := range n.Children {
+			code := genTemplateNodeComp(child)
+			code = strings.ReplaceAll(code, "$loop.", "loop.")
+			buf.WriteString("\t\t" + code + "\n")
+		}
+		buf.WriteString("\t}\n")
+		if hasElse {
+			buf.WriteString("} else {\n")
+			for _, child := range n.ElseChildren {
+				buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
+			}
+			buf.WriteString("\t}")
+		}
+		return buf.String()
 	case NodeSlot:
 		if n.Content != "" {
 			return fmt.Sprintf("b.WriteString(ctx.Get(\"slot_%s\"))", n.Content)

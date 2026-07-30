@@ -18,7 +18,12 @@ func (p *Parser) parseIfNodes() ([]TemplateNode, error) {
 			break
 		}
 		if tok.Type == TokenTagClose {
-			return nil, fmt.Errorf("unexpected </div> inside {#if}")
+			node, err := p.parseTemplateNode("if")
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+			continue
 		}
 
 		node, err := p.parseTemplateNode("if")
@@ -45,7 +50,12 @@ func (p *Parser) parseElseNodes() ([]TemplateNode, error) {
 			return nil, fmt.Errorf("unexpected {#else} or {#else if} inside {#else}")
 		}
 		if tok.Type == TokenTagClose {
-			return nil, fmt.Errorf("unexpected </div> inside {#else}")
+			node, err := p.parseTemplateNode("if")
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+			continue
 		}
 
 		node, err := p.parseTemplateNode("if")
@@ -69,7 +79,12 @@ func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
 			break
 		}
 		if tok.Type == TokenTagClose {
-			return nil, fmt.Errorf("unexpected </div> inside {#each}")
+			node, err := p.parseTemplateNode("each")
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, node)
+			continue
 		}
 
 		node, err := p.parseTemplateNode("each")

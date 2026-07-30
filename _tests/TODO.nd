@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B1 | `genTemplateNodeComp` missing `NodeIf`/`NodeEach` cases | `core/codegen.go:477-508` |
 | B2 | `BindForm` panics on non-string fields | `core/validate.go:29` |
 | B3 | `scopeCSS` breaks `@media` queries | `core/codegen_template.go:141-154` |
 | B4 | `hasValidateTag`/`hasFormTag` ignore `structName` param | `core/forms.go:63-79` |

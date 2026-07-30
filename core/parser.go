@@ -88,7 +88,15 @@ func (p *Parser) Parse() (*File, error) {
 			}
 			file.Style = &StyleSection{Code: strings.TrimSpace(section)}
 		default:
-			return nil, fmt.Errorf("unknown section <%s> at position %d", tok.Tag, tok.Pos)
+			if file.Template != nil {
+				return nil, fmt.Errorf("unknown section <%s> at position %d", tok.Tag, tok.Pos)
+			}
+			nodes, err := p.parsePlainTemplate()
+			if err != nil {
+				return nil, err
+			}
+			file.Template = &TemplateSection{Nodes: nodes}
+			break
 		}
 	}
 

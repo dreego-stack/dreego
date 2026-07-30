@@ -105,11 +105,8 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		}
 		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children, ElseChildren: elseChildren}, nil
 	case TokenTagClose:
-		if parent == "root" || parent == "component" {
-			p.advance()
-			return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)}, nil
-		}
-		return TemplateNode{}, fmt.Errorf("unexpected </%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
+		p.advance()
+		return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)}, nil
 	case TokenSlot:
 		p.advance()
 		return TemplateNode{Type: NodeSlot, Content: tok.Value}, nil
@@ -121,11 +118,13 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		}
 		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children}, nil
 	case TokenTagOpen:
-		if parent == "root" || parent == "component" {
-			p.advance()
-			return TemplateNode{Type: NodeText, Content: fmt.Sprintf("<%s>", tok.Tag)}, nil
+		p.advance()
+		content := fmt.Sprintf("<%s", tok.Tag)
+		if tok.Attr != "" {
+			content += " " + tok.Attr
 		}
-		return TemplateNode{}, fmt.Errorf("unexpected <%s> inside <%s> at position %d", tok.Tag, parent, tok.Pos)
+		content += ">"
+		return TemplateNode{Type: NodeText, Content: content}, nil
 	case TokenComponentSelfClose:
 		p.advance()
 		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true}, nil

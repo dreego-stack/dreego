@@ -8,10 +8,11 @@ import (
 func Lex(input string) ([]Token, error) {
 	var tokens []Token
 	pos := 0
-	stack := []string{}
+	sectionStack := []string{}
+	sectionTags := map[string]bool{"go": true, "head": true, "script": true, "style": true}
 
 	for pos < len(input) {
-		insideDiv := len(stack) > 0 && stack[len(stack)-1] == "div"
+		inSection := len(sectionStack) > 0
 
 		nextPos := -1
 		nextCh := byte(0)
@@ -22,7 +23,7 @@ func Lex(input string) ([]Token, error) {
 				nextCh = '<'
 				break
 			}
-			if insideDiv && input[i] == '{' {
+			if !inSection && input[i] == '{' {
 				nextPos = i
 				nextCh = '{'
 				break
@@ -51,18 +52,18 @@ func Lex(input string) ([]Token, error) {
 			tok := scanTag(input, &pos)
 			tokens = append(tokens, tok)
 
-			switch tok.Type {
-			case TokenTagOpen:
-				stack = append(stack, tok.Tag)
-			case TokenTagClose:
-				if len(stack) == 0 {
+			if tok.Type == TokenTagOpen && sectionTags[tok.Tag] {
+				sectionStack = append(sectionStack, tok.Tag)
+			}
+			if tok.Type == TokenTagClose && sectionTags[tok.Tag] {
+				if len(sectionStack) == 0 {
 					return nil, fmt.Errorf("unexpected closing tag </%s> at position %d", tok.Tag, tok.Pos)
 				}
-				if stack[len(stack)-1] != tok.Tag {
+				if sectionStack[len(sectionStack)-1] != tok.Tag {
 					return nil, fmt.Errorf("mismatched closing tag </%s>, expected </%s> at position %d",
-						tok.Tag, stack[len(stack)-1], tok.Pos)
+						tok.Tag, sectionStack[len(sectionStack)-1], tok.Pos)
 				}
-				stack = stack[:len(stack)-1]
+				sectionStack = sectionStack[:len(sectionStack)-1]
 			}
 		} else if nextCh == '{' {
 			tok, err := scanBrace(input, &pos)
@@ -73,8 +74,8 @@ func Lex(input string) ([]Token, error) {
 		}
 	}
 
-	if len(stack) > 0 {
-		return nil, fmt.Errorf("unclosed tag <%s>", stack[len(stack)-1])
+	if len(sectionStack) > 0 {
+		return nil, fmt.Errorf("unclosed tag <%s>", sectionStack[len(sectionStack)-1])
 	}
 
 	tokens = append(tokens, Token{Type: TokenEOF, Pos: pos})
@@ -199,9 +200,9 @@ func scanTag(input string, pos *int) Token {
 		return scanComponentTag(input, pos)
 	}
 
-	tags := []string{"go", "div", "head", "script", "style"}
+	knownTags := []string{"go", "div", "head", "script", "style"}
 
-	for _, tag := range tags {
+	for _, tag := range knownTags {
 		closer := "</" + tag + ">"
 		if strings.HasPrefix(remaining, closer) {
 			*pos += len(closer)
@@ -225,6 +226,37 @@ func scanTag(input string, pos *int) Token {
 			*pos += end + 1
 			return Token{Type: TokenTagOpen, Tag: tag, Attr: attrs, Pos: start}
 		}
+	}
+
+	if strings.HasPrefix(remaining, "</") {
+		end := strings.IndexByte(remaining, '>')
+		if end < 0 {
+			*pos += len(remaining)
+			return Token{Type: TokenText, Value: remaining, Pos: start}
+		}
+		tag := remaining[2:end]
+		if idx := strings.IndexByte(tag, ' '); idx >= 0 {
+			tag = tag[:idx]
+		}
+		*pos += end + 1
+		return Token{Type: TokenTagClose, Tag: tag, Pos: start}
+	}
+
+	if remaining[0] == '<' {
+		end := strings.IndexByte(remaining, '>')
+		if end < 0 {
+			*pos += len(remaining)
+			return Token{Type: TokenText, Value: remaining, Pos: start}
+		}
+		body := remaining[1:end]
+		tag := body
+		if idx := strings.IndexByte(body, ' '); idx >= 0 {
+			tag = body[:idx]
+		}
+		attrs := strings.TrimSpace(strings.TrimPrefix(body, tag))
+		attrs = strings.TrimSpace(strings.TrimSuffix(attrs, "/"))
+		*pos += end + 1
+		return Token{Type: TokenTagOpen, Tag: strings.TrimSpace(tag), Attr: attrs, Pos: start}
 	}
 
 	end := strings.IndexByte(remaining, '>')
