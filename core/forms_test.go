@@ -127,3 +127,21 @@ func TestFindFormHandlerMissing(t *testing.T) {
 		t.Error("expected handler to not be found")
 	}
 }
+
+func TestHasValidateTagScoped(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "type MyForm struct {\n\tName string `validate:\"required\"`\n}"},
+	}
+	if !hasValidateTag(goSections, "MyForm") {
+		t.Error("expected validate tag to be found")
+	}
+}
+
+func TestHasFormTagScoped(t *testing.T) {
+	goSections := []GoSection{
+		{Code: "type MyForm struct {\n\tName string `form:\"name\"`\n}"},
+	}
+	if !hasFormTag(goSections, "MyForm") {
+		t.Error("expected form tag to be found")
+	}
+}

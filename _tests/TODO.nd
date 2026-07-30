@@ -3,13 +3,6 @@
 Tests identified by 10 subagent audits, filtered for v0.0.19 relevance.
 Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test-cmd (no subcommand), B7/B9/B10 (fixed or package missing).
 
-## Forms Unit Tests (core/forms_test.go)
-
-| # | Name | What it tests |
-|---|------|---------------|
-| 17 | `TestHasValidateTagScoped` | Scoped validate tag detection |
-| 18 | `TestHasFormTagScoped` | Scoped form tag detection |
-
 ## Validate Unit Tests (core/validate_test.go)
 
 | # | Name | What it tests |
