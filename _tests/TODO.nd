@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Name | What it tests |
 |---|------|---------------|
-| 12 | `TestScanFormActionsNoAction` | Form without g-action |
 | 13 | `TestFindFormStruct` | Struct name extraction from handler |
 | 14 | `TestFindFormStructMissing` | Missing struct returns "" |
 | 15 | `TestFindFormHandler` | Handler detection |

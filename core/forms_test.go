@@ -60,3 +60,32 @@ func TestScanFormActionsNested(t *testing.T) {
 		t.Errorf("expected 'save', got '%s'", actions[0])
 	}
 }
+
+func TestScanFormActionsDeduplicate(t *testing.T) {
+	nodes := []TemplateNode{
+		{
+			Type:    NodeText,
+			Content: `<form g-action="save"><input g-action="save">`,
+		},
+	}
+	actions := scanFormActions(nodes)
+	if len(actions) != 1 {
+		t.Fatalf("expected 1 action after dedup, got %d", len(actions))
+	}
+	if actions[0] != "save" {
+		t.Errorf("expected 'save', got '%s'", actions[0])
+	}
+}
+
+func TestScanFormActionsNoAction(t *testing.T) {
+	nodes := []TemplateNode{
+		{
+			Type:    NodeText,
+			Content: `<form method="post">`,
+		},
+	}
+	actions := scanFormActions(nodes)
+	if len(actions) != 0 {
+		t.Fatalf("expected 0 actions, got %d", len(actions))
+	}
+}
