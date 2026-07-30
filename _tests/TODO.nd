@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B12 | `crypto/rand.Read` errors ignored | `core/middleware_csrf.go:47` |
 | B13 | `scanComponents`/`findLayout` swallow all errors | `core/generate.go:375-446` |
 | B14 | `GenerateComponent` ignores `<go>` after `Go[0]` | `core/codegen.go:448` |
 | B15 | `cleanSegment("[[opt]]")` returns `"[opt]"` | `core/generate.go:348-350` |

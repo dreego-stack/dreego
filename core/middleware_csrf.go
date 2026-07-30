@@ -44,7 +44,9 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 
 func generateCSRFToken() string {
 	b := make([]byte, 32)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("csrf: failed to read random bytes: " + err.Error())
+	}
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
