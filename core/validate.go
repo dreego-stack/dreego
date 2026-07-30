@@ -81,26 +81,38 @@ func applyRule(rule string, val string) string {
 		}
 	case strings.HasPrefix(rule, "min="):
 		min := strings.TrimPrefix(rule, "min=")
-		if len(val) < atoi(min) {
+		n, err := atoi(min)
+		if err != nil {
+			return "min must be a valid number"
+		}
+		if len(val) < n {
 			return "must be at least " + min + " characters"
 		}
 	case strings.HasPrefix(rule, "max="):
 		max := strings.TrimPrefix(rule, "max=")
-		if len(val) > atoi(max) {
+		n, err := atoi(max)
+		if err != nil {
+			return "max must be a valid number"
+		}
+		if len(val) > n {
 			return "must be at most " + max + " characters"
 		}
 	}
 	return ""
 }
 
-func atoi(s string) int {
+func atoi(s string) (int, error) {
+	if s == "" {
+		return 0, fmt.Errorf("empty number")
+	}
 	n := 0
 	for _, c := range s {
-		if c >= '0' && c <= '9' {
-			n = n*10 + int(c-'0')
+		if c < '0' || c > '9' {
+			return 0, fmt.Errorf("invalid digit %q", c)
 		}
+		n = n*10 + int(c-'0')
 	}
-	return n
+	return n, nil
 }
 
 func SaveOld(c *SSRContext, form any) {

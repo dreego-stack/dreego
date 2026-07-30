@@ -50,11 +50,11 @@ func TestApplyRuleUnknown(t *testing.T) {
 }
 
 func TestAtoi(t *testing.T) {
-	if atoi("42") != 42 {
-		t.Errorf("expected 42, got %d", atoi("42"))
+	if n, err := atoi("42"); n != 42 || err != nil {
+		t.Errorf("expected 42, got %d, err %v", n, err)
 	}
-	if atoi("0") != 0 {
-		t.Errorf("expected 0, got %d", atoi("0"))
+	if n, err := atoi("0"); n != 0 || err != nil {
+		t.Errorf("expected 0, got %d, err %v", n, err)
 	}
 }
 
@@ -211,14 +211,14 @@ func TestBindFormEmptyValue(t *testing.T) {
 }
 
 func TestApplyRuleMinNonNumeric(t *testing.T) {
-	if applyRule("min=abc", "x") != "" {
-		t.Error("expected no error when min value is non-numeric")
+	if applyRule("min=abc", "x") == "" {
+		t.Error("expected error when min value is non-numeric")
 	}
 }
 
 func TestApplyRuleMaxNonNumeric(t *testing.T) {
 	if applyRule("max=abc", "x") == "" {
-		t.Error("expected error when max value is non-numeric (atoi returns 0)")
+		t.Error("expected error when max value is non-numeric")
 	}
 }
 
@@ -250,14 +250,14 @@ func TestValidateFormEmptyStruct(t *testing.T) {
 }
 
 func TestAtoiEmpty(t *testing.T) {
-	if atoi("") != 0 {
-		t.Errorf("expected 0, got %d", atoi(""))
+	if n, err := atoi(""); n != 0 || err == nil {
+		t.Errorf("expected error for empty string, got %d, err %v", n, err)
 	}
 }
 
 func TestAtoiNonDigits(t *testing.T) {
-	if atoi("abc") != 0 {
-		t.Errorf("expected 0, got %d", atoi("abc"))
+	if n, err := atoi("abc"); n != 0 || err == nil {
+		t.Errorf("expected error for non-digits, got %d, err %v", n, err)
 	}
 }
 
