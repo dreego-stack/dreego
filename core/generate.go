@@ -351,29 +351,48 @@ func errorCatchPattern(dirPattern string) string {
 }
 
 func cleanSegment(seg string) string {
-	if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
-		return seg[1 : len(seg)-1]
+	for {
+		if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
+			seg = seg[1 : len(seg)-1]
+			continue
+		}
+		if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
+			seg = seg[1 : len(seg)-1]
+			continue
+		}
+		if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
+			seg = seg[1 : len(seg)-1]
+			continue
+		}
+		return seg
 	}
-	if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
-		return seg[1 : len(seg)-1]
-	}
-	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
-		return seg[1 : len(seg)-1]
-	}
-	return seg
 }
 
 func patternSegment(seg string) string {
-	if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
-		return "{" + seg[1:len(seg)-1] + "}"
-	}
-	if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
-		return "{" + seg[1:len(seg)-1] + "}"
-	}
 	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
 		return ""
 	}
-	return seg
+	wrapped := false
+	for {
+		if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
+			seg = seg[1 : len(seg)-1]
+			wrapped = true
+			continue
+		}
+		if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
+			seg = seg[1 : len(seg)-1]
+			wrapped = true
+			continue
+		}
+		break
+	}
+	if !wrapped {
+		return seg
+	}
+	if seg == "" {
+		return ""
+	}
+	return "{" + seg + "}"
 }
 
 func findLayout() (*File, error) {

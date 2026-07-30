@@ -87,6 +87,14 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/component-multi-go`
 - Full suite: 131 passed, 0 failed
 
+## 2026-07-30 — B15: `cleanSegment`/`patternSegment` nested brackets
+
+- Fix B15: `core/generate.go` `cleanSegment` now strips all wrapping bracket/underscore pairs
+- Fix B15: `core/generate.go` `patternSegment` only wraps segments that were actually bracketed/underscored
+- Plain segments like `about` remain literal route parts; `[[opt]]` becomes `/{opt}`
+- Integration test added: `_tests/Bugs/clean-segment-optional`
+- Full suite: 132 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

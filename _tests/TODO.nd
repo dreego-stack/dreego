@@ -7,7 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B15 | `cleanSegment("[[opt]]")` returns `"[opt]"` | `core/generate.go:348-350` |
 | B16 | `extractAttrValues` splits on spaces in brace expressions | `core/codegen_template.go:173-195` |
 | B17 | `atoi` silently eats non-digits | `core/validate.go:92-99` |
 | B18 | `unindent` only handles tabs, not spaces | `core/codegen.go:226-251` |
