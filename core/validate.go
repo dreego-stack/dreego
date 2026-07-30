@@ -25,9 +25,13 @@ func BindForm(r *http.Request, target any) error {
 			tag = strings.ToLower(field.Name)
 		}
 		val := r.FormValue(tag)
-		if val != "" {
-			v.Field(i).SetString(val)
+		if val == "" {
+			continue
 		}
+		if field.Type.Kind() != reflect.String {
+			return fmt.Errorf("unsupported field type %s for field %s", field.Type.Kind(), field.Name)
+		}
+		v.Field(i).SetString(val)
 	}
 	return nil
 }

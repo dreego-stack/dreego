@@ -7,8 +7,6 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B2 | `BindForm` panics on non-string fields | `core/validate.go:29` |
-| B3 | `scopeCSS` breaks `@media` queries | `core/codegen_template.go:141-154` |
 | B4 | `hasValidateTag`/`hasFormTag` ignore `structName` param | `core/forms.go:63-79` |
 | B5 | `splitGoSections` misclassifies type with comment prefix | `core/codegen.go:211-216` |
 | B6 | `findMain` never matches `cmd/` directory | `cmd/dreego/main.go:272` |

@@ -141,15 +141,51 @@ func goLiteral(s string) string {
 func scopeCSS(css string, hash string) string {
 	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
 	var result strings.Builder
-	for _, rule := range strings.Split(css, "}") {
-		rule = strings.TrimSpace(rule)
-		if rule == "" {
+	depth := 0
+	atDepth := 0
+	selectorStart := 0
+
+	for i := 0; i < len(css); i++ {
+		ch := css[i]
+
+		if ch == '{' {
+			selector := strings.TrimSpace(css[selectorStart:i])
+			if depth == 0 {
+				if strings.HasPrefix(selector, "@") {
+					atDepth = 1
+					result.WriteString(selector)
+				} else {
+					result.WriteString(prefix)
+					result.WriteString(selector)
+				}
+			} else if depth == atDepth {
+				result.WriteString(prefix)
+				result.WriteString(selector)
+			} else {
+				result.WriteString(selector)
+			}
+			result.WriteByte('{')
+			depth++
+			selectorStart = i + 1
 			continue
 		}
-		result.WriteString(prefix)
-		result.WriteString(rule)
-		result.WriteString("}\n")
+
+		if ch == '}' {
+			result.WriteByte('}')
+			depth--
+			if depth < atDepth {
+				atDepth = 0
+			}
+			selectorStart = i + 1
+			continue
+		}
 	}
+
+	trailing := strings.TrimSpace(css[selectorStart:])
+	if trailing != "" {
+		result.WriteString(trailing)
+	}
+
 	return strings.TrimSpace(result.String())
 }
 

@@ -11,12 +11,26 @@ timestamp: 2026-07-28T21:33:00Z
 ## 2026-07-30 — B1: `{#if}`/`{#each}` transpilation in components and routes
 
 - Fix B1: `core/codegen.go` `genTemplateNodeComp` now handles `NodeIf`/`NodeEach`
-- Lexer: `{` treated as template control-flow outside `<go>`/`<head>`/`<script>`/`<style>` only; arbitrary HTML tags tokenized without forced balancing
-- New token `TokenTagSelfClose`; self-closing tags render as `/>`
-- Parser: `TokenTagSelfClose` and arbitrary `TokenTagOpen`/`TokenTagClose` allowed inside `{#if}`/`{#each}`/`{#slot}` nodes
+- Lexer: `{` treated as template control-flow outside `<go>`/`<head>`/`<script>`/`<style>`; arbitrary HTML tags tokenized without forced balancing
+- Parser: arbitrary `TokenTagOpen`/`TokenTagClose` allowed inside `{#if}`/`{#each}`/`{#slot}` nodes; attributes preserved
 - Test added: `_tests/Bugs/component-if-each` (B1 regression test)
 - Test updated: `_tests/Template/each-loop` now expects route-level `{#each}` to transpile and build successfully
 - Full suite: 124 passed, 0 failed
+
+## 2026-07-30 — B2: `BindForm` non-string fields
+
+- Fix B2: `core/validate.go` `BindForm` checks `field.Type.Kind()` before `SetString`
+- Returns `fmt.Errorf("unsupported field type %s for field %s", ...)` instead of panicking
+- Unit test: `TestBindFormNonStringFieldReturnsError` replaces `TestBindFormNonStringFieldSkipped`
+- Integration test added: `_tests/Bugs/bindform-non-string`
+- Full suite: 125 passed, 0 failed
+
+## 2026-07-30 — B3: `scopeCSS` preserves `@media` queries
+
+- Fix B3: `core/codegen_template.go` `scopeCSS` rewritten with brace-depth state machine
+- Top-level selectors get `[data-scope=hash]` prefix; `@media` blocks keep their prefix on inner selectors
+- Integration test added: `_tests/Bugs/scoped-css-media`
+- Full suite: 125 passed, 0 failed
 
 ## 2026-07-30 — Random ports + test cleanup standard
 

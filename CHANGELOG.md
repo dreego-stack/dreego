@@ -1,13 +1,15 @@
 # Changelog
 
-## v0.0.19 (2026-07-30) — Bug Fixes Only
+## v0.0.19 (2026-07-30) — Bug Fixes
 
 - Fix B1: `{#if}` and `{#each}` now transpile correctly inside components **and** route templates
+- Fix B2: `BindForm` returns an error instead of panicking on non-string fields
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
 - Parser: unknown root tags and arbitrary open/close tags allowed in template contexts
 - Test: `_tests/Bugs/component-if-each` covers `{#if}`/`{#each}` in components
+- Test: `_tests/Bugs/bindform-non-string` covers B2
 - Test: `_tests/Template/each-loop` converted from expected-failure to expected-success for route-level `{#each}`
 
 ## v0.0.18 (2026-07-29) — Package Restructuring

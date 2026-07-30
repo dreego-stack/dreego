@@ -150,17 +150,13 @@ type bindFormNonString struct {
 	Count int
 }
 
-func TestBindFormNonStringFieldSkipped(t *testing.T) {
+func TestBindFormNonStringFieldReturnsError(t *testing.T) {
 	f := bindFormNonString{Count: 5}
 	r := &http.Request{Form: url.Values{"count": {"99"}}}
-	func() {
-		defer func() {
-			if recover() == nil {
-				t.Error("expected panic for non-string field (B2)")
-			}
-		}()
-		BindForm(r, &f)
-	}()
+	err := BindForm(r, &f)
+	if err == nil {
+		t.Error("expected error for non-string field (B2)")
+	}
 }
 
 func TestSaveOld(t *testing.T) {
