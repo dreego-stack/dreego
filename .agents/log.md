@@ -117,6 +117,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/unindent-spaces`
 - Full suite: 135 passed, 0 failed
 
+## 2026-07-30 — B19: `findFormStruct` regex
+
+- Fix B19: `core/forms.go` `findFormStruct` regex updated to `func\s+Action\s*\(\s*\w+\s+[^,]+,\s*\w+\s+([^,)]+)\s*\)`
+- Now matches complex parameter types (pointers, slices) and named return values
+- Integration test added: `_tests/Bugs/form-handler-named-return`
+- Full suite: 136 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

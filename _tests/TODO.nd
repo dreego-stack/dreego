@@ -7,5 +7,4 @@ Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test
 
 | # | Bug | File:Line |
 |---|-----|-----------|
-| B19 | `findFormStruct` regex fails on named returns | `core/forms.go:46` |
 | B20 | `dreego run -t` uses SIGKILL not SIGTERM | `cmd/dreego/main.go:243` |

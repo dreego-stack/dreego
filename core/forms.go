@@ -2,6 +2,7 @@ package core
 
 import (
 	"regexp"
+	"strings"
 )
 
 var gActionRE = regexp.MustCompile(`g-action="([^"]+)"`)
@@ -43,10 +44,10 @@ func findFormStruct(goSections []GoSection, action string) string {
 	for _, g := range goSections {
 		combined += g.Code + "\n"
 	}
-	re := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(\s*\w+\s+\S+,\s*\w+\s+(\w+)\s*\)`)
+	re := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(\s*\w+\s+[^,]+,\s*\w+\s+([^,)]+)\s*\)`)
 	matches := re.FindStringSubmatch(combined)
 	if len(matches) >= 2 {
-		return matches[1]
+		return strings.TrimSpace(matches[1])
 	}
 	return ""
 }
