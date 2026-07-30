@@ -212,12 +212,20 @@ func extractAttrValues(attrs string) string {
 	}
 	var vals []string
 	inQuote := false
+	braceDepth := 0
 	start := 0
 	for i := 0; i < len(attrs); i++ {
-		if attrs[i] == '"' {
+		ch := attrs[i]
+		if ch == '"' && braceDepth == 0 {
 			inQuote = !inQuote
 		}
-		if attrs[i] == ' ' && !inQuote {
+		if ch == '{' && !inQuote {
+			braceDepth++
+		}
+		if ch == '}' && !inQuote {
+			braceDepth--
+		}
+		if ch == ' ' && !inQuote && braceDepth == 0 {
 			if start < i {
 				vals = append(vals, attrVal(attrs[start:i]))
 			}

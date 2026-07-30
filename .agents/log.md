@@ -95,6 +95,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/clean-segment-optional`
 - Full suite: 132 passed, 0 failed
 
+## 2026-07-30 — B16: `extractAttrValues` spaces in braces
+
+- Fix B16: `core/codegen_template.go` `extractAttrValues` now tracks brace depth
+- Spaces inside `{...}` expressions are no longer treated as attribute separators
+- Integration test added: `_tests/Bugs/component-attr-space`
+- Full suite: 133 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`
