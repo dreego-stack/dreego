@@ -3,24 +3,6 @@
 Tests identified by 10 subagent audits, filtered for v0.0.19 relevance.
 Removed: Golden Tests (no testdata/ infra), CSRF/Session (already covered), test-cmd (no subcommand), B7/B9/B10 (fixed or package missing).
 
-## Validate Unit Tests (core/validate_test.go)
-
-| # | Name | What it tests |
-|---|------|---------------|
-| 19 | `TestApplyRuleRequired` | Required rule |
-| 20 | `TestApplyRuleEmail` | Email rule |
-| 21 | `TestApplyRuleMin` | Min length rule |
-| 22 | `TestApplyRuleMax` | Max length rule |
-| 23 | `TestApplyRuleUnknown` | Unknown rule silently ignored |
-| 24 | `TestAtoi` | Custom atoi function |
-| 25 | `TestValidateFormRequired` | ValidateForm with required |
-| 26 | `TestValidateFormEmail` | ValidateForm with email |
-| 27 | `TestValidateFormMultipleRules` | Multiple rules on one field |
-| 28 | `TestValidateFormNoTag` | Field without validate tag |
-| 29 | `TestBindFormStringField` | BindForm with string field |
-| 30 | `TestBindFormFallbackToLowercase` | BindForm fallback to lowercase |
-| 31 | `TestBindFormNonStringFieldSkipped` | BindForm skips non-string fields |
-
 ## Bugs to Fix (before tests)
 
 | # | Bug | File:Line |
