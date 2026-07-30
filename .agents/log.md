@@ -110,6 +110,13 @@ timestamp: 2026-07-28T21:33:00Z
 - Integration test added: `_tests/Bugs/validate-atoi-non-digit`
 - Full suite: 134 passed, 0 failed
 
+## 2026-07-30 — B18: `unindent` spaces
+
+- Fix B18: `core/codegen.go` `unindent` now strips both tabs and spaces (`TrimLeft(l, " \t")`)
+- Fix B18: `splitGoSections` passes raw `g.Code` (not trimmed) to `unindent` so consistent indentation can be removed
+- Integration test added: `_tests/Bugs/unindent-spaces`
+- Full suite: 135 passed, 0 failed
+
 ## 2026-07-30 — Random ports + test cleanup standard
 
 - All 116 `test.sh` files converted to standardized pattern: `mktemp -d`, `trap`, `go run`

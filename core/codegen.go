@@ -219,7 +219,7 @@ func splitGoSections(sections []GoSection, hasFormActions bool) (pkgCode string,
 		}
 		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
 		if isDeclaration && hasFormActions {
-			pkg = append(pkg, unindent(trimmed))
+			pkg = append(pkg, unindent(g.Code))
 		} else {
 			inl = append(inl, trimmed)
 		}
@@ -239,7 +239,7 @@ func unindent(code string) string {
 		if trimmed == "" {
 			continue
 		}
-		indent := len(l) - len(strings.TrimLeft(l, "\t"))
+		indent := len(l) - len(strings.TrimLeft(l, " \t"))
 		if minIndent < 0 || indent < minIndent {
 			minIndent = indent
 		}

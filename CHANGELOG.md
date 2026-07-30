@@ -16,6 +16,7 @@
 - Fix B15: `cleanSegment` and `patternSegment` now strip all wrapping bracket/underscore pairs from optional/dynamic segments
 - Fix B16: `extractAttrValues` no longer splits on spaces inside brace expressions
 - Fix B17: `atoi` now returns an error for non-digit input; `min=`/`max=` validation reports invalid numbers
+- Fix B18: `unindent` handles both tabs and spaces; `splitGoSections` passes raw go code to unindent
 - Lexer: `{` treated as template control-flow everywhere except inside `<go>`, `<head>`, `<script>`, and `<style>` sections
 - Lexer: arbitrary HTML tags (e.g. `<ul>`, `<input>`) tokenize without mandatory balancing
 - Codegen: `NodeIf`/`NodeEach` cases added to component template generation path
@@ -31,6 +32,7 @@
 - Test: `_tests/Bugs/clean-segment-optional` covers B15
 - Test: `_tests/Bugs/component-attr-space` covers B16
 - Test: `_tests/Bugs/validate-atoi-non-digit` covers B17
+- Test: `_tests/Bugs/unindent-spaces` covers B18
 - Test: `_tests/Template/each-loop` converted from expected-failure to expected-success for route-level `{#each}`
 
 ## v0.0.18 (2026-07-29) — Package Restructuring
