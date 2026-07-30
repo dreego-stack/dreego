@@ -16,8 +16,31 @@ require codeberg.org/dreego/dreego v0.0.0
 replace codeberg.org/dreego/dreego => $realrepo
 EOF
 
-go run $realrepo/cmd/dreego init .
-sed -i 's|_ "gen"|_ "t/dreego/gen"|' main.go
+cat > main.go << 'GO'
+package main
+
+import (
+	_ "t/dreego/gen"
+
+	core "codeberg.org/dreego/dreego/core"
+)
+
+func main() {
+	core.Listen(":8080")
+}
+GO
+
+mkdir -p dreego/routes
+
+cat > dreego/routes/get.dreego << 'DREEGO'
+<go>
+    c.SetSessionVal("key", "val")
+    v := c.SessionVal("key")
+    _ = v
+</go>
+<div><p>session set/get</p></div>
+DREEGO
+
 go run $realrepo/cmd/dreego generate
 go build -o /dev/null .
 echo ok

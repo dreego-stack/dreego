@@ -7,8 +7,10 @@ workdir="$(mktemp -d)"
 trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
+apk add --no-cache curl >/dev/null 2>&1 || true
 
-port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
+port=$((port % 50000 + 10000))
 
 cat > go.mod << EOF
 module t
@@ -43,15 +45,14 @@ func main() {
 GO
 sed -i "s/8080/$port/" main.go
 go run $realrepo/cmd/dreego generate 2>&1
-go build -o /tmp/srv .
-/tmp/srv &
+go build -o $workdir/srv .
+$workdir/srv &
 PID=$!
-trap "kill $PID 2>/dev/null" EXIT
-sleep 1
-COOKIE_JAR=$(mktemp)
+trap "kill $PID 2>/dev/null; rm -rf $workdir" EXIT
+for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/ && break; sleep 0.1; done
+COOKIE_JAR="$workdir/cookies"
 curl -s -c "$COOKIE_JAR" http://localhost:$port/health > /dev/null
 CSRF=$(grep csrf_token "$COOKIE_JAR" | awk '{print $NF}')
 CODE=$(curl -s -o /dev/null -w "%{http_code}" -b "$COOKIE_JAR" -H "Content-Type: application/x-www-form-urlencoded" -d "email=test@dreego.dev&csrf_token=$CSRF" http://localhost:$port/)
 [ "$CODE" = "303" ] || { echo "FAIL: expected 303 with valid CSRF, got $CODE"; exit 1; }
-rm "$COOKIE_JAR"
 echo ok

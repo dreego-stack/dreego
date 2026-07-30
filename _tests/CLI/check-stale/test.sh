@@ -31,7 +31,6 @@ DREEGO
 
 go run $realrepo/cmd/dreego generate
 go run $realrepo/cmd/dreego generate --check 2>&1 | grep -q "up-to-date" || { echo "initial check failed"; exit 1; }
-sleep 1
 touch dreego/routes/get.dreego
 if go run $realrepo/cmd/dreego generate --check 2>/dev/null; then echo "expected stale but got up-to-date"; exit 1; fi
 echo ok

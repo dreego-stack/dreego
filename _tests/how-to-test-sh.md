@@ -47,7 +47,8 @@ echo "ok"
 6. **`mkdir -p dreego/routes`** — scaffold minimal project structure as needed
 7. **No files left behind** — test does all I/O inside `$workdir`
 8. **Random port for server tests** — if the test starts an HTTP server, use a random port to avoid conflicts:
-   - Add `port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')` after `cd "$workdir"`
+   - Add `port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
+port=$((port % 50000 + 10000))` after `cd "$workdir"`
    - Write `main.go` with `:8080` inside the heredoc
    - Add `sed -i "s/8080/$port/" main.go` after the `main.go` heredoc (before `go run`)
    - Use `localhost:$port` in all `curl` commands, never `localhost:8080`

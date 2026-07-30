@@ -8,8 +8,10 @@ workdir="$(mktemp -d)"
 trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
+apk add --no-cache curl >/dev/null 2>&1 || true
 
-port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
+port=$((port % 50000 + 10000))
 
 cat > go.mod << EOF
 module t
@@ -35,11 +37,11 @@ func main() { core.Listen(":8080") }
 GO
 sed -i "s/8080/$port/" main.go
 go run $realrepo/cmd/dreego generate 2>&1
-go build -o /tmp/srv .
-/tmp/srv &
+go build -o $workdir/srv .
+$workdir/srv &
 PID=$!
-trap "kill $PID 2>/dev/null" EXIT
-sleep 1
+trap "kill $PID 2>/dev/null; rm -rf $workdir" EXIT
+for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/ && break; sleep 0.1; done
 RESP=$(curl -s http://localhost:$port/)
 echo "$RESP" | grep -q '<h1>hello</h1>' || { echo "FAIL: no HTML fallback, got: $RESP"; exit 1; }
 echo ok

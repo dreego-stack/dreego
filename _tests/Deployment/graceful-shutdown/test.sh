@@ -7,8 +7,10 @@ workdir="$(mktemp -d)"
 trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
+apk add --no-cache curl >/dev/null 2>&1 || true
 
-port=$(awk 'BEGIN{srand();print int(rand()*50000)+10000}')
+port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
+port=$((port % 50000 + 10000))
 
 cat > go.mod << EOF
 module t
@@ -28,10 +30,10 @@ func main() { core.SetLogging(false); core.Listen(":8080") }
 GO
 sed -i "s/8080/$port/" main.go
 go run $realrepo/cmd/dreego generate 2>&1
-go build -o /tmp/srv .
-/tmp/srv &
+go build -o $workdir/srv .
+$workdir/srv &
 PID=$!
-sleep 1
+for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/ && break; sleep 0.1; done
 # verify server is running
 RESP=$(curl -s http://localhost:$port/health)
 [ "$RESP" = "ok" ] || { echo "FAIL: health check failed, got: $RESP"; exit 1; }
