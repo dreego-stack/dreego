@@ -27,7 +27,9 @@ func RequestID() func(http.Handler) http.Handler {
 
 func newID() string {
 	b := make([]byte, 8)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("requestid: failed to read random bytes: " + err.Error())
+	}
 	dst := make([]byte, 16)
 	hex.Encode(dst, b)
 	return string(dst)
