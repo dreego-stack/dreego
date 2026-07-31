@@ -47,7 +47,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.21 tagged — Monorepo plugin layout (`plugins/` + `go.work`). v0.0.20: CSP header + CSRF cookie Secure flag. See TODO.md for next steps.
+v0.0.22 tagged — Single-source versioning: `VERSION` file at repo root is the single truth; CLI derives its version at build/runtime, `_scripts/release.sh` creates the module tags from it. v0.0.21: monorepo plugin layout (`plugins/` + `go.work`). See TODO.md for next steps.
 
 ## File Structure
 

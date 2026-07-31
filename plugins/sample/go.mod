@@ -2,6 +2,4 @@ module codeberg.org/dreego/dreego/plugins/sample
 
 go 1.22
 
-require codeberg.org/dreego/dreego/core v0.0.0
-
-replace codeberg.org/dreego/dreego/core => ../../core
+require codeberg.org/dreego/dreego/core v0.0.22

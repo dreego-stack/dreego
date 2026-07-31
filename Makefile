@@ -7,7 +7,7 @@ down:
 	docker compose down
 
 build:
-	go build -o bin/dreego ./cmd/dreego
+	go build -ldflags "-X main.version=$$(cat VERSION)" -o bin/dreego ./cmd/dreego
 
 generate:
 	go run ./cmd/dreego

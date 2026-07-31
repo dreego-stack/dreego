@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.0.22 (2026-07-31) — Single-Source Versioning + go install Fix
+
+- **Fix:** `go install codeberg.org/dreego/dreego/cmd/dreego@latest` now works. Removed the relative `replace` directive from `cmd/dreego/go.mod` and `plugins/sample/go.mod` (relative replaces are invalid for non-main modules), replaced with a real published `require codeberg.org/dreego/dreego/core v0.0.22`. Local development still resolves `core` via `go.work` (`use ./core`).
+- **Versioning:** New single source of truth `VERSION` file at repo root (`v0.0.22`). The CLI version derives from it at build time (`-ldflags -X main.version`) or, when installed via `go install pkg@tag`, from the module build info.
+- New `dreego version` command prints the CLI version.
+- `dreego new` now requires the CLI's own `core` version instead of a hardcoded one.
+- New `_scripts/release.sh` creates `core/<V>`, `cmd/dreego/<V>`, `plugins/sample/<V>` directory-prefix tags from the `VERSION` file.
+- Full suite: expected pass.
+
 ## v0.0.21 (2026-07-31) — Monorepo Plugin Layout
 
 - Official plugins moved from separate repos into `plugins/` in this repository (one repo, many modules)
