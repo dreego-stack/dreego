@@ -145,14 +145,14 @@ import _ "myapp/plugins/auth"
 
 ## Cluster Plugin (planned)
 
-`dreego-cluster` — distributed state for multi-node deployments. Combines:
+`dreego/plugins/cluster` — distributed state for multi-node deployments. Combines:
 
 ```
-dreego-cluster
+dreego/plugins/cluster
 ├── Node-Discovery       (memberlist / DNS / static)
 ├── Shared-Session-Store (dreego/plugins/session-redis)
 ├── PubSub-Sync          (dreego/plugins/eventbus-redis)
 └── Distributed-Cache    (dreego/plugins/cache-redis)
 ```
 
-A load balancer distributes requests across N Go instances. `dreego-cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.
+A load balancer distributes requests across N Go instances. `dreego/plugins/cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.

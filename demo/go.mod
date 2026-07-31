@@ -1,5 +1,7 @@
 module demo
 
-go 1.26.4
+go 1.22
 
-require codeberg.org/dreego/dreego v0.0.13
+require codeberg.org/dreego/dreego v0.0.0
+
+replace codeberg.org/dreego/dreego => ../

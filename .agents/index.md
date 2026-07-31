@@ -62,13 +62,12 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## Plans & Tips
 
-- [PlanTODO](PlanTODO.md) — Complete plan of all features
+- [Plan](../_todo/plan.md) — Linear reorderable timeline
 - [Tips](tips.md) — 50 tips + checklist
 
 ## External Docs
 
 - [README](../README.md) — Project README
 - [TODO](../TODO.md) — Next code changes
-- [ROADMAP](../ROADMAP.md) — Release pipeline
 - [CHANGELOG](../CHANGELOG.md) — Version history
 - [Docs](../_docs/index.md) — Public documentation

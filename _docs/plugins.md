@@ -15,7 +15,7 @@ Plugins without external dependencies can also be plain packages inside the root
 
 The repository root contains a `go.work` file that links the root module and every plugin module for local development. Consumers of the framework only see the modules they explicitly import.
 
-## Plugin Interface (planned for v0.1.0)
+## Plugin Interface (planned for v0.0.25)
 
 Core defines Go interfaces. Plugins register implementations.
 

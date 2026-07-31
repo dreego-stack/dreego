@@ -27,7 +27,7 @@ core.SetReady(true)  // signal ready
 
 Health endpoints are registered before user routes — they cannot be overridden.
 
-## Security Headers (v0.0.14)
+## Security Headers (v0.0.14, CSP v0.0.20)
 
 Core-fixed middleware that sets security headers on every response:
 

@@ -6,9 +6,10 @@
 dreego generate [--force]
 ```
 
-Transpiles `.dreego` files in `dreego/routes/` to Go code. Creates `dree.go` per route directory and `dreego/gen/dree.go` as central import file.
+Transpiles `.dreego` files in `dreego/routes/` and `dreego/components/` to Go code. Produces split-gen output: `gen/routes.go` + `gen/components.go` + `gen/dree.go` (config + static assets). Files are only written when content changes.
 
 - `--force`: Forces complete regeneration (ignores cache)
+- `--check`: CI mode — exits non-zero when generated files are stale
 
 ## dreego build
 

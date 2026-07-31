@@ -1,7 +1,7 @@
 ---
 id: deployment.1
 title: Deployment Strategy (Docker, Single-Binary, Graceful)
-status: planned
+status: 37
 phase: v0.0.x
 requires:
   - cli.1

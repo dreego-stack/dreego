@@ -1,10 +1,19 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–34 done. Next code: **35**.
+Status via `python _todo/process.py`. Chain 1–36 done. Next code: **37**.
 
 Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (may include breaking changes), `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
-## v0.0.17 (current)
+## v0.0.21 (current)
+
+- **monorepo-plugin-layout** — Official plugins moved into `plugins/` in this repo (chain via v0.0.21 commit)
+
+## v0.0.20
+
+- **security-cookie.1** — Harden session and CSRF cookie flags ✅ (chain 35)
+- **security-csp.1** — Add Content-Security-Policy header ✅ (chain 36)
+
+## v0.0.17
 
 - **deployment.1** — Production Deployment (Graceful Shutdown, Cross-Compile, Docker) ✅
 - **request-id.1** — Request-ID Middleware (X-Request-ID → Context + Logs) ✅
@@ -12,16 +21,6 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 ## v0.0.16
 
 - **form-actions.1** — Form Actions (g-action + auto-validation + redirect) ✅
-
-## v0.0.15
-
-- **api-json.1** — Content-Type Routing (JSON, XML, Custom) ✅
-
-## v0.0.14
-
-- **health-checks.1** — /health + /ready Endpoints ✅
-- **security-headers.1** — Security Headers ✅
-- **compression.1** — Gzip Compression Middleware ✅
 
 ## Available Next
 
@@ -39,8 +38,6 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 
 - **codegen-errors.1** — Replace silent fails in CodeGen with explicit errors.
 - **servemux-cache.1** — Build and cache the middleware/routing stack once at startup.
-- **security-cookie.1** — Harden session and CSRF cookie flags.
-- **security-csp.1** — Add Content-Security-Policy header.
 - **security-session.1** — Document or encrypt sensitive session payload.
 - **golden-tests-core.1** — Add golden-code tests for generated Go output.
 - **docs-extensibility.1** — Adapt `dreego docs` to consume docs from `plugins/<name>/_docs/` (local) or external repos.

@@ -70,20 +70,20 @@ Three principles:
 - **XML API** — `c.XML(200, data)`, auto `Content-Type: application/xml`
 - **Custom** — `c.Write(status, contentType, body)` for arbitrary formats
 
-### Middleware (v0.0.14)
+### Middleware (v0.0.14, v0.0.20)
 - **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `core.SetReady(bool)`
-- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy
+- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (override via `core.SetCSP`)
 - **Gzip Compression** — `Accept-Encoding` → compressed response wrapping
 - **Recovery** — Panic → 500 with stack trace
 - **Request Logging** — JSONL format with duration, IP, status
 - **Session** — Cookie store via `core.SetSessionStore()`, `c.SetSessionVal()`
-- **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE
+- **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
 
 ### Developer Experience
 - **CLI** — `dreego init`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
 - **Auto-Imports** — `fmt`, `html`, `strings`, `net/http` added to generated code as needed
-- **112 Integration Tests** — Docker-based, all pass
+- **141 Integration Tests** — Docker-based, all pass
 
 ## Quick Start
 
@@ -121,6 +121,20 @@ dreego/
 │   └── dree.go
 └── main.go
 ```
+
+## Plugins
+
+Official plugins live in `plugins/` in this repository. Each plugin with external dependencies gets its own `go.mod`; Core stays dependency-free and never imports a plugin package.
+
+```
+plugins/
+├── sample/             # minimal example plugin
+├── auth/               # future: OAuth2, JWT, sessions
+├── db/                 # future: SQL drivers, migrations
+└── ...
+```
+
+→ **[Plugin System](https://codeberg.org/dreego/dreego/src/branch/main/_docs/plugins.md)**
 
 ## Documentation
 

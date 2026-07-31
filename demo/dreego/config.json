@@ -1,5 +1,5 @@
 {
-    "logging": true,
+    "logging": {"enabled": true},
     "redirects": [],
     "rewrites": []
 }

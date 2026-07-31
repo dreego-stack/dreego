@@ -47,24 +47,26 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.20 tagged — CSP header + CSRF cookie Secure flag. Monorepo plugin layout introduced (`plugins/`). See TODO.md for next steps.
+v0.0.21 tagged — Monorepo plugin layout (`plugins/` + `go.work`). v0.0.20: CSP header + CSRF cookie Secure flag. See TODO.md for next steps.
 
 ## File Structure
 
 ```
 repo-root/
 ├── TODO.md                 ← NEXT code changes (short, prioritized)
-├── ROADMAP.md              ← Release pipeline (high-level)
+├── _todo/                  ← Blockwebchain task system (blocks, plan.md)
 ├── CHANGELOG.md            ← What came in which version
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
+├── go.work                 ← Links root module + plugin modules
 ├── _docs/                  ← Public documentation
 ├── _tests/                 ← Integration tests (Docker, `make test`)
+│   └── core/<Category>/    ← Core/framework test suites
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
 ├── core/                   ← Core package (single package, no external deps)
 ├── cmd/dreego/             ← CLI binary
-├── dreegotest/             ← Testing package (go test integration)
+├── plugins/                ← Official plugins (each with own go.mod if deps needed)
 │
 .agents/                    ← Knowledge Base (OKF format)
 ├── index.md                 ← Start here (OKF TOC)
@@ -108,8 +110,8 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 
 ## Bug → Test → Fix Workflow
 
-Every bug gets a permanent test in `_tests/Bugs/<name>/`. Workflow:
-1. Bug found → create `_tests/Bugs/<name>/` that reproduces the bug (must FAIL)
+Every bug gets a permanent test in `_tests/core/Bugs/<name>/`. Workflow:
+1. Bug found → create `_tests/core/Bugs/<name>/` that reproduces the bug (must FAIL)
 2. Fix code until `make test` shows the new test GREEN
 3. Bug is permanently covered — no regression risk
 
@@ -119,7 +121,7 @@ Every bug gets a permanent test in `_tests/Bugs/<name>/`. Workflow:
 
 Every feature follows this cycle:
 
-1. **`_tests/`** — Create integration test in `_tests/<FeatureGroup>/<name>/test.sh`
+1. **`_tests/`** — Create integration test in `_tests/core/<FeatureGroup>/<name>/test.sh`
 2. **Code** — Implement in `core/` (one logical thing per file, max 120 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN

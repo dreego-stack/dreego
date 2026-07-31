@@ -24,7 +24,7 @@ The configuration file is located at `dreego/config.json` in the project root.
 |-----------|--------|---------|-------------------------------------|
 | `enabled` | bool   | `true`  | Enable RequestLogging middleware    |
 
-When `false`, no request logging is performed. A plugin (`dreego-logging`) can take over the logging function in V2.
+When `false`, no request logging is performed. A plugin (`plugins/logging`) can take over the logging function in a future version.
 
 ## redirects
 

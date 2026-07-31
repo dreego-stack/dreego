@@ -9,7 +9,7 @@ timestamp: 2026-07-28T00:00:00Z
 # Routing, Plugin Routes & Component System
 
 **Date:** 2026-07-28 (updated after review)
-**Status:** Accepted
+**Status:** Accepted (plugin discovery in Decision 2 superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) v0.0.21)
 **Replaces:** [file-based-routing](file-based-routing.md) (updated)
 
 ## Context / Open Questions
@@ -60,32 +60,38 @@ Each route package (including plugin packages) registers itself via `init()` →
 
 ## Decision 2: Plugin Routes via init() — No dreego generate Needed
 
-The plugin author commits generated `dree.go` files IN the plugin repo.
+> **Superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21):** official plugins now live under `plugins/<name>/` in this repository. Plugin `.dreego` sources and components are discovered by filesystem scan in the same repo, not via `go list -m -json` against external module repos. The `init()` registration pattern below remains valid; only the repository/discovery model has changed. Community plugins in separate repos can still follow the original workflow.
+
+The plugin author commits generated `dree.go` files IN the plugin module.
 
 ```
-dreego-auth/
+plugins/auth/
 ├── routes/
 │   ├── login.go          ← pre-generated (contains init() + runtime.Register)
 │   └── ...
-├── go.mod
+├── go.mod                ← module codeberg.org/dreego/dreego/plugins/auth
 ```
 
-Plugin developer workflow:
+Plugin developer workflow (official, monorepo):
 ```bash
-cd dreego-auth
+cd plugins/auth
 dreego generate               # generates routes/*.go
 git add routes/*.go && git commit
-git tag v0.1.0 && git push
 ```
 
-User workflow:
+User workflow (official, monorepo):
 ```bash
-go get github.com/dreego/dreego-auth@v0.1.0
-# dreego generate adds the import to gen/routes.go:
-#   _ "github.com/dreego/dreego-auth"
+# go.work already links plugins/auth for local dev
+# main.go imports _ "codeberg.org/dreego/dreego/plugins/auth"
 ```
 
-`dreego generate` detects plugin packages via `go.mod` + `go list -m -json all` and adds their import to `gen/routes.go`. No scanning of vendor/module cache needed — `go build` automatically fetches the correct version.
+Community plugin (separate repo) workflow:
+```bash
+go get codeberg.org/dreego/dreego-community-auth@v0.1.0
+# dreego generate adds the import to gen/routes.go
+```
+
+`dreego generate` detects official plugin packages via filesystem scan under `plugins/<name>/` and community plugins via `go.mod` + `go list -m -json all`. `go build` automatically links the correct version.
 
 ## Decision 3: Routing Conventions
 

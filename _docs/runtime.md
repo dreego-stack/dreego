@@ -44,6 +44,7 @@ Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Pat
 |----------|-------------|
 | `core.SetLogging(bool)` | Enable/disable request logging (JSONL format) |
 | `core.SetCSRF(bool)` | Enable/disable CSRF protection (default: on) |
+| `core.SetCSP(value string)` | Override the Content-Security-Policy header (empty falls back to `default-src 'self'`) |
 | `core.SetErrorHandler(code, handler)` | Custom handler for HTTP errors (500 used by Recovery) |
 
 ## Configuration File
@@ -52,7 +53,7 @@ Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Pat
 
 ```json
 {
-    "logging": true,
+    "logging": {"enabled": true},
     "redirects": [
         {"from": "/old", "to": "/new", "status": 301}
     ],

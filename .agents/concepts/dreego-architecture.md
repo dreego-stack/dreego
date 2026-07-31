@@ -3,8 +3,8 @@
 type: Concept
 title: "Dreego Architecture"
 description: "Compile-time web framework architecture with transpiler, router, and plugin system"
-tags: [v0.0.13]
-timestamp: 2026-07-28T21:33:00Z
+tags: [v0.0.21]
+timestamp: 2026-07-31T07:00:00Z
 ---
 # Dreego Architecture
 
@@ -13,7 +13,7 @@ timestamp: 2026-07-28T21:33:00Z
 Dreego is a compile-time web framework for Go. It consists of two main components:
 
 1. **Dreego Transpiler** (`dreego generate`) — Converts `.dreego` files into Go code
-2. **Dreego Runtime** (`import "github.com/.../dreego"`) — Provides router, context, plugin system
+2. **Dreego Runtime** (`import "codeberg.org/dreego/dreego/core"`) — Provides router, context, plugin system
 
 ## Architecture Diagram
 
@@ -44,13 +44,13 @@ Dreego is a compile-time web framework for Go. It consists of two main component
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Dreego Addons                          │
-│  dreego-auth, dreego-map, dreego-ui, dreego-admin, ...      │
+│                    Dreego Plugins                          │
+│  plugins/auth, plugins/map, plugins/ui, plugins/admin, ... │
 ├─────────────────────────────────────────────────────────┤
 │                    Dreego Core                            │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐  │
 │  │ Router   │ │ Context  │ │ Plugin   │ │ Middleware  │  │
-│  │ (Chi)    │ │ (Req/Res)│ │ System   │ │ System      │  │
+│  │(net/http)│ │ (Req/Res)│ │ System   │ │ System      │  │
 │  └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
 ├─────────────────────────────────────────────────────────┤
 │              Dreego Transpiler (dreego generate)           │
@@ -60,7 +60,7 @@ Dreego is a compile-time web framework for Go. It consists of two main component
 ├─────────────────────────────────────────────────────────┤
 │              External Dependencies                        │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐  │
-│  │ chi      │ │ validator│ │ Tailwind │ │ HTMX/Alpine │  │
+│  │ net/http │ │ (stdlib) │ │ Tailwind │ │ HTMX/Alpine │  │
 │  └──────────┘ └──────────┘ └──────────┘ └────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -72,8 +72,8 @@ Browser Request
       │
       ▼
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│ Chi Router  │ ──▶ │ Middleware  │ ──▶ │ Dreego        │
-│             │     │ (Auth, etc) │     │ Handler      │
+│ net/http    │ ──▶ │ Middleware  │ ──▶ │ Dreego        │
+│ ServeMux    │     │ (Auth, etc) │     │ Handler      │
 └─────────────┘     └─────────────┘     └──────┬──────┘
                                                │
                               ┌────────────────┼────────────────┐
@@ -96,16 +96,19 @@ Browser Request
                                        Browser Response
 ```
 
-## Project Structure (planned)
+## Project Structure
 
 ```
 dreego/
 ├── cmd/
 │   └── dreego/
 │       └── main.go           # CLI: dreego generate, dreego dev, dreego build
-├── dreego-core/               # Core library (single package)
-├── dreego-plugin/             # Plugins (future)
+├── core/                      # Core library (single package, stdlib only)
+├── plugins/                   # Official plugins (own go.mod when deps needed)
+├── _tests/                    # Integration tests
+│   └── core/<Category>/
 ├── go.mod
+├── go.work
 └── go.sum
 ```
 
@@ -113,7 +116,7 @@ dreego/
 
 - [x] Transpiler: `.dreego` → `.go`
 - [x] 3 Sections: `<go>`, Template, `<style>`
-- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
 - [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
 - [x] Static Assets: `dreego/static/` → inline handler + MIME types + collision check
@@ -121,12 +124,18 @@ dreego/
 - [x] Scaffolding: `dreego new` with landing blueprint (v0.0.13)
 - [x] Split-Gen: `routes.go` + `components.go` + `dree.go` with `isUpToDate()` caching (v0.0.13)
 - [x] Health Checks: `/health` + `/ready` endpoints (v0.0.14)
-- [x] Security Headers: CSP, nosniff, frame-options (v0.0.14)
+- [x] Security Headers: nosniff, frame-options, referrer-policy, permissions-policy (v0.0.14)
+- [x] CSP header via `core.SetCSP` (v0.0.20)
 - [x] Gzip Compression: compress/gzip middleware (v0.0.14)
 - [x] Content-Type Routing: `<go type="json|xml">` with c.JSON/XML/Bind/Write (v0.0.15)
+- [x] Form Actions: `g-action` + auto-validation + redirect (v0.0.16)
+- [x] Production Deployment: graceful shutdown, cross-compile, Docker (v0.0.17)
+- [x] Request-ID Middleware (v0.0.17)
+- [x] CSRF cookie Secure flag TLS-aware (v0.0.20)
+- [x] Monorepo plugin layout: `plugins/` + `go.work` (v0.0.21)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
-- [ ] Plugin system (minimal)
+- [ ] Plugin interface (frozen contract)
 
 ## Components (v0.0.5+)
 

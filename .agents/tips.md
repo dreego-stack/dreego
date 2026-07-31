@@ -76,11 +76,11 @@ timestamp: 2026-07-28T00:00:00Z
 
 | # | Tip | Status |
 |---|------|--------|
-| 41 | Secure HTTP headers (CSP, X-Frame-Options) | planned |
-| 42 | Gzip/Brotli compression | planned |
+| 41 | Secure HTTP headers (CSP, X-Frame-Options) | ✅ CSP v0.0.20, headers v0.0.14 |
+| 42 | Gzip/Brotli compression | ✅ Gzip v0.0.14 |
 | 43 | Zero-allocation in hot path | planned (V2) |
-| 44 | CSRF protection | planned (decision made) |
-| 45 | Graceful shutdown | planned |
+| 44 | CSRF protection | ✅ v0.0.3, Secure flag v0.0.20 |
+| 45 | Graceful shutdown | ✅ v0.0.17 |
 | 46 | VS Code Syntax Highlighting Extension | planned |
 | 47 | ARIA warnings in CLI | planned (V3) |
 | 48 | Go doc comments for core | planned |

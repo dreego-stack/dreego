@@ -72,12 +72,12 @@ graph TD
     style security_cookie_1 fill:#d4edda,stroke:#28a745
     security_csp_1["36 Add Content-Security-Policy Header"]
     style security_csp_1 fill:#d4edda,stroke:#28a745
+    deployment_1["37 Deployment Strategy (Docker, Single-Bina"]
+    style deployment_1 fill:#d4edda,stroke:#28a745
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#fff3cd,stroke:#ffc107
     codegen_errors_1["Replace Silent CodeGen Failures with Err"]
     style codegen_errors_1 fill:#fff3cd,stroke:#ffc107
-    deployment_1["Deployment Strategy (Docker, Single-Bina"]
-    style deployment_1 fill:#fff3cd,stroke:#ffc107
     dev_server_1["Dev Server with Hot Reload"]
     style dev_server_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
@@ -177,7 +177,6 @@ graph TD
     components_1 --> dreego_icons_1
     plugin_interface_1 --> dreego_storage_1
     storage_interface_1 --> dreego_storage_1
-    middleware_1 --> request_id_1
     plugin_interface_1 --> dreego_seo_1
     middleware_hooks_1 --> dreego_seo_1
     plugin_interface_1 --> devtools_1
@@ -218,10 +217,6 @@ graph TD
     middleware_hooks_1 --> dreego_analytics_1
     plugin_interface_1 --> email_interface_1
     plugin_interface_1 --> dreego_polar_1
-    context_refactoring_1 --> form_actions_1
-    routing_1 --> form_actions_1
-    csrf_1 --> form_actions_1
-    session_1 --> form_actions_1
     plugin_interface_1 --> queue_interface_1
     plugin_interface_1 --> addon_ecosystem_1
     components_1 --> addon_ecosystem_1
@@ -238,7 +233,6 @@ graph TD
     session_1 --> security_session_1
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
-    cli_1 --> deployment_1
     plugin_interface_1 --> dreego_i18n_1
     middleware_hooks_1 --> dreego_i18n_1
     plugin_interface_1 --> dreego_search_1
@@ -259,6 +253,7 @@ graph TD
     routing_1 --> flat_gen_1
     transpiler_1 --> context_refactoring_1
     transpiler_1 --> layout_1
+    middleware_1 --> request_id_1
     transpiler_1 --> middleware_1
     routing_1 --> components_1
     security_headers_1 --> security_csp_1
@@ -271,6 +266,10 @@ graph TD
     routing_1 --> bracket_routes_1
     transpiler_1 --> static_assets_1
     routing_1 --> static_assets_1
+    context_refactoring_1 --> form_actions_1
+    routing_1 --> form_actions_1
+    csrf_1 --> form_actions_1
+    session_1 --> form_actions_1
     component_handler_1 --> named_slots_1
     routing_1 --> error_pages_1
     recovery_1 --> error_pages_1
@@ -288,6 +287,7 @@ graph TD
     context_refactoring_1 --> session_1
     session_1 --> security_cookie_1
     csrf_1 --> security_cookie_1
+    cli_1 --> deployment_1
     context_refactoring_1 --> component_handler_1
     middleware_1 --> config_1
     cli_1 --> ci_check_1
@@ -331,4 +331,5 @@ graph TD
     form_actions_1 -.->|chain| request_id_1
     request_id_1 -.->|chain| security_cookie_1
     security_cookie_1 -.->|chain| security_csp_1
+    security_csp_1 -.->|chain| deployment_1
 ```

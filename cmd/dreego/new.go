@@ -59,7 +59,7 @@ func cmdNew(args []string) {
 		os.Exit(1)
 	}
 
-	dreegoCoreVersion := "v0.0.14"
+	dreegoCoreVersion := "v0.0.21"
 
 	c := exec.Command("go", "mod", "init", projName)
 	c.Dir = target

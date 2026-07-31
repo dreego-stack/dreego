@@ -64,7 +64,7 @@
 
 - **BREAKING**: `dreego-core/` → `core/` — import path changes from `codeberg.org/dreego/dreego/dreego-core` to `codeberg.org/dreego/dreego/core`
 - **BREAKING**: `dreego-plugin/` removed — plugins live in separate repos under `codeberg.org/dreego/<name>`
-- `_docs/ plugins.md`: plugin architecture overview, planned plugins, interface contracts
+- `_docs/plugins.md`: plugin architecture overview, planned plugins, interface contracts
 - AGENTS.md updated to reflect new directory structure
 
 ## v0.0.17 (2026-07-29) — Production Deployment + Request-ID

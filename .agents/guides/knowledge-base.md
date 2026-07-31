@@ -18,7 +18,7 @@ Maintain the `.agents/` Obsidian-style knowledge vault for the Dreego project.
 - After researching a topic → write reference in `KB/`
 - When a concept is fully formed → write in `concepts/`
 - When project conventions change → update `guides/`
-- Always update `_index.md` when adding new files
+- Always update `index.md` when adding new files
 
 ## File conventions
 
@@ -29,7 +29,7 @@ Maintain the `.agents/` Obsidian-style knowledge vault for the Dreego project.
 
 ## Priority order when updating
 
-1. `_index.md` — TOC, always first
+1. `index.md` — TOC, always first
 2. `decisions/` — ADRs for architecture
 3. `concepts/` — fleshed-out feature designs
 4. `KB/` — external research, reference material

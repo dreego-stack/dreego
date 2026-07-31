@@ -1,5 +1,5 @@
 # dreego/plugins/sample
 
-Example plugin showing the monorepo layout. It imports `codeberg.org/dreego/dreego/core` via the local replace directive in `go.work`.
+Example plugin showing the monorepo layout. It imports `codeberg.org/dreego/dreego/core` via a `replace` directive in `plugins/sample/go.mod`, and `go.work` links the modules for local development.
 
 Core must never import this package or any other plugin package.

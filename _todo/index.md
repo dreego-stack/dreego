@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-31T05:12:12Z
+Generated: 2026-07-31T05:44:44Z
 
-Chain: 1–36 | Next status code: **37**
+Chain: 1–37 | Next status code: **38**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -41,11 +41,11 @@ Chain: 1–36 | Next status code: **37**
 - `34` **request-id.1** — Request-ID Middleware (X-Request-ID)
 - `35` **security-cookie.1** — Harden Session and CSRF Cookie Flags
 - `36` **security-csp.1** — Add Content-Security-Policy Header
+- `37` **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
 
 ## AVAILABLE NEXT
 - **api-swagger.1** — Swagger/OpenAPI Auto-Generation
 - **codegen-errors.1** — Replace Silent CodeGen Failures with Errors
-- **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
 - **dev-server.1** — Dev Server with Hot Reload
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-feedback.1** — dreego feedback (POST endpoint)
@@ -98,4 +98,4 @@ Chain: 1–36 | Next status code: **37**
 - **live-reload.1** — Live Reload Proxy (SSE + Script Injection)
 - **smart-recompile.1** — Smart Recompile (Text vs Go Detection)
 
-chain: 36 | web: 50 | next code: 37
+chain: 37 | web: 49 | next code: 38

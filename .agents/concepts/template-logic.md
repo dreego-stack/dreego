@@ -29,7 +29,7 @@ timestamp: 2026-07-28T21:33:00Z
 | `{#switch}` / `{#case}` | ❌ V2 | — |
 | `{#await}` | ❌ V2 | — |
 | `{#let}` | ❌ V2 | — |
-| `{#each else if}` | ❌ | Not yet implemented |
+| `{#else if}` / `{#elseif}` | ✅ | Implemented v0.0.19 |
 
 ## {#if} / {#else}
 
@@ -44,7 +44,7 @@ timestamp: 2026-07-28T21:33:00Z
 **Rules:**
 - Supports arbitrary Go conditions (variables from `<go>`)
 - `{#else}` optional
-- `{#else if}` not yet implemented
+- `{#else if}` / `{#elseif}` — implemented (v0.0.19)
 
 ## {#each} / {#each else} / $loop
 

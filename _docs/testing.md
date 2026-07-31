@@ -1,7 +1,7 @@
 # Testing Strategy
 
 Every area of the framework needs positive (confirm behavior) and negative (detect errors early) tests.
-Tests run as integration tests in `_tests/` via Docker (`make test`). Bugs permanently under `_tests/Bugs/`.
+Tests run as integration tests in `_tests/` via Docker (`make test`). Bugs permanently under `_tests/core/Bugs/`.
 
 ## 1. Transpiler
 

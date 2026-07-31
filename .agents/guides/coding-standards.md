@@ -1,10 +1,9 @@
-
 ---
 type: Guide
 title: Coding Standards for Dreego
 description: Code conventions: file size limits, imports, error handling, testing for Dreego
-tags: [v0.0.10]
-timestamp: 2026-07-28T00:00:00Z
+tags: [v0.0.21]
+timestamp: 2026-07-31T07:00:00Z
 ---
 # Coding Standards for Dreego
 
@@ -14,7 +13,7 @@ timestamp: 2026-07-28T00:00:00Z
 - **One logical thing per file**
 - **No comments** — code speaks for itself
 - **Package names** short, clean, without hyphens
-- **Go 1.26+**, prefer standard library
+- **Go 1.22+**, prefer standard library
 
 ## Build & Run
 
@@ -32,9 +31,7 @@ import (
     "context"
     "log"
 
-    "github.com/go-chi/chi/v5"
-
-    core "codeberg.org/dreego/dreego/dreego-core"
+    core "codeberg.org/dreego/dreego/core"
 )
 ```
 

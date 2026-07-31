@@ -64,4 +64,4 @@ port=$((port % 50000 + 10000))` after `cd "$workdir"`
 
 ## Example
 
-See [Static/subdir/test.sh](./Static/subdir/test.sh) for a complete working example.
+See [Static/subdir/test.sh](./core/Static/subdir/test.sh) for a complete working example.
