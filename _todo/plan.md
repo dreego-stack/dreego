@@ -4,30 +4,30 @@ Loose, reorderable timeline. Versioning stays at `v0.x.y` for the foreseeable fu
 
 Official plugins live in `plugins/` in this repository. Each plugin with external dependencies gets its own `go.mod`. Core must never import a plugin package — plugins depend on Core, never the other way around.
 
-## v0.0.20
+## Done
 
-- `security-cookie.1` — harden session and CSRF cookie flags
-- `security-csp.1` — add Content-Security-Policy header
+- **v0.0.20** — `security-cookie.1`, `security-csp.1`
+- **v0.0.21** — monorepo plugin layout (`plugins/`, `go.work`, test moves)
 
-## v0.0.21
+## v0.0.22
 
 - `servemux-cache.1` — cache built middleware/router stack
 - `codegen-errors.1` — replace silent CodeGen failures with errors
 - `security-session.1` — document or encrypt session payload
 
-## v0.0.22
+## v0.0.23
 
 - `dreegotest.1` — testing package for routes and components
 - `golden-tests-core.1` — golden tests for generated Go code
 - `typed-forms.1` — int/bool/slice binding, custom validators, improve `email` validator
 
-## v0.0.23
+## v0.0.24
 
 - `frontmatter.1` — parse frontmatter and expose typed metadata
 - `dev-server.1` — `dreego dev` with file watcher and auto-regenerate
 - `docs-extensibility.1` — design how `dreego docs` can read plugin docs
 
-## v0.0.24
+## v0.0.25
 
 - `plugin-interface.1` — frozen plugin contract
 - `middleware-hooks.1` — plugin middleware hooks via app.Use
@@ -58,7 +58,7 @@ After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plug
 - dreego-admin
 - dreego-devtools
 
-## v0.0.25
+## v0.0.26
 
 - `documentation.1` — docs site, tutorial, examples
 - `api-swagger.1` — Swagger/OpenAPI auto-generation
