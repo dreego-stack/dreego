@@ -8,6 +8,16 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-07-31 — v0.0.20 Security: CSP header + CSRF cookie Secure flag
+
+- `core/middleware_security.go`: `SecurityHeaders` now sets `Content-Security-Policy` header with a default allowing `self`, `unsafe-inline` for scripts/styles (HTMX/Alpine + scoped CSS), and common CDN/font sources
+- `core.SetCSP(value string)` allows overriding the policy from `main.go` (e.g. `core.SetCSP("default-src 'none'")`)
+- `core/middleware_csrf.go`: readable `csrf_token` cookie now sets `Secure` when the request is over TLS (`r.TLS != nil`), keeping it accessible to JS (`HttpOnly: false`) but protected in transit
+- SameSite already set to `Strict`; session cookie SameSite stays unset-by-default but Secure passes through via `Options`
+- Unit tests added: `core/middleware_csrf_test.go`, `core/middleware_security_test.go`, `core/session_secure_test.go`
+- Integration tests added: `_tests/Middleware/csp-runtime`, `_tests/Middleware/csp-override`, `_tests/Middleware/csrf-cookie-samesite`
+- Full suite: 141 passed, 0 failed
+
 ## 2026-07-30 — B1: `{#if}`/`{#each}` transpilation in components and routes
 
 - Fix B1: `core/codegen.go` `genTemplateNodeComp` now handles `NodeIf`/`NodeEach`

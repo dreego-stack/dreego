@@ -17,13 +17,14 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 					Path:     "/",
 				})
 			}
-			http.SetCookie(w, &http.Cookie{
-				Name:     "csrf_token",
-				Value:    token,
-				Path:     "/",
-				HttpOnly: false,
-				SameSite: http.SameSiteStrictMode,
-			})
+		http.SetCookie(w, &http.Cookie{
+			Name:     "csrf_token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: false,
+			Secure:   r.TLS != nil,
+			SameSite: http.SameSiteStrictMode,
+		})
 
 			if isUnsafeMethod(r.Method) {
 				clientToken := r.Header.Get("X-CSRF-Token")

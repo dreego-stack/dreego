@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.0.20 (2026-07-31) — Security Hardening
+
+- `Content-Security-Policy` header now set by `SecurityHeaders` middleware with a permissive default (`self` + `unsafe-inline` for scripts/styles, common CDN/font sources) to support HTMX/Alpine.js and scoped CSS
+- `core.SetCSP(value)` — override the policy from `main.go` for stricter/looser setups
+- `csrf_token` readable cookie now sets `Secure` when the request is over TLS; `HttpOnly: false` and `SameSite=Strict` retained so the token stays JS-accessible yet transport-protected
+- Tests: `core/middleware_csrf_test.go`, `core/middleware_security_test.go`, `core/session_secure_test.go`
+- Integration tests: `csp-runtime`, `csp-override`, `csrf-cookie-samesite`
+- Full suite: 141 passed, 0 failed
+
 ## v0.0.19 (2026-07-30) — Bug Fixes
 
 - Fix B1: `{#if}` and `{#each}` now transpile correctly inside components **and** route templates

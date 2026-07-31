@@ -37,6 +37,15 @@ Core-fixed middleware that sets security headers on every response:
 | `X-Frame-Options` | `DENY` |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` |
 | `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` |
+| `Content-Security-Policy` | permissive default (see below) |
+
+The default CSP allows `self`, `unsafe-inline` for scripts/styles (so HTMX/Alpine.js and scoped CSS work out of the box), and common CDN/font sources. Override it for stricter setups:
+
+```go
+core.SetCSP("default-src 'self'")
+```
+
+Call `core.SetCSP` before `core.Listen`. An empty string falls back to `default-src 'self'`.
 
 Always on. Applied after Recovery, before Compression.
 
