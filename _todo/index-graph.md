@@ -68,28 +68,48 @@ graph TD
     style form_actions_1 fill:#d4edda,stroke:#28a745
     request_id_1["34 Request-ID Middleware (X-Request-ID)"]
     style request_id_1 fill:#d4edda,stroke:#28a745
+    security_cookie_1["35 Harden Session and CSRF Cookie Flags"]
+    style security_cookie_1 fill:#d4edda,stroke:#28a745
+    security_csp_1["36 Add Content-Security-Policy Header"]
+    style security_csp_1 fill:#d4edda,stroke:#28a745
     api_swagger_1["Swagger/OpenAPI Auto-Generation"]
     style api_swagger_1 fill:#fff3cd,stroke:#ffc107
+    codegen_errors_1["Replace Silent CodeGen Failures with Err"]
+    style codegen_errors_1 fill:#fff3cd,stroke:#ffc107
     deployment_1["Deployment Strategy (Docker, Single-Bina"]
     style deployment_1 fill:#fff3cd,stroke:#ffc107
+    dev_server_1["Dev Server with Hot Reload"]
+    style dev_server_1 fill:#fff3cd,stroke:#ffc107
     documentation_1["docs.dreego.dev + Tutorial + Examples"]
     style documentation_1 fill:#fff3cd,stroke:#ffc107
     dreego_feedback_1["dreego feedback (POST endpoint)"]
     style dreego_feedback_1 fill:#fff3cd,stroke:#ffc107
     dreegotest_1["dreegotest — Testing Package"]
     style dreegotest_1 fill:#fff3cd,stroke:#ffc107
+    frontmatter_1["Frontmatter Support in .dreego"]
+    style frontmatter_1 fill:#fff3cd,stroke:#ffc107
     observability_1["Observability (Request-ID, Metrics, Trac"]
     style observability_1 fill:#fff3cd,stroke:#ffc107
     plugin_interface_1["Plugin Interface (Frozen for v1)"]
     style plugin_interface_1 fill:#fff3cd,stroke:#ffc107
+    security_session_1["Document or Encrypt Session Payload"]
+    style security_session_1 fill:#fff3cd,stroke:#ffc107
+    servemux_cache_1["Cache Built Middleware/Router Stack"]
+    style servemux_cache_1 fill:#fff3cd,stroke:#ffc107
+    typed_forms_1["Typed Form Binding and Validation"]
+    style typed_forms_1 fill:#fff3cd,stroke:#ffc107
     addon_ecosystem_1["Addon Ecosystem (auth, ui, admin, db)"]
     style addon_ecosystem_1 fill:#f8d7da,stroke:#dc3545
     cache_interface_1["Caching Interface (Memory, Redis)"]
     style cache_interface_1 fill:#f8d7da,stroke:#dc3545
+    client_reactivity_1["Client-Side Reactivity for .dreego"]
+    style client_reactivity_1 fill:#f8d7da,stroke:#dc3545
     ddos_protection_1["DDoS Protection (PoW + Rate-Limiting) — "]
     style ddos_protection_1 fill:#f8d7da,stroke:#dc3545
     devtools_1["DevTools (LSP, VS Code, CLI-Niceties)"]
     style devtools_1 fill:#f8d7da,stroke:#dc3545
+    docs_extensibility_1["Extensible dreego docs Command"]
+    style docs_extensibility_1 fill:#f8d7da,stroke:#dc3545
     dreego_analytics_1["dreego-analytics (Privacy-friendly, Serv"]
     style dreego_analytics_1 fill:#f8d7da,stroke:#dc3545
     dreego_cache_1["dreego-cache (Caching: Memory, Redis)"]
@@ -130,6 +150,8 @@ graph TD
     style email_interface_1 fill:#f8d7da,stroke:#dc3545
     event_bus_1["Pub/Sub Event Bus (Core Interface)"]
     style event_bus_1 fill:#f8d7da,stroke:#dc3545
+    golden_tests_core_1["Golden Code Tests for Generator Output"]
+    style golden_tests_core_1 fill:#f8d7da,stroke:#dc3545
     golden_tests_1["Golden File Tests for Generator"]
     style golden_tests_1 fill:#f8d7da,stroke:#dc3545
     middleware_hooks_1["Plugin Middleware Hooks (app.Use FIFO)"]
@@ -150,6 +172,7 @@ graph TD
     email_interface_1 --> dreego_mail_1
     plugin_interface_1 --> dreego_map_1
     components_1 --> dreego_map_1
+    dreegotest_1 --> golden_tests_core_1
     plugin_interface_1 --> dreego_icons_1
     components_1 --> dreego_icons_1
     plugin_interface_1 --> dreego_storage_1
@@ -158,11 +181,18 @@ graph TD
     plugin_interface_1 --> dreego_seo_1
     middleware_hooks_1 --> dreego_seo_1
     plugin_interface_1 --> devtools_1
+    transpiler_1 --> dev_server_1
+    cli_1 --> dev_server_1
     plugin_interface_1 --> storage_interface_1
     cli_1 --> hot_reload_1
     routing_1 --> hot_reload_1
+    transpiler_1 --> codegen_errors_1
+    middleware_1 --> servemux_cache_1
+    routing_1 --> servemux_cache_1
     plugin_interface_1 --> dreego_jobs_1
     queue_interface_1 --> dreego_jobs_1
+    form_actions_1 --> typed_forms_1
+    transpiler_1 --> typed_forms_1
     plugin_interface_1 --> dreego_pdf_1
     plugin_interface_1 --> middleware_hooks_1
     middleware_1 --> middleware_hooks_1
@@ -197,10 +227,15 @@ graph TD
     components_1 --> addon_ecosystem_1
     session_1 --> addon_ecosystem_1
     plugin_interface_1 --> event_bus_1
+    cli_1 --> docs_extensibility_1
+    plugin_interface_1 --> docs_extensibility_1
     routing_1 --> wails_1
     plugin_interface_1 --> wails_1
+    plugin_interface_1 --> client_reactivity_1
+    transpiler_1 --> client_reactivity_1
     plugin_interface_1 --> dreego_features_1
     middleware_hooks_1 --> dreego_features_1
+    session_1 --> security_session_1
     plugin_interface_1 --> dreego_cache_1
     cache_interface_1 --> dreego_cache_1
     cli_1 --> deployment_1
@@ -214,6 +249,8 @@ graph TD
     routing_1 --> route_hooks_1
     plugin_interface_1 --> dreego_markdown_1
     plugin_interface_1 --> cache_interface_1
+    transpiler_1 --> frontmatter_1
+    context_refactoring_1 --> frontmatter_1
     hot_reload_1 --> smart_recompile_1
     middleware_1 --> observability_1
     middleware_1 --> security_headers_1
@@ -224,6 +261,7 @@ graph TD
     transpiler_1 --> layout_1
     transpiler_1 --> middleware_1
     routing_1 --> components_1
+    security_headers_1 --> security_csp_1
     routing_1 --> route_groups_1
     transpiler_1 --> each_loop_1
     transpiler_1 --> if_else_1
@@ -248,6 +286,8 @@ graph TD
     transpiler_1 --> verbatim_1
     transpiler_1 --> dreego_fmt_1
     context_refactoring_1 --> session_1
+    session_1 --> security_cookie_1
+    csrf_1 --> security_cookie_1
     context_refactoring_1 --> component_handler_1
     middleware_1 --> config_1
     cli_1 --> ci_check_1
@@ -289,4 +329,6 @@ graph TD
     compression_1 -.->|chain| api_json_1
     api_json_1 -.->|chain| form_actions_1
     form_actions_1 -.->|chain| request_id_1
+    request_id_1 -.->|chain| security_cookie_1
+    security_cookie_1 -.->|chain| security_csp_1
 ```

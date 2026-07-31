@@ -1,7 +1,7 @@
 ---
 id: security-csp.1
 title: Add Content-Security-Policy Header
-status: planned
+status: 36
 phase: pre-v1.0
 requires:
   - security-headers.1

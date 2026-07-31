@@ -1,7 +1,7 @@
 ---
 id: security-cookie.1
 title: Harden Session and CSRF Cookie Flags
-status: planned
+status: 35
 phase: pre-v1.0
 requires:
   - session.1

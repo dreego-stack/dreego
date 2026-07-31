@@ -1,8 +1,8 @@
 # Blockwebchain Index
 
-Generated: 2026-07-31T05:33:00Z
+Generated: 2026-07-31T05:12:12Z
 
-Chain: 1–34 | Next status code: **35**
+Chain: 1–36 | Next status code: **37**
 
 ## CHAIN (History)
 - `01` **transpiler.1** — Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
@@ -39,31 +39,31 @@ Chain: 1–34 | Next status code: **35**
 - `32` **api-json.1** — Content-Type Routing (JSON, XML, Custom)
 - `33` **form-actions.1** — Form Actions (g-action / g-submit)
 - `34` **request-id.1** — Request-ID Middleware (X-Request-ID)
+- `35` **security-cookie.1** — Harden Session and CSRF Cookie Flags
+- `36` **security-csp.1** — Add Content-Security-Policy Header
 
 ## AVAILABLE NEXT
 - **api-swagger.1** — Swagger/OpenAPI Auto-Generation
+- **codegen-errors.1** — Replace Silent CodeGen Failures with Errors
 - **deployment.1** — Deployment Strategy (Docker, Single-Binary, Graceful)
+- **dev-server.1** — Dev Server with Hot Reload
 - **documentation.1** — docs.dreego.dev + Tutorial + Examples
 - **dreego-feedback.1** — dreego feedback (POST endpoint)
 - **dreegotest.1** — dreegotest — Testing Package
+- **frontmatter.1** — Frontmatter Support in .dreego
 - **observability.1** — Observability (Request-ID, Metrics, Tracing)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
-- **codegen-errors.1** — Replace Silent CodeGen Failures with Errors
-- **servemux-cache.1** — Cache Built Middleware/Router Stack
-- **security-cookie.1** — Harden Session and CSRF Cookie Flags
-- **security-csp.1** — Add Content-Security-Policy Header
 - **security-session.1** — Document or Encrypt Session Payload
-- **golden-tests-core.1** — Golden Code Tests for Generator Output
-- **dev-server.1** — Dev Server with Hot Reload
-- **frontmatter.1** — Frontmatter Support in .dreego
+- **servemux-cache.1** — Cache Built Middleware/Router Stack
 - **typed-forms.1** — Typed Form Binding and Validation
-- **docs-extensibility.1** — Extensible dreego docs Command
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon Ecosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
 - **cache-interface.1** — Caching Interface (Memory, Redis)  (missing: plugin-interface.1)
+- **client-reactivity.1** — Client-Side Reactivity for .dreego  (missing: plugin-interface.1)
 - **ddos-protection.1** — DDoS Protection (PoW + Rate-Limiting) — Plugin  (missing: plugin-interface.1, middleware-hooks.1)
 - **devtools.1** — DevTools (LSP, VS Code, CLI-Niceties)  (missing: plugin-interface.1)
+- **docs-extensibility.1** — Extensible dreego docs Command  (missing: plugin-interface.1)
 - **dreego-analytics.1** — dreego-analytics (Privacy-friendly, Server-Side)  (missing: plugin-interface.1, middleware-hooks.1)
 - **dreego-cache.1** — dreego-cache (Caching: Memory, Redis)  (missing: plugin-interface.1, cache-interface.1)
 - **dreego-charts.1** — dreego-charts (Chart.js/Canvas Components)  (missing: plugin-interface.1)
@@ -84,6 +84,7 @@ Chain: 1–34 | Next status code: **35**
 - **dreego-storage.1** — dreego-storage (File Uploads, Progress, Resize)  (missing: plugin-interface.1, storage-interface.1)
 - **email-interface.1** — Email Sending Interface (SMTP, Resend, Postmark)  (missing: plugin-interface.1)
 - **event-bus.1** — Pub/Sub Event Bus (Core Interface)  (missing: plugin-interface.1)
+- **golden-tests-core.1** — Golden Code Tests for Generator Output  (missing: dreegotest.1)
 - **golden-tests.1** — Golden File Tests for Generator  (missing: dreegotest.1)
 - **middleware-hooks.1** — Plugin Middleware Hooks (app.Use FIFO)  (missing: plugin-interface.1)
 - **queue-interface.1** — Background Job Queue Interface  (missing: plugin-interface.1)
@@ -91,11 +92,10 @@ Chain: 1–34 | Next status code: **35**
 - **ssg.1** — Static Site Generation (SSG)  (missing: plugin-interface.1)
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
-- **client-reactivity.1** — Client-Side Reactivity for .dreego  (missing: plugin-interface.1, transpiler.1)
 
 ## REJECTED
 - **hot-reload.1** — Hot Reload (Dev Server + SSE)
 - **live-reload.1** — Live Reload Proxy (SSE + Script Injection)
 - **smart-recompile.1** — Smart Recompile (Text vs Go Detection)
 
-chain: 34 | web: 41 | next code: 35
+chain: 36 | web: 50 | next code: 37
