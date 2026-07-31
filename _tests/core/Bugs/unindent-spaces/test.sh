@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -42,7 +42,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 </div>
 DREEGO
 
-go run $realrepo/cmd/dreego generate
+$DREEGO_BIN generate
 generated="dreego/gen/routes.go"
 if grep -q "^    type UserForm struct" "$generated"; then
     echo "FAIL: space-indented declaration not unindented (B18)"

@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 mkdir -p dreego/routes
@@ -28,7 +28,7 @@ package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() { core.Listen(":0") }
 GO
-go run $realrepo/cmd/dreego generate 2>&1
+$DREEGO_BIN generate 2>&1
 grep -q "text/plain" dreego/gen/routes.go || { echo "FAIL: no text/plain content-type"; exit 1; }
 grep -q "c.Write" dreego/gen/routes.go || { echo "FAIL: c.Write not in generated code"; exit 1; }
 go build -o /dev/null .

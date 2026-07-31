@@ -1,4 +1,4 @@
-module codeberg.org/dreego/dreego/plugins/sample
+module codeberg.org/dreego/dreego/cmd/dreego
 
 go 1.22
 

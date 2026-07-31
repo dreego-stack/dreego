@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -38,7 +38,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><h1>Page</h1></div>
 DREEGO
 
-go run $realrepo/cmd/dreego generate 2>&1
+$DREEGO_BIN generate 2>&1
 
 grep -q "cdn.tailwindcss.com" dreego/gen/routes.go || { echo "FAIL: layout head dropped — tailwind CDN not in generated code"; exit 1; }
 grep -q "Layout Title" dreego/gen/routes.go || { echo "FAIL: layout head dropped — title not in generated code"; exit 1; }

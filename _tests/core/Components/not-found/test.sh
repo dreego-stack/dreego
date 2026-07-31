@@ -11,8 +11,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -26,6 +26,6 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><@Missing/></div>
 DREEGO
 
-go run $realrepo/cmd/dreego generate
+$DREEGO_BIN generate
 if go build -o /dev/null . 2>/dev/null; then echo "expected build failure but succeeded"; exit 1; fi
 echo ok

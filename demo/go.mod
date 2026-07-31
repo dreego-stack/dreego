@@ -2,6 +2,6 @@ module demo
 
 go 1.22
 
-require codeberg.org/dreego/dreego v0.0.0
+require codeberg.org/dreego/dreego/core v0.0.0
 
-replace codeberg.org/dreego/dreego => ../
+replace codeberg.org/dreego/dreego/core => ../core

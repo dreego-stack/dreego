@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -29,8 +29,8 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>check me</p></div>
 DREEGO
 
-go run $realrepo/cmd/dreego generate
-go run $realrepo/cmd/dreego generate --check 2>&1 | grep -q "up-to-date" || { echo "initial check failed"; exit 1; }
+$DREEGO_BIN generate
+$DREEGO_BIN generate --check 2>&1 | grep -q "up-to-date" || { echo "initial check failed"; exit 1; }
 touch dreego/routes/get.dreego
-if go run $realrepo/cmd/dreego generate --check 2>/dev/null; then echo "expected stale but got up-to-date"; exit 1; fi
+if $DREEGO_BIN generate --check 2>/dev/null; then echo "expected stale but got up-to-date"; exit 1; fi
 echo ok

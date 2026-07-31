@@ -72,7 +72,7 @@ func cmdNew(args []string) {
 	c.Dir = target
 	c.Run()
 
-	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego@"+dreegoCoreVersion)
+	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego/core@"+dreegoCoreVersion)
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
 	c.Run()

@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -30,5 +30,5 @@ DREEGO
 
 printf 'text' > dreego/static/about
 
-if go run $realrepo/cmd/dreego generate 2>/dev/null; then echo "expected collision error but succeeded"; exit 1; fi
+if $DREEGO_BIN generate 2>/dev/null; then echo "expected collision error but succeeded"; exit 1; fi
 echo ok

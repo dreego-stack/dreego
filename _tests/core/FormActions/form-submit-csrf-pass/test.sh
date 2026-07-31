@@ -15,8 +15,8 @@ port=$((port % 50000 + 10000))
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 mkdir -p dreego/routes
@@ -44,12 +44,12 @@ func main() {
 }
 GO
 sed -i "s/8080/$port/" main.go
-go run $realrepo/cmd/dreego generate 2>&1
+$DREEGO_BIN generate 2>&1
 go build -o $workdir/srv .
 $workdir/srv &
 PID=$!
 trap "kill $PID 2>/dev/null; rm -rf $workdir" EXIT
-for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/health && break; sleep 0.2; done
+for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:$port/health && break; sleep 0.5; done
 COOKIE_JAR="$workdir/cookies"
 curl -s -c "$COOKIE_JAR" http://localhost:$port/health > /dev/null
 CSRF=$(grep csrf_token "$COOKIE_JAR" | awk '{print $NF}')

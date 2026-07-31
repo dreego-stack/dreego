@@ -88,6 +88,8 @@ func main() {
 }
 ```
 
+Install core: `go get codeberg.org/dreego/dreego/core@latest`
+
 ## See Also
 
 - [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)

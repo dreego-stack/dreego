@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << 'GO'
@@ -36,7 +36,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div><p>hello</p></div>
 DREEGO
 
-go run $realrepo/cmd/dreego generate 2>&1
+$DREEGO_BIN generate 2>&1
 
 grep -q "Layout Title" dreego/gen/routes.go || { echo "FAIL: layout head dropped — title not in generated code"; exit 1; }
 grep -q "route-script.js" dreego/gen/routes.go || { echo "FAIL: route head dropped — script not in generated code"; exit 1; }

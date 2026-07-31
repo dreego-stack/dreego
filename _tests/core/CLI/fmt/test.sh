@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 cat > messy.dreego << 'DREEGO'
@@ -51,7 +51,7 @@ cat > expected.dreego << 'DREEGO'
 </div>
 DREEGO
 
-go run $realrepo/cmd/dreego fmt --stdout messy.dreego > actual.dreego
+$DREEGO_BIN fmt --stdout messy.dreego > actual.dreego
 
 if diff expected.dreego actual.dreego > /dev/null 2>&1; then
     echo "ok: basic formatting"
@@ -61,7 +61,7 @@ else
     exit 1
 fi
 
-go run $realrepo/cmd/dreego fmt --stdout actual.dreego > formatted_twice.dreego
+$DREEGO_BIN fmt --stdout actual.dreego > formatted_twice.dreego
 if diff actual.dreego formatted_twice.dreego > /dev/null 2>&1; then
     echo "ok: idempotent"
 else

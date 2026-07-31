@@ -23,16 +23,16 @@ Large frameworks (React, Svelte, Phoenix) keep all official packages in a single
 
 ```
 dreego/
-├── go.mod              ← root module (core/ + cmd/dreego/)
-├── go.work             ← links root module + plugin modules for local dev
+├── go.work             ← links all local modules for development
 ├── core/
+│   └── go.mod          ← module codeberg.org/dreego/dreego/core (stdlib only)
 ├── cmd/dreego/
-└── plugins/
-    ├── sample/         ← example plugin
-    │   └── go.mod      ← module codeberg.org/dreego/dreego/plugins/sample
-    ├── auth/
-    ├── db/
-    └── ...
+│   └── go.mod          ← module codeberg.org/dreego/dreego/cmd/dreego (requires core)
+├── plugins/
+│   └── sample/
+│       └── go.mod      ← module codeberg.org/dreego/dreego/plugins/sample (requires core)
+└── demo/
+    └── go.mod          ← module demo (requires core)
 ```
 
 ### Rules

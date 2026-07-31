@@ -92,7 +92,7 @@ go install codeberg.org/dreego/dreego/cmd/dreego@latest
 dreego init myapp
 cd myapp
 go mod init myapp
-go mod edit -replace codeberg.org/dreego/dreego=../dreego  # or use go get
+go mod edit -replace codeberg.org/dreego/dreego/core=../dreego/core  # or use go get
 dreego generate
 go run .
 

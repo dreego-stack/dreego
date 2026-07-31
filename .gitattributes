@@ -12,3 +12,5 @@ demo export-ignore
 docker-compose.yml export-ignore
 Dockerfile export-ignore
 Dockerfile.test export-ignore
+go.work export-ignore
+smd.toml export-ignore

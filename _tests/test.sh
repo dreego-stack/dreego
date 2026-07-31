@@ -26,6 +26,15 @@ else
     echo "==> PASS <=> GO Tests <========="
 fi
 
+DREEGO_BIN="$workdir/.dreego-bin"
+DREEGO_BIN="$(mktemp -d)/dreego"
+(cd "$REPO_DIR" && go build -o "$DREEGO_BIN" ./cmd/dreego) || {
+    echo "FAIL: could not build dreego CLI"
+    exit 1
+}
+export DREEGO_BIN
+export REPO_DIR
+
 for test_dir in $(find "$DIR/core" "$DIR/plugins" -type d 2>/dev/null | sort); do
     test_script="$test_dir/test.sh"
     [ -f "$test_script" ] || continue

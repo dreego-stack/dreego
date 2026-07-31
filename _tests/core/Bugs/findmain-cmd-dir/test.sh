@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego v0.0.0
-replace codeberg.org/dreego/dreego => $realrepo
+require codeberg.org/dreego/dreego/core v0.0.0
+replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
 mkdir -p cmd dreego/routes
@@ -28,7 +28,7 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div>hello</div>
 DREEGO
 
-go run $realrepo/cmd/dreego build
+$DREEGO_BIN build
 if [ ! -f "cmd/build/bin/cmd" ]; then
     echo "FAIL: findMain did not build cmd/main.go (B6)"
     exit 1
