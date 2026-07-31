@@ -1,3 +1,20 @@
 #!/bin/sh
-# Auto-format Go files before commit
-gofmt -w core/ cmd/dreego/
+# Auto-format staged Go files before commit, then re-stage the result
+set -e
+
+staged=$(git diff --cached --name-only --diff-filter=ACM -- 'core/*.go' 'cmd/dreego/*.go')
+if [ -z "$staged" ]; then
+	exit 0
+fi
+
+# Format only the staged Go files so untouched files are not modified
+echo "$staged" | xargs gofmt -w
+
+# Re-stage the formatted versions so the commit includes the formatting
+echo "$staged" | xargs git add
+
+# Warn if formatting changed something
+changed=$(echo "$staged" | xargs -I{} sh -c 'git diff --cached --name-only -- {}' 2>/dev/null)
+if [ -n "$changed" ]; then
+	echo "pre-commit: gofmt reformatted and re-staged Go files"
+fi
