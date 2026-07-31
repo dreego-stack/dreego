@@ -237,12 +237,16 @@ func cmdRun(args []string) {
 	}
 
 	if timer > 0 {
-		time.Sleep(time.Duration(timer) * time.Second)
-		if err := c.Process.Signal(syscall.SIGTERM); err != nil {
-			fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
-			c.Process.Kill()
-		}
-		fmt.Println("timer: server stopped")
+		go func() {
+			time.Sleep(time.Duration(timer) * time.Second)
+			if err := c.Process.Signal(syscall.SIGTERM); err != nil {
+				fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
+				c.Process.Kill()
+			} else {
+				fmt.Println("timer: server stopped")
+			}
+		}()
+		c.Wait()
 		return
 	}
 

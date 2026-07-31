@@ -50,6 +50,6 @@ DREEGO
 
 go run $realrepo/cmd/dreego generate
 outfile="$workdir/run.out"
-go run $realrepo/cmd/dreego run -t 1 > "$outfile" 2>&1
+go run $realrepo/cmd/dreego run -t 5 > "$outfile" 2>&1
 grep -q "SIGTERM received" "$outfile" || { echo "FAIL: server did not receive SIGTERM (B20)"; cat "$outfile"; exit 1; }
 echo ok
