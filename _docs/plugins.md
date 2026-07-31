@@ -1,20 +1,19 @@
 # Plugins
 
-Dreego plugins are separate Go modules in their own repositories under the `codeberg.org/dreego` organization. Core never imports plugins — plugins implement Core interfaces.
+Dreego plugins live in the same repository under `plugins/`. Each plugin that needs external dependencies has its own `go.mod`, so Core stays dependency-free and users only pull in what they import. Core never imports any plugin package — plugins depend on Core, never the other way around.
 
 ## Architecture
 
 ```
-codeberg.org/dreego/dreego      ← Core (no external deps beyond stdlib)
-codeberg.org/dreego/auth         ← Plugin: OAuth2, JWT, sessions
-codeberg.org/dreego/metrics       ← Plugin: Prometheus /metrics
-codeberg.org/dreego/cache         ← Plugin: Redis/Memory caching
-codeberg.org/dreego/storage       ← Plugin: S3, R2, local file storage
-codeberg.org/dreego/mail          ← Plugin: SMTP, Resend, Postmark
-codeberg.org/dreego/db            ← Plugin: SQL drivers, migrations
+codeberg.org/dreego/dreego              ← Root module: core/ + cmd/dreego/
+codeberg.org/dreego/dreego/core         ← Core package (no external deps beyond stdlib)
+codeberg.org/dreego/dreego/plugins/auth ← Plugin: OAuth2, JWT, sessions (own go.mod)
+codeberg.org/dreego/dreego/plugins/db   ← Plugin: SQL drivers, migrations (own go.mod)
 ```
 
-Each plugin has its own `go.mod` with dependencies isolated from Core.
+Plugins without external dependencies can also be plain packages inside the root module, but once a plugin needs a third-party dependency it gets its own `go.mod`.
+
+The repository root contains a `go.work` file that links the root module and every plugin module for local development. Consumers of the framework only see the modules they explicitly import.
 
 ## Plugin Interface (planned for v0.1.0)
 
@@ -37,15 +36,35 @@ type CacheProvider interface {
 Plugins register via `init()`:
 
 ```go
-// codeberg.org/dreego/metrics
-package metrics
+// codeberg.org/dreego/dreego/plugins/auth
+package auth
 
 import "codeberg.org/dreego/dreego/core"
 
 func init() {
-    core.RegisterMetrics(&PrometheusProvider{})
+    core.RegisterAuth(&OAuth2Provider{})
 }
 ```
+
+## Layout
+
+```
+plugins/
+├── sample/                 ← minimal example plugin
+│   ├── go.mod              → module codeberg.org/dreego/dreego/plugins/sample
+│   ├── sample.go           → implements core.Plugin or other core interfaces
+│   └── README.md
+├── auth/                   ← future official plugin
+├── db/
+└── ...
+```
+
+## Rules
+
+1. **Core never imports a plugin.** This is the invariant that keeps the dependency graph clean.
+2. **Plugins import Core.** They use `codeberg.org/dreego/dreego/core`.
+3. **Plugins with external deps get their own `go.mod`.** Plugins without external deps can live as plain packages in the root module or in `plugins/` with or without their own module.
+4. **One repo, many modules.** Releases use directory-prefix tags (e.g. `plugins/auth/v0.0.1`) if a plugin has its own `go.mod`.
 
 ## Planned Plugins
 
@@ -67,3 +86,5 @@ func init() {
 | `pdf` | PDF generation from HTML | `chromedp/chromedp` |
 | `charts` | Chart.js/Canvas server-side components | none |
 | `icons` | Lucide/Heroicons as components | none |
+
+Community plugins can also be published in separate repositories as templates, but the official plugins live here.

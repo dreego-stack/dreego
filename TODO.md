@@ -43,7 +43,7 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 - **security-csp.1** — Add Content-Security-Policy header.
 - **security-session.1** — Document or encrypt sensitive session payload.
 - **golden-tests-core.1** — Add golden-code tests for generated Go output.
-- **docs-extensibility.1** — Adapt `dreego docs` to consume docs from plugins/external repos.
+- **docs-extensibility.1** — Adapt `dreego docs` to consume docs from `plugins/<name>/_docs/` (local) or external repos.
 
 ## Framework Roadmap (new blocks)
 

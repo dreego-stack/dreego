@@ -26,7 +26,7 @@ else
     echo "==> PASS <=> GO Tests <========="
 fi
 
-for test_dir in $(find "$DIR" -type d -not -path "$DIR" | sort); do
+for test_dir in $(find "$DIR/core" "$DIR/plugins" -type d 2>/dev/null | sort); do
     test_script="$test_dir/test.sh"
     [ -f "$test_script" ] || continue
     name="${test_dir#$DIR/}"

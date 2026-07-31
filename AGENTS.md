@@ -47,7 +47,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.18 tagged — core package renamed (`dreego-core/` → `core/`), plugins moved to separate repos. See TODO.md for next steps.
+v0.0.20 tagged — CSP header + CSRF cookie Secure flag. Monorepo plugin layout introduced (`plugins/`). See TODO.md for next steps.
 
 ## File Structure
 
@@ -101,7 +101,8 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 - Max 120 lines per file, one logical thing per file
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
-- Core code in `` (single package), plugins in separate repos
+- Core code in `core` (single package), plugins in `plugins/`
+- Plugins with external dependencies get their own `go.mod` inside `plugins/`
 - Build via `dreego` CLI, not directly `go build`
 - Generated `dree.go` not committed
 

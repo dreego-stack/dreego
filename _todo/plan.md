@@ -2,7 +2,7 @@
 
 Loose, reorderable timeline. Versioning stays at `v0.x.y` for the foreseeable future. `v0.x` marks larger milestones and may include breaking changes; `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
-Plugins live in separate repos and must not be required by core. Core must never import a plugin package.
+Official plugins live in `plugins/` in this repository. Each plugin with external dependencies gets its own `go.mod`. Core must never import a plugin package — plugins depend on Core, never the other way around.
 
 ## v0.0.20
 
@@ -35,7 +35,7 @@ Plugins live in separate repos and must not be required by core. Core must never
 
 ## unlock: plugin ecosystem
 
-After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plugin blocks unblock. They are tracked here for visibility but implemented in separate repos under `codeberg.org/dreego/<name>`:
+After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plugin blocks unblock. They are tracked here for visibility and implemented under `plugins/<name>` in this repository (each with its own `go.mod` when external deps are needed):
 
 - dreego-auth
 - dreego-db
@@ -73,5 +73,6 @@ After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plug
 ## Notes
 
 - Core must never import a plugin package.
-- `dreego docs` extensibility is an open design question: plugin docs could be embedded, read from local paths, or fetched from known URLs. Not decided yet.
+- Official plugins live in `plugins/` with their own `go.mod` when external deps are needed.
+- `dreego docs` extensibility is an open design question: plugin docs could be embedded or read from local `plugins/<name>/_docs/`. Not decided yet.
 - This plan is intentionally linear and can be shifted as priorities change.

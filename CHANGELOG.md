@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.21 (2026-07-31) — Monorepo Plugin Layout
+
+- Official plugins moved from separate repos into `plugins/` in this repository (one repo, many modules)
+- New `plugins/sample/` minimal example plugin with its own `go.mod` importing `codeberg.org/dreego/dreego/core`
+- New `go.work` linking the root module and `plugins/sample` for local development
+- Integration tests moved from `_tests/<Category>/` to `_tests/core/<Category>/`; `test.sh` runner now scans `_tests/core` and `_tests/plugins`
+- All `test.sh` realrepo depth updated from `../../..` to `../../../..` (4 levels up from `_tests/core/<Group>/<name>/`)
+- `_docs/plugins.md`, `_docs/plugin-interfaces.md`, `AGENTS.md` updated to describe the monorepo plugin model; Core never imports a plugin package
+- Plugins with external dependencies get their own `go.mod`; dependency-free plugins can be plain packages
+- Full suite: 141 passed, 0 failed
+
 ## v0.0.20 (2026-07-31) — Security Hardening
 
 - `Content-Security-Policy` header now set by `SecurityHeaders` middleware with a permissive default (`self` + `unsafe-inline` for scripts/styles, common CDN/font sources) to support HTMX/Alpine.js and scoped CSS

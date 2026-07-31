@@ -2,7 +2,9 @@
 
 Dreego's plugin system is based on Go interfaces. Every interface is a contract: the core defines, plugins implement.
 
-## Core Interfaces (in `codeberg.org/dreego/dreego`)
+Official plugins live under `plugins/` in the dreego repository. Each plugin with external dependencies has its own `go.mod`, while dependency-free plugins can be plain packages in the root module. Core never imports any plugin package.
+
+## Core Interfaces (in `codeberg.org/dreego/dreego/core`)
 
 ### session.Store
 
@@ -15,7 +17,7 @@ type Store interface {
 }
 ```
 
-Built-in: `CookieStore`. Plugins: `dreego-session-redis`.
+Built-in: `CookieStore`. Plugin: `codeberg.org/dreego/dreego/plugins/session-redis` (planned).
 
 ### Plugin Interface
 
@@ -62,7 +64,7 @@ type Storage interface {
 }
 ```
 
-Implementations: `dreego-storage-s3`, `dreego-storage-local`.
+Implementations: `codeberg.org/dreego/dreego/plugins/storage-s3`, `codeberg.org/dreego/dreego/plugins/storage-local`.
 
 ### Email Interface
 
@@ -72,7 +74,7 @@ type Mailer interface {
 }
 ```
 
-Implementations: `dreego-mail-smtp`, `dreego-mail-resend`.
+Implementations: `codeberg.org/dreego/dreego/plugins/mail-smtp`, `codeberg.org/dreego/dreego/plugins/mail-resend`.
 
 ### Queue Interface
 
@@ -83,7 +85,7 @@ type Queue interface {
 }
 ```
 
-Implementations: `dreego-jobs-redis`, `dreego-jobs-memory`.
+Implementations: `codeberg.org/dreego/dreego/plugins/jobs-redis`, `codeberg.org/dreego/dreego/plugins/jobs-memory`.
 
 ### Cache Interface
 
@@ -95,7 +97,7 @@ type Cache interface {
 }
 ```
 
-Implementations: `dreego-cache-redis`, `dreego-cache-memory`.
+Implementations: `codeberg.org/dreego/dreego/plugins/cache-redis`, `codeberg.org/dreego/dreego/plugins/cache-memory`.
 
 ### Event Bus Interface
 
@@ -106,14 +108,21 @@ type EventBus interface {
 }
 ```
 
-Implementations: `dreego-eventbus-redis`, `dreego-eventbus-nats`.
+Implementations: `codeberg.org/dreego/dreego/plugins/eventbus-redis`, `codeberg.org/dreego/dreego/plugins/eventbus-nats`.
 
-## Plugin Repo Structure
+## Plugin Layout
+
+Official plugins live in the same repository:
 
 ```
-codeberg.org/dreego/dreego              ← Core
-codeberg.org/dreego/dreego-session-redis ← Plugin
-codeberg.org/dreego/dreego-auth          ← Plugin
+dreego/
+├── core/
+├── cmd/dreego/
+└── plugins/
+    ├── sample/              ← minimal example
+    ├── auth/
+    ├── db/
+    └── ...
 ```
 
 Or in your own project repo:
@@ -141,9 +150,9 @@ import _ "myapp/plugins/auth"
 ```
 dreego-cluster
 ├── Node-Discovery       (memberlist / DNS / static)
-├── Shared-Session-Store (dreego-session-redis)
-├── PubSub-Sync          (dreego-eventbus-redis)
-└── Distributed-Cache    (dreego-cache-redis)
+├── Shared-Session-Store (dreego/plugins/session-redis)
+├── PubSub-Sync          (dreego/plugins/eventbus-redis)
+└── Distributed-Cache    (dreego/plugins/cache-redis)
 ```
 
 A load balancer distributes requests across N Go instances. `dreego-cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.

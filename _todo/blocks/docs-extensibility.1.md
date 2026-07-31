@@ -10,4 +10,4 @@ created: 2026-07-31
 changed: 2026-07-31
 ---
 
-Adapt `dreego docs` so it can consume documentation from plugins and external repos, not only this repository. Open design question: how to discover plugin docs elegantly (embed? local path? Codeberg URL?). Must not depend on any specific plugin at compile time.
+Adapt `dreego docs` so it can consume documentation from plugins. Official plugins now live under `plugins/<name>/` in this repository, so local `plugins/<name>/_docs/` directories are the primary source. Open design question: how to discover plugin docs elegantly (embed? local path? also support external repos for community plugins?). Must not depend on any specific plugin at compile time.
