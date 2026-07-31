@@ -9,4 +9,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/markdown/` in this repository.
+
 Plugin for Markdown rendering. {#md} block in template (MDX-like). Frontmatter parsing. GFM support (Tables, Task-Lists). Syntax highlighting. No core interface — template extension via plugin.

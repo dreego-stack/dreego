@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/icons/` in this repository.
+
 Plugin/Component library for icons. Lucide/Heroicons as components. <Icon name="user" /> syntax. SVG inline rendering. Tree-shaking (only compile used icons). No core interface — pure UI components.

@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/mail/` in this repository.
+
 Plugin for email sending. Implements email-interface.1. SMTP, Resend, Postmark backends. HTML/Text templates. Queue integration for async sending. Usable by dreego-auth (Verify, Reset) and dreego-notify.

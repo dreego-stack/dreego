@@ -9,4 +9,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/pdf/` in this repository.
+
 Plugin for PDF generation. HTML-to-PDF via Chromedp or wkhtmltopdf. Template-based (normal .dreego templates as PDF input). No core interface needed — standalone.

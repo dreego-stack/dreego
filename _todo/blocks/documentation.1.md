@@ -2,7 +2,7 @@
 id: documentation.1
 title: docs.dreego.dev + Tutorial + Examples
 status: planned
-phase: v1.0
+phase: v0.0.26
 requires: []
 created: 2026-07-26
 changed: 2026-07-26

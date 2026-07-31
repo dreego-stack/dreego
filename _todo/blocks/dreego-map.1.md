@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/map/` in this repository.
+
 Plugin/Component library for maps. MapLibre/Leaflet integration. <Map center={...} markers={...} /> syntax. SSR-compatible (server renders config as JSON, client hydrates). No core interface — pure UI components.

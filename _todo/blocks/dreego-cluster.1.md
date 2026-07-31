@@ -12,4 +12,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/cluster/` in this repository.
+
 Plugin for distributed deployments. Node discovery, shared session store, PubSub sync, distributed cache. Valkey/Redis as backend. Load balancer-compatible — every node sees same state. No Kubernetes required.

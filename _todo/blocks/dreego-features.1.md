@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/features/` in this repository.
+
 Plugin for feature flags and A/B testing. Flag definition via config or DB. Per-user/per-group activation. Middleware hook for request-based decision. c.Flag("new-ui") in template. Dashboard in dreego-admin.

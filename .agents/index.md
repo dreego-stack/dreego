@@ -38,8 +38,6 @@ timestamp: 2026-07-31T07:00:00Z
 - [Affons Ecosystem](concepts/affons-ecosystem.md) — CLI, docs, registry, community
 - [Signals & Runes](concepts/signals-and-runes.md) — Signals and Svelte runes in Dreego
 - [Output Strategy](concepts/output-strategy-comparison.md) — Comparison of output strategies
-- [Gap Analysis](concepts/gap-analysis.md) — What's missing, what can be improved
-- [Roadmap](concepts/roadmap.md) — V1, V2, and beyond
 - [Form Actions](concepts/form-actions.md) — Form handling concept
 
 ## Reference (KB)

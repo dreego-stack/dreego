@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/jobs/` in this repository.
+
 Plugin for background jobs. Implements queue-interface.1. Redis/NATS/In-Memory backend. Job middleware, batching, retry, delayed dispatch. Cron scheduler. Dashboard (like Laravel Horizon).

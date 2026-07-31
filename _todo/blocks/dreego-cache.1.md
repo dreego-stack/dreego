@@ -10,4 +10,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/cache/` in this repository.
+
 Plugin for caching. Implements cache-interface.1. In-Memory (dev), Redis (prod). Usable by session store, template cache, DB query cache. TTL, Tags, Cache warming.

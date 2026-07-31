@@ -9,4 +9,6 @@ created: 2026-07-26
 changed: 2026-07-26
 ---
 
+Target directory: `plugins/search/` in this repository.
+
 Plugin for full-text search. Bleve/Meilisearch/Typesense backends. Index definition via Go struct tags. Auto-indexing on changes. Search API for templates.
