@@ -49,7 +49,7 @@ go build -o $workdir/srv .
 $workdir/srv &
 PID=$!
 trap "kill $PID 2>/dev/null; rm -rf $workdir" EXIT
-for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/ && break; sleep 0.1; done
+for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:$port/health && break; sleep 0.2; done
 COOKIE_JAR="$workdir/cookies"
 curl -s -c "$COOKIE_JAR" http://localhost:$port/health > /dev/null
 CSRF=$(grep csrf_token "$COOKIE_JAR" | awk '{print $NF}')
