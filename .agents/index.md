@@ -1,9 +1,9 @@
 ---
 type: Index
 title: Dreego Knowledge Base
-description: Agent Knowledge Bundle for Dreego — Go web framework v0.0.19
-tags: [index, v0.0.19]
-timestamp: 2026-07-31T00:00:00Z
+description: Agent Knowledge Bundle for Dreego — Go web framework v0.0.21
+tags: [index, v0.0.21]
+timestamp: 2026-07-31T07:00:00Z
 ---
 
 # Dreego Knowledge Base
@@ -11,6 +11,7 @@ timestamp: 2026-07-31T00:00:00Z
 ## Decisions
 
 - [Name "dreego"](decisions/name-dreego.md) — Naming and package convention
+- [Monorepo Plugin Layout](decisions/monorepo-plugin-layout.md) — Official plugins live in this repo under plugins/ (supersedes separate-repo model)
 - [Technology Stack](decisions/technology-stack.md) — Tech stack: Go, net/http, HTMX, Alpine.js
 - [Transpiler vs Runtime](decisions/transpiler-vs-runtime.md) — Compile-time code generation
 - [Transpiler Pipeline](decisions/transpiler-pipeline.md) — Lexer → Parser → AST → CodeGen
