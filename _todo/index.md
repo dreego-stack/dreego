@@ -1,6 +1,6 @@
 # Blockwebchain Index
 
-Generated: 2026-07-29T20:55:13Z
+Generated: 2026-07-31T05:33:00Z
 
 Chain: 1–34 | Next status code: **35**
 
@@ -48,6 +48,16 @@ Chain: 1–34 | Next status code: **35**
 - **dreegotest.1** — dreegotest — Testing Package
 - **observability.1** — Observability (Request-ID, Metrics, Tracing)
 - **plugin-interface.1** — Plugin Interface (Frozen for v1)
+- **codegen-errors.1** — Replace Silent CodeGen Failures with Errors
+- **servemux-cache.1** — Cache Built Middleware/Router Stack
+- **security-cookie.1** — Harden Session and CSRF Cookie Flags
+- **security-csp.1** — Add Content-Security-Policy Header
+- **security-session.1** — Document or Encrypt Session Payload
+- **golden-tests-core.1** — Golden Code Tests for Generator Output
+- **dev-server.1** — Dev Server with Hot Reload
+- **frontmatter.1** — Frontmatter Support in .dreego
+- **typed-forms.1** — Typed Form Binding and Validation
+- **docs-extensibility.1** — Extensible dreego docs Command
 
 ## BLOCKED
 - **addon-ecosystem.1** — Addon Ecosystem (auth, ui, admin, db)  (missing: plugin-interface.1)
@@ -81,6 +91,7 @@ Chain: 1–34 | Next status code: **35**
 - **ssg.1** — Static Site Generation (SSG)  (missing: plugin-interface.1)
 - **storage-interface.1** — File Storage Interface (S3, R2, Local)  (missing: plugin-interface.1)
 - **wails.1** — Wails Desktop Integration  (missing: plugin-interface.1)
+- **client-reactivity.1** — Client-Side Reactivity for .dreego  (missing: plugin-interface.1, transpiler.1)
 
 ## REJECTED
 - **hot-reload.1** — Hot Reload (Dev Server + SSE)
