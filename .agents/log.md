@@ -8,12 +8,20 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-08-03 — v0.0.23 (unreleased)
+
+- **runtime:** New exported `core.Reset()` clears the cached middleware/router stack (`builtHandler`) for tests and reload paths.
+- **security-session.2:** `core/session_keys.go` derives signing and encryption keys via HMAC-SHA256(secret, label) instead of raw SHA-256 concatenation.
+- **security-session.3:** `core/session.go` propagates `json.Marshal` and encryption errors from `CookieStore.Set`; `core/session_crypto.go` `encryptPayload` returns `(ciphertext, error)` and accepts an `io.Reader` for nonce generation to enable testable error paths.
+- **coding-standards:** Maximum file line limit raised from 120 to 300 lines.
+- Tests: `core/runtime_test.go`, `core/session_encrypt_test.go`; integration test `_tests/core/Middleware/session-encrypt/`.
+- Full suite: 147 passed, 0 failed
+
 ## 2026-08-03 — v0.0.22 (released 2026-08-03)
 
-- **servemux-cache.1:** `core/runtime.go` caches the built middleware/router stack. `Build()`/`Listen()` reuse `builtHandler` once constructed; `Reset()` helper clears the cache for tests.
+- **servemux-cache.1:** `core/runtime.go` caches the built middleware/router stack. `Build()`/`Listen()` reuse `builtHandler` once constructed.
 - **codegen-errors.1:** `core/codegen*.go` template generators return `(string, error)` and propagate failures instead of silently returning empty strings. New `core/codegen_component.go` extracts component template generation. Fixed nested `{#if}` in `{#else}` branch bug in component templates.
-- **security-session.1:** Optional AES-256-GCM session encryption via `core.Options.Encrypt` passed to `store.Set`. `core/session_crypto.go` provides `encryptPayload`/`decryptPayload` and propagates errors; `core/session.go` propagates `json.Marshal` and encryption errors from `CookieStore.Set` (encrypt-then-MAC). `core/session_keys.go` derives signing and encryption keys via HMAC-SHA256(secret, label). Tampered or key-rotated cookies are rejected.
-- **runtime:** New `core.Reset()` clears the cached middleware/router stack (`builtHandler`) for tests and reload paths.
+- **security-session.1:** Optional AES-256-GCM session encryption via `core.Options.Encrypt` passed to `store.Set` (encrypt-then-MAC). `core/session_crypto.go` provides `encryptPayload`/`decryptPayload`; tampered or key-rotated cookies are rejected.
 - Tests: `core/codegen_template_test.go`, `core/runtime_test.go`, `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
 - Full suite: 147 passed, 0 failed
 - Released. Tags pushed: core/v0.0.22, cmd/dreego/v0.0.22, plugins/sample/v0.0.22.
@@ -463,3 +471,4 @@ timestamp: 2026-07-28T21:33:00Z
 2026-08-03 22:56 | docs | ses_036976955ffeU57foCX9eZICq0 | Task-ID v0.0.22-triple: final docs update done — CHANGELOG.md, .agents/log.md, _docs/session-encryption.md updated. next: user
 2026-08-03 23:00 | shell | ses_036926cceffe1ljhp90jQbrkT7 | Task v0.0.22-triple: running release script to create tags
 2026-08-03 23:03 | git | ses_0369032cfffeGbeSJEP6u53rcO | Task-ID v0.0.22-triple: remote tags already exist (core/cmd/plugins v0.0.22), abort push. Updating docs to mark released.
+2026-08-03 23:10 | docs | ses_0368bea62ffeZnPI5YLT5z02hr | Task-ID v0.0.22-triple: split v0.0.22/v0.0.23 in CHANGELOG.md, log.md, session-encryption.md, task file. next: git

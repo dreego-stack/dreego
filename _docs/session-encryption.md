@@ -19,6 +19,8 @@ Encryption applies to the whole session payload as a single JSON blob, not to in
 
 ## How It Works
 
+> Since v0.0.23, key derivation uses HMAC-SHA256 and `Set` propagates encryption errors.
+
 - `NewCookieStore(secret)` derives two 256-bit keys from the secret via HMAC-SHA256:
   - `dreego-session-sig` — HMAC signing key
   - `dreego-session-enc` — AES-GCM encryption key
