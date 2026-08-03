@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.22 (2026-08-03) — ServeMux Cache + CodeGen Error Propagation + Session Encryption
+## v0.0.22 (2026-08-03) — Released — ServeMux Cache + CodeGen Error Propagation + Session Encryption
 
 - **servemux-cache.1:** `core/runtime.go` now caches the built middleware/router stack. `core.Build()` and `core.Listen()` reuse `builtHandler` once constructed, avoiding repeated `http.NewServeMux` and middleware wrapping. A `Reset()` helper clears the cache for tests.
 - **codegen-errors.1:** All `core/codegen*.go` template generators return `(string, error)` and propagate failures instead of silently returning empty strings. New `core/codegen_component.go` contains component template generation. Fixed the nested `{#if}` in `{#else}` branch bug for component templates: `genTemplateNodeComp` now detects an else-if chain vs. a true else branch and emits nested blocks correctly.
@@ -8,6 +8,7 @@
 - **runtime:** New `core.Reset()` clears the cached middleware/router stack (`builtHandler`) so tests and reload paths start from a clean runtime state.
 - Tests: unit tests in `core/codegen_template_test.go`, `core/runtime_test.go`, and `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
 - Full suite: 147 passed, 0 failed
+- Released. Tags pushed: core/v0.0.22, cmd/dreego/v0.0.22, plugins/sample/v0.0.22.
 
 ## v0.0.23 (2026-08-03) — Nested Control Flow + Head Expression Resolution
 

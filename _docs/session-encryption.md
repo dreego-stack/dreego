@@ -19,11 +19,12 @@ Encryption applies to the whole session payload as a single JSON blob, not to in
 
 ## How It Works
 
-- `NewCookieStore(secret)` derives two 256-bit keys from the secret via SHA-256:
+- `NewCookieStore(secret)` derives two 256-bit keys from the secret via HMAC-SHA256:
   - `dreego-session-sig` — HMAC signing key
   - `dreego-session-enc` — AES-GCM encryption key
 - When `Encrypt: true`, the JSON payload is encrypted first, then HMAC-signed (`encrypt-then-MAC`).
 - A one-byte marker distinguishes encrypted cookies from signed-only cookies, so both formats can coexist during key rotation.
+- `CookieStore.Set` returns an error if JSON marshaling or encryption fails (for example, when nonce generation fails).
 - Decryption verifies the HMAC first; any tampering or wrong key rejects the cookie and returns an empty session.
 
 ## Security Notes

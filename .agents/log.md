@@ -8,13 +8,15 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
-## 2026-08-03 — v0.0.22
+## 2026-08-03 — v0.0.22 (released 2026-08-03)
 
 - **servemux-cache.1:** `core/runtime.go` caches the built middleware/router stack. `Build()`/`Listen()` reuse `builtHandler` once constructed; `Reset()` helper clears the cache for tests.
 - **codegen-errors.1:** `core/codegen*.go` template generators return `(string, error)` and propagate failures instead of silently returning empty strings. New `core/codegen_component.go` extracts component template generation. Fixed nested `{#if}` in `{#else}` branch bug in component templates.
-- **security-session.1:** Optional AES-256-GCM session encryption via `core.Options.Encrypt` passed to `store.Set`. `core/session_crypto.go` + `core/session_keys.go` provide encrypt-then-HMAC with separate derived signing/encryption keys. Tampered or key-rotated cookies are rejected.
-- Tests: `core/codegen_template_test.go`, `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
-- Full suite: 144 passed, 0 failed
+- **security-session.1:** Optional AES-256-GCM session encryption via `core.Options.Encrypt` passed to `store.Set`. `core/session_crypto.go` provides `encryptPayload`/`decryptPayload` and propagates errors; `core/session.go` propagates `json.Marshal` and encryption errors from `CookieStore.Set` (encrypt-then-MAC). `core/session_keys.go` derives signing and encryption keys via HMAC-SHA256(secret, label). Tampered or key-rotated cookies are rejected.
+- **runtime:** New `core.Reset()` clears the cached middleware/router stack (`builtHandler`) for tests and reload paths.
+- Tests: `core/codegen_template_test.go`, `core/runtime_test.go`, `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
+- Full suite: 147 passed, 0 failed
+- Released. Tags pushed: core/v0.0.22, cmd/dreego/v0.0.22, plugins/sample/v0.0.22.
 
 ## 2026-07-31 — v0.0.21 Monorepo Plugin Layout
 
@@ -458,3 +460,6 @@ timestamp: 2026-07-28T21:33:00Z
 2026-08-03 22:41 | test-engineer | ses_036a6974affe8Vi8KB4wzljVc6 | v0.0.22-triple: added 3 failing tests. runtime_test.go:42 calls undefined core.Reset(); session_keys_test.go asserts HMAC derivation; session_encrypt_test.go requires error propagation + internal test hook. Build fails on missing Reset. next: coder
 2026-08-03 22:42 | coder | ses_036a38749ffe2qnBYZ9TtxkTSB | started v0.0.22-triple remaining fixes (Reset, HMAC key derivation, encrypt/sign errors)
 2026-08-03 22:54 | coder | ses_036a38749ffe2qnBYZ9TtxkTSB | completed v0.0.22-triple remaining fixes: core tests green, 147 integration tests green
+2026-08-03 22:56 | docs | ses_036976955ffeU57foCX9eZICq0 | Task-ID v0.0.22-triple: final docs update done — CHANGELOG.md, .agents/log.md, _docs/session-encryption.md updated. next: user
+2026-08-03 23:00 | shell | ses_036926cceffe1ljhp90jQbrkT7 | Task v0.0.22-triple: running release script to create tags
+2026-08-03 23:03 | git | ses_0369032cfffeGbeSJEP6u53rcO | Task-ID v0.0.22-triple: remote tags already exist (core/cmd/plugins v0.0.22), abort push. Updating docs to mark released.
