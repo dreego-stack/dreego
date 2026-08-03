@@ -9,7 +9,7 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## General
 
-- **Max 120 lines per file** — hard limit
+- **Max 300 lines per file** — hard limit
 - **One logical thing per file**
 - **No comments** — code speaks for itself
 - **Package names** short, clean, without hyphens

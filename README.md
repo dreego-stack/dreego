@@ -83,7 +83,7 @@ Three principles:
 - **CLI** — `dreego init`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
 - **Auto-Imports** — `fmt`, `html`, `strings`, `net/http` added to generated code as needed
-- **141 Integration Tests** — Docker-based, all pass
+- **147 Integration Tests** — Docker-based, all pass
 
 ## Quick Start
 

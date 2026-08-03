@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -12,10 +13,15 @@ import (
 type CookieStore struct {
 	secret []byte
 	name   string
+	rand   randReader
+}
+
+type randReader interface {
+	Read(p []byte) (n int, err error)
 }
 
 func NewCookieStore(secret []byte) *CookieStore {
-	return &CookieStore{secret: secret, name: "dreego_session"}
+	return &CookieStore{secret: secret, name: "dreego_session", rand: randReader(rand.Reader)}
 }
 
 func (s *CookieStore) Get(r *http.Request, key string) (string, error) {
@@ -31,7 +37,10 @@ func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value str
 		m[key] = value
 	}
 	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
-	encoded := s.sign(m, opt(opts, func(o *Options) bool { return o.Encrypt }))
+	encoded, err := s.sign(m, opt(opts, func(o *Options) bool { return o.Encrypt }))
+	if err != nil {
+		return err
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.name,
 		Value:    encoded,
@@ -76,16 +85,23 @@ func (s *CookieStore) Destroy(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (s *CookieStore) sign(m map[string]string, encrypt bool) string {
-	data, _ := json.Marshal(m)
+func (s *CookieStore) sign(m map[string]string, encrypt bool) (string, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
 	key := deriveKeys(s.secret)
 	if encrypt {
-		data = append([]byte{encMarker}, encryptPayload(key.enc, data)...)
+		enc, err := encryptPayload(key.enc, data, s.rand)
+		if err != nil {
+			return "", err
+		}
+		data = append([]byte{encMarker}, enc...)
 	}
 	mac := hmac.New(sha256.New, key.sig)
 	mac.Write(data)
 	sig := mac.Sum(nil)
-	return base64.RawURLEncoding.EncodeToString(append(sig, data...))
+	return base64.RawURLEncoding.EncodeToString(append(sig, data...)), nil
 }
 
 func (s *CookieStore) verify(value string) ([]byte, bool) {

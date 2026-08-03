@@ -2,10 +2,17 @@ package core
 
 import (
 	"encoding/base64"
+	"io"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
+
+type shortReader struct{}
+
+func (shortReader) Read(p []byte) (int, error) {
+	return 0, io.ErrUnexpectedEOF
+}
 
 func TestCookieStoreEncryptDefaultReadable(t *testing.T) {
 	store := NewCookieStore([]byte("secret-key"))
@@ -22,6 +29,25 @@ func TestCookieStoreEncryptDefaultReadable(t *testing.T) {
 	val, _ := store.Get(req, "user_id")
 	if val != "42" {
 		t.Errorf("expected '42', got '%s'", val)
+	}
+}
+
+func TestCookieStoreEncryptPropagatesError(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	store.rand = &shortReader{}
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+
+	err := store.Set(w, r, "user_id", "42", &Options{Encrypt: true})
+	if err == nil {
+		t.Error("Set should propagate encryption errors, got nil")
+	}
+
+	cookies := w.Result().Cookies()
+	for _, c := range cookies {
+		if c.Name == "dreego_session" && c.Value != "" {
+			t.Error("Set should not write a cookie when encryption fails")
+		}
 	}
 }
 

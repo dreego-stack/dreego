@@ -6,18 +6,14 @@ Dreego sessions are HMAC-signed by default. You can also encrypt the session pay
 
 Pass `Encrypt: true` in session options:
 
-```go
-func MyHandler(c *core.SSRContext) {
-    c.SetSessionVal("user_id", "42") // default: signed only
-}
-```
-
-To encrypt, use `core.Options` directly with the underlying store:
+Use `core.Options` directly with the underlying store:
 
 ```go
 store := core.NewCookieStore(secret)
 store.Set(w, r, "user_id", "42", &core.Options{Encrypt: true})
 ```
+
+`c.SetSessionVal` does not accept options; call `store.Set` directly when you need encryption.
 
 Encryption applies to the whole session payload as a single JSON blob, not to individual keys.
 

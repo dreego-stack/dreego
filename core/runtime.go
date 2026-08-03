@@ -25,6 +25,10 @@ var sessionStore Store
 
 var builtHandler http.Handler
 
+func Reset() {
+	builtHandler = nil
+}
+
 type route struct {
 	method  string
 	pattern string

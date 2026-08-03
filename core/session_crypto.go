@@ -3,28 +3,27 @@ package core
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"io"
 )
 
 const encMarker byte = 1
 
-func encryptPayload(key, plaintext []byte) []byte {
+func encryptPayload(key, plaintext []byte, r io.Reader) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return nil
+	if _, err := io.ReadFull(r, nonce); err != nil {
+		return nil, err
 	}
 	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
-	return []byte(base64.RawURLEncoding.EncodeToString(ciphertext))
+	return []byte(base64.RawURLEncoding.EncodeToString(ciphertext)), nil
 }
 
 func decryptPayload(key, ciphertext []byte) ([]byte, bool) {

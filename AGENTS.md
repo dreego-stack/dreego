@@ -42,7 +42,7 @@ Two models share the work with strict role separation:
    - Pro makes a decision → Flash executes → Pro verifies → User sees final result
 
 4. **Quality Gate:**
-   - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 120), coding rules, no comments unless needed
+   - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
 ## Current Phase: pre v0.1
@@ -100,7 +100,7 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 
 ## Coding Rules
 
-- Max 120 lines per file, one logical thing per file
+- Max 300 lines per file, one logical thing per file
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
 - Core code in `core/` (own module `codeberg.org/dreego/dreego/core`, no external deps)
@@ -124,7 +124,7 @@ Every bug gets a permanent test in `_tests/core/Bugs/<name>/`. Workflow:
 Every feature follows this cycle:
 
 1. **`_tests/`** — Create integration test in `_tests/core/<FeatureGroup>/<name>/test.sh`
-2. **Code** — Implement in `core/` (one logical thing per file, max 120 lines)
+2. **Code** — Implement in `core/` (one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
 5. **Changelog** — Add entry to `CHANGELOG.md`

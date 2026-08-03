@@ -1,6 +1,7 @@
 package core
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
 )
 
@@ -10,15 +11,11 @@ type sessionKeys struct {
 }
 
 func deriveKeys(secret []byte) sessionKeys {
-	h := sha256.New()
-	h.Write(secret)
-	h.Write([]byte("dreego-session-sig"))
-	sig := h.Sum(nil)
+	sig := hmac.New(sha256.New, secret)
+	sig.Write([]byte("dreego-session-sig"))
 
-	h2 := sha256.New()
-	h2.Write(secret)
-	h2.Write([]byte("dreego-session-enc"))
-	enc := h2.Sum(nil)
+	enc := hmac.New(sha256.New, secret)
+	enc.Write([]byte("dreego-session-enc"))
 
-	return sessionKeys{sig: sig, enc: enc}
+	return sessionKeys{sig: sig.Sum(nil), enc: enc.Sum(nil)}
 }
