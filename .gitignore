@@ -21,3 +21,5 @@ dree.go
 dreego/gen/
 *.vsix
 /dreego
+go.work
+go.work.sum
