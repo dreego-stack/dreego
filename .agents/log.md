@@ -8,6 +8,14 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-08-03 — v0.0.22
+
+- **servemux-cache.1:** `core/runtime.go` caches the built middleware/router stack. `Build()`/`Listen()` reuse `builtHandler` once constructed; `Reset()` helper clears the cache for tests.
+- **codegen-errors.1:** `core/codegen*.go` template generators return `(string, error)` and propagate failures instead of silently returning empty strings. New `core/codegen_component.go` extracts component template generation. Fixed nested `{#if}` in `{#else}` branch bug in component templates.
+- **security-session.1:** Optional AES-256-GCM session encryption via `core.Options.Encrypt`. `core/session_crypto.go` + `core/session_keys.go` provide encrypt-then-HMAC with separate derived signing/encryption keys. Tampered or key-rotated cookies are rejected.
+- Tests: `core/codegen_template_test.go`, `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
+- Full suite: 144 passed, 0 failed
+
 ## 2026-07-31 — v0.0.21 Monorepo Plugin Layout
 
 - Official plugins moved from separate repos into `plugins/` in this repository (one repo, many modules)
@@ -407,3 +415,28 @@ timestamp: 2026-07-28T21:33:00Z
 2026-08-03 13:45 | docs | ses_038a32513ffecPhqJWz4gZKqz0 | feedback-intake Doku: CHANGELOG.md v0.0.23-Eintrag (nested {#if} in else + head-expression-resolution, 144/0), log.md KB-Update, TODO.md Quality Backlog + codegen-errors.2 (genTemplateNodeComp:521 gleicher silent-drop in Komponenten). next: manager
 2026-08-03 13:32 | hr | ses_038b94d8dffechdVNUKE1pGtjb | HR: git.md auf direkte Host-Ausfuehrung umgestellt (kein smd git, Identitaets-Problem), subchain.ts Plugin entfernt. Config-Commit d3cdea5.
 2026-08-03 13:37 | manager | ses_038b94d8dffechdVNUKE1pGtjb | feedback-intake: Manager zurueck, Neustart erfolgt, git-Agent hat Update (Host-Ausfuehrung). Offen: Commit mit QS. next: git
+2026-08-03 13:46 | manager | ses_038b94d8dffechdVNUKE1pGtjb | feedback-intake abgeschlossen: Commit f78c1db (10 Dateien +269/-13, QS durch git-Agent, Working Tree sauber). next: report
+2026-08-03 13:46 | report | ses_0388dc91cffeYbz3nQOmcROZMG | Report für feedback-intake erstellt (2 Bugs gefixt, 144/0 Tests, Commit f78c1db). next: user
+2026-08-03 14:38 | manager | ses_0385ef562ffeR6tUelzclQaOqL | Task-ID todo-review: User asked which TODO entries can be tackled now. next: planning
+2026-08-03 14:41 | manager | ses_0385ef562ffeR6tUelzclQaOqL | Task-ID v0.0.22-triple: Starting plan for servemux-cache.1 + codegen-errors.1 + security-session.1. Spawning explore subagents.
+2026-08-03 15:08 | manager | ses_0385ef562ffeR6tUelzclQaOqL | Task-ID v0.0.22-triple: Plan approved. Starting with servemux-cache.1.
+2026-08-03 15:20 | coder | ses_03842084effewIKLPrHEDAZlP1 | servemux-cache.1 implemented; core tests pass; 2 pre-existing integration tests fail unrelated next: user
+2026-08-03 15:20 | coder | ses_03837b018ffeDn1IObjjFdjgUj | v0.0.22-triple codegen-errors.1 in progress: reading done, about to rewrite codegen signatures to (string,error)
+2026-08-03 15:36 | coder | ses_03829a724ffeVWCxVdv7K2PMSW | Starting codegen-errors.1: refactor signatures, fix nested-if-in-else in component, add tests. next: coder
+2026-08-03 15:39 | coder | ses_03829a724ffeVWCxVdv7K2PMSW | Refactored codegen signatures, extracted codegen_component.go, fixed nested-if-in-else, added tests. next: shell
+2026-08-03 15:41 | coder | ses_03829a724ffeVWCxVdv7K2PMSW | Core tests pass; integration tests show 2 form-action failures (pre-existing vs new?). next: debug
+2026-08-03 15:43 | coder | ses_03829a724ffeVWCxVdv7K2PMSW | 2 form-action integration tests newly failing. Reproducing in tmp dir to inspect generated routes.go. next: coder
+2026-08-03 15:45 | coder | ses_03829a724ffeVWCxVdv7K2PMSW | codegen-errors.1 done; all tests pass. Updated .agents/tasks/v0.0.22-triple/main.md. next: user
+2026-08-03 15:58 | shell | ses_0381601dfffeK7XBHEqL8O69dp | Adding temporary TestDebugSignFlag to core/session_test.go to inspect cookie bytes.
+2026-08-03 16:01 | manager | ses_0385ef562ffeR6tUelzclQaOqL | Task-ID v0.0.22-triple: Scope expanded to include _tests, docs, version bump, and commit.
+2026-08-03 16:04 | debug | ses_0380f12a5ffeAKuSHV58zdpUZP | Started debugging two failing tests: TestCookieStoreMultipleKeys and form-submit-csrf-pass
+2026-08-03 16:17 | debug | ses_0380f12a5ffeAKuSHV58zdpUZP | Identified root causes: session.go Set re-reads stale request context; integration test missing DREEGO_BIN when run standalone. next: coder
+2026-08-03 16:30 | coder | ses_037f7adffffe6MKxUyO3F80yuL | Started session v0.0.22-triple: implementing security-session.1
+2026-08-03 16:31 | shell | ses_037f6caceffeN3rqAOP2dV3yCK | shell: running tests per user request next: shell
+2026-08-03 16:40 | coder | ses_037f7adffffe6MKxUyO3F80yuL | security-session.1 done: AES-256-GCM encrypt-then-HMAC in core/session*.go, tests pass, integration test added, task status updated
+2026-08-03 16:49 | docs | ses_037e7b85effe5koO7dG0z66pJL | docs-agent updating CHANGELOG.md, log.md, _docs for v0.0.22 triple block. next: docs
+2026-08-03 16:53 | shell | ses_037e36684ffeOoJm4g8PrnFPW0 | Task v0.0.22-triple: fix $DREEGO_BIN lines, run three tests + suite.
+2026-08-03 16:57 | manager | ses_0385ef562ffeR6tUelzclQaOqL | Task-ID v0.0.22-triple: All tests green (147/0). Starting git commit and final report.
+2026-08-03 16:57 | coder | ses_037de6acfffeWeym84GhRUojOW | Starting cleanup of stray untracked files for v0.0.22-triple
+2026-08-03 16:59 | coder | ses_037de6acfffeWeym84GhRUojOW | Cleanup complete: removed stray files and .agents/chains/, git status clean, all tests pass (147/0)
+2026-08-03 16:59 | git | ses_037dcc080ffeIJWEkzGF2oY7un | Starting commit for v0.0.22-triple: servemux-cache, codegen-errors, security-session blocks.

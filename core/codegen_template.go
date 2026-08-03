@@ -2,19 +2,17 @@ package core
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
-	"unicode"
 )
 
-func genTemplateNode(n TemplateNode, depth int) string {
+func genTemplateNode(n TemplateNode, depth int) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
 	case NodeText:
 		if n.Content == "" {
-			return ""
+			return "", nil
 		}
-		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content))
+		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content)), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false
@@ -27,14 +25,18 @@ func genTemplateNode(n TemplateNode, depth int) string {
 			}
 		}
 		if raw {
-			return fmt.Sprintf("%sb.WriteString(%s)\n", indent, code)
+			return fmt.Sprintf("%sb.WriteString(%s)\n", indent, code), nil
 		}
-		return fmt.Sprintf(`%sb.WriteString(html.EscapeString(%s))`+"\n", indent, code)
+		return fmt.Sprintf(`%sb.WriteString(html.EscapeString(%s))`+"\n", indent, code), nil
 	case NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
-			buf.WriteString(genTemplateNode(child, depth+1))
+			code, err := genTemplateNode(child, depth+1)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(code)
 		}
 		chain := true
 		for _, ec := range n.ElseChildren {
@@ -47,23 +49,35 @@ func genTemplateNode(n TemplateNode, depth int) string {
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
 				for _, child := range ec.Children {
-					buf.WriteString(genTemplateNode(child, depth+1))
+					code, err := genTemplateNode(child, depth+1)
+					if err != nil {
+						return "", err
+					}
+					buf.WriteString(code)
 				}
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 					for _, child := range ec.ElseChildren {
-						buf.WriteString(genTemplateNode(child, depth+1))
+						code, err := genTemplateNode(child, depth+1)
+						if err != nil {
+							return "", err
+						}
+						buf.WriteString(code)
 					}
 				}
 			}
 		} else {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, ec := range n.ElseChildren {
-				buf.WriteString(genTemplateNode(ec, depth+1))
+				code, err := genTemplateNode(ec, depth+1)
+				if err != nil {
+					return "", err
+				}
+				buf.WriteString(code)
 			}
 		}
 		buf.WriteString(indent + "}\n")
-		return buf.String()
+		return buf.String(), nil
 	case NodeEach:
 		var buf strings.Builder
 		hasElse := len(n.ElseChildren) > 0
@@ -78,7 +92,10 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		buf.WriteString(fmt.Sprintf("%s\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code := genTemplateNode(child, forDepth+1)
+			code, err := genTemplateNode(child, forDepth+1)
+			if err != nil {
+				return "", err
+			}
 			code = strings.ReplaceAll(code, "$loop.", "loop.")
 			buf.WriteString(code)
 		}
@@ -86,31 +103,38 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		if hasElse {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, child := range n.ElseChildren {
-				buf.WriteString(genTemplateNode(child, depth+1))
+				code, err := genTemplateNode(child, depth+1)
+				if err != nil {
+					return "", err
+				}
+				buf.WriteString(code)
 			}
 			buf.WriteString(indent + "}\n")
 		}
-		return buf.String()
+		return buf.String(), nil
 	case NodeSlot:
 		if n.Content != "" && len(n.Children) > 0 {
 			var buf strings.Builder
 			buf.WriteString(fmt.Sprintf("%s{\n", indent))
 			buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
 			for _, child := range n.Children {
-				code := genTemplateNode(child, depth+2)
+				code, err := genTemplateNode(child, depth+2)
+				if err != nil {
+					return "", err
+				}
 				code = strings.ReplaceAll(code, "b.WriteString(", "cb.WriteString(")
 				buf.WriteString(code)
 			}
 			buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot_%s\", cb.String())\n", indent, n.Content))
 			buf.WriteString(fmt.Sprintf("%s}\n", indent))
-			return buf.String()
+			return buf.String(), nil
 		}
 		if n.Content != "" {
-			return fmt.Sprintf("%sb.WriteString(c.Get(\"slot_%s\"))\n", indent, n.Content)
+			return fmt.Sprintf("%sb.WriteString(c.Get(\"slot_%s\"))\n", indent, n.Content), nil
 		}
-		return fmt.Sprintf("%sb.WriteString(c.Get(\"slot\"))\n", indent)
+		return fmt.Sprintf("%sb.WriteString(c.Get(\"slot\"))\n", indent), nil
 	case NodeVerbatim:
-		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content))
+		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content)), nil
 	case NodeComponentCall:
 		funcName := n.Tag
 		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {
@@ -118,7 +142,7 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		}
 		args := extractAttrValues(n.Attrs)
 		if n.SelfClose {
-			return fmt.Sprintf("%sb.WriteString(func() string { h, _ := %s(%s).Render(c); return h }())\n", indent, funcName, args)
+			return fmt.Sprintf("%sb.WriteString(func() string { h, _ := %s(%s).Render(c); return h }())\n", indent, funcName, args), nil
 		}
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%s{\n", indent))
@@ -128,14 +152,20 @@ func genTemplateNode(n TemplateNode, depth int) string {
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar sb strings.Builder\n", indent))
 				for _, sc := range child.Children {
-					code := genTemplateNode(sc, depth+3)
+					code, err := genTemplateNode(sc, depth+3)
+					if err != nil {
+						return "", err
+					}
 					code = strings.ReplaceAll(code, "b.WriteString(", "sb.WriteString(")
 					buf.WriteString(code)
 				}
 				buf.WriteString(fmt.Sprintf("%s\t\tc.Set(\"slot_%s\", sb.String())\n", indent, child.Content))
 				buf.WriteString(fmt.Sprintf("%s\t}\n", indent))
 			} else {
-				code := genTemplateNode(child, depth+2)
+				code, err := genTemplateNode(child, depth+2)
+				if err != nil {
+					return "", err
+				}
 				code = strings.ReplaceAll(code, "b.WriteString(", "cb.WriteString(")
 				buf.WriteString(code)
 			}
@@ -145,130 +175,7 @@ func genTemplateNode(n TemplateNode, depth int) string {
 		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\tb.WriteString(html)\n", indent))
 		buf.WriteString(fmt.Sprintf("%s}\n", indent))
-		return buf.String()
+		return buf.String(), nil
 	}
-	return ""
-}
-
-func goLiteral(s string) string {
-	if strings.Contains(s, "`") {
-		return strconv.Quote(s)
-	}
-	return "`" + s + "`"
-}
-
-func scopeCSS(css string, hash string) string {
-	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
-	var result strings.Builder
-	depth := 0
-	atDepth := 0
-	selectorStart := 0
-
-	for i := 0; i < len(css); i++ {
-		ch := css[i]
-
-		if ch == '{' {
-			selector := strings.TrimSpace(css[selectorStart:i])
-			if depth == 0 {
-				if strings.HasPrefix(selector, "@") {
-					atDepth = 1
-					result.WriteString(selector)
-				} else {
-					result.WriteString(prefix)
-					result.WriteString(selector)
-				}
-			} else if depth == atDepth {
-				result.WriteString(prefix)
-				result.WriteString(selector)
-			} else {
-				result.WriteString(selector)
-			}
-			result.WriteByte('{')
-			depth++
-			selectorStart = i + 1
-			continue
-		}
-
-		if ch == '}' {
-			result.WriteByte('}')
-			depth--
-			if depth < atDepth {
-				atDepth = 0
-			}
-			selectorStart = i + 1
-			continue
-		}
-	}
-
-	trailing := strings.TrimSpace(css[selectorStart:])
-	if trailing != "" {
-		result.WriteString(trailing)
-	}
-
-	return strings.TrimSpace(result.String())
-}
-
-func toPascalCase(s string) string {
-	parts := strings.FieldsFunc(s, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
-	})
-	var result strings.Builder
-	for _, p := range parts {
-		if p == "" {
-			continue
-		}
-		result.WriteByte(byte(unicode.ToUpper(rune(p[0]))))
-		if len(p) > 1 {
-			result.WriteString(strings.ToLower(p[1:]))
-		}
-	}
-	return result.String()
-}
-
-func extractAttrValues(attrs string) string {
-	if attrs == "" {
-		return ""
-	}
-	var vals []string
-	inQuote := false
-	braceDepth := 0
-	start := 0
-	for i := 0; i < len(attrs); i++ {
-		ch := attrs[i]
-		if ch == '"' && braceDepth == 0 {
-			inQuote = !inQuote
-		}
-		if ch == '{' && !inQuote {
-			braceDepth++
-		}
-		if ch == '}' && !inQuote {
-			braceDepth--
-		}
-		if ch == ' ' && !inQuote && braceDepth == 0 {
-			if start < i {
-				vals = append(vals, attrVal(attrs[start:i]))
-			}
-			start = i + 1
-		}
-	}
-	if start < len(attrs) {
-		vals = append(vals, attrVal(attrs[start:]))
-	}
-	return strings.Join(vals, ", ")
-}
-
-func attrVal(part string) string {
-	eq := strings.IndexByte(part, '=')
-	if eq < 0 {
-		return fmt.Sprintf("%q", part)
-	}
-	val := strings.TrimSpace(part[eq+1:])
-	if val == "" {
-		return fmt.Sprintf("%q", "")
-	}
-	if val[0] == '{' && val[len(val)-1] == '}' {
-		return val[1 : len(val)-1]
-	}
-	val = strings.Trim(val, "\"")
-	return fmt.Sprintf("%q", val)
+	return "", fmt.Errorf("unsupported template node type %d", n.Type)
 }

@@ -7,35 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
-	"strings"
 )
-
-type ctxKey struct{}
-
-type storeCtxKey struct{}
-
-func WithStore(r *http.Request, s Store) *http.Request {
-	return r.WithContext(context.WithValue(r.Context(), storeCtxKey{}, s))
-}
-
-func StoreFromCtx(ctx context.Context) Store {
-	s, _ := ctx.Value(storeCtxKey{}).(Store)
-	return s
-}
-
-type Store interface {
-	Get(r *http.Request, key string) (string, error)
-	Set(w http.ResponseWriter, r *http.Request, key, value string, opts *Options) error
-	Delete(w http.ResponseWriter, r *http.Request, key string) error
-	Destroy(w http.ResponseWriter, r *http.Request) error
-}
-
-type Options struct {
-	MaxAge   int
-	Secure   bool
-	HttpOnly bool
-	Path     string
-}
 
 type CookieStore struct {
 	secret []byte
@@ -59,7 +31,7 @@ func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value str
 		m[key] = value
 	}
 	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
-	encoded := s.sign(m)
+	encoded := s.sign(m, opt(opts, func(o *Options) bool { return o.Encrypt }))
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.name,
 		Value:    encoded,
@@ -104,14 +76,16 @@ func (s *CookieStore) Destroy(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func (s *CookieStore) sign(m map[string]string) string {
+func (s *CookieStore) sign(m map[string]string, encrypt bool) string {
 	data, _ := json.Marshal(m)
-	mac := hmac.New(sha256.New, s.secret)
+	key := deriveKeys(s.secret)
+	if encrypt {
+		data = append([]byte{encMarker}, encryptPayload(key.enc, data)...)
+	}
+	mac := hmac.New(sha256.New, key.sig)
 	mac.Write(data)
 	sig := mac.Sum(nil)
-	combined := append(sig, byte('.'))
-	combined = append(combined, data...)
-	return base64.RawURLEncoding.EncodeToString(combined)
+	return base64.RawURLEncoding.EncodeToString(append(sig, data...))
 }
 
 func (s *CookieStore) verify(value string) ([]byte, bool) {
@@ -119,35 +93,19 @@ func (s *CookieStore) verify(value string) ([]byte, bool) {
 	if err != nil {
 		return nil, false
 	}
-	idx := strings.IndexByte(string(decoded), '.')
-	if idx < 0 || idx != sha256.Size {
+	if len(decoded) < sha256.Size {
 		return nil, false
 	}
-	sig := decoded[:idx]
-	data := decoded[idx+1:]
-	mac := hmac.New(sha256.New, s.secret)
+	sig := decoded[:sha256.Size]
+	data := decoded[sha256.Size:]
+	key := deriveKeys(s.secret)
+	mac := hmac.New(sha256.New, key.sig)
 	mac.Write(data)
 	if !hmac.Equal(mac.Sum(nil), sig) {
 		return nil, false
 	}
+	if len(data) > 0 && data[0] == encMarker {
+		return decryptPayload(key.enc, data[1:])
+	}
 	return data, true
-}
-
-func opt[T any](opts *Options, fn func(*Options) T) T {
-	if opts == nil {
-		var zero T
-		return zero
-	}
-	return fn(opts)
-}
-
-func optStr(opts *Options, fn func(*Options) string, def string) string {
-	if opts == nil {
-		return def
-	}
-	v := fn(opts)
-	if v == "" {
-		return def
-	}
-	return v
 }

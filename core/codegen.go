@@ -58,11 +58,19 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	}
 
 	if hasTypedBlocks {
-		buf.WriteString(genTypedBlocks(file))
+		typedCode, err := genTypedBlocks(file)
+		if err != nil {
+			return "", err
+		}
+		buf.WriteString(typedCode)
 	}
 
 	if file.Template != nil && len(file.Template.Nodes) > 0 {
-		buf.WriteString(genTempl(file, layout, scopeHash, true))
+		templCode, err := genTempl(file, layout, scopeHash, true)
+		if err != nil {
+			return "", err
+		}
+		buf.WriteString(templCode)
 	} else if !hasFormActions && firstMethod != "GET" {
 		buf.WriteString("\tb.WriteString(\"OK\")\n")
 	}
@@ -83,7 +91,11 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 
 	var postCode string
 	if hasFormActions {
-		postCode = generateFormPostHandler(file, renderFunc, postHandler, pattern)
+		var err error
+		postCode, err = generateFormPostHandler(file, renderFunc, postHandler, pattern)
+		if err != nil {
+			return "", err
+		}
 		if !strings.HasPrefix(postCode, "//") {
 			buf.WriteString(postCode)
 		}
@@ -92,7 +104,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("func init() {\n")
 	if hasFormActions {
 		buf.WriteString(fmt.Sprintf("\tcore.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
-		if !strings.HasPrefix(postCode, "//") {
+		if postCode != "" && !strings.HasPrefix(postCode, "//") {
 			buf.WriteString(fmt.Sprintf("\tcore.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
 		}
 	} else {
@@ -103,7 +115,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	return buf.String(), nil
 }
 
-func genTypedBlocks(file *File) string {
+func genTypedBlocks(file *File) (string, error) {
 	var buf strings.Builder
 	buf.WriteString("\tif true {\n")
 	for _, g := range file.Go {
@@ -127,20 +139,28 @@ func genTypedBlocks(file *File) string {
 		}
 	}
 	buf.WriteString("\t}\n\n")
-	return buf.String()
+	return buf.String(), nil
 }
 
-func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
+func genTempl(file *File, layout *File, scopeHash string, isGET bool) (string, error) {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
-		buf.WriteString(genHead(file.Head.Content, "b"))
+		headCode, err := genHead(file.Head.Content, "b")
+		if err != nil {
+			return "", err
+		}
+		buf.WriteString(headCode)
 	}
 	if isGET {
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 	}
 	for _, n := range file.Template.Nodes {
-		buf.WriteString(genTemplateNode(n, 1))
+		code, err := genTemplateNode(n, 1)
+		if err != nil {
+			return "", err
+		}
+		buf.WriteString(code)
 	}
 	if isGET {
 		buf.WriteString("\tb.WriteString(\"</div>\")\n")
@@ -170,7 +190,11 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
 					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[0])))
 				}
 				if file.Head != nil {
-					buf.WriteString(genHead(file.Head.Content, "b"))
+					headCode, err := genHead(file.Head.Content, "b")
+					if err != nil {
+						return "", err
+					}
+					buf.WriteString(headCode)
 				} else {
 					buf.WriteString("\tb.WriteString(\"\")\n")
 				}
@@ -184,184 +208,30 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
 
 		if file.Head != nil {
 			buf.WriteString("\tvar headBuf strings.Builder\n")
-			buf.WriteString(genHead(file.Head.Content, "headBuf"))
+			headCode, err := genHead(file.Head.Content, "headBuf")
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(headCode)
 			buf.WriteString("\tc.Set(\"head\", headBuf.String())\n")
 		}
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
 		if layout.Template != nil {
 			for _, n := range layout.Template.Nodes {
-				buf.WriteString(genLayoutNode(n, 1))
+				code, err := genLayoutNode(n, 1)
+				if err != nil {
+					return "", err
+				}
+				buf.WriteString(code)
 			}
 		}
 	}
 
-	return buf.String()
-}
-
-func splitGoSections(sections []GoSection, hasFormActions bool) (pkgCode string, inlineCode string) {
-	var pkg []string
-	var inl []string
-	for _, g := range sections {
-		if g.ContentType != "" && g.ContentType != "custom" {
-			continue
-		}
-		trimmed := strings.TrimSpace(g.Code)
-		if trimmed == "" {
-			continue
-		}
-		firstLine := ""
-		for _, line := range strings.Split(trimmed, "\n") {
-			line = strings.TrimSpace(line)
-			if line == "" || strings.HasPrefix(line, "//") {
-				continue
-			}
-			firstLine = line
-			break
-		}
-		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
-		if isDeclaration && hasFormActions {
-			pkg = append(pkg, unindent(g.Code))
-		} else {
-			inl = append(inl, trimmed)
-		}
-	}
-	result := strings.Join(pkg, "\n")
-	if result != "" {
-		result += "\n"
-	}
-	return result, strings.Join(inl, "\n")
-}
-
-func unindent(code string) string {
-	lines := strings.Split(code, "\n")
-	minIndent := -1
-	for _, l := range lines {
-		trimmed := strings.TrimSpace(l)
-		if trimmed == "" {
-			continue
-		}
-		indent := len(l) - len(strings.TrimLeft(l, " \t"))
-		if minIndent < 0 || indent < minIndent {
-			minIndent = indent
-		}
-	}
-	if minIndent <= 0 {
-		return code
-	}
-	var out []string
-	for _, l := range lines {
-		if len(l) >= minIndent {
-			out = append(out, l[minIndent:])
-		} else {
-			out = append(out, l)
-		}
-	}
-	return strings.Join(out, "\n")
-}
-
-func generateFormPostHandler(file *File, renderFunc string, postHandler string, pattern string) string {
-	action := file.FormActions[0]
-	structName := findFormStruct(file.Go, action)
-	if structName == "" {
-		return fmt.Sprintf("// no form struct for action %s\n", action)
-	}
-	if !findFormHandler(file.Go, action) {
-		return fmt.Sprintf("// no handler function for action %s\n", action)
-	}
-	hasValidate := hasValidateTag(file.Go, structName)
-
-	var buf strings.Builder
-	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", postHandler))
-	buf.WriteString("\tc := core.NewSSR(w, r)\n\n")
-	buf.WriteString(fmt.Sprintf("\tvar form %s\n", structName))
-	buf.WriteString("\tif err := core.BindForm(r, &form); err != nil {\n")
-	buf.WriteString(fmt.Sprintf("\t\tc.Set(\"error__form\", err.Error())\n"))
-	buf.WriteString(fmt.Sprintf("\t\thtml, _ := %s(c)\n", renderFunc))
-	buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
-	buf.WriteString("\t\tw.Write([]byte(html))\n")
-	buf.WriteString("\t\treturn\n")
-	buf.WriteString("\t}\n\n")
-	if hasValidate {
-		buf.WriteString("\terrs := core.ValidateForm(form)\n")
-		buf.WriteString("\tif len(errs) > 0 {\n")
-		buf.WriteString("\t\tcore.SaveErrors(c, errs)\n")
-		buf.WriteString("\t\tcore.SaveOld(c, form)\n")
-		buf.WriteString(fmt.Sprintf("\t\thtml, _ := %s(c)\n", renderFunc))
-		buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
-		buf.WriteString("\t\tw.Write([]byte(html))\n")
-		buf.WriteString("\t\treturn\n")
-		buf.WriteString("\t}\n\n")
-	}
-	buf.WriteString(fmt.Sprintf("\tif err := %s(c, form); err != nil {\n", action))
-	buf.WriteString("\t\tif err == core.ErrRedirect {\n")
-	buf.WriteString("\t\t\treturn\n")
-	buf.WriteString("\t\t}\n")
-	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
-	buf.WriteString("\t\treturn\n")
-	buf.WriteString("\t}\n\n")
-	buf.WriteString("\thttp.Redirect(w, r, r.URL.Path, 303)\n")
-	buf.WriteString("}\n\n")
-	return buf.String()
-}
-
-func genLayoutNode(n TemplateNode, depth int) string {
-	indent := strings.Repeat("\t", depth)
-	if n.Type == NodeSlot {
-		if n.Content != "" {
-			return indent + fmt.Sprintf("b.WriteString(c.Get(\"slot_%s\"))\n", n.Content)
-		}
-		return indent + "b.WriteString(c.Get(\"slot\"))\n"
-	}
-	if n.Type == NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
-		parts := splitLayoutText(n.Content)
-		var out string
-		for _, p := range parts {
-			switch p {
-			case "{#head}":
-				out += indent + "b.WriteString(c.Get(\"head\"))\n"
-			case "{#slot}":
-				out += indent + "b.WriteString(c.Get(\"slot\"))\n"
-			default:
-				out += indent + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(p))
-			}
-		}
-		return out
-	}
-	return genTemplateNode(n, depth)
-}
-
-func splitLayoutText(s string) []string {
-	var result []string
-	for s != "" {
-		headIdx := strings.Index(s, "{#head}")
-		slotIdx := strings.Index(s, "{#slot}")
-
-		next := -1
-		nextLen := 0
-		if headIdx >= 0 && (slotIdx < 0 || headIdx <= slotIdx) {
-			next = headIdx
-			nextLen = 7
-		} else if slotIdx >= 0 {
-			next = slotIdx
-			nextLen = 7
-		}
-
-		if next < 0 {
-			if s != "" {
-				result = append(result, s)
-			}
-			break
-		}
-		if next > 0 {
-			result = append(result, s[:next])
-		}
-		result = append(result, s[next:next+nextLen])
-		s = s[next+nextLen:]
-	}
-	return result
+	return buf.String(), nil
 }
 
 func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, error) {
+
 	safeName := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
 			return r
@@ -385,11 +255,19 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	if file.Template != nil {
 		if file.Head != nil {
-			buf.WriteString(genHead(file.Head.Content, "b"))
+			headCode, err := genHead(file.Head.Content, "b")
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(headCode)
 		}
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		for _, n := range file.Template.Nodes {
-			buf.WriteString(genTemplateNode(n, 1))
+			code, err := genTemplateNode(n, 1)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(code)
 		}
 		buf.WriteString("\tb.WriteString(\"</div>\")\n")
 
@@ -466,7 +344,11 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 	if file.Template != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		for _, n := range file.Template.Nodes {
-			buf.WriteString("\t\t" + genTemplateNodeComp(n) + "\n")
+			code, err := genTemplateNodeComp(n)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString("\t\t" + code + "\n")
 		}
 		buf.WriteString("\t\tb.WriteString(\"</div>\")\n")
 	}
@@ -483,99 +365,4 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 	buf.WriteString("}\n\n")
 
 	return buf.String(), nil
-}
-
-func genTemplateNodeComp(n TemplateNode) string {
-	switch n.Type {
-	case NodeText:
-		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content))
-	case NodeExpression:
-		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
-		raw := false
-		for _, f := range n.Filters {
-			switch f {
-			case "raw":
-				raw = true
-			case "upper":
-				code = fmt.Sprintf("strings.ToUpper(%s)", code)
-			}
-		}
-		if raw {
-			return fmt.Sprintf("b.WriteString(%s)", code)
-		}
-		return fmt.Sprintf("b.WriteString(html.EscapeString(%s))", code)
-	case NodeIf:
-		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
-		for _, child := range n.Children {
-			buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
-		}
-		for i, ec := range n.ElseChildren {
-			if ec.Type == NodeIf {
-				buf.WriteString(fmt.Sprintf("\t} else if %s {\n", ec.Cond))
-				for _, child := range ec.Children {
-					buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
-				}
-				if len(ec.ElseChildren) > 0 {
-					if i != len(n.ElseChildren)-1 {
-						return ""
-					}
-					buf.WriteString("\t} else {\n")
-					for _, child := range ec.ElseChildren {
-						buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
-					}
-				}
-			} else {
-				if i == 0 {
-					buf.WriteString("\t} else {\n")
-				}
-				buf.WriteString("\t\t" + genTemplateNodeComp(ec) + "\n")
-			}
-		}
-		buf.WriteString("\t}")
-		return buf.String()
-	case NodeEach:
-		var buf strings.Builder
-		hasElse := len(n.ElseChildren) > 0
-		if hasElse {
-			buf.WriteString(fmt.Sprintf("if len(%s) > 0 {\n", n.Items))
-		}
-		buf.WriteString(fmt.Sprintf("\tfor i, %s := range %s {\n", n.Item, n.Items))
-		buf.WriteString(fmt.Sprintf("\t\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", n.Items))
-		buf.WriteString("\t\t_ = loop\n")
-		for _, child := range n.Children {
-			code := genTemplateNodeComp(child)
-			code = strings.ReplaceAll(code, "$loop.", "loop.")
-			buf.WriteString("\t\t" + code + "\n")
-		}
-		buf.WriteString("\t}\n")
-		if hasElse {
-			buf.WriteString("} else {\n")
-			for _, child := range n.ElseChildren {
-				buf.WriteString("\t\t" + genTemplateNodeComp(child) + "\n")
-			}
-			buf.WriteString("\t}")
-		}
-		return buf.String()
-	case NodeSlot:
-		if n.Content != "" {
-			return fmt.Sprintf("b.WriteString(ctx.Get(\"slot_%s\"))", n.Content)
-		}
-		return "b.WriteString(ctx.Get(\"slot\"))"
-	case NodeComponentCall:
-		return genComponentCall(n)
-	case NodeVerbatim:
-		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content))
-	default:
-		return ""
-	}
-}
-
-func genComponentCall(n TemplateNode) string {
-	parts := strings.SplitN(n.Tag, ".", 2)
-	funcName := parts[len(parts)-1]
-	if n.SelfClose {
-		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, n.Attrs)
-	}
-	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag)
 }

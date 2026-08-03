@@ -23,6 +23,8 @@ var errorHandlers = map[int]http.HandlerFunc{}
 
 var sessionStore Store
 
+var builtHandler http.Handler
+
 type route struct {
 	method  string
 	pattern string
@@ -52,7 +54,10 @@ func RegisterRewrite(from, to string) {
 	rewrites = append(rewrites, rewriteRule{from: from, to: to})
 }
 
-func ServeMux() http.Handler {
+func Build() {
+	if builtHandler != nil {
+		return
+	}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", healthHandler())
@@ -81,7 +86,12 @@ func ServeMux() http.Handler {
 	h = Compress()(h)
 	h = SecurityHeaders()(h)
 	h = Recovery(errorHandlers[500])(h)
-	return h
+	builtHandler = h
+}
+
+func ServeMux() http.Handler {
+	Build()
+	return builtHandler
 }
 
 func redirectRewriteMiddleware(next http.Handler) http.Handler {
@@ -136,6 +146,7 @@ func SessionStore() Store {
 }
 
 func Listen(addr string) error {
+	Build()
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: ServeMux(),

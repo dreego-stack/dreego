@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func genHead(html string, bufName string) string {
+func genHead(html string, bufName string) (string, error) {
 	var out strings.Builder
 	rest := html
 	for rest != "" {
@@ -41,5 +41,5 @@ func genHead(html string, bufName string) string {
 		}
 		rest = rest[closeIdx+1:]
 	}
-	return out.String()
+	return out.String(), nil
 }

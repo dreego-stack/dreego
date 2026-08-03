@@ -38,6 +38,8 @@ Available as `c` in `<go>` blocks and component render functions.
 
 Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Path: "/"`.
 
+For AES-256-GCM session encryption see [Session Encryption](https://codeberg.org/dreego/dreego/src/branch/main/_docs/session-encryption.md).
+
 ## Configuration
 
 | Function | Description |

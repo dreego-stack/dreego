@@ -10,6 +10,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Routing](https://codeberg.org/dreego/dreego/src/branch/main/_docs/routing.md) — File-based Routing
 - [Middleware](https://codeberg.org/dreego/dreego/src/branch/main/_docs/middleware.md) — Middleware System
 - [Runtime API](https://codeberg.org/dreego/dreego/src/branch/main/_docs/runtime.md) — SSRContext, Listen, sessions, config
+- [Session Encryption](https://codeberg.org/dreego/dreego/src/branch/main/_docs/session-encryption.md) — AES-256-GCM encrypted session cookies
 
 ## Framework
 
