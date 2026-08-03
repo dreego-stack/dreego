@@ -134,7 +134,7 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
+		buf.WriteString(genHead(file.Head.Content, "b"))
 	}
 	if isGET {
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
@@ -170,7 +170,7 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
 					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[0])))
 				}
 				if file.Head != nil {
-					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
+					buf.WriteString(genHead(file.Head.Content, "b"))
 				} else {
 					buf.WriteString("\tb.WriteString(\"\")\n")
 				}
@@ -183,7 +183,9 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) string {
 		}
 
 		if file.Head != nil {
-			buf.WriteString(fmt.Sprintf("\tc.Set(\"head\", %s)\n", goLiteral(file.Head.Content)))
+			buf.WriteString("\tvar headBuf strings.Builder\n")
+			buf.WriteString(genHead(file.Head.Content, "headBuf"))
+			buf.WriteString("\tc.Set(\"head\", headBuf.String())\n")
 		}
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
 		if layout.Template != nil {
@@ -383,7 +385,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	if file.Template != nil {
 		if file.Head != nil {
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Head.Content)))
+			buf.WriteString(genHead(file.Head.Content, "b"))
 		}
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		for _, n := range file.Template.Nodes {

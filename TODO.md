@@ -37,6 +37,7 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 ## Quality Backlog (from code review)
 
 - **codegen-errors.1** — Replace silent fails in CodeGen with explicit errors.
+- **codegen-errors.2** — Same silent-drop bug as feedback-intake A in the component template path: `genTemplateNodeComp` (`core/codegen.go:521`) returns `""` for a nested `{#if}` inside a non-final `{#else}` branch. Reuse the route-level fix pattern from v0.0.23 (`NodeIf` chain-vs-else detection).
 - **servemux-cache.1** — Build and cache the middleware/routing stack once at startup.
 - **security-session.1** — Document or encrypt sensitive session payload.
 - **golden-tests-core.1** — Add golden-code tests for generated Go output.

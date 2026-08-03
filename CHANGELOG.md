@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.23 (2026-08-03) — Nested Control Flow + Head Expression Resolution
+
+- **Fix (feedback-intake A):** Nested `{#if}` blocks inside the `{#else}` branch of a route template are no longer silently dropped. `core/codegen_template.go` `NodeIf` codegen now distinguishes an else-if chain from a true else branch and emits the nested blocks instead of returning an empty string — previously `dreego generate` succeeded but produced an empty template (with follow-up `go build` errors like `declared and not used`).
+- **Fix (feedback-intake B):** Expressions in the `<head>` section of a route (e.g. `<title>{doc.Title}</title>`) are now resolved instead of being emitted raw. New `core/codegen_head.go` (`genHead`) splits head markup into literal and expression segments, applies escaping and the `raw`/`upper` filters; the four head emission sites in `core/codegen.go` (lines 137, 173, 187, 388) use it.
+- Tests: unit test `TestGenTemplateNodeNestedIfInElseNotDropped` (`core/codegen_template_test.go`) + regression tests `_tests/core/Bugs/nested-if-in-else/` and `_tests/core/Bugs/head-expression-raw/`; existing `_tests/core/Bugs/head-expression/` extended.
+- Full suite: 144 passed, 0 failed
+
 ## v0.0.22 (2026-07-31) — Single-Source Versioning + go install Fix
 
 - **Fix:** `go install codeberg.org/dreego/dreego/cmd/dreego@latest` now works. Removed the relative `replace` directive from `cmd/dreego/go.mod` and `plugins/sample/go.mod` (relative replaces are invalid for non-main modules), replaced with a real published `require codeberg.org/dreego/dreego/core v0.0.22`. Local development still resolves `core` via `go.work` (`use ./core`).

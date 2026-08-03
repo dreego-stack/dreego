@@ -59,3 +59,24 @@ func TestGenTemplateNodeTextNoEscape(t *testing.T) {
 		t.Errorf("static text must NOT use html.EscapeString, got:\n%s", result)
 	}
 }
+
+func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
+	input := `{#if a}A{#else}{#if b}B{#else}C{/if}D{/if}`
+	tokens, err := Lex(input)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	out := genTemplateNode(file.Template.Nodes[0], 0)
+	if out == "" {
+		t.Fatal("nested {#if} inside {#else} silently dropped: generated code is empty")
+	}
+	for _, want := range []string{"if a", "if b", "`A`", "`B`", "`C`", "`D`"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("generated code missing %q, got:\n%s", want, out)
+		}
+	}
+}

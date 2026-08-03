@@ -379,3 +379,31 @@ timestamp: 2026-07-28T21:33:00Z
 - Decision: SSG & Wails in V2
 - Researched: React/Svelte ecosystems, Phoenix/Laravel/Django, Rust frameworks, Solid/Astro, Blazor
 - Concepts drafted: Architecture, Sections, Template Logic, Addon Ecosystem
+2026-08-03 07:13 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-config-audit: Untersuche opencode-Config-Umbau (~/.config/opencode vs ~/.agents/opencode). next: shell
+2026-08-03 07:17 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-config-audit abgeschlossen: Status quo dokumentiert (Symlinks .config->.agents, instructions intakt, debug config OK, ~/.agents = git). next: user-bericht
+2026-08-03 07:50 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-cleanup: Umbau ~/.config/opencode (echte Dateien, Backup weg, .vscode exclude, Git). next: shell
+2026-08-03 08:06 | shell | ses_039c9359bffe2JNB9SO8bmYhce | oc-cleanup abgeschlossen: Symlinks→Dateien, Backup unter ~/.agents/opencode-backup, .vscode/settings.json angelegt, opencode.jsonc entfernt. Kein .git in ~/.config/opencode.
+2026-08-03 08:06 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-cleanup: Datei-Umbau fertig (echte Dateien, .backup+smd.toml nach ~/.agents/opencode-backup/, .vscode exclude, opencode.jsonc weg). Warte auf opencode-Neustart. next: user
+2026-08-03 08:09 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-cleanup: opencode neu gestartet. Führe Config-Test aus, danach ~/.agents/opencode auflösen. next: shell
+2026-08-03 08:09 | shell | ses_039c20211ffe8jcEc9jhyFWpmW | Start oc-cleanup: Test debug config + bedingtes Aufräumen ~/.agents/opencode. next: manager
+2026-08-03 08:11 | shell | ses_039c20211ffe8jcEc9jhyFWpmW | oc-cleanup fertig: Bedingung erfüllt (manager, kein Backup, 18 agents), ~/.agents/opencode entfernt, backup intakt. next: manager
+2026-08-03 08:12 | git | ses_039bfa4b5fferPDPRHx9RRUuor | git: oc-cleanup erledigt — ~/.config/opencode init+commit 85db252, ~/.agents commit be55809. Security-Check sauber, node_modules 0. next: manager
+2026-08-03 08:13 | manager | ses_039f9fe51ffeYSKD1qS2haiYc5 | Task-ID oc-cleanup: ABGESCHLOSSEN. Config getestet (manager+18 agents, kein Backup), Git-Rollback in ~/.config/opencode (85db252) und ~/.agents (be55809). next: user
+2026-08-03 12:59 | manager | ses_038b94d8dffechdVNUKE1pGtjb | Task-ID feedback-intake: .tmp/dreego-feedback.md gelesen (2 Issues: nested {#if} silent-drop, head-expr nicht aufgeloest). Plan erstellt, Task-Ordner angelegt. next: coder
+2026-08-03 13:03 | manager | ses_038b94d8dffechdVNUKE1pGtjb | subchain [feedback-intake] starte Kette: test-engineer -> coder -> shell (3 Schritte)
+2026-08-03 13:03 | manager | ses_038b94d8dffechdVNUKE1pGtjb | subchain [feedback-intake] starte Kette: test-engineer -> coder -> shell (3 Schritte)
+2026-08-03 13:03 | test-engineer | ses_038b4bb7cffeTPwy0JScGkpZdH | test-engineer ses_038b4bb7cffeTPwy0JScGkpZdH | Kette feedback-intake Schritt 1/3: Reproduktionstest für Issue A (verschachtelte {#if} in {#else} werden verworfen). Start.
+2026-08-03 13:08 | test-engineer | ses_038b4bb7cffeTPwy0JScGkpZdH | subchain [feedback-intake] Schritt 1/3: FEHLER: This operation was aborted
+2026-08-03 13:08 | test-engineer | ses_038b4b817ffeCI4GrCBh64zPcF | subchain [feedback-intake] Schritt 1/3: FEHLER: This operation was aborted
+2026-08-03 13:08 | manager | ses_038b94d8dffechdVNUKE1pGtjb | subchain [feedback-intake] Kette beendet: failed, 3 Schritte dokumentiert
+2026-08-03 13:08 | manager | ses_038b94d8dffechdVNUKE1pGtjb | subchain [feedback-intake] Kette beendet: failed, 3 Schritte dokumentiert
+2026-08-03 13:08 | test-engineer | ses_038b4bb7cffeTPwy0JScGkpZdH | Repro-Tests geschrieben: core/codegen_template_test.go (Unit, Lex+Parse+genTemplateNode) + _tests/core/Bugs/nested-if-in-else/test.sh (Route). Beide FAIL verifiziert (Silent-Drop: return "" bei codegen_template.go:47). next: coder
+2026-08-03 13:12 | test-engineer | ses_038b4b817ffeCI4GrCBh64zPcF | feedback-intake/schritt1: Reproduktionstest B geschrieben (_tests/core/Bugs/head-expression/test.sh), verifiziert FAIL. Bug-Beleg: {doc.Title} im <head> bleibt wörtlich, Body wird korrekt aufgelöst. next: coder
+2026-08-03 13:13 | test-engineer | ses_038afdcefffesBaUKDBvKnu34p | test-engineer: Issue-A Reproduktionstests verifiziert (existieren bereits, uncommitted): core/codegen_template_test.go +Unit-Test, _tests/core/Bugs/nested-if-in-else/test.sh. Beide reproduzieren Bug (codegen_template.go Z47 'return ""'). kein Fix. next: coder
+2026-08-03 13:14 | test-engineer | ses_038afdc8effeNhwAht6oZQ92fF | Repro-Test Issue B angelegt: _tests/core/Bugs/head-expression-raw/test.sh (muss aktuell FAIL). next: debug/coder für Fix parser_section_go.go:28 parseNonDivSection head
+2026-08-03 13:16 | coder | ses_038ab019dffeyZdToT2s5oE4DD | Issue A fix done: codegen_template.go NodeIf else-branch rewritten (chain-vs-nested detection, no more silent return ""). next: shell/test-engineer
+2026-08-03 13:18 | coder | ses_038aaea87ffec4UJhiU03SDvEE | Issue B fix umgesetzt: neue core/codegen_head.go (genHead löst {expr}/|raw/|upper im Head-String auf), 4 Head-Emissionsstellen in codegen.go:137,173,187,388 auf genHead umgestellt. Kein Lexer/AST-Change (schützt {#head}-Layout-Placeholder). Logisch grün geprüft. next: shell/test-engineer für make test
+2026-08-03 13:22 | shell | ses_038a7809effeRxPw9TZO7KNEH1 | shell: Tests ausgeführt — nested-if-in-else GREEN, head-expression-raw GREEN, head-expression GREEN (2), kompletter Lauf 144 PASS / 0 FAIL. Gesamt: alle Bugs repariert. next: manager
+2026-08-03 13:45 | docs | ses_038a32513ffecPhqJWz4gZKqz0 | feedback-intake Doku: CHANGELOG.md v0.0.23-Eintrag (nested {#if} in else + head-expression-resolution, 144/0), log.md KB-Update, TODO.md Quality Backlog + codegen-errors.2 (genTemplateNodeComp:521 gleicher silent-drop in Komponenten). next: manager
+2026-08-03 13:32 | hr | ses_038b94d8dffechdVNUKE1pGtjb | HR: git.md auf direkte Host-Ausfuehrung umgestellt (kein smd git, Identitaets-Problem), subchain.ts Plugin entfernt. Config-Commit d3cdea5.
+2026-08-03 13:37 | manager | ses_038b94d8dffechdVNUKE1pGtjb | feedback-intake: Manager zurueck, Neustart erfolgt, git-Agent hat Update (Host-Ausfuehrung). Offen: Commit mit QS. next: git
