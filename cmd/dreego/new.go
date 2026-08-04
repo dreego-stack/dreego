@@ -70,12 +70,24 @@ func cmdNew(args []string) {
 
 	c = exec.Command("go", "mod", "edit", "-go=1.22")
 	c.Dir = target
-	c.Run()
+	c.Stdout, c.Stderr = nil, os.Stderr
+	if err := c.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: go mod edit -go failed: %v\n", err)
+	}
 
 	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego/core@"+dreegoCoreVersion)
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
-	c.Run()
+	if err := c.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: go mod edit -require failed: %v\n", err)
+	}
+
+	c = exec.Command("go", "mod", "tidy")
+	c.Dir = target
+	c.Stdout, c.Stderr = nil, os.Stderr
+	if err := c.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: go mod tidy failed: %v\n", err)
+	}
 
 	fmt.Printf("Done!\n")
 	fmt.Printf("  cd %s && dreego generate && go run .\n", name)
