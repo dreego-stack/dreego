@@ -16,8 +16,7 @@ require codeberg.org/dreego/dreego/core v0.0.0
 replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
-port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
-port=$((port % 50000 + 10000))
+port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) + 10000 ))}"
 
 cat > main.go << GO
 package main

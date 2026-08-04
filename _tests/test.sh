@@ -35,6 +35,15 @@ DREEGO_BIN="$(mktemp -d)/dreego"
 export DREEGO_BIN
 export REPO_DIR
 
+# Install curl once, sequentially, before any parallel test starts. Every server
+# test needs curl; doing apk add concurrently per-test races on apk's database
+# lock and flakes. A single pre-install here is deterministic and race-free.
+apk add --no-cache curl >/dev/null 2>&1 || { echo "FAIL: curl unavailable"; exit 1; }
+
+DREEGO_PORT_BASE="${DREEGO_PORT_BASE:-20000}"
+export DREEGO_PORT_BASE
+port_counter=$DREEGO_PORT_BASE
+
 for test_dir in $(find "$DIR/core" "$DIR/plugins" -type d 2>/dev/null | sort); do
     test_script="$test_dir/test.sh"
     [ -f "$test_script" ] || continue
@@ -43,6 +52,8 @@ for test_dir in $(find "$DIR/core" "$DIR/plugins" -type d 2>/dev/null | sort); d
         continue
     fi
     result_file="$RESULTDIR/$(echo "$name" | tr '/' '_')"
+    export DREEGO_PORT=$port_counter
+    port_counter=$((port_counter + 1))
     (
         if sh "$test_script" >/dev/null 2>&1; then
             echo "PASS" > "$result_file"

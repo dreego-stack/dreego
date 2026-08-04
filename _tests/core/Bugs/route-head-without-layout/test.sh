@@ -15,10 +15,9 @@ if [ -z "$DREEGO_BIN" ]; then
     export DREEGO_BIN
 fi
 
-apk add --no-cache curl >/dev/null 2>&1
+apk add --no-cache curl >/dev/null 2>&1 || true
 
-port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
-port=$((port % 50000 + 10000))
+port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) + 10000 ))}"
 
 cat > go.mod << EOF
 module t

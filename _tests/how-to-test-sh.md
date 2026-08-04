@@ -46,12 +46,16 @@ echo "ok"
 5. **`go.mod`** — always fresh with `require` + `replace` for `codeberg.org/dreego/dreego/core` (use `cat > go.mod`, never `go mod init`)
 6. **`mkdir -p dreego/routes`** — scaffold minimal project structure as needed
 7. **No files left behind** — test does all I/O inside `$workdir`
-8. **Random port for server tests** — if the test starts an HTTP server, use a random port to avoid conflicts:
-   - Add `port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
-port=$((port % 50000 + 10000))` after `cd "$workdir"`
-   - Write `main.go` with `:8080` inside the heredoc
-   - Add `sed -i "s/8080/$port/" main.go` after the `main.go` heredoc (before `$DREEGO_BIN`)
-   - Use `localhost:$port` in all `curl` commands, never `localhost:8080`
+8. **Port for server tests** — the test runner (`_tests/test.sh`) exports `DREEGO_PORT` for every test, deterministically ascending from `DREEGO_PORT_BASE` (default `20000`), so ports never overlap in a parallel run:
+   - Read the port after `cd "$workdir"`:
+     ```sh
+     port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) + 10000 ))}"
+     ```
+     The `od` fallback only applies when the test runs standalone without the runner.
+   - Write `core.Listen(":$port")` **directly** into the `main.go` heredoc. The heredoc must be **unquoted** (`<< GO`, not `<< 'GO'`) so `$port` expands.
+   - Do **not** use `sed -i "s/8080/$port/" main.go` anymore — it is non-portable (BSD-sed) and flakes.
+   - Use `localhost:$port` in all `curl` commands, never `localhost:8080`.
+   - `curl` is installed once, sequentially, by the runner before any test runs. In a test it is enough to add `apk add --no-cache curl >/dev/null 2>&1 || true`.
 
 ## Why
 

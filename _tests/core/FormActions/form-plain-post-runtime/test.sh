@@ -9,8 +9,7 @@ trap "rm -rf $workdir" EXIT
 cd "$workdir"
 apk add --no-cache curl >/dev/null 2>&1 || true
 
-port=$(od -An -N2 -i /dev/urandom | tr -d ' ')
-port=$((port % 50000 + 10000))
+port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) + 10000 ))}"
 
 cat > go.mod << EOF
 module t
@@ -30,15 +29,14 @@ cat > dreego/routes/post.dreego << 'DREEGO'
     <button>Submit</button>
 </form>
 DREEGO
-cat > main.go << 'GO'
+cat > main.go << GO
 package main
 import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
 func main() {
     core.SetCSRF(false)
-    core.Listen(":8080")
+    core.Listen(":$port")
 }
 GO
-sed -i "s/8080/$port/" main.go
 $DREEGO_BIN generate 2>&1
 go build -o $workdir/srv .
 $workdir/srv &
