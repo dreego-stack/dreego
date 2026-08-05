@@ -8,27 +8,15 @@ Official plugins live in `plugins/` in this repository. Each plugin with externa
 
 - **v0.0.20** — `security-cookie.1`, `security-csp.1`
 - **v0.0.21** — monorepo plugin layout (`plugins/`, `go.work`, test moves)
-
-## v0.0.22
-
-- `servemux-cache.1` — cache built middleware/router stack
-- `codegen-errors.1` — replace silent CodeGen failures with errors
-- `security-session.1` — document or encrypt session payload
-
-## v0.0.23
-
-- `dreegotest.1` — testing package for routes and components
-- `golden-tests-core.1` — golden tests for generated Go code
-- `typed-forms.1` — int/bool/slice binding, custom validators, improve `email` validator
-
-## v0.0.24
-
-- `frontmatter.1` — parse frontmatter and expose typed metadata
-- `dev-server.1` — `dreego dev` with file watcher and auto-regenerate
-- `docs-extensibility.1` — design how `dreego docs` can read plugin docs
+- **v0.0.22** — `servemux-cache.1`, `codegen-errors.1`, `security-session.1`
+- **v0.0.23** — `dreegotest.1` (planned), `golden-tests-core.1` (planned), `typed-forms.1` (planned)
+- **v0.0.24** — `scaffold-fix.1`, `layout-head.1`, `scoped-css.2`, `component-attr-props.1`, `typed-forms.1`, `dreegotest.1`, `golden-tests-core.1` + deterministic port-schema runner
 
 ## v0.0.25
 
+- `frontmatter.1` — parse frontmatter and expose typed metadata (deferred from v0.0.24)
+- `dev-server.1` — `dreego dev` with file watcher and auto-regenerate (deferred from v0.0.24)
+- `docs-extensibility.1` — design how `dreego docs` can read plugin docs (deferred from v0.0.24)
 - `plugin-interface.1` — frozen plugin contract
 - `middleware-hooks.1` — plugin middleware hooks via app.Use
 - `route-hooks.1` — plugin route registration

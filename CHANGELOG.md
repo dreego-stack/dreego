@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.0.24 (2026-08-05) — Feedback-Driven Rollout: Layouts, Scoped CSS, Typed Forms, Testing
+
+- **scaffold-fix.1:** `dreego new` scaffold now includes `go.sum`, and the generated `.gitignore` ignores only `dreego/gen/` (not the source dirs). `cmd/dreego/version.go` reads the repo `VERSION` file as a fallback so local dev builds work with `dreego new` and `go mod tidy`.
+- **layout-head.1:** Layouts apply (`{#slot}`/`{#head}`) and route `<head>` works with or without a layout — covered by `Bugs/layout-not-applied`, `Bugs/route-head-without-layout`, `Bugs/layout-route-head-merge`, `Layout/no-layout` + unit tests (`core/codegen_layout_test.go`, `core/codegen_head_test.go`).
+- **scoped-css.2:** `scopeCSS` in `core/codegen_helpers.go` rewritten as a recursive brace-tracked parser so declarations between `{}` are preserved verbatim (`radial-gradient`, `calc()`, `rgb()`), `@media` inner selectors stay scoped, and `@keyframes` bodies survive unscoped. Regression tests: `Bugs/scoped-style-declarations-lost`, `Bugs/scoped-style-comma-parens`, `Bugs/scoped-style-keyframes`.
+- **component-attr-props.1:** `{prop}` inside HTML attributes is substituted and escaped, both in component calls (`<@Link url="...">`) and in component bodies (`<a href="{url}">`). `core/codegen_component.go` (`compTextWithAttrs`, `genComponentCall` via `extractAttrValues`) + `core/codegen_helpers.go` (`attrVal` resolves `{expr}` inside quoted values). Tests: `Bugs/component-attr-prop-substitution`, `Components/prop-expression`, `Components/multi-props`, `Components/empty-props` + unit tests.
+- **typed-forms.1:** `BindForm` now binds `int`, `bool`, and `[]string` fields (beyond `reflect.String`); new `core.RegisterRule(name, fn)` custom-validator API; `ValidateForm` uses `fmt.Sprint` so `min`/`max`/`required` work on bound numeric values. Tests: `core/validate_typed_test.go` + `FormActions/form-int-binding`, `FormActions/form-bool-binding`.
+- **dreegotest.1:** New exported `dreegotest` helper package (`dreegotest/`, own Go module) with `Get(t, path)`, `PostForm(t, path, form)`, and `RenderComponent(t, fn, props...)` for route/component unit tests against `core.ServeMux()`.
+- **golden-tests-core.1:** Golden-file assertions for generated `gen/routes.go`/`gen/components.go` output (`core/codegen_golden_test.go` + `core/testdata/golden/*.golden`), run with `-update` to refresh fixtures.
+- **port-schema / test stability:** `_tests/test.sh` runner now assigns deterministic sequential ports from `DREEGO_PORT_BASE` (default 20000) and installs `curl` once before the test loop; all ~28 server-based tests read `${DREEGO_PORT:-...}` and write the port directly into `main.go` (no more `sed -i`, no random-port collisions, no apk database-lock races). `run-timer-sigterm/test.sh` gained a `DREEGO_BIN` fallback so it runs standalone.
+- Full suite: 161 passed, 1 expected failure (`core/CLI/new-go-sum`) — the `core/v0.0.24` git tag does not exist yet; it is created by `_scripts/release.sh` at release time. Not a regression.
+
 ## v0.0.23 (2026-08-03) — Unreleased — Late v0.0.22 Fixes
 
 - **runtime:** New exported `core.Reset()` helper clears the cached middleware/router stack (`builtHandler`) so tests and reload paths start from a clean runtime state.
