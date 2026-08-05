@@ -1,0 +1,26 @@
+func Badge(title string, tone string) core.Component {
+	return core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {
+		var b strings.Builder
+
+		b.WriteString("<div data-scope=\"5828563e12c4\">")
+		b.WriteString(`
+    `)
+		b.WriteString(`<span>`)
+		b.WriteString(html.EscapeString(fmt.Sprintf("%v", title)))
+		b.WriteString(`</span>`)
+		b.WriteString(`
+    `)
+		b.WriteString(`<em>`)
+		b.WriteString(html.EscapeString(fmt.Sprintf("%v", tone)))
+		b.WriteString(`</em>`)
+		b.WriteString(`
+`)
+		b.WriteString("</div>")
+		b.WriteString("<style>")
+		b.WriteString(`[data-scope=5828563e12c4] .badge{ font-weight: bold; }[data-scope=5828563e12c4] .badge em{ color: #666; }`)
+		b.WriteString("</style>")
+
+		return b.String(), nil
+	})
+}
+

@@ -1,0 +1,39 @@
+
+func renderIndex(c *core.SSRContext) (string, error) {
+	var b strings.Builder
+
+b.WriteString(`<title>Home</title>`)
+	b.WriteString("<div data-scope=\"3a75f7b5aeb7\">")
+	b.WriteString(`
+    `)
+	b.WriteString(`<h1>`)
+	b.WriteString(`Welcome`)
+	b.WriteString(`</h1>`)
+	b.WriteString(`
+    `)
+	b.WriteString(`<p>`)
+	b.WriteString(`Hello, `)
+	b.WriteString(html.EscapeString(fmt.Sprintf("%v", name)))
+	b.WriteString(`!`)
+	b.WriteString(`</p>`)
+	b.WriteString(`
+`)
+	b.WriteString("</div>")
+
+	return b.String(), nil
+}
+
+func HandleIndex(w http.ResponseWriter, r *http.Request) {
+	c := core.NewSSR(w, r)
+	html, err := renderIndex(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(html))
+}
+
+func init() {
+	core.Register("GET", "/", HandleIndex)
+}

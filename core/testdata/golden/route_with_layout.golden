@@ -1,0 +1,44 @@
+
+func renderAbout(c *core.SSRContext) (string, error) {
+	var b strings.Builder
+
+	b.WriteString("<div data-scope=\"4f3f671a10cb\">")
+	b.WriteString(`<h1>`)
+	b.WriteString(`About us`)
+	b.WriteString(`</h1>`)
+	b.WriteString("</div>")
+	pageContent := b.String()
+	b.Reset()
+	var headBuf strings.Builder
+headBuf.WriteString(`<title>About</title>`)
+	c.Set("head", headBuf.String())
+	c.Set("slot", pageContent)
+	b.WriteString(`<!doctype html>`)
+	b.WriteString(`<html>`)
+	b.WriteString(`<head>`)
+	b.WriteString(c.Get("head"))
+	b.WriteString(`</head>`)
+	b.WriteString(`<body>`)
+	b.WriteString(`<main>`)
+	b.WriteString(c.Get("slot"))
+	b.WriteString(`</main>`)
+	b.WriteString(`</body>`)
+	b.WriteString(`</html>`)
+
+	return b.String(), nil
+}
+
+func HandleAbout(w http.ResponseWriter, r *http.Request) {
+	c := core.NewSSR(w, r)
+	html, err := renderAbout(c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(html))
+}
+
+func init() {
+	core.Register("GET", "/about", HandleAbout)
+}
