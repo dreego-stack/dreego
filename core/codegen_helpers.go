@@ -168,5 +168,8 @@ func attrVal(part string) string {
 		return val[1 : len(val)-1]
 	}
 	val = strings.Trim(val, "\"")
+	if len(val) >= 2 && val[0] == '{' && val[len(val)-1] == '}' {
+		return val[1 : len(val)-1]
+	}
 	return fmt.Sprintf("%q", val)
 }

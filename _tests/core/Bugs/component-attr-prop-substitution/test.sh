@@ -1,6 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
-# What: Tests that a component with no props compiles
+# What: {prop} in an HTML attribute is substituted, not emitted literally
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../../.. && pwd)"
@@ -29,16 +29,28 @@ func main() {}
 GO
 
 mkdir -p dreego/components dreego/routes
-
-cat > dreego/components/Empty.dreego << 'DREEGO'
-Component Empty ()
-<div><p>no props</p></div>
+cat > dreego/components/Link.dreego << 'DREEGO'
+Component Link (url string, label string)
+<a href="{url}">{label}</a>
 DREEGO
-
 cat > dreego/routes/get.dreego << 'DREEGO'
-<div><@Empty/></div>
+<div><@Link url="https://example.com" label="Go"/></div>
 DREEGO
 
 $DREEGO_BIN generate
+
+generated="dreego/gen/components.go"
+if grep -q '{url}' "$generated"; then
+    echo "FAIL: {url} emitted literally in attribute, expected resolved expression"
+    exit 1
+fi
+if grep -q '{label}' "$generated"; then
+    echo "FAIL: {label} emitted literally in text content"
+    exit 1
+fi
+if ! grep -q 'EscapeString' "$generated"; then
+    echo "FAIL: attribute expression must be html-escaped (XSS-safe)"
+    exit 1
+fi
 go build -o /dev/null .
 echo ok

@@ -8,7 +8,7 @@ import (
 func genTemplateNodeComp(n TemplateNode) (string, error) {
 	switch n.Type {
 	case NodeText:
-		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content)), nil
+		return fmt.Sprintf("b.WriteString(%s)", compTextWithAttrs(n.Content)), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false
@@ -121,7 +121,48 @@ func genComponentCall(n TemplateNode) (string, error) {
 	parts := strings.SplitN(n.Tag, ".", 2)
 	funcName := parts[len(parts)-1]
 	if n.SelfClose {
-		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, n.Attrs), nil
+		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, extractAttrValues(n.Attrs)), nil
 	}
 	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag), nil
+}
+
+func compTextWithAttrs(s string) string {
+	if !strings.Contains(s, "{") {
+		return goLiteral(s)
+	}
+	var parts []string
+	inQuote := false
+	braceDepth := 0
+	start := 0
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '"':
+			if i > 0 && s[i-1] == '\\' {
+				continue
+			}
+			inQuote = !inQuote
+		case '{':
+			if inQuote && braceDepth == 0 {
+				if start < i {
+					parts = append(parts, goLiteral(s[start:i]))
+				}
+				braceDepth = 1
+				start = i + 1
+			}
+		case '}':
+			if inQuote && braceDepth > 0 {
+				braceDepth--
+				if braceDepth == 0 {
+					expr := s[start:i]
+					code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
+					parts = append(parts, fmt.Sprintf("html.EscapeString(%s)", code))
+					start = i + 1
+				}
+			}
+		}
+	}
+	if start < len(s) {
+		parts = append(parts, goLiteral(s[start:]))
+	}
+	return strings.Join(parts, " + ")
 }

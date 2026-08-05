@@ -126,3 +126,34 @@ func TestGenTemplateNodeCompReturnsErrorForUnsupportedNode(t *testing.T) {
 		t.Fatal("expected error for unsupported template node type in component codegen")
 	}
 }
+
+// An attribute expression in a component body must be escaped (XSS-safe).
+// `<a href="{url}">` must generate html.EscapeString for the url value so a
+// quote in the value cannot break out of the attribute. Currently the whole
+// tag is a literal NodeText and {url} is emitted verbatim with no escaping.
+func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
+	body := `<a href="{url}">{label}</a>`
+	tokens, err := Lex(body)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	var out strings.Builder
+	for _, n := range file.Template.Nodes {
+		code, err := genTemplateNodeComp(n)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		out.WriteString(code)
+	}
+	got := out.String()
+	if strings.Contains(got, "{url}") {
+		t.Errorf("attribute expression {url} left literal, must be resolved. got:\n%s", got)
+	}
+	if !strings.Contains(got, "html.EscapeString") {
+		t.Errorf("attribute expression must be html-escaped (XSS-safe), got:\n%s", got)
+	}
+}

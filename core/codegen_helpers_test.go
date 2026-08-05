@@ -35,6 +35,19 @@ func TestScopeCSSMediaPreservesDeclarationsAndScopesInnerSelectors(t *testing.T)
 	}
 }
 
+// extractAttrValues must resolve {expr} inside a quoted attribute value as a
+// Go expression (unquoted), not a literal string. Currently attrVal trims the
+// quotes and returns "{url}" as a literal.
+func TestExtractAttrValuesResolvesExprInQuotedValue(t *testing.T) {
+	out := extractAttrValues(`href="{url}" label="x"`)
+	if strings.Contains(out, "{url}") {
+		t.Errorf("extractAttrValues left {url} literal, must resolve to url. got: %s", out)
+	}
+	if !strings.Contains(out, "url") {
+		t.Errorf("extractAttrValues must contain url expression, got: %s", out)
+	}
+}
+
 func TestScopeCSSPseudoSelectorKeepsDeclaration(t *testing.T) {
 	css := ".box:hover { color: green; }"
 	out := scopeCSS(css, "abc")

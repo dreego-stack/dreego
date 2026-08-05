@@ -1,6 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
-# What: Tests that a component with no props compiles
+# What: Component prop value from expression title={user.Name} compiles
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../../.. && pwd)"
@@ -29,16 +29,17 @@ func main() {}
 GO
 
 mkdir -p dreego/components dreego/routes
-
-cat > dreego/components/Empty.dreego << 'DREEGO'
-Component Empty ()
-<div><p>no props</p></div>
+cat > dreego/components/Card.dreego << 'DREEGO'
+Component Card (title string)
+<div><article><h2>{title}</h2></article></div>
 DREEGO
-
 cat > dreego/routes/get.dreego << 'DREEGO'
-<div><@Empty/></div>
+<go>type User struct { Name string }
+user := User{Name: "Ada"}</go>
+<div><@Card title={user.Name}/></div>
 DREEGO
 
 $DREEGO_BIN generate
+grep -q 'user.Name' dreego/gen/routes.go || { echo "FAIL: prop expression user.Name not passed to component"; exit 1; }
 go build -o /dev/null .
 echo ok

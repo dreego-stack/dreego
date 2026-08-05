@@ -1,6 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
-# What: Tests that a component with no props compiles
+# What: Component with 3+ props all rendered
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../../.. && pwd)"
@@ -29,16 +29,17 @@ func main() {}
 GO
 
 mkdir -p dreego/components dreego/routes
-
-cat > dreego/components/Empty.dreego << 'DREEGO'
-Component Empty ()
-<div><p>no props</p></div>
+cat > dreego/components/Profile.dreego << 'DREEGO'
+Component Profile (name string, role string, email string)
+<div><h2>{name}</h2><p>{role}</p><a href="mailto:{email}">{email}</a></div>
 DREEGO
-
 cat > dreego/routes/get.dreego << 'DREEGO'
-<div><@Empty/></div>
+<div><@Profile name="Ada" role="Admin" email="ada@example.com"/></div>
 DREEGO
 
 $DREEGO_BIN generate
+grep -q 'Profile("Ada"' dreego/gen/routes.go || { echo "FAIL: first prop not passed"; exit 1; }
+grep -q '"Admin"' dreego/gen/routes.go || { echo "FAIL: second prop not passed"; exit 1; }
+grep -q '"ada@example.com"' dreego/gen/routes.go || { echo "FAIL: third prop not passed"; exit 1; }
 go build -o /dev/null .
 echo ok
