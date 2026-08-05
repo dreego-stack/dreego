@@ -164,12 +164,49 @@ func attrVal(part string) string {
 	if val == "" {
 		return fmt.Sprintf("%q", "")
 	}
-	if val[0] == '{' && val[len(val)-1] == '}' {
+	if val[0] == '{' && val[len(val)-1] == '}' && strings.Count(val, "{") == 1 && strings.Count(val, "}") == 1 {
 		return val[1 : len(val)-1]
 	}
 	val = strings.Trim(val, "\"")
-	if len(val) >= 2 && val[0] == '{' && val[len(val)-1] == '}' {
+	if len(val) >= 2 && val[0] == '{' && val[len(val)-1] == '}' && strings.Count(val, "{") == 1 && strings.Count(val, "}") == 1 {
 		return val[1 : len(val)-1]
 	}
+	if strings.Contains(val, "{") {
+		return concatPlaceholders(val)
+	}
 	return fmt.Sprintf("%q", val)
+}
+
+// concatPlaceholders splits a quoted attribute value that mixes literal text and
+// one or more {…} placeholders into a Go concatenation, quoting literal segments
+// and emitting each expression as fmt.Sprintf. Escaping is deferred to the prop
+// injection point (component bodies escape their own placeholders), matching the
+// single-placeholder raw path so multi-placeholder calls are not double-escaped.
+func concatPlaceholders(val string) string {
+	var parts []string
+	start := 0
+	inExpr := false
+	for i := 0; i < len(val); i++ {
+		switch val[i] {
+		case '{':
+			if !inExpr {
+				if start < i {
+					parts = append(parts, strconv.Quote(val[start:i]))
+				}
+				inExpr = true
+				start = i + 1
+			}
+		case '}':
+			if inExpr {
+				expr := val[start:i]
+				parts = append(parts, fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr))
+				inExpr = false
+				start = i + 1
+			}
+		}
+	}
+	if start < len(val) {
+		parts = append(parts, strconv.Quote(val[start:]))
+	}
+	return strings.Join(parts, " + ")
 }

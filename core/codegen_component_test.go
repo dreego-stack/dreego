@@ -27,3 +27,21 @@ func TestGenComponentCallResolvesAttrExpression(t *testing.T) {
 		t.Errorf("genComponentCall must pass resolved args Link(url, \"x\"), got:\n%s", out)
 	}
 }
+
+// compTextWithAttrs is applied to every NodeText in a component body, including
+// text inside <script>/<style> sections. The lexer treats those sections as raw
+// text blocks where {…} is NOT a Go expression, so compTextWithAttrs must leave
+// them untouched. Currently it replaces {x} inside "<script>const s = "{x}";"
+// with html.EscapeString(fmt.Sprintf("%v", x)).
+func TestCompTextWithAttrsLeavesScriptStyleBodiesUntouched(t *testing.T) {
+	cases := []string{
+		`<script>const s = "{x}";</script>`,
+		`<style>.a { color: "{x}"; }</style>`,
+	}
+	for _, in := range cases {
+		out := compTextWithAttrs(in)
+		if !strings.Contains(out, "{x}") {
+			t.Errorf("compTextWithAttrs must leave script/style body {x} literal (not resolve as Go expr). input=%q got=%q", in, out)
+		}
+	}
+}

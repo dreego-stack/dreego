@@ -5,10 +5,21 @@ import (
 	"strings"
 )
 
+type compGen struct {
+	inSection bool
+}
+
 func genTemplateNodeComp(n TemplateNode) (string, error) {
+	g := &compGen{}
+	return g.node(n)
+}
+
+func (g *compGen) node(n TemplateNode) (string, error) {
 	switch n.Type {
 	case NodeText:
-		return fmt.Sprintf("b.WriteString(%s)", compTextWithAttrs(n.Content)), nil
+		code, next := compTextSection(n.Content, g.inSection)
+		g.inSection = next
+		return fmt.Sprintf("b.WriteString(%s)", code), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false
@@ -28,7 +39,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
 		for _, child := range n.Children {
-			code, err := genTemplateNodeComp(child)
+			code, err := g.node(child)
 			if err != nil {
 				return "", err
 			}
@@ -45,7 +56,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("\t} else if %s {\n", ec.Cond))
 				for _, child := range ec.Children {
-					code, err := genTemplateNodeComp(child)
+					code, err := g.node(child)
 					if err != nil {
 						return "", err
 					}
@@ -54,7 +65,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString("\t} else {\n")
 					for _, child := range ec.ElseChildren {
-						code, err := genTemplateNodeComp(child)
+						code, err := g.node(child)
 						if err != nil {
 							return "", err
 						}
@@ -65,7 +76,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 		} else {
 			buf.WriteString("\t} else {\n")
 			for _, ec := range n.ElseChildren {
-				code, err := genTemplateNodeComp(ec)
+				code, err := g.node(ec)
 				if err != nil {
 					return "", err
 				}
@@ -84,7 +95,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 		buf.WriteString(fmt.Sprintf("\t\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", n.Items))
 		buf.WriteString("\t\t_ = loop\n")
 		for _, child := range n.Children {
-			code, err := genTemplateNodeComp(child)
+			code, err := g.node(child)
 			if err != nil {
 				return "", err
 			}
@@ -95,7 +106,7 @@ func genTemplateNodeComp(n TemplateNode) (string, error) {
 		if hasElse {
 			buf.WriteString("} else {\n")
 			for _, child := range n.ElseChildren {
-				code, err := genTemplateNodeComp(child)
+				code, err := g.node(child)
 				if err != nil {
 					return "", err
 				}
@@ -127,24 +138,55 @@ func genComponentCall(n TemplateNode) (string, error) {
 }
 
 func compTextWithAttrs(s string) string {
-	if !strings.Contains(s, "{") {
-		return goLiteral(s)
-	}
+	code, _ := compTextSection(s, false)
+	return code
+}
+
+// compTextSection renders a NodeText content segment to Go code, resolving {…}
+// placeholders inside quoted attribute values but leaving <script>/<style> section
+// bodies literal (the lexer treats those as raw text where {…} is not an expression).
+// It returns the generated code and the section state after this segment so the
+// caller can carry section tracking across sibling text nodes.
+func compTextSection(content string, inSection bool) (string, bool) {
 	var parts []string
+	cur := inSection
 	inQuote := false
 	braceDepth := 0
 	start := 0
-	for i := 0; i < len(s); i++ {
-		switch s[i] {
-		case '"':
-			if i > 0 && s[i-1] == '\\' {
+	i := 0
+	for i < len(content) {
+		if cur {
+			if closeLen := sectionCloseLen(content[i:]); closeLen > 0 {
+				end := i + closeLen
+				parts = append(parts, goLiteral(content[start:end]))
+				start = end
+				i = end
+				cur = false
 				continue
+			}
+			i++
+			continue
+		}
+		if strings.HasPrefix(content[i:], "<script") || strings.HasPrefix(content[i:], "<style") {
+			if start < i {
+				parts = append(parts, goLiteral(content[start:i]))
+			}
+			start = i
+			cur = true
+			inQuote = false
+			braceDepth = 0
+			continue
+		}
+		switch content[i] {
+		case '"':
+			if i > 0 && content[i-1] == '\\' {
+				break
 			}
 			inQuote = !inQuote
 		case '{':
 			if inQuote && braceDepth == 0 {
 				if start < i {
-					parts = append(parts, goLiteral(s[start:i]))
+					parts = append(parts, goLiteral(content[start:i]))
 				}
 				braceDepth = 1
 				start = i + 1
@@ -153,16 +195,26 @@ func compTextWithAttrs(s string) string {
 			if inQuote && braceDepth > 0 {
 				braceDepth--
 				if braceDepth == 0 {
-					expr := s[start:i]
+					expr := content[start:i]
 					code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
 					parts = append(parts, fmt.Sprintf("html.EscapeString(%s)", code))
 					start = i + 1
 				}
 			}
 		}
+		i++
 	}
-	if start < len(s) {
-		parts = append(parts, goLiteral(s[start:]))
+	if start < len(content) {
+		parts = append(parts, goLiteral(content[start:]))
 	}
-	return strings.Join(parts, " + ")
+	return strings.Join(parts, " + "), cur
+}
+
+func sectionCloseLen(s string) int {
+	for _, tag := range []string{"</script>", "</style>"} {
+		if strings.HasPrefix(s, tag) {
+			return len(tag)
+		}
+	}
+	return 0
 }
