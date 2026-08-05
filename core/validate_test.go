@@ -147,11 +147,11 @@ func TestBindFormFallbackToLowercase(t *testing.T) {
 }
 
 type bindFormNonString struct {
-	Count int
+	Count map[string]string
 }
 
 func TestBindFormNonStringFieldReturnsError(t *testing.T) {
-	f := bindFormNonString{Count: 5}
+	f := bindFormNonString{Count: map[string]string{"x": "y"}}
 	r := &http.Request{Form: url.Values{"count": {"99"}}}
 	err := BindForm(r, &f)
 	if err == nil {

@@ -4,8 +4,22 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 )
+
+// validatorFunc validates a single field value and returns an error message
+// (empty string means the value is valid).
+type validatorFunc func(string) string
+
+// customRules holds user-registered validators dispatched by applyRule.
+var customRules = map[string]validatorFunc{}
+
+// RegisterRule registers a named custom validator. Registered rules are
+// dispatched by applyRule alongside the built-in required/email/min/max rules.
+func RegisterRule(name string, fn func(string) string) {
+	customRules[name] = fn
+}
 
 type FieldError struct {
 	Field   string
@@ -24,14 +38,40 @@ func BindForm(r *http.Request, target any) error {
 		if tag == "" {
 			tag = strings.ToLower(field.Name)
 		}
-		val := r.FormValue(tag)
-		if val == "" {
+		fieldVal := v.Field(i)
+		kind := field.Type.Kind()
+		if kind == reflect.String {
+			val := r.FormValue(tag)
+			if val == "" {
+				continue
+			}
+			fieldVal.SetString(val)
 			continue
 		}
-		if field.Type.Kind() != reflect.String {
+		values := r.Form[tag]
+		switch kind {
+		case reflect.Int:
+			if len(values) == 0 || values[0] == "" {
+				continue
+			}
+			n, err := strconv.Atoi(values[0])
+			if err != nil {
+				return fmt.Errorf("invalid integer for field %s: %q", field.Name, values[0])
+			}
+			fieldVal.SetInt(int64(n))
+		case reflect.Bool:
+			fieldVal.SetBool(len(values) > 0 && values[0] == "on")
+		case reflect.Slice:
+			var out []string
+			for _, s := range values {
+				if s != "" {
+					out = append(out, s)
+				}
+			}
+			fieldVal.Set(reflect.ValueOf(out))
+		default:
 			return fmt.Errorf("unsupported field type %s for field %s", field.Type.Kind(), field.Name)
 		}
-		v.Field(i).SetString(val)
 	}
 	return nil
 }
@@ -54,7 +94,7 @@ func ValidateForm(form any) map[string]string {
 		if formTag == "" {
 			formTag = strings.ToLower(field.Name)
 		}
-		val := v.Field(i).String()
+		val := fmt.Sprint(v.Field(i).Interface())
 		for _, rule := range strings.Split(tag, ",") {
 			rule = strings.TrimSpace(rule)
 			if msg := applyRule(rule, val); msg != "" {
@@ -96,6 +136,10 @@ func applyRule(rule string, val string) string {
 		}
 		if len(val) > n {
 			return "must be at most " + max + " characters"
+		}
+	default:
+		if fn, ok := customRules[rule]; ok {
+			return fn(val)
 		}
 	}
 	return ""
