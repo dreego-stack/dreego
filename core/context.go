@@ -31,9 +31,18 @@ type SSRContext struct {
 	data map[string]any
 }
 
+// NewSSR builds an SSRContext. A nil r is tolerated: the context falls back to
+// context.Background() and Data/Set/Get work on the in-memory data map. The
+// request-bound methods (Param, Query, FormValue, Redirect, SessionVal,
+// SetSessionVal, DelSessionVal, DestroySession) dereference c.R and panic on a
+// nil request — they are only safe when r is non-nil.
 func NewSSR(w http.ResponseWriter, r *http.Request) *SSRContext {
+	var ctx gcontext.Context = gcontext.Background()
+	if r != nil {
+		ctx = r.Context()
+	}
 	return &SSRContext{
-		Context: r.Context(),
+		Context: ctx,
 		W:       w,
 		R:       r,
 		data:    make(map[string]any),
