@@ -101,6 +101,30 @@ func ShutdownPlugins(ctx context.Context) error // OnShutdown on every plugin
 
 **Abort behavior:** `StartPlugins` returns on the **first** `OnStart` error and stops — it does **not** start the remaining plugins. Plugins whose `OnStart` already succeeded before the failure are **not** shut down automatically, which can leak resources (open connections, goroutines, background workers). Callers must handle cleanup explicitly on an error from `StartPlugins`. The same early-abort applies to `ShutdownPlugins`.
 
+### Middleware hooks (FIFO)
+
+A plugin's `Middlewares()` are appended to the runtime middleware chain in **FIFO order** — the first registered plugin runs first on request entry, then the next, then the handler:
+
+```go
+dreego.UsePlugin(pluginA)  // A runs first
+dreego.UsePlugin(pluginB)  // then B
+```
+
+The chain is **fixated on the first `Build()`**: registering a plugin after the handler is already built does **not** reorder the stack. To change middleware order you must register plugins before the first build/serve.
+
+### Route hooks (programmatic routes)
+
+A plugin registers routes by calling `core.Register(...)` **inside its `RegisterRoutes()`**. All such routes are served by `core.ServeMux()` alongside the file-based routes:
+
+```go
+func (a *Auth) RegisterRoutes() {
+    dreego.Register("GET", "/login", a.handleLogin)
+    dreego.Register("POST", "/logout", a.handleLogout)
+}
+```
+
+Because `core.Register` is idempotent (re-registering a `method`+`pattern` replaces the handler), a later-registered plugin can override a route deterministically.
+
 ## Layout
 
 ```

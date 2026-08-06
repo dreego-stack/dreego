@@ -11,15 +11,7 @@ Official plugins live in `plugins/` in this repository. Each plugin with externa
 - **v0.0.22** — `servemux-cache.1`, `codegen-errors.1`, `security-session.1`
 - **v0.0.23** — `dreegotest.1` (planned), `golden-tests-core.1` (planned), `typed-forms.1` (planned)
 - **v0.0.24** — `scaffold-fix.1`, `layout-head.1`, `scoped-css.2`, `component-attr-props.1`, `typed-forms.1`, `dreegotest.1`, `golden-tests-core.1` + deterministic port-schema runner
-
-## v0.0.25
-
-- `frontmatter.1` — parse frontmatter and expose typed metadata (deferred from v0.0.24)
-- `dev-server.1` — `dreego dev` with file watcher and auto-regenerate (deferred from v0.0.24)
-- `docs-extensibility.1` — design how `dreego docs` can read plugin docs (deferred from v0.0.24)
-- `plugin-interface.1` — frozen plugin contract
-- `middleware-hooks.1` — plugin middleware hooks via app.Use
-- `route-hooks.1` — plugin route registration
+- **v0.0.25** — `plugin-interface.1`, `middleware-hooks.1`, `route-hooks.1`, `docs-extensibility.1`, `docs-embed.1`, `frontmatter.1`, `dev-server.1` ✅
 
 ## unlock: plugin ecosystem
 
@@ -62,5 +54,5 @@ After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plug
 
 - Core must never import a plugin package.
 - Official plugins live in `plugins/` with their own `go.mod` when external deps are needed.
-- `dreego docs` extensibility is an open design question: plugin docs could be embedded or read from local `plugins/<name>/_docs/`. Not decided yet.
+- `dreego docs` resolves plugin docs from local `plugins/<name>/_docs/` (docs-extensibility.1, done in v0.0.25); external-repo docs for community plugins remain an open design question.
 - This plan is intentionally linear and can be shifted as priorities change.

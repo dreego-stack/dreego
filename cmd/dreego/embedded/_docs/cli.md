@@ -39,13 +39,23 @@ dreego run -t 60            # build + start + stop after 60s
 dreego run -d -t 60         # debug log + 60s timer
 ```
 
+## dreego dev
+
+```bash
+dreego dev
+```
+
+Runs `generate` + `build`, starts the server, then watches `.dreego` files (500 ms poll). On any change it regenerates, rebuilds, and gracefully restarts the server (SIGTERM + reap). Build errors do **not** kill the watcher — the previous server keeps running. Stop with `Ctrl-C`.
+
+> **Note:** `dreego build` and `dreego run` are dev tools, not for production.
+
 ## dreego docs
 
 ```bash
 dreego docs [path]
 ```
 
-Fetches and displays repo documentation from Codeberg. Without arguments, shows `/_docs/index.md`.
+Displays repo documentation from the embedded copy (`cmd/dreego/embedded/`), so it works **offline**. Without arguments, shows `/_docs/index.md`. Local plugin docs in `plugins/<name>/_docs/` take priority over the embedded copy.
 
 Examples:
 ```bash
