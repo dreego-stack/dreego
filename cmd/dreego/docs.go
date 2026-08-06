@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -19,6 +20,28 @@ const feedbackURL = "https://codeberg.org/dreego/dreego/issues/new"
 var headingPattern = regexp.MustCompile(`^#{1,6}\s+(.*)`)
 var codeBlockPattern = regexp.MustCompile("`{3}[^`]*`{3}")
 var linkPattern = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
+
+var pluginDocsRoot = "plugins"
+var fetchDocFallback = fetchDoc
+
+func fetchDocLocal(path string) ([]byte, bool, error) {
+	rel := strings.TrimPrefix(path, "/")
+	parts := strings.SplitN(rel, "/", 2)
+	if len(parts) != 2 || parts[0] != "plugins" {
+		// Not a plugin path: no local doc. The caller (cmdDocs/cmdDump)
+		// decides whether to invoke the fallback. Do NOT call it here.
+		return nil, false, nil
+	}
+	full := filepath.Join(pluginDocsRoot, parts[1])
+	body, err := os.ReadFile(full)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return body, true, nil
+}
 
 func cmdDocs(args []string) {
 	web := false
@@ -56,10 +79,17 @@ func cmdDocs(args []string) {
 		return
 	}
 
-	body, err := fetchDoc(path)
+	body, fromLocal, err := fetchDocLocal(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "docs error: %v\n", err)
 		os.Exit(1)
+	}
+	if !fromLocal {
+		body, err = fetchDocFallback(path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "docs error: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	if jsonOut {
@@ -114,10 +144,17 @@ func cmdDump(path string) {
 		if !strings.HasPrefix(p, "/") {
 			p = "/" + p
 		}
-		body, err := fetchDoc(p)
+		body, fromLocal, err := fetchDocLocal(p)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "skip %s: %v\n", p, err)
 			continue
+		}
+		if !fromLocal {
+			body, err = fetchDocFallback(p)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "skip %s: %v\n", p, err)
+				continue
+			}
 		}
 		fmt.Printf("\n--- %s ---\n\n", p)
 		out := string(body)
