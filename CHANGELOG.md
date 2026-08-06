@@ -1,6 +1,11 @@
 # Changelog
 
-## v0.0.24 (2026-08-05) — Feedback-Driven Rollout: Layouts, Scoped CSS, Typed Forms, Testing
+## v0.0.25 (unreleased) — Plugin Interface v1
+
+- **plugin-interface.1:** The frozen v1 `core.Plugin` contract shipped (`Name`, `RegisterRoutes`, `Middlewares`, `Assets`, `OnStart`, `OnShutdown`). Plugins import core and register via `core.UsePlugin(p)`; core never imports a plugin. Lifecycle: `StartPlugins(ctx)` / `ShutdownPlugins(ctx)` call `OnStart`/`OnShutdown` on every registered plugin and propagate the first error. Compile-time interface-satisfaction check plus route/middleware/lifecycle tests in `core/plugin_test.go`.
+- **BREAKING (behavior change):** `core.Register(method, pattern, handler)` is now **idempotent** — registering the same `method`+`pattern` again **replaces** the existing handler instead of appending a duplicate route. This lets a later-registered plugin (or a reload) override a route deterministically. Downstream callers that relied on duplicate-registration behavior must update. See `core/runtime.go` `Register`.
+
+## v0.0.24 (2026-08-05)
 
 - **scaffold-fix.1:** `dreego new` scaffold now includes `go.sum`, and the generated `.gitignore` ignores only `dreego/gen/` (not the source dirs). `cmd/dreego/version.go` reads the repo `VERSION` file as a fallback so local dev builds work with `dreego new` and `go mod tidy`.
 - **layout-head.1:** Layouts apply (`{#slot}`/`{#head}`) and route `<head>` works with or without a layout — covered by `Bugs/layout-not-applied`, `Bugs/route-head-without-layout`, `Bugs/layout-route-head-merge`, `Layout/no-layout` + unit tests (`core/codegen_layout_test.go`, `core/codegen_head_test.go`).

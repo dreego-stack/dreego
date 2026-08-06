@@ -15,36 +15,91 @@ Plugins without external dependencies can also be plain packages inside the root
 
 The repository root contains a `go.work` file that links the root module and every plugin module for local development. Consumers of the framework only see the modules they explicitly import.
 
-## Plugin Interface (planned for v0.0.25)
+## Plugin Interface (v1, frozen)
 
-Core defines Go interfaces. Plugins register implementations.
+Core defines a single `Plugin` interface. Plugins import Core, satisfy the interface, and register themselves with the runtime via `core.UsePlugin(p)`. Core never imports a plugin.
 
 ```go
 // Defined in core
-type MetricsProvider interface {
-    Middleware() func(http.Handler) http.Handler
-    Handler() http.Handler
-}
-
-type CacheProvider interface {
-    Get(key string) (any, bool)
-    Set(key string, value any, ttl time.Duration)
-    Delete(key string)
+type Plugin interface {
+    Name() string
+    RegisterRoutes() // plugin calls dreego.Register(...) internally
+    Middlewares() []func(http.Handler) http.Handler
+    Assets() fs.FS
+    OnStart(ctx context.Context) error
+    OnShutdown(ctx context.Context) error
 }
 ```
 
-Plugins register via `init()`:
+### Registration
+
+`core.UsePlugin(p)` is the central v1 API. It is called at package level (typically from `main.go`), not on an app object. It registers the plugin's routes, middleware, assets and lifecycle hooks with the core runtime:
+
+```go
+func UsePlugin(p Plugin)
+```
+
+A plugin package imports Core and implements the interface:
 
 ```go
 // codeberg.org/dreego/dreego/plugins/auth
 package auth
 
-import "codeberg.org/dreego/dreego/core"
+import (
+    "context"
+    "io/fs"
+    "net/http"
 
-func init() {
-    core.RegisterAuth(&OAuth2Provider{})
+    dreego "codeberg.org/dreego/dreego/core"
+)
+
+type Auth struct{ secret string }
+
+func New(secret string) *Auth { return &Auth{secret: secret} }
+
+func (a *Auth) Name() string { return "auth" }
+
+func (a *Auth) RegisterRoutes() {
+    dreego.Register("GET", "/login", a.handleLogin)
+    dreego.Register("POST", "/logout", a.handleLogout)
+}
+
+func (a *Auth) Middlewares() []func(http.Handler) http.Handler {
+    return []func(http.Handler) http.Handler{a.sessionMiddleware}
+}
+
+func (a *Auth) Assets() fs.FS { return nil }
+
+func (a *Auth) OnStart(ctx context.Context) error    { return nil }
+func (a *Auth) OnShutdown(ctx context.Context) error { return nil }
+```
+
+The application registers the plugin in `main.go`:
+
+```go
+package main
+
+import (
+    dreego "codeberg.org/dreego/dreego/core"
+    "codeberg.org/dreego/dreego/plugins/auth"
+)
+
+func main() {
+    dreego.UsePlugin(auth.New("secret"))
+    // ...
 }
 ```
+
+### Lifecycle
+
+Plugins are started and shut down in registration order via `core.StartPlugins(ctx)` and `core.ShutdownPlugins(ctx)`:
+
+```go
+func StartPlugins(ctx context.Context) error   // OnStart on every plugin
+func ShutdownPlugins(ctx context.Context) error // OnShutdown on every plugin
+```
+
+**Abort behavior:** `StartPlugins` returns on the **first** `OnStart` error and stops — it does **not** start the remaining plugins. Plugins whose `OnStart` already succeeded before the failure are **not** shut down automatically, which can leak resources (open connections, goroutines, background workers). Callers must handle cleanup explicitly on an error from `StartPlugins`. The same early-abort applies to `ShutdownPlugins`.
 
 ## Layout
 
