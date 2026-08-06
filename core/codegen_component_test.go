@@ -1,6 +1,8 @@
 package core
 
 import (
+	"go/parser"
+	"go/token"
 	"strings"
 	"testing"
 )
@@ -43,5 +45,50 @@ func TestCompTextWithAttrsLeavesScriptStyleBodiesUntouched(t *testing.T) {
 		if !strings.Contains(out, "{x}") {
 			t.Errorf("compTextWithAttrs must leave script/style body {x} literal (not resolve as Go expr). input=%q got=%q", in, out)
 		}
+	}
+}
+
+// GenerateComponent drives the stateful compGen over file.Template.Nodes. Unlike
+// the wrapper-only unit tests, this exercises the real production path and must
+// (1) keep a <script>/<style> body literal, (2) still resolve a quoted attribute
+// placeholder like href="{url}", and (3) produce syntactically valid Go.
+func TestGenerateComponentStatefulGenerator(t *testing.T) {
+	src := `Component Card (x string, url string)
+
+<div>
+    <script>const s = "literal {x}";</script>
+    <a href="{url}">go</a>
+</div>
+`
+	_, _, body := ParseHeader(src)
+	file := parseFile(t, body)
+	file.Component = &ComponentDef{
+		Name: "Card",
+		Props: []Prop{
+			{Name: "x", Type: "string"},
+			{Name: "url", Type: "string"},
+		},
+	}
+
+	out, err := GenerateComponent(file, scopeHashFor(src))
+	if err != nil {
+		t.Fatalf("GenerateComponent: %v", err)
+	}
+
+	if !strings.Contains(out, "literal {x}") {
+		t.Errorf("script body {x} must stay literal, got resolved as expression:\n%s", out)
+	}
+	if strings.Contains(out, "fmt.Sprintf(\"%v\", x)") {
+		t.Errorf("script body {x} must NOT become an expression, got:\n%s", out)
+	}
+	if !strings.Contains(out, `fmt.Sprintf("%v", url)`) {
+		t.Errorf("href={url} must resolve to an expression, got literal:\n%s", out)
+	}
+	if strings.Contains(out, `href="{url}"`) {
+		t.Errorf("href must not keep the literal placeholder {url}:\n%s", out)
+	}
+
+	if _, err := parser.ParseFile(token.NewFileSet(), "comp.go", "package comp\n"+out, 0); err != nil {
+		t.Fatalf("generated component is not valid Go: %v\n--- body ---\n%s", err, out)
 	}
 }
