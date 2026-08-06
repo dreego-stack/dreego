@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +20,7 @@ var codeBlockPattern = regexp.MustCompile("`{3}[^`]*`{3}")
 var linkPattern = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 
 var pluginDocsRoot = "plugins"
-var fetchDocFallback = fetchDoc
+var fetchDocFallback = fetchDocEmbedded
 
 func fetchDocLocal(path string) ([]byte, bool, error) {
 	rel := strings.TrimPrefix(path, "/")
@@ -102,21 +100,6 @@ func cmdDocs(args []string) {
 	out = strings.ReplaceAll(out, docsBaseURL, "")
 	fmt.Print(out)
 	fmt.Println()
-}
-
-func fetchDoc(path string) ([]byte, error) {
-	url := docsBaseURL + path
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("%s not found (%d)", path, resp.StatusCode)
-	}
-
-	return io.ReadAll(resp.Body)
 }
 
 func cmdDump(path string) {
