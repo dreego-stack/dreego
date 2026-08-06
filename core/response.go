@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/json"
 	"encoding/xml"
 	"net/http"
@@ -8,19 +9,25 @@ import (
 )
 
 func (c *SSRContext) JSON(status int, data any) {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(data); err != nil {
+		http.Error(c.W, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	c.W.Header().Set("Content-Type", "application/json; charset=utf-8")
 	c.W.WriteHeader(status)
-	if err := json.NewEncoder(c.W).Encode(data); err != nil {
-		http.Error(c.W, err.Error(), http.StatusInternalServerError)
-	}
+	c.W.Write(buf.Bytes())
 }
 
 func (c *SSRContext) XML(status int, data any) {
+	var buf bytes.Buffer
+	if err := xml.NewEncoder(&buf).Encode(data); err != nil {
+		http.Error(c.W, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	c.W.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	c.W.WriteHeader(status)
-	if err := xml.NewEncoder(c.W).Encode(data); err != nil {
-		http.Error(c.W, err.Error(), http.StatusInternalServerError)
-	}
+	c.W.Write(buf.Bytes())
 }
 
 func (c *SSRContext) Bind(target any) error {
