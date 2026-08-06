@@ -30,6 +30,8 @@ func main() {
 		cmdBuild(os.Args[2:])
 	case "run":
 		cmdRun(os.Args[2:])
+	case "dev":
+		cmdDev(os.Args[2:])
 	case "docs":
 		cmdDocs(os.Args[2:])
 	case "fmt":
@@ -59,6 +61,7 @@ commands:
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
   build [--target <os/arch>] generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
+  dev                    watch .dreego files, rebuild + restart on change
   docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
   feedback               open browser to submit feedback/issue
   version                show the dreego CLI version
@@ -81,6 +84,7 @@ examples:
   dreego run -d               build + start + log to file
   dreego run -t 60            build + start + stop after 60s
   dreego run -d -t 60         debug log + 60s timer
+  dreego dev                  watch + rebuild + restart on change
   dreego docs                 show docs index (terminal)
   dreego docs --web           open docs index in browser
   dreego docs --json          structured JSON for AI agents
@@ -136,7 +140,18 @@ func cmdGenerate(args []string) {
 	}
 }
 
+// cmdBuild wraps cmdBuildE for the CLI, printing the error and exiting.
 func cmdBuild(args []string) {
+	if err := cmdBuildE(args); err != nil {
+		fmt.Fprintf(os.Stderr, "build error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+// cmdBuildE runs generation and the go build, returning an error instead of
+// calling os.Exit. Callers in the dev watcher use it so a build failure does
+// not kill the process.
+func cmdBuildE(args []string) error {
 	target := ""
 	for i := 0; i < len(args); i++ {
 		if args[i] == "--target" && i+1 < len(args) {
@@ -148,8 +163,7 @@ func cmdBuild(args []string) {
 	}
 
 	if err := core.Run(false); err != nil {
-		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
-		os.Exit(1)
+		return err
 	}
 
 	projDir, pkg, name := findMain()
@@ -169,11 +183,10 @@ func cmdBuild(args []string) {
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		if err := c.Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "build error: %v\n", err)
-			os.Exit(1)
+			return err
 		}
 		fmt.Println("build ok")
-		return
+		return nil
 	}
 
 	fmt.Printf("building %s → %s\n", pkg, out)
@@ -181,10 +194,10 @@ func cmdBuild(args []string) {
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 	if err := c.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "build error: %v\n", err)
-		os.Exit(1)
+		return err
 	}
 	fmt.Println("build ok")
+	return nil
 }
 
 func cmdRun(args []string) {
