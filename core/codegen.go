@@ -343,8 +343,9 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 
 	if file.Template != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		g := &compGen{}
 		for _, n := range file.Template.Nodes {
-			code, err := genTemplateNodeComp(n)
+			code, err := g.node(n)
 			if err != nil {
 				return "", err
 			}
