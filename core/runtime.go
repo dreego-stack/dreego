@@ -30,6 +30,12 @@ func Reset() {
 	plugins = nil
 	pluginMiddlewares = nil
 	pluginAssets = nil
+	redirects = nil
+	rewrites = nil
+	sessionStore = nil
+	loggingEnabled = true
+	csrfEnabled = true
+	errorHandlers = map[int]http.HandlerFunc{}
 }
 
 type route struct {
@@ -122,8 +128,8 @@ func redirectRewriteMiddleware(next http.Handler) http.Handler {
 		}
 
 		for _, rd := range redirects {
-			if r.URL.Path == strings.TrimSuffix(rd.from, "/*") || rd.from == r.URL.Path {
-				http.Redirect(w, r, rd.to, rd.status)
+			if target, ok := matchRedirect(rd, r.URL.Path); ok {
+				http.Redirect(w, r, target, rd.status)
 				return
 			}
 		}
@@ -134,6 +140,24 @@ func redirectRewriteMiddleware(next http.Handler) http.Handler {
 
 func matchRewrite(rw rewriteRule, path string) bool {
 	return strings.HasPrefix(path, strings.TrimSuffix(rw.from, "/*"))
+}
+
+// matchRedirect reports whether path matches the redirect rule and returns the
+// redirect target. A rule with a "/*" suffix prefix-matches: the matched prefix
+// is replaced by the rule's target (analogous to rewrites). A rule without a
+// wildcard matches the path exactly.
+func matchRedirect(rd redirectRule, path string) (string, bool) {
+	if strings.HasSuffix(rd.from, "/*") {
+		prefix := strings.TrimSuffix(rd.from, "/*")
+		if strings.HasPrefix(path, prefix) {
+			return strings.Replace(path, prefix, strings.TrimSuffix(rd.to, "/*"), 1), true
+		}
+		return "", false
+	}
+	if path == rd.from {
+		return rd.to, true
+	}
+	return "", false
 }
 
 func sessionMiddleware(store Store) func(http.Handler) http.Handler {
