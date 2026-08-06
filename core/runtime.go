@@ -85,8 +85,11 @@ func Build() {
 	}
 
 	var h http.Handler = mux
-	for _, mw := range pluginMiddlewares {
-		h = mw(h)
+	for i := len(pluginMiddlewares) - 1; i >= 0; i-- {
+		if pluginMiddlewares[i] == nil {
+			continue
+		}
+		h = pluginMiddlewares[i](h)
 	}
 	h = redirectRewriteMiddleware(h)
 	if sessionStore != nil && csrfEnabled {

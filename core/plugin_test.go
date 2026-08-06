@@ -2,104 +2,12 @@ package core
 
 import (
 	"context"
-	"io/fs"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
+	"sync"
 	"testing"
-	"testing/fstest"
 )
-
-// testPlugin is a minimal full implementation of the frozen v1 Plugin
-// contract. Used for the compile-time interface-satisfaction check.
-type testPlugin struct {
-	name string
-}
-
-func (p *testPlugin) Name() string                                   { return p.name }
-func (p *testPlugin) RegisterRoutes()                                {}
-func (p *testPlugin) Middlewares() []func(http.Handler) http.Handler { return nil }
-func (p *testPlugin) Assets() fs.FS                                  { return fstest.MapFS{} }
-func (p *testPlugin) OnStart(ctx context.Context) error              { return nil }
-func (p *testPlugin) OnShutdown(ctx context.Context) error           { return nil }
-
-// Compile-time guarantee: testPlugin satisfies the frozen Plugin contract.
-var _ Plugin = (*testPlugin)(nil)
-
-// routePlugin registers a route via core.Register inside RegisterRoutes, the
-// way an external plugin module would (importing core and calling Register).
-type routePlugin struct{}
-
-func (p *routePlugin) Name() string { return "route-plugin" }
-func (p *routePlugin) RegisterRoutes() {
-	Register("GET", "/plugin-route", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("plugin-route-ok"))
-	})
-}
-func (p *routePlugin) Middlewares() []func(http.Handler) http.Handler { return nil }
-func (p *routePlugin) Assets() fs.FS                                  { return fstest.MapFS{} }
-func (p *routePlugin) OnStart(ctx context.Context) error              { return nil }
-func (p *routePlugin) OnShutdown(ctx context.Context) error           { return nil }
-
-var _ Plugin = (*routePlugin)(nil)
-
-// headerPlugin appends a response header via middleware, proving that
-// UsePlugin collects and injects middleware into the Build() stack.
-type headerPlugin struct{}
-
-func (p *headerPlugin) Name() string { return "header-plugin" }
-func (p *headerPlugin) RegisterRoutes() {
-	Register("GET", "/plugin-middleware", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	})
-}
-func (p *headerPlugin) Middlewares() []func(http.Handler) http.Handler {
-	return []func(http.Handler) http.Handler{
-		func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("X-Plugin-Middleware", "active")
-				next.ServeHTTP(w, r)
-			})
-		},
-	}
-}
-func (p *headerPlugin) Assets() fs.FS                     { return fstest.MapFS{} }
-func (p *headerPlugin) OnStart(ctx context.Context) error { return nil }
-func (p *headerPlugin) OnShutdown(ctx context.Context) error {
-	return nil
-}
-
-var _ Plugin = (*headerPlugin)(nil)
-
-// lifecyclePlugin records OnStart/OnShutdown invocations so the tests can
-// assert that UsePlugin registers them and StartPlugins/ShutdownPlugins call
-// them exactly once each.
-type lifecyclePlugin struct {
-	started  bool
-	shutdown bool
-	startErr error
-	shutErr  error
-}
-
-func (p *lifecyclePlugin) Name() string { return "lifecycle-plugin" }
-func (p *lifecyclePlugin) RegisterRoutes() {
-	Register("GET", "/plugin-lifecycle", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-}
-func (p *lifecyclePlugin) Middlewares() []func(http.Handler) http.Handler { return nil }
-func (p *lifecyclePlugin) Assets() fs.FS                                  { return fstest.MapFS{} }
-func (p *lifecyclePlugin) OnStart(ctx context.Context) error {
-	p.started = true
-	return p.startErr
-}
-func (p *lifecyclePlugin) OnShutdown(ctx context.Context) error {
-	p.shutdown = true
-	return p.shutErr
-}
-
-var _ Plugin = (*lifecyclePlugin)(nil)
 
 // Test 1: Interface satisfaction.
 func TestPluginInterfaceSatisfaction(t *testing.T) {
@@ -181,5 +89,81 @@ func TestUsePluginLifecycleErrors(t *testing.T) {
 	UsePlugin(&lifecyclePlugin{shutErr: context.DeadlineExceeded})
 	if err := ShutdownPlugins(context.Background()); err == nil {
 		t.Error("ShutdownPlugins must propagate an OnShutdown error")
+	}
+}
+
+// Test 5: Plugin middleware runs in FIFO order — the first registered plugin
+// is the outermost middleware and runs first on request entry.
+//
+// Defined FIFO semantics: UsePlugin(pluginA); UsePlugin(pluginB) means on a
+// request A runs first, then B, then the handler. This is the standard Go
+// middleware convention (e.g. Chi). The current Build() loop
+// `for _, mw := range pluginMiddlewares { h = mw(h) }` produces LIFO (B first),
+// so this test is RED against the current implementation.
+func TestPluginMiddlewareFIFOOrder(t *testing.T) {
+	Reset()
+
+	var log []string
+	var mu sync.Mutex
+	UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
+	UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/plugin-order", nil)
+	ServeMux().ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
+	}
+	want := []string{"A", "B"}
+	if !reflect.DeepEqual(log, want) {
+		t.Errorf("plugin middleware execution order = %v, want %v (FIFO: first registered runs first)", log, want)
+	}
+}
+
+// Test 6: Middleware order is fixated on the first Build(). Registering a
+// plugin after the handler is already built must not change the order.
+func TestPluginMiddlewareOrderFixatedOnFirstBuild(t *testing.T) {
+	Reset()
+
+	var log []string
+	var mu sync.Mutex
+	UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
+
+	// First Build() fixates the stack.
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/plugin-order", nil)
+	ServeMux().ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	// Registering B after the first Build() must not change the order.
+	UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
+
+	log = nil
+	rr = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "/plugin-order", nil)
+	ServeMux().ServeHTTP(rr, req)
+
+	want := []string{"A"}
+	if !reflect.DeepEqual(log, want) {
+		t.Errorf("after first Build(), middleware order = %v, want %v (order fixated on first Build)", log, want)
+	}
+}
+
+// Test 7: A nil plugin middleware entry must not panic; the stack stays stable
+// and the route still serves.
+func TestPluginMiddlewareNilEntryStable(t *testing.T) {
+	Reset()
+
+	UsePlugin(&nilMiddlewarePlugin{})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/plugin-nil-mw", nil)
+	ServeMux().ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
 	}
 }
