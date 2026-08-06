@@ -27,6 +27,9 @@ var builtHandler http.Handler
 
 func Reset() {
 	builtHandler = nil
+	plugins = nil
+	pluginMiddlewares = nil
+	pluginAssets = nil
 }
 
 type route struct {
@@ -47,6 +50,12 @@ type rewriteRule struct {
 }
 
 func Register(method, pattern string, handler http.HandlerFunc) {
+	for i, r := range routes {
+		if r.method == method && r.pattern == pattern {
+			routes[i].handler = handler
+			return
+		}
+	}
 	routes = append(routes, route{method, pattern, handler})
 }
 
@@ -76,6 +85,9 @@ func Build() {
 	}
 
 	var h http.Handler = mux
+	for _, mw := range pluginMiddlewares {
+		h = mw(h)
+	}
 	h = redirectRewriteMiddleware(h)
 	if sessionStore != nil && csrfEnabled {
 		h = CSRF(sessionStore)(h)
