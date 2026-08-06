@@ -46,6 +46,6 @@ ENTRYPOINT ["/dreego"]
 
 ## Runtime
 
-- `core.Listen(":8080")` binds and serves, with graceful shutdown on SIGINT/SIGTERM (10s drain).
-- Health/ready endpoints: `GET /health` (liveness) and `GET /ready` (readiness via `core.SetReady`).
+- `dreego.Listen(":8080")` binds and serves, with graceful shutdown on SIGINT/SIGTERM (10s drain).
+- Health/ready endpoints: `GET /health` (liveness) and `GET /ready` (readiness via `dreego.SetReady`).
 - Static assets are embedded at build time, so a single binary serves everything.

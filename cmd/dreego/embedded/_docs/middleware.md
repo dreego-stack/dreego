@@ -21,8 +21,8 @@ Built-in `GET /health` and `GET /ready` endpoints, always available:
 - `GET /ready` → 200 `ready` or 503 `not ready` — traffic readiness
 
 ```go
-core.SetReady(false) // signal not ready (e.g., during startup)
-core.SetReady(true)  // signal ready
+dreego.SetReady(false) // signal not ready (e.g., during startup)
+dreego.SetReady(true)  // signal ready
 ```
 
 Health endpoints are registered before user routes — they cannot be overridden.
@@ -42,10 +42,10 @@ Core-fixed middleware that sets security headers on every response:
 The default CSP allows `self`, `unsafe-inline` for scripts/styles (so HTMX/Alpine.js and scoped CSS work out of the box), and common CDN/font sources. Override it for stricter setups:
 
 ```go
-core.SetCSP("default-src 'self'")
+dreego.SetCSP("default-src 'self'")
 ```
 
-Call `core.SetCSP` before `core.Listen`. An empty string falls back to `default-src 'self'`.
+Call `dreego.SetCSP` before `dreego.Listen`. An empty string falls back to `default-src 'self'`.
 
 Always on. Applied after Recovery, before Compression.
 

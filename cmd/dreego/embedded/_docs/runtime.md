@@ -1,6 +1,6 @@
 # Runtime API
 
-Full API surface available after `import core "codeberg.org/dreego/dreego/core"`.
+Full API surface available after `import dreego "codeberg.org/dreego/dreego/core"`.
 
 ## SSRContext
 
@@ -26,15 +26,15 @@ Available as `c` in `<go>` blocks and component render functions.
 
 | Function | Description |
 |----------|-------------|
-| `core.Listen(":8080")` | Start HTTP server with full middleware chain |
-| `core.ServeMux()` | Build `http.Handler` with all routes, middleware, session, CSRF |
+| `dreego.Listen(":8080")` | Start HTTP server with full middleware chain |
+| `dreego.ServeMux()` | Build `http.Handler` with all routes, middleware, session, CSRF |
 
 ## Session
 
 | Function | Description |
 |----------|-------------|
-| `core.NewCookieStore([]byte("secret-32-bytes"))` | Create HMAC-signed cookie session store |
-| `core.SetSessionStore(store)` | Enable sessions for all requests |
+| `dreego.NewCookieStore([]byte("secret-32-bytes"))` | Create HMAC-signed cookie session store |
+| `dreego.SetSessionStore(store)` | Enable sessions for all requests |
 
 Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Path: "/"`.
 
@@ -44,10 +44,10 @@ For AES-256-GCM session encryption see [Session Encryption](https://codeberg.org
 
 | Function | Description |
 |----------|-------------|
-| `core.SetLogging(bool)` | Enable/disable request logging (JSONL format) |
-| `core.SetCSRF(bool)` | Enable/disable CSRF protection (default: on) |
-| `core.SetCSP(value string)` | Override the Content-Security-Policy header (empty falls back to `default-src 'self'`) |
-| `core.SetErrorHandler(code, handler)` | Custom handler for HTTP errors (500 used by Recovery) |
+| `dreego.SetLogging(bool)` | Enable/disable request logging (JSONL format) |
+| `dreego.SetCSRF(bool)` | Enable/disable CSRF protection (default: on) |
+| `dreego.SetCSP(value string)` | Override the Content-Security-Policy header (empty falls back to `default-src 'self'`) |
+| `dreego.SetErrorHandler(code, handler)` | Custom handler for HTTP errors (500 used by Recovery) |
 
 ## Configuration File
 
@@ -68,7 +68,7 @@ For AES-256-GCM session encryption see [Session Encryption](https://codeberg.org
 ## Static Assets
 
 ```go
-core.RegisterStatic("/style.css", "text/css", []byte("body{color:red}"))
+dreego.RegisterStatic("/style.css", "text/css", []byte("body{color:red}"))
 ```
 
 Generated automatically from `dreego/static/` by `dreego generate`. MIME type detected from file extension.
@@ -80,13 +80,13 @@ package main
 
 import (
     _ "myapp/dreego/gen"
-    core "codeberg.org/dreego/dreego/core"
+    dreego "codeberg.org/dreego/dreego/core"
 )
 
 func main() {
-    store := core.NewCookieStore([]byte("super-secret-key-32-bytes!"))
-    core.SetSessionStore(store)
-    core.Listen(":8080")
+    store := dreego.NewCookieStore([]byte("super-secret-key-32-bytes!"))
+    dreego.SetSessionStore(store)
+    dreego.Listen(":8080")
 }
 ```
 

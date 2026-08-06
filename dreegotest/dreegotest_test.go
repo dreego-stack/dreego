@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 	"codeberg.org/dreego/dreego/dreegotest"
 )
 
 // Public API contract under test:
 //
-//	dreegotest.Get(t, path) *Response                 // simulates a GET request through core.ServeMux()
+//	dreegotest.Get(t, path) *Response                 // simulates a GET request through dreego.ServeMux()
 //	dreegotest.PostForm(t, path, form) *Response      // simulates an application/x-www-form-urlencoded POST
 //	dreegotest.RenderComponent(t, fn, props...) string // renders a single component, props as key/value pairs
 //
@@ -21,12 +21,12 @@ import (
 //   - Body       string
 
 func TestGetReturnsStatusAndBody(t *testing.T) {
-	core.Reset()
-	core.Register("GET", "/dgt-hello", func(w http.ResponseWriter, r *http.Request) {
+	dreego.Reset()
+	dreego.Register("GET", "/dgt-hello", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello, World"))
 	})
-	defer core.Reset()
+	defer dreego.Reset()
 
 	resp := dreegotest.Get(t, "/dgt-hello")
 	if resp.StatusCode != http.StatusOK {
@@ -38,11 +38,11 @@ func TestGetReturnsStatusAndBody(t *testing.T) {
 }
 
 func TestGetReturnsNonOKStatus(t *testing.T) {
-	core.Reset()
-	core.Register("GET", "/dgt-missing", func(w http.ResponseWriter, r *http.Request) {
+	dreego.Reset()
+	dreego.Register("GET", "/dgt-missing", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "nope", http.StatusNotFound)
 	})
-	defer core.Reset()
+	defer dreego.Reset()
 
 	resp := dreegotest.Get(t, "/dgt-missing")
 	if resp.StatusCode != http.StatusNotFound {
@@ -51,13 +51,13 @@ func TestGetReturnsNonOKStatus(t *testing.T) {
 }
 
 func TestPostFormBindsValues(t *testing.T) {
-	core.Reset()
-	core.Register("POST", "/dgt-submit", func(w http.ResponseWriter, r *http.Request) {
+	dreego.Reset()
+	dreego.Register("POST", "/dgt-submit", func(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("got:" + name))
 	})
-	defer core.Reset()
+	defer dreego.Reset()
 
 	form := url.Values{"name": {"world"}}
 	resp := dreegotest.PostForm(t, "/dgt-submit", form)
@@ -70,13 +70,13 @@ func TestPostFormBindsValues(t *testing.T) {
 }
 
 func TestPostFormSetsFormContentType(t *testing.T) {
-	core.Reset()
+	dreego.Reset()
 	var contentType string
-	core.Register("POST", "/dgt-ctype", func(w http.ResponseWriter, r *http.Request) {
+	dreego.Register("POST", "/dgt-ctype", func(w http.ResponseWriter, r *http.Request) {
 		contentType = r.Header.Get("Content-Type")
 		w.WriteHeader(http.StatusOK)
 	})
-	defer core.Reset()
+	defer dreego.Reset()
 
 	dreegotest.PostForm(t, "/dgt-ctype", url.Values{"a": {"1"}})
 	if !strings.HasPrefix(contentType, "application/x-www-form-urlencoded") {
@@ -85,7 +85,7 @@ func TestPostFormSetsFormContentType(t *testing.T) {
 }
 
 func TestRenderComponentReturnsHTML(t *testing.T) {
-	comp := core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {
+	comp := dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
 		return "<section><h1>" + ctx.Get("title") + "</h1></section>", nil
 	})
 	out := dreegotest.RenderComponent(t, comp, "title", "Welcome")
@@ -95,7 +95,7 @@ func TestRenderComponentReturnsHTML(t *testing.T) {
 }
 
 func TestRenderComponentEscapesXSS(t *testing.T) {
-	comp := core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {
+	comp := dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
 		return "<p>" + ctx.Get("name") + "</p>", nil
 	})
 	out := dreegotest.RenderComponent(t, comp, "name", "<script>alert(1)</script>")

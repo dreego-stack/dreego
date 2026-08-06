@@ -31,10 +31,10 @@ cat > dreego/routes/post.dreego << 'DREEGO'
 DREEGO
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
 func main() {
-    core.SetCSRF(false)
-    core.Listen(":$port")
+    dreego.SetCSRF(false)
+    dreego.Listen(":$port")
 }
 GO
 $DREEGO_BIN generate 2>&1

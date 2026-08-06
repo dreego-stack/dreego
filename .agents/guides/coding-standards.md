@@ -31,7 +31,7 @@ import (
     "context"
     "log"
 
-    core "codeberg.org/dreego/dreego/core"
+    dreego "codeberg.org/dreego/dreego/core"
 )
 ```
 

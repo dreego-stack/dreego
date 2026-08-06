@@ -6,14 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
-func RenderComponent(t *testing.T, fn core.ComponentFunc, props ...any) string {
+func RenderComponent(t *testing.T, fn dreego.ComponentFunc, props ...any) string {
 	t.Helper()
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/", nil)
-	ctx := core.NewSSR(rec, req)
+	ctx := dreego.NewSSR(rec, req)
 	for i := 0; i+1 < len(props); i += 2 {
 		key, ok := props[i].(string)
 		if !ok {

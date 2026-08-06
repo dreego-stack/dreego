@@ -35,7 +35,7 @@ type SearchQuery struct {
 	Query string `form:"q"`
 }
 
-func Search(c *core.SSRContext, form SearchQuery) error {
+func Search(c *dreego.SSRContext, form SearchQuery) error {
 	return nil
 }
 </go>

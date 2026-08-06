@@ -1,5 +1,5 @@
 
-func renderAbout(c *core.SSRContext) (string, error) {
+func renderAbout(c *dreego.SSRContext) (string, error) {
 	var b strings.Builder
 
 	b.WriteString("<div data-scope=\"4f3f671a10cb\">")
@@ -29,7 +29,7 @@ headBuf.WriteString(`<title>About</title>`)
 }
 
 func HandleAbout(w http.ResponseWriter, r *http.Request) {
-	c := core.NewSSR(w, r)
+	c := dreego.NewSSR(w, r)
 	html, err := renderAbout(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -40,5 +40,5 @@ func HandleAbout(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	core.Register("GET", "/about", HandleAbout)
+	dreego.Register("GET", "/about", HandleAbout)
 }

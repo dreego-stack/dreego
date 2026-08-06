@@ -1,5 +1,5 @@
-func Badge(title string, tone string) core.Component {
-	return core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {
+func Badge(title string, tone string) dreego.Component {
+	return dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
 		var b strings.Builder
 
 		b.WriteString("<div data-scope=\"5828563e12c4\">")

@@ -21,7 +21,7 @@ cat > dreego/routes/get-login.dreego << 'DREEGO'
     type LoginForm struct {
         Email string
     }
-    func Login(c core.Context, form LoginForm) error {
+    func Login(c dreego.Context, form LoginForm) error {
         return nil
     }
 </go>
@@ -32,8 +32,8 @@ cat > dreego/routes/get-login.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
 go build -o /dev/null .

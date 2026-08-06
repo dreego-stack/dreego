@@ -20,9 +20,9 @@ cat > main.go << 'GO'
 package main
 import (
 	_ "t/dreego/gen"
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
-func main() { core.Listen(":0") }
+func main() { dreego.Listen(":0") }
 GO
 
 mkdir -p dreego/routes

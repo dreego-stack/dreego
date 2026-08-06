@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 func main() {
@@ -105,7 +105,7 @@ func cmdGenerate(args []string) {
 		}
 	}
 	if !check {
-		if err := core.Run(force); err != nil {
+		if err := dreego.Run(force); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
@@ -162,7 +162,7 @@ func cmdBuildE(args []string) error {
 		}
 	}
 
-	if err := core.Run(false); err != nil {
+	if err := dreego.Run(false); err != nil {
 		return err
 	}
 

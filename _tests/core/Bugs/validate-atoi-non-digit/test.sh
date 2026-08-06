@@ -21,7 +21,7 @@ package main
 
 import (
 	"fmt"
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 type Form struct {
@@ -29,7 +29,7 @@ type Form struct {
 }
 
 func main() {
-	errs := core.ValidateForm(Form{Name: "x"})
+	errs := dreego.ValidateForm(Form{Name: "x"})
 	if errs == nil || errs["name"] == "" {
 		fmt.Println("FAIL: non-digit min rule silently accepted")
 		return

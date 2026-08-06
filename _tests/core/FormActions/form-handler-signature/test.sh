@@ -21,7 +21,7 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
     type BadForm struct {
         X string
     }
-    func bad(c core.Context, form BadForm) string {
+    func bad(c dreego.Context, form BadForm) string {
         return "wrong"
     }
 </go>
@@ -32,8 +32,8 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
 go build -o /dev/null . 2>&1 && { echo "FAIL: should not build with wrong return type"; exit 1; }

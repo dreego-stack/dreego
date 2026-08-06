@@ -47,7 +47,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 		buf.WriteString(pkgCode)
 	}
 
-	buf.WriteString(fmt.Sprintf("\nfunc %s(c *core.SSRContext) (string, error) {\n", renderFunc))
+	buf.WriteString(fmt.Sprintf("\nfunc %s(c *dreego.SSRContext) (string, error) {\n", renderFunc))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if inlineCode != "" {
@@ -79,7 +79,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("}\n\n")
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", getHandler))
-	buf.WriteString("\tc := core.NewSSR(w, r)\n")
+	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", renderFunc))
 	buf.WriteString("\tif err != nil {\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
@@ -103,12 +103,12 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 
 	buf.WriteString("func init() {\n")
 	if hasFormActions {
-		buf.WriteString(fmt.Sprintf("\tcore.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
+		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
 		if postCode != "" && !strings.HasPrefix(postCode, "//") {
-			buf.WriteString(fmt.Sprintf("\tcore.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
+			buf.WriteString(fmt.Sprintf("\tdreego.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
 		}
 	} else {
-		buf.WriteString(fmt.Sprintf("\tcore.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, getHandler))
+		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, getHandler))
 	}
 	buf.WriteString("}\n")
 
@@ -243,7 +243,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	var buf strings.Builder
 
-	buf.WriteString(fmt.Sprintf("func %s(c *core.SSRContext) (string, error) {\n", funcName))
+	buf.WriteString(fmt.Sprintf("func %s(c *dreego.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if len(file.Go) > 0 && file.Go[0].Code != "" {
@@ -288,7 +288,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 	buf.WriteString("}\n\n")
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", handlerName))
-	buf.WriteString("\tc := core.NewSSR(w, r)\n")
+	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", funcName))
 	buf.WriteString("\tif err != nil {\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
@@ -303,9 +303,9 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	buf.WriteString("func init() {\n")
 	if code == 404 {
-		buf.WriteString(fmt.Sprintf("\tcore.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
+		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
 	} else if code == 500 {
-		buf.WriteString(fmt.Sprintf("\tcore.SetErrorHandler(%d, %s)\n", code, handlerName))
+		buf.WriteString(fmt.Sprintf("\tdreego.SetErrorHandler(%d, %s)\n", code, handlerName))
 	}
 	buf.WriteString("}\n")
 
@@ -328,8 +328,8 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 		params += p.Name + " " + p.Type
 	}
 
-	buf.WriteString(fmt.Sprintf("func %s(%s) core.Component {\n", comp.Name, params))
-	buf.WriteString("\treturn core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {\n")
+	buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, params))
+	buf.WriteString("\treturn dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {\n")
 	buf.WriteString("\t\tvar b strings.Builder\n\n")
 
 	for _, g := range file.Go {

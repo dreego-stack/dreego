@@ -6,11 +6,11 @@ Dreego sessions are HMAC-signed by default. You can also encrypt the session pay
 
 Pass `Encrypt: true` in session options:
 
-Use `core.Options` directly with the underlying store:
+Use `dreego.Options` directly with the underlying store:
 
 ```go
-store := core.NewCookieStore(secret)
-store.Set(w, r, "user_id", "42", &core.Options{Encrypt: true})
+store := dreego.NewCookieStore(secret)
+store.Set(w, r, "user_id", "42", &dreego.Options{Encrypt: true})
 ```
 
 `c.SetSessionVal` does not accept options; call `store.Set` directly when you need encryption.
@@ -43,4 +43,4 @@ Session cookies use secure defaults:
 - `Secure: true` when the request uses TLS
 - `Path: "/"`
 
-Pass `&core.Options{Encrypt: true, Secure: true, HttpOnly: true}` to override any of these per call.
+Pass `&dreego.Options{Encrypt: true, Secure: true, HttpOnly: true}` to override any of these per call.

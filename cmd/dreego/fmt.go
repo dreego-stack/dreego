@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 func cmdFmt(args []string) {
@@ -49,7 +49,7 @@ func cmdFmt(args []string) {
 		}
 
 		original := string(data)
-		formatted := core.Format(original)
+		formatted := dreego.Format(original)
 
 		if formatted == original {
 			if !check && !write {

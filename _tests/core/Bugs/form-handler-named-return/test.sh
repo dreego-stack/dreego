@@ -30,7 +30,7 @@ type LoginForm struct {
     Email string `form:"email" validate:"required,email"`
 }
 
-func Save(c *core.SSRContext, form LoginForm) (err error) {
+func Save(c *dreego.SSRContext, form LoginForm) (err error) {
     return nil
 }
 </go>

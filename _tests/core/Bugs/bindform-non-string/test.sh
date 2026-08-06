@@ -24,7 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 type Profile struct {
@@ -49,7 +49,7 @@ func main() {
 	r.ParseForm()
 
 	var p Profile
-	err := core.BindForm(r, &p)
+	err := dreego.BindForm(r, &p)
 	if err == nil {
 		panic("expected error for unsupported field type (map)")
 	}

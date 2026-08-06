@@ -21,8 +21,8 @@ EOF
 
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.SetCSP("default-src 'none'"); core.Listen(":$port") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.SetCSP("default-src 'none'"); dreego.Listen(":$port") }
 GO
 
 mkdir -p dreego/routes

@@ -28,10 +28,10 @@ cat > dreego/routes/get-plain.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
-grep -q "core.Register(\"POST\"" dreego/gen/routes.go && { echo "FAIL: POST handler registered without g-action"; exit 1; }
+grep -q "dreego.Register(\"POST\"" dreego/gen/routes.go && { echo "FAIL: POST handler registered without g-action"; exit 1; }
 go build -o /dev/null .
 echo ok

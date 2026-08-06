@@ -18,9 +18,9 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 
 	var buf strings.Builder
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", postHandler))
-	buf.WriteString("\tc := core.NewSSR(w, r)\n\n")
+	buf.WriteString("\tc := dreego.NewSSR(w, r)\n\n")
 	buf.WriteString(fmt.Sprintf("\tvar form %s\n", structName))
-	buf.WriteString("\tif err := core.BindForm(r, \u0026form); err != nil {\n")
+	buf.WriteString("\tif err := dreego.BindForm(r, \u0026form); err != nil {\n")
 	buf.WriteString(fmt.Sprintf("\t\tc.Set(\"error__form\", err.Error())\n"))
 	buf.WriteString(fmt.Sprintf("\t\thtml, _ := %s(c)\n", renderFunc))
 	buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
@@ -28,10 +28,10 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 	buf.WriteString("\t\treturn\n")
 	buf.WriteString("\t}\n\n")
 	if hasValidate {
-		buf.WriteString("\terrs := core.ValidateForm(form)\n")
+		buf.WriteString("\terrs := dreego.ValidateForm(form)\n")
 		buf.WriteString("\tif len(errs) > 0 {\n")
-		buf.WriteString("\t\tcore.SaveErrors(c, errs)\n")
-		buf.WriteString("\t\tcore.SaveOld(c, form)\n")
+		buf.WriteString("\t\tdreego.SaveErrors(c, errs)\n")
+		buf.WriteString("\t\tdreego.SaveOld(c, form)\n")
 		buf.WriteString(fmt.Sprintf("\t\thtml, _ := %s(c)\n", renderFunc))
 		buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
 		buf.WriteString("\t\tw.Write([]byte(html))\n")
@@ -39,7 +39,7 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 		buf.WriteString("\t}\n\n")
 	}
 	buf.WriteString(fmt.Sprintf("\tif err := %s(c, form); err != nil {\n", action))
-	buf.WriteString("\t\tif err == core.ErrRedirect {\n")
+	buf.WriteString("\t\tif err == dreego.ErrRedirect {\n")
 	buf.WriteString("\t\t\treturn\n")
 	buf.WriteString("\t\t}\n")
 	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")

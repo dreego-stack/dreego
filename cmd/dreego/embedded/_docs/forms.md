@@ -12,7 +12,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
         Password string `form:"password" validate:"required,min=8"`
     }
 
-    func Login(c core.Context, form LoginForm) error {
+    func Login(c dreego.Context, form LoginForm) error {
         if form.Email == "admin@dreego.dev" {
             c.SetSessionVal("user", form.Email)
             return c.Redirect("/dashboard", 303)
@@ -104,7 +104,7 @@ Returns the previously submitted value after validation failure. Useful for re-p
 Sends an HTTP redirect and returns `ErrRedirect` to signal the handler pipeline. Use for Post-Redirect-Get pattern.
 
 ```go
-func Login(c core.Context, form LoginForm) error {
+func Login(c dreego.Context, form LoginForm) error {
     // ... authenticate ...
     return c.Redirect("/dashboard", 303)
 }
@@ -112,7 +112,7 @@ func Login(c core.Context, form LoginForm) error {
 
 ## CSRF Protection
 
-CSRF is handled by the middleware, not the form handler. With `core.SetSessionStore(...)`:
+CSRF is handled by the middleware, not the form handler. With `dreego.SetSessionStore(...)`:
 - CSRF token is set via cookie on any GET request
 - POST/PUT/DELETE without valid token → 403
 - Token sent via `X-CSRF-Token` header or `csrf_token` form field
@@ -123,7 +123,7 @@ HTMX automatically sends the CSRF token via header. For plain HTML forms, includ
 <input type="hidden" name="csrf_token" value="{c.CSRFToken()}">
 ```
 
-Disable CSRF for API-only routes: `core.SetCSRF(false)`.
+Disable CSRF for API-only routes: `dreego.SetCSRF(false)`.
 
 ## Without g-action
 

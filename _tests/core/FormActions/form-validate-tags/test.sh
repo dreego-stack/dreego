@@ -22,7 +22,7 @@ cat > dreego/routes/get-form.dreego << DREEGO
     type ValForm struct {
         Email string ${BT}validate:"required,email"${BT}
     }
-    func DoVal(c core.Context, form ValForm) error {
+    func DoVal(c dreego.Context, form ValForm) error {
         return nil
     }
 </go>
@@ -33,10 +33,10 @@ cat > dreego/routes/get-form.dreego << DREEGO
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
-grep -q "core.ValidateForm" dreego/gen/routes.go || { echo "FAIL: ValidateForm not in generated code"; exit 1; }
+grep -q "dreego.ValidateForm" dreego/gen/routes.go || { echo "FAIL: ValidateForm not in generated code"; exit 1; }
 go build -o /dev/null .
 echo ok

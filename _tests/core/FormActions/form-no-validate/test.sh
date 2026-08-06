@@ -21,7 +21,7 @@ cat > dreego/routes/get-form.dreego << 'DREEGO'
     type NoValForm struct {
         Email string
     }
-    func NoVal(c core.Context, form NoValForm) error {
+    func NoVal(c dreego.Context, form NoValForm) error {
         return nil
     }
 </go>
@@ -32,10 +32,10 @@ cat > dreego/routes/get-form.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
-grep -q "core.ValidateForm" dreego/gen/routes.go && { echo "FAIL: ValidateForm found but should not exist"; exit 1; }
+grep -q "dreego.ValidateForm" dreego/gen/routes.go && { echo "FAIL: ValidateForm found but should not exist"; exit 1; }
 go build -o /dev/null .
 echo ok

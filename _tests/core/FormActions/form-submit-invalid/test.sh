@@ -25,7 +25,7 @@ cat > dreego/routes/post-login.dreego << DREEGO
     type LoginForm struct {
         Email string ${BT}validate:"required,email"${BT}
     }
-    func Login(c core.Context, form LoginForm) error {
+    func Login(c dreego.Context, form LoginForm) error {
         return c.Redirect("/ok", 303)
     }
 </go>
@@ -36,8 +36,8 @@ cat > dreego/routes/post-login.dreego << DREEGO
 DREEGO
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.SetCSRF(false); core.Listen(":$port") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.SetCSRF(false); dreego.Listen(":$port") }
 GO
 $DREEGO_BIN generate 2>&1
 go build -o $workdir/srv .

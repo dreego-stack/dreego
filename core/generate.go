@@ -193,7 +193,7 @@ func Run(force bool) error {
 	compImports = append(compImports, "\"strings\"")
 	compImportLine := strings.Join(compImports, "\n\t")
 
-	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/core\"\n)\n\n", routeImportLine)
+	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"codeberg.org/dreego/dreego/core\"\n)\n\n", routeImportLine)
 	routesOut += src
 
 	if !isUpToDate(filepath.Join(genDir, "routes.go"), routesOut) {
@@ -203,7 +203,7 @@ func Run(force bool) error {
 	}
 
 	if compSrc != "" {
-		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tcore \"codeberg.org/dreego/dreego/core\"\n)\n\n", compImportLine)
+		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"codeberg.org/dreego/dreego/core\"\n)\n\n", compImportLine)
 		compOut += compSrc
 		if !isUpToDate(filepath.Join(genDir, "components.go"), compOut) {
 			if err := os.WriteFile(filepath.Join(genDir, "components.go"), []byte(compOut), 0644); err != nil {
@@ -231,18 +231,18 @@ func writeDreeGo(genDir string, settings *Settings, staticSrc string) error {
 	hasCore := settings != nil || staticSrc != ""
 	if hasCore || staticSrc != "" {
 		buf.WriteString("import (\n")
-		buf.WriteString("\tcore \"codeberg.org/dreego/dreego/core\"\n")
+		buf.WriteString("\tdreego \"codeberg.org/dreego/dreego/core\"\n")
 		buf.WriteString(")\n\n")
 	}
 
 	buf.WriteString("func init() {\n")
 	if settings != nil {
-		buf.WriteString(fmt.Sprintf("\tcore.SetLogging(%t)\n", settings.Logging.Enabled))
+		buf.WriteString(fmt.Sprintf("\tdreego.SetLogging(%t)\n", settings.Logging.Enabled))
 		for _, rd := range settings.Redirects {
-			buf.WriteString(fmt.Sprintf("\tcore.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
+			buf.WriteString(fmt.Sprintf("\tdreego.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
 		}
 		for _, rw := range settings.Rewrites {
-			buf.WriteString(fmt.Sprintf("\tcore.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
+			buf.WriteString(fmt.Sprintf("\tdreego.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
 		}
 	}
 	buf.WriteString("}\n")
@@ -515,7 +515,7 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 		mime := MimeByExt(ext)
 
 		content := []byte(data)
-		buf.WriteString(fmt.Sprintf("\tcore.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
+		buf.WriteString(fmt.Sprintf("\tdreego.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
 		count++
 		return nil
 	})

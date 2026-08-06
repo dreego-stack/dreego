@@ -31,7 +31,7 @@ cat > dreego/routes/get-news.dreego << DREEGO
         Email    string ${BT}validate:"required"${BT}
         Subscribe bool
     }
-    func SubmitNews(c core.Context, form NewsForm) error {
+    func SubmitNews(c dreego.Context, form NewsForm) error {
         if form.Subscribe {
             return c.Redirect("/subscribed", 303)
         }
@@ -46,8 +46,8 @@ cat > dreego/routes/get-news.dreego << DREEGO
 DREEGO
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.SetCSRF(false); core.Listen(":$port") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.SetCSRF(false); dreego.Listen(":$port") }
 GO
 $DREEGO_BIN generate 2>&1
 go build -o $workdir/srv .

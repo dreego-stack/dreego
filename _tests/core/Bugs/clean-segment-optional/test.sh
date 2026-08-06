@@ -34,7 +34,7 @@ if grep -q "\[opt\]" "$generated"; then
     echo "FAIL: optional segment still contains brackets (B15)"
     exit 1
 fi
-if grep -q 'core.Register("GET", "/{opt}",' "$generated"; then
+if grep -q 'dreego.Register("GET", "/{opt}",' "$generated"; then
     :
 else
     echo "FAIL: optional segment not registered as /{opt}"

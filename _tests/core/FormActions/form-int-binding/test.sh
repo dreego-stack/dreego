@@ -30,7 +30,7 @@ cat > dreego/routes/get-age.dreego << DREEGO
     type AgeForm struct {
         Age int ${BT}validate:"min=2"${BT}
     }
-    func SubmitAge(c core.Context, form AgeForm) error {
+    func SubmitAge(c dreego.Context, form AgeForm) error {
         if form.Age == 20 {
             return c.Redirect("/adult", 303)
         }
@@ -44,8 +44,8 @@ cat > dreego/routes/get-age.dreego << DREEGO
 DREEGO
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.SetCSRF(false); core.Listen(":$port") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.SetCSRF(false); dreego.Listen(":$port") }
 GO
 $DREEGO_BIN generate 2>&1
 go build -o $workdir/srv .

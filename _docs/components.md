@@ -134,8 +134,8 @@ Component Card (title string)
 ## Generated Go Code
 
 ```go
-func Card(title string) core.Component {
-    return core.ComponentFunc(func(ctx *core.SSRContext) (string, error) {
+func Card(title string) dreego.Component {
+    return dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
         var b strings.Builder
         b.WriteString("<div data-scope=\"abc123\">")
         b.WriteString(`<article class="card">`)

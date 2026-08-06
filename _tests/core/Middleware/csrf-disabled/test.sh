@@ -21,8 +21,8 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.SetSessionStore(core.NewCookieStore([]byte("test"))); core.SetCSRF(false); core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.SetSessionStore(dreego.NewCookieStore([]byte("test"))); dreego.SetCSRF(false); dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate
 go build -o /dev/null .

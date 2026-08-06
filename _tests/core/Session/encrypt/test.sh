@@ -24,15 +24,15 @@ import (
 	"strings"
 	"testing"
 
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 func TestSessionEncryptRoundTrip(t *testing.T) {
-	store := core.NewCookieStore([]byte("secret-key"))
+	store := dreego.NewCookieStore([]byte("secret-key"))
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
-	store.Set(w, r, "user", "alice", &core.Options{Encrypt: true})
+	store.Set(w, r, "user", "alice", &dreego.Options{Encrypt: true})
 
 	req := httptest.NewRequest("GET", "/", nil)
 	for _, c := range w.Result().Cookies() {
@@ -45,11 +45,11 @@ func TestSessionEncryptRoundTrip(t *testing.T) {
 }
 
 func TestSessionEncryptValueNotPlaintext(t *testing.T) {
-	store := core.NewCookieStore([]byte("secret-key"))
+	store := dreego.NewCookieStore([]byte("secret-key"))
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
-	store.Set(w, r, "user", "alice", &core.Options{Encrypt: true})
+	store.Set(w, r, "user", "alice", &dreego.Options{Encrypt: true})
 
 	cookies := w.Result().Cookies()
 	if len(cookies) != 1 {
@@ -65,11 +65,11 @@ func TestSessionEncryptValueNotPlaintext(t *testing.T) {
 }
 
 func TestSessionEncryptTamperRejected(t *testing.T) {
-	store := core.NewCookieStore([]byte("secret-key"))
+	store := dreego.NewCookieStore([]byte("secret-key"))
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
-	store.Set(w, r, "role", "admin", &core.Options{Encrypt: true})
+	store.Set(w, r, "role", "admin", &dreego.Options{Encrypt: true})
 
 	req := httptest.NewRequest("GET", "/", nil)
 	for _, c := range w.Result().Cookies() {
@@ -83,13 +83,13 @@ func TestSessionEncryptTamperRejected(t *testing.T) {
 }
 
 func TestSessionEncryptKeyRotationRejected(t *testing.T) {
-	store := core.NewCookieStore([]byte("secret-key"))
+	store := dreego.NewCookieStore([]byte("secret-key"))
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
-	store.Set(w, r, "role", "admin", &core.Options{Encrypt: true})
+	store.Set(w, r, "role", "admin", &dreego.Options{Encrypt: true})
 
-	other := core.NewCookieStore([]byte("other-secret"))
+	other := dreego.NewCookieStore([]byte("other-secret"))
 	req := httptest.NewRequest("GET", "/", nil)
 	for _, c := range w.Result().Cookies() {
 		req.AddCookie(c)

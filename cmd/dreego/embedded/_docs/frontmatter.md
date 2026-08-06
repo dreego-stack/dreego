@@ -30,7 +30,7 @@ Rules:
 
 ## API
 
-`core.ParseFrontmatter(src)` splits the source and returns the metadata plus the remaining body:
+`dreego.ParseFrontmatter(src)` splits the source and returns the metadata plus the remaining body:
 
 ```go
 fm, body := dreego.ParseFrontmatter(src)

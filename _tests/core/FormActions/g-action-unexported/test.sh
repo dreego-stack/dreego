@@ -21,7 +21,7 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
     type myForm struct {
         X string
     }
-    func myAction(c core.Context, form myForm) error {
+    func myAction(c dreego.Context, form myForm) error {
         return nil
     }
 </go>
@@ -32,8 +32,8 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
 grep -q "HandleIndexPost" dreego/gen/routes.go || { echo "FAIL: POST handler should be generated for unexported (same package)"; exit 1; }

@@ -17,7 +17,7 @@ The repository root contains a `go.work` file that links the root module and eve
 
 ## Plugin Interface (v1, frozen)
 
-Core defines a single `Plugin` interface. Plugins import Core, satisfy the interface, and register themselves with the runtime via `core.UsePlugin(p)`. Core never imports a plugin.
+Core defines a single `Plugin` interface. Plugins import Core, satisfy the interface, and register themselves with the runtime via `dreego.UsePlugin(p)`. Core never imports a plugin.
 
 ```go
 // Defined in core
@@ -33,7 +33,7 @@ type Plugin interface {
 
 ### Registration
 
-`core.UsePlugin(p)` is the central v1 API. It is called at package level (typically from `main.go`), not on an app object. It registers the plugin's routes, middleware, assets and lifecycle hooks with the core runtime:
+`dreego.UsePlugin(p)` is the central v1 API. It is called at package level (typically from `main.go`), not on an app object. It registers the plugin's routes, middleware, assets and lifecycle hooks with the core runtime:
 
 ```go
 func UsePlugin(p Plugin)
@@ -92,7 +92,7 @@ func main() {
 
 ### Lifecycle
 
-Plugins are started and shut down in registration order via `core.StartPlugins(ctx)` and `core.ShutdownPlugins(ctx)`:
+Plugins are started and shut down in registration order via `dreego.StartPlugins(ctx)` and `dreego.ShutdownPlugins(ctx)`:
 
 ```go
 func StartPlugins(ctx context.Context) error   // OnStart on every plugin
@@ -114,7 +114,7 @@ The chain is **fixated on the first `Build()`**: registering a plugin after the 
 
 ### Route hooks (programmatic routes)
 
-A plugin registers routes by calling `core.Register(...)` **inside its `RegisterRoutes()`**. All such routes are served by `core.ServeMux()` alongside the file-based routes:
+A plugin registers routes by calling `dreego.Register(...)` **inside its `RegisterRoutes()`**. All such routes are served by `dreego.ServeMux()` alongside the file-based routes:
 
 ```go
 func (a *Auth) RegisterRoutes() {
@@ -123,7 +123,7 @@ func (a *Auth) RegisterRoutes() {
 }
 ```
 
-Because `core.Register` is idempotent (re-registering a `method`+`pattern` replaces the handler), a later-registered plugin can override a route deterministically.
+Because `dreego.Register` is idempotent (re-registering a `method`+`pattern` replaces the handler), a later-registered plugin can override a route deterministically.
 
 ## Layout
 
@@ -131,7 +131,7 @@ Because `core.Register` is idempotent (re-registering a `method`+`pattern` repla
 plugins/
 ├── sample/                 ← minimal example plugin
 │   ├── go.mod              → module codeberg.org/dreego/dreego/plugins/sample
-│   ├── sample.go           → implements core.Plugin or other core interfaces
+│   ├── sample.go           → implements dreego.Plugin or other core interfaces
 │   └── README.md
 ├── auth/                   ← future official plugin
 ├── db/

@@ -21,7 +21,7 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
     type BadForm struct {
         X string
     }
-    func Bad(c core.Context) error {
+    func Bad(c dreego.Context) error {
         return nil
     }
 </go>
@@ -32,10 +32,10 @@ cat > dreego/routes/get-fail.dreego << 'DREEGO'
 DREEGO
 cat > main.go << 'GO'
 package main
-import (_ "t/dreego/gen"; core "codeberg.org/dreego/dreego/core")
-func main() { core.Listen(":0") }
+import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+func main() { dreego.Listen(":0") }
 GO
 $DREEGO_BIN generate 2>&1
-grep -q "core.Register(\"POST\"" dreego/gen/routes.go && { echo "FAIL: POST handler registered for bad arity"; exit 1; }
+grep -q "dreego.Register(\"POST\"" dreego/gen/routes.go && { echo "FAIL: POST handler registered for bad arity"; exit 1; }
 go build -o /dev/null .
 echo ok

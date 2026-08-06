@@ -31,7 +31,7 @@ type UserForm struct {
     Email string `form:"email" validate:"required,email"`
 }
 
-func Save(c *core.SSRContext, form UserForm) error {
+func Save(c *dreego.SSRContext, form UserForm) error {
     return nil
 }
 </go>

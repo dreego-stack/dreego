@@ -32,7 +32,7 @@ import (
 	"os/signal"
 	"syscall"
 	_ "t/dreego/gen"
-	core "codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 func main() {
@@ -43,8 +43,8 @@ func main() {
 		fmt.Println("SIGTERM received")
 		os.Exit(0)
 	}()
-	core.SetLogging(false)
-	core.Listen(":$port")
+	dreego.SetLogging(false)
+	dreego.Listen(":$port")
 }
 GO
 

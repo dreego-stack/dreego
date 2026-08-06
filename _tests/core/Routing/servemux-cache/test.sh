@@ -1,6 +1,6 @@
 #!/bin/sh
 # Using standard: _tests/how-to-test-sh.md
-# What: core.ServeMux() returns the same handler on repeated calls (cached stack)
+# What: dreego.ServeMux() returns the same handler on repeated calls (cached stack)
 set -e
 
 realrepo="$(cd "$(dirname "$0")"/../../../.. && pwd)"
@@ -22,13 +22,13 @@ package main
 import (
 	"fmt"
 
-	"codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 	_ "t/dreego/gen"
 )
 
 func main() {
-	first := fmt.Sprintf("%p", core.ServeMux())
-	second := fmt.Sprintf("%p", core.ServeMux())
+	first := fmt.Sprintf("%p", dreego.ServeMux())
+	second := fmt.Sprintf("%p", dreego.ServeMux())
 	if first != second {
 		fmt.Println("FAIL: ServeMux returned different handlers")
 		panic("servemux cache miss")

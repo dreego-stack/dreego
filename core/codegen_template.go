@@ -89,7 +89,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 			forIndent = strings.Repeat("\t", forDepth)
 		}
 		buf.WriteString(fmt.Sprintf("%sfor i, %s := range %s {\n", forIndent, n.Item, n.Items))
-		buf.WriteString(fmt.Sprintf("%s\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
+		buf.WriteString(fmt.Sprintf("%s\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
 			code, err := genTemplateNode(child, forDepth+1)

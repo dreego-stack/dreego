@@ -1,5 +1,5 @@
 
-func renderIndex(c *core.SSRContext) (string, error) {
+func renderIndex(c *dreego.SSRContext) (string, error) {
 	var b strings.Builder
 
 b.WriteString(`<title>Home</title>`)
@@ -24,7 +24,7 @@ b.WriteString(`<title>Home</title>`)
 }
 
 func HandleIndex(w http.ResponseWriter, r *http.Request) {
-	c := core.NewSSR(w, r)
+	c := dreego.NewSSR(w, r)
 	html, err := renderIndex(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,5 +35,5 @@ func HandleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	core.Register("GET", "/", HandleIndex)
+	dreego.Register("GET", "/", HandleIndex)
 }

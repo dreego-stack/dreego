@@ -92,7 +92,7 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 			buf.WriteString(fmt.Sprintf("if len(%s) > 0 {\n", n.Items))
 		}
 		buf.WriteString(fmt.Sprintf("\tfor i, %s := range %s {\n", n.Item, n.Items))
-		buf.WriteString(fmt.Sprintf("\t\tloop := core.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", n.Items))
+		buf.WriteString(fmt.Sprintf("\t\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", n.Items))
 		buf.WriteString("\t\t_ = loop\n")
 		for _, child := range n.Children {
 			code, err := g.node(child)

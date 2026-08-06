@@ -11,7 +11,7 @@ SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, dep
         Email string `form:"email" validate:"required,email"`
     }
 
-    func Login(c core.Context, form LoginForm) error {
+    func Login(c dreego.Context, form LoginForm) error {
         c.SetSessionVal("user", form.Email)
         return c.Redirect("/dashboard", 303)
     }
@@ -71,12 +71,12 @@ Three principles:
 - **Custom** — `c.Write(status, contentType, body)` for arbitrary formats
 
 ### Middleware (v0.0.14, v0.0.20)
-- **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `core.SetReady(bool)`
-- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (override via `core.SetCSP`)
+- **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `dreego.SetReady(bool)`
+- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (override via `dreego.SetCSP`)
 - **Gzip Compression** — `Accept-Encoding` → compressed response wrapping
 - **Recovery** — Panic → 500 with stack trace
 - **Request Logging** — JSONL format with duration, IP, status
-- **Session** — Cookie store via `core.SetSessionStore()`, `c.SetSessionVal()`
+- **Session** — Cookie store via `dreego.SetSessionStore()`, `c.SetSessionVal()`
 - **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
 
 ### Developer Experience

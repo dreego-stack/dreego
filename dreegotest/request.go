@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/dreego/dreego/core"
+	dreego "codeberg.org/dreego/dreego/core"
 )
 
 type Response struct {
@@ -30,6 +30,6 @@ func PostForm(t *testing.T, path string, form url.Values) *Response {
 
 func serve(req *http.Request) *Response {
 	rec := httptest.NewRecorder()
-	core.ServeMux().ServeHTTP(rec, req)
+	dreego.ServeMux().ServeHTTP(rec, req)
 	return &Response{StatusCode: rec.Code, Body: rec.Body.String()}
 }
