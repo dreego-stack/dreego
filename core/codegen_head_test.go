@@ -89,3 +89,35 @@ func TestGenHeadUnclosedBrace(t *testing.T) {
 		t.Errorf("genHead unclosed brace must keep the literal remainder, got:\n%s", out)
 	}
 }
+
+// A route whose template starts with a doctype must emit the head section
+// AFTER the doctype node (at the position of the <head> tag), never before it:
+// the rendered body must start with <!doctype html>.
+func TestGenTemplHeadAfterDoctypeWithoutLayout(t *testing.T) {
+	file := &File{
+		Head: &HeadSection{Content: `<meta charset="utf-8"><title>Home</title>`},
+		Template: &TemplateSection{
+			Nodes: []TemplateNode{
+				{Type: NodeText, Content: "<!doctype html><html><head>"},
+				{Type: NodeText, Content: "</head><body><p>body</p></body></html>"},
+			},
+		},
+	}
+
+	out, err := genTempl(file, nil, "abc123", true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	doctypeIdx := strings.Index(out, "<!doctype html>")
+	headIdx := strings.Index(out, "<title>Home</title>")
+	if doctypeIdx < 0 {
+		t.Fatalf("doctype missing, got:\n%s", out)
+	}
+	if headIdx < 0 {
+		t.Fatalf("head content missing, got:\n%s", out)
+	}
+	if headIdx < doctypeIdx {
+		t.Errorf("head must be emitted after the doctype, got:\n%s", out)
+	}
+}

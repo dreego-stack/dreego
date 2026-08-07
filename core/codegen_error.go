@@ -29,26 +29,35 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 	}
 
 	if file.Template != nil {
-		if file.Head != nil {
-			headCode, err := genHead(file.Head.Content, "b")
-			if err != nil {
-				return "", err
-			}
-			buf.WriteString(headCode)
-		}
 		suppressScope := false
 		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText {
 			suppressScope = strings.HasPrefix(file.Template.Nodes[0].Content, "<!")
 		}
+		var headCode string
+		if file.Head != nil {
+			var err error
+			headCode, err = genHead(file.Head.Content, "b")
+			if err != nil {
+				return "", err
+			}
+		}
 		if !suppressScope {
+			if headCode != "" {
+				buf.WriteString(headCode)
+			}
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
+		headPending := suppressScope && headCode != ""
 		for _, n := range file.Template.Nodes {
 			code, err := genTemplateNode(n, 1)
 			if err != nil {
 				return "", err
 			}
 			buf.WriteString(code)
+			if headPending && n.Type == NodeText && strings.HasPrefix(n.Content, "<!") {
+				buf.WriteString(headCode)
+				headPending = false
+			}
 		}
 		if !suppressScope {
 			buf.WriteString("\tb.WriteString(\"</div>\")\n")
@@ -60,9 +69,12 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 			buf.WriteString("\tb.WriteString(\"</script>\")\n")
 		}
 		if file.Style != nil {
-			scoped := scopeCSS(file.Style.Code, scopeHash)
+			styleCode := file.Style.Code
+			if !suppressScope {
+				styleCode = scopeCSS(file.Style.Code, scopeHash)
+			}
 			buf.WriteString("\tb.WriteString(\"<style>\")\n")
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(scoped)))
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(styleCode)))
 			buf.WriteString("\tb.WriteString(\"</style>\")\n")
 		}
 	}

@@ -6,8 +6,9 @@ import (
 )
 
 type Parser struct {
-	tokens []Token
-	pos    int
+	tokens          []Token
+	pos             int
+	templateFromDiv bool
 }
 
 func NewParser(tokens []Token) *Parser {
@@ -38,7 +39,7 @@ func (p *Parser) Parse() (*File, error) {
 				return nil, err
 			}
 			file.Template = &TemplateSection{Nodes: nodes}
-			break
+			continue
 		}
 
 		switch tok.Tag {
@@ -55,10 +56,15 @@ func (p *Parser) Parse() (*File, error) {
 			if err != nil {
 				return nil, err
 			}
-			if file.Template != nil {
+			if p.templateFromDiv {
 				return nil, fmt.Errorf("duplicate <div> section at position %d", tok.Pos)
 			}
-			file.Template = section
+			if file.Template == nil {
+				file.Template = section
+				p.templateFromDiv = true
+			} else {
+				file.Template.Nodes = append(file.Template.Nodes, section.Nodes...)
+			}
 		case "head":
 			section, err := p.parseNonDivSection("head")
 			if err != nil {
@@ -87,15 +93,19 @@ func (p *Parser) Parse() (*File, error) {
 			}
 			file.Style = &StyleSection{Code: strings.TrimSpace(section)}
 		default:
-			if file.Template != nil {
+			if p.templateFromDiv {
 				return nil, fmt.Errorf("unknown section <%s> at position %d", tok.Tag, tok.Pos)
 			}
 			nodes, err := p.parsePlainTemplate()
 			if err != nil {
 				return nil, err
 			}
-			file.Template = &TemplateSection{Nodes: nodes}
-			break
+			if file.Template == nil {
+				file.Template = &TemplateSection{Nodes: nodes}
+			} else {
+				file.Template.Nodes = append(file.Template.Nodes, nodes...)
+			}
+			continue
 		}
 	}
 
@@ -127,12 +137,23 @@ func (p *Parser) parsePlainTemplate() ([]TemplateNode, error) {
 		if tok.Type == TokenEOF {
 			return nodes, nil
 		}
+		if tok.Type == TokenTagOpen && isSectionTag(tok.Tag) && tok.Tag != "div" {
+			return nodes, nil
+		}
 		node, err := p.parseTemplateNode("root")
 		if err != nil {
 			return nil, err
 		}
 		nodes = append(nodes, node)
 	}
+}
+
+func isSectionTag(tag string) bool {
+	switch tag {
+	case "go", "div", "head", "script", "style":
+		return true
+	}
+	return false
 }
 
 func parseGoAttrs(attrs string) string {

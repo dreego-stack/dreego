@@ -188,20 +188,45 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) (string, e
 		if err != nil {
 			return "", err
 		}
-		buf.WriteString(headCode)
-	}
-	if isGET {
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
-	}
-	for _, n := range file.Template.Nodes {
-		code, err := genTemplateNode(n, 1)
-		if err != nil {
-			return "", err
+		headPending := false
+		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText &&
+			strings.HasPrefix(file.Template.Nodes[0].Content, "<!") {
+			headPending = true
 		}
-		buf.WriteString(code)
-	}
-	if isGET {
-		buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		if !headPending {
+			buf.WriteString(headCode)
+		}
+		if isGET {
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		}
+		for _, n := range file.Template.Nodes {
+			code, err := genTemplateNode(n, 1)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(code)
+			if headPending && n.Type == NodeText && strings.HasPrefix(n.Content, "<!") {
+				buf.WriteString(headCode)
+				headPending = false
+			}
+		}
+		if isGET {
+			buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		}
+	} else {
+		if isGET {
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		}
+		for _, n := range file.Template.Nodes {
+			code, err := genTemplateNode(n, 1)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(code)
+		}
+		if isGET {
+			buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		}
 	}
 
 	if file.Script != nil {
