@@ -175,3 +175,17 @@ func TestCmdBuildEErrorsInsteadOfExit(t *testing.T) {
 		t.Fatal("expected cmdBuildE to return an error in a dir without a valid module")
 	}
 }
+
+// TestStartServerMissingBinary verifies startServer returns an error when the
+// target binary does not exist, so the dev watcher can surface a clean message
+// instead of crashing the process.
+func TestStartServerMissingBinary(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "does-not-exist")
+	cmd, err := startServer(bin)
+	if err == nil {
+		if cmd != nil {
+			t.Fatal("expected error for missing binary")
+		}
+		t.Fatal("expected startServer to return an error for a missing binary")
+	}
+}
