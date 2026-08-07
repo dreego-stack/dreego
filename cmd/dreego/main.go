@@ -38,7 +38,7 @@ func main() {
 		cmdFmt(os.Args[2:])
 	case "feedback":
 		cmdFeedback()
-	case "version":
+	case "version", "--version", "-v":
 		fmt.Println(dreegoVersion())
 	case "help", "--help", "-h":
 		printHelp()
@@ -64,7 +64,7 @@ commands:
   dev                    watch .dreego files, rebuild + restart on change
   docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
   feedback               open browser to submit feedback/issue
-  version                show the dreego CLI version
+  version, --version, -v  show the dreego CLI version
   help                   show this help
 
 flags:
