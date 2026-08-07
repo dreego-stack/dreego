@@ -1,6 +1,10 @@
 package core
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 )
@@ -118,5 +122,113 @@ func TestCookieStoreOptions(t *testing.T) {
 	}
 	if c.Path != "/app" {
 		t.Errorf("expected Path /app, got %s", c.Path)
+	}
+}
+
+func TestCookieStoreVerifyInvalidBase64(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	r := httptest.NewRequest("GET", "/", nil)
+	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: "!!!not-base64!!!"})
+
+	val, err := store.Get(r, "key")
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+	if val != "" {
+		t.Errorf("expected empty value for invalid base64, got %q", val)
+	}
+}
+
+func TestCookieStoreVerifyTooShort(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	// Valid base64 but shorter than sha256.Size (32 bytes).
+	short := base64.RawURLEncoding.EncodeToString([]byte("short"))
+	r := httptest.NewRequest("GET", "/", nil)
+	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: short})
+
+	val, err := store.Get(r, "key")
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+	if val != "" {
+		t.Errorf("expected empty value for too-short cookie, got %q", val)
+	}
+}
+
+func TestCookieStoreCorruptJSON(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	// Build a valid signature over a non-JSON payload so verify() passes
+	// but json.Unmarshal in load() rejects it.
+	payload := []byte("{not valid json")
+	mac := hmac.New(sha256.New, deriveKeys([]byte("secret-key")).sig)
+	mac.Write(payload)
+	sig := mac.Sum(nil)
+	value := base64.RawURLEncoding.EncodeToString(append(sig, payload...))
+
+	r := httptest.NewRequest("GET", "/", nil)
+	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: value})
+
+	val, err := store.Get(r, "key")
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+	if val != "" {
+		t.Errorf("expected empty value for corrupt JSON, got %q", val)
+	}
+}
+
+func TestCookieStoreEmptySecret(t *testing.T) {
+	store := NewCookieStore([]byte{})
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+
+	err := store.Set(w, r, "key", "value", nil)
+	if err != nil {
+		t.Fatalf("Set with empty secret failed: %v", err)
+	}
+
+	req := httptest.NewRequest("GET", "/", nil)
+	for _, c := range w.Result().Cookies() {
+		req.AddCookie(c)
+	}
+	val, err := store.Get(req, "key")
+	if err != nil {
+		t.Fatalf("Get with empty secret failed: %v", err)
+	}
+	if val != "value" {
+		t.Errorf("expected value 'value' with empty secret, got %q", val)
+	}
+}
+
+func TestCookieStoreSetEmptyValueDeletes(t *testing.T) {
+	store := NewCookieStore([]byte("secret-key"))
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+
+	if err := store.Set(w, r, "key", "value", nil); err != nil {
+		t.Fatalf("Set failed: %v", err)
+	}
+
+	req := httptest.NewRequest("GET", "/", nil)
+	for _, c := range w.Result().Cookies() {
+		req.AddCookie(c)
+	}
+
+	w2 := httptest.NewRecorder()
+	if err := store.Set(w2, req, "key", "", nil); err != nil {
+		t.Fatalf("Set empty failed: %v", err)
+	}
+
+	req2 := httptest.NewRequest("GET", "/", nil)
+	for _, c := range w2.Result().Cookies() {
+		req2.AddCookie(c)
+	}
+
+	val, err := store.Get(req2, "key")
+	if err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+	if val != "" {
+		t.Errorf("expected empty value after Set empty, got %q", val)
 	}
 }

@@ -80,6 +80,73 @@ func TestScopeCSSPseudoSelectorKeepsDeclaration(t *testing.T) {
 	}
 }
 
+func TestGoLiteralPlain(t *testing.T) {
+	out := goLiteral(`<p>hi</p>`)
+	if out != "`<p>hi</p>`" {
+		t.Errorf("goLiteral plain must wrap in backticks, got: %q", out)
+	}
+}
+
+func TestGoLiteralContainsBacktick(t *testing.T) {
+	out := goLiteral("a ` b")
+	if strings.Contains(out, "`") && !strings.Contains(out, "\"") {
+		t.Errorf("goLiteral with backtick must use quotes, got: %q", out)
+	}
+	if !strings.Contains(out, `"a `) {
+		t.Errorf("goLiteral with backtick must produce a quoted string, got: %q", out)
+	}
+}
+
+func TestToPascalCaseVariants(t *testing.T) {
+	cases := []struct{ in, want string }{
+		{"hello world", "HelloWorld"},
+		{"user-id", "UserId"},
+		{"my_page", "MyPage"},
+		{"123abc", "123abc"},
+		{"alreadyPascal", "Alreadypascal"},
+	}
+	for _, c := range cases {
+		if got := toPascalCase(c.in); got != c.want {
+			t.Errorf("toPascalCase(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+func TestScopeSelectorCommaList(t *testing.T) {
+	out := scopeSelector(".a, .b:hover", "[data-scope=x] ")
+	if !strings.Contains(out, "[data-scope=x] .a") {
+		t.Errorf("scopeSelector must scope first selector, got: %q", out)
+	}
+	if !strings.Contains(out, "[data-scope=x] .b:hover") {
+		t.Errorf("scopeSelector must scope second selector, got: %q", out)
+	}
+}
+
+func TestSplitTopLevelCommaNested(t *testing.T) {
+	in := ":not(.a), .b, .c:hover, div > span"
+	out := splitTopLevelComma(in)
+	if len(out) != 4 {
+		t.Fatalf("splitTopLevelComma must split 4 top-level selectors, got %d: %#v", len(out), out)
+	}
+}
+
+func TestMatchBraceUnbalanced(t *testing.T) {
+	// "a{b{c}" — opening brace at index 1 never closes before end.
+	css := "a{b{c}"
+	got := matchBrace(css, 1, len(css))
+	if got != len(css) {
+		t.Errorf("matchBrace unbalanced must return end index, got %d, want %d", got, len(css))
+	}
+}
+
+func TestMatchBraceBalanced(t *testing.T) {
+	// "a{b{c}d}": brace at index 3 (c) closes at index 5.
+	css := "a{b{c}d}"
+	if got := matchBrace(css, 3, len(css)); got != 5 {
+		t.Errorf("matchBrace nested must return matching close, got %d, want 5", got)
+	}
+}
+
 // concatPlaceholders builds a component-call argument for a quoted attribute
 // value with mixed literal text and multiple {…} placeholders. Escaping must be
 // deferred to the prop-injection point (the component body escapes its own

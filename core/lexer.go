@@ -125,23 +125,20 @@ func parseComponentHeader(line string) *ComponentDef {
 	name := strings.TrimSpace(line[:openParen])
 	rest := line[openParen:]
 
-	closeParen := strings.LastIndexByte(rest, ')')
+	closeParen := strings.IndexByte(rest, ')')
 	if closeParen < 0 {
 		return &ComponentDef{Name: name}
 	}
 
-	params := strings.TrimSpace(rest[1:closeParen])
-
 	comp := &ComponentDef{Name: name}
-	if strings.Contains(params, "(") || !strings.Contains(params, ",") {
-		comp.Props = parseProps(params)
-	} else {
-		parts := strings.SplitN(params, ") (", 2)
-		if len(parts) > 0 && parts[0] != "" {
-			comp.Props = parseProps(strings.Trim(parts[0], "() "))
-		}
-		if len(parts) > 1 && parts[1] != "" {
-			for _, s := range strings.Split(strings.Trim(parts[1], "() "), ",") {
+	params := strings.TrimSpace(rest[1:closeParen])
+	comp.Props = parseProps(params)
+
+	slots := strings.TrimSpace(rest[closeParen+1:])
+	if strings.HasPrefix(slots, "(") && strings.HasSuffix(slots, ")") {
+		inner := strings.Trim(slots[1:len(slots)-1], " ")
+		if inner != "" {
+			for _, s := range strings.Split(inner, ",") {
 				s = strings.TrimSpace(s)
 				if s != "" {
 					comp.Slots = append(comp.Slots, s)
@@ -182,13 +179,18 @@ func parseProps(s string) []Prop {
 func parseImportLine(line string) *Import {
 	line = strings.TrimPrefix(line, "import ")
 	fields := strings.Fields(line)
-	if len(fields) < 2 {
+	if len(fields) == 0 {
 		return nil
 	}
-	imp := &Import{Path: strings.Trim(fields[len(fields)-1], "\"")}
-	if len(fields) >= 3 {
-		imp.Alias = fields[0]
+	if len(fields) == 1 {
+		path := strings.Trim(fields[0], "\"")
+		if path == fields[0] {
+			return nil
+		}
+		return &Import{Path: path}
 	}
+	imp := &Import{Path: strings.Trim(fields[len(fields)-1], "\"")}
+	imp.Alias = fields[0]
 	return imp
 }
 
