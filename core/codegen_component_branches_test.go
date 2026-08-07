@@ -30,6 +30,61 @@ func TestCompGenEachWithElse(t *testing.T) {
 	}
 }
 
+// compGen: $loop. inside a {#if} cond nested in an {#each} body must be
+// substituted too — the whole generated child code (including NodeIf conds)
+// is rewritten, not only direct expressions.
+func TestCompGenEachSubstitutesLoopInIfCond(t *testing.T) {
+	n := TemplateNode{
+		Type:  NodeEach,
+		Item:  "item",
+		Items: "items",
+		Children: []TemplateNode{
+			{
+				Type: NodeIf,
+				Cond: "!$loop.Last",
+				Children: []TemplateNode{
+					{Type: NodeText, Content: ", "},
+				},
+			},
+			{Type: NodeExpression, Content: "item.Name"},
+		},
+	}
+	out, err := genTemplateNodeComp(n)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "if !loop.Last {") {
+		t.Errorf("compGen $loop. in {#if} cond must be substituted to loop., got:\n%s", out)
+	}
+	if strings.Contains(out, "$loop.") {
+		t.Errorf("compGen raw $loop. must not remain, got:\n%s", out)
+	}
+}
+
+// compGen full pipeline (lex → parse → codegen): {#if !$loop.Last} inside
+// {#each} must produce "if !loop.Last {".
+func TestCompGenEachLoopInIfCondFullParse(t *testing.T) {
+	input := `{#each items as item}<div>{#if !$loop.Last}, {/if}{item}</div>{/each}`
+	tokens, err := Lex(input)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	out, err := genTemplateNodeComp(file.Template.Nodes[0])
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "if !loop.Last {") {
+		t.Errorf("compGen full pipeline must substitute $loop. in {#if} cond, got:\n%s", out)
+	}
+	if strings.Contains(out, "$loop.") {
+		t.Errorf("compGen raw $loop. must not remain, got:\n%s", out)
+	}
+}
+
 // compGen NodeIf with a chain of else-if nodes must emit "else if" rather
 // than a single plain else.
 func TestCompGenIfElseIfChain(t *testing.T) {

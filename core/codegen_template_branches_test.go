@@ -77,6 +77,99 @@ func TestGenTemplateNodeEachLoopVar(t *testing.T) {
 	}
 }
 
+// $loop. inside a {#if} cond nested in an {#each} body must be substituted
+// too — the whole generated child code (including NodeIf conds) is rewritten,
+// not only direct expressions. {#if !$loop.Last} must generate
+// "if !loop.Last {" or the emitted Go does not compile.
+func TestGenTemplateNodeEachSubstitutesLoopInIfCond(t *testing.T) {
+	n := TemplateNode{
+		Type:  NodeEach,
+		Item:  "item",
+		Items: "items",
+		Children: []TemplateNode{
+			{
+				Type: NodeIf,
+				Cond: "!$loop.Last",
+				Children: []TemplateNode{
+					{Type: NodeText, Content: ", "},
+				},
+			},
+			{Type: NodeExpression, Content: "item.Name"},
+		},
+	}
+	result, err := genTemplateNode(n, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(result, "if !loop.Last {") {
+		t.Errorf("$loop. in {#if} cond must be substituted to loop., got:\n%s", result)
+	}
+	if strings.Contains(result, "$loop.") {
+		t.Errorf("raw $loop. must not remain, got:\n%s", result)
+	}
+}
+
+// $loop. in an {#else if} cond inside an {#each} body must be substituted too.
+func TestGenTemplateNodeEachSubstitutesLoopInElseIfCond(t *testing.T) {
+	n := TemplateNode{
+		Type:  NodeEach,
+		Item:  "item",
+		Items: "items",
+		Children: []TemplateNode{
+			{
+				Type: NodeIf,
+				Cond: "$loop.First",
+				Children: []TemplateNode{
+					{Type: NodeText, Content: "A"},
+				},
+				ElseChildren: []TemplateNode{
+					{
+						Type:     NodeIf,
+						Cond:     "$loop.Last",
+						Children: []TemplateNode{{Type: NodeText, Content: "B"}},
+					},
+				},
+			},
+		},
+	}
+	result, err := genTemplateNode(n, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, want := range []string{"if loop.First {", "} else if loop.Last {"} {
+		if !strings.Contains(result, want) {
+			t.Errorf("$loop. in else-if cond must be substituted, missing %q, got:\n%s", want, result)
+		}
+	}
+	if strings.Contains(result, "$loop.") {
+		t.Errorf("raw $loop. must not remain, got:\n%s", result)
+	}
+}
+
+// Full pipeline (lex → parse → codegen): {#if !$loop.Last} inside {#each}
+// must produce "if !loop.Last {" — the exact feedback.md scenario.
+func TestGenTemplateNodeEachLoopInIfCondFullParse(t *testing.T) {
+	input := `{#each items as item}<div>{#if !$loop.Last}, {/if}{item}</div>{/each}`
+	tokens, err := Lex(input)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	out, err := genTemplateNode(file.Template.Nodes[0], 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "if !loop.Last {") {
+		t.Errorf("full pipeline must substitute $loop. in {#if} cond, got:\n%s", out)
+	}
+	if strings.Contains(out, "$loop.") {
+		t.Errorf("raw $loop. must not remain, got:\n%s", out)
+	}
+}
+
 func TestGenTemplateNodeSlotNamed(t *testing.T) {
 	n := TemplateNode{
 		Type:    NodeSlot,
