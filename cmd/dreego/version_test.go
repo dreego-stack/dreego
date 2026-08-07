@@ -108,3 +108,19 @@ func TestDreegoVersionFallbackDev(t *testing.T) {
 		t.Errorf("expected resolved version, got build-info placeholder %q", got)
 	}
 }
+
+// TestDreegoVersionMatchesVERSIONFile pins the CLI version to the repo's VERSION
+// file: dreegoVersion() without ldflags must resolve to exactly the version in
+// the VERSION file at the repo root — never "dev" and never a stale value. This
+// guards the version-drift class of bugs where the CLI reports or scaffolds a
+// core version that differs from the current VERSION.
+func TestDreegoVersionMatchesVERSIONFile(t *testing.T) {
+	version = ""
+	want := versionFromSourceRoot("VERSION")
+	if want == "" || want == "dev" || want == "(devel)" {
+		t.Fatalf("VERSION file at repo root must hold a real version, got %q", want)
+	}
+	if got := dreegoVersion(); got != want {
+		t.Errorf("dreegoVersion() = %q, want %q (VERSION file)", got, want)
+	}
+}
