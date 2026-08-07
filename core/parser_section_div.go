@@ -2,9 +2,14 @@ package core
 
 import (
 	"fmt"
+	"strings"
 )
 
 func (p *Parser) parseDivSection() (*TemplateSection, error) {
+	tok := p.current()
+	if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
+		return nil, err
+	}
 	p.advance()
 	nodes, err := p.parseDivNodes()
 	if err != nil {
@@ -23,6 +28,9 @@ func (p *Parser) parseDivNodes() ([]TemplateNode, error) {
 			return nil, fmt.Errorf("unclosed <div>")
 		}
 		if tok.Type == TokenTagOpen && tok.Tag == "div" {
+			if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
+				return nil, err
+			}
 			p.advance()
 			depth++
 			content := fmt.Sprintf("<%s", tok.Tag)
@@ -139,6 +147,9 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		}
 		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children}, nil
 	case TokenTagOpen:
+		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
+			return TemplateNode{}, err
+		}
 		p.advance()
 		content := fmt.Sprintf("<%s", tok.Tag)
 		if tok.Attr != "" {
@@ -147,9 +158,15 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		content += ">"
 		return TemplateNode{Type: NodeText, Content: content}, nil
 	case TokenComponentSelfClose:
+		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
+			return TemplateNode{}, err
+		}
 		p.advance()
 		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true}, nil
 	case TokenComponentTagOpen:
+		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
+			return TemplateNode{}, err
+		}
 		p.advance()
 		children, err := p.parseComponentNodes(tok.Tag)
 		if err != nil {
@@ -211,4 +228,30 @@ func (p *Parser) parseComponentNodes(tag string) ([]TemplateNode, error) {
 		}
 		nodes = append(nodes, node)
 	}
+}
+
+// checkAttrControlFlow rejects {#if}/{#each} control flow inside tag attribute
+// values. The lexer scans a whole tag as one token, so control flow inside a
+// quoted attribute would either stay literal (route path: cond never referenced)
+// or be misparsed as an expression (component path: broken Go). Fail fast with
+// a clear error instead of silently generating corrupt code.
+func checkAttrControlFlow(attrs string, pos int) error {
+	if attrs == "" {
+		return nil
+	}
+	inQuote := false
+	for i := 0; i < len(attrs); i++ {
+		switch attrs[i] {
+		case '"', '\'':
+			inQuote = !inQuote
+		case '{':
+			if inQuote && strings.HasPrefix(attrs[i:], "{#if ") {
+				return fmt.Errorf("{#if} inside attribute value at position %d is not supported; wrap the whole tag in {#if} instead", pos)
+			}
+			if inQuote && strings.HasPrefix(attrs[i:], "{#each ") {
+				return fmt.Errorf("{#each} inside attribute value at position %d is not supported; wrap the whole tag in {#each} instead", pos)
+			}
+		}
+	}
+	return nil
 }
