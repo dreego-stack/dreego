@@ -53,6 +53,19 @@ func TestCompressGzipApplied(t *testing.T) {
 	}
 }
 
+func TestCompressPreservesFlusher(t *testing.T) {
+	mw := Compress()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := w.(http.Flusher); !ok {
+			t.Error("expected http.Flusher through Compress with gzip")
+		}
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	r.Header.Set("Accept-Encoding", "gzip")
+	mw.ServeHTTP(w, r)
+}
+
 func TestGzipResponseWriterWritesGzip(t *testing.T) {
 	var buf strings.Builder
 	gw := gzip.NewWriter(&buf)

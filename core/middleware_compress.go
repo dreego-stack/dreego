@@ -30,3 +30,10 @@ type gzipResponseWriter struct {
 func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
+
+func (w *gzipResponseWriter) Flush() {
+	w.Writer.Flush()
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}

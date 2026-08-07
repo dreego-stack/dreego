@@ -80,3 +80,15 @@ func TestRequestLoggingIncludesRID(t *testing.T) {
 		t.Error("expected request ID in context through RequestLogging")
 	}
 }
+
+func TestRequestLoggingPreservesFlusher(t *testing.T) {
+	mw := RequestLogging()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := w.(http.Flusher); !ok {
+			t.Error("expected http.Flusher through RequestLogging")
+		}
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	mw.ServeHTTP(w, r)
+}
