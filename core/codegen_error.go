@@ -36,7 +36,13 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 			}
 			buf.WriteString(headCode)
 		}
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		suppressScope := false
+		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText {
+			suppressScope = strings.HasPrefix(file.Template.Nodes[0].Content, "<!")
+		}
+		if !suppressScope {
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		}
 		for _, n := range file.Template.Nodes {
 			code, err := genTemplateNode(n, 1)
 			if err != nil {
@@ -44,7 +50,9 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 			}
 			buf.WriteString(code)
 		}
-		buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		if !suppressScope {
+			buf.WriteString("\tb.WriteString(\"</div>\")\n")
+		}
 
 		if file.Script != nil {
 			buf.WriteString("\tb.WriteString(\"<script>\")\n")
