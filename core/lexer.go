@@ -165,8 +165,8 @@ func parseProps(s string) []Prop {
 		if len(fields) >= 2 {
 			p.Type = fields[1]
 		}
-		if len(fields) >= 4 && fields[2] == "=" {
-			p.Default = fields[3]
+		if eq := strings.IndexByte(part, '='); eq >= 0 {
+			p.Default = strings.TrimSpace(part[eq+1:])
 		}
 		if p.Type == "" {
 			p.Type = "string"

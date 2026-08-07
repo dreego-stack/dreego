@@ -92,3 +92,58 @@ func TestGenerateComponentStatefulGenerator(t *testing.T) {
 		t.Fatalf("generated component is not valid Go: %v\n--- body ---\n%s", err, out)
 	}
 }
+
+// GenerateComponent must apply prop defaults from the component signature
+// (chosen design option a: the default is applied inside the generated
+// component code, so a call site may omit the prop). Only string props get a
+// fallback: the variadic wrapper makes "omitted" distinguishable from "passed",
+// and an empty string is a valid value the default may replace. bool/int props
+// get NO fallback — an explicit false/0 is a valid value and must never be
+// overwritten, so their defaults are not supported (caller must pass the value).
+func TestGenerateComponentAppliesPropDefaults(t *testing.T) {
+	src := `Component Badge (title string = "Hi", count int = 5, active bool = true)`
+	comp, _, body := ParseHeader(src)
+	if len(comp.Props) != 3 {
+		t.Fatalf("expected 3 props, got %+v", comp.Props)
+	}
+	if comp.Props[0].Default != `"Hi"` || comp.Props[1].Default != "5" || comp.Props[2].Default != "true" {
+		t.Fatalf("parseProps must capture the defaults, got %+v", comp.Props)
+	}
+	file := parseFile(t, body)
+	file.Component = comp
+
+	out, err := GenerateComponent(file, scopeHashFor(src))
+	if err != nil {
+		t.Fatalf("GenerateComponent: %v", err)
+	}
+
+	if !strings.Contains(out, `"Hi"`) {
+		t.Errorf("generated component must apply the string default \"Hi\", got:\n%s", out)
+	}
+	if strings.Contains(out, "count = 5") {
+		t.Errorf("int default must NOT be applied (explicit 0 is a valid value), got:\n%s", out)
+	}
+	if strings.Contains(out, "active = true") {
+		t.Errorf("bool default must NOT be applied (explicit false is a valid value), got:\n%s", out)
+	}
+	if _, err := parser.ParseFile(token.NewFileSet(), "comp.go", "package comp\n"+out, 0); err != nil {
+		t.Fatalf("generated component is not valid Go: %v\n--- body ---\n%s", err, out)
+	}
+}
+
+// An explicitly passed false must never be overwritten by a bool default: the
+// generated component must not contain a zero-fallback for bool props.
+func TestGenerateComponentBoolDefaultNotApplied(t *testing.T) {
+	src := `Component Toggle (active bool = true)`
+	comp, _, body := ParseHeader(src)
+	file := parseFile(t, body)
+	file.Component = comp
+
+	out, err := GenerateComponent(file, scopeHashFor(src))
+	if err != nil {
+		t.Fatalf("GenerateComponent: %v", err)
+	}
+	if strings.Contains(out, "active == false") || strings.Contains(out, "active = true") {
+		t.Errorf("bool default must not generate a zero-fallback (explicit false is valid), got:\n%s", out)
+	}
+}

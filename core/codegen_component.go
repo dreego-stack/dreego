@@ -218,3 +218,63 @@ func sectionCloseLen(s string) int {
 	}
 	return 0
 }
+
+func GenerateComponent(file *File, scopeHash string) (string, error) {
+	comp := file.Component
+	if comp == nil {
+		return "", fmt.Errorf("no component definition")
+	}
+
+	var buf strings.Builder
+
+	declParams, implParams, callArgs, variadicName := componentParams(comp)
+
+	if variadicName != "" {
+		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
+		buf.WriteString("\t" + variadicName + "0 := \"\"\n")
+		buf.WriteString("\tif len(" + variadicName + ") > 0 {\n\t\t" + variadicName + "0 = " + variadicName + "[0]\n\t}\n")
+		buf.WriteString("\treturn component" + comp.Name + "(" + callArgs + ")\n")
+		buf.WriteString("}\n\n")
+		buf.WriteString(fmt.Sprintf("func component%s(%s) dreego.Component {\n", comp.Name, implParams))
+	} else {
+		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
+	}
+	buf.WriteString("\treturn dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {\n")
+	writePropDefaultFallbacks(&buf, comp)
+	buf.WriteString("\t\tvar b strings.Builder\n\n")
+
+	for _, g := range file.Go {
+		if g.Code != "" {
+			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\n")
+		}
+	}
+
+	if file.Template != nil {
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		g := &compGen{}
+		for _, n := range file.Template.Nodes {
+			code, err := g.node(n)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString("\t\t" + code + "\n")
+		}
+		buf.WriteString("\t\tb.WriteString(\"</div>\")\n")
+	}
+
+	if file.Style != nil {
+		scoped := scopeCSS(file.Style.Code, scopeHash)
+		buf.WriteString("\t\tb.WriteString(\"<style>\")\n")
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(%s)\n", goLiteral(scoped)))
+		buf.WriteString("\t\tb.WriteString(\"</style>\")\n")
+	}
+
+	buf.WriteString("\n\t\treturn b.String(), nil\n")
+	buf.WriteString("\t})\n")
+	buf.WriteString("}\n\n")
+
+	return buf.String(), nil
+}
