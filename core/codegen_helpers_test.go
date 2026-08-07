@@ -147,6 +147,42 @@ func TestMatchBraceBalanced(t *testing.T) {
 	}
 }
 
+// attrVal must resolve a quoted {var} attribute value as a Go expression, not a
+// literal string. Feedback (testspace/feedback.md, core v0.0.23): prop="{var}"
+// generated []string{"{var}"} for slices and a compile error for bools.
+func TestAttrValQuotedExpr(t *testing.T) {
+	out := attrVal(`prop="{var}"`)
+	if out != "var" {
+		t.Errorf("attrVal(prop=\"{var}\") = %q, want expression var", out)
+	}
+}
+
+// attrVal must resolve an unquoted {var} attribute value as a Go expression.
+func TestAttrValUnquotedExpr(t *testing.T) {
+	out := attrVal(`prop={var}`)
+	if out != "var" {
+		t.Errorf("attrVal(prop={var}) = %q, want expression var", out)
+	}
+}
+
+// attrVal must keep a plain quoted literal as a Go string literal.
+func TestAttrValLiteral(t *testing.T) {
+	out := attrVal(`prop="literal"`)
+	if out != `"literal"` {
+		t.Errorf("attrVal(prop=\"literal\") = %q, want string literal \"literal\"", out)
+	}
+}
+
+// attrVal on a quoted bool-looking string keeps it a string literal. This is
+// documented behavior: a bool prop must be passed unquoted (active={true}),
+// passing active="false" yields a string and fails to compile at the call site.
+func TestAttrValQuotedBoolString(t *testing.T) {
+	out := attrVal(`active="false"`)
+	if out != `"false"` {
+		t.Errorf("attrVal(active=\"false\") = %q, want string literal \"false\"", out)
+	}
+}
+
 // concatPlaceholders builds a component-call argument for a quoted attribute
 // value with mixed literal text and multiple {…} placeholders. Escaping must be
 // deferred to the prop-injection point (the component body escapes its own
