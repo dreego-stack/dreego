@@ -18,7 +18,19 @@ func (p *Parser) parseGoSection() (*GoSection, error) {
 			p.advance()
 			return &GoSection{Code: strings.TrimSpace(content.String())}, nil
 		}
-		if tok.Type == TokenText {
+		if tok.Type == TokenTagOpen {
+			content.WriteString("<" + tok.Tag)
+			if tok.Attr != "" {
+				content.WriteString(" " + tok.Attr)
+			}
+			if tok.SelfClose {
+				content.WriteString("/>")
+			} else {
+				content.WriteString(">")
+			}
+		} else if tok.Type == TokenTagClose {
+			content.WriteString("</" + tok.Tag + ">")
+		} else if tok.Type == TokenText {
 			content.WriteString(tok.Value)
 		}
 		p.advance()
@@ -36,14 +48,18 @@ func (p *Parser) parseNonDivSection(tag string) (string, error) {
 			return "", fmt.Errorf("unclosed <%s> at position %d", tag, tok.Pos)
 		}
 		if tok.Type == TokenTagOpen {
-			if tok.Tag == tag {
+			if tok.Tag == tag && !tok.SelfClose {
 				depth++
 			}
 			content.WriteString("<" + tok.Tag)
 			if tok.Attr != "" {
 				content.WriteString(" " + tok.Attr)
 			}
-			content.WriteString(">")
+			if tok.SelfClose {
+				content.WriteString("/>")
+			} else {
+				content.WriteString(">")
+			}
 		} else if tok.Type == TokenTagClose {
 			if tok.Tag == tag {
 				depth--

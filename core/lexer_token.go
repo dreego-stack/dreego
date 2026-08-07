@@ -29,11 +29,12 @@ const (
 )
 
 type Token struct {
-	Type  TokenType
-	Value string
-	Tag   string
-	Attr  string
-	Pos   int
+	Type      TokenType
+	Value     string
+	Tag       string
+	Attr      string
+	Pos       int
+	SelfClose bool
 }
 
 func (t TokenType) String() string {

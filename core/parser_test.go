@@ -123,6 +123,55 @@ func TestParseGoSectionFirstStillWorks(t *testing.T) {
 	}
 }
 
+// Item 9 (v0.0.25-feedback2): `<` inside Go strings. The lexer has no
+// Go-string awareness — every <...> inside a <go> section lexes as a tag
+// token (TokenTagOpen/TokenTagClose). parseGoSection currently only keeps
+// TokenText, so <HASH> / <svg> content is silently dropped from the code.
+// Chosen fix (option b): the go-section scanner reconstructs the raw content
+// from the tokens (exactly like parseNonDivSection does for head/script/
+// style), so the lexer stays as-is and <...> inside strings survives verbatim.
+
+// "TO: <HASH>" in a quoted Go string must survive the parse.
+func TestParseGoSectionKeepsLtInQuotedString(t *testing.T) {
+	tokens, err := Lex(`<go>msg := "TO: <HASH>"</go>`)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if len(file.Go) != 1 {
+		t.Fatalf("expected 1 Go section, got %d", len(file.Go))
+	}
+	want := `msg := "TO: <HASH>"`
+	if file.Go[0].Code != want {
+		t.Fatalf("expected Go code %q, got %q", want, file.Go[0].Code)
+	}
+}
+
+// A backtick string containing <svg>...</svg> must survive the parse,
+// including a self-closing <path .../> tag (regression: the trailing / was
+// silently dropped, corrupting the reconstructed tag).
+func TestParseGoSectionKeepsLtInBacktickString(t *testing.T) {
+	src := "<go>svg := `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2\"/></svg>`</go>"
+	tokens, err := Lex(src)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if len(file.Go) != 1 {
+		t.Fatalf("expected 1 Go section, got %d", len(file.Go))
+	}
+	want := "svg := `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2\"/></svg>`"
+	if file.Go[0].Code != want {
+		t.Fatalf("expected Go code %q, got %q", want, file.Go[0].Code)
+	}
+}
+
 func TestParseGoAttrsVariants(t *testing.T) {
 	cases := []struct {
 		name  string

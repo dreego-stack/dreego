@@ -226,7 +226,9 @@ func scanTag(input string, pos *int) Token {
 			}
 			attrs := strings.TrimSpace(remaining[len(opener):end])
 			*pos += end + 1
-			return Token{Type: TokenTagOpen, Tag: tag, Attr: attrs, Pos: start}
+			selfClose := strings.HasSuffix(attrs, "/")
+			attrs = strings.TrimSpace(strings.TrimSuffix(attrs, "/"))
+			return Token{Type: TokenTagOpen, Tag: tag, Attr: attrs, SelfClose: selfClose, Pos: start}
 		}
 	}
 
@@ -256,9 +258,10 @@ func scanTag(input string, pos *int) Token {
 			tag = body[:idx]
 		}
 		attrs := strings.TrimSpace(strings.TrimPrefix(body, tag))
+		selfClose := strings.HasSuffix(attrs, "/")
 		attrs = strings.TrimSpace(strings.TrimSuffix(attrs, "/"))
 		*pos += end + 1
-		return Token{Type: TokenTagOpen, Tag: strings.TrimSpace(tag), Attr: attrs, Pos: start}
+		return Token{Type: TokenTagOpen, Tag: strings.TrimSpace(tag), Attr: attrs, SelfClose: selfClose, Pos: start}
 	}
 
 	end := strings.IndexByte(remaining, '>')

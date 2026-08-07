@@ -93,8 +93,22 @@ func TestScanTagSelfClosing(t *testing.T) {
 	if tok.Attr != "src=x" {
 		t.Fatalf("expected attr 'src=x', got %q", tok.Attr)
 	}
+	if !tok.SelfClose {
+		t.Fatalf("expected SelfClose true, got false")
+	}
 	if pos != 12 {
 		t.Fatalf("expected pos 12, got %d", pos)
+	}
+}
+
+func TestScanTagNotSelfClosing(t *testing.T) {
+	pos := 0
+	tok := scanTag("<img src=x>", &pos)
+	if tok.Type != TokenTagOpen {
+		t.Fatalf("expected TokenTagOpen, got %v", tok.Type)
+	}
+	if tok.SelfClose {
+		t.Fatalf("expected SelfClose false, got true")
 	}
 }
 
@@ -123,5 +137,29 @@ func TestScanComponentUnclosed(t *testing.T) {
 	}
 	if pos != 6 {
 		t.Fatalf("expected pos 6, got %d", pos)
+	}
+}
+
+// Item 9 (v0.0.25-feedback2): the lexer has no Go-string awareness — <...>
+// inside a <go> section lexes as tag tokens, NOT as string content. This
+// documents the current (deliberately kept) behavior: the fix lives in
+// parseGoSection (option b, raw reconstruction), not in the lexer.
+func TestLexGoSectionLtLexesAsTags(t *testing.T) {
+	tokens, err := Lex(`<go>msg := "TO: <HASH>"</go>`)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	var kinds []string
+	for _, tok := range tokens {
+		if tok.Type == TokenEOF {
+			break
+		}
+		if tok.Type == TokenTagOpen || tok.Type == TokenTagClose {
+			kinds = append(kinds, tok.Type.String()+"("+tok.Tag+")")
+		}
+	}
+	want := "TagOpen(go), TagOpen(HASH), TagClose(go)"
+	if strings.Join(kinds, ", ") != want {
+		t.Fatalf("expected %q, got %q", want, strings.Join(kinds, ", "))
 	}
 }
