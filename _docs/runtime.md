@@ -4,7 +4,7 @@ Full API surface available after `import dreego "codeberg.org/dreego/dreego/core
 
 ## SSRContext
 
-Available as `c` in `<go>` blocks and component render functions.
+Available as **`c`** in routes (including `<go>` blocks and error pages) and as **`ctx`** in components (see [Components](https://codeberg.org/dreego/dreego/src/branch/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
 
 | Method | Returns | Description |
 |--------|---------|-------------|
