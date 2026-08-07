@@ -224,8 +224,12 @@ func genTempl(file *File, layout *File, scopeHash string, isGET bool) (string, e
 			headContent := layout.Head.Content
 			if strings.Contains(headContent, "{#head}") {
 				parts := strings.SplitN(headContent, "{#head}", 2)
-				if parts[0] != "" {
-					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[0])))
+				prefix := parts[0]
+				if file.Head != nil {
+					prefix = dedupeHeadMerge(prefix, file.Head.Content)
+				}
+				if prefix != "" {
+					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(prefix)))
 				}
 				if file.Head != nil {
 					headCode, err := genHead(file.Head.Content, "b")

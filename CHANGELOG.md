@@ -10,6 +10,7 @@
 - **docs-embed.1:** Offline embedded docs. `dreego docs` reads `_docs/`, `README.md`, and `CHANGELOG.md` from a `//go:embed` copy (`cmd/dreego/embedded/`) so it works without a network. `_scripts/sync-embedded-docs.sh` mirrors the repo docs into the embedded dir after doc changes. Coverage in `cmd/dreego/docs_embed_test.go`.
 - **frontmatter.1:** `core.ParseFrontmatter(src) (map[string]string, body)` splits a leading YAML-like `---` delimited frontmatter block off a `.dreego` source and exposes its `key: value` pairs as typed metadata; `:` in values is preserved and list values (`tags: [a, b]`) are normalized to a comma-joined string. `core/frontmatter.go` + `core/frontmatter_test.go`.
 - **dev-server.1:** New `dreego dev` command watches `.dreego` files (500 ms poll), regenerates + rebuilds on change, and gracefully restarts the server (SIGTERM + reap). Build errors do not kill the watcher. `cmd/dreego/dev.go` (+ `cmdDev` dispatch in `cmd/dreego/main.go`).
+- **head-dedupe.1:** When a route head defines a `<title>` or `<meta name="description">`, the layout's corresponding tag is dropped from the merged `{#head}` output — the route wins. Non-overridden layout head content (e.g. `<meta charset>`, `<link>`) is preserved. `core/codegen_head_dedupe.go` + `core/codegen_head_dedupe_test.go`; integration test `_tests/core/Bugs/head-title-dedupe/`.
 - Full suite: 164 passed, 0 failed
 
 ## v0.0.24 (2026-08-05)
