@@ -1,8 +1,10 @@
 # Agent Instructions for Dreego
 
+- Dont create here a bianry only on /tmp or ./tmp
+
 ## Language Rule
 
-- **Chat with user (Lukas): German**
+- **Chat with user : German**
 - **Everything in this repository: English**
   - All `.go` files, comments, variable names
   - All `.md` documentation (docs, agents, todos)
