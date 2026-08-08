@@ -39,7 +39,7 @@
 - **servemux-cache.1:** `core/runtime.go` now caches the built middleware/router stack. `core.Build()` and `core.Listen()` reuse `builtHandler` once constructed, avoiding repeated `http.NewServeMux` and middleware wrapping.
 - **codegen-errors.1:** All `core/codegen*.go` template generators return `(string, error)` and propagate failures instead of silently returning empty strings. New `core/codegen_component.go` contains component template generation. Fixed the nested `{#if}` in `{#else}` branch bug for component templates: `genTemplateNodeComp` now detects an else-if chain vs. a true else branch and emits nested blocks correctly.
 - **security-session.1:** Optional AES-256-GCM session encryption in `core/session.go`. Passing `&core.Options{Encrypt: true}` to `store.Set` encrypts the JSON payload before the HMAC signature (encrypt-then-MAC). `core/session_crypto.go` provides `encryptPayload`/`decryptPayload`; tampered or key-rotated cookies are rejected.
-- Tests: unit tests in `core/codegen_template_test.go`, `core/runtime_test.go`, and `core/session_encrypt_test.go`; integration tests `_tests/core/Bugs/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
+- Tests: unit tests in `core/codegen_template_test.go`, `core/runtime_test.go`, and `core/session_encrypt_test.go`; integration tests `_tests/core/Template/component-nested-if-else/` and `_tests/core/Middleware/session-encrypt/`.
 - Full suite: 147 passed, 0 failed
 - Released. Tags pushed: core/v0.0.22, cmd/dreego/v0.0.22, plugins/sample/v0.0.22.
 
@@ -47,7 +47,7 @@
 
 - **Fix (feedback-intake A):** Nested `{#if}` blocks inside the `{#else}` branch of a route template are no longer silently dropped. `core/codegen_template.go` `NodeIf` codegen now distinguishes an else-if chain from a true else branch and emits the nested blocks instead of returning an empty string — previously `dreego generate` succeeded but produced an empty template (with follow-up `go build` errors like `declared and not used`).
 - **Fix (feedback-intake B):** Expressions in the `<head>` section of a route (e.g. `<title>{doc.Title}</title>`) are now resolved instead of being emitted raw. New `core/codegen_head.go` (`genHead`) splits head markup into literal and expression segments, applies escaping and the `raw`/`upper` filters; the four head emission sites in `core/codegen.go` (lines 137, 173, 187, 388) use it.
-- Tests: unit test `TestGenTemplateNodeNestedIfInElseNotDropped` (`core/codegen_template_test.go`) + regression tests `_tests/core/Bugs/nested-if-in-else/` and `_tests/core/Bugs/head-expression-raw/`; existing `_tests/core/Bugs/head-expression/` extended.
+- Tests: unit test `TestGenTemplateNodeNestedIfInElseNotDropped` (`core/codegen_template_test.go`) + regression tests `_tests/core/Bugs/nested-if-in-else/` and `_tests/core/Bugs/head-expression-raw/`; existing `_tests/core/Bugs/head-expression/` extended. The component-path variant is covered by `_tests/core/Template/component-nested-if-else/` (v0.0.22).
 - Full suite: 144 passed, 0 failed
 
 ## v0.0.21 (2026-08-03) — Single-Source Versioning + go install Fix
