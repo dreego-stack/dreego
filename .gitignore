@@ -23,3 +23,10 @@ dreego/gen/
 /dreego
 go.work
 go.work.sum
+.dreego-review-bin
+.tmp-review-cli
+dreego-linux
+
+# macOS
+.DS_Store
+
