@@ -1,6 +1,32 @@
 # Changelog
 
-## v0.0.25 (unreleased) — Plugin Interface v1
+## v0.0.26 (2026-08-08) — Post-Release Fixes + SSE Plugin
+
+### Added
+
+- **SSE example plugin:** `plugins/sse` is a full v1 `core.Plugin` implementation (SSE hub, `/sse` route with `text/event-stream`, heartbeat, broadcast, embedded assets, docs with `dreego-sitemap.xml` seed).
+- **`--version` / `-v` flags:** the CLI now accepts `--version` and `-v` alongside the `version` subcommand, matching the help/--help/-h trio. All three forms print the identical version (`_tests/core/CLI/version-flag/`).
+
+### Fixed
+
+- **Control flow in attribute values:** `{#if}`/`{#each}` inside quoted HTML attribute values produced silent corrupt codegen (route path: cond never referenced; component path: invalid Go). Detect and reject at parse time with a clear error suggesting wrapping the whole tag in `{#if}` instead (`_tests/core/Bugs/attr-if-in-attribute/`).
+- **`<...>` dropped from go-section strings:** `parseGoSection` silently dropped tag tokens, so Go strings like `"TO: <HASH>"` or backtick SVGs lost their `<...>` content (silent data corruption). Tags are now reconstructed and a `SelfClose` flag keeps self-closing tags' trailing slash (`_tests/core/Bugs/go-string-lt/`).
+- **Sections after leading template text:** a file starting with non-section text (e.g. `<!doctype html>`) swallowed following `<go>`/`<head>` blocks as template text. `parsePlainTemplate` now stops at section tags so sections work after leading text (`_tests/core/Bugs/text-before-section/`).
+- **Scope div before doctype in error pages:** `GenerateErrorHandler` emitted `<div data-scope>` unconditionally, so a 404/500 template starting with `<!doctype html>` rendered the scope div first and fell into quirks mode. The scope wrapper is now suppressed when the first template node starts with `<!` (`_tests/core/Bugs/error-page-doctype/`, `_tests/core/Bugs/error-page-layout/`).
+- **Title/meta-description dedupe in `{#head}` merge:** the merge appended layout head and route head, so pages rendered two `<title>` tags and the browser used the landing title. When the route head defines a `<title>` or `<meta name="description">`, the layout's copy is dropped from the merge (route wins); non-description meta/link tags are preserved and the layout title is kept when the route defines none (`_tests/core/Bugs/head-title-dedupe/`).
+- **Component prop defaults:** `parseProps` read `= default` but `GenerateComponent` ignored it, so `<@Card/>` without a prop failed to compile. A variadic wrapper + empty-string fallback is generated for string props with defaults; bool/int defaults remain unsupported so explicit `false`/`0` is never overwritten (`_tests/core/Bugs/component-prop-default/`).
+- **JSON/XML status committed before encode:** `WriteHeader(status)` ran before `Encode`, so an encode error returned a pre-committed 200. The encoded payload is now buffered and `WriteHeader` runs only after a successful encode; an encode error returns 500 (`core/response.go`).
+- **Streaming through middleware:** `responseWriter` and `gzipResponseWriter` now implement `http.Flusher` so streaming handlers work behind `RequestLogging` and `Compress` (browsers send `Accept-Encoding: gzip`).
+- **`dreego init` gen import:** `dreego init` generated `import _ "gen"` but `generate` places the package in `dreego/gen/`, so a fresh project failed to build with "package gen is not in std". The placeholder is now replaced with the module name read from the target `go.mod` (`_tests/core/CLI/init-import/`).
+- **`plugins/sample` core require drift:** the sample plugin required `core v0.0.23` while `VERSION` was `v0.0.25`, so codegen behavior drifted from the docs. The require is bumped to the current `VERSION` at each release.
+
+### Changed
+
+- **Import style:** core is imported as `dreego` everywhere (`codeberg.org/dreego/dreego/core` → `dreego` alias), for consistency across codegen, tests, and docs.
+
+- Full suite: 185 passed, 0 failed
+
+## v0.0.25 (2026-08-06) — Plugin Interface v1
 
 - **plugin-interface.1:** The frozen v1 `core.Plugin` contract shipped (`Name`, `RegisterRoutes`, `Middlewares`, `Assets`, `OnStart`, `OnShutdown`). Plugins import core and register via `core.UsePlugin(p)`; core never imports a plugin. Lifecycle: `StartPlugins(ctx)` / `ShutdownPlugins(ctx)` call `OnStart`/`OnShutdown` on every registered plugin and propagate the first error. Compile-time interface-satisfaction check plus route/middleware/lifecycle tests in `core/plugin_test.go`.
 - **BREAKING (behavior change):** `core.Register(method, pattern, handler)` is now **idempotent** — registering the same `method`+`pattern` again **replaces** the existing handler instead of appending a duplicate route. This lets a later-registered plugin (or a reload) override a route deterministically. Downstream callers that relied on duplicate-registration behavior must update. See `core/runtime.go` `Register`.

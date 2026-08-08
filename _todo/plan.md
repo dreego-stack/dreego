@@ -12,6 +12,7 @@ Official plugins live in `plugins/` in this repository. Each plugin with externa
 - **v0.0.23** — `dreegotest.1` (planned), `golden-tests-core.1` (planned), `typed-forms.1` (planned)
 - **v0.0.24** — `scaffold-fix.1`, `layout-head.1`, `scoped-css.2`, `component-attr-props.1`, `typed-forms.1`, `dreegotest.1`, `golden-tests-core.1` + deterministic port-schema runner
 - **v0.0.25** — `plugin-interface.1`, `middleware-hooks.1`, `route-hooks.1`, `docs-extensibility.1`, `docs-embed.1`, `frontmatter.1`, `dev-server.1` ✅
+- **v0.0.26** — post-v0.0.25 bugfix batch + SSE example plugin + `--version`/`-v` flags ✅
 
 ## unlock: plugin ecosystem
 

@@ -4,6 +4,12 @@ Status via `python _todo/process.py`. Chain 1–49 done. Next code: **50**.
 
 Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (may include breaking changes), `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
+## v0.0.26 (done)
+
+- Post-v0.0.25 bugfix batch — `{#if}/{#each}` in attributes, `<...>` in go strings, sections after leading text, doctype/scope in error pages, head dedupe, prop defaults, JSON/XML status-before-encode, `dreego init` gen import, `plugins/sample` core-require drift
+- **SSE example plugin** — full v1 `core.Plugin` (`plugins/sse`), streaming fixed through `RequestLogging`/`Compress` via `http.Flusher`
+- **`--version` / `-v` flags** — match the help trio
+
 ## v0.0.25 (done)
 
 - **plugin-interface.1** — frozen v1 `core.Plugin` contract + `core.UsePlugin` ✅
