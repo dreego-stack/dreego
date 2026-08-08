@@ -105,10 +105,10 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 - Max 300 lines per file, one logical thing per file
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
-- Core code in `core/` (own module `github.com/dreego-stack/dreego/core`, no external deps)
-- CLI in `cmd/dreego/` (own module `github.com/dreego-stack/dreego/cmd/dreego`, requires core)
-- Plugins in `plugins/` (each with own `go.mod` when external deps needed, requires core)
-- `go.work` at root links all modules for local development
+- Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
+- Core code in `core/` (no external deps — enforced by `_scripts/check-core-deps.sh` in CI)
+- CLI in `cmd/dreego/` (imports core)
+- Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
 - Build via `dreego` CLI, not directly `go build`
 - Generated `dree.go` not committed
 

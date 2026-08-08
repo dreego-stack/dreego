@@ -1,8 +1,8 @@
 #!/bin/sh
-# Create release tags for all modules from the single source VERSION file.
+# Create the release tag from the single source VERSION file.
 # Usage: _scripts/release.sh
 # Only tags locally. Push manually after review:
-#   git push origin core/<V> cmd/dreego/<V> plugins/sample/<V>
+#   git push origin v0.0.27
 set -e
 
 cd "$(dirname "$0")/.."
@@ -17,11 +17,9 @@ v[0-9]*\.[0-9]*\.[0-9]*) ;;
 	;;
 esac
 
-for mod in core cmd/dreego plugins/sample; do
-	git tag "$mod/$V"
-	echo "tagged $mod/$V"
-done
+git tag "$V"
+echo "tagged $V"
 
 echo ""
 echo "Next (manual):"
-echo "  git push origin core/$V cmd/dreego/$V plugins/sample/$V"
+echo "  git push origin $V"

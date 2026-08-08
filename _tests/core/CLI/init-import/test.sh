@@ -18,8 +18,8 @@ fi
 cat > go.mod << EOF
 module t
 go 1.22
-require github.com/dreego-stack/dreego/core v0.0.0
-replace github.com/dreego-stack/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego v0.0.0
+replace github.com/dreego-stack/dreego => $realrepo
 EOF
 
 $DREEGO_BIN init .

@@ -19,8 +19,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require github.com/dreego-stack/dreego/core v0.0.0
-replace github.com/dreego-stack/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego v0.0.0
+replace github.com/dreego-stack/dreego => $realrepo
 EOF
 
 mkdir -p dreego/routes
@@ -43,7 +43,7 @@ echo "ok"
 2. **`$DREEGO_BIN`** — pre-compiled dreego CLI, exported by the test runner. Use `$DREEGO_BIN generate` / `$DREEGO_BIN run` etc. Never `go run`.
 3. **`workdir`** — always `mktemp -d`, never create files inside `_tests/`
 4. **`trap "rm -rf $workdir" EXIT`** — mandatory cleanup on success *and* failure
-5. **`go.mod`** — always fresh with `require` + `replace` for `github.com/dreego-stack/dreego/core` (use `cat > go.mod`, never `go mod init`)
+5. **`go.mod`** — always fresh with `require` + `replace` for `github.com/dreego-stack/dreego` (use `cat > go.mod`, never `go mod init`)
 6. **`mkdir -p dreego/routes`** — scaffold minimal project structure as needed
 7. **No files left behind** — test does all I/O inside `$workdir`
 8. **Port for server tests** — the test runner (`_tests/test.sh`) exports `DREEGO_PORT` for every test, deterministically ascending from `DREEGO_PORT_BASE` (default `20000`), so ports never overlap in a parallel run:

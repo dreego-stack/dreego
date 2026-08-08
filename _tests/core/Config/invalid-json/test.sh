@@ -16,8 +16,8 @@ port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) +
 cat > go.mod << EOF
 module t
 go 1.22
-require github.com/dreego-stack/dreego/core v0.0.0
-replace github.com/dreego-stack/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego v0.0.0
+replace github.com/dreego-stack/dreego => $realrepo
 EOF
 
 mkdir -p dreego/routes

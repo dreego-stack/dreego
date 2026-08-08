@@ -1,19 +1,19 @@
 # Plugins
 
-Dreego plugins live in the same repository under `plugins/`. Each plugin that needs external dependencies has its own `go.mod`, so Core stays dependency-free and users only pull in what they import. Core never imports any plugin package — plugins depend on Core, never the other way around.
+Dreego plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`, so Core stays dependency-free and users only pull in what they import. Core never imports any plugin package — plugins depend on Core, never the other way around.
 
 ## Architecture
 
 ```
-github.com/dreego-stack/dreego              ← Root module: core/ + cmd/dreego/
+github.com/dreego-stack/dreego              ← Main repo: core/ + cmd/dreego/ (single module)
 github.com/dreego-stack/dreego/core         ← Core package (no external deps beyond stdlib)
-github.com/dreego-stack/dreego/plugins/auth ← Plugin: OAuth2, JWT, sessions (own go.mod)
-github.com/dreego-stack/dreego/plugins/db   ← Plugin: SQL drivers, migrations (own go.mod)
+github.com/dreego-stack/plugin-auth         ← Plugin: OAuth2, JWT, sessions (own go.mod)
+github.com/dreego-stack/plugin-db   ← Plugin: SQL drivers, migrations (own go.mod)
 ```
 
-Plugins without external dependencies can also be plain packages inside the root module, but once a plugin needs a third-party dependency it gets its own `go.mod`.
+Plugins without external dependencies can also be plain packages inside the root module, but once a plugin needs a third-party dependency it gets its own `go.mod` and lives in a separate repo under `github.com/dreego-stack/`.
 
-The repository root contains a `go.work` file that links the root module and every plugin module for local development. Consumers of the framework only see the modules they explicitly import.
+The repository root is a single Go module (`github.com/dreego-stack/dreego`). Consumers of the framework only see the packages they explicitly import.
 
 ## Plugin Interface (v1, frozen)
 
@@ -128,22 +128,23 @@ Because `dreego.Register` is idempotent (re-registering a `method`+`pattern` rep
 ## Layout
 
 ```
-plugins/
-├── sample/                 ← minimal example plugin
-│   ├── go.mod              → module github.com/dreego-stack/dreego/plugins/sample
-│   ├── sample.go           → implements dreego.Plugin or other core interfaces
-│   └── README.md
-├── auth/                   ← future official plugin
-├── db/
+github.com/dreego-stack/
+├── dreego/                  ← main repo (core + CLI, single module)
+├── plugin-example/          ← minimal example plugin (own go.mod)
+├── plugin-sse/              ← SSE plugin (own go.mod)
+├── plugin-auth/             ← future official plugin
+├── plugin-db/
 └── ...
 ```
+
+Each plugin repo has its own `go.mod` and requires `github.com/dreego-stack/dreego`.
 
 ## Rules
 
 1. **Core never imports a plugin.** This is the invariant that keeps the dependency graph clean.
 2. **Plugins import Core.** They use `github.com/dreego-stack/dreego/core`.
-3. **Plugins with external deps get their own `go.mod`.** Plugins without external deps can live as plain packages in the root module or in `plugins/` with or without their own module.
-4. **One repo, many modules.** Releases use directory-prefix tags (e.g. `plugins/auth/v0.0.1`) if a plugin has its own `go.mod`.
+3. **Plugins with external deps get their own `go.mod`.** Plugins without external deps can live as plain packages in the root module.
+4. **One repo, one module.** The main repo is a single Go module; releases use a single tag (`v0.0.27`). Each plugin repo has its own module and its own tag.
 
 ## Planned Plugins
 

@@ -24,14 +24,14 @@ case "$out" in
     *) echo "FAIL: dreego version is '$out', want it to contain '$want' (VERSION file)"; exit 1 ;;
 esac
 
-# The CLI module must require a core version matching the repo's VERSION
+# The repo module must declare the module path matching the repo's VERSION
 # file. A stale require (e.g. v0.0.23 while VERSION is v0.0.25) is the drift.
-# In-repo builds resolve core via go.work (local core wins); external
-# `go install` resolves via the published core/vX.Y.Z tag.
-gomod="$realrepo/cmd/dreego/go.mod"
-if ! grep -q "^require github.com/dreego-stack/dreego/core $want\$" "$gomod"; then
-    echo "FAIL: cmd/dreego/go.mod does not require github.com/dreego-stack/dreego/core $want"
-    grep 'github.com/dreego-stack/dreego/core' "$gomod" || true
+# In-repo builds resolve core via the root module (local core wins); external
+# `go install` resolves via the published vX.Y.Z tag.
+gomod="$realrepo/go.mod"
+if ! grep -q "^module github.com/dreego-stack/dreego$" "$gomod"; then
+    echo "FAIL: go.mod does not declare module github.com/dreego-stack/dreego"
+    grep '^module ' "$gomod" || true
     exit 1
 fi
 

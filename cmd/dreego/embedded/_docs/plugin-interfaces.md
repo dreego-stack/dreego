@@ -2,7 +2,7 @@
 
 Dreego's plugin system is based on Go interfaces. Every interface is a contract: the core defines, plugins implement.
 
-Official plugins live under `plugins/` in the dreego repository. Each plugin with external dependencies has its own `go.mod`, while dependency-free plugins can be plain packages in the root module. Core never imports any plugin package.
+Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`. Core never imports any plugin package.
 
 ## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
 
@@ -112,17 +112,15 @@ Implementations: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `githu
 
 ## Plugin Layout
 
-Official plugins live in the same repository:
+Official plugins live in separate repos under `github.com/dreego-stack/`:
 
 ```
-dreego/
-├── core/
-├── cmd/dreego/
-└── plugins/
-    ├── sample/              ← minimal example
-    ├── auth/
-    ├── db/
-    └── ...
+github.com/dreego-stack/
+├── dreego/              ← main repo (core + CLI, single module)
+├── plugin-example/      ← minimal example
+├── plugin-auth/
+├── plugin-db/
+└── ...
 ```
 
 Or in your own project repo:
@@ -145,14 +143,14 @@ import _ "myapp/plugins/auth"
 
 ## Cluster Plugin (planned)
 
-`dreego/plugins/cluster` — distributed state for multi-node deployments. Combines:
+`github.com/dreego-stack/plugin-cluster` — distributed state for multi-node deployments. Combines:
 
 ```
-dreego/plugins/cluster
+plugin-cluster
 ├── Node-Discovery       (memberlist / DNS / static)
-├── Shared-Session-Store (dreego/plugins/session-redis)
-├── PubSub-Sync          (dreego/plugins/eventbus-redis)
-└── Distributed-Cache    (dreego/plugins/cache-redis)
+├── Shared-Session-Store (plugin-session-redis)
+├── PubSub-Sync          (plugin-eventbus-redis)
+└── Distributed-Cache    (plugin-cache-redis)
 ```
 
-A load balancer distributes requests across N Go instances. `dreego/plugins/cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.
+A load balancer distributes requests across N Go instances. `plugin-cluster` ensures all instances see the same state. No Kubernetes needed — Valkey/Redis as backend is sufficient.

@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << EOF
 module t
 go 1.22
-require github.com/dreego-stack/dreego/core v0.0.0
-replace github.com/dreego-stack/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego v0.0.0
+replace github.com/dreego-stack/dreego => $realrepo
 EOF
 
 $DREEGO_BIN new 2>&1 && { echo "FAIL: expected non-zero exit when no name given"; exit 1; }

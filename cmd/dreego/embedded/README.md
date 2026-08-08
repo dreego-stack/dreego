@@ -124,13 +124,14 @@ dreego/
 
 ## Plugins
 
-Official plugins live in `plugins/` in this repository. Each plugin with external dependencies gets its own `go.mod`; Core stays dependency-free and never imports a plugin package.
+Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`; Core stays dependency-free and never imports a plugin package.
 
 ```
-plugins/
-├── sample/             # minimal example plugin
-├── auth/               # future: OAuth2, JWT, sessions
-├── db/                 # future: SQL drivers, migrations
+github.com/dreego-stack/
+├── dreego/             # main repo (core + CLI, single module)
+├── plugin-example/     # minimal example plugin
+├── plugin-auth/        # future: OAuth2, JWT, sessions
+├── plugin-db/          # future: SQL drivers, migrations
 └── ...
 ```
 

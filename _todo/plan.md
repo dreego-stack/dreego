@@ -2,7 +2,7 @@
 
 Loose, reorderable timeline. Versioning stays at `v0.x.y` for the foreseeable future. `v0.x` marks larger milestones and may include breaking changes; `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
-Official plugins live in `plugins/` in this repository. Each plugin with external dependencies gets its own `go.mod`. Core must never import a plugin package — plugins depend on Core, never the other way around.
+Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`. Core must never import a plugin package — plugins depend on Core, never the other way around.
 
 ## Done
 
@@ -16,7 +16,7 @@ Official plugins live in `plugins/` in this repository. Each plugin with externa
 
 ## unlock: plugin ecosystem
 
-After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plugin blocks unblock. They are tracked here for visibility and implemented under `plugins/<name>` in this repository (each with its own `go.mod` when external deps are needed):
+After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plugin blocks unblock. They are tracked here for visibility and implemented as separate repos under `github.com/dreego-stack/` (each with its own `go.mod`):
 
 - dreego-auth
 - dreego-db
@@ -54,6 +54,6 @@ After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plug
 ## Notes
 
 - Core must never import a plugin package.
-- Official plugins live in `plugins/` with their own `go.mod` when external deps are needed.
+- Official plugins live in separate repos under `github.com/dreego-stack/` with their own `go.mod`.
 - `dreego docs` resolves plugin docs from local `plugins/<name>/_docs/` (docs-extensibility.1, done in v0.0.25); external-repo docs for community plugins remain an open design question.
 - This plan is intentionally linear and can be shifted as priorities change.
