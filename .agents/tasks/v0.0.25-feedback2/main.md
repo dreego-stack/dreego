@@ -88,11 +88,11 @@ Tests written (no production code):
   version matching VERSION or carry a local `replace ... => ../core`. RED —
   go.mod requires core v0.0.23 while VERSION is v0.0.25.
 
-Chosen fix (option a): `cmd/dreego/go.mod` requires `codeberg.org/dreego/dreego/core v0.0.25`
+Chosen fix (option a): `cmd/dreego/go.mod` requires `github.com/dreego-stack/dreego/core v0.0.25`
 (bumped from v0.0.23, matching VERSION), no `replace` directive. `cmd/dreego/go.sum`
 carries the v0.0.25/go.mod hash (core/go.mod unchanged since v0.0.22, hash verified
 against the known v0.0.22/v0.0.23 entry). Test `_tests/core/CLI/version-drift/test.sh`
-now asserts `require codeberg.org/dreego/dreego/core $VERSION` exactly and `dreego
+now asserts `require github.com/dreego-stack/dreego/core $VERSION` exactly and `dreego
 version` output; no replace path accepted.
 
 RELEASE NOTE: require v0.0.25 set — tags must be pushed before external `go install`

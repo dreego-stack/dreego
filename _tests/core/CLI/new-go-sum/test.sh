@@ -18,8 +18,8 @@ fi
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego/core v0.0.0
-replace codeberg.org/dreego/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego/core v0.0.0
+replace github.com/dreego-stack/dreego/core => $realrepo/core
 EOF
 
 $DREEGO_BIN new testapp 2>&1
@@ -31,7 +31,7 @@ cd testapp
 # `dreego new` adds a `replace` directive pointing the required core version at
 # the local core module, so `go mod tidy` and the build run fully offline.
 # Verify the replace directive was written and that the scaffold builds.
-grep -q '^replace codeberg.org/dreego/dreego/core => ' go.mod \
+grep -q '^replace github.com/dreego-stack/dreego/core => ' go.mod \
     || { echo "FAIL: go.mod has no replace directive for the local core"; exit 1; }
 
 GOWORK=off go mod tidy

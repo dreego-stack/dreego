@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 var _ dreego.Plugin = (*SSEPlugin)(nil)

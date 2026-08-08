@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 type Response struct {

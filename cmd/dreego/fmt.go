@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func cmdFmt(args []string) {

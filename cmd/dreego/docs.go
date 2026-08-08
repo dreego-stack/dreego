@@ -11,9 +11,9 @@ import (
 	"strings"
 )
 
-const docsBaseURL = "https://codeberg.org/dreego/dreego/raw/branch/main"
-const docsWebBase = "https://codeberg.org/dreego/dreego/src/branch/main"
-const feedbackURL = "https://codeberg.org/dreego/dreego/issues/new"
+const docsBaseURL = "https://raw.githubusercontent.com/dreego-stack/dreego/main"
+const docsWebBase = "https://github.com/dreego-stack/dreego/blob/main"
+const feedbackURL = "https://github.com/dreego-stack/dreego/issues/new"
 
 var headingPattern = regexp.MustCompile(`^#{1,6}\s+(.*)`)
 var codeBlockPattern = regexp.MustCompile("`{3}[^`]*`{3}")

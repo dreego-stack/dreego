@@ -29,9 +29,9 @@ esac
 # In-repo builds resolve core via go.work (local core wins); external
 # `go install` resolves via the published core/vX.Y.Z tag.
 gomod="$realrepo/cmd/dreego/go.mod"
-if ! grep -q "^require codeberg.org/dreego/dreego/core $want\$" "$gomod"; then
-    echo "FAIL: cmd/dreego/go.mod does not require codeberg.org/dreego/dreego/core $want"
-    grep 'codeberg.org/dreego/dreego/core' "$gomod" || true
+if ! grep -q "^require github.com/dreego-stack/dreego/core $want\$" "$gomod"; then
+    echo "FAIL: cmd/dreego/go.mod does not require github.com/dreego-stack/dreego/core $want"
+    grep 'github.com/dreego-stack/dreego/core' "$gomod" || true
     exit 1
 fi
 

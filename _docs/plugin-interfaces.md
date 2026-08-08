@@ -4,7 +4,7 @@ Dreego's plugin system is based on Go interfaces. Every interface is a contract:
 
 Official plugins live under `plugins/` in the dreego repository. Each plugin with external dependencies has its own `go.mod`, while dependency-free plugins can be plain packages in the root module. Core never imports any plugin package.
 
-## Core Interfaces (in `codeberg.org/dreego/dreego/core`)
+## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
 
 ### session.Store
 
@@ -17,7 +17,7 @@ type Store interface {
 }
 ```
 
-Built-in: `CookieStore`. Plugin: `codeberg.org/dreego/dreego/plugins/session-redis` (planned).
+Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session-redis` (planned).
 
 ### Plugin Interface
 
@@ -64,7 +64,7 @@ type Storage interface {
 }
 ```
 
-Implementations: `codeberg.org/dreego/dreego/plugins/storage-s3`, `codeberg.org/dreego/dreego/plugins/storage-local`.
+Implementations: `github.com/dreego-stack/dreego/plugins/storage-s3`, `github.com/dreego-stack/dreego/plugins/storage-local`.
 
 ### Email Interface
 
@@ -74,7 +74,7 @@ type Mailer interface {
 }
 ```
 
-Implementations: `codeberg.org/dreego/dreego/plugins/mail-smtp`, `codeberg.org/dreego/dreego/plugins/mail-resend`.
+Implementations: `github.com/dreego-stack/dreego/plugins/mail-smtp`, `github.com/dreego-stack/dreego/plugins/mail-resend`.
 
 ### Queue Interface
 
@@ -85,7 +85,7 @@ type Queue interface {
 }
 ```
 
-Implementations: `codeberg.org/dreego/dreego/plugins/jobs-redis`, `codeberg.org/dreego/dreego/plugins/jobs-memory`.
+Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
 
 ### Cache Interface
 
@@ -97,7 +97,7 @@ type Cache interface {
 }
 ```
 
-Implementations: `codeberg.org/dreego/dreego/plugins/cache-redis`, `codeberg.org/dreego/dreego/plugins/cache-memory`.
+Implementations: `github.com/dreego-stack/dreego/plugins/cache-redis`, `github.com/dreego-stack/dreego/plugins/cache-memory`.
 
 ### Event Bus Interface
 
@@ -108,7 +108,7 @@ type EventBus interface {
 }
 ```
 
-Implementations: `codeberg.org/dreego/dreego/plugins/eventbus-redis`, `codeberg.org/dreego/dreego/plugins/eventbus-nats`.
+Implementations: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats`.
 
 ## Plugin Layout
 

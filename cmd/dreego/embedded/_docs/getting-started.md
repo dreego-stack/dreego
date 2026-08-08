@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-go install codeberg.org/dreego/dreego/cmd/dreego@latest
+go install github.com/dreego-stack/dreego/cmd/dreego@latest
 ```
 
 ## New Project
@@ -48,7 +48,7 @@ package main
 
 import (
     _ "myapp/dreego/gen"
-    dreego "codeberg.org/dreego/dreego/core"
+    dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
@@ -123,8 +123,8 @@ Visiting `/users/42` shows "User: 42".
 
 ## See Also
 
-- [Components](https://codeberg.org/dreego/dreego/src/branch/main/_docs/components.md) — full component docs
-- [Routing](https://codeberg.org/dreego/dreego/src/branch/main/_docs/routing.md) — dynamic segments, groups, methods
-- [Runtime API](https://codeberg.org/dreego/dreego/src/branch/main/_docs/runtime.md) — SSRContext, sessions, config
-- [CLI Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/cli.md)
-- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
+- [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — full component docs
+- [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — dynamic segments, groups, methods
+- [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md) — SSRContext, sessions, config
+- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md)
+- [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)

@@ -3,7 +3,7 @@ package sample
 import (
 	"net/http"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 type SamplePlugin struct{}

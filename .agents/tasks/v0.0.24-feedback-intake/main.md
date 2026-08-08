@@ -318,7 +318,7 @@ Agent naming convention:
     - Full suite: `smd go test ./core/...` → ok; `smd go vet ./core/...` → ok.
   - Note: golden-tests produce fixtures (no classic RED start) — value is regression protection. No production code touched.
 - [ ] dreegotest.1 tests written (increment 6, coder-test6) — **RED** (package does not exist yet)
-  - **Package location**: `dreegotest/` at repo root. New Go module `codeberg.org/dreego/dreego/dreegotest` (own `dreegotest/go.mod`, `replace` → `../core`, same pattern as `demo/`). Added `./dreegotest` to `go.work`. This is required because `dreegotest` imports `core` and must live outside `core/`.
+  - **Package location**: `dreegotest/` at repo root. New Go module `github.com/dreego-stack/dreego/dreegotest` (own `dreegotest/go.mod`, `replace` → `../core`, same pattern as `demo/`). Added `./dreegotest` to `go.work`. This is required because `dreegotest` imports `core` and must live outside `core/`.
   - **Defined public API (unit tests `dreegotest/dreegotest_test.go`, package `dreegotest_test`):**
     - `dreegotest.Get(t *testing.T, path string) *Response` — simulates a GET through `core.ServeMux()`; returns `*Response{StatusCode int; Body string}`. Tests: status 200 + body, non-OK status (404).
     - `dreegotest.PostForm(t *testing.T, path string, form url.Values) *Response` — simulates an `application/x-www-form-urlencoded` POST; returns `*Response`. Tests: binds values (`r.FormValue("name")`), sets `Content-Type: application/x-www-form-urlencoded`.
@@ -527,7 +527,7 @@ next: review-edge3
 - `dreegotest/dreegotest_test.go` (new, dreegotest.1 unit tests defining public API)
 - `core/codegen_golden_test.go` (new, golden-tests-core.1)
 - `core/testdata/golden/*.golden` (new, golden-tests-core.1 fixtures)
-- `dreegotest/go.mod` (new, module codeberg.org/dreego/dreego/dreegotest, replace core)
+- `dreegotest/go.mod` (new, module github.com/dreego-stack/dreego/dreegotest, replace core)
 - `go.work` (added `./dreegotest`)
 - `core/validate_typed_test.go` (new, typed-forms.1 unit tests)
 - `core/validate.go` (typed-forms.1: RegisterRule + int/bool/slice BindForm + ValidateForm Sprint)
@@ -572,7 +572,7 @@ next: review-edge3
 **Suite verification result:**
 - `smd go test ./core/... ./cmd/dreego/... ./dreegotest/...` — ok (cached, all pass)
 - `smd sh _tests/test.sh` — **161 Passed / 1 Failed** (`core/CLI/new-go-sum`)
-  - **Root cause (expected, release-time):** The `VERSION` bump to `v0.0.24` makes `dreego new` write `require codeberg.org/dreego/dreego/core v0.0.24`. `go mod tidy` inside `new` fails with `unknown revision core/v0.0.24` because the git tag `core/v0.0.24` does not exist yet (only `core/v0.0.22` and `core/v0.0.23` are present). This is the normal release-order dependency: the tag is created/pushed by the release process (`_scripts/release.sh`) after committing. Once `core/v0.0.24` (and `cmd/dreego/v0.0.24`, `plugins/sample/v0.0.24`) tags exist, `new-go-sum` turns green. **Not a code bug** — no other test regressed.
+  - **Root cause (expected, release-time):** The `VERSION` bump to `v0.0.24` makes `dreego new` write `require github.com/dreego-stack/dreego/core v0.0.24`. `go mod tidy` inside `new` fails with `unknown revision core/v0.0.24` because the git tag `core/v0.0.24` does not exist yet (only `core/v0.0.22` and `core/v0.0.23` are present). This is the normal release-order dependency: the tag is created/pushed by the release process (`_scripts/release.sh`) after committing. Once `core/v0.0.24` (and `cmd/dreego/v0.0.24`, `plugins/sample/v0.0.24`) tags exist, `new-go-sum` turns green. **Not a code bug** — no other test regressed.
 
 ## Summary
 
@@ -635,11 +635,11 @@ Status:
 
 - [x] **`cmd/dreego/new.go`** — `dreego new` fügt jetzt selbst eine `replace`-Direktive auf das lokale `core`-Verzeichnis ins Scaffold ein, wenn es als repo-lokaler Build läuft:
   - `findLocalCore()` (neu): löst `<repo>/core` über `runtime.Caller(0)` relativ zum Quellverzeichnis auf (Quellpfad `<repo>/cmd/dreego/new.go` → `../../core`), verifiziert `core/go.mod` existiert. Muster analog `versionFromSourceRoot` in `version.go`.
-  - Nach `go mod edit -require ...`: falls `findLocalCore()` nicht leer → `go mod edit -replace=codeberg.org/dreego/dreego/core=<abs coreDir>`.
+  - Nach `go mod edit -require ...`: falls `findLocalCore()` nicht leer → `go mod edit -replace=github.com/dreego-stack/dreego/core=<abs coreDir>`.
   - `go mod tidy` läuft jetzt mit `GOWORK=off`, damit die Auflösung gegen das lokale replace offline/deterministisch erfolgt.
   - **Release-sicher:** Schlägt NICHT fehl, wenn kein lokales core existiert (release-installiertes Binary hat keins) → tidy löst dann den gepushten Tag remote. Damit bricht das Release-Verhalten nicht.
 - [x] **`_tests/core/CLI/new-go-sum/test.sh`** — vereinfacht auf reales Verhalten ohne manuellen replace-Workaround:
-  - `$DREEGO_BIN new testapp`, `cd testapp`, prüft dass `go.mod` eine `^replace codeberg.org/dreego/dreego/core => `-Zeile enthält (von `dreego new` geschrieben), `GOWORK=off go mod tidy`, `$DREEGO_BIN generate`, `GOWORK=off go build .`.
+  - `$DREEGO_BIN new testapp`, `cd testapp`, prüft dass `go.mod` eine `^replace github.com/dreego-stack/dreego/core => `-Zeile enthält (von `dreego new` geschrieben), `GOWORK=off go mod tidy`, `$DREEGO_BIN generate`, `GOWORK=off go build .`.
 - [x] **`cmd/dreego/go.mod`** — unnötiger Whitespace-Diff (vom früheren Agenten) revertiert; `git diff cmd/dreego/go.mod` ist leer. Nicht committet.
 - [x] Verifikation:
   - `smd sh _tests/core/CLI/new-go-sum/test.sh` — grün (exit 0), offline.

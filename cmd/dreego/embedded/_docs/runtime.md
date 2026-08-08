@@ -1,10 +1,10 @@
 # Runtime API
 
-Full API surface available after `import dreego "codeberg.org/dreego/dreego/core"`.
+Full API surface available after `import dreego "github.com/dreego-stack/dreego/core"`.
 
 ## SSRContext
 
-Available as **`c`** in routes (including `<go>` blocks and error pages) and as **`ctx`** in components (see [Components](https://codeberg.org/dreego/dreego/src/branch/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
+Available as **`c`** in routes (including `<go>` blocks and error pages) and as **`ctx`** in components (see [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -38,7 +38,7 @@ Available as **`c`** in routes (including `<go>` blocks and error pages) and as 
 
 Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Path: "/"`.
 
-For AES-256-GCM session encryption see [Session Encryption](https://codeberg.org/dreego/dreego/src/branch/main/_docs/session-encryption.md).
+For AES-256-GCM session encryption see [Session Encryption](https://github.com/dreego-stack/dreego/blob/main/_docs/session-encryption.md).
 
 ## Configuration
 
@@ -80,7 +80,7 @@ package main
 
 import (
     _ "myapp/dreego/gen"
-    dreego "codeberg.org/dreego/dreego/core"
+    dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
@@ -90,10 +90,10 @@ func main() {
 }
 ```
 
-Install core: `go get codeberg.org/dreego/dreego/core@latest`
+Install core: `go get github.com/dreego-stack/dreego/core@latest`
 
 ## See Also
 
-- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
-- [Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)
-- [Config Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/config.md)
+- [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)
+- [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md)
+- [Config Reference](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md)

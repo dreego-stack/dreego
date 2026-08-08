@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	dreego "codeberg.org/dreego/dreego/core"
-	"codeberg.org/dreego/dreego/dreegotest"
+	dreego "github.com/dreego-stack/dreego/core"
+	"github.com/dreego-stack/dreego/dreegotest"
 )
 
 // Public API contract under test:

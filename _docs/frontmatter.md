@@ -42,5 +42,5 @@ If there is no leading frontmatter, `fm` is `nil` and `body` is the whole `src`.
 
 ## See Also
 
-- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
-- [Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)
+- [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)
+- [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md)

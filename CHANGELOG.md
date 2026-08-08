@@ -22,7 +22,7 @@
 
 ### Changed
 
-- **Import style:** core is imported as `dreego` everywhere (`codeberg.org/dreego/dreego/core` → `dreego` alias), for consistency across codegen, tests, and docs.
+- **Import style:** core is imported as `dreego` everywhere (`github.com/dreego-stack/dreego/core` → `dreego` alias), for consistency across codegen, tests, and docs.
 
 - Full suite: 185 passed, 0 failed
 
@@ -78,7 +78,7 @@
 
 ## v0.0.21 (2026-08-03) — Single-Source Versioning + go install Fix
 
-- **Fix:** `go install codeberg.org/dreego/dreego/cmd/dreego@latest` now works. Removed the relative `replace` directive from `cmd/dreego/go.mod` and `plugins/sample/go.mod` (relative replaces are invalid for non-main modules), replaced with a real published `require codeberg.org/dreego/dreego/core v0.0.22`. Local development still resolves `core` via `go.work` (`use ./core`).
+- **Fix:** `go install github.com/dreego-stack/dreego/cmd/dreego@latest` now works. Removed the relative `replace` directive from `cmd/dreego/go.mod` and `plugins/sample/go.mod` (relative replaces are invalid for non-main modules), replaced with a real published `require github.com/dreego-stack/dreego/core v0.0.22`. Local development still resolves `core` via `go.work` (`use ./core`).
 - **Versioning:** New single source of truth `VERSION` file at repo root (`v0.0.22`). The CLI version derives from it at build time (`-ldflags -X main.version`) or, when installed via `go install pkg@tag`, from the module build info.
 - New `dreego version` command prints the CLI version.
 - `dreego new` now requires the CLI's own `core` version instead of a hardcoded one.
@@ -88,7 +88,7 @@
 ## v0.0.20 (2026-07-31) — Security Hardening
 
 - Official plugins moved from separate repos into `plugins/` in this repository (one repo, many modules)
-- New `plugins/sample/` minimal example plugin with its own `go.mod` importing `codeberg.org/dreego/dreego/core`
+- New `plugins/sample/` minimal example plugin with its own `go.mod` importing `github.com/dreego-stack/dreego/core`
 - New `go.work` linking the root module and `plugins/sample` for local development
 - Integration tests moved from `_tests/<Category>/` to `_tests/core/<Category>/`; `test.sh` runner now scans `_tests/core` and `_tests/plugins`
 - All `test.sh` realrepo depth updated from `../../..` to `../../../..` (4 levels up from `_tests/core/<Group>/<name>/`)
@@ -147,7 +147,7 @@
 
 ## v0.0.18 (2026-07-29) — Package Restructuring
 
-- **BREAKING**: `dreego-core/` → `core/` — import path changes from `codeberg.org/dreego/dreego/dreego-core` to `codeberg.org/dreego/dreego/core`
+- **BREAKING**: `dreego-core/` → `core/` — import path changes from `github.com/dreego-stack/dreego/dreego-core` to `github.com/dreego-stack/dreego/core`
 - **BREAKING**: `dreego-plugin/` removed — plugins live in separate repos under `codeberg.org/dreego/<name>`
 - `_docs/plugins.md`: plugin architecture overview, planned plugins, interface contracts
 - AGENTS.md updated to reflect new directory structure
@@ -308,7 +308,7 @@
 - CSRF protection: double-submit cookie (Core-Conditional, default on) — Token via X-CSRF-Token header or csrf_token form field
 - SSRContext: `CSRFToken()` for template rendering (hidden field)
 - VS Code Extension: syntax highlighting + raccoon icon for `.dreego` files (`make dx`)
-- **Breaking:** `pkg/` → `core/` (single package), single import `import "codeberg.org/dreego/dreego/core"`
+- **Breaking:** `pkg/` → `core/` (single package), single import `import "github.com/dreego-stack/dreego/core"`
 - Plugins in separate repos (see `_docs/plugins.md`)
 
 ## v0.0.2 (2026-07-25) — Safety & Structure

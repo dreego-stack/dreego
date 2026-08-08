@@ -31,7 +31,7 @@ SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, dep
 dreego generate && go run .
 ```
 
-→ **[Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)**
+→ **[Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md)**
 
 ## Philosophy
 
@@ -88,11 +88,11 @@ Three principles:
 ## Quick Start
 
 ```bash
-go install codeberg.org/dreego/dreego/cmd/dreego@latest
+go install github.com/dreego-stack/dreego/cmd/dreego@latest
 dreego init myapp
 cd myapp
 go mod init myapp
-go mod edit -replace codeberg.org/dreego/dreego/core=../dreego/core  # or use go get
+go mod edit -replace github.com/dreego-stack/dreego/core=../dreego/core  # or use go get
 dreego generate
 go run .
 
@@ -134,7 +134,7 @@ plugins/
 └── ...
 ```
 
-→ **[Plugin System](https://codeberg.org/dreego/dreego/src/branch/main/_docs/plugins.md)**
+→ **[Plugin System](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md)**
 
 ## Documentation
 

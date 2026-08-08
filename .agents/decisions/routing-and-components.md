@@ -69,7 +69,7 @@ plugins/auth/
 ├── routes/
 │   ├── login.go          ← pre-generated (contains init() + runtime.Register)
 │   └── ...
-├── go.mod                ← module codeberg.org/dreego/dreego/plugins/auth
+├── go.mod                ← module github.com/dreego-stack/dreego/plugins/auth
 ```
 
 Plugin developer workflow (official, monorepo):
@@ -82,12 +82,12 @@ git add routes/*.go && git commit
 User workflow (official, monorepo):
 ```bash
 # go.work already links plugins/auth for local dev
-# main.go imports _ "codeberg.org/dreego/dreego/plugins/auth"
+# main.go imports _ "github.com/dreego-stack/dreego/plugins/auth"
 ```
 
 Community plugin (separate repo) workflow:
 ```bash
-go get codeberg.org/dreego/dreego-community-auth@v0.1.0
+go get github.com/dreego-stack/dreego-community-auth@v0.1.0
 # dreego generate adds the import to gen/routes.go
 ```
 

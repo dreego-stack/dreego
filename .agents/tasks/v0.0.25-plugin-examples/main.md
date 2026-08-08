@@ -14,7 +14,7 @@ ecosystem and the upcoming module-docs discovery have real references.
 ## Deliverables
 
 1. **In-repo plugin: `plugins/sse/`** — Server-Sent Events plugin.
-   - Own module `codeberg.org/dreego/dreego/plugins/sse` with its own go.mod
+   - Own module `github.com/dreego-stack/dreego/plugins/sse` with its own go.mod
      (requires core, replace to ../core for local dev).
    - Implements the full Plugin interface: Name, RegisterRoutes, Middlewares,
      Assets, OnStart, OnShutdown.

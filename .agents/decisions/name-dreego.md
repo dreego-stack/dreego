@@ -23,10 +23,10 @@ timestamp: 2026-07-28T00:00:00Z
 
 | Type             | Path                                      |
 |------------------|-------------------------------------------|
-| Core             | `codeberg.org/dreego/dreego`             |
-| Auth Plugin      | `codeberg.org/dreego/dreego/plugins/auth`  |
-| Map Plugin       | `codeberg.org/dreego/dreego/plugins/map`   |
-| UI Plugin        | `codeberg.org/dreego/dreego/plugins/ui`    |
+| Core             | `github.com/dreego-stack/dreego`             |
+| Auth Plugin      | `github.com/dreego-stack/dreego/plugins/auth`  |
+| Map Plugin       | `github.com/dreego-stack/dreego/plugins/map`   |
+| UI Plugin        | `github.com/dreego-stack/dreego/plugins/ui`    |
 
 > Plugin paths superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21): official plugins live under `plugins/<name>` in this repository. Community plugins may still use separate repos.
 

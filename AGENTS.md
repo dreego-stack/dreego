@@ -92,8 +92,8 @@ See [Changelog Guide](.agents/guides/changelog.md) for the full workflow.
 
 ## Project: dreego
 
-- **Name:** dreego | **Package:** `dreego` | **Module:** `codeberg.org/dreego/dreego`
-- **Org:** codeberg.org/dreego | **Mirror:** github.com/LukasLow/dreego
+- **Name:** dreego | **Package:** `dreego` | **Module:** `github.com/dreego-stack/dreego`
+- **Org:** github.com/dreego-stack | **Main repo:** github.com/dreego-stack/dreego
 - **Approach:** Compile-Time Transpiler (.dreego → Go-Code) + net/http + HTMX/Alpine.js
 
 ## Note: smd
@@ -105,8 +105,8 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 - Max 300 lines per file, one logical thing per file
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
-- Core code in `core/` (own module `codeberg.org/dreego/dreego/core`, no external deps)
-- CLI in `cmd/dreego/` (own module `codeberg.org/dreego/dreego/cmd/dreego`, requires core)
+- Core code in `core/` (own module `github.com/dreego-stack/dreego/core`, no external deps)
+- CLI in `cmd/dreego/` (own module `github.com/dreego-stack/dreego/cmd/dreego`, requires core)
 - Plugins in `plugins/` (each with own `go.mod` when external deps needed, requires core)
 - `go.work` at root links all modules for local development
 - Build via `dreego` CLI, not directly `go build`

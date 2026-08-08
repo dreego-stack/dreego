@@ -15,13 +15,13 @@ port="${DREEGO_PORT:-$(( ( $(od -An -N2 -i /dev/urandom | tr -d ' ') % 50000 ) +
 cat > go.mod << EOF
 module t
 go 1.22
-require codeberg.org/dreego/dreego/core v0.0.0
-replace codeberg.org/dreego/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego/core v0.0.0
+replace github.com/dreego-stack/dreego/core => $realrepo/core
 EOF
 
 cat > main.go << GO
 package main
-import (_ "t/dreego/gen"; dreego "codeberg.org/dreego/dreego/core")
+import (_ "t/dreego/gen"; dreego "github.com/dreego-stack/dreego/core")
 func main() { dreego.SetLogging(false); dreego.Listen(":$port") }
 GO
 

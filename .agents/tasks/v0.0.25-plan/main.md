@@ -11,7 +11,7 @@ Goal: Ship the frozen plugin contract (monolithic Plugin interface), plugin midd
 
 ## Blocks (in execution order)
 
-1. **plugin-interface.1** — Frozen monolithic Plugin interface (v1 contract). Paket-level API (no App object). Import alias `import dreego "codeberg.org/dreego/dreego/core"`. `dreego.UsePlugin(p Plugin)`. Plugins are external Go modules that import core and satisfy the interface; core never imports a plugin.
+1. **plugin-interface.1** — Frozen monolithic Plugin interface (v1 contract). Paket-level API (no App object). Import alias `import dreego "github.com/dreego-stack/dreego/core"`. `dreego.UsePlugin(p Plugin)`. Plugins are external Go modules that import core and satisfy the interface; core never imports a plugin.
    - Interface methods (monolithic, "plugins can do everything"): `Name() string`, `RegisterRoutes(...)`, `Middlewares() []func(http.Handler) http.Handler`, `Assets() fs.FS`, `OnStart(ctx) error`, `OnShutdown(ctx) error`.
    - Tests: ≥3 (interface satisfaction, UsePlugin registration, lifecycle).
 
@@ -31,7 +31,7 @@ Goal: Ship the frozen plugin contract (monolithic Plugin interface), plugin midd
 
 - Plugin interface: monolithic (single interface, all methods).
 - API: paket-level `dreego.*` (no App object). Consistent with existing `core.Listen`/`core.Build`.
-- Import alias: `import dreego "codeberg.org/dreego/dreego/core"`.
+- Import alias: `import dreego "github.com/dreego-stack/dreego/core"`.
 - Frontmatter: YAML.
 - Plugin methods: full set (Name, RegisterRoutes, Middlewares, Assets, OnStart, OnShutdown).
 - dev-server: full (watcher + restart).
@@ -389,7 +389,7 @@ Tests (4 + 1 edge):
 
 Usage (user-confirmed import alias):
 ```go
-import dreego "codeberg.org/dreego/dreego/core"
+import dreego "github.com/dreego-stack/dreego/core"
 import auth "github.com/example/dreego-auth"
 
 func main() {

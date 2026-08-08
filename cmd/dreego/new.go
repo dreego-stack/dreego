@@ -76,7 +76,7 @@ func cmdNew(args []string) {
 		fmt.Fprintf(os.Stderr, "warning: go mod edit -go failed: %v\n", err)
 	}
 
-	c = exec.Command("go", "mod", "edit", "-require", "codeberg.org/dreego/dreego/core@"+dreegoCoreVersion)
+	c = exec.Command("go", "mod", "edit", "-require", "github.com/dreego-stack/dreego/core@"+dreegoCoreVersion)
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
 	if err := c.Run(); err != nil {
@@ -89,7 +89,7 @@ func cmdNew(args []string) {
 	// fully offline. For a release-installed binary there is no local core
 	// directory, so tidy resolves the published tag instead.
 	if coreDir := findLocalCore(); coreDir != "" {
-		c = exec.Command("go", "mod", "edit", "-replace=codeberg.org/dreego/dreego/core="+coreDir)
+		c = exec.Command("go", "mod", "edit", "-replace=github.com/dreego-stack/dreego/core="+coreDir)
 		c.Dir = target
 		c.Stdout, c.Stderr = nil, os.Stderr
 		if err := c.Run(); err != nil {

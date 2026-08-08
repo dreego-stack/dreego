@@ -17,10 +17,10 @@ On start it runs `generate` + `build` and launches the server, then watches the 
 
 ## What it is not
 
-`dreego dev` is a **dev tool, not for production**. For hot reloading with live browser reload, see [Hot Reload](https://codeberg.org/dreego/dreego/src/branch/main/_docs/hot-reload.md) (Air / `entr`).
+`dreego dev` is a **dev tool, not for production**. For hot reloading with live browser reload, see [Hot Reload](https://github.com/dreego-stack/dreego/blob/main/_docs/hot-reload.md) (Air / `entr`).
 
 ## See Also
 
-- [CLI Reference](https://codeberg.org/dreego/dreego/src/branch/main/_docs/cli.md)
-- [Hot Reload](https://codeberg.org/dreego/dreego/src/branch/main/_docs/hot-reload.md)
-- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
+- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md)
+- [Hot Reload](https://github.com/dreego-stack/dreego/blob/main/_docs/hot-reload.md)
+- [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)

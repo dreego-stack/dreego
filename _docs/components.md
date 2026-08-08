@@ -154,7 +154,7 @@ Call `<@Card title="x"/>` → `Card("x").Render(c)`.
 
 ## Context Variable
 
-Inside a component, the SSRContext is available as **`ctx`** — in routes it is called **`c`** (see [Runtime API](https://codeberg.org/dreego/dreego/src/branch/main/_docs/runtime.md)). The generated render function always receives it as `ctx`:
+Inside a component, the SSRContext is available as **`ctx`** — in routes it is called **`c`** (see [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md)). The generated render function always receives it as `ctx`:
 
 ```dreego
 Component Greeting (name string)

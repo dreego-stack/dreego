@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func RenderComponent(t *testing.T, fn dreego.ComponentFunc, props ...any) string {

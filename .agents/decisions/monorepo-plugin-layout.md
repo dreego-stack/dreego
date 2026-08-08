@@ -13,7 +13,7 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## Context
 
-Dreego originally planned one repository per plugin (`codeberg.org/dreego/dreego-auth`, `codeberg.org/dreego/dreego-db`, etc.). As a one-person project this is unwieldy: every core update requires bumping versions and re-testing across dozens of separate repos, and the split provides little benefit when there are no external plugin authors yet.
+Dreego originally planned one repository per plugin (`github.com/dreego-stack/dreego-auth`, `github.com/dreego-stack/dreego-db`, etc.). As a one-person project this is unwieldy: every core update requires bumping versions and re-testing across dozens of separate repos, and the split provides little benefit when there are no external plugin authors yet.
 
 Large frameworks (React, Svelte, Phoenix) keep all official packages in a single repository with independent dependency graphs. Go's equivalent is `go.work` plus per-plugin `go.mod` files.
 
@@ -25,12 +25,12 @@ Large frameworks (React, Svelte, Phoenix) keep all official packages in a single
 dreego/
 ├── go.work             ← links all local modules for development
 ├── core/
-│   └── go.mod          ← module codeberg.org/dreego/dreego/core (stdlib only)
+│   └── go.mod          ← module github.com/dreego-stack/dreego/core (stdlib only)
 ├── cmd/dreego/
-│   └── go.mod          ← module codeberg.org/dreego/dreego/cmd/dreego (requires core)
+│   └── go.mod          ← module github.com/dreego-stack/dreego/cmd/dreego (requires core)
 ├── plugins/
 │   └── sample/
-│       └── go.mod      ← module codeberg.org/dreego/dreego/plugins/sample (requires core)
+│       └── go.mod      ← module github.com/dreego-stack/dreego/plugins/sample (requires core)
 └── demo/
     └── go.mod          ← module demo (requires core)
 ```
@@ -38,7 +38,7 @@ dreego/
 ### Rules
 
 1. **Core never imports a plugin package.** This invariant keeps the root module dependency-free.
-2. **Plugins import Core** via `codeberg.org/dreego/dreego/core`.
+2. **Plugins import Core** via `github.com/dreego-stack/dreego/core`.
 3. **Plugins with external dependencies get their own `go.mod`** inside `plugins/<name>/`. A `replace` directive points back to the root module.
 4. **Dependency-free plugins can be plain packages** in the root module or in `plugins/` with or without their own module.
 5. **`go.work` links all local modules** so development works without publishing tags.

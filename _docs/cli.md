@@ -77,5 +77,5 @@ Shows all available commands and flags.
 
 ## See Also
 
-- [Docs Index](https://codeberg.org/dreego/dreego/src/branch/main/_docs/index.md)
-- [Getting Started](https://codeberg.org/dreego/dreego/src/branch/main/_docs/getting-started.md)
+- [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)
+- [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md)

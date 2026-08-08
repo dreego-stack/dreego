@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 //go:embed assets

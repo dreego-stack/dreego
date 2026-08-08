@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "demo/dreego/gen"
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {

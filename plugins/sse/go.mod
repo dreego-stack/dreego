@@ -1,7 +1,7 @@
-module codeberg.org/dreego/dreego/plugins/sse
+module github.com/dreego-stack/dreego/plugins/sse
 
 go 1.22
 
-require codeberg.org/dreego/dreego/core v0.0.0
+require github.com/dreego-stack/dreego/core v0.0.0
 
-replace codeberg.org/dreego/dreego/core => ../../core
+replace github.com/dreego-stack/dreego/core => ../../core

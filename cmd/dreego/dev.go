@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	dreego "codeberg.org/dreego/dreego/core"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 // detectChanges scans dir for .dreego files and compares their modtimes

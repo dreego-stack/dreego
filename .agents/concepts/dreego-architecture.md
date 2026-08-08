@@ -13,7 +13,7 @@ timestamp: 2026-07-31T07:00:00Z
 Dreego is a compile-time web framework for Go. It consists of two main components:
 
 1. **Dreego Transpiler** (`dreego generate`) — Converts `.dreego` files into Go code
-2. **Dreego Runtime** (`import "codeberg.org/dreego/dreego/core"`) — Provides router, context, plugin system
+2. **Dreego Runtime** (`import "github.com/dreego-stack/dreego/core"`) — Provides router, context, plugin system
 
 ## Architecture Diagram
 

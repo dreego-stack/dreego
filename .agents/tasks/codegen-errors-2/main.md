@@ -112,7 +112,7 @@ Befund im Detail:
 4. **Verifikation:** `smd go test -count=1 ./core` — ok (0.015s). `TestCompGenIfElseMixedChildren` PASS, `TestCompGenIfElseIfChain` PASS. Keine Regressionen.
 
 Hinweise für shell (keine Blocker):
-- 🟡 `go.sum` (Root) wurde als Test-Nebeneffekt modifiziert (Hash für `codeberg.org/dreego/dreego/core v0.0.24` aus Root-`go.mod` "gzipflush" — die Root-`go.mod` selbst ist UNTRACKED). Nicht Teil des Tasks → NICHT committen, nur die 3 Task-Dateien.
+- 🟡 `go.sum` (Root) wurde als Test-Nebeneffekt modifiziert (Hash für `github.com/dreego-stack/dreego/core v0.0.24` aus Root-`go.mod` "gzipflush" — die Root-`go.mod` selbst ist UNTRACKED). Nicht Teil des Tasks → NICHT committen, nur die 3 Task-Dateien.
 - 🟡 `.agents/log.md` enthält die Agentlog-Einträge des Tasks (282 Zeilen) — Task-Spec listet nur 3 Dateien; log.md-Änderung ist Workflow-Konvention, Entscheidung bei shell/manager.
 - 🟡 `cmd/dreego/embedded/CHANGELOG.md:42` enthält noch den alten Pfad — korrekt NICHT manuell angefasst (wird von `_scripts/sync-embedded-docs.sh` regeneriert, verifiziert).
 - 🟡 Viele untracked Artefakte im Repo (.DS_Store, dreego-linux, main.go, .tmp-review-cli, cmd/dreego/dreego-Binary) — `git add` nur die 3 Task-Dateien.

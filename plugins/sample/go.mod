@@ -1,5 +1,5 @@
-module codeberg.org/dreego/dreego/plugins/sample
+module github.com/dreego-stack/dreego/plugins/sample
 
 go 1.22
 
-require codeberg.org/dreego/dreego/core v0.0.26
+require github.com/dreego-stack/dreego/core v0.0.26

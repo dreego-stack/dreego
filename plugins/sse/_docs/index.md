@@ -8,8 +8,8 @@ streams `text/event-stream` responses with a heartbeat, and exposes a
 
 ```go
 import (
-    dreego "codeberg.org/dreego/dreego/core"
-    "codeberg.org/dreego/dreego/plugins/sse"
+    dreego "github.com/dreego-stack/dreego/core"
+    "github.com/dreego-stack/dreego/plugins/sse"
 )
 
 func main() {

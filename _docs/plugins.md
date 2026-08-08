@@ -5,10 +5,10 @@ Dreego plugins live in the same repository under `plugins/`. Each plugin that ne
 ## Architecture
 
 ```
-codeberg.org/dreego/dreego              ← Root module: core/ + cmd/dreego/
-codeberg.org/dreego/dreego/core         ← Core package (no external deps beyond stdlib)
-codeberg.org/dreego/dreego/plugins/auth ← Plugin: OAuth2, JWT, sessions (own go.mod)
-codeberg.org/dreego/dreego/plugins/db   ← Plugin: SQL drivers, migrations (own go.mod)
+github.com/dreego-stack/dreego              ← Root module: core/ + cmd/dreego/
+github.com/dreego-stack/dreego/core         ← Core package (no external deps beyond stdlib)
+github.com/dreego-stack/dreego/plugins/auth ← Plugin: OAuth2, JWT, sessions (own go.mod)
+github.com/dreego-stack/dreego/plugins/db   ← Plugin: SQL drivers, migrations (own go.mod)
 ```
 
 Plugins without external dependencies can also be plain packages inside the root module, but once a plugin needs a third-party dependency it gets its own `go.mod`.
@@ -42,7 +42,7 @@ func UsePlugin(p Plugin)
 A plugin package imports Core and implements the interface:
 
 ```go
-// codeberg.org/dreego/dreego/plugins/auth
+// github.com/dreego-stack/dreego/plugins/auth
 package auth
 
 import (
@@ -50,7 +50,7 @@ import (
     "io/fs"
     "net/http"
 
-    dreego "codeberg.org/dreego/dreego/core"
+    dreego "github.com/dreego-stack/dreego/core"
 )
 
 type Auth struct{ secret string }
@@ -80,8 +80,8 @@ The application registers the plugin in `main.go`:
 package main
 
 import (
-    dreego "codeberg.org/dreego/dreego/core"
-    "codeberg.org/dreego/dreego/plugins/auth"
+    dreego "github.com/dreego-stack/dreego/core"
+    "github.com/dreego-stack/dreego/plugins/auth"
 )
 
 func main() {
@@ -130,7 +130,7 @@ Because `dreego.Register` is idempotent (re-registering a `method`+`pattern` rep
 ```
 plugins/
 ├── sample/                 ← minimal example plugin
-│   ├── go.mod              → module codeberg.org/dreego/dreego/plugins/sample
+│   ├── go.mod              → module github.com/dreego-stack/dreego/plugins/sample
 │   ├── sample.go           → implements dreego.Plugin or other core interfaces
 │   └── README.md
 ├── auth/                   ← future official plugin
@@ -141,7 +141,7 @@ plugins/
 ## Rules
 
 1. **Core never imports a plugin.** This is the invariant that keeps the dependency graph clean.
-2. **Plugins import Core.** They use `codeberg.org/dreego/dreego/core`.
+2. **Plugins import Core.** They use `github.com/dreego-stack/dreego/core`.
 3. **Plugins with external deps get their own `go.mod`.** Plugins without external deps can live as plain packages in the root module or in `plugins/` with or without their own module.
 4. **One repo, many modules.** Releases use directory-prefix tags (e.g. `plugins/auth/v0.0.1`) if a plugin has its own `go.mod`.
 

@@ -12,8 +12,8 @@ cd "$workdir"
 cat > go.mod << GO
 module t
 go 1.22
-require codeberg.org/dreego/dreego/core v0.0.0
-replace codeberg.org/dreego/dreego/core => $realrepo/core
+require github.com/dreego-stack/dreego/core v0.0.0
+replace github.com/dreego-stack/dreego/core => $realrepo/core
 GO
 
 cat > main.go << 'GO'

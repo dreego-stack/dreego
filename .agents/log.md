@@ -29,7 +29,7 @@ timestamp: 2026-07-28T21:33:00Z
 ## 2026-07-31 — v0.0.21 Monorepo Plugin Layout
 
 - Official plugins moved from separate repos into `plugins/` in this repository (one repo, many modules)
-- `plugins/sample/` minimal example plugin with own `go.mod` importing `codeberg.org/dreego/dreego/core`
+- `plugins/sample/` minimal example plugin with own `go.mod` importing `github.com/dreego-stack/dreego/core`
 - `go.work` links root module and `plugins/sample` for local development
 - Integration tests moved from `_tests/<Category>/` to `_tests/core/<Category>/`
 - `test.sh` runner scans `_tests/core` and `_tests/plugins`; `realrepo` depth updated to `../../../..`
@@ -610,7 +610,7 @@ timestamp: 2026-07-28T21:33:00Z
 2026-08-06 14:16 | reviewer | ses_029048e2cffeoX2PzRAozGIV63 | Review v0.0.25-Finalisierung: GO. VERSION/CHANGELOG/TODO/plan konsistent, embedded-Spiegel 100% identisch (18 docs+README+CHANGELOG), Doku stimmt mit Implementierung. next: git-final
 2026-08-06 14:31 | coder | ses_028f5a6b4ffeuJG06pFvWHXn8p | smd-Container-Umgebung repariert: runtime="" -> "docker", volume enabled=false -> true (go cache) in smd.toml + core/smd.toml. Verifiziert: go1.22.12 linux/arm64, apk 2.14.6, curl alpine, Suite 164/0 grün. next: manager
 2026-08-06 14:35 | manager | ses_03394895bffeZv1nz8YxbeBUet | Task-ID v0.0.25-plan: ABGESCHLOSSEN. 8 Commits (7 Blöcke + Finalisierung), Suite 164/0 (nur vorbestehender run-timer-sigterm-Flake). Tags core/cmd/plugins v0.0.25 erstellt. next: user
-2026-08-06 14:37 | manager | ses_03394895bffeZv1nz8YxbeBUet | Task-ID v0.0.25-import-alias: Konvention 'import dreego "codeberg.org/dreego/dreego/core"' flächendeckend umsetzen. 73 Fundstellen. next: coder-import
+2026-08-06 14:37 | manager | ses_03394895bffeZv1nz8YxbeBUet | Task-ID v0.0.25-import-alias: Konvention 'import dreego "github.com/dreego-stack/dreego/core"' flächendeckend umsetzen. 73 Fundstellen. next: coder-import
 2026-08-06 14:41 | coder | ses_028ebfcdbffeIGt1K6mtpPsSqe | Start Task v0.0.25-import-alias: Rename core->dreego import alias. Explore scope first. next: manager
 2026-08-06 15:05 | coder | ses_028ebfcdbffeIGt1K6mtpPsSqe | Task v0.0.25-import-alias done. Renamed core->dreego import alias across generator, goldens, check-stale, 59 test.sh, blueprints, CLI, dreegotest, plugins, docs. 164/0 green. next: manager
 2026-08-06 15:06 | manager | ses_03394895bffeZv1nz8YxbeBUet | Task-ID v0.0.25-import-alias: Umbau abgeschlossen, kein 'core "..."' mehr, Suite 164/0. Generator emittiert dreego-Alias. next: review-import

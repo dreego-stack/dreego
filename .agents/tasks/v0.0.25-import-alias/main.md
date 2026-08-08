@@ -5,10 +5,10 @@
 Make the Dreego core package import alias consistent across the entire repo:
 
 ```go
-import dreego "codeberg.org/dreego/dreego/core"
+import dreego "github.com/dreego-stack/dreego/core"
 ```
 
-replacing the previous `core "codeberg.org/dreego/dreego/core"` everywhere, so
+replacing the previous `core "github.com/dreego-stack/dreego/core"` everywhere, so
 `dreego.UsePlugin`, `dreego.Listen`, etc. read naturally. Pure rename — no
 behavior change.
 
@@ -83,7 +83,7 @@ import alias + all `core.` uses → `dreego.`. Shell logic untouched. One test
 - Full suite `sh _tests/test.sh` — **164 Passed / 0 Failed**
 - `run-timer-sigterm` (previous known flake) passed both in full run and
   isolated.
-- grep confirms `core "codeberg.org/dreego/dreego/core"` no longer appears.
+- grep confirms `core "github.com/dreego-stack/dreego/core"` no longer appears.
 
 ## Result
 
