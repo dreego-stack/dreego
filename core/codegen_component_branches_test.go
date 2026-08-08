@@ -118,6 +118,41 @@ func TestCompGenIfElseIfChain(t *testing.T) {
 	}
 }
 
+// compGen NodeIf with mixed else children (NodeIf + NodeText) must emit a
+// plain "else" block with recursive processing of both children, not an
+// else-if chain.
+func TestCompGenIfElseMixedChildren(t *testing.T) {
+	n := TemplateNode{
+		Type: NodeIf,
+		Cond: "a",
+		Children: []TemplateNode{
+			{Type: NodeText, Content: "A"},
+		},
+		ElseChildren: []TemplateNode{
+			{
+				Type: NodeIf,
+				Cond: "b",
+				Children: []TemplateNode{
+					{Type: NodeText, Content: "B"},
+				},
+			},
+			{Type: NodeText, Content: "fallback"},
+		},
+	}
+	out, err := genTemplateNodeComp(n)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, want := range []string{"if a {", "} else {", "if b {", "`A`", "`B`", "`fallback`"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("compGen mixed else missing %q, got:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "} else if b {") {
+		t.Errorf("compGen mixed else must not emit an else-if chain, got:\n%s", out)
+	}
+}
+
 // compGen NodeSlot with a name must read the named slot from the context.
 func TestCompGenSlotNamed(t *testing.T) {
 	n := TemplateNode{Type: NodeSlot, Content: "header"}

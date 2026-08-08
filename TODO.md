@@ -63,7 +63,7 @@ Planned for **v0.0.26**: `documentation.1`, `api-swagger.1`, `observability.1`.
 
 ## Quality Backlog (from code review)
 
-- **codegen-errors.2** — Same silent-drop bug as feedback-intake A in the component template path: `genTemplateNodeComp` (`core/codegen.go:521`) returns `""` for a nested `{#if}` inside a non-final `{#else}` branch. Reuse the route-level fix pattern from v0.0.23 (`NodeIf` chain-vs-else detection).
+- **codegen-errors.2** — ✅ already fixed in v0.0.22 (codegen-errors.1, commit 11d33d2); backlog entry obsolete, covered by `TestCompGenIfElseMixedChildren`
 
 ## Framework Roadmap (new blocks)
 
