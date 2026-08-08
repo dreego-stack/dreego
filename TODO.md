@@ -1,6 +1,6 @@
 # Blockwebchain
 
-Status via `python _todo/process.py`. Chain 1–36 done. Next code: **37**.
+Status via `python _todo/process.py`. Chain 1–49 done. Next code: **50**.
 
 Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (may include breaking changes), `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
@@ -25,12 +25,18 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 - **golden-tests-core.1** — golden-file assertions for generated Go ✅
 - **port-schema / test stability** — deterministic runner ports, DREEGO_BIN fallbacks ✅
 
-## v0.0.23
+## v0.0.23 (done)
 
 - **feedback-intake A/B** — nested `{#if}` in `{#else}` + `<head>` expression resolution ✅
-- **servemux-cache.1**, **codegen-errors.1**, **security-session.1-3**, **core.Reset()** ✅
+- **security-session.2/.3**, **core.Reset()** ✅
 
-## v0.0.21 (current)
+## v0.0.22 (done)
+
+- **servemux-cache.1** — cached built middleware/router stack ✅
+- **codegen-errors.1** — all CodeGen returns `(string, error)` ✅
+- **security-session.1** — optional AES-256-GCM session encryption ✅
+
+## v0.0.21 (done)
 
 - **monorepo-plugin-layout** — Official plugins moved into `plugins/` in this repo (chain via v0.0.21 commit)
 
