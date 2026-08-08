@@ -1,2 +1,0 @@
-<head></head>
-<div><!doctype html><html><head>{#head}</head><body><main>{#slot}</main></body></html></div>

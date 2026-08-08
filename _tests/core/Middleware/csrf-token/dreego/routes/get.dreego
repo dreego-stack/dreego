@@ -1,2 +1,0 @@
-<go>msg:="csrf test"</go>
-<div><p>{msg}</p></div>

@@ -17,13 +17,15 @@ require codeberg.org/dreego/dreego/core v0.0.0
 replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
-cat > main.go << 'GO'
-package main
+cat > bindform_test.go << 'GO'
+package t
 
 import (
 	"net/http"
 	"net/url"
 	"strings"
+	"testing"
+
 	dreego "codeberg.org/dreego/dreego/core"
 )
 
@@ -34,7 +36,7 @@ type Profile struct {
 	Labels map[string]string
 }
 
-func main() {
+func TestBindFormUnsupportedFieldReturnsError(t *testing.T) {
 	form := url.Values{}
 	form.Set("name", "Ada")
 	form.Set("age", "42")
@@ -51,22 +53,22 @@ func main() {
 	var p Profile
 	err := dreego.BindForm(r, &p)
 	if err == nil {
-		panic("expected error for unsupported field type (map)")
+		t.Fatal("expected error for unsupported field type (map)")
 	}
 	if !strings.Contains(err.Error(), "unsupported field type") {
-		panic("expected unsupported field type error, got: " + err.Error())
+		t.Fatalf("expected unsupported field type error, got: %s", err.Error())
 	}
 	if p.Name != "Ada" {
-		panic("Name not bound")
+		t.Errorf("Name not bound")
 	}
 	if p.Age != 42 {
-		panic("Age not bound as int")
+		t.Errorf("Age not bound as int")
 	}
 	if !p.Admin {
-		panic("Admin not bound as bool")
+		t.Errorf("Admin not bound as bool")
 	}
 }
 GO
 
-go run .
+go test .
 echo ok

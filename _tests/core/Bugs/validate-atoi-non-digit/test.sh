@@ -16,11 +16,12 @@ require codeberg.org/dreego/dreego/core v0.0.0
 replace codeberg.org/dreego/dreego/core => $realrepo/core
 EOF
 
-cat > main.go << 'GO'
-package main
+cat > validate_test.go << 'GO'
+package t
 
 import (
-	"fmt"
+	"testing"
+
 	dreego "codeberg.org/dreego/dreego/core"
 )
 
@@ -28,14 +29,13 @@ type Form struct {
 	Name string `validate:"min=abc"`
 }
 
-func main() {
+func TestValidateNonDigitRejected(t *testing.T) {
 	errs := dreego.ValidateForm(Form{Name: "x"})
 	if errs == nil || errs["name"] == "" {
-		fmt.Println("FAIL: non-digit min rule silently accepted")
-		return
+		t.Fatal("non-digit min rule silently accepted")
 	}
-	fmt.Println("ok")
 }
 GO
 
-go run .
+go test .
+echo ok

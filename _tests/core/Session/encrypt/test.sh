@@ -1,4 +1,5 @@
 #!/bin/sh
+# Using standard: _tests/how-to-test-sh.md
 # What: encrypted session round-trip via the core module
 set -e
 

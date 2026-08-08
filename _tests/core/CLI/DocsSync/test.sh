@@ -3,7 +3,7 @@
 # What: Verify the embedded docs in cmd/dreego/embedded/ match _docs/, README.md, and CHANGELOG.md
 set -e
 
-realrepo="$(cd "$(dirname "$0")"/../../.. && pwd)"
+realrepo="$(cd "$(dirname "$0")"/../../../.. && pwd)"
 workdir="$(mktemp -d)"
 trap "rm -rf $workdir" EXIT
 
