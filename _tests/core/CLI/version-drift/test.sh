@@ -11,12 +11,12 @@ cd "$workdir"
 
 if [ -z "$DREEGO_BIN" ]; then
     DREEGO_BIN="$workdir/.dreego-bin"
-    (cd "$realrepo" && go build -o "$DREEGO_BIN" ./cmd/dreego) || { echo "FAIL: could not build dreego CLI"; exit 1; }
+    (cd "$realrepo" && go build -o "$DREEGO_BIN" ./cli/dreego) || { echo "FAIL: could not build dreego CLI"; exit 1; }
     export DREEGO_BIN
 fi
 
 # The CLI version must match the version injected at build time (the latest
-# git tag), not a stale core version that cmd/dreego/go.mod requires.
+# git tag), not a stale core version.
 want="${DREEGO_VERSION:-dev}"
 out="$($DREEGO_BIN version)"
 case "$out" in

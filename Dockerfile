@@ -1,7 +1,7 @@
 FROM golang:1.22-alpine AS build
 WORKDIR /src
 COPY . .
-RUN go build -o /dreego ./cmd/dreego
+RUN go build -o /dreego ./cli/dreego
 RUN cd demo && /dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
 
 FROM scratch

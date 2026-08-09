@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-go install github.com/dreego-stack/dreego/cmd/dreego@latest
+go install github.com/dreego-stack/dreego/cli/dreego@latest
 ```
 
 ## New Project

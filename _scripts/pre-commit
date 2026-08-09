@@ -2,7 +2,7 @@
 # Auto-format staged Go files before commit, then re-stage the result
 set -e
 
-staged=$(git diff --cached --name-only --diff-filter=ACM -- 'core/*.go' 'cmd/dreego/*.go')
+staged=$(git diff --cached --name-only --diff-filter=ACM -- 'core/*.go' 'cli/dreego/*.go')
 if [ -z "$staged" ]; then
 	exit 0
 fi

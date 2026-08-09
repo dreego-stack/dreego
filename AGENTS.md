@@ -68,7 +68,7 @@ repo-root/
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
 ├── core/                   ← Core package (single package, no external deps)
-├── cmd/dreego/             ← CLI binary
+├── cli/dreego/             ← CLI binary
 ├── .github/workflows/      ← CI: pull_request.yml, release-prep.yml, release.yml
 │
 .agents/                    ← Knowledge Base (OKF format)
@@ -124,7 +124,7 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 - Go 1.22+, prefer standard library
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
 - Core code in `core/` (no external deps — enforced by `_scripts/check-core-deps.sh` in CI)
-- CLI in `cmd/dreego/` (imports core)
+- CLI in `cli/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
 - Build via `dreego` CLI, not directly `go build`
 - Generated `dree.go` not committed

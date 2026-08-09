@@ -11,7 +11,7 @@ cd "$workdir"
 
 if [ -z "$DREEGO_BIN" ]; then
     DREEGO_BIN="$workdir/.dreego-bin"
-    (cd "$realrepo" && go build -o "$DREEGO_BIN" ./cmd/dreego) || { echo "FAIL: could not build dreego CLI"; exit 1; }
+    (cd "$realrepo" && go build -o "$DREEGO_BIN" ./cli/dreego) || { echo "FAIL: could not build dreego CLI"; exit 1; }
     export DREEGO_BIN
 fi
 
