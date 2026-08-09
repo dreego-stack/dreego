@@ -9,12 +9,6 @@ trap "rm -rf $workdir" EXIT
 
 cd "$workdir"
 
-if [ -z "$DREEGO_BIN" ]; then
-    DREEGO_BIN="$workdir/.dreego-bin"
-    (cd "$realrepo" && go build -o "$DREEGO_BIN" ./cmd/dreego) || { echo "FAIL: could not build dreego CLI"; exit 1; }
-    export DREEGO_BIN
-fi
-
 cat > go.mod << EOF
 module t
 go 1.22
@@ -53,8 +47,8 @@ cat > dreego/routes/get.dreego << 'DREEGO'
 <div>hello</div>
 DREEGO
 
-$DREEGO_BIN generate
+go run "$realrepo/cmd/dreego" generate
 outfile="$workdir/run.out"
-$DREEGO_BIN run -t 30 > "$outfile" 2>&1
+go run "$realrepo/cmd/dreego" run -t 3 > "$outfile" 2>&1
 grep -q "SIGTERM received" "$outfile" || { echo "FAIL: server did not receive SIGTERM (B20)"; cat "$outfile"; exit 1; }
 echo ok
