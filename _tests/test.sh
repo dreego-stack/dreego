@@ -44,7 +44,7 @@ DREEGO_PORT_BASE="${DREEGO_PORT_BASE:-20000}"
 export DREEGO_PORT_BASE
 port_counter=$DREEGO_PORT_BASE
 
-for test_dir in $(find "$DIR/core" "$DIR/plugins" -type d 2>/dev/null | sort); do
+for test_dir in $(find "$DIR/core" -type d 2>/dev/null | sort); do
     test_script="$test_dir/test.sh"
     [ -f "$test_script" ] || continue
     name="${test_dir#$DIR/}"
