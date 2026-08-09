@@ -7,7 +7,7 @@ down:
 	docker compose down
 
 build:
-	go build -ldflags "-X main.version=$$(cat VERSION)" -o bin/dreego ./cmd/dreego
+	go build -ldflags "-X main.version=$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -o bin/dreego ./cmd/dreego
 
 generate:
 	go run ./cmd/dreego
@@ -16,8 +16,8 @@ dev:
 	go run ./cmd/dreego && go run .
 
 test:
-	@docker build -q -f _tests/Dockerfile -t dreego-test . > /dev/null 2>&1
-	@docker run --rm -e DREEGO_FILTER="$${DREEGO_FILTER:-}" dreego-test
+	@docker build -q --build-arg DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -f _tests/Dockerfile -t dreego-test . > /dev/null 2>&1
+	@docker run --rm -e DREEGO_FILTER="$${DREEGO_FILTER:-}" -e DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" dreego-test
 
 dx:
 	@EXT_DIR="$$(pwd)/.vscode/extensions/dreego"; \

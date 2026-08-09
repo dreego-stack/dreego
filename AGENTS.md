@@ -49,7 +49,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.26 tagged — Single-source versioning: `VERSION` file at repo root is the single truth; the CLI derives its version at build/runtime. Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See TODO.md for next steps.
+v0.0.27 tagged — Single-source versioning: the latest git tag (`vX.Y.Z`) is the single truth; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See TODO.md for next steps.
 
 ## File Structure
 
