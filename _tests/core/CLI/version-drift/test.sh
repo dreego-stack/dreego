@@ -15,17 +15,17 @@ if [ -z "$DREEGO_BIN" ]; then
     export DREEGO_BIN
 fi
 
-# The CLI version must match the repo's VERSION file (v0.0.25), not a stale
-# core version (v0.0.23) that cmd/dreego/go.mod currently requires.
-want="$(cat "$realrepo/VERSION")"
+# The CLI version must match the version injected at build time (the latest
+# git tag), not a stale core version that cmd/dreego/go.mod requires.
+want="${DREEGO_VERSION:-dev}"
 out="$($DREEGO_BIN version)"
 case "$out" in
     *"$want"*) ;;
-    *) echo "FAIL: dreego version is '$out', want it to contain '$want' (VERSION file)"; exit 1 ;;
+    *) echo "FAIL: dreego version is '$out', want it to contain '$want' (DREEGO_VERSION)"; exit 1 ;;
 esac
 
-# The repo module must declare the module path matching the repo's VERSION
-# file. A stale require (e.g. v0.0.23 while VERSION is v0.0.25) is the drift.
+# The repo module must declare the module path matching the repo's latest tag.
+# A stale require (e.g. v0.0.23 while the latest tag is v0.0.27) is the drift.
 # In-repo builds resolve core via the root module (local core wins); external
 # `go install` resolves via the published vX.Y.Z tag.
 gomod="$realrepo/go.mod"

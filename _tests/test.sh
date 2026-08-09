@@ -35,7 +35,7 @@ fi
 
 DREEGO_BIN="$workdir/.dreego-bin"
 DREEGO_BIN="$(mktemp -d)/dreego"
-(cd "$REPO_DIR" && go build -o "$DREEGO_BIN" ./cmd/dreego) || {
+(cd "$REPO_DIR" && go build -ldflags "-X main.version=${DREEGO_VERSION:-dev}" -o "$DREEGO_BIN" ./cmd/dreego) || {
     echo "FAIL: could not build dreego CLI"
     exit 1
 }

@@ -28,8 +28,11 @@ jobs:
           fi
 
       - name: Apply pr.md (changelog + version + remove pr.md)
+        id: prep
         if: steps.check.outputs.has_pr == 'true'
-        run: python3 _scripts/release-prep.py
+        run: |
+          python3 _scripts/release-prep.py | tee /tmp/prep.out
+          echo "new_version=$(grep '^new=' /tmp/prep.out | cut -d= -f2)" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push to main
         if: steps.check.outputs.has_pr == 'true'
@@ -43,19 +46,18 @@ jobs:
           git push --force-with-lease origin main
 
       - name: Create tag if version bumped
-        if: steps.check.outputs.has_pr == 'true'
+        if: steps.check.outputs.has_pr == 'true' && steps.prep.outputs.new_version != 'none'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          current=$(cat VERSION)
-          last_tag=$(git ls-remote --tags origin | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          if [ -z "$last_tag" ] || [ "$last_tag" = "$current" ]; then
-            echo "no version bump (last=$last_tag current=$current), skipping tag"
+          new="${{ steps.prep.outputs.new_version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$new$"; then
+            echo "tag $new already exists, skipping"
             exit 0
           fi
-          git tag "$current"
-          git push origin "$current"
-          echo "created tag $current"
+          git tag "$new"
+          git push origin "$new"
+          echo "created tag $new"
 
   delete-branch:
     if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository

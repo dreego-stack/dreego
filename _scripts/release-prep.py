@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""Apply a PR's pr.md to CHANGELOG.md and VERSION.
+"""Apply a PR's pr.md to CHANGELOG.md and print the next version.
 
 Reads pr.md from the current directory, validates the version field,
-computes the next version from the current VERSION file, prepends a
-CHANGELOG entry, updates VERSION, and removes pr.md.
+computes the next version from the latest git tag (vX.Y.Z), prepends a
+CHANGELOG entry, and removes pr.md. The VERSION file is no longer used —
+the git tag is the single source of truth.
 
 Changelog format:
 - version=none: prepend changelog lines at the very top of the file
 - version=patch|minor|major: prepend a version block (blank line,
-  '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog
-  lines. Update VERSION file.
+  '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog lines.
+
+Prints 'new=vX.Y.Z' or 'new=none' on stdout for the workflow to consume.
 
 Usage: python3 _scripts/release-prep.py
 Exit 0 on success, non-zero on validation error.
 """
 
 import re
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
@@ -23,7 +26,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PR_MD = ROOT / "pr.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
-VERSION_FILE = ROOT / "VERSION"
 
 VALID_VERSIONS = ("none", "patch", "minor", "major")
 
@@ -31,6 +33,17 @@ VALID_VERSIONS = ("none", "patch", "minor", "major")
 def fail(msg):
     print(f"error: {msg}", file=sys.stderr)
     sys.exit(1)
+
+
+def latest_tag():
+    out = subprocess.run(
+        ["git", "tag", "-l", "v[0-9]*"],
+        capture_output=True, text=True, cwd=ROOT,
+    )
+    tags = [t for t in out.stdout.splitlines() if re.match(r"^v\d+\.\d+\.\d+$", t)]
+    if not tags:
+        return "v0.0.0"
+    return sorted(tags, key=lambda t: [int(x) for x in t[1:].split(".")])[-1]
 
 
 def parse_pr_md(text):
@@ -57,7 +70,7 @@ def parse_pr_md(text):
 def next_version(current, bump):
     m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)$", current.strip())
     if not m:
-        fail(f"VERSION file has invalid format: '{current}'")
+        fail(f"latest tag has invalid format: '{current}'")
     major, minor, patch = (int(g) for g in m.groups())
     if bump == "patch":
         patch += 1
@@ -76,7 +89,7 @@ def main():
         fail("pr.md not found in PR branch")
     version, lines = parse_pr_md(PR_MD.read_text())
 
-    current = VERSION_FILE.read_text().strip() if VERSION_FILE.exists() else "v0.0.0"
+    current = latest_tag()
     new_version = next_version(current, version) if version != "none" else None
 
     today = date.today().isoformat()
@@ -93,11 +106,9 @@ def main():
 
     CHANGELOG.write_text(entry + old)
 
-    if new_version:
-        VERSION_FILE.write_text(new_version + "\n")
-
     PR_MD.unlink()
-    print(f"applied: version={version} new={new_version or '(none)'} lines={len(lines)}")
+    print(f"new={new_version or 'none'}")
+    print(f"applied: version={version} new={new_version or '(none)'} lines={len(lines)}", file=sys.stderr)
 
 
 if __name__ == "__main__":
