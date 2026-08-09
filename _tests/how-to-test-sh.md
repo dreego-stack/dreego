@@ -40,7 +40,7 @@ echo "ok"
 0. **First line** after `#!/bin/sh` must be `# Using standard: _tests/how-to-test-sh.md` — makes non-compliant files discoverable via `head -1`
 0a. **Second line** must be `# What: <summary>` — one-line description of what this test verifies
 1. **`realrepo`** — absolute path to repo root, always `../../../..` from `_tests/core/<Group>/<name>/` (4 levels up). For `_tests/plugins/<name>/` adjust depth accordingly.
-2. **`$DREEGO_BIN`** — pre-compiled dreego CLI, exported by the test runner. Use `$DREEGO_BIN generate` / `$DREEGO_BIN run` etc. Never `go run`.
+2. **`$DREEGO_BIN`** — pre-compiled dreego CLI, exported by the test runner. Use `$DREEGO_BIN generate` / `$DREEGO_BIN run` etc. Never `go run`. Exception: tests that spawn a real subprocess and signal it (e.g. `run-timer-sigterm`) use `go run "$realrepo/cmd/dreego"` instead — the runner's pre-compiled binary would be reused across tests and the signal would hit the wrong process.
 3. **`workdir`** — always `mktemp -d`, never create files inside `_tests/`
 4. **`trap "rm -rf $workdir" EXIT`** — mandatory cleanup on success *and* failure
 5. **`go.mod`** — always fresh with `require` + `replace` for `github.com/dreego-stack/dreego` (use `cat > go.mod`, never `go mod init`)
