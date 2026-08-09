@@ -1,0 +1,37 @@
+name: release-prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to prepare for merge'
+        required: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR head ref
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName --jq .headRefName)
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/heads/${{ steps.pr.outputs.ref }}
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        run: python3 _scripts/release-prep.py
+
+      - name: Commit and push to PR branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: apply pr.md changelog + version"
+          git push origin HEAD:${{ steps.pr.outputs.ref }}

@@ -11,6 +11,13 @@ RUNNING=0
 
 REPO_DIR="$(cd "$DIR/.." && pwd)"
 
+if ! (cd "$REPO_DIR" && sh _scripts/check-core-deps.sh > /dev/null 2>&1); then
+    echo "FAIL core-deps"
+    FAIL=$((FAIL + 1))
+else
+    echo "==> PASS <=> Core deps <========="
+fi
+
 go_failed=0
 for pkg in ./core/... ./cmd/dreego/...; do
     if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then

@@ -1,0 +1,26 @@
+name: release
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create tag if version bumped
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(cat VERSION)
+          last_tag=$(git ls-remote --tags origin | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -z "$last_tag" ] || [ "$last_tag" = "$current" ]; then
+            echo "no version bump (last=$last_tag current=$current), skipping tag"
+            exit 0
+          fi
+          git tag "$current"
+          git push origin "$current"
+          echo "created tag $current"

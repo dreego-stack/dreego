@@ -1,0 +1,58 @@
+name: pull-request
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to check (fork PRs only)'
+        required: true
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', github.event.inputs.pr_number) || github.event.pull_request.head.sha }}
+
+      - name: pr.md exists
+        run: |
+          if [ ! -f pr.md ]; then
+            echo "error: pr.md missing — copy pr.md.example and fill in version + changelog lines"
+            exit 1
+          fi
+
+      - name: pr.md format valid
+        run: |
+          python3 - <<'EOF'
+          import re, sys
+          text = open('pr.md').read()
+          m = re.match(r'^---\s*\n(.*?)\n---\s*\n?(.*)$', text, re.DOTALL)
+          if not m:
+              print('error: pr.md must start with YAML frontmatter (--- ... ---)')
+              sys.exit(1)
+          fm = m.group(1)
+          version = None
+          for line in fm.strip().splitlines():
+              if line.strip().startswith('version:'):
+                  version = line.split(':', 1)[1].strip()
+          if version not in ('none', 'patch', 'minor', 'major'):
+              print(f"error: pr.md version must be none|patch|minor|major, got '{version}'")
+              sys.exit(1)
+          lines = [l.strip() for l in m.group(2).splitlines() if l.strip()]
+          if not lines:
+              print('error: pr.md has no changelog lines')
+              sys.exit(1)
+          print(f"ok: version={version} lines={len(lines)}")
+          EOF
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: make test
+        run: make test
