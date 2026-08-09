@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PR_MD = ROOT / "pr.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
+EMBEDDED_CHANGELOG = ROOT / "cmd" / "dreego" / "embedded" / "CHANGELOG.md"
 VERSION_FILE = ROOT / "VERSION"
 
 VALID_VERSIONS = ("none", "patch", "minor", "major")
@@ -81,6 +82,10 @@ def main():
         entry = "\n".join(f"- {l}" for l in lines) + "\n"
     old = CHANGELOG.read_text() if CHANGELOG.exists() else ""
     CHANGELOG.write_text(entry + old)
+
+    if EMBEDDED_CHANGELOG.exists():
+        old_emb = EMBEDDED_CHANGELOG.read_text()
+        EMBEDDED_CHANGELOG.write_text(entry + old_emb)
 
     if new_version:
         VERSION_FILE.write_text(new_version + "\n")
