@@ -1,6 +1,6 @@
 # Agent Instructions for Dreego
 
-- Dont create here a bianry only on /tmp or ./tmp
+- Don't create binaries here — only in /tmp or ./tmp
 
 ## Language Rule
 
@@ -49,7 +49,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.22 tagged — Single-source versioning: `VERSION` file at repo root is the single truth; CLI derives its version at build/runtime, `_scripts/release.sh` creates the module tags from it. v0.0.21: monorepo plugin layout (`plugins/` + `go.work`). See TODO.md for next steps.
+v0.0.26 tagged — Single-source versioning: `VERSION` file at repo root is the single truth; the CLI derives its version at build/runtime. Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See TODO.md for next steps.
 
 ## File Structure
 
@@ -60,7 +60,8 @@ repo-root/
 ├── CHANGELOG.md            ← What came in which version
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
-├── go.work                 ← Links root module + plugin modules
+├── go.mod                  ← Single root module (one tag per release)
+├── pr.md.example           ← PR metadata template (version + changelog lines)
 ├── _docs/                  ← Public documentation
 ├── _tests/                 ← Integration tests (Docker, `make test`)
 │   └── core/<Category>/    ← Core/framework test suites
@@ -68,7 +69,7 @@ repo-root/
 │
 ├── core/                   ← Core package (single package, no external deps)
 ├── cmd/dreego/             ← CLI binary
-├── plugins/                ← Official plugins (each with own go.mod if deps needed)
+├── .github/workflows/      ← CI: pull_request.yml, release-prep.yml, release.yml
 │
 .agents/                    ← Knowledge Base (OKF format)
 ├── index.md                 ← Start here (OKF TOC)
@@ -88,7 +89,23 @@ repo-root/
 
 ## Commit Convention
 
-See [Changelog Guide](.agents/guides/changelog.md) for the full workflow.
+Every change lands via a pull request. The PR must contain a `pr.md` (copy `pr.md.example`) with YAML frontmatter:
+
+```yaml
+---
+version: patch        # none | patch | minor | major
+---
+
+- Bug: fix X
+- Feat: add Y
+```
+
+- `version: none` — no version bump, changelog lines only (e.g. dependabot updates)
+- `version: patch` — `0.0.x` +1
+- `version: minor` — `0.x.0` +1
+- `version: major` — `x.0.0` +1
+
+The CI (`pull_request.yml`) validates pr.md and runs `make test`. After approval, `release-prep` (manual, with PR number) applies the changelog + version to the PR branch and removes pr.md. After squash-merge, `release.yml` creates the tag. No local tags.
 
 ## Project: dreego
 
@@ -129,7 +146,7 @@ Every feature follows this cycle:
 2. **Code** — Implement in `core/` (one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
-5. **Changelog** — Add entry to `CHANGELOG.md`
+5. **PR** — Create a PR with `pr.md` (version bump + changelog lines); CI validates it
 6. **KB** — Update `.agents/log.md` + relevant concept/decision docs
 
 For multi-step features, repeat the cycle for each step. Commit after each step.
