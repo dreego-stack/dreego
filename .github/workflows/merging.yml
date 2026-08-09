@@ -10,13 +10,43 @@ permissions:
   contents: write
 
 jobs:
-  tag:
+  process:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Stop if no pr.md (loop protection)
+        id: check
+        run: |
+          if [ -f pr.md ]; then
+            echo "has_pr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_pr=false" >> "$GITHUB_OUTPUT"
+            echo "no pr.md, nothing to process"
+          fi
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        if: steps.check.outputs.has_pr == 'true'
+        run: python3 _scripts/release-prep.py
+
+      - name: Sync embedded docs
+        if: steps.check.outputs.has_pr == 'true'
+        run: sh _scripts/sync-embedded-docs.sh
+
+      - name: Commit and push to main
+        if: steps.check.outputs.has_pr == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: apply pr.md changelog + version [skip ci]"
+          git push origin main
+
       - name: Create tag if version bumped
+        if: steps.check.outputs.has_pr == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
