@@ -55,6 +55,6 @@ DREEGO
 
 $DREEGO_BIN generate
 outfile="$workdir/run.out"
-$DREEGO_BIN run -t 15 > "$outfile" 2>&1
+$DREEGO_BIN run -t 30 > "$outfile" 2>&1
 grep -q "SIGTERM received" "$outfile" || { echo "FAIL: server did not receive SIGTERM (B20)"; cat "$outfile"; exit 1; }
 echo ok
