@@ -2,5 +2,5 @@
 version: none
 ---
 
-- Fix: release workflow triggers on push to main instead of pull_request closed
-  (GitHub suppresses workflow runs for PRs that modify workflow files)
+- Fix: release-prep gets PR head ref with --repo flag
+  (gh pr view fails without a git checkout)
