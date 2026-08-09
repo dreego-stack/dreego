@@ -17,7 +17,18 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', github.event.inputs.pr_number) || github.event.pull_request.head.sha }}
 
+      - name: Detect release-prep commit
+        id: prep
+        run: |
+          author=$(git log -1 --format=%an)
+          if [ "$author" = "github-actions[bot]" ]; then
+            echo "prepared=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prepared=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: pr.md exists
+        if: steps.prep.outputs.prepared != 'true'
         run: |
           if [ ! -f pr.md ]; then
             echo "error: pr.md missing — copy pr.md.example and fill in version + changelog lines"
@@ -25,6 +36,7 @@ jobs:
           fi
 
       - name: pr.md format valid
+        if: steps.prep.outputs.prepared != 'true'
         run: |
           python3 - <<'EOF'
           import re, sys

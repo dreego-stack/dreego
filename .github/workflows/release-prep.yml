@@ -7,6 +7,10 @@ on:
         description: 'PR number to prepare for merge'
         required: true
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -33,5 +37,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore: apply pr.md changelog + version"
+          git commit -m "chore: apply pr.md changelog + version [skip ci]"
           git push origin HEAD:${{ steps.pr.outputs.ref }}
