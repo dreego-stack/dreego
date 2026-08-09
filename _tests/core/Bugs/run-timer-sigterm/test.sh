@@ -41,7 +41,7 @@ func main() {
 	go func() {
 		<-done
 		fmt.Println("SIGTERM received")
-		os.Exit(0)
+		return
 	}()
 	dreego.SetLogging(false)
 	dreego.Listen(":$port")
