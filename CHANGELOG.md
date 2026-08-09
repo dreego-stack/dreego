@@ -1,3 +1,5 @@
+- Chore: remove stale _tests/TODO.nd and root CLI.md (duplicate of _docs/cli.md)
+- Chore: clean up .gitignore (grouped sections, .review/, removed obsolete go.work entries)
 # Changelog
 
 ## v0.0.26 (2026-08-08) — Post-Release Fixes + SSE Plugin
