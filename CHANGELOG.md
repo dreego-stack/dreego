@@ -1,6 +1,8 @@
+# Changelog
+
 ## v0.0.27 (2026-08-09)
 
-# Changelog
+- Test: verify end-to-end release workflow (changelog append + version bump + tag)
 
 ## v0.0.26 (2026-08-08) — Post-Release Fixes + SSE Plugin
 
@@ -349,5 +351,3 @@ First prototype. Transpiler, Routing, Layout, Middleware, CLI.
 - [Routing & Components](.agents/decisions/routing-and-components.md) — Hybrid routing, Plugin routes
 - [Middleware System](.agents/decisions/middleware-system.md) — Core-Fixed vs Core-Conditional vs Plugin
 - GLM Review: Per-directory `dree.go` output strategy confirmed
-
-- Test: verify end-to-end release workflow (changelog append + version bump + tag)

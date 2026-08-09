@@ -6,10 +6,10 @@ computes the next version from the current VERSION file, prepends a
 CHANGELOG entry, updates VERSION, and removes pr.md.
 
 Changelog format:
-- version=none: append changelog lines at the END of the file
-- version=patch|minor|major: insert a new version header at the TOP
-  (## vX.Y.Z (YYYY-MM-DD)) followed by the changelog lines, then
-  append the same lines at the END as well. Update VERSION file.
+- version=none: insert changelog lines after the '# Changelog' title
+- version=patch|minor|major: insert a new version header
+  (## vX.Y.Z (YYYY-MM-DD)) followed by the changelog lines after the
+  '# Changelog' title. Update VERSION file.
 
 Usage: python3 _scripts/release-prep.py
 Exit 0 on success, non-zero on validation error.
@@ -84,13 +84,18 @@ def main():
     if old and not old.endswith("\n"):
         old += "\n"
 
-    tail = "\n".join(f"- {l}" for l in lines) + "\n"
+    lines_text = "\n".join(f"- {l}" for l in lines) + "\n"
 
     if new_version:
-        header = f"## {new_version} ({today})\n\n"
-        new_content = header + old + "\n" + tail
+        entry = f"## {new_version} ({today})\n\n{lines_text}\n"
     else:
-        new_content = old + tail
+        entry = lines_text
+
+    title = "# Changelog\n\n"
+    if old.startswith(title):
+        new_content = title + entry + old[len(title):]
+    else:
+        new_content = entry + old
 
     CHANGELOG.write_text(new_content)
 
