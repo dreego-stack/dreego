@@ -55,7 +55,7 @@ Runs `generate` + `build`, starts the server, then watches `.dreego` files (500 
 dreego docs [path]
 ```
 
-Displays repo documentation from the embedded copy (`cmd/dreego/embedded/`), so it works **offline**. Without arguments, shows `/_docs/index.md`. Local plugin docs in `plugins/<name>/_docs/` take priority over the embedded copy.
+Displays repo documentation from the embedded copy (`cmd/dreego/embedded/`), so it works **offline**. Without arguments, shows `/_docs/index.md`.
 
 Examples:
 ```bash

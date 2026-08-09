@@ -14,9 +14,9 @@ Keep CHANGELOG.md up to date with every meaningful change.
 
 ## When to use
 
-- Before EVERY commit: one line or short paragraph in CHANGELOG.md
-- New version (Tag): Agent proposes (Feature=MINOR, Fix=PATCH, Doc=optional)
-- User decides whether to tag a new version
+- Every change lands via a pull request with a `pr.md` (see AGENTS.md Commit Convention)
+- The `pr.md` frontmatter declares the version bump: `none | patch | minor | major`
+- The changelog lines in `pr.md` become the CHANGELOG entry
 
 ## Format
 
@@ -34,12 +34,15 @@ Keep CHANGELOG.md up to date with every meaningful change.
 - Newest version on TOP
 - One bullet per feature/fix
 - Date in ISO format
+- `version: none` prepends only the lines, no version header
 
 ## Workflow
 
 1. Change code
-2. Update CHANGELOG.md (one line)
-3. Check off completed items in TODO.md
-4. Commit
-5. When feature is complete: `git tag -a vX.Y.Z -m "vX.Y.Z: summary"`
-6. Push: `git push origin main --tags`
+2. Create a PR with `pr.md` (copy `pr.md.example`): `version:` + changelog lines
+3. CI (`pull_request.yml`) validates pr.md and runs `make test`
+4. After approval, run `release-prep` (manual, with PR number) — it applies the changelog + version to the PR branch and removes pr.md
+5. Squash-merge the PR
+6. `release.yml` creates the tag after merge
+
+No local tags, no `git tag -a`, no `git push --tags`.

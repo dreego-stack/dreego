@@ -18,32 +18,35 @@ Official plugins live in separate repos under `github.com/dreego-stack/`. Each p
 
 After plugin-interface.1 + middleware-hooks.1 + route-hooks.1 the following plugin blocks unblock. They are tracked here for visibility and implemented as separate repos under `github.com/dreego-stack/` (each with its own `go.mod`):
 
-- dreego-auth
-- dreego-db
-- dreego-cache
-- dreego-storage
-- dreego-i18n
-- dreego-seo
-- dreego-mail
-- dreego-jobs
-- dreego-analytics
-- dreego-features
-- dreego-pwa
-- dreego-markdown
-- dreego-icons
-- dreego-charts
-- dreego-map
-- dreego-search
-- dreego-pdf
-- dreego-polar
-- dreego-admin
-- dreego-devtools
+- plugin-auth
+- plugin-db
+- plugin-cache
+- plugin-storage
+- plugin-i18n
+- plugin-seo
+- plugin-mail
+- plugin-jobs
+- plugin-analytics
+- plugin-features
+- plugin-pwa
+- plugin-markdown
+- plugin-icons
+- plugin-charts
+- plugin-map
+- plugin-search
+- plugin-pdf
+- plugin-polar
+- plugin-admin
+- plugin-devtools
 
-## v0.0.26
+## v0.0.27 (chore batch)
 
-- `documentation.1` — docs site, tutorial, examples
-- `api-swagger.1` — Swagger/OpenAPI auto-generation
-- `observability.1` — core request-id done; plugin metrics/tracing later
+- Platform migration codeberg → github.com/dreego-stack ✅
+- Single root module (one tag per release) ✅
+- Plugin extraction to separate repos ✅
+- PR-based release workflow (pr.md + CI tag) ✅
+- Docs simplification (remove embedded mirror) — open
+- `_todo`/Blockwebchain simplification — open
 
 ## v0.0.30 area
 

@@ -4,6 +4,23 @@ Status via `python _todo/process.py`. Chain 1–49 done. Next code: **50**.
 
 Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (may include breaking changes), `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
 
+## v0.0.27 (in progress — chore batch)
+
+- Platform migration codeberg → github.com/dreego-stack ✅
+- Single root module (one tag per release) ✅
+- Plugin extraction to separate repos ✅
+- PR-based release workflow (pr.md + CI tag) ✅
+- AGENTS.md + docs updated for new workflow ✅
+- Flaky test fix (run-timer-sigterm stdout flush) ✅
+
+### Open design questions (need a new process/brauch)
+
+These three systems are all in flux and need a decision on how they should work going forward:
+
+- **docs system** — embedded docs (`cmd/dreego/embedded/`) vs decentralized `dreego docs` (remote fetch). Current state: embedded mirror + sync script + DocsSync test exist, but no HTTP fetch function. Decide: keep embedded, go decentralized, or hybrid.
+- **todo system** — Blockwebchain is too custom for agents. Simplify (drop chain integers, keep dependency graph) or replace (linear TODO.md + issues).
+- **tests system** — shell-based `_tests/**/test.sh` vs `_test.go` (dreegotest + httptest + golden). Decide migration strategy and how the agent is told to follow the convention.
+
 ## v0.0.26 (done)
 
 - Post-v0.0.25 bugfix batch — `{#if}/{#each}` in attributes, `<...>` in go strings, sections after leading text, doctype/scope in error pages, head dedupe, prop defaults, JSON/XML status-before-encode, `dreego init` gen import, `plugins/sample` core-require drift
