@@ -6,10 +6,10 @@ computes the next version from the current VERSION file, prepends a
 CHANGELOG entry, updates VERSION, and removes pr.md.
 
 Changelog format:
-- version=none: insert changelog lines after the '# Changelog' title
-- version=patch|minor|major: insert a new version header
-  (## vX.Y.Z (YYYY-MM-DD)) followed by the changelog lines after the
-  '# Changelog' title. Update VERSION file.
+- version=none: prepend changelog lines at the very top of the file
+- version=patch|minor|major: prepend a version block (blank line,
+  '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog
+  lines. Update VERSION file.
 
 Usage: python3 _scripts/release-prep.py
 Exit 0 on success, non-zero on validation error.
@@ -81,23 +81,17 @@ def main():
 
     today = date.today().isoformat()
     old = CHANGELOG.read_text() if CHANGELOG.exists() else ""
-    if old and not old.endswith("\n"):
-        old += "\n"
+    if old and not old.startswith("\n"):
+        old = "\n" + old
 
     lines_text = "\n".join(f"- {l}" for l in lines) + "\n"
 
     if new_version:
-        entry = f"## {new_version} ({today})\n\n{lines_text}\n"
+        entry = f"\n## {new_version} - {today}\n\n{lines_text}"
     else:
         entry = lines_text
 
-    title = "# Changelog\n\n"
-    if old.startswith(title):
-        new_content = title + entry + old[len(title):]
-    else:
-        new_content = entry + old
-
-    CHANGELOG.write_text(new_content)
+    CHANGELOG.write_text(entry + old)
 
     if new_version:
         VERSION_FILE.write_text(new_version + "\n")

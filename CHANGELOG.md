@@ -1,8 +1,3 @@
-# Changelog
-
-## v0.0.27 (2026-08-09)
-
-- Test: verify end-to-end release workflow (changelog append + version bump + tag)
 
 ## v0.0.26 (2026-08-08) — Post-Release Fixes + SSE Plugin
 
