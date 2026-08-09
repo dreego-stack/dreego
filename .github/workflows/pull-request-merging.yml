@@ -1,20 +1,19 @@
-name: merging
+name: pull-request-merging
 
 on:
   push:
     branches: [main]
-  pull_request:
-    types: [closed]
 
 permissions:
   contents: write
 
 jobs:
   process:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Stop if no pr.md (loop protection)
         id: check

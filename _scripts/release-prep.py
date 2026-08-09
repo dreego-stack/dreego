@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Apply a PR's pr.md to CHANGELOG.md and VERSION.
 
-Reads pr.md from the current directory (PR branch), validates the version
-field, computes the next version from the current VERSION file, prepends a
+Reads pr.md from the current directory, validates the version field,
+computes the next version from the current VERSION file, prepends a
 CHANGELOG entry, updates VERSION, and removes pr.md.
+
+Changelog format:
+- version=none: append changelog lines at the END of the file
+- version=patch|minor|major: insert a new version header at the TOP
+  (## vX.Y.Z (YYYY-MM-DD)) followed by the changelog lines, then
+  append the same lines at the END as well. Update VERSION file.
 
 Usage: python3 _scripts/release-prep.py
 Exit 0 on success, non-zero on validation error.
@@ -74,13 +80,19 @@ def main():
     new_version = next_version(current, version) if version != "none" else None
 
     today = date.today().isoformat()
-    if new_version:
-        header = f"## {new_version} ({today})\n"
-        entry = header + "\n" + "\n".join(f"- {l}" for l in lines) + "\n\n"
-    else:
-        entry = "\n".join(f"- {l}" for l in lines) + "\n"
     old = CHANGELOG.read_text() if CHANGELOG.exists() else ""
-    CHANGELOG.write_text(entry + old)
+    if old and not old.endswith("\n"):
+        old += "\n"
+
+    tail = "\n".join(f"- {l}" for l in lines) + "\n"
+
+    if new_version:
+        header = f"## {new_version} ({today})\n\n"
+        new_content = header + old + "\n" + tail
+    else:
+        new_content = old + tail
+
+    CHANGELOG.write_text(new_content)
 
     if new_version:
         VERSION_FILE.write_text(new_version + "\n")
