@@ -112,7 +112,7 @@ func cmdNew(args []string) {
 // findLocalRepo returns the absolute path to the local dreego repo root
 // (used to replace the remote dreego dependency in generated scaffolds), or ""
 // if it cannot be located. The path is resolved relative to this source file,
-// which lives in <repo>/cmd/dreego/ for a repo-local build.
+// which lives in <repo>/cli/dreego/ for a repo-local build.
 func findLocalRepo() string {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {

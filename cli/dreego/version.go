@@ -6,7 +6,7 @@ import (
 
 // version is injected at build time via:
 //
-//	go build -ldflags "-X main.version=$(git describe --tags --abbrev=0)" ./cmd/dreego
+//	go build -ldflags "-X main.version=$(git describe --tags --abbrev=0)" ./cli/dreego
 var version string
 
 // dreegoVersion returns the CLI version. Resolution order:

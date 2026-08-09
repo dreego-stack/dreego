@@ -7,13 +7,13 @@ down:
 	docker compose down
 
 build:
-	go build -ldflags "-X main.version=$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -o bin/dreego ./cmd/dreego
+	go build -ldflags "-X main.version=$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -o bin/dreego ./cli/dreego
 
 generate:
-	go run ./cmd/dreego
+	go run ./cli/dreego
 
 dev:
-	go run ./cmd/dreego && go run .
+	go run ./cli/dreego && go run .
 
 test:
 	@docker build -q --build-arg DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -f _tests/Dockerfile -t dreego-test . > /dev/null 2>&1

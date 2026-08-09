@@ -5,7 +5,7 @@ Dreego plugins live in separate repos under `github.com/dreego-stack/`. Each plu
 ## Architecture
 
 ```
-github.com/dreego-stack/dreego              ← Main repo: core/ + cmd/dreego/ (single module)
+github.com/dreego-stack/dreego              ← Main repo: core/ + cli/dreego/ (single module)
 github.com/dreego-stack/dreego/core         ← Core package (no external deps beyond stdlib)
 github.com/dreego-stack/plugin-auth         ← Plugin: OAuth2, JWT, sessions (own go.mod)
 github.com/dreego-stack/plugin-db   ← Plugin: SQL drivers, migrations (own go.mod)

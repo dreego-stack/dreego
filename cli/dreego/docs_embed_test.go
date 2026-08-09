@@ -10,7 +10,7 @@ import (
 // newTestEmbeddedFS replaces the package-level embeddedDocs with a
 // t.TempDir()-backed fs.FS built from the given path->content map. This keeps
 // the read-logic tests deterministic and independent of the production
-// //go:embed copy step (which lives in cmd/dreego/embedded/).
+// //go:embed copy step (which lives in cli/dreego/embedded/).
 func newTestEmbeddedFS(t *testing.T, files map[string]string) {
 	t.Helper()
 	root := t.TempDir()

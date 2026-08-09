@@ -7,7 +7,7 @@ import (
 )
 
 // TestFindLocalRepo verifies findLocalRepo resolves the absolute path to the
-// local dreego repo root relative to this source file (<repo>/cmd/dreego/../..),
+// local dreego repo root relative to this source file (<repo>/cli/dreego/../..),
 // when that directory contains a go.mod. This is what allows a repo-local
 // build to scaffold projects with an offline replace directive.
 func TestFindLocalRepo(t *testing.T) {
@@ -27,7 +27,7 @@ func TestFindLocalRepo(t *testing.T) {
 }
 
 // TestFindLocalRepoMissing verifies findLocalRepo tolerates a missing root
-// go.mod. The function is hardwired to this source file (<repo>/cmd/dreego/),
+// go.mod. The function is hardwired to this source file (<repo>/cli/dreego/),
 // so in this repo the root go.mod always exists and the branch is unreachable;
 // it is asserted here that the resolved path is a directory containing a
 // regular go.mod file (not a directory or a non-existent path), which is the

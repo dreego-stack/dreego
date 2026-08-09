@@ -19,7 +19,7 @@ else
 fi
 
 go_failed=0
-for pkg in ./core/... ./cmd/dreego/...; do
+for pkg in ./core/... ./cli/dreego/...; do
     if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then
         go_failed=$((go_failed + 1))
         echo "FAIL $pkg"
@@ -35,7 +35,7 @@ fi
 
 DREEGO_BIN="$workdir/.dreego-bin"
 DREEGO_BIN="$(mktemp -d)/dreego"
-(cd "$REPO_DIR" && go build -ldflags "-X main.version=${DREEGO_VERSION:-dev}" -o "$DREEGO_BIN" ./cmd/dreego) || {
+(cd "$REPO_DIR" && go build -ldflags "-X main.version=${DREEGO_VERSION:-dev}" -o "$DREEGO_BIN" ./cli/dreego) || {
     echo "FAIL: could not build dreego CLI"
     exit 1
 }

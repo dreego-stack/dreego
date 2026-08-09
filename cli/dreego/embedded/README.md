@@ -88,7 +88,7 @@ Three principles:
 ## Quick Start
 
 ```bash
-go install github.com/dreego-stack/dreego/cmd/dreego@latest
+go install github.com/dreego-stack/dreego/cli/dreego@latest
 dreego init myapp
 cd myapp
 go mod init myapp
