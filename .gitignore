@@ -1,32 +1,39 @@
+# Kilo / editor
 .kilo/
-.tmp/
-code/
-*.exe
-*.test
-vendor/
+.idea/
 
+# Temp / debug
+.tmp/
+.tmp-review-cli
+.dreego-review-bin
+.review/
+
+# Environment
 .env
 .env.*
 
+# Go build artifacts
+bin/
+build/
+*.exe
+*.test
+vendor/
+/dreego
+dreego-linux
+
+# Generated dreego code
 *_dreego.go
+dreego_router.go
+handle_*.go
+dree.go
+dreego/gen/
+
+# smd
 _smd/
 smd.toml
 
-dreego_router.go
-handle_*.go
-bin/
-build/
-*_dreego.go
-dree.go
-dreego/gen/
+# VS Code extension
 *.vsix
-/dreego
-go.work
-go.work.sum
-.dreego-review-bin
-.tmp-review-cli
-dreego-linux
 
 # macOS
 .DS_Store
-
