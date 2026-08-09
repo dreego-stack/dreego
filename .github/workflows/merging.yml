@@ -1,0 +1,49 @@
+name: merging
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create tag if version bumped
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(cat VERSION)
+          last_tag=$(git ls-remote --tags origin | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -z "$last_tag" ] || [ "$last_tag" = "$current" ]; then
+            echo "no version bump (last=$last_tag current=$current), skipping tag"
+            exit 0
+          fi
+          git tag "$current"
+          git push origin "$current"
+          echo "created tag $current"
+
+  delete-branch:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged head branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="${{ github.event.pull_request.head.ref }}"
+          if [ "$branch" = "main" ]; then
+            echo "refusing to delete main"
+            exit 0
+          fi
+          gh api --method DELETE \
+            "repos/${{ github.repository }}/git/refs/heads/$branch" \
+            || echo "branch $branch already deleted or not found"
+          echo "deleted branch $branch"
