@@ -17,11 +17,10 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', github.event.inputs.pr_number) || github.event.pull_request.head.sha }}
 
-      - name: Detect release-prep commit
+      - name: Detect prepared PR
         id: prep
         run: |
-          author=$(git log -1 --format=%an)
-          if [ "$author" = "github-actions[bot]" ]; then
+          if git log --format=%H --grep="apply pr.md changelog + version" | grep -q .; then
             echo "prepared=true" >> "$GITHUB_OUTPUT"
           else
             echo "prepared=false" >> "$GITHUB_OUTPUT"
@@ -68,3 +67,38 @@ jobs:
 
       - name: make test
         run: make test
+
+  prepare:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/heads/${{ github.event.pull_request.head.ref }}
+
+      - name: Detect prepared PR
+        id: prep
+        run: |
+          if git log --format=%H --grep="apply pr.md changelog + version" | grep -q .; then
+            echo "prepared=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prepared=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        if: steps.prep.outputs.prepared != 'true' && hashFiles('pr.md') != ''
+        run: python3 _scripts/release-prep.py
+
+      - name: Commit and push to PR branch
+        if: steps.prep.outputs.prepared != 'true' && hashFiles('pr.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: apply pr.md changelog + version [skip ci]"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
