@@ -1,0 +1,22 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/dreego-stack/dreego/dreegotest"
+)
+
+func TestBugComponentIfEach(t *testing.T) {
+	gen := dreegotest.Build(t, map[string]string{
+		"dreego/components/List.dreego": `Component List (items []string)
+<ul>
+{#each items as item}
+    <li>{item}</li>
+{/each}
+</ul>`,
+		"dreego/routes/get.dreego": `<go>items := []string{"a", "b"}</go>
+<div><@List items={items}/></div>`,
+	})
+	dreegotest.MustNotContain(t, gen["dreego/gen/components.go"], "{#each")
+	dreegotest.MustNotContain(t, gen["dreego/gen/components.go"], "{#if")
+}

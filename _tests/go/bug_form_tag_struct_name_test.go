@@ -1,0 +1,29 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/dreego-stack/dreego/dreegotest"
+)
+
+func TestBugFormTagStructName(t *testing.T) {
+	gen := dreegotest.Build(t, map[string]string{
+		"dreego/routes/get-search.dreego": `<go>
+type LoginForm struct {
+}
+type SearchQuery struct {
+	Query string ` + "`form:\"q\"`" + `
+}
+func Search(c *dreego.SSRContext, form SearchQuery) error {
+	return nil
+}
+</go>
+<div>
+  <form g-action="Search" method="post">
+    <input name="q">
+    <button>Search</button>
+  </form>
+</div>`,
+	})
+	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "SearchQuery")
+}
