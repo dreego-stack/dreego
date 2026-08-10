@@ -62,7 +62,7 @@ commands:
   build [--target <os/arch>] generate + go build → build/bin/<name>
   run [-d] [-t <seconds>] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change
-  docs [--web] [--json] [--dump] [path]  fetch repo docs (default: /_docs/index.md)
+  docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: core /_docs/index.md)
   feedback               open browser to submit feedback/issue
   version, --version, -v  show the dreego CLI version
   help                   show this help
@@ -70,7 +70,9 @@ commands:
 flags:
   --force                force regeneration of all files
   --target <os/arch>     cross-compile target (e.g. linux/amd64, darwin/arm64)
+  -p <name>              docs of a dreego plugin (github.com/dreego-stack/<name>)
   --web                  open docs in browser instead of terminal
+  --list                 list all core + plugin doc pages
   -d                     debug mode: write logs to build/logs/<utc>.log
   -t <seconds>           auto-stop server after N seconds (timer)
 
@@ -85,7 +87,9 @@ examples:
   dreego run -t 60            build + start + stop after 60s
   dreego run -d -t 60         debug log + 60s timer
   dreego dev                  watch + rebuild + restart on change
-  dreego docs                 show docs index (terminal)
+  dreego docs                 show core docs index (terminal)
+  dreego docs -p plugin-sse   show plugin docs index
+  dreego docs --list          list all core + plugin pages
   dreego docs --web           open docs index in browser
   dreego docs --json          structured JSON for AI agents
   dreego docs --dump          all docs for LLM context
