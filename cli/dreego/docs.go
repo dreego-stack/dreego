@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,147 +9,301 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 )
 
-const docsBaseURL = "https://raw.githubusercontent.com/dreego-stack/dreego/main"
-const docsWebBase = "https://github.com/dreego-stack/dreego/blob/main"
+const coreModule = "github.com/dreego-stack/dreego"
+const pluginOrgPrefix = "github.com/dreego-stack/"
 const feedbackURL = "https://github.com/dreego-stack/dreego/issues/new"
 
 var headingPattern = regexp.MustCompile(`^#{1,6}\s+(.*)`)
 var codeBlockPattern = regexp.MustCompile("`{3}[^`]*`{3}")
 var linkPattern = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 
-var pluginDocsRoot = "plugins"
-var fetchDocFallback = fetchDocEmbedded
+var modCacheDir = ""
 
-func fetchDocLocal(path string) ([]byte, bool, error) {
-	rel := strings.TrimPrefix(path, "/")
-	parts := strings.SplitN(rel, "/", 2)
-	if len(parts) != 2 || parts[0] != "plugins" {
-		// Not a plugin path: no local doc. The caller (cmdDocs/cmdDump)
-		// decides whether to invoke the fallback. Do NOT call it here.
-		return nil, false, nil
-	}
-	full := filepath.Join(pluginDocsRoot, parts[1])
-	body, err := os.ReadFile(full)
+var wdFunc = func() string {
+	d, _ := os.Getwd()
+	return d
+}
+
+type goMod struct {
+	Module   string
+	Requires map[string]string
+}
+
+type sitemapDoc struct {
+	Module string        `json:"module"`
+	Pages  []sitemapPage `json:"pages"`
+}
+
+type sitemapPage struct {
+	Path  string `json:"path"`
+	Title string `json:"title"`
+}
+
+func parseGoMod(path string) (*goMod, error) {
+	f, err := os.Open(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, false, nil
-		}
-		return nil, false, err
+		return nil, err
 	}
-	return body, true, nil
+	defer f.Close()
+	gm := &goMod{Requires: map[string]string{}}
+	scanner := bufio.NewScanner(f)
+	inRequire := false
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if inRequire {
+			if line == ")" {
+				inRequire = false
+				continue
+			}
+			if f := strings.Fields(line); len(f) >= 2 {
+				gm.Requires[f[0]] = f[1]
+			}
+			continue
+		}
+		switch {
+		case strings.HasPrefix(line, "module "):
+			gm.Module = strings.TrimSpace(strings.TrimPrefix(line, "module "))
+		case strings.HasPrefix(line, "require ("):
+			inRequire = true
+		case strings.HasPrefix(line, "require "):
+			if f := strings.Fields(strings.TrimPrefix(line, "require ")); len(f) >= 2 {
+				gm.Requires[f[0]] = f[1]
+			}
+		}
+	}
+	return gm, scanner.Err()
+}
+
+// findModDir locates the on-disk directory for a module path, reading go.mod
+// in cwd. Priority: the module itself (self-repo) → vendor/ → module cache.
+func findModDir(cwd, modPath string) (string, error) {
+	modFile := filepath.Join(cwd, "go.mod")
+	gm, err := parseGoMod(modFile)
+	if err != nil {
+		return "", err
+	}
+	if gm.Module == modPath {
+		return cwd, nil
+	}
+	version, ok := gm.Requires[modPath]
+	if !ok {
+		return "", fmt.Errorf("%s not found in %s", modPath, modFile)
+	}
+	vendorDir := filepath.Join(cwd, "vendor", filepath.FromSlash(modPath))
+	if _, err := os.Stat(vendorDir); err == nil {
+		return vendorDir, nil
+	}
+	cacheDir := filepath.Join(goModCache(), filepath.FromSlash(modPath+"@"+version))
+	if _, err := os.Stat(cacheDir); err == nil {
+		return cacheDir, nil
+	}
+	return "", fmt.Errorf("module %s (%s) not downloaded; run go mod download", modPath, version)
+}
+
+func goModCache() string {
+	if modCacheDir != "" {
+		return modCacheDir
+	}
+	out, err := exec.Command("go", "env", "GOMODCACHE").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func readDocFrom(dir, path string) ([]byte, error) {
+	rel := strings.TrimPrefix(path, "/")
+	full := filepath.Join(dir, rel)
+	cleanDir := filepath.Clean(dir)
+	cleanFull := filepath.Clean(full)
+	if cleanFull != cleanDir && !strings.HasPrefix(cleanFull, cleanDir+string(os.PathSeparator)) {
+		return nil, fmt.Errorf("path escapes module dir: %s", path)
+	}
+	return os.ReadFile(full)
+}
+
+func readSitemap(dir string) (*sitemapDoc, error) {
+	body, err := os.ReadFile(filepath.Join(dir, "_docs", "sitemap.json"))
+	if err != nil {
+		return nil, err
+	}
+	var sm sitemapDoc
+	if err := json.Unmarshal(body, &sm); err != nil {
+		return nil, err
+	}
+	return &sm, nil
+}
+
+func sitemapPaths(dir string) []string {
+	sm, err := readSitemap(dir)
+	if err != nil {
+		return nil
+	}
+	var paths []string
+	for _, p := range sm.Pages {
+		paths = append(paths, p.Path)
+	}
+	return paths
+}
+
+func webBases(modPath string) (web, raw string) {
+	repo := strings.TrimPrefix(modPath, "github.com/")
+	return "https://github.com/" + repo + "/blob/main",
+		"https://raw.githubusercontent.com/" + repo + "/main"
 }
 
 func cmdDocs(args []string) {
-	web := false
-	dump := false
-	jsonOut := false
+	web, dump, jsonOut, list := false, false, false, false
+	plugin := ""
 	var remaining []string
-	for _, a := range args {
-		switch a {
-		case "--web":
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch {
+		case a == "--web":
 			web = true
-		case "--dump":
+		case a == "--dump":
 			dump = true
-		case "--json":
+		case a == "--json":
 			jsonOut = true
+		case a == "--list":
+			list = true
+		case a == "-p" && i+1 < len(args):
+			plugin = args[i+1]
+			i++
+		case strings.HasPrefix(a, "-p="):
+			plugin = strings.TrimPrefix(a, "-p=")
 		default:
 			remaining = append(remaining, a)
 		}
+	}
+
+	if list {
+		cmdList()
+		return
 	}
 
 	path := "/_docs/index.md"
 	if len(remaining) > 0 {
 		path = remaining[0]
 	}
-	if !strings.HasPrefix(path, "/") {
+	dumpAll := path == "all"
+	if !strings.HasPrefix(path, "/") && !dumpAll {
 		path = "/" + path
 	}
 
-	if web {
-		openBrowser(docsWebBase + path)
-		return
+	modPath := coreModule
+	if plugin != "" {
+		modPath = pluginOrgPrefix + plugin
 	}
+	webBase, rawBase := webBases(modPath)
 
-	if dump {
-		cmdDump(path)
-		return
-	}
-
-	body, fromLocal, err := fetchDocLocal(path)
+	dir, err := findModDir(wdFunc(), modPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "docs error: %v\n", err)
 		os.Exit(1)
 	}
-	if !fromLocal {
-		body, err = fetchDocFallback(path)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "docs error: %v\n", err)
-			os.Exit(1)
-		}
-	}
 
-	if jsonOut {
-		printJSON(path, body)
+	if web {
+		openBrowser(webBase + path)
 		return
 	}
 
-	out := string(body)
-	out = strings.ReplaceAll(out, docsWebBase, "")
-	out = strings.ReplaceAll(out, docsBaseURL, "")
-	fmt.Print(out)
-	fmt.Println()
+	if dump {
+		cmdDump(dir, path, webBase, rawBase)
+		return
+	}
+
+	body, err := readDocFrom(dir, path)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "docs error: %v\n", err)
+		os.Exit(1)
+	}
+
+	if jsonOut {
+		printJSON(webBase, path, body)
+		return
+	}
+
+	printDoc(body, webBase, rawBase)
 }
 
-func cmdDump(path string) {
+func cmdDump(dir, path, webBase, rawBase string) {
 	var pages []string
 	if path == "/_docs/index.md" || path == "all" {
-		pages = []string{
-			"/_docs/index.md",
-			"/_docs/getting-started.md",
-			"/_docs/cli.md",
-			"/_docs/routing.md",
-			"/_docs/components.md",
-			"/_docs/middleware.md",
-			"/_docs/config.md",
-			"/_docs/runtime.md",
-			"/_docs/testing.md",
-			"/README.md",
-			"/CHANGELOG.md",
-		}
+		pages = sitemapPaths(dir)
 	} else {
 		pages = strings.Split(path, ",")
 	}
-
 	for _, p := range pages {
 		p = strings.TrimSpace(p)
 		if !strings.HasPrefix(p, "/") {
 			p = "/" + p
 		}
-		body, fromLocal, err := fetchDocLocal(p)
+		body, err := readDocFrom(dir, p)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "skip %s: %v\n", p, err)
 			continue
 		}
-		if !fromLocal {
-			body, err = fetchDocFallback(p)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "skip %s: %v\n", p, err)
-				continue
-			}
-		}
 		fmt.Printf("\n--- %s ---\n\n", p)
-		out := string(body)
-		out = strings.ReplaceAll(out, docsWebBase, "")
-		out = strings.ReplaceAll(out, docsBaseURL, "")
-		fmt.Print(out)
+		printDoc(body, webBase, rawBase)
 	}
 	fmt.Println()
 }
 
-func printJSON(path string, body []byte) {
+func cmdList() {
+	cwd := wdFunc()
+	gm, err := parseGoMod(filepath.Join(cwd, "go.mod"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "docs error: no go.mod found (%v)\n", err)
+		os.Exit(1)
+	}
+	seen := map[string]bool{}
+	mods := []string{}
+	if !seen[gm.Module] {
+		seen[gm.Module] = true
+		mods = append(mods, gm.Module)
+	}
+	var plugins []string
+	for path := range gm.Requires {
+		if strings.HasPrefix(path, pluginOrgPrefix) && !seen[path] {
+			seen[path] = true
+			plugins = append(plugins, path)
+		}
+	}
+	sort.Strings(plugins)
+	mods = append(mods, plugins...)
+
+	for _, m := range mods {
+		dir, err := findModDir(cwd, m)
+		if err != nil {
+			fmt.Printf("\n[%s]\n  (not downloaded)\n", m)
+			continue
+		}
+		sm, err := readSitemap(dir)
+		if err != nil {
+			fmt.Printf("\n[%s]\n  (no _docs/sitemap.json)\n", m)
+			continue
+		}
+		fmt.Printf("\n[%s]\n", m)
+		for _, p := range sm.Pages {
+			if p.Title != "" {
+				fmt.Printf("  %-35s %s\n", p.Path, p.Title)
+			} else {
+				fmt.Printf("  %s\n", p.Path)
+			}
+		}
+	}
+	fmt.Println()
+}
+
+func printJSON(webBase, path string, body []byte) {
 	text := string(body)
 
 	var headings []string
@@ -172,7 +327,7 @@ func printJSON(path string, body []byte) {
 
 	doc := map[string]any{
 		"path":        path,
-		"source":      docsWebBase + path,
+		"source":      webBase + path,
 		"headings":    headings,
 		"code_blocks": codeBlocks,
 		"links":       links,
@@ -181,6 +336,14 @@ func printJSON(path string, body []byte) {
 
 	out, _ := json.MarshalIndent(doc, "", "  ")
 	fmt.Println(string(out))
+}
+
+func printDoc(body []byte, webBase, rawBase string) {
+	out := string(body)
+	out = strings.ReplaceAll(out, webBase, "")
+	out = strings.ReplaceAll(out, rawBase, "")
+	fmt.Print(out)
+	fmt.Println()
 }
 
 func cmdFeedback() {
