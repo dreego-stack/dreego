@@ -1,8 +1,29 @@
-# Blockwebchain
+# TODO
 
-Status via `python _todo/process.py`. Chain 1–49 done. Next code: **50**.
+Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future.md](TODO-Future.md).
 
-Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (may include breaking changes), `y` is continuous. `v1.0.0` is reserved for a stable, trustworthy release and is not a near-term target.
+## How to use this file
+
+- One line per entry, checkbox for progress:
+  `- [ ] **name** — short description`
+- Status via the checkbox: `[ ]` planned / `[x]` done
+- Group entries under a version heading (`## v0.0.x`) or a topic heading
+- When an entry ships, tick the box and add a changelog line via `pr.md`
+- Versioning stays conservative: `v0.x.y` only. `v1.0.0` is reserved for a stable release.
+
+## Planned
+
+### Core
+
+- [ ] **observability.1** — Metrics + Tracing: `request-id.1` is done (v0.0.17); Prometheus `/metrics` and OpenTelemetry spans as plugins, blocked on plugin-interface.1
+- [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec from Go struct tags and API routes: `c.Swagger()` endpoint, `api:"..."`/`validate:"..."` struct tags, generated `/openapi.json` route, optionally embedded Swagger UI
+- [ ] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
+- [ ] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
+- [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
+
+### Decision needed
+
+- [ ] **addon vs plugin naming** — decide whether the ecosystem is called "addons" or "plugins" (both currently describe the same thing)
 
 ## v0.0.27 (in progress — chore batch)
 
@@ -12,14 +33,8 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 - PR-based release workflow (pr.md + CI tag) ✅
 - AGENTS.md + docs updated for new workflow ✅
 - Flaky test fix (run-timer-sigterm stdout flush) ✅
-
-### Open design questions (need a new process/brauch)
-
-These three systems are all in flux and need a decision on how they should work going forward:
-
-- **docs system** — decentralized `dreego docs` (local module store, no HTTP, no embedded copy). Resolution via `go.mod` → vendor/ or module cache; `-p <plugin>` + `--list` via per-module `_docs/sitemap.json`.
-- **todo system** — Blockwebchain is too custom for agents. Simplify (drop chain integers, keep dependency graph) or replace (linear TODO.md + issues).
-- **tests system** — shell-based `_tests/**/test.sh` vs `_test.go` (dreegotest + httptest + golden). Decide migration strategy and how the agent is told to follow the convention.
+- Todo system simplification (_todo/ → TODO.md + TODO-Future.md) ✅
+- Test migration strategy (shell → _test.go) — open, see PLAN-v0.0.27.md Phase 7
 
 ## v0.0.26 (done)
 
@@ -63,39 +78,22 @@ These three systems are all in flux and need a decision on how they should work 
 
 - **monorepo-plugin-layout** — Official plugins moved into `plugins/` in this repo (chain via v0.0.21 commit)
 
-## v0.0.20
+## v0.0.20 (done)
 
 - **security-cookie.1** — Harden session and CSRF cookie flags ✅ (chain 35)
 - **security-csp.1** — Add Content-Security-Policy header ✅ (chain 36)
 
-## v0.0.17
+## v0.0.17 (done)
 
 - **deployment.1** — Production Deployment (Graceful Shutdown, Cross-Compile, Docker) ✅
 - **request-id.1** — Request-ID Middleware (X-Request-ID → Context + Logs) ✅
 
-## v0.0.16
+## v0.0.16 (done)
 
 - **form-actions.1** — Form Actions (g-action + auto-validation + redirect) ✅
 
-## Available Next
+## Rejected / superseded
 
-- **observability.1** — Metrics + Tracing (Plugin: Prometheus, OpenTelemetry)
-- **documentation.1** — docs.dreego.dev + Tutorial + Examples
-
-Planned for **v0.0.26**: `documentation.1`, `api-swagger.1`, `observability.1`.
-
-## Rejected
-
-- **hot-reload.1** — Replaced by Air (`_docs/hot-reload.md`)
-- **live-reload.1** — Replaced by Air
-- **smart-recompile.1** — Replaced by Air
-
-## Quality Backlog (from code review)
-
-- **codegen-errors.2** — ✅ already fixed in v0.0.22 (codegen-errors.1, commit 11d33d2); backlog entry obsolete, covered by `TestCompGenIfElseMixedChildren`
-
-## Framework Roadmap (new blocks)
-
-- **client-reactivity.1** — Research client-side interactivity (Alpine/islands/custom runtime).
-
-See `_todo/index.md` for the full chain and dependency graph.
+- **hot-reload.1**, **live-reload.1**, **smart-recompile.1** — replaced by Air (`_docs/hot-reload.md`)
+- **documentation.1** (docs.dreego.dev + Tutorial) — replaced by the decentralized `dreego docs` system
+- **golden-tests.1** — already covered by `golden-tests-core.1` (v0.0.24)

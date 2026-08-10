@@ -60,12 +60,12 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## Plans & Tips
 
-- [Plan](../_todo/plan.md) — Linear reorderable timeline
+- [TODO](../TODO.md) — Next code changes
+- [TODO Future](../TODO-Future.md) — Long-term ideas (SSG, Wails, plugin ideas)
 - [Tips](tips.md) — 50 tips + checklist
 
 ## External Docs
 
 - [README](../README.md) — Project README
-- [TODO](../TODO.md) — Next code changes
 - [CHANGELOG](../CHANGELOG.md) — Version history
 - [Docs](../_docs/index.md) — Public documentation
