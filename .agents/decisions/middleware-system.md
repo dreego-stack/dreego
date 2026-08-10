@@ -33,7 +33,7 @@ CORS()        // Default: same-origin restrictive
 Compress()    // gzip/deflate via Chi
 ```
 
-### Plugin/Addon (never Core)
+### Plugin (never Core)
 
 | Middleware         | Why Plugin                                   |
 |--------------------|----------------------------------------------|

@@ -586,7 +586,7 @@ dreego new my-app              # Scaffold with layout.dreego, app.go
 dreego dev                     # Transpiler watch + Hot-Reload + Tailwind
 dreego build                   # Single Binary with embed
 dreego routes                  # List of all generated routes
-dreego add auth                # Install addon
+dreego add auth                # Install plugin
 dreego build --static          # SSG mode (V2)
 ```
 

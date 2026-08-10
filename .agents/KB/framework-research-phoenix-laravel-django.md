@@ -47,7 +47,7 @@ LiveView works via **WebSockets** (not SSE). Architecture:
 | `stream/4` (efficient lists) | `{#each}` with SSE-based streaming updates | ✅ V3 |
 | Graceful Reconnection | Datastar's built-in SSE Reconnect | ✅ V1 |
 | Flash Messages | Built-in Flash in `dreego.Context` | ✅ V1 |
-| File Uploads | `dreego-storage` addon, model: `allow_upload/3` API | ✅ V2 |
+| File Uploads | `dreego-storage` plugin, model: `allow_upload/3` API | ✅ V2 |
 | Lifecycle Hooks | `dreego.Plugin` Interface → Middleware hooks + transpiler hooks | ✅ V1 |
 | LiveComponents | `.dreego` components with their own state (<go> per component) | ✅ V2 |
 
@@ -71,7 +71,7 @@ PubSub.broadcast(:my_pubsub, "user:123", {:user_update, %{name: "Shane"}})
 
 - **Event Bus in Core:** `dreego.Emit("user:123", payload)` → all subscribers (SSE/WS) receive update.
 - **Don't build yourself:** Either NATS embedded, Redis PubSub, or Go channel-based event bus.
-- **Addon:** `dreego-pubsub` with Redis/NATS backend.
+- **Plugin:** `dreego-pubsub` with Redis/NATS backend.
 
 ### 1.3 Ecto — Why It Is Good
 
@@ -93,7 +93,7 @@ Ecto is **not an ORM** but a **Database Wrapper + Query Builder**:
 
 | Ecto Feature | Dreego Adaptation |
 |---|---|
-| Changesets | `dreego-db` addon: Validation object independent of DB model |
+| Changesets | `dreego-db` plugin: Validation object independent of DB model |
 | Composable Queries | Go: Query builder with chainable methods (similar to squirrel) |
 | Multi (Transactions) | Go: `db.Transaction(func(tx *sql.Tx) error { ... })` |
 | Embedded Schemas | Go structs with tags for validation without DB binding |
@@ -241,7 +241,7 @@ Blade compiles to **plain PHP** and caches the results. Features:
 
 | Blade Feature | Dreego Adaptation |
 |---|---|
-| Components (`<x-alert>`) | `<dreego:alert>` or as addon tags (already planned) |
+| Components (`<x-alert>`) | `<dreego:alert>` or as plugin tags (already planned) |
 | Conditional Classes | `<div class:active={isActive}>` — Svelte-Style (planned) |
 | Stacks (`@push`/`@stack`) | `<slot name="head">` or `<head>` block CSS/JS Injection |
 | `@once` | `{#once}` block → V2 |
@@ -291,17 +291,17 @@ Each command creates a file in the right place with the right boilerplate.
 |---|---|---|
 | **Forge** | Server management (provisioning, deployment) | `dreego deploy` — via SSH or Docker |
 | **Vapor** | Serverless Laravel on AWS Lambda | Not relevant for Go (Single Binary) |
-| **Nova** | Admin panel generator | `dreego-admin` addon |
-| **Spark** | SaaS starter kit (Billing, Teams) | `dreego-saas` addon |
+| **Nova** | Admin panel generator | `dreego-admin` plugin |
+| **Spark** | SaaS starter kit (Billing, Teams) | `dreego-saas` plugin |
 | **Envoyer** | Zero-downtime deployment | `dreego deploy` with blue-green |
 | **Horizon** | Queue monitoring dashboard | `dreego-jobs` dashboard |
 | **Telescope** | Debugging & Monitoring | `dreego-devtools` |
-| **Pennant** | Feature Flags | `dreego-features` addon |
+| **Pennant** | Feature Flags | `dreego-features` plugin |
 | **Pulse** | Performance Monitoring | Not V1 |
 | **Reverb** | WebSocket server (first-party) | Not needed (SSE) |
 | **Echo** | Client-side WebSocket library | Datastar (SSE) suffices |
 
-**Takeaway:** Laravel's Ecosystem is the **greatest strength** of the framework. Dreego doesn't need to replicate this in V1, but the **plugin architecture must be open enough** that such tools can emerge as addons.
+**Takeaway:** Laravel's Ecosystem is the **greatest strength** of the framework. Dreego doesn't need to replicate this in V1, but the **plugin architecture must be open enough** that such tools can emerge as plugins.
 
 ### 2.5 Queue/Job System
 
@@ -323,7 +323,7 @@ Laravel's Queue system is extremely mature:
 
 #### For Dreego adopt:
 
-- `dreego-jobs` addon with:
+- `dreego-jobs` plugin with:
   - Interface: `type Job interface { Handle() error }`
   - Backends: Redis, PG, NATS
   - Delayed Jobs: `dreego.Dispatch(job).Delay(10 * time.Minute)`
@@ -341,7 +341,7 @@ Laravel Notifications:
 - **Markdown Mail Templates:** Pre-formatted email components.
 
 #### For Dreego:
-- `dreego-notify` addon with channel interface:
+- `dreego-notify` plugin with channel interface:
   ```go
   type Channel interface {
       Send(to User, notification Notification) error
@@ -398,7 +398,7 @@ Laravel ships **everything with it**:
 
 #### For Dreego:
 - **Core must remain minimal** (Go Standard Library philosophy)
-- **Addons as "Batteries"**: `dreego-auth`, `dreego-cache`, `dreego-mail`, `dreego-storage`
+- **Plugins as "Batteries"**: `dreego-auth`, `dreego-cache`, `dreego-mail`, `dreego-storage`
 - **Don't ship everything, but make it easy to install** (`dreego add auth`)
 
 ---
@@ -450,7 +450,7 @@ The Django Admin is **Django's killer feature**:
 
 #### For Dreego:
 
-- **`dreego-admin` is a MUST-HAVE addon.**
+- **`dreego-admin` is a MUST-HAVE plugin.**
 - Django Admin is **the standard** every admin generator tool must measure against.
 - Generate automatic CRUD UI from Go structs.
 - `list_display`, `list_filter`, `search_fields` as struct tag options:
@@ -530,8 +530,8 @@ Django's Built-in Apps (in `INSTALLED_APPS`):
 
 #### For Dreego:
 - **Core:** Router, Context, Middleware, Template Engine.
-- **Official Addons:** Auth, Admin, Sessions, Storage, Cache, Mail, Jobs.
-- **Community Addons:** Everything else.
+- **Official Plugins:** Auth, Admin, Sessions, Storage, Cache, Mail, Jobs.
+- **Community Plugins:** Everything else.
 
 ### 3.5 Authentication System
 
@@ -555,7 +555,7 @@ Django Auth — **most complete built-in auth system of all frameworks**:
 
 #### For Dreego:
 
-- **`dreego-auth` addon with:**
+- **`dreego-auth` plugin with:**
   - Go Interface: `type User interface { GetID() string; HasRole(string) bool }`
   - Session-based auth (Cookie)
   - Middleware: `auth.Required`, `auth.HasRole("admin")`
@@ -599,7 +599,7 @@ DRF is the **standard for API development in Django**:
 
 #### For Dreego:
 
-- **`dreego-api` addon:**
+- **`dreego-api` plugin:**
   - ViewSet-like pattern for REST endpoints:
     ```go
     type UserAPI struct {
@@ -661,12 +661,12 @@ DRF is the **standard for API development in Django**:
 4. **Blade Components & Slots** → `<x-*>` = `<dreego:*>`
 5. **Queue/Job System** → Job Middleware, Batching, Chaining, Delayed Dispatch
 6. **Notification System** → Multi-Channel (Mail, DB, Slack)
-7. **Ecosystem-First Thinking** → Plugin interface must enable addon ecosystem
+7. **Ecosystem-First Thinking** → Plugin interface must enable plugin ecosystem
 
 ### From Django (Python):
-1. **Admin Panel** → `dreego-admin` addon (highest priority)
+1. **Admin Panel** → `dreego-admin` plugin (highest priority)
 2. **Auth System** → Password hashing, reset flow, permission system
-3. **DRF's ViewSet/Router Pattern** → `dreego-api` addon
+3. **DRF's ViewSet/Router Pattern** → `dreego-api` plugin
 4. **Migrations** → Auto-detection from Go structs
 5. **Documentation** → Gold standard as model
 6. **Stability & Longevity** → No breaking changes without deprecation
@@ -674,6 +674,6 @@ DRF is the **standard for API development in Django**:
 ### Anti-Patterns (consistent across all frameworks):
 1. **Magic / Implicitness** → Dreego: Everything explicit (Go philosophy)
 2. **Too opinionated** → Override paths for conventions
-3. **Monolithic Core** → Core minimal, addons for batteries
+3. **Monolithic Core** → Core minimal, plugins for batteries
 4. **String-based APIs** → Type safety via Go structs
 5. **Lazy Loading / Implicit N+1** → Explicit preloads

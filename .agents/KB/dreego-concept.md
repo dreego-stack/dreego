@@ -2,7 +2,7 @@
 ---
 type: Reference
 title: Dreego Concept — Gemini Chat (PDF Source)
-description: Core concept of Dreego framework: transpiler, 5 sections, file-based routing, addon ecosystem
+description: Core concept of Dreego framework: transpiler, 5 sections, file-based routing, plugin ecosystem
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
 ---
@@ -64,7 +64,7 @@ The chosen approach for Dreego. `.dreego` files are compiled into Go code via `d
 </head>
 ```
 - Only loaded when the component is actually rendered
-- Perfect for addons (dreego-map needs Mapbox only on the map page)
+- Perfect for plugins (dreego-map needs Mapbox only on the map page)
 
 ### 2. `<go>` — Server-side Go Code
 ```html
@@ -256,10 +256,10 @@ func RegisterDreegoRoutes(mux *http.ServeMux) {
 
 ---
 
-## Addon/Plugin Ecosystem
+## Plugin Ecosystem
 
 ### Architecture
-A Goree addon is a Go package that fulfills the `dreego.Plugin` interface:
+A Dreego plugin is a Go package that fulfills the `dreego.Plugin` interface:
 
 ```go
 type Plugin interface {
@@ -277,9 +277,9 @@ app.UsePlugin(auth.New("super-secret-key"))
 app.Listen(":8080")
 ```
 
-### Addon Ideas (full list)
+### Plugin Ideas (full list)
 
-| Addon               | Purpose                                                  |
+| Plugin             | Purpose                                                  |
 |---------------------|----------------------------------------------------------|
 | dreego-auth          | Sessions, OAuth, Passkeys, Login/Register                |
 | dreego-map           | MapLibre/Leaflet Integration                             |
@@ -297,7 +297,7 @@ app.Listen(":8080")
 | dreego-pdf           | PDF generation from .dreego templates                    |
 | dreego-pwa           | Progressive Web App                                      |
 
-### Benefits of the Go Addon System
+### Benefits of the Go Plugin System
 - No dependency hell (go.mod resolves cleanly)
 - Compile-Time Safety: Build breaks on errors
 - Tree-Shaking: Unused code is compiled out

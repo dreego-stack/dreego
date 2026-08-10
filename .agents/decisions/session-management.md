@@ -1,12 +1,12 @@
 
 ---
 type: Decision
-title: Session Management — Interface in Core, Store as Addon
-description: Session interface in the core with built-in cookie store and external store addons
+title: Session Management — Interface in Core, Store as Plugin
+description: Session interface in the core with built-in cookie store and external store plugins
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
 ---
-# Session Management — Interface in Core, Store as Addon
+# Session Management — Interface in Core, Store as Plugin
 
 **Date:** 2026-07-28
 **Status:** Accepted
@@ -17,7 +17,7 @@ SSR apps need sessions: request mapping, CSRF protection, flash messages, shoppi
 
 ## Decision
 
-**Session interface in the core. Concrete stores as addons.**
+**Session interface in the core. Concrete stores as plugins.**
 
 ```go
 // Core: dreego/session (Interface)
@@ -34,8 +34,8 @@ type Store interface {
 type CookieStore struct { ... }
 func NewCookieStore(secret []byte) *CookieStore
 
-// Addon: dreego-session-redis
-// Addon: dreego-session-db (PostgreSQL/SQLite)
+// Plugin: dreego-session-redis
+// Plugin: dreego-session-db (PostgreSQL/SQLite)
 ```
 
 ## dreego-auth Builds on This
@@ -58,11 +58,11 @@ func (p *AuthPlugin) Middlewares() []func(http.Handler) http.Handler {
 }
 ```
 
-## Why Not Only Addon?
+## Why Not Only Plugin?
 
 - CSRF protection (Core) needs sessions
 - Flash messages (Core) need sessions
-- Without session interface in the core, every addon would need its own session logic
+- Without session interface in the core, every plugin would need its own session logic
 - Cookie store is 50 lines of Go — no reason to outsource it
 
 ## Why Not Completely in Core?
@@ -76,4 +76,4 @@ func (p *AuthPlugin) Middlewares() []func(http.Handler) http.Handler {
 - `dreego.New()` automatically creates a cookie store
 - Apps can upgrade via `app.Use(session.NewRedisStore(...))`
 - dreego-auth uses `session.Store` interface — no vendor lock-in
-- All addons (not just Auth) can use sessions
+- All plugins (not just Auth) can use sessions

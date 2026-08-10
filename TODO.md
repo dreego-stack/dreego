@@ -23,7 +23,7 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 
 ### Decision needed
 
-- [ ] **addon vs plugin naming** — decide whether the ecosystem is called "addons" or "plugins" (both currently describe the same thing)
+- [x] **addon vs plugin naming** — decided: "plugin" (v0.0.27) — `TODO-Future.md` uses "plugin" consistently, concept docs renamed accordingly
 
 ## v0.0.27 (in progress — chore batch)
 

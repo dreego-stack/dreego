@@ -10,13 +10,9 @@ Long-term ideas and larger architecture goals without a concrete near-term plan.
 
 ## Ecosystem
 
-### Naming decision
-
-- **addon vs plugin** — decide whether the ecosystem is called "addons" or "plugins"; both currently describe the same thing (tracked in TODO.md as a decision entry)
-
 ### Plugin ideas
 
-- **addon-ecosystem.1** — Addon ecosystem (auth, ui, admin, db)
+- **plugin-ecosystem.1** — Plugin ecosystem (auth, ui, admin, db)
 - **dreego-analytics.1** — Privacy-friendly, server-side analytics
 - **dreego-cache.1** — Caching (Memory, Redis)
 - **dreego-charts.1** — Chart.js/Canvas components

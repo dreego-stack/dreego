@@ -35,7 +35,7 @@ A `.dreego` file is divided into **5 clearly separated sections**:
 
 ## The `<head>` Innovation
 
-The `<head>` tag is a core innovation for addons and performance:
+The `<head>` tag is a core innovation for plugins and performance:
 
 - `dreego-map` declares Mapbox scripts only in its `<head>`
 - The Dreego transpiler injects these only when the component is actually rendered

@@ -8,6 +8,10 @@ timestamp: 2026-07-28T21:33:00Z
 
 # log
 
+## 2026-08-10 — v0.0.27 naming decision
+
+- **naming:** "addon" → "plugin" decision locked. Concept `addon-ecosystem.md` renamed to `plugin-ecosystem.md`, stale `affons-ecosystem.md` deleted, references updated across AGENTS.md, .agents docs, and KB research notes.
+
 ## 2026-08-03 — v0.0.23 (unreleased)
 
 - **runtime:** New exported `core.Reset()` clears the cached middleware/router stack (`builtHandler`) for tests and reload paths.

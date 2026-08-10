@@ -125,7 +125,7 @@ All template variables `{variable}` are HTML-escaped:
 Only `{variable|raw}` allows unescaped HTML — explicit, rare, deliberately risky.
 
 ### Auto-Escaping in Core
-Not an addon — MUST be built into the template renderer. Otherwise every Dreego app is insecure.
+Not a plugin — MUST be built into the template renderer. Otherwise every Dreego app is insecure.
 
 ## Open Design Questions (for GLM)
 
