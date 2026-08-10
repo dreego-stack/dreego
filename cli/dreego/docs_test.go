@@ -9,167 +9,157 @@ import (
 	"testing"
 )
 
-// TestFetchDocLocalPluginDiscovery verifies that dreego docs resolves a
-// plugin doc from the local plugins/<name>/_docs/ directory without any
-// HTTP call. Priority: local plugin docs win over embedded/remote.
-func TestFetchDocLocalPluginDiscovery(t *testing.T) {
+func writeTestTree(t *testing.T, files map[string]string) string {
+	t.Helper()
 	root := t.TempDir()
-	dir := filepath.Join(root, "sample", "_docs")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		t.Fatal(err)
+	for p, content := range files {
+		full := filepath.Join(root, filepath.FromSlash(p))
+		if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
-	content := "# Sample Plugin\n\nLocal plugin docs."
-	if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
+	return root
+}
 
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = root
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	body, fromLocal, err := fetchDocLocal("/plugins/sample/_docs/index.md")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+func writeGoMod(t *testing.T, root, module string, reqs map[string]string) {
+	t.Helper()
+	var b strings.Builder
+	b.WriteString("module " + module + "\n\ngo 1.22\n")
+	if len(reqs) > 0 {
+		b.WriteString("require (\n")
+		for m, v := range reqs {
+			b.WriteString("\t" + m + " " + v + "\n")
+		}
+		b.WriteString(")\n")
 	}
-	if !fromLocal {
-		t.Fatal("expected fromLocal=true (local plugin doc should win)")
-	}
-	if string(body) != content {
-		t.Errorf("expected body %q, got %q", content, string(body))
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte(b.String()), 0644); err != nil {
+		t.Fatal(err)
 	}
 }
 
-// TestFetchDocLocalReadsFilesystem verifies the discovery reads the doc
-// from the filesystem (plugins/<name>/_docs/) rather than importing any
-// plugin package. A plugin without a matching _docs file is not found.
-func TestFetchDocLocalReadsFilesystem(t *testing.T) {
+func TestParseGoMod(t *testing.T) {
 	root := t.TempDir()
-	dir := filepath.Join(root, "auth", "_docs")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	content := "# Auth\n\nAuth plugin docs."
-	if err := os.WriteFile(filepath.Join(dir, "guide.md"), []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = root
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	body, fromLocal, err := fetchDocLocal("/plugins/auth/_docs/guide.md")
+	writeGoMod(t, root, "example.com/app", map[string]string{
+		"github.com/dreego-stack/dreego":    "v0.0.27",
+		"github.com/dreego-stack/plugin-sse": "v0.1.0",
+	})
+	gm, err := parseGoMod(filepath.Join(root, "go.mod"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !fromLocal {
-		t.Fatal("expected fromLocal=true")
+	if gm.Module != "example.com/app" {
+		t.Errorf("expected module example.com/app, got %q", gm.Module)
 	}
-	if string(body) != content {
-		t.Errorf("expected %q, got %q", content, string(body))
+	if gm.Requires["github.com/dreego-stack/dreego"] != "v0.0.27" {
+		t.Errorf("unexpected core version: %q", gm.Requires["github.com/dreego-stack/dreego"])
 	}
-
-	// A plugin with no _docs file must not be found (no error).
-	_, fromLocal, err = fetchDocLocal("/plugins/missing/_docs/index.md")
-	if err != nil {
-		t.Fatalf("unexpected error for missing plugin: %v", err)
-	}
-	if fromLocal {
-		t.Fatal("expected fromLocal=false for missing plugin doc")
+	if gm.Requires["github.com/dreego-stack/plugin-sse"] != "v0.1.0" {
+		t.Errorf("unexpected plugin version: %q", gm.Requires["github.com/dreego-stack/plugin-sse"])
 	}
 }
 
-// TestFetchDocLocalFallback verifies that fetchDocLocal does NOT invoke the
-// fallback internally. For a non-plugin path (or a plugin with no local
-// _docs file) it returns (nil, false, nil); the caller decides whether to
-// call the fallback. Priority: local plugin docs → embedded/remote.
-func TestFetchDocLocalFallback(t *testing.T) {
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = t.TempDir() // empty: no local plugin docs
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	fallbackCalls := 0
-	oldFallback := fetchDocFallback
-	fetchDocFallback = func(path string) ([]byte, error) {
-		fallbackCalls++
-		return []byte("remote:" + path), nil
-	}
-	defer func() { fetchDocFallback = oldFallback }()
-
-	body, fromLocal, err := fetchDocLocal("/_docs/index.md")
+func TestFindModDirSelfRepo(t *testing.T) {
+	root := writeTestTree(t, map[string]string{"go.mod": ""})
+	writeGoMod(t, root, coreModule, nil)
+	dir, err := findModDir(root, coreModule)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if fromLocal {
-		t.Fatal("expected fromLocal=false (no local plugin doc)")
-	}
-	if body != nil {
-		t.Errorf("expected nil body, got %q", string(body))
-	}
-	if fallbackCalls != 0 {
-		t.Errorf("fetchDocLocal must not call the fallback internally, got %d calls", fallbackCalls)
+	if dir != root {
+		t.Errorf("expected self repo dir %q, got %q", root, dir)
 	}
 }
 
-// TestCmdDocsFallbackCalledOnce verifies the caller (cmdDocs) invokes the
-// fallback exactly once when no local plugin doc exists. This guards against
-// the regression where fetchDocLocal called the fallback internally AND the
-// caller called it again, producing two HTTP requests.
-func TestCmdDocsFallbackCalledOnce(t *testing.T) {
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = t.TempDir() // empty: no local plugin docs
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	fallbackCalls := 0
-	oldFallback := fetchDocFallback
-	fetchDocFallback = func(path string) ([]byte, error) {
-		fallbackCalls++
-		return []byte("remote:" + path), nil
-	}
-	defer func() { fetchDocFallback = oldFallback }()
-
-	cmdDocs([]string{"/_docs/index.md"})
-
-	if fallbackCalls != 1 {
-		t.Errorf("expected fallback called exactly once, got %d calls", fallbackCalls)
-	}
-}
-
-// TestFetchDocLocalPriorityLocalWins verifies the priority order: when a
-// local plugin doc exists, it wins over the embedded/remote fallback.
-func TestFetchDocLocalPriorityLocalWins(t *testing.T) {
-	root := t.TempDir()
-	dir := filepath.Join(root, "sample", "_docs")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("local"), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = root
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	oldFallback := fetchDocFallback
-	fetchDocFallback = func(path string) ([]byte, error) {
-		return []byte("remote"), nil
-	}
-	defer func() { fetchDocFallback = oldFallback }()
-
-	body, fromLocal, err := fetchDocLocal("/plugins/sample/_docs/index.md")
+func TestFindModDirVendorWins(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"vendor/github.com/dreego-stack/plugin-sse/_docs/index.md": "# Plugin\n",
+	})
+	writeGoMod(t, root, "example.com/app", map[string]string{
+		"github.com/dreego-stack/plugin-sse": "v0.1.0",
+	})
+	dir, err := findModDir(root, "github.com/dreego-stack/plugin-sse")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !fromLocal {
-		t.Fatal("expected fromLocal=true (local must win over fallback)")
-	}
-	if string(body) != "local" {
-		t.Errorf("expected local body, got %q", string(body))
+	if !strings.HasSuffix(dir, "vendor/github.com/dreego-stack/plugin-sse") {
+		t.Errorf("expected vendor dir, got %q", dir)
 	}
 }
 
-// TestPrintJSON verifies printJSON emits a JSON document with the extracted
-// headings, code blocks and links, plus the source path and text length.
+func TestFindModDirCacheFallback(t *testing.T) {
+	root := writeTestTree(t, map[string]string{})
+	writeGoMod(t, root, "example.com/app", map[string]string{
+		"github.com/dreego-stack/plugin-sse": "v0.1.0",
+	})
+	oldCache := modCacheDir
+	modCacheDir = filepath.Join(root, "cache")
+	defer func() { modCacheDir = oldCache }()
+	os.MkdirAll(filepath.Join(root, "cache", "github.com", "dreego-stack", "plugin-sse@v0.1.0"), 0755)
+
+	dir, err := findModDir(root, "github.com/dreego-stack/plugin-sse")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.HasSuffix(dir, "cache/github.com/dreego-stack/plugin-sse@v0.1.0") {
+		t.Errorf("expected cache dir, got %q", dir)
+	}
+}
+
+func TestFindModDirNotInGoMod(t *testing.T) {
+	root := writeTestTree(t, map[string]string{})
+	writeGoMod(t, root, "example.com/app", nil)
+	if _, err := findModDir(root, "github.com/dreego-stack/plugin-sse"); err == nil {
+		t.Fatal("expected error for module not in go.mod")
+	}
+}
+
+func TestReadDocFromDir(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"_docs/cli.md": "# CLI\n",
+	})
+	body, err := readDocFrom(root, "/_docs/cli.md")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(body) != "# CLI\n" {
+		t.Errorf("expected body, got %q", string(body))
+	}
+}
+
+func TestReadDocFromDirRejectsTraversal(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"_docs/cli.md": "# CLI\n",
+	})
+	for _, p := range []string{"../../../etc/passwd", "/../secret", ".."} {
+		if _, err := readDocFrom(root, p); err == nil {
+			t.Errorf("expected traversal error for path %q", p)
+		}
+	}
+}
+
+func TestReadSitemap(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"_docs/sitemap.json": `{"module":"github.com/dreego-stack/dreego","pages":[{"path":"/_docs/index.md","title":"Index"}]}`,
+	})
+	sm, err := readSitemap(root)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(sm.Pages) != 1 || sm.Pages[0].Path != "/_docs/index.md" || sm.Pages[0].Title != "Index" {
+		t.Errorf("unexpected sitemap: %+v", sm)
+	}
+}
+
+func TestSitemapPathsMissingFile(t *testing.T) {
+	root := writeTestTree(t, map[string]string{})
+	if got := sitemapPaths(root); got != nil {
+		t.Errorf("expected nil paths for missing sitemap, got %v", got)
+	}
+}
+
 func TestPrintJSON(t *testing.T) {
 	body := `# Title
 
@@ -179,7 +169,7 @@ Some text with a [link](/docs) and another [external](https://example.com).
 
 ## Section
 `
-	got := captureStdout(t, func() { printJSON("/_docs/index.md", []byte(body)) })
+	got := captureStdout(t, func() { printJSON("https://github.com/example/repo/blob/main", "/_docs/index.md", []byte(body)) })
 
 	var doc map[string]any
 	if err := json.Unmarshal([]byte(got), &doc); err != nil {
@@ -191,31 +181,28 @@ Some text with a [link](/docs) and another [external](https://example.com).
 	if doc["length"] != float64(len(body)) {
 		t.Errorf("expected length %d, got %v", len(body), doc["length"])
 	}
-
 	headings, ok := doc["headings"].([]any)
 	if !ok || len(headings) != 2 || headings[0] != "Title" || headings[1] != "Section" {
 		t.Errorf("expected 2 headings [Title Section], got %v", doc["headings"])
 	}
-
 	codeBlocks, ok := doc["code_blocks"].([]any)
 	if !ok || len(codeBlocks) != 1 {
 		t.Errorf("expected 1 code block, got %v", doc["code_blocks"])
 	}
-
 	links, ok := doc["links"].([]any)
 	if !ok || len(links) != 2 {
 		t.Errorf("expected 2 links, got %v", doc["links"])
 	}
 }
 
-// TestCmdDumpAll verifies cmdDump with "all" iterates the central doc pages and
-// prints each preceded by a --- <path> --- separator. Uses the embedded docs.
 func TestCmdDumpAll(t *testing.T) {
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = t.TempDir() // empty: no local plugin docs override
-	defer func() { pluginDocsRoot = oldRoot }()
-
-	got := captureStdout(t, func() { cmdDump("all") })
+	root := writeTestTree(t, map[string]string{
+		"_docs/sitemap.json": `{"module":"github.com/dreego-stack/dreego","pages":[{"path":"/_docs/index.md"},{"path":"/README.md"},{"path":"/CHANGELOG.md"}]}`,
+		"_docs/index.md":     "# Index\n",
+		"README.md":          "# Readme\n",
+		"CHANGELOG.md":       "# Changelog\n",
+	})
+	got := captureStdout(t, func() { cmdDump(root, "/_docs/index.md", "https://github.com/dreego-stack/dreego/blob/main", "https://raw.githubusercontent.com/dreego-stack/dreego/main") })
 	if !strings.Contains(got, "--- /_docs/index.md ---") {
 		t.Errorf("expected index separator in dump, got:\n%s", got)
 	}
@@ -227,30 +214,31 @@ func TestCmdDumpAll(t *testing.T) {
 	}
 }
 
-// TestCmdDocsJSON verifies cmdDocs --json routes through printJSON and emits
-// valid JSON with headings for the requested doc path.
-func TestCmdDocsJSON(t *testing.T) {
-	oldRoot := pluginDocsRoot
-	pluginDocsRoot = t.TempDir() // empty: no local plugin docs override
-	defer func() { pluginDocsRoot = oldRoot }()
+func TestCmdList(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"go.mod": "",
+		"_docs/sitemap.json": `{"module":"github.com/dreego-stack/dreego","pages":[{"path":"/_docs/index.md","title":"Index"}]}`,
+		"_docs/index.md":     "# Index\n",
+	})
+	writeGoMod(t, root, "github.com/dreego-stack/dreego", map[string]string{
+		"github.com/dreego-stack/plugin-sse": "v0.1.0",
+	})
+	os.MkdirAll(filepath.Join(root, "vendor", "github.com", "dreego-stack", "plugin-sse", "_docs"), 0755)
+	os.WriteFile(filepath.Join(root, "vendor", "github.com", "dreego-stack", "plugin-sse", "_docs", "sitemap.json"), []byte(`{"module":"github.com/dreego-stack/plugin-sse","pages":[{"path":"/_docs/index.md","title":"Plugin Index"}]}`), 0644)
 
-	got := captureStdout(t, func() { cmdDocs([]string{"--json", "/_docs/index.md"}) })
-	var doc map[string]any
-	if err := json.Unmarshal([]byte(got), &doc); err != nil {
-		t.Fatalf("cmdDocs --json output is not valid JSON: %v\n%s", err, got)
+	oldWd := wdFunc
+	wdFunc = func() string { return root }
+	defer func() { wdFunc = oldWd }()
+
+	got := captureStdout(t, cmdList)
+	if !strings.Contains(got, "[github.com/dreego-stack/dreego]") {
+		t.Errorf("expected core section, got:\n%s", got)
 	}
-	if doc["path"] != "/_docs/index.md" {
-		t.Errorf("expected path /_docs/index.md, got %v", doc["path"])
-	}
-	headings, ok := doc["headings"].([]any)
-	if !ok || len(headings) == 0 {
-		t.Errorf("expected non-empty headings, got %v", doc["headings"])
+	if !strings.Contains(got, "[github.com/dreego-stack/plugin-sse]") {
+		t.Errorf("expected plugin section, got:\n%s", got)
 	}
 }
 
-// captureStdout runs fn and returns everything written to os.Stdout. A reader
-// goroutine drains the pipe concurrently so functions that write more than the
-// pipe buffer do not deadlock on a full pipe.
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 	old := os.Stdout
