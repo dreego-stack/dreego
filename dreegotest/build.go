@@ -69,7 +69,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 	t.Helper()
 	dir := t.TempDir()
 
-	repoRoot, err := repoRoot()
+	repoRoot, err := RepoRoot()
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +122,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 	return dir, nil
 }
 
-func repoRoot() (string, error) {
+func RepoRoot() (string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return "", err

@@ -24,7 +24,7 @@ func Serve(t *testing.T, files map[string]string) *Client {
 	t.Helper()
 	dir := t.TempDir()
 
-	repoRoot, err := repoRoot()
+	repoRoot, err := RepoRoot()
 	if err != nil {
 		t.Fatalf("Serve: %v", err)
 	}
