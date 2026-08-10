@@ -34,7 +34,9 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - AGENTS.md + docs updated for new workflow ✅
 - Flaky test fix (run-timer-sigterm stdout flush) ✅
 - Todo system simplification (_todo/ → TODO.md + TODO-Future.md) ✅
-- Test migration strategy (shell → _test.go) — open, see PLAN-v0.0.27.md Phase 7
+- Test migration strategy (shell → _test.go) ✅
+- AGENTS.md test rules — update Feature Workflow to `_test.go` + `dreegotest`, drop `test.sh` reference
+- CI standard-header check — add a CI check for the standard test header in workflows
 
 ## v0.0.26 (done)
 
