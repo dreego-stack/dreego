@@ -11,6 +11,11 @@ permissions:
 
 jobs:
   process:
+    # Only run when a PR was actually merged (or on a push to main). Closing
+    # a PR without merging triggers `pull_request` types [closed] too; without
+    # this guard the job would try to apply pr.md from a non-merged PR and
+    # fail (detached HEAD has no main ref).
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
