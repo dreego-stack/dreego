@@ -1,28 +1,30 @@
-name: pull-request-merging
+name: main-push
 
 on:
   push:
     branches: [main]
-  pull_request:
-    types: [closed]
 
 permissions:
   contents: write
 
 jobs:
-  process:
-    # Only run on pushes to main. Both a merged PR (push event) and a closed
-    # PR (pull_request closed) trigger this workflow; running process on both
-    # causes a race where two runs amend the same merge commit and one fails
-    # with "stale info". The push event is the single source of truth.
-    if: github.event_name == 'push'
+  check-and-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Stop if no pr.md (loop protection)
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: make test
+        run: make test
+
+      - name: Check for pr.md
         id: check
         run: |
           if [ -f pr.md ]; then
@@ -47,8 +49,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit --amend --no-edit
-          git push --force-with-lease origin main
+          git commit -m "docs: apply pr.md changelog (release-prep)"
+          git push origin main
 
       - name: Create tag if version bumped
         if: steps.check.outputs.has_pr == 'true' && steps.prep.outputs.new_version != 'none'
@@ -63,21 +65,3 @@ jobs:
           git tag "$new"
           git push origin "$new"
           echo "created tag $new"
-
-  delete-branch:
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete merged head branch
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          branch="${{ github.event.pull_request.head.ref }}"
-          if [ "$branch" = "main" ]; then
-            echo "refusing to delete main"
-            exit 0
-          fi
-          gh api --method DELETE \
-            "repos/${{ github.repository }}/git/refs/heads/$branch" \
-            || echo "branch $branch already deleted or not found"
-          echo "deleted branch $branch"
