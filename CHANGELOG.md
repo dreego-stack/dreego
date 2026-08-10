@@ -1,3 +1,9 @@
+
+## v0.0.31 - 2026-08-10
+
+- Chore: migrate remaining ~120 shell tests (`_tests/core/{Components,Template,Imports,Static,Session,Routing,Layout,ContentType,FormActions,Middleware,Config,Deployment,CLI,Bugs}`) to Go in `_tests/go/` via `dreegotest`
+- Feat: extend `dreegotest` with CLI/project helpers (`CLIBin`, `ProjectDir`, `RunCLI`, `BuildInDirOK`, `LatestTag`) and a cookie-jar HTTP client (`ServeSetup`, `Client.Request/Cookie`)
+
 - Chore: replace _todo/Blockwebchain system with linear TODO.md + TODO-Future.md
 - Chore: lock "plugin" naming (addon → plugin), rename concept docs
 
