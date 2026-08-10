@@ -17,7 +17,7 @@ Versioning stays conservative: `v0.x.y` only. `v0.x` marks larger milestones (ma
 
 These three systems are all in flux and need a decision on how they should work going forward:
 
-- **docs system** — embedded docs (`cmd/dreego/embedded/`) vs decentralized `dreego docs` (remote fetch). Current state: embedded mirror + sync script + DocsSync test exist, but no HTTP fetch function. Decide: keep embedded, go decentralized, or hybrid.
+- **docs system** — decentralized `dreego docs` (local module store, no HTTP, no embedded copy). Resolution via `go.mod` → vendor/ or module cache; `-p <plugin>` + `--list` via per-module `_docs/sitemap.json`.
 - **todo system** — Blockwebchain is too custom for agents. Simplify (drop chain integers, keep dependency graph) or replace (linear TODO.md + issues).
 - **tests system** — shell-based `_tests/**/test.sh` vs `_test.go` (dreegotest + httptest + golden). Decide migration strategy and how the agent is told to follow the convention.
 

@@ -20,6 +20,7 @@ build/
 vendor/
 /dreego
 dreego-linux
+cli/dreego/dreego
 
 # Generated dreego code
 *_dreego.go
