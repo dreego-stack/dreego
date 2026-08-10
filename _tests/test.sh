@@ -41,6 +41,13 @@ else
     echo "==> PASS <=> GO Tests <========="
 fi
 
+if ! (cd "$REPO_DIR" && go test ./_tests/go/... > /dev/null 2>&1); then
+    echo "-> FAIL -> go test ./_tests/go/..."
+    FAIL=$((FAIL + 1))
+else
+    echo "==> PASS <=> _tests/go (Go integration tests) <========="
+fi
+
 DREEGO_BIN="$workdir/.dreego-bin"
 DREEGO_BIN="$(mktemp -d)/dreego"
 (cd "$REPO_DIR" && go build -ldflags "-X main.version=${DREEGO_VERSION:-dev}" -o "$DREEGO_BIN" ./cli/dreego) || {
