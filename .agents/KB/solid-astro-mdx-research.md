@@ -225,7 +225,7 @@ Astro extends MDX:
 - [x] **Frontmatter as First-Class** — Every `.dreego` file could optionally have frontmatter (YAML/TOML) that is available in the `<go>` block as a `Meta` variable.
 - [x] **Content Collections + Schema** — Like MDX in Astro Collections: `.dreego` pages in a collection with Zod-like schema (Go struct tags?), automatic type generation.
 - [x] **Markdown in Template Blocks** — Template code (`{#if}`, `{#each}`) within Markdown content. "Literate Programming" for websites.
-- [x] **ESM/Import Pattern → Dreego Addon System** — MDX's `import` Statement → Dreego's `{#use addon}` in template. Import components from addons.
+- [x] **ESM/Import Pattern → Dreego Plugin System** — MDX's `import` Statement → Dreego's `{#use plugin}` in template. Import components from plugins.
 - [x] **Remark/Rehype Plugin System → Dreego Markdown Pipeline** — A pipeline of Markdown transformers (Syntax Highlighting, Table of Contents, Link Rewriting). Implementable as Go pipeline.
 
 **DO NOT ADOPT:**

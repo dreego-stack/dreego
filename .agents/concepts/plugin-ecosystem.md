@@ -1,7 +1,7 @@
 
 ---
 type: Concept
-title: "Addon/Plugin Ecosystem"
+title: "Plugin Ecosystem"
 description: "Go-based plugin system with compile-time safety and tree-shaking"
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
@@ -9,7 +9,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Design Philosophy
 
-Dreego addons are Go packages that fulfill the `dreego.Plugin` interface. No dynamic plugins, no runtime magic — pure, compile-time-safe Go.
+Dreego plugins are Go packages that fulfill the `dreego.Plugin` interface. No dynamic plugins, no runtime magic — pure, compile-time-safe Go.
 
 ## Plugin Interface
 
@@ -26,7 +26,7 @@ type Plugin interface {
 
 ## Extension Points
 
-An addon can hook into the framework at 5 points:
+A plugin can hook into the framework at 5 points:
 
 1. **Middleware** — HTTP wrappers (e.g. auth checks)
 2. **Routes** — Register new paths (e.g. `/auth/login`)
@@ -79,24 +79,24 @@ func main() {
 }
 ```
 
-## Advantages of the Go Addon System
+## Advantages of the Go Plugin System
 
 1. **No dependency hell:** `go.mod` resolves dependencies strictly
 2. **Compile-Time Safety:** Build breaks on incompatibilities
 3. **Tree-Shaking:** Unused code is removed by the compiler
 4. **Installation:** `go get github.com/dreego-ecosystem/dreego-auth` — one command
 
-## Addon Ideas (complete)
+## Plugin Ideas (complete)
 
 ### Auth & Security
-| Addon            | Description                                      |
+| Plugin           | Description                                      |
 |------------------|--------------------------------------------------|
 | dreego-auth       | Login, Register, Sessions, OAuth, Passkeys       |
 | dreego-csrf       | CSRF protection (if not in core)                 |
 | dreego-2fa        | Two-factor authentication                        |
 
 ### UI & Components
-| Addon            | Description                                      |
+| Plugin           | Description                                      |
 |------------------|--------------------------------------------------|
 | dreego-ui         | Component library (Shadcn-like)                  |
 | dreego-map        | MapLibre/Leaflet Integration                     |
@@ -105,7 +105,7 @@ func main() {
 | dreego-markdown   | Markdown Rendering                               |
 
 ### Data & Backend
-| Addon            | Description                                      |
+| Plugin           | Description                                      |
 |------------------|--------------------------------------------------|
 | dreego-db         | DB Integration (SQLite, Turso, PG)               |
 | dreego-storage    | File Uploads (S3, R2, local)                     |
@@ -114,7 +114,7 @@ func main() {
 | dreego-cache      | Caching (Redis, In-Memory)                       |
 
 ### Business
-| Addon            | Description                                      |
+| Plugin           | Description                                      |
 |------------------|--------------------------------------------------|
 | dreego-stripe     | Stripe Payments & Webhooks                       |
 | dreego-mail       | Email delivery with .dreego templates            |
@@ -124,7 +124,7 @@ func main() {
 | dreego-analytics  | Privacy-friendly Analytics                       |
 
 ### DX & Tools
-| Addon            | Description                                      |
+| Plugin           | Description                                      |
 |------------------|--------------------------------------------------|
 | dreego-admin      | Auto-generated admin dashboard                   |
 | dreego-pwa        | Progressive Web App                              |
@@ -133,7 +133,7 @@ func main() {
 
 ## Transpiler Hook for Custom Tags
 
-Addons can register their own HTML tags:
+Plugins can register their own HTML tags:
 
 ```html
 <!-- In a .dreego file -->
@@ -142,5 +142,5 @@ Addons can register their own HTML tags:
 
 The transpiler:
 1. Finds `<dreego:map />`
-2. Checks `dreego.config.json` for installed addons
+2. Checks `dreego.config.json` for installed plugins
 3. Replaces with Go code: `dreegomap.RenderMap(dreegomap.Props{Lat: 52.52, Lng: 13.40})`

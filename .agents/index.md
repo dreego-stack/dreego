@@ -24,7 +24,7 @@ timestamp: 2026-07-31T07:00:00Z
 - [SSG & Wails V2](decisions/ssg-wails-v2.md) — Static site generation and desktop in V2
 - [Context Design](decisions/context-design.md) — Interface + embedding per target
 - [Plugin Interface](decisions/plugin-interface.md) — Capability-based plugin system
-- [Session Management](decisions/session-management.md) — Interface in core, store as addon
+- [Session Management](decisions/session-management.md) — Interface in core, store as plugin
 - [Error Handling](decisions/error-handling.md) — Typed errors, recovery, request logging
 - [Middleware System](decisions/middleware-system.md) — Core-fixed vs core-conditional vs plugin
 - [Form Actions](decisions/form-actions.md) — g-action + generated pipeline
@@ -34,8 +34,7 @@ timestamp: 2026-07-31T07:00:00Z
 - [Dreego Architecture](concepts/dreego-architecture.md) — Architecture overview
 - [Dreego Sections](concepts/dreego-sections.md) — The 5 sections of a .dreego file
 - [Template Logic](concepts/template-logic.md) — {#if}, {#each}, {#switch}, {#slot}
-- [Addon Ecosystem](concepts/addon-ecosystem.md) — Plugin architecture
-- [Affons Ecosystem](concepts/affons-ecosystem.md) — CLI, docs, registry, community
+- [Plugin Ecosystem](concepts/plugin-ecosystem.md) — Plugin architecture
 - [Signals & Runes](concepts/signals-and-runes.md) — Signals and Svelte runes in Dreego
 - [Output Strategy](concepts/output-strategy-comparison.md) — Comparison of output strategies
 - [Form Actions](concepts/form-actions.md) — Form handling concept
@@ -60,12 +59,12 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## Plans & Tips
 
-- [Plan](../_todo/plan.md) — Linear reorderable timeline
+- [TODO](../TODO.md) — Next code changes
+- [TODO Future](../TODO-Future.md) — Long-term ideas (SSG, Wails, plugin ideas)
 - [Tips](tips.md) — 50 tips + checklist
 
 ## External Docs
 
 - [README](../README.md) — Project README
-- [TODO](../TODO.md) — Next code changes
 - [CHANGELOG](../CHANGELOG.md) — Version history
 - [Docs](../_docs/index.md) — Public documentation

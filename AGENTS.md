@@ -56,7 +56,7 @@ v0.0.27 tagged — Single-source versioning: the latest git tag (`vX.Y.Z`) is th
 ```
 repo-root/
 ├── TODO.md                 ← NEXT code changes (short, prioritized)
-├── _todo/                  ← Blockwebchain task system (blocks, plan.md)
+├── TODO-Future.md          ← Long-term ideas (SSG, Wails, plugin ideas)
 ├── CHANGELOG.md            ← What came in which version
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
@@ -173,7 +173,7 @@ Solution: `dreego.Context` Interface. → [decisions/context-design](.agents/dec
 → [decisions/typescript-v2](.agents/decisions/typescript-v2.md)
 
 ### 4. Plugin Interface: First Release = Final Contract
-→ [concepts/addon-ecosystem](.agents/concepts/addon-ecosystem.md)
+→ [concepts/plugin-ecosystem](.agents/concepts/plugin-ecosystem.md)
 
 ### 5. File-based Routing: Crawlable for SSG
 → [decisions/routing-and-components](.agents/decisions/routing-and-components.md)

@@ -144,7 +144,7 @@ func RequestLogging(log *slog.Logger) func(http.Handler) http.Handler
 
 ### Integration with Plugin System
 
-Addons return errors as typed values:
+Plugins return errors as typed values:
 
 ```go
 // In auth plugin

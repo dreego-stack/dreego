@@ -33,7 +33,7 @@ Elixir's attempt to retroactively introduce types shows how hard that is: Typeif
 2. The `<script>` block is isolated — it does not influence the core architecture
 3. Vanilla JS → TypeScript is an upgrade, not a fundamental redesign
 
-But for OTHER decisions: What we now set in the architecture should be designed so that future extensions are possible without breaking changes (plugin interface, transpiler pipeline, addon system).
+But for OTHER decisions: What we now set in the architecture should be designed so that future extensions are possible without breaking changes (plugin interface, transpiler pipeline, plugin system).
 
 ## Decision
 

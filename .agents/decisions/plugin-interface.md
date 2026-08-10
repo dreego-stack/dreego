@@ -14,7 +14,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Context
 
-Dreego needs a plugin system for its addon ecosystem. The interface must be stable from the start — later changes are breaking changes for all addons.
+Dreego needs a plugin system for its plugin ecosystem. The interface must be stable from the start — later changes are breaking changes for all plugins.
 
 ## Decision
 
@@ -160,4 +160,4 @@ Middleware is wrapped in execution order (LIFO like Chi).
 - `dreego.Plugin` interface in the core — never change again
 - New capabilities can be added as separate interfaces
 - No central plugin registry needed — user registers explicitly
-- Addons start with `go get` + `app.Use()`
+- Plugins start with `go get` + `app.Use()`
