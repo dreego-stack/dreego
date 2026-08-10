@@ -18,16 +18,24 @@ else
     echo "==> PASS <=> Core deps <========="
 fi
 
+if ! out=$(sh "$DIR/find-binary.sh" 2>&1); then
+    echo "$out" | grep '^->' || true
+    echo "==> FAIL   <=>  find-binary <==========="
+    FAIL=$((FAIL + 1))
+else
+    echo "==> PASS <=> No binary files <========="
+fi
+
 go_failed=0
 for pkg in ./core/... ./cli/dreego/...; do
     if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then
         go_failed=$((go_failed + 1))
-        echo "FAIL $pkg"
+        echo "-> FAIL -> go test $pkg"
     fi
 done
 
 if [ "$go_failed" -gt 0 ]; then
-    echo "==> FAIL <=> GO Tests <========="
+    echo "==> FAIL   <=>  GO Tests <==========="
     FAIL=$((FAIL + go_failed))
 else
     echo "==> PASS <=> GO Tests <========="
@@ -65,7 +73,7 @@ for test_dir in $(find "$DIR/core" -type d 2>/dev/null | sort); do
         if sh "$test_script" >/dev/null 2>&1; then
             echo "PASS" > "$result_file"
         else
-            echo "FAIL $name" > "$result_file"
+            echo "-> FAIL -> $name" > "$result_file"
         fi
     ) &
     RUNNING=$((RUNNING + 1))
@@ -83,6 +91,7 @@ for f in "$RESULTDIR"/*; do
     case "$line" in
         PASS) PASS=$((PASS + 1)) ;;
         FAIL*) echo "$line"; FAIL=$((FAIL + 1)) ;;
+        "-> FAIL"*) echo "$line"; FAIL=$((FAIL + 1)) ;;
     esac
 done
 
