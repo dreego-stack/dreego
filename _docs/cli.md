@@ -52,17 +52,34 @@ Runs `generate` + `build`, starts the server, then watches `.dreego` files (500 
 ## dreego docs
 
 ```bash
-dreego docs [path]
+dreego docs [-p <name>] [--web] [--json] [--dump] [--list] [path]
 ```
 
-Displays repo documentation from the embedded copy (`cli/dreego/embedded/`), so it works **offline**. Without arguments, shows `/_docs/index.md`.
+Reads documentation from the **local module store** — no HTTP, no embedded copy. The docs live next to the source in each module's `_docs/` directory, so there is a single source of truth per module.
+
+Resolution uses the project's `go.mod` to locate each module on disk, in priority order:
+1. the module itself (when run inside the dreego repo)
+2. the `vendor/` directory (when present)
+3. the Go module cache (`go env GOMODCACHE`)
+
+Without arguments, `dreego docs` shows the core index `/_docs/index.md`. Flags:
+
+- `-p <name>`: read a plugin's docs from `github.com/dreego-stack/<name>` (must be required in `go.mod`)
+- `--list`: list every core + plugin page from each module's `_docs/sitemap.json`
+- `--dump`: print all sitemap pages (or a comma-separated list of paths) in one output
+- `--json`: structured JSON (headings, code blocks, links) for AI agents
+- `--web`: open the docs page in a browser
 
 Examples:
 ```bash
-dreego docs                    show docs index
-dreego docs /README.md         show readme
-dreego docs /_docs/cli.md      show CLI docs
+dreego docs                    show core docs index
+dreego docs /README.md         show core readme
+dreego docs /_docs/cli.md      show core CLI docs
+dreego docs -p plugin-sse /_docs/index.md   show a plugin's docs
+dreego docs --list             list all core + plugin pages
 ```
+
+> **Note:** `dreego docs` reads the version installed in your project's `go.mod`. If a module is not downloaded yet, run `go mod download` first.
 
 ## dreego help
 

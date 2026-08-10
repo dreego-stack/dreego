@@ -1,0 +1,24 @@
+{
+  "module": "github.com/dreego-stack/dreego",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "Documentation Index"},
+    {"path": "/_docs/cli.md", "title": "CLI Reference"},
+    {"path": "/_docs/config.md", "title": "Configuration"},
+    {"path": "/_docs/routing.md", "title": "File-based Routing"},
+    {"path": "/_docs/layouts.md", "title": "Layouts"},
+    {"path": "/_docs/middleware.md", "title": "Middleware"},
+    {"path": "/_docs/components.md", "title": "Components"},
+    {"path": "/_docs/frontmatter.md", "title": "Frontmatter"},
+    {"path": "/_docs/forms.md", "title": "Forms"},
+    {"path": "/_docs/plugin-interfaces.md", "title": "Plugin Interfaces"},
+    {"path": "/_docs/plugins.md", "title": "Plugins"},
+    {"path": "/_docs/runtime.md", "title": "Runtime API"},
+    {"path": "/_docs/session-encryption.md", "title": "Session Encryption"},
+    {"path": "/_docs/testing.md", "title": "Testing"},
+    {"path": "/_docs/deployment.md", "title": "Deployment"},
+    {"path": "/_docs/dev-server.md", "title": "Dev Server"},
+    {"path": "/_docs/hot-reload.md", "title": "Hot Reload"},
+    {"path": "/README.md", "title": "README"},
+    {"path": "/CHANGELOG.md", "title": "Changelog"}
+  ]
+}
