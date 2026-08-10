@@ -7,6 +7,4 @@ version: patch
 - Feat: `dreego docs --list` lists every core + plugin page from each module's `_docs/sitemap.json`
 - Feat: per-module `_docs/sitemap.json` defines each module's doc pages (replaces the embedded mirror)
 - Fix: remove `cli/dreego/embedded/`, `cli/dreego/embed.go`, `_scripts/sync-embedded-docs.sh` and the duplicated docs copy
-- Feat: `find-binary` check in `make test` fails on any stray binary in the repo (NUL-byte heuristic; exceptions: `.DS_Store`, `.kilo/`, `.tmp/`, allowlisted image/font/archive types)
-- Fix: `pull-request-merging` process job only runs on push events to main (merged PRs trigger both push and closed; running on both raced and failed with "stale info")
 - Fix: `run-timer-sigterm` flake — timer logic extracted into `scheduleStop` with deterministic unit tests (`TestScheduleStopSendsSIGTERM`, `TestScheduleStopFallsBackToKill`); integration test uses prebuilt CLI + 1s timer instead of double `go run` + 3s wait
