@@ -7,3 +7,4 @@ version: patch
 - Feat: `dreego docs --list` lists every core + plugin page from each module's `_docs/sitemap.json`
 - Feat: per-module `_docs/sitemap.json` defines each module's doc pages (replaces the embedded mirror)
 - Fix: remove `cli/dreego/embedded/`, `cli/dreego/embed.go`, `_scripts/sync-embedded-docs.sh` and the duplicated docs copy
+- Feat: `find-binary` check in `make test` fails on any stray binary in the repo (NUL-byte heuristic; exceptions: `.DS_Store`, `.kilo/`, `.tmp/`, allowlisted image/font/archive types)
