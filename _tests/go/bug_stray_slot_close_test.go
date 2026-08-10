@@ -1,0 +1,15 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/dreego-stack/dreego/dreegotest"
+)
+
+func TestBugStraySlotClose(t *testing.T) {
+	dreegotest.MustBuildFail(t, map[string]string{
+		"dreego/components/Card.dreego": `Component Card ()
+<div><article>{#slot header}</article></div>`,
+		"dreego/routes/get.dreego": `<div><@Card>{/slot}</@Card></div>`,
+	})
+}
