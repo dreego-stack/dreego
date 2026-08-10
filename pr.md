@@ -8,3 +8,4 @@ version: patch
 - Feat: per-module `_docs/sitemap.json` defines each module's doc pages (replaces the embedded mirror)
 - Fix: remove `cli/dreego/embedded/`, `cli/dreego/embed.go`, `_scripts/sync-embedded-docs.sh` and the duplicated docs copy
 - Feat: `find-binary` check in `make test` fails on any stray binary in the repo (NUL-byte heuristic; exceptions: `.DS_Store`, `.kilo/`, `.tmp/`, allowlisted image/font/archive types)
+- Fix: `pull-request-merging` process job only runs on merged PRs or pushes to main (closing a PR without merging no longer triggers it)
