@@ -257,20 +257,25 @@ func cmdRun(args []string) {
 	}
 
 	if timer > 0 {
-		go func() {
-			time.Sleep(time.Duration(timer) * time.Second)
-			if err := c.Process.Signal(syscall.SIGTERM); err != nil {
-				fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
-				c.Process.Kill()
-			} else {
-				fmt.Println("timer: server stopped")
-			}
-		}()
+		go scheduleStop(c.Process, time.Duration(timer)*time.Second)
 		c.Wait()
 		return
 	}
 
 	c.Wait()
+}
+
+// scheduleStop sends SIGTERM to the process after the given delay (graceful
+// shutdown, bug B20) and falls back to SIGKILL if signaling fails. Extracted
+// from cmdRun so the timer behavior is testable without a full server run.
+func scheduleStop(proc *os.Process, after time.Duration) {
+	time.Sleep(after)
+	if err := proc.Signal(syscall.SIGTERM); err != nil {
+		fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
+		proc.Kill()
+	} else {
+		fmt.Println("timer: server stopped")
+	}
 }
 
 func findMain() (projDir, pkg, name string) {
