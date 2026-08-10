@@ -27,25 +27,28 @@ else
 fi
 
 go_failed=0
+go_count=0
 for pkg in ./core/... ./cli/dreego/...; do
     if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then
         go_failed=$((go_failed + 1))
         echo "-> FAIL -> go test $pkg"
     fi
+    go_count=$((go_count + $(cd "$REPO_DIR" && go test -list '^Test' "$pkg" 2>/dev/null | grep -c '^Test')))
 done
 
 if [ "$go_failed" -gt 0 ]; then
-    echo "==> FAIL   <=>  GO Tests <==========="
+    echo "==> FAIL   <=>  GO Tests ($go_count) <==========="
     FAIL=$((FAIL + go_failed))
 else
-    echo "==> PASS <=> GO Tests <========="
+    echo "==> PASS <=> GO Tests ($go_count) <========="
 fi
 
+goit_count=$(cd "$REPO_DIR" && go test -list '^Test' ./_tests/go/... 2>/dev/null | grep -c '^Test')
 if ! (cd "$REPO_DIR" && go test ./_tests/go/... > /dev/null 2>&1); then
     echo "-> FAIL -> go test ./_tests/go/..."
     FAIL=$((FAIL + 1))
 else
-    echo "==> PASS <=> _tests/go (Go integration tests) <========="
+    echo "==> PASS <=> _tests/go (Go integration tests, $goit_count) <========="
 fi
 
 DREEGO_BIN="$workdir/.dreego-bin"
