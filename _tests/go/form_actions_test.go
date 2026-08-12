@@ -8,6 +8,7 @@ import (
 )
 
 func TestFormActionsGActionBasic(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get-login.dreego": `<go>
     type LoginForm struct {
@@ -25,6 +26,7 @@ func TestFormActionsGActionBasic(t *testing.T) {
 }
 
 func TestFormActionsGActionNoHandler(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-fail.dreego": `<go>
 </go>
@@ -37,6 +39,7 @@ func TestFormActionsGActionNoHandler(t *testing.T) {
 }
 
 func TestFormActionsGActionUnexported(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-fail.dreego": `<go>
     type myForm struct {
@@ -55,6 +58,7 @@ func TestFormActionsGActionUnexported(t *testing.T) {
 }
 
 func TestFormActionsGActionWrongArity(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-fail.dreego": `<go>
     type BadForm struct {
@@ -73,6 +77,7 @@ func TestFormActionsGActionWrongArity(t *testing.T) {
 }
 
 func TestFormActionsHandlerSignature(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get-fail.dreego": `<go>
     type BadForm struct {
@@ -96,6 +101,7 @@ func TestFormActionsHandlerSignature(t *testing.T) {
 }
 
 func TestFormActionsMethodPostFile(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/post-login.dreego": `<go>
     type LoginForm struct {
@@ -115,6 +121,7 @@ func TestFormActionsMethodPostFile(t *testing.T) {
 }
 
 func TestFormActionsNoGAction(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/post-search.dreego": `<form method="post">
     <input name="search">
@@ -127,6 +134,7 @@ func TestFormActionsNoGAction(t *testing.T) {
 }
 
 func TestFormActionsNoValidate(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-form.dreego": `<go>
     type NoValForm struct {
@@ -145,6 +153,7 @@ func TestFormActionsNoValidate(t *testing.T) {
 }
 
 func TestFormActionsPlainForm(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-plain.dreego": `<go>
     email := c.FormValue("email")
@@ -159,6 +168,7 @@ func TestFormActionsPlainForm(t *testing.T) {
 }
 
 func TestFormActionsPlainPostRuntime(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post.dreego": `<go>
     email := c.FormValue("email")
@@ -176,6 +186,7 @@ func TestFormActionsPlainPostRuntime(t *testing.T) {
 }
 
 func TestFormActionsStructTags(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-form.dreego": "<go>\n    type MyForm struct {\n        Email string `form:\"email\"`\n    }\n    func DoForm(c dreego.Context, form MyForm) error {\n        return nil\n    }\n</go>\n<form g-action=\"DoForm\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>",
 	})
@@ -183,6 +194,7 @@ func TestFormActionsStructTags(t *testing.T) {
 }
 
 func TestFormActionsValidateTags(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-form.dreego": "<go>\n    type ValForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func DoVal(c dreego.Context, form ValForm) error {\n        return nil\n    }\n</go>\n<form g-action=\"DoVal\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>",
 	})
@@ -190,6 +202,7 @@ func TestFormActionsValidateTags(t *testing.T) {
 }
 
 func TestFormActionsBoolBinding(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get-news.dreego": "<go>\n    type NewsForm struct {\n        Email    string `validate:\"required\"`\n        Subscribe bool\n    }\n    func SubmitNews(c dreego.Context, form NewsForm) error {\n        if form.Subscribe {\n            return c.Redirect(\"/subscribed\", 303)\n        }\n        return c.Redirect(\"/skipped\", 303)\n    }\n</go>\n<form g-action=\"SubmitNews\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <input name=\"subscribe\" type=\"checkbox\">\n    <button type=\"submit\">Send</button>\n</form>",
 	}, "dreego.SetCSRF(false); ")
@@ -210,6 +223,7 @@ func TestFormActionsBoolBinding(t *testing.T) {
 }
 
 func TestFormActionsIntBinding(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get-age.dreego": "<go>\n    type AgeForm struct {\n        Age int `validate:\"min=2\"`\n    }\n    func SubmitAge(c dreego.Context, form AgeForm) error {\n        if form.Age == 20 {\n            return c.Redirect(\"/adult\", 303)\n        }\n        return c.Redirect(\"/other\", 303)\n    }\n</go>\n<form g-action=\"SubmitAge\" method=\"post\">\n    <input name=\"age\" type=\"number\">\n    <button type=\"submit\">Send</button>\n</form>",
 	}, "dreego.SetCSRF(false); ")
@@ -227,6 +241,7 @@ func TestFormActionsIntBinding(t *testing.T) {
 }
 
 func TestFormActionsSubmitValid(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/dashboard\", 303)\n    }\n</go>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>",
 	}, "dreego.SetCSRF(false); ")
@@ -237,6 +252,7 @@ func TestFormActionsSubmitValid(t *testing.T) {
 }
 
 func TestFormActionsSubmitInvalid(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>",
 	}, "dreego.SetCSRF(false); ")
@@ -247,6 +263,7 @@ func TestFormActionsSubmitInvalid(t *testing.T) {
 }
 
 func TestFormActionsSubmitCSRFPass(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>",
 	}, "dreego.SetSessionStore(dreego.NewCookieStore([]byte(\"test-secret\"))); ")

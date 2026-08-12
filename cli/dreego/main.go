@@ -182,7 +182,7 @@ func cmdBuildE(args []string) error {
 		c := exec.Command("go", "build", "-o", out, "./"+pkg)
 		c.Env = os.Environ()
 		if len(parts) == 2 {
-			c.Env = append(c.Env, "GOOS="+parts[0], "GOARCH="+parts[1])
+			c.Env = append(c.Env, "GOOS="+parts[0], "GOARCH="+parts[1], "CGO_ENABLED=0")
 		}
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr

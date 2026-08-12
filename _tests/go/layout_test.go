@@ -8,6 +8,7 @@ import (
 )
 
 func TestLayoutNoLayout(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>hello no layout</p></div>`,
 	})
@@ -24,6 +25,7 @@ func TestLayoutNoLayout(t *testing.T) {
 }
 
 func TestLayoutWithHead(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -35,6 +37,7 @@ func TestLayoutWithHead(t *testing.T) {
 }
 
 func TestLayoutWithSlot(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)

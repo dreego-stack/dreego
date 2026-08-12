@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugHeadDroppedByLayout(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/layouts/default.dreego": `<head><title>Layout Title</title></head>
 <div>{#slot}</div>`,

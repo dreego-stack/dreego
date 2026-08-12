@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugFormTagStructName(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-search.dreego": `<go>
 type LoginForm struct {

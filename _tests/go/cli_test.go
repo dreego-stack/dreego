@@ -12,6 +12,7 @@ import (
 )
 
 func TestCLIHelp(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "--help")
 	if err != nil {
@@ -30,6 +31,7 @@ func TestCLIHelp(t *testing.T) {
 }
 
 func TestCLINoArgs(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, _ := dreegotest.RunCLI(t, dir)
 	if !strings.Contains(out, "usage:") {
@@ -38,6 +40,7 @@ func TestCLINoArgs(t *testing.T) {
 }
 
 func TestCLIUnknownCmd(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	_, err := dreegotest.RunCLI(t, dir, "bogus")
 	if err == nil {
@@ -46,6 +49,7 @@ func TestCLIUnknownCmd(t *testing.T) {
 }
 
 func TestCLIVersion(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "version")
 	if err != nil {
@@ -61,6 +65,7 @@ func TestCLIVersion(t *testing.T) {
 }
 
 func TestCLIVersionDrift(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "version")
 	if err != nil {
@@ -77,6 +82,7 @@ func TestCLIVersionDrift(t *testing.T) {
 }
 
 func TestCLIVersionFlag(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	flagOut, err := dreegotest.RunCLI(t, dir, "--version")
 	if err != nil {
@@ -106,6 +112,7 @@ func TestCLIVersionFlag(t *testing.T) {
 }
 
 func TestCLIInit(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -119,6 +126,7 @@ func TestCLIInit(t *testing.T) {
 }
 
 func TestCLIInitNoArg(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "init")
 	if err == nil {
@@ -130,6 +138,7 @@ func TestCLIInitNoArg(t *testing.T) {
 }
 
 func TestCLIInitImport(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -150,6 +159,7 @@ func TestCLIInitImport(t *testing.T) {
 }
 
 func TestCLICheck(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -167,6 +177,7 @@ func TestCLICheck(t *testing.T) {
 }
 
 func TestCLICheckStale(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get.dreego": `<head><title>T</title></head>
 <div><p>check me</p></div>`,
@@ -190,6 +201,7 @@ func TestCLICheckStale(t *testing.T) {
 }
 
 func TestCLICheckNoGen(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {
@@ -201,6 +213,7 @@ func TestCLICheckNoGen(t *testing.T) {
 }
 
 func TestCLINew(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -220,6 +233,7 @@ func TestCLINew(t *testing.T) {
 }
 
 func TestCLINewNoArg(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	out, err := dreegotest.RunCLI(t, dir, "new")
 	if err == nil {
@@ -231,6 +245,7 @@ func TestCLINewNoArg(t *testing.T) {
 }
 
 func TestCLINewExists(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "myapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -245,6 +260,7 @@ func TestCLINewExists(t *testing.T) {
 }
 
 func TestCLINewGoSum(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -264,6 +280,7 @@ func TestCLINewGoSum(t *testing.T) {
 }
 
 func TestCLINewGitignore(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -289,6 +306,7 @@ func TestCLINewGitignore(t *testing.T) {
 }
 
 func TestCLINewBlueprintValid(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -316,6 +334,7 @@ func TestCLINewBlueprintValid(t *testing.T) {
 }
 
 func TestCLINewLayoutExists(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
@@ -335,6 +354,7 @@ func TestCLINewLayoutExists(t *testing.T) {
 }
 
 func TestCLIBuildTarget(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
 	})
@@ -353,6 +373,7 @@ func TestCLIBuildTarget(t *testing.T) {
 }
 
 func TestCLIDocs(t *testing.T) {
+	t.Parallel()
 	bin := dreegotest.CLIBin(t)
 	repoRoot, _ := dreegotest.RepoRoot()
 
@@ -388,6 +409,7 @@ func TestCLIDocs(t *testing.T) {
 }
 
 func TestCLIFmt(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	messy := `<head>
     <title>test</title>

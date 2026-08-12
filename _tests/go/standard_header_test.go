@@ -40,6 +40,7 @@ func checkStandardHeader(path string) []string {
 }
 
 func TestCheckStandardHeader(t *testing.T) {
+	t.Parallel()
 	cases := []struct {
 		name    string
 		content string
@@ -68,6 +69,7 @@ func TestCheckStandardHeader(t *testing.T) {
 }
 
 func TestStandardHeaderAllTests(t *testing.T) {
+	t.Parallel()
 	found := 0
 	var violations []string
 	err := filepath.WalkDir(coreTestsDir, func(path string, d fs.DirEntry, err error) error {

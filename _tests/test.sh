@@ -28,10 +28,14 @@ fi
 
 go_failed=0
 go_count=0
+go_run=0
 for pkg in ./core/... ./cli/dreego/...; do
-    if ! (cd "$REPO_DIR" && go test "$pkg" > /dev/null 2>&1); then
+    go_run=$((go_run + 1))
+    go_out="$RESULTDIR/gotest-$go_run.out"
+    if ! (cd "$REPO_DIR" && go test "$pkg" > "$go_out" 2>&1); then
         go_failed=$((go_failed + 1))
         echo "-> FAIL -> go test $pkg"
+        cat "$go_out"
     fi
     go_count=$((go_count + $(cd "$REPO_DIR" && go test -list '^Test' "$pkg" 2>/dev/null | grep -c '^Test')))
 done
@@ -44,8 +48,10 @@ else
 fi
 
 goit_count=$(cd "$REPO_DIR" && go test -list '^Test' ./_tests/go/... 2>/dev/null | grep -c '^Test')
-if ! (cd "$REPO_DIR" && go test ./_tests/go/... > /dev/null 2>&1); then
+goit_out="$RESULTDIR/gotest-goit.out"
+if ! (cd "$REPO_DIR" && go test ./_tests/go/... > "$goit_out" 2>&1); then
     echo "-> FAIL -> go test ./_tests/go/..."
+    cat "$goit_out"
     FAIL=$((FAIL + 1))
 else
     echo "==> PASS <=> _tests/go (Go integration tests, $goit_count) <========="

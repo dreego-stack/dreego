@@ -8,6 +8,7 @@ import (
 )
 
 func TestBugErrorPageLayout(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/layouts/default.dreego": `<head>
     <title>Layout Site</title>

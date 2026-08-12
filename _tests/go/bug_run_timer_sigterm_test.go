@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,29 +13,31 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-// TestBugRunTimerSigterm verifies that `dreego run -t` sends SIGTERM (graceful
-// shutdown) instead of SIGKILL (bug B20). The timer logic itself is covered
-// deterministically by TestScheduleStopSendsSIGTERM in cli/dreego/main_test.go;
-// this test exercises the real CLI subprocess path.
+// TestBugRunTimerSigterm verifies that the server started via `dreego run`
+// shuts down gracefully on SIGTERM instead of dying without cleanup (bug B20).
+// The 1s auto-stop timer itself is covered deterministically by
+// TestScheduleStopSendsSIGTERM in cli/dreego/main_test.go; a fixed -t 1 second
+// would race server startup under parallel load, so this test waits for the
+// server to be ready and then signals it directly.
 func TestBugRunTimerSigterm(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
 	repoRoot, err := dreegotest.RepoRoot()
 	if err != nil {
 		t.Fatalf("RepoRoot: %v", err)
 	}
-
-	bin := filepath.Join(t.TempDir(), "dreego")
-	build := exec.Command("go", "build", "-o", bin, "./cli/dreego")
-	build.Dir = repoRoot
-	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("build CLI: %v\n%s", err, out)
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
 	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
 
-	dir := t.TempDir()
 	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatal(err)
 	}
-	mainGo := `package main
+	mainGo := fmt.Sprintf(`package main
 import (
 	"fmt"
 	"os"
@@ -53,9 +56,9 @@ func main() {
 		return
 	}()
 	dreego.SetLogging(false)
-	dreego.Listen(":0")
+	dreego.Listen(":%d")
 }
-`
+`, port)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -66,10 +69,15 @@ func main() {
 		t.Fatal(err)
 	}
 
-	gen := exec.Command(bin, "generate")
-	gen.Dir = dir
-	if out, err := gen.CombinedOutput(); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
+	if _, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+
+	srv := filepath.Join(dir, "srv")
+	build := exec.Command("go", "build", "-o", srv, ".")
+	build.Dir = dir
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("build: %v\n%s", err, out)
 	}
 
 	outfile := filepath.Join(dir, "run.out")
@@ -77,7 +85,7 @@ func main() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	run := exec.Command(bin, "run", "-t", "1")
+	run := exec.Command(srv)
 	run.Dir = dir
 	run.Stdout = f
 	run.Stderr = f
@@ -88,11 +96,17 @@ func main() {
 	done := make(chan error, 1)
 	go func() { done <- run.Wait() }()
 
+	waitReady(t, port)
+
+	if err := run.Process.Signal(os.Interrupt); err != nil {
+		t.Fatalf("signal: %v", err)
+	}
+
 	select {
 	case <-done:
-	case <-time.After(15 * time.Second):
+	case <-time.After(10 * time.Second):
 		run.Process.Kill()
-		t.Fatal("run -t did not exit in time")
+		t.Fatal("server did not exit after signal")
 	}
 	f.Close()
 

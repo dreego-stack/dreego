@@ -8,6 +8,7 @@ import (
 )
 
 func TestBugHeadTitleDedupe(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/layouts/default.dreego": `<head>
     <title>Site</title>

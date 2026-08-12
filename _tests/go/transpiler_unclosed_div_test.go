@@ -7,5 +7,6 @@ import (
 )
 
 func TestTranspilerUnclosedDiv(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustFail(t, `<div>no end`)
 }

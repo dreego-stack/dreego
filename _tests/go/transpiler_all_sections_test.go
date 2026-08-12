@@ -7,6 +7,7 @@ import (
 )
 
 func TestTranspilerAllSections(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>All</title></head>
 <go>x := "ok"</go>
 <div><p>{x}</p></div>
