@@ -18,7 +18,7 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - [ ] **observability.1** — Metrics + Tracing: `request-id.1` is done (v0.0.17); Prometheus `/metrics` and OpenTelemetry spans as plugins, blocked on plugin-interface.1
 - [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec from Go struct tags and API routes: `c.Swagger()` endpoint, `api:"..."`/`validate:"..."` struct tags, generated `/openapi.json` route, optionally embedded Swagger UI
 - [x] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
-- [ ] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
+- [x] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
 - [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
 
 ### Decision needed

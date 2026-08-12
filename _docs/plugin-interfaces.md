@@ -74,6 +74,42 @@ type Subscription interface {
 
 Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
 
+### Queue Interface
+
+Background job queue contract, like `database/sql`: core defines the interface,
+plugins implement it (Redis, NATS, in-memory, ...). Interface only — no
+implementation ships in core. A `Job` is an opaque unit of work: `ID` is unique
+per caller, `Name` routes the job to the worker registered for it, `Payload`
+carries opaque bytes. `Dispatch` enqueues for immediate execution,
+`DispatchAfter` for execution after a delay, `DispatchBatch` enqueues all jobs
+atomically (all-or-nothing). `Worker` registers a handler for a job name
+(registering a name twice is an error); `Use` appends job middlewares that wrap
+handlers FIFO (first registered = outermost) and apply to all workers
+registered after `Use`. Handlers may enqueue follow-up jobs (chaining) without
+deadlocking; all methods respect ctx cancellation.
+
+```go
+type JobHandler func(ctx context.Context, job Job) error
+
+type JobMiddleware func(next JobHandler) JobHandler
+
+type Job struct {
+    ID      string
+    Name    string
+    Payload []byte
+}
+
+type Queue interface {
+    Dispatch(ctx context.Context, job Job) error
+    DispatchAfter(ctx context.Context, job Job, delay time.Duration) error
+    DispatchBatch(ctx context.Context, jobs []Job) error
+    Worker(name string, handler JobHandler) error
+    Use(middlewares ...JobMiddleware)
+}
+```
+
+Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
+
 ## Plugin Interfaces (not yet implemented)
 
 ### Storage Interface
@@ -98,17 +134,6 @@ type Mailer interface {
 ```
 
 Implementations: `github.com/dreego-stack/dreego/plugins/mail-smtp`, `github.com/dreego-stack/dreego/plugins/mail-resend`.
-
-### Queue Interface
-
-```go
-type Queue interface {
-    Dispatch(ctx context.Context, job Job) error
-    Worker(name string, handler JobHandler)
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
 
 ### Cache Interface
 
