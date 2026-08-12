@@ -21,6 +21,11 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - [ ] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
 - [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
 
+### Tests
+
+- [ ] **dreegotest-parity.1** — parity test: CLI `generate` output must match `core.Run` output — since `dreegotest` build/serve now run codegen via the cached CLI subprocess instead of `core.Run` directly, a divergence between the two would silently change test behavior
+- [ ] **standard-header-reactivate.1** — re-activate the standard-header check when shell tests return to `_tests/core` — `standard_header_test` currently passes silently when `_tests/core` is missing, so the header check is effectively deactivated
+
 ### Decision needed
 
 - [x] **addon vs plugin naming** — decided: "plugin" (v0.0.27) — `TODO-Future.md` uses "plugin" consistently, concept docs renamed accordingly

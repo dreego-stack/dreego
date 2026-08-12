@@ -1,7 +1,7 @@
 # Testing Strategy
 
 Every area of the framework needs positive (confirm behavior) and negative (detect errors early) tests.
-Tests run as integration tests in `_tests/` via Docker (`make test`). Bugs permanently under `_tests/core/Bugs/`.
+Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), using `dreegotest`.
 
 ## 1. Transpiler
 
@@ -152,7 +152,6 @@ Tests run as integration tests in `_tests/` via Docker (`make test`). Bugs perma
 | route-head-without-layout | ✅ bug | `<head>` works without layout (`_tests/go/bug_route_head_without_layout_test.go`) |
 | layout-route-head-merge | ✅ bug | Route `<head>` merges into layout `{#head}` (`_tests/go/bug_layout_route_head_merge_test.go`) |
 | bindform-typed | ✅ bug | int/bool/slice binding + unsupported map type error (`_tests/go/bug_bindform_non_string_test.go`) |
-| run-timer-sigterm | ✅ bug | SIGTERM graceful shutdown (`Bugs/run-timer-sigterm`) |
 | div-in-slot | ⬜ bug | `<@Card><div>hi</div></@Card>` — HTML in children |
 
 ## 12. Form Actions
