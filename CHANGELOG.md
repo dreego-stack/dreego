@@ -1,4 +1,8 @@
 
+## v0.0.36 - 2026-08-12
+
+- Feat: add core Storage interface (storage-interface.1) — `Storage` interface (Put/Get/Delete/List/URL) like `database/sql`, interface only, plugins implement (S3/R2/Local)
+
 ## v0.0.35 - 2026-08-12
 
 - Feat: add core Queue interface (queue-interface.1) — `Queue` interface (Dispatch/DispatchAfter/DispatchBatch/Worker/Use) + `Job`/`JobHandler`/`JobMiddleware`, like `database/sql`, interface only, plugins implement (Redis/NATS/In-Memory)
