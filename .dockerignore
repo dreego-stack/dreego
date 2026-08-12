@@ -1,0 +1,11 @@
+# Keep the Docker build context lean and reproducible (mirrors .gitignore)
+.tmp/
+bin/
+build/
+*.exe
+*.test
+vendor/
+.dreego-review-bin
+.review/
+.git/
+_smd/

@@ -74,6 +74,64 @@ type Subscription interface {
 
 Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
 
+### Queue Interface
+
+Background job queue contract, like `database/sql`: core defines the interface,
+plugins implement it (Redis, NATS, in-memory, ...). Interface only — no
+implementation ships in core. A `Job` is an opaque unit of work: `ID` is unique
+per caller, `Name` routes the job to the worker registered for it, `Payload`
+carries opaque bytes. `Dispatch` enqueues for immediate execution,
+`DispatchAfter` for execution after a delay, `DispatchBatch` enqueues all jobs
+atomically (all-or-nothing). `Worker` registers a handler for a job name
+(registering a name twice is an error); `Use` appends job middlewares that wrap
+handlers FIFO (first registered = outermost) and apply to all workers
+registered after `Use`. Handlers may enqueue follow-up jobs (chaining) without
+deadlocking; all methods respect ctx cancellation.
+
+```go
+type JobHandler func(ctx context.Context, job Job) error
+
+type JobMiddleware func(next JobHandler) JobHandler
+
+type Job struct {
+    ID      string
+    Name    string
+    Payload []byte
+}
+
+type Queue interface {
+    Dispatch(ctx context.Context, job Job) error
+    DispatchAfter(ctx context.Context, job Job, delay time.Duration) error
+    DispatchBatch(ctx context.Context, jobs []Job) error
+    Worker(name string, handler JobHandler) error
+    Use(middlewares ...JobMiddleware)
+}
+```
+
+Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
+
+### Key-Value Store Interface
+
+Like `database/sql`: core defines the contract, plugins provide the implementation (Redis, Ristretto, in-memory). Distinct from `Storage` (blobs) — KV holds small values with an optional TTL.
+
+```go
+type KVStore interface {
+    Get(ctx context.Context, key string) ([]byte, error)
+    Set(ctx context.Context, key string, val []byte, ttl time.Duration) error
+    Delete(ctx context.Context, key string) error
+    Expire(ctx context.Context, key string, ttl time.Duration) error
+}
+```
+
+Semantics:
+- Get returns the value stored under key; an error if key does not exist or ttl expired.
+- Set stores val under key with ttl; ttl <= 0 means no expiry (keep forever).
+- Delete removes key; idempotent (no error for missing key).
+- Expire sets/adjusts the ttl on an existing key; error if key does not exist.
+- All methods respect ctx cancellation.
+
+Plugins: `github.com/dreego-stack/dreego/plugins/kv-redis`, `github.com/dreego-stack/dreego/plugins/kv-memory` (planned).
+
 ### Storage Interface
 
 Like `database/sql`, interface only; plugins implement (S3/R2/Local). Core stays transport-agnostic.
@@ -103,17 +161,6 @@ type Mailer interface {
 ```
 
 Implementations: `github.com/dreego-stack/dreego/plugins/mail-smtp`, `github.com/dreego-stack/dreego/plugins/mail-resend`.
-
-### Queue Interface
-
-```go
-type Queue interface {
-    Dispatch(ctx context.Context, job Job) error
-    Worker(name string, handler JobHandler)
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
 
 ### Cache Interface
 

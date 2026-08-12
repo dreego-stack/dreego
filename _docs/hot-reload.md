@@ -49,7 +49,7 @@ For quick ad-hoc reload without installing Air:
 while true; do dreego generate && go build -o ./tmp/srv . && ./tmp/srv; sleep 2; done
 ```
 
-Or use `dreego run -t 0` with an external file watcher like `entr`:
+Or use `dreego run` with an external file watcher like `entr`:
 
 ```bash
 find dreego -name '*.dreego' | entr -r dreego run

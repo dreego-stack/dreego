@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugEachLoopInCond(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items := []string{"a", "b", "c"}</go>
 <div>

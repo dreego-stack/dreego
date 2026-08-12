@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugNestedIfInElse(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>score := 85</go>
 <div>

@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugComponentQuotedProp(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/components/Card.dreego": `Component Card (title string, active bool)
 <div><h1>{title}</h1><span>{active}</span></div>`,

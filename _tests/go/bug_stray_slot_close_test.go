@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugStraySlotClose(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
 		"dreego/components/Card.dreego": `Component Card ()
 <div><article>{#slot header}</article></div>`,

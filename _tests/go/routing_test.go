@@ -7,6 +7,7 @@ import (
 )
 
 func TestRouting404Page(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -18,6 +19,7 @@ func TestRouting404Page(t *testing.T) {
 }
 
 func TestRouting500Page(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -29,6 +31,7 @@ func TestRouting500Page(t *testing.T) {
 }
 
 func TestRoutingCatchall(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -40,6 +43,7 @@ func TestRoutingCatchall(t *testing.T) {
 }
 
 func TestRoutingDeepNesting(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/a/b/c/d/get.dreego": `<div><p>deep</p></div>`,
 	})
@@ -50,6 +54,7 @@ func TestRoutingDeepNesting(t *testing.T) {
 }
 
 func TestRoutingDeleteMethod(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/delete.dreego": `<div><p>delete works</p></div>`,
 	})
@@ -60,6 +65,7 @@ func TestRoutingDeleteMethod(t *testing.T) {
 }
 
 func TestRoutingDynamic(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -71,6 +77,7 @@ func TestRoutingDynamic(t *testing.T) {
 }
 
 func TestRoutingGetMethod(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -82,6 +89,7 @@ func TestRoutingGetMethod(t *testing.T) {
 }
 
 func TestRoutingGroups(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -93,6 +101,7 @@ func TestRoutingGroups(t *testing.T) {
 }
 
 func TestRoutingMultiSegment(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/a/get.dreego": `<go>a:=c.Param("a")</go>
 <div><p>{a}</p></div>`,
@@ -104,6 +113,7 @@ func TestRoutingMultiSegment(t *testing.T) {
 }
 
 func TestRoutingNestedRoutes(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/about/get.dreego":        `<div><p>about page</p></div>`,
 		"dreego/routes/users/about/get.dreego":  `<div><p>users about page</p></div>`,
@@ -115,6 +125,7 @@ func TestRoutingNestedRoutes(t *testing.T) {
 }
 
 func TestRoutingOptional(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -126,6 +137,7 @@ func TestRoutingOptional(t *testing.T) {
 }
 
 func TestRoutingPostMethod(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
@@ -137,6 +149,7 @@ func TestRoutingPostMethod(t *testing.T) {
 }
 
 func TestRoutingPutMethod(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/put.dreego": `<div><p>put works</p></div>`,
 	})
@@ -147,6 +160,7 @@ func TestRoutingPutMethod(t *testing.T) {
 }
 
 func TestRoutingServemuxCache(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
 	})

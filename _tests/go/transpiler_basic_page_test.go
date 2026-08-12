@@ -7,6 +7,7 @@ import (
 )
 
 func TestTranspilerBasicPage(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>Test</title></head>
 <go>msg := "hello"</go>
 <div><h1>{msg}</h1></div>`)
