@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugValidateAtoiNonDigit(t *testing.T) {
+	t.Parallel()
 	type Form struct {
 		Name string `validate:"min=abc"`
 	}

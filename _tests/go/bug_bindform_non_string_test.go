@@ -10,6 +10,7 @@ import (
 )
 
 func TestBugBindFormNonString(t *testing.T) {
+	t.Parallel()
 	type Profile struct {
 		Name   string
 		Age    int

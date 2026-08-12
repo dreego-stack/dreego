@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugCleanSegmentOptional(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/[[opt]]/get.dreego": `<div>optional</div>`,
 	})

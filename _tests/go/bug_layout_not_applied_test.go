@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugLayoutNotApplied(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/layouts/default.dreego": `<html><body><nav>Nav</nav>{#slot}<footer>Footer</footer></body></html>`,
 		"dreego/routes/get.dreego":     `<div><p>Page</p></div>`,

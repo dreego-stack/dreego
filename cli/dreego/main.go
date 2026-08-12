@@ -5,9 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	dreego "github.com/dreego-stack/dreego/core"
@@ -60,7 +58,7 @@ commands:
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
   build [--target <os/arch>] generate + go build → build/bin/<name>
-  run [-d] [-t <seconds>] build + start server (dev only)
+  run [-d] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change
   docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: core /_docs/index.md)
   feedback               open browser to submit feedback/issue
@@ -74,7 +72,6 @@ flags:
   --web                  open docs in browser instead of terminal
   --list                 list all core + plugin doc pages
   -d                     debug mode: write logs to build/logs/<utc>.log
-  -t <seconds>           auto-stop server after N seconds (timer)
 
 examples:
   dreego new myapp            create project with landing page
@@ -84,8 +81,6 @@ examples:
   dreego build --target linux/amd64  cross-compile for Docker
   dreego run                  build + start server (foreground)
   dreego run -d               build + start + log to file
-  dreego run -t 60            build + start + stop after 60s
-  dreego run -d -t 60         debug log + 60s timer
   dreego dev                  watch + rebuild + restart on change
   dreego docs                 show core docs index (terminal)
   dreego docs -p plugin-sse   show plugin docs index
@@ -182,7 +177,7 @@ func cmdBuildE(args []string) error {
 		c := exec.Command("go", "build", "-o", out, "./"+pkg)
 		c.Env = os.Environ()
 		if len(parts) == 2 {
-			c.Env = append(c.Env, "GOOS="+parts[0], "GOARCH="+parts[1])
+			c.Env = append(c.Env, "GOOS="+parts[0], "GOARCH="+parts[1], "CGO_ENABLED=0")
 		}
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
@@ -206,17 +201,10 @@ func cmdBuildE(args []string) error {
 
 func cmdRun(args []string) {
 	debug := false
-	timer := 0
 
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "-d":
+	for _, a := range args {
+		if a == "-d" {
 			debug = true
-		case "-t":
-			if i+1 < len(args) {
-				timer, _ = strconv.Atoi(args[i+1])
-				i++
-			}
 		}
 	}
 
@@ -225,11 +213,7 @@ func cmdRun(args []string) {
 	projDir, _, name := findMain()
 	bin := filepath.Join(projDir, "build", "bin", name)
 
-	fmt.Printf("starting %s", bin)
-	if timer > 0 {
-		fmt.Printf(" (auto-stop in %ds)", timer)
-	}
-	fmt.Println()
+	fmt.Printf("starting %s\n", bin)
 
 	c := exec.Command(bin)
 	c.Stderr = os.Stderr
@@ -256,26 +240,7 @@ func cmdRun(args []string) {
 		os.Exit(1)
 	}
 
-	if timer > 0 {
-		go scheduleStop(c.Process, time.Duration(timer)*time.Second)
-		c.Wait()
-		return
-	}
-
 	c.Wait()
-}
-
-// scheduleStop sends SIGTERM to the process after the given delay (graceful
-// shutdown, bug B20) and falls back to SIGKILL if signaling fails. Extracted
-// from cmdRun so the timer behavior is testable without a full server run.
-func scheduleStop(proc *os.Process, after time.Duration) {
-	time.Sleep(after)
-	if err := proc.Signal(syscall.SIGTERM); err != nil {
-		fmt.Fprintf(os.Stderr, "timer: signal error: %v\n", err)
-		proc.Kill()
-	} else {
-		fmt.Println("timer: server stopped")
-	}
 }
 
 func findMain() (projDir, pkg, name string) {

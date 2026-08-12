@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugComponentMultiPlaceholderAttr(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/components/Card.dreego": `Component Card (url string)
 <div><a href="{url}">go</a></div>`,

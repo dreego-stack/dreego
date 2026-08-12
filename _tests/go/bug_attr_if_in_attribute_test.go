@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugAttrIfInAttribute(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustFailWith(t, `<go>cond := true</go>
 <div><a class="nav {#if cond}active{/if}">link</a></div>`, "inside attribute value")
 	dreegotest.MustFailWith(t, `<go>cond := true</go>

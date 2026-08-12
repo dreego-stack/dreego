@@ -7,6 +7,7 @@ import (
 )
 
 func TestTranspilerMismatchedClose(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustFail(t, `<go>x:=1</go>
 <div>text</go>`)
 }

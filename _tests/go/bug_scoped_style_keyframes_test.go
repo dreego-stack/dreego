@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugScopedStyleKeyframes(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<style>@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
 <div><p>hi</p></div>`,

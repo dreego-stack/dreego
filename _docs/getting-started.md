@@ -38,7 +38,6 @@ dreego generate    # transpiles .dreego → Go code
 dreego build       # generate + go build
 dreego run         # build + start server
 dreego run -d      # with debug logging (JSONL)
-dreego run -t 30   # auto-stop after 30 seconds
 ```
 
 ## main.go

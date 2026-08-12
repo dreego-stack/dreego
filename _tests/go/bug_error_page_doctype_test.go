@@ -8,6 +8,7 @@ import (
 )
 
 func TestBugErrorPageDoctype(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/404.dreego": `<!doctype html>
 <html lang="en">

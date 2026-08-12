@@ -1,10 +1,11 @@
 package core
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/base64"
 	"io"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -66,8 +67,19 @@ func TestCookieStoreEncryptValueNotPlaintext(t *testing.T) {
 	if err != nil {
 		t.Fatalf("decode failed: %v", err)
 	}
-	if strings.Contains(string(decoded), "user_id") || strings.Contains(string(decoded), "42") {
-		t.Error("encrypted cookie should not contain plaintext key/value")
+	// Value layout: sig (32B) || marker (1B) || base64(nonce||ciphertext).
+	// Assert the marker and that the encrypted payload is not the plaintext
+	// map. A byte-level substring check for the key/value is flaky: the random
+	// ciphertext can coincidentally contain "user_id"/"42" as base64 bytes.
+	if len(decoded) < sha256.Size+1 || decoded[sha256.Size] != encMarker {
+		t.Fatalf("expected encrypted payload (marker %d), got marker %d", encMarker, decoded[sha256.Size])
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(string(decoded[sha256.Size+1:]))
+	if err != nil {
+		t.Fatalf("decode payload failed: %v", err)
+	}
+	if bytes.Contains(payload, []byte("user_id")) || bytes.Contains(payload, []byte("42")) {
+		t.Error("encrypted cookie payload should not contain plaintext key/value")
 	}
 }
 

@@ -9,14 +9,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 	"time"
-
-	dreego "github.com/dreego-stack/dreego/core"
 )
-
-var serveMu sync.Mutex
 
 // Serve builds a temp module from files, starts it as a subprocess on a free
 // port, and returns a client for HTTP requests. It replaces shell tests that
@@ -63,18 +58,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		}
 	}
 
-	serveMu.Lock()
-	defer serveMu.Unlock()
-	old, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Serve: getwd: %v", err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatalf("Serve: chdir: %v", err)
-	}
-	defer os.Chdir(old)
-
-	if err := dreego.Run(false); err != nil {
+	if _, err := RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("Serve: generate failed: %v", err)
 	}
 

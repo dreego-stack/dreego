@@ -9,6 +9,7 @@ import (
 )
 
 func TestContentTypeAcceptFallback(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>
     msg := "hello"
@@ -28,6 +29,7 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 }
 
 func TestContentTypeAcceptJSON(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/get.dreego": `<go type="json">
     c.JSON(200, map[string]string{"ok": "true"})
@@ -43,6 +45,7 @@ func TestContentTypeAcceptJSON(t *testing.T) {
 }
 
 func TestContentTypeAcceptXML(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/get.dreego": `<go type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
@@ -59,6 +62,7 @@ func TestContentTypeAcceptXML(t *testing.T) {
 }
 
 func TestContentTypeBindError(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/post.dreego": `<go type="json">
     var input map[string]any
@@ -83,6 +87,7 @@ func TestContentTypeBindError(t *testing.T) {
 }
 
 func TestContentTypeBindPost(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/post.dreego": `<go type="json">
     var input map[string]any
@@ -107,6 +112,7 @@ func TestContentTypeBindPost(t *testing.T) {
 }
 
 func TestContentTypeCustomBasic(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go type="custom">
     msg := []byte("hello world")
@@ -118,6 +124,7 @@ func TestContentTypeCustomBasic(t *testing.T) {
 }
 
 func TestContentTypeHTMLDefault(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>
     msg := "hello"
@@ -129,6 +136,7 @@ func TestContentTypeHTMLDefault(t *testing.T) {
 }
 
 func TestContentTypeJSONAutoImports(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/post.dreego": `<go type="json">
     var input map[string]any
@@ -143,6 +151,7 @@ func TestContentTypeJSONAutoImports(t *testing.T) {
 }
 
 func TestContentTypeJSONBasic(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go type="json">
     user := map[string]string{"name": "Lukas"}
@@ -154,6 +163,7 @@ func TestContentTypeJSONBasic(t *testing.T) {
 }
 
 func TestContentTypeJSONShared(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>
     msg := "Lukas"
@@ -173,6 +183,7 @@ func TestContentTypeJSONShared(t *testing.T) {
 }
 
 func TestContentTypeMultiTyped(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>
     name := "Lukas"
@@ -201,6 +212,7 @@ func TestContentTypeMultiTyped(t *testing.T) {
 }
 
 func TestContentTypeXMLBasic(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}

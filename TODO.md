@@ -15,11 +15,20 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 
 ### Core
 
-- [ ] **observability.1** — Metrics + Tracing: `request-id.1` is done (v0.0.17); Prometheus `/metrics` and OpenTelemetry spans as plugins, blocked on plugin-interface.1
-- [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec from Go struct tags and API routes: `c.Swagger()` endpoint, `api:"..."`/`validate:"..."` struct tags, generated `/openapi.json` route, optionally embedded Swagger UI
 - [x] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
 - [x] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
 - [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
+- [x] **kv-store.1** — Core Key-Value Store interface (abstracts Redis/Ristretto/In-Memory): Get, Set, Delete, Expire — interface only, like database/sql, distinct from Storage (blobs), small values with TTL
+
+### Plugins (external repos)
+
+- [ ] **observability.1** — Metrics + Tracing: Prometheus `/metrics` + OpenTelemetry spans as plugins (separate repos, own go.mod); plugin-interface.1 (v0.0.25) is the foundation
+- [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec as plugin: `api:"..."`/`validate:"..."` struct tags on routes, `/openapi.json` endpoint, optionally embedded Swagger UI
+
+### Tests
+
+- [ ] **dreegotest-parity.1** — parity test: CLI `generate` output must match `core.Run` output — since `dreegotest` build/serve now run codegen via the cached CLI subprocess instead of `core.Run` directly, a divergence between the two would silently change test behavior
+- [ ] **standard-header-reactivate.1** — re-activate the standard-header check when shell tests return to `_tests/core` — `standard_header_test` currently passes silently when `_tests/core` is missing, so the header check is effectively deactivated
 
 ### Decision needed
 

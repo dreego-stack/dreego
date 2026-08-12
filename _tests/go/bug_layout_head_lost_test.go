@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugLayoutHeadLost(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/layouts/default.dreego": `<head><title>Layout Title</title><link rel="stylesheet" href="cdn.tailwindcss.com"></head>
 <div>{#slot}</div>`,
