@@ -74,20 +74,25 @@ type Subscription interface {
 
 Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
 
-## Plugin Interfaces (not yet implemented)
-
 ### Storage Interface
+
+Like `database/sql`, interface only; plugins implement (S3/R2/Local). Core stays transport-agnostic.
 
 ```go
 type Storage interface {
     Put(ctx context.Context, key string, r io.Reader) error
     Get(ctx context.Context, key string) (io.ReadCloser, error)
     Delete(ctx context.Context, key string) error
+    List(ctx context.Context, prefix string) ([]string, error)
     URL(ctx context.Context, key string) (string, error)
 }
 ```
 
+`Put` streams `r` under `key`; the caller must not reuse `r` after return. `Get` returns a stream the caller closes and errors on missing keys. `Delete` is idempotent. `List` returns all keys with the given prefix (no pagination in v1). `URL` returns a usable URL (signed or public, implementation-defined). All methods respect ctx cancellation.
+
 Implementations: `github.com/dreego-stack/dreego/plugins/storage-s3`, `github.com/dreego-stack/dreego/plugins/storage-local`.
+
+## Plugin Interfaces (not yet implemented)
 
 ### Email Interface
 
