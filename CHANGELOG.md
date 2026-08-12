@@ -1,4 +1,8 @@
 
+## v0.0.33 - 2026-08-12
+
+- Bug: fix flaky `TestCookieStoreEncryptValueNotPlaintext` — the byte-level substring check for `user_id`/`42` in the decoded cookie value was statistically unsound: the random AES-GCM ciphertext (base64-encoded) can coincidentally contain those bytes (~1.5% per run), causing intermittent `make test` failures. The test now asserts the encryption marker and checks the decrypted payload instead, making it deterministic (verified 300/300 green).
+
 ## v0.0.32 - 2026-08-12
 
 - Feat: add typed in-memory event bus (event-bus.1) — generic `EventBus[T]` interface (Publish/Subscribe/Unsubscribe) + `NewInMemoryBus[T]()`, concurrency-safe, panic recovery, ctx-cancellation
