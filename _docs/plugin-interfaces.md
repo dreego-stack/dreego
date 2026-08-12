@@ -51,6 +51,29 @@ type RouteProvider interface {
 
 Plugins that register their own URL paths (`/admin/*`, `/api/auth/*`).
 
+### Event Bus Interface
+
+Typed pub/sub contract. Implementations may back it with in-memory storage,
+Redis, NATS or similar; core code stays transport-agnostic.
+
+```go
+type EventBus[T any] interface {
+    Publish(ctx context.Context, event T) error
+    Subscribe(ctx context.Context, handler func(T)) (Subscription, error)
+    Unsubscribe(sub Subscription)
+}
+```
+
+`Subscription` is an opaque handle identifying a registered handler:
+
+```go
+type Subscription interface {
+    ID() uint64
+}
+```
+
+Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
+
 ## Plugin Interfaces (not yet implemented)
 
 ### Storage Interface
@@ -98,17 +121,6 @@ type Cache interface {
 ```
 
 Implementations: `github.com/dreego-stack/dreego/plugins/cache-redis`, `github.com/dreego-stack/dreego/plugins/cache-memory`.
-
-### Event Bus Interface
-
-```go
-type EventBus interface {
-    Publish(ctx context.Context, topic string, event any) error
-    Subscribe(topic string, handler EventHandler) error
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats`.
 
 ## Plugin Layout
 

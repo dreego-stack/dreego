@@ -17,7 +17,7 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 
 - [ ] **observability.1** — Metrics + Tracing: `request-id.1` is done (v0.0.17); Prometheus `/metrics` and OpenTelemetry spans as plugins, blocked on plugin-interface.1
 - [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec from Go struct tags and API routes: `c.Swagger()` endpoint, `api:"..."`/`validate:"..."` struct tags, generated `/openapi.json` route, optionally embedded Swagger UI
-- [ ] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
+- [x] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
 - [ ] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
 - [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
 
@@ -35,8 +35,8 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - Flaky test fix (run-timer-sigterm stdout flush) ✅
 - Todo system simplification (_todo/ → TODO.md + TODO-Future.md) ✅
 - Test migration strategy (shell → _test.go) ✅
-- AGENTS.md test rules — update Feature Workflow to `_test.go` + `dreegotest`, drop `test.sh` reference
-- CI standard-header check — add a CI check for the standard test header in workflows
+- [x] AGENTS.md test rules — update Feature Workflow to `_test.go` + `dreegotest`, drop `test.sh` reference
+- [x] CI standard-header check — add a CI check for the standard test header in workflows
 
 ## v0.0.26 (done)
 
