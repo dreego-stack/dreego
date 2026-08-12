@@ -1,4 +1,8 @@
 
+## v0.0.35 - 2026-08-12
+
+- Feat: add core Queue interface (queue-interface.1) — `Queue` interface (Dispatch/DispatchAfter/DispatchBatch/Worker/Use) + `Job`/`JobHandler`/`JobMiddleware`, like `database/sql`, interface only, plugins implement (Redis/NATS/In-Memory)
+
 ## v0.0.34 - 2026-08-12
 
 - Feat: add core KVStore interface (kv-store.1) — `KVStore` interface (Get/Set/Delete/Expire with TTL), like `database/sql`, interface only, plugins implement (Redis/Ristretto/In-Memory), distinct from Storage (blobs)
