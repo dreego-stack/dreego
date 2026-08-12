@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugComponentIfEach(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/components/List.dreego": `Component List (items []string)
 <ul>

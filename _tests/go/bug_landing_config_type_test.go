@@ -10,6 +10,7 @@ import (
 )
 
 func TestBugLandingConfigType(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)

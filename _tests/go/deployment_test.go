@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +13,7 @@ import (
 )
 
 func TestDeploymentCrossCompile(t *testing.T) {
+	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
 	})
@@ -34,11 +37,19 @@ func TestDeploymentCrossCompile(t *testing.T) {
 }
 
 func TestDeploymentGracefulShutdown(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	repoRoot, _ := dreegotest.RepoRoot()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	ln.Close()
+
 	goMod := "module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644)
-	os.WriteFile(filepath.Join(dir, "main.go"), []byte("package main\nimport (\n\t_ \"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { dreego.SetLogging(false); dreego.Listen(\":0\") }\n"), 0644)
+	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t_ \"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { dreego.SetLogging(false); dreego.Listen(\":%d\") }\n", port)), 0644)
 	os.MkdirAll(filepath.Join(dir, "dreego", "routes"), 0755)
 	os.WriteFile(filepath.Join(dir, "dreego", "routes", "get.dreego"), []byte("<div><h1>hello</h1></div>"), 0644)
 
@@ -61,7 +72,7 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	done := make(chan error, 1)
 	go func() { done <- proc.Wait() }()
 
-	time.Sleep(2 * time.Second)
+	waitReady(t, port)
 
 	if err := proc.Process.Signal(os.Interrupt); err != nil {
 		t.Fatalf("signal: %v", err)
@@ -74,4 +85,20 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 		proc.Process.Kill()
 		t.Fatal("server did not exit after signal")
 	}
+}
+
+// waitReady polls until a TCP connection to port succeeds, replacing a fixed
+// sleep so shutdown tests start immediately once the server is listening.
+func waitReady(t *testing.T, port int) {
+	t.Helper()
+	deadline := time.Now().Add(10 * time.Second)
+	for time.Now().Before(deadline) {
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), 100*time.Millisecond)
+		if err == nil {
+			conn.Close()
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatalf("server on port %d did not start in time", port)
 }

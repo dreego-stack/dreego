@@ -25,6 +25,11 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - [ ] **observability.1** — Metrics + Tracing: Prometheus `/metrics` + OpenTelemetry spans as plugins (separate repos, own go.mod); plugin-interface.1 (v0.0.25) is the foundation
 - [ ] **api-swagger.1** — Auto-generated OpenAPI 3.0 spec as plugin: `api:"..."`/`validate:"..."` struct tags on routes, `/openapi.json` endpoint, optionally embedded Swagger UI
 
+### Tests
+
+- [ ] **dreegotest-parity.1** — parity test: CLI `generate` output must match `core.Run` output — since `dreegotest` build/serve now run codegen via the cached CLI subprocess instead of `core.Run` directly, a divergence between the two would silently change test behavior
+- [ ] **standard-header-reactivate.1** — re-activate the standard-header check when shell tests return to `_tests/core` — `standard_header_test` currently passes silently when `_tests/core` is missing, so the header check is effectively deactivated
+
 ### Decision needed
 
 - [x] **addon vs plugin naming** — decided: "plugin" (v0.0.27) — `TODO-Future.md` uses "plugin" consistently, concept docs renamed accordingly

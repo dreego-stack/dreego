@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugComponentAttrPropSubstitution(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/components/Link.dreego": `Component Link (url string, label string)
 <a href="{url}">{label}</a>`,

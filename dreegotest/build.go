@@ -6,13 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-
-	dreego "github.com/dreego-stack/dreego/core"
 )
-
-var buildMu sync.Mutex
 
 // MustBuild runs the full core pipeline (core.Run) in a temp module and then
 // compiles it with `go build`. It replaces shell tests that do
@@ -92,18 +87,9 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		}
 	}
 
-	buildMu.Lock()
-	defer buildMu.Unlock()
-	old, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	if err := os.Chdir(dir); err != nil {
-		return "", err
-	}
-	defer os.Chdir(old)
-
-	if err := dreego.Run(false); err != nil {
+	// Run codegen in a subprocess (the cached CLI binary) instead of in-process
+	// with a global os.Chdir. This makes build() safe for t.Parallel().
+	if _, err := RunCLI(t, dir, "generate"); err != nil {
 		if expectFail {
 			return dir, err
 		}

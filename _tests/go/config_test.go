@@ -8,6 +8,7 @@ import (
 )
 
 func TestConfigInvalidJSON(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/config.json":     `{ broken json !!!`,
 		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
@@ -22,6 +23,7 @@ func TestConfigInvalidJSON(t *testing.T) {
 }
 
 func TestConfigRedirect(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/config.json": `{
     "redirects": [
@@ -40,6 +42,7 @@ func TestConfigRedirect(t *testing.T) {
 }
 
 func TestConfigRewrite(t *testing.T) {
+	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/config.json": `{
     "rewrites": [

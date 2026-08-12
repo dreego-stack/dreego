@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugHeadExpressionRaw(t *testing.T) {
+	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>
 type Doc struct{ Title string }

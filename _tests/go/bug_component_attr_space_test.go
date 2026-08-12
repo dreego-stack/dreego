@@ -7,6 +7,7 @@ import (
 )
 
 func TestBugComponentAttrSpace(t *testing.T) {
+	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (name string)
 <div>Hello {name}</div>`,
