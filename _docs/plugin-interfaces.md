@@ -74,6 +74,28 @@ type Subscription interface {
 
 Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
 
+### Key-Value Store Interface
+
+Like `database/sql`: core defines the contract, plugins provide the implementation (Redis, Ristretto, in-memory). Distinct from `Storage` (blobs) — KV holds small values with an optional TTL.
+
+```go
+type KVStore interface {
+    Get(ctx context.Context, key string) ([]byte, error)
+    Set(ctx context.Context, key string, val []byte, ttl time.Duration) error
+    Delete(ctx context.Context, key string) error
+    Expire(ctx context.Context, key string, ttl time.Duration) error
+}
+```
+
+Semantics:
+- Get returns the value stored under key; an error if key does not exist or ttl expired.
+- Set stores val under key with ttl; ttl <= 0 means no expiry (keep forever).
+- Delete removes key; idempotent (no error for missing key).
+- Expire sets/adjusts the ttl on an existing key; error if key does not exist.
+- All methods respect ctx cancellation.
+
+Plugins: `github.com/dreego-stack/dreego/plugins/kv-redis`, `github.com/dreego-stack/dreego/plugins/kv-memory` (planned).
+
 ## Plugin Interfaces (not yet implemented)
 
 ### Storage Interface
