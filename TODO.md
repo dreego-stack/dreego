@@ -17,7 +17,7 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 
 - [x] **event-bus.1** — Core Pub/Sub Event Bus interface (abstracts Redis/NATS/In-Memory), typed via generics: Publish, Subscribe, Unsubscribe
 - [x] **queue-interface.1** — Core Background Job Queue interface (abstracts Redis/NATS/In-Memory): job middleware, batching, chaining, delayed dispatch
-- [ ] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
+- [x] **storage-interface.1** — Core File Storage interface (S3/R2/Local): Put, Get, Delete, List, URL — interface only, like `database/sql`
 - [x] **kv-store.1** — Core Key-Value Store interface (abstracts Redis/Ristretto/In-Memory): Get, Set, Delete, Expire — interface only, like database/sql, distinct from Storage (blobs), small values with TTL
 
 ### Plugins (external repos)
