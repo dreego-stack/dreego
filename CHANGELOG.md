@@ -1,4 +1,9 @@
 
+## v0.0.34 - 2026-08-12
+
+- Feat: add core KVStore interface (kv-store.1) — `KVStore` interface (Get/Set/Delete/Expire with TTL), like `database/sql`, interface only, plugins implement (Redis/Ristretto/In-Memory), distinct from Storage (blobs)
+- Chore: TODO reorg — observability.1 + api-swagger.1 moved to new "Plugins (external repos)" section
+
 ## v0.0.33 - 2026-08-12
 
 - Bug: fix flaky `TestCookieStoreEncryptValueNotPlaintext` — the byte-level substring check for `user_id`/`42` in the decoded cookie value was statistically unsound: the random AES-GCM ciphertext (base64-encoded) can coincidentally contain those bytes (~1.5% per run), causing intermittent `make test` failures. The test now asserts the encryption marker and checks the decrypted payload instead, making it deterministic (verified 300/300 green).
