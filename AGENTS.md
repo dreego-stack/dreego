@@ -131,8 +131,8 @@ All commands run inside `smd` (Docker container). Never run `make test`, `go bui
 
 ## Bug → Test → Fix Workflow
 
-Every bug gets a permanent test in `_tests/core/Bugs/<name>/`. Workflow:
-1. Bug found → create `_tests/core/Bugs/<name>/` that reproduces the bug (must FAIL)
+Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
+1. Bug found → create `_tests/go/bug_<name>_test.go` that reproduces the bug (must FAIL)
 2. Fix code until `make test` shows the new test GREEN
 3. Bug is permanently covered — no regression risk
 
@@ -142,10 +142,10 @@ Every bug gets a permanent test in `_tests/core/Bugs/<name>/`. Workflow:
 
 Every feature follows this cycle:
 
-1. **`_tests/`** — Create integration test in `_tests/core/<FeatureGroup>/<name>/test.sh`
+1. **`_tests/`** — Create integration test in `_tests/go/<name>_test.go` using `dreegotest` (see `_docs/testing.md` and existing `_tests/go/*_test.go` for the pattern)
 2. **Code** — Implement in `core/` (one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
-4. **Test** — `DREEGO_FILTER=<name> make test` — must be GREEN
+4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `make test`) — must be GREEN
 5. **PR** — Create a PR with `pr.md` (version bump + changelog lines); CI validates it
 6. **KB** — Update `.agents/log.md` + relevant concept/decision docs
 
