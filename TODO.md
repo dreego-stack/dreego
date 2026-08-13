@@ -30,6 +30,18 @@ Concrete, planned code work. Ideas without a near-term plan live in [TODO-Future
 - [ ] **dreegotest-parity.1** — parity test: CLI `generate` output must match `core.Run` output — since `dreegotest` build/serve now run codegen via the cached CLI subprocess instead of `core.Run` directly, a divergence between the two would silently change test behavior
 - [ ] **standard-header-reactivate.1** — re-activate the standard-header check when shell tests return to `_tests/core` — `standard_header_test` currently passes silently when `_tests/core` is missing, so the header check is effectively deactivated
 
+### Hardening (v0.1 readiness)
+
+- [ ] **benchmarks.1** — add Go benchmarks for codegen + runtime to back the "zero overhead" claim (currently zero benchmarks in repo)
+- [ ] **race-detector.1** — run tests with `-race` in CI/Makefile; audit global mutable state in core (routes, sessionStore, cspHeader)
+- [ ] **fuzz-transpiler.1** — add fuzz targets for Lexer/Parser (malformed input currently untested, codegen bug risk)
+- [ ] **server-timeouts.1** — set ReadTimeout/WriteTimeout/IdleTimeout/MaxHeaderBytes + request body limit in core.Listen() (slowloris/body-bomb hardening)
+- [ ] **context-render.1** — implement or remove the `Context.Render()` no-op stub (public API currently does nothing, untested)
+- [ ] **api-freeze.1** — API-freeze review + documented breaking-change policy before v0.1 (v0.0.25 already had a breaking change)
+- [ ] **docs-drift.1** — sync stale docs: README test count (147 vs ~185), dead links in demo app, outdated checkboxes in _docs/testing.md
+- [ ] **session-security.1** — add session fixation/rotation tests (cookie-based sessions untested against fixation)
+- [ ] **htmx-guide.1** — document HTMX/Alpine.js integration with a worked example (core positioning, currently zero docs/tests)
+
 ### Decision needed
 
 - [x] **addon vs plugin naming** — decided: "plugin" (v0.0.27) — `TODO-Future.md` uses "plugin" consistently, concept docs renamed accordingly
