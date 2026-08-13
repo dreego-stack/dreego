@@ -3,7 +3,7 @@
 SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, deploy as single binary. File-based routing, built-in form handling, compile-time validation — no runtime magic.
 
 ```html
-<!-- dreego/routes/post-login.dreego -->
+<!-- dreego/routes/login/post.dreego -->
 <head><title>Dreego</title></head>
 
 <go>
@@ -37,16 +37,17 @@ dreego generate && go run .
 
 Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing, no hidden overhead. Your app is a plain Go binary using `net/http`.
 
-Three principles:
+Four principles:
 1. **SSR-First** — Pages render server-side. HTMX/Alpine.js for progressive enhancement, not required.
-2. **File-Based** — `dreego/routes/get-login.dreego` becomes `GET /login`. One file = one page.
+2. **File-Based** — `dreego/routes/login/get.dreego` becomes `GET /login`. Directories define the URL; each method has its own focused file.
 3. **Type-Safe** — Handler functions receive typed structs, not `map[string]string`. Compile-time guarantees.
+4. **Accessible by Default** — CLI output, diagnostics, blueprints, and official components are designed for screen readers, keyboards, and semantic HTML. Applications still verify their own content and conformance.
 
 ## Features
 
 ### Core
 - **Transpiler Pipeline** — Lexer → Parser → AST → CodeGen. `.dreego` → Go code.
-- **File-based Routing** — `dreego/routes/get.dreego` → `GET /`, `post-login.dreego` → `POST /login`
+- **File-based Routing** — `dreego/routes/get.dreego` → `GET /`, `dreego/routes/login/post.dreego` → `POST /login`
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
@@ -107,8 +108,10 @@ docker build -t myapp .
 dreego/
 ├── routes/           # .dreego files → URL routes
 │   ├── get.dreego        → GET /
-│   ├── post-login.dreego → POST /login
-│   └── [id]/get.dreego   → GET /:id
+│   ├── login/
+│   │   ├── get.dreego    → GET /login
+│   │   └── post.dreego   → POST /login
+│   └── [id]/get.dreego   → GET /{id}
 ├── layouts/
 │   └── default.dreego    # {#slot} + {#head} wrapper
 ├── components/

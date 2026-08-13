@@ -6,6 +6,8 @@ Official plugins live in separate repos under `github.com/dreego-stack/`. Each p
 
 ## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
 
+The EventBus, Queue, KVStore, and Storage sections below describe the current pre-v0.1 implementation. They are scheduled for removal from core because optional infrastructure contracts must first be proven by real plugins. The session Store remains a core web contract.
+
 ### session.Store
 
 ```go
@@ -21,15 +23,20 @@ Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session
 
 ### Plugin Interface
 
+The plugin contract is provisional until v1. The current implementation is intentionally documented as it exists, not as a compatibility promise.
+
 ```go
 type Plugin interface {
     Name() string
-    Version() string
-    Init(app *App) error
+    RegisterRoutes()
+    Middlewares() []func(http.Handler) http.Handler
+    Assets() fs.FS
+    OnStart(ctx context.Context) error
+    OnShutdown(ctx context.Context) error
 }
 ```
 
-Every plugin implements `Init()` for registering routes, middleware, services.
+Before v1, real plugins will determine whether this all-in-one interface should become a set of smaller optional capability interfaces.
 
 ### Middleware Hooks (Plugin)
 

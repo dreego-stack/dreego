@@ -15,7 +15,7 @@ Form Actions replace manual `r.ParseForm()` + `r.FormValue()` with declarative f
 ## Syntax
 
 ```html
-<!-- routes/login.dreego -->
+<!-- routes/login/post.dreego -->
 <form g-action="Login">
     <input name="email" type="email" />
     <input name="password" type="password" />

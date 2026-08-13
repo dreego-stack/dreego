@@ -25,7 +25,7 @@ timestamp: 2026-07-29T01:16:00+02:00
 ## Syntax
 
 ```html
-<!-- dreego/routes/login.dreego -->
+<!-- dreego/routes/login/post.dreego -->
 <form g-action="Login">
     <input name="email" type="email" />
     {#if c.Errors("email")}

@@ -1,14 +1,14 @@
 ---
 type: Decision
 title: Monorepo Plugin Layout
-description: Official plugins live in this repository under plugins/ instead of separate repos
+description: Superseded decision that previously kept official plugins in this repository
 tags: [v0.0.21]
 timestamp: 2026-07-31T07:00:00Z
 ---
 # Monorepo Plugin Layout
 
 **Date:** 2026-07-31
-**Status:** Accepted (supersedes the multi-repo model in name-dreego.md and routing-and-components.md)
+**Status:** Superseded — official optional plugins now use separate repositories and modules
 **Supersedes:** separate-repo statements in [name-dreego](name-dreego.md) and [routing-and-components](routing-and-components.md)
 
 ## Context

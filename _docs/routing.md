@@ -1,5 +1,9 @@
 # File-based Routing
 
+Directories below `dreego/routes/` define the URL path. The filename defines
+the HTTP method. Keeping one method per file prevents a route file from growing
+into a combined implementation for every operation on the same URL.
+
 ## Directory Structure
 
 ```

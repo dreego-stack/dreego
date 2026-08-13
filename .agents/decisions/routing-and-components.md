@@ -60,7 +60,7 @@ Each route package (including plugin packages) registers itself via `init()` →
 
 ## Decision 2: Plugin Routes via init() — No dreego generate Needed
 
-> **Superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21):** official plugins now live under `plugins/<name>/` in this repository. Plugin `.dreego` sources and components are discovered by filesystem scan in the same repo, not via `go list -m -json` against external module repos. The `init()` registration pattern below remains valid; only the repository/discovery model has changed. Community plugins in separate repos can still follow the original workflow.
+> **Historical note:** the v0.0.21 monorepo experiment was later superseded. Every optional plugin now lives in a separate repository and module. Registration and discovery will be revised by `app-runtime.1` and `plugin-contract.1`; the pattern below is not a current compatibility promise.
 
 The plugin author commits generated `dree.go` files IN the plugin module.
 
@@ -95,14 +95,14 @@ go get github.com/dreego-stack/dreego-community-auth@v0.1.0
 
 ## Decision 3: Routing Conventions
 
-| Syntax                | Path                    | Go Param              |
-|-----------------------|-------------------------|-----------------------|
-| `get.dreego`        | `/`                     | —                     |
-| `about.dreego`        | `/about`                | —                     |
-| `[id]/get.dreego`     | `/users/{id}`           | `c.Param("id")`       |
-| `[...catchall].dreego`| `/blog/{catchall}`      | `c.Param("catchall")` |
-| `[[lang]]/get.dreego` | `/docs/{lang}` (optional)| `c.Param("lang")`    |
-| `(auth)/login.dreego` | `/login` (group in path ignored) |               |
+| Syntax                            | Method | Path                     | Go Param              |
+|-----------------------------------|--------|--------------------------|-----------------------|
+| `get.dreego`                      | GET    | `/`                      | —                     |
+| `about/get.dreego`                | GET    | `/about`                 | —                     |
+| `users/[id]/get.dreego`           | GET    | `/users/{id}`            | `c.Param("id")`       |
+| `blog/[...catchall]/get.dreego`   | GET    | `/blog/{catchall...}`    | `c.Param("catchall")` |
+| `docs/[[lang]]/get.dreego`        | GET    | `/docs/{lang}` (optional)| `c.Param("lang")`     |
+| `(auth)/login/get.dreego`         | GET    | `/login`                 | —                     |
 
 Priority: Static > Dynamic > Optional > Catch-All
 
@@ -115,16 +115,15 @@ error: route conflict: /auth/login
 
 ### API Routes & HTTP Methods
 
-HTTP method is derived from the filename:
+Directories define the URL path. The method-only filename keeps each HTTP
+operation in a separate, focused file:
 
 ```
-routes/api/users.get.dreego   → GET  /api/users
-routes/api/users.post.dreego  → POST /api/users
-routes/api/users.put.dreego   → PUT  /api/users
-routes/api/users.delete.dreego→ DELETE /api/users
+routes/api/users/get.dreego    → GET    /api/users
+routes/api/users/post.dreego   → POST   /api/users
+routes/api/users/put.dreego    → PUT    /api/users
+routes/api/users/delete.dreego → DELETE /api/users
 ```
-
-Alternatively via `<go method="post">` in the `.dreego` file (like current).
 
 API routes render NO layout — only the `<div>` fragment. Detection: path contains `api/` → `layout = nil`.
 

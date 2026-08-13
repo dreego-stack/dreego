@@ -30,6 +30,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 
 ## Meta
 
+- [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Product direction, release phases, and plugin ideas
 - [README](https://github.com/dreego-stack/dreego/blob/main/README.md)
 - [CHANGELOG](https://github.com/dreego-stack/dreego/blob/main/CHANGELOG.md)
-- [TODO](https://github.com/dreego-stack/dreego/blob/main/TODO.md)
+- [Open work](https://github.com/dreego-stack/dreego/tree/main/_todo) — One item per file

@@ -104,7 +104,7 @@ dreego/
 │   └── dreego/
 │       └── main.go           # CLI: dreego generate, dreego dev, dreego build
 ├── core/                      # Core library (single package, stdlib only)
-├── plugins/                   # Official plugins (own go.mod when deps needed)
+├── plugins/                   # No optional implementations; official plugins use separate repos
 ├── _tests/                    # Integration tests
 │   └── core/<Category>/
 ├── go.mod
@@ -135,7 +135,7 @@ dreego/
 - [x] Monorepo plugin layout: `plugins/` + `go.work` (v0.0.21)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
-- [ ] Plugin interface (frozen contract)
+- [ ] Plugin interface validated by real external plugins before the v1 stability promise
 
 ## Components (v0.0.5+)
 

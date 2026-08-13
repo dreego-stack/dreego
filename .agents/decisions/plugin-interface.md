@@ -9,12 +9,12 @@ timestamp: 2026-07-28T00:00:00Z
 # Plugin Interface (Capability-based)
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Superseded as a stability promise; capability design pending pre-v1 validation
 **Review:** GLM-5.2 Expert Review (.tmp/output2.md)
 
 ## Context
 
-Dreego needs a plugin system for its plugin ecosystem. The interface must be stable from the start — later changes are breaking changes for all plugins.
+Dreego needs a plugin system for its plugin ecosystem. The original decision attempted to make the first interface permanent before real external plugins existed. That stability promise was withdrawn: plugin contracts remain provisional until v1 and must be validated through multiple implementations after v0.1.
 
 ## Decision
 
@@ -157,7 +157,7 @@ Middleware is wrapped in execution order (LIFO like Chi).
 
 ## Consequences
 
-- `dreego.Plugin` interface in the core — never change again
+- The current `dreego.Plugin` interface may change before v1
 - New capabilities can be added as separate interfaces
 - No central plugin registry needed — user registers explicitly
 - Plugins start with `go get` + `app.Use()`
