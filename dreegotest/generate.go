@@ -108,7 +108,9 @@ func generate(src string) (string, error) {
 		file.Go = []dreego.GoSection{{Method: "GET"}}
 	}
 	for i := range file.Go {
-		file.Go[i].Method = "GET"
+		if !file.Go[i].MethodExplicit {
+			file.Go[i].Method = "GET"
+		}
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]

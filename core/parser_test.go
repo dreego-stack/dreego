@@ -157,3 +157,61 @@ func TestParseGoAttrsVariants(t *testing.T) {
 		})
 	}
 }
+
+func TestParseGoMethodVariants(t *testing.T) {
+	cases := []struct {
+		name  string
+		attrs string
+		want  string
+	}{
+		{"double quoted", `method="post"`, "POST"},
+		{"single quoted", `method='PUT'`, "PUT"},
+		{"unquoted", `method=delete`, "DELETE"},
+		{"no method", `type="json"`, ""},
+		{"empty", "", ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := parseGoMethod(tc.attrs); got != tc.want {
+				t.Errorf("parseGoMethod(%q) = %q, want %q", tc.attrs, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestParseGoSectionMethodAttr(t *testing.T) {
+	tokens, err := Lex(`<go method="post">x := 1</go><div><p>{{ x }}</p></div>`)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if len(file.Go) != 1 {
+		t.Fatalf("expected 1 Go section, got %d", len(file.Go))
+	}
+	if file.Go[0].Method != "POST" {
+		t.Fatalf("expected method POST, got %q", file.Go[0].Method)
+	}
+	if !file.Go[0].MethodExplicit {
+		t.Fatal("expected MethodExplicit to be true")
+	}
+}
+
+func TestParseGoSectionDefaultMethod(t *testing.T) {
+	tokens, err := Lex(`<go>x := 1</go><div><p>{{ x }}</p></div>`)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if file.Go[0].Method != "GET" {
+		t.Fatalf("expected default method GET, got %q", file.Go[0].Method)
+	}
+	if file.Go[0].MethodExplicit {
+		t.Fatal("expected MethodExplicit to be false for default method")
+	}
+}
