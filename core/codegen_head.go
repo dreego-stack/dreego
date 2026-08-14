@@ -8,6 +8,7 @@ import (
 func genHead(html string, bufName string) (string, error) {
 	var out strings.Builder
 	rest := html
+	pos := 0
 	for rest != "" {
 		open := strings.Index(rest, "{{")
 		if open < 0 {
@@ -16,6 +17,7 @@ func genHead(html string, bufName string) (string, error) {
 		}
 		if open > 0 {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, goLiteral(rest[:open])))
+			pos += open
 			rest = rest[open:]
 		}
 		closeIdx := strings.Index(rest[2:], "}}")
@@ -33,6 +35,8 @@ func genHead(html string, bufName string) (string, error) {
 				raw = true
 			case "upper":
 				code = fmt.Sprintf("strings.ToUpper(%s)", code)
+			default:
+				return "", fmt.Errorf("unknown filter '%s' at position %d", f, pos)
 			}
 		}
 		if raw {
@@ -40,6 +44,7 @@ func genHead(html string, bufName string) (string, error) {
 		} else {
 			out.WriteString(fmt.Sprintf("%s.WriteString(html.EscapeString(%s))\n", bufName, code))
 		}
+		pos += closeIdx + 2
 		rest = rest[closeIdx+2:]
 	}
 	return out.String(), nil

@@ -128,7 +128,15 @@ func parseExpression(raw string) (expr string, filters []string) {
 	if !strings.Contains(raw, "|") {
 		return raw, nil
 	}
-	parts := strings.Split(raw, "|")
+	var parts []string
+	start := 0
+	for i := 0; i < len(raw); i++ {
+		if raw[i] == '|' && (i+1 >= len(raw) || raw[i+1] != '|') && (i == 0 || raw[i-1] != '|') {
+			parts = append(parts, raw[start:i])
+			start = i + 1
+		}
+	}
+	parts = append(parts, raw[start:])
 	expr = strings.TrimSpace(parts[0])
 	for _, f := range parts[1:] {
 		filters = append(filters, strings.TrimSpace(f))
