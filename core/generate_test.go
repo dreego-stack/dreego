@@ -4,14 +4,15 @@ import "testing"
 
 func TestBuildPattern(t *testing.T) {
 	cases := map[string]string{
-		"./routes":                   "/{$}",
-		"./routes/":                  "/{$}",
-		"./routes/about":             "/about",
-		"./routes/blog/[id]":         "/blog/{id}",
-		"./routes/blog/_slug_":       "/blog/{slug}",
-		"./routes/blog/(optional)":   "/blog",
-		"./routes/blog/[id]/edit":    "/blog/{id}/edit",
-		"./routes/blog/(group)/[id]": "/blog/{id}",
+		"./routes":                    "/{$}",
+		"./routes/":                   "/{$}",
+		"./routes/about":              "/about",
+		"./routes/blog/[id]":          "/blog/{id}",
+		"./routes/blog/_slug_":        "/blog/{slug}",
+		"./routes/blog/(optional)":    "/blog",
+		"./routes/blog/[id]/edit":     "/blog/{id}/edit",
+		"./routes/blog/(group)/[id]":  "/blog/{id}",
+		"./routes/blog/[...catchall]": "/blog/{catchall...}",
 	}
 	for in, want := range cases {
 		if got := buildPattern(in); got != want {
@@ -42,7 +43,6 @@ func TestCleanSegment(t *testing.T) {
 		"_slug_":     "slug",
 		"(optional)": "optional",
 		"about":      "about",
-		"[[id]]":     "id",
 		"__x__":      "x",
 	}
 	for in, want := range cases {
@@ -54,16 +54,32 @@ func TestCleanSegment(t *testing.T) {
 
 func TestPatternSegment(t *testing.T) {
 	cases := map[string]string{
-		"[id]":       "{id}",
-		"_slug_":     "{slug}",
-		"(optional)": "",
-		"about":      "about",
-		"[[id]]":     "{id}",
-		"__x__":      "{x}",
+		"[id]":          "{id}",
+		"_slug_":        "{slug}",
+		"(optional)":    "",
+		"about":         "about",
+		"__x__":         "{x}",
+		"[...catchall]": "{catchall...}",
 	}
 	for in, want := range cases {
 		if got := patternSegment(in); got != want {
 			t.Errorf("patternSegment(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestDoubleBracketSegment(t *testing.T) {
+	cases := map[string]string{
+		"./routes":                   "",
+		"./routes/blog/[id]":         "",
+		"./routes/blog/[[opt]]":      "[[opt]]",
+		"./routes/blog/[[opt]]/get":  "[[opt]]",
+		"./routes/blog/[id]/[[opt]]": "[[opt]]",
+		"./routes/blog/[[a]]/[[b]]":  "[[a]]",
+	}
+	for in, want := range cases {
+		if got := doubleBracketSegment(in); got != want {
+			t.Errorf("doubleBracketSegment(%q) = %q, want %q", in, got, want)
 		}
 	}
 }

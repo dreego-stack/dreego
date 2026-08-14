@@ -128,6 +128,7 @@ func (c *Client) Get(t *testing.T, path string) (int, string) {
 	code, body, _ := c.Request(t, "GET", path, "", nil)
 	return code, body
 }
+
 // Request performs an HTTP request with the given method, path, body and
 // headers. It disables automatic redirect following so tests can assert on
 // redirect status codes and Location headers. Returns status, body and headers.
