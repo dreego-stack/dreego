@@ -34,7 +34,6 @@ type Context interface {
     context.Context                    // Deadline/Cancel Propagation
     Param(name string) string          // URL and route params
     Data(key string) any               // Request-local extension data
-    Render(name string, data any) error // Nested rendering
 }
 ```
 

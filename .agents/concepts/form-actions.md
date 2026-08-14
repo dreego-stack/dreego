@@ -133,4 +133,4 @@ Not a plugin — MUST be built into the template renderer. Otherwise every Dreeg
 3. File uploads — separate `g-upload` or part of `g-action`?
 4. Non-SSR Actions — do actions work in SSG mode? (no — build time, no form handling)
 5. Action Naming — `Login` is the Go function name — case-sensitive?
-6. Redirect vs Render — `return c.Redirect()` vs `return c.Render()` vs `return nil` (stay on page)?
+6. Redirect vs Stay — `return c.Redirect()` vs `return nil` (stay on page)?
