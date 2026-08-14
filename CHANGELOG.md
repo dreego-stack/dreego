@@ -1,3 +1,10 @@
+
+## v0.0.38 - 2026-08-14
+
+- Bug: lexer treats < in Go blocks, > in quoted attributes, and < > in script/style as tags
+- Bug: || in template expressions is misparsed as filter pipeline
+- Bug: unknown template filters are silently ignored instead of failing
+
 - Chore: block minor/major version bumps in the v0.0.x phase (AGENTS.md, release-prep.py, CI, pr.md.example)
 
 ## v0.0.37 - 2026-08-14
