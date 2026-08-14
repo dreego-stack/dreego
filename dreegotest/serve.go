@@ -22,8 +22,8 @@ func Serve(t *testing.T, files map[string]string) *Client {
 }
 
 // ServeSetup is like Serve but injects setup code into the generated main
-// function before dreego.Listen. It replaces shell tests that customise the
-// server main (e.g. dreego.SetCSRF(false)).
+// function before app.Listen. It replaces shell tests that customise the
+// server main (e.g. app.SetCSRF(false)).
 func ServeSetup(t *testing.T, files map[string]string, setup string) *Client {
 	t.Helper()
 	return serveSetup(t, files, setup)
@@ -44,7 +44,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
-	mainGo := fmt.Sprintf("package main\nimport (\n\t_ \"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { %sdreego.Listen(\":%d\") }\n", setup, port)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); %sif err := gen.Register(app); err != nil { panic(err) }; if err := app.Listen(\":%d\"); err != nil { panic(err) } }\n", setup, port)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}

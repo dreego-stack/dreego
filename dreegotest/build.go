@@ -73,7 +73,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		return "", err
 	}
-	mainGo := "package main\nimport _ \"t/dreego/gen\"\nfunc main() {}\n"
+	mainGo := "package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := gen.Register(app); err != nil { panic(err) } }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		return "", err
 	}

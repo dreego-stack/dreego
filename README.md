@@ -72,12 +72,12 @@ Four principles:
 - **Custom** — `c.Write(status, contentType, body)` for arbitrary formats
 
 ### Middleware (v0.0.14, v0.0.20)
-- **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `dreego.SetReady(bool)`
-- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (override via `dreego.SetCSP`)
+- **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `app.SetReady(bool)`
+- **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (configure via `app.SetCSP` before build)
 - **Gzip Compression** — `Accept-Encoding` → compressed response wrapping
 - **Recovery** — Panic → 500 with stack trace
 - **Request Logging** — JSONL format with duration, IP, status
-- **Session** — Cookie store via `dreego.SetSessionStore()`, `c.SetSessionVal()`
+- **Session** — Cookie store via `app.SetSessionStore()`, `c.SetSessionVal()`
 - **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
 
 ### Developer Experience

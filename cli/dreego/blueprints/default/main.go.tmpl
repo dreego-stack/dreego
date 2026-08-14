@@ -1,10 +1,18 @@
 package main
 
 import (
-	_ "§$name$§/dreego/gen"
+	"log"
+
 	dreego "github.com/dreego-stack/dreego/core"
+	"§$name$§/dreego/gen"
 )
 
 func main() {
-	dreego.Listen(":8080")
+	app := dreego.New()
+	if err := gen.Register(app); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }

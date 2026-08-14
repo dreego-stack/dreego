@@ -12,15 +12,6 @@ import (
 // (empty string means the value is valid).
 type validatorFunc func(string) string
 
-// customRules holds user-registered validators dispatched by applyRule.
-var customRules = map[string]validatorFunc{}
-
-// RegisterRule registers a named custom validator. Registered rules are
-// dispatched by applyRule alongside the built-in required/email/min/max rules.
-func RegisterRule(name string, fn func(string) string) {
-	customRules[name] = fn
-}
-
 type FieldError struct {
 	Field   string
 	Message string
@@ -77,6 +68,20 @@ func BindForm(r *http.Request, target any) error {
 }
 
 func ValidateForm(form any) map[string]string {
+	return validateForm(form, nil)
+}
+
+func (a *App) ValidateForm(form any) map[string]string {
+	a.mu.RLock()
+	rules := make(map[string]validatorFunc, len(a.customRules))
+	for name, rule := range a.customRules {
+		rules[name] = rule
+	}
+	a.mu.RUnlock()
+	return validateForm(form, rules)
+}
+
+func validateForm(form any, rules map[string]validatorFunc) map[string]string {
 	t := reflect.TypeOf(form)
 	v := reflect.ValueOf(form)
 	if t.Kind() == reflect.Ptr {
@@ -97,7 +102,7 @@ func ValidateForm(form any) map[string]string {
 		val := fmt.Sprint(v.Field(i).Interface())
 		for _, rule := range strings.Split(tag, ",") {
 			rule = strings.TrimSpace(rule)
-			if msg := applyRule(rule, val); msg != "" {
+			if msg := applyRuleWithRules(rule, val, rules); msg != "" {
 				errs[formTag] = msg
 				break
 			}
@@ -110,6 +115,10 @@ func ValidateForm(form any) map[string]string {
 }
 
 func applyRule(rule string, val string) string {
+	return applyRuleWithRules(rule, val, nil)
+}
+
+func applyRuleWithRules(rule string, val string, customRules map[string]validatorFunc) string {
 	switch {
 	case rule == "required":
 		if strings.TrimSpace(val) == "" {
@@ -138,7 +147,8 @@ func applyRule(rule string, val string) string {
 			return "must be at most " + max + " characters"
 		}
 	default:
-		if fn, ok := customRules[rule]; ok {
+		fn, ok := customRules[rule]
+		if ok {
 			return fn(val)
 		}
 	}

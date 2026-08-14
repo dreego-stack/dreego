@@ -16,24 +16,25 @@ func (mockStore) Delete(http.ResponseWriter, *http.Request, string) error { retu
 func (mockStore) Destroy(http.ResponseWriter, *http.Request) error        { return nil }
 
 func TestRegisterRedirect(t *testing.T) {
-	Reset()
-	RegisterRedirect("/old", "/new", http.StatusMovedPermanently)
-	if len(redirects) != 1 {
-		t.Fatalf("expected 1 redirect rule, got %d", len(redirects))
+	app := New()
+	app.RegisterRedirect("/old", "/new", http.StatusMovedPermanently)
+	if len(app.redirects) != 1 {
+		t.Fatalf("expected 1 redirect rule, got %d", len(app.redirects))
 	}
-	if redirects[0].from != "/old" || redirects[0].to != "/new" || redirects[0].status != http.StatusMovedPermanently {
-		t.Errorf("redirect rule not registered correctly: %+v", redirects[0])
+	rd := app.redirects[0]
+	if rd.from != "/old" || rd.to != "/new" || rd.status != http.StatusMovedPermanently {
+		t.Errorf("redirect rule not registered correctly: %+v", rd)
 	}
 }
 
 func TestRedirectServesRedirect(t *testing.T) {
-	Reset()
-	Register("GET", "/redirect-target", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.Register("GET", "/redirect-target", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	RegisterRedirect("/old", "/redirect-target", http.StatusMovedPermanently)
+	app.RegisterRedirect("/old", "/redirect-target", http.StatusMovedPermanently)
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/old", nil)
 	h.ServeHTTP(rr, req)
@@ -47,13 +48,13 @@ func TestRedirectServesRedirect(t *testing.T) {
 }
 
 func TestRedirectWildcardMatch(t *testing.T) {
-	Reset()
-	Register("GET", "/wild-target", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.Register("GET", "/wild-target", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	RegisterRedirect("/blog/*", "/wild-target", http.StatusFound)
+	app.RegisterRedirect("/blog/*", "/wild-target", http.StatusFound)
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/blog", nil)
 	h.ServeHTTP(rr, req)
@@ -67,15 +68,13 @@ func TestRedirectWildcardMatch(t *testing.T) {
 }
 
 func TestRedirectWildcardPrefixMatch(t *testing.T) {
-	// A "/blog/*" rule prefix-matches deeper paths: "/blog/2024/01" is
-	// redirected, and the matched prefix is replaced by the target.
-	Reset()
-	RegisterRedirect("/blog/*", "/new", http.StatusFound)
-	Register("GET", "/blog/2024/01", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.RegisterRedirect("/blog/*", "/new", http.StatusFound)
+	app.Register("GET", "/blog/2024/01", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/blog/2024/01", nil)
 	h.ServeHTTP(rr, req)
@@ -89,13 +88,13 @@ func TestRedirectWildcardPrefixMatch(t *testing.T) {
 }
 
 func TestRedirectNoMatch(t *testing.T) {
-	Reset()
-	RegisterRedirect("/old", "/new", http.StatusMovedPermanently)
-	Register("GET", "/keep", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.RegisterRedirect("/old", "/new", http.StatusMovedPermanently)
+	app.Register("GET", "/keep", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/keep", nil)
 	h.ServeHTTP(rr, req)
@@ -106,24 +105,25 @@ func TestRedirectNoMatch(t *testing.T) {
 }
 
 func TestRegisterRewrite(t *testing.T) {
-	Reset()
-	RegisterRewrite("/old/*", "/new/*")
-	if len(rewrites) != 1 {
-		t.Fatalf("expected 1 rewrite rule, got %d", len(rewrites))
+	app := New()
+	app.RegisterRewrite("/old/*", "/new/*")
+	if len(app.rewrites) != 1 {
+		t.Fatalf("expected 1 rewrite rule, got %d", len(app.rewrites))
 	}
-	if rewrites[0].from != "/old/*" || rewrites[0].to != "/new/*" {
-		t.Errorf("rewrite rule not registered correctly: %+v", rewrites[0])
+	rw := app.rewrites[0]
+	if rw.from != "/old/*" || rw.to != "/new/*" {
+		t.Errorf("rewrite rule not registered correctly: %+v", rw)
 	}
 }
 
 func TestRewriteRewritesPath(t *testing.T) {
-	Reset()
-	Register("GET", "/new/route", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.Register("GET", "/new/route", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	RegisterRewrite("/old/*", "/new/*")
+	app.RegisterRewrite("/old/*", "/new/*")
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/old/route", nil)
 	h.ServeHTTP(rr, req)
@@ -134,13 +134,13 @@ func TestRewriteRewritesPath(t *testing.T) {
 }
 
 func TestRewriteNoMatch(t *testing.T) {
-	Reset()
-	Register("GET", "/unchanged", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.Register("GET", "/unchanged", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	RegisterRewrite("/old/*", "/new/*")
+	app.RegisterRewrite("/old/*", "/new/*")
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/unchanged", nil)
 	h.ServeHTTP(rr, req)
@@ -168,8 +168,8 @@ func TestMatchRewrite(t *testing.T) {
 }
 
 func TestSessionMiddlewareSetsStore(t *testing.T) {
-	Reset()
-	Register("GET", "/session-test", func(w http.ResponseWriter, r *http.Request) {
+	app := New()
+	app.Register("GET", "/session-test", func(w http.ResponseWriter, r *http.Request) {
 		got := StoreFromCtx(r.Context())
 		if got == nil {
 			http.Error(w, "no store", http.StatusInternalServerError)
@@ -181,9 +181,9 @@ func TestSessionMiddlewareSetsStore(t *testing.T) {
 		}
 		w.WriteHeader(http.StatusOK)
 	})
-	SetSessionStore(mockStore{})
+	app.SetSessionStore(mockStore{})
 
-	h := ServeMux()
+	h := app.Handler()
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/session-test", nil)
 	h.ServeHTTP(rr, req)
@@ -194,66 +194,66 @@ func TestSessionMiddlewareSetsStore(t *testing.T) {
 }
 
 func TestSetSessionStore(t *testing.T) {
-	Reset()
-	SetSessionStore(mockStore{})
-	if got := SessionStore(); got == nil {
+	app := New()
+	app.SetSessionStore(mockStore{})
+	if got := app.SessionStore(); got == nil {
 		t.Fatal("SetSessionStore did not set the session store")
 	}
-	if _, ok := SessionStore().(mockStore); !ok {
-		t.Errorf("expected mockStore, got %T", SessionStore())
+	if _, ok := app.SessionStore().(mockStore); !ok {
+		t.Errorf("expected mockStore, got %T", app.SessionStore())
 	}
 }
 
 func TestSessionStore(t *testing.T) {
-	Reset()
-	if SessionStore() != nil {
-		t.Errorf("expected nil store after Reset, got %T", SessionStore())
+	app := New()
+	if app.SessionStore() != nil {
+		t.Errorf("expected nil store on new app, got %T", app.SessionStore())
 	}
-	SetSessionStore(mockStore{})
-	if SessionStore() == nil {
+	app.SetSessionStore(mockStore{})
+	if app.SessionStore() == nil {
 		t.Error("expected non-nil store after SetSessionStore")
 	}
 }
 
 func TestSetLoggingDisablesLogging(t *testing.T) {
-	Reset()
-	if !loggingEnabled {
+	app := New()
+	if !app.loggingEnabled {
 		t.Fatal("logging should default to enabled")
 	}
-	SetLogging(false)
-	if loggingEnabled {
+	app.SetLogging(false)
+	if app.loggingEnabled {
 		t.Error("SetLogging(false) should disable logging")
 	}
-	SetLogging(true)
-	if !loggingEnabled {
+	app.SetLogging(true)
+	if !app.loggingEnabled {
 		t.Error("SetLogging(true) should re-enable logging")
 	}
 }
 
 func TestSetCSRF(t *testing.T) {
-	Reset()
-	if !csrfEnabled {
+	app := New()
+	if !app.csrfEnabled {
 		t.Fatal("CSRF should default to enabled")
 	}
-	SetCSRF(false)
-	if csrfEnabled {
+	app.SetCSRF(false)
+	if app.csrfEnabled {
 		t.Error("SetCSRF(false) should disable CSRF")
 	}
-	SetCSRF(true)
-	if !csrfEnabled {
+	app.SetCSRF(true)
+	if !app.csrfEnabled {
 		t.Error("SetCSRF(true) should re-enable CSRF")
 	}
 }
 
 func TestSetErrorHandler(t *testing.T) {
-	Reset()
-	if _, ok := errorHandlers[http.StatusInternalServerError]; ok {
-		t.Fatal("error handler should be unset after Reset")
+	app := New()
+	if _, ok := app.errorHandlers[http.StatusInternalServerError]; ok {
+		t.Fatal("error handler should be unset on new app")
 	}
-	SetErrorHandler(http.StatusInternalServerError, func(w http.ResponseWriter, r *http.Request) {
+	app.SetErrorHandler(http.StatusInternalServerError, func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("custom 500"))
 	})
-	if h, ok := errorHandlers[http.StatusInternalServerError]; !ok || h == nil {
+	if h, ok := app.errorHandlers[http.StatusInternalServerError]; !ok || h == nil {
 		t.Error("SetErrorHandler did not register the 500 handler")
 	}
 }

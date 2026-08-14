@@ -144,11 +144,11 @@ func TestCLIInitImport(t *testing.T) {
 		t.Fatalf("init: %v\n%s", err, out)
 	}
 	mainGo, _ := os.ReadFile(filepath.Join(dir, "main.go"))
-	if !strings.Contains(string(mainGo), `_ "t/dreego/gen"`) {
-		t.Fatalf("main.go does not import _ \"t/dreego/gen\": %s", mainGo)
+	if !strings.Contains(string(mainGo), `"t/dreego/gen"`) {
+		t.Fatalf("main.go does not import \"t/dreego/gen\": %s", mainGo)
 	}
-	if regexp.MustCompile(`_\s*"gen"`).MatchString(string(mainGo)) {
-		t.Fatalf("main.go contains bare _ \"gen\" import: %s", mainGo)
+	if !strings.Contains(string(mainGo), "gen.Register(app)") {
+		t.Fatalf("main.go does not call gen.Register(app): %s", mainGo)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

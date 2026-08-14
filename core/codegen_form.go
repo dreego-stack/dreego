@@ -17,7 +17,7 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 	hasValidate := hasValidateTag(file.Go, structName)
 
 	var buf strings.Builder
-	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", postHandler))
+	buf.WriteString(fmt.Sprintf("func %s(app *dreego.App, w http.ResponseWriter, r *http.Request) {\n", postHandler))
 	buf.WriteString("\tc := dreego.NewSSR(w, r)\n\n")
 	buf.WriteString(fmt.Sprintf("\tvar form %s\n", structName))
 	buf.WriteString("\tif err := dreego.BindForm(r, \u0026form); err != nil {\n")
@@ -28,7 +28,7 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 	buf.WriteString("\t\treturn\n")
 	buf.WriteString("\t}\n\n")
 	if hasValidate {
-		buf.WriteString("\terrs := dreego.ValidateForm(form)\n")
+		buf.WriteString("\terrs := app.ValidateForm(form)\n")
 		buf.WriteString("\tif len(errs) > 0 {\n")
 		buf.WriteString("\t\tdreego.SaveErrors(c, errs)\n")
 		buf.WriteString("\t\tdreego.SaveOld(c, form)\n")

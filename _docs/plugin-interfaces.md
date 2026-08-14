@@ -1,6 +1,8 @@
 # Plugin Interfaces
 
-Dreego's plugin system is based on Go interfaces. Every interface is a contract: the core defines, plugins implement.
+Dreego plugins use explicit App-bound registration functions. Core interfaces
+exist only for proven framework contracts such as sessions; plugins do not
+implement a central Plugin interface.
 
 Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`. Core never imports any plugin package.
 
@@ -21,48 +23,12 @@ type Store interface {
 
 Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session-redis` (planned).
 
-### Current Plugin Interface
+### Plugin registration
 
-The following fat interface exists in the released pre-v0.1 implementation.
-It is deprecated design and will be removed by the App migration; it is not a
-compatibility promise for plugin authors.
-
-```go
-type Plugin interface {
-    Name() string
-    RegisterRoutes()
-    Middlewares() []func(http.Handler) http.Handler
-    Assets() fs.FS
-    OnStart(ctx context.Context) error
-    OnShutdown(ctx context.Context) error
-}
-```
-
-The accepted v0.1 direction has no required central plugin interface. A plugin
-instead exposes `Register(app, typedOptions) error`. Only real plugins may later
-justify small shared capability interfaces, and compatibility begins at v1.
-
-### Proposed Middleware Hooks (superseded)
-
-```go
-type MiddlewareProvider interface {
-    Middlewares() []func(http.Handler) http.Handler
-}
-```
-
-This interface was exploratory and is not the accepted v0.1 contract. Plugins
-register middleware directly on their owning App.
-
-### Proposed Route Hooks (superseded)
-
-```go
-type RouteProvider interface {
-    Routes() []Route
-}
-```
-
-This interface was exploratory and is not the accepted v0.1 contract. Plugins
-register routes directly on their owning App.
+There is no central Plugin interface before v1. Plugin packages expose a typed
+`Register(app, options) error` function and use `app.Register` and `app.Use`
+directly. Shared capability interfaces are introduced only after multiple real
+plugins prove the same small contract.
 
 ## Plugin Interfaces (not yet implemented)
 
@@ -106,17 +72,22 @@ Or in your own project repo:
 ```
 myapp/
 ├── go.mod           (module myapp)
-├── main.go          (import _ "myapp/plugins/auth")
+├── main.go          (calls auth.Register)
 ├── plugins/
 │   └── auth/
-│       └── auth.go  (implements dreego.Plugin)
+│       └── auth.go  (exports Register and Options)
 └── dreego/
     └── routes/
 ```
 
-Then import:
+Then register the feature explicitly on the owning app:
 ```go
-import _ "myapp/plugins/auth"
+app := dreego.New()
+if err := auth.Register(app, auth.Options{
+	LoginPath: "/login",
+}); err != nil {
+	log.Fatal(err)
+}
 ```
 
 ## Cluster Plugin (planned)

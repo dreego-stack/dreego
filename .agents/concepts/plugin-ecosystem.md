@@ -1,4 +1,3 @@
-
 ---
 type: Concept
 title: "Plugin Ecosystem"
@@ -9,30 +8,34 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Design Philosophy
 
-Dreego plugins are Go packages that fulfill the `dreego.Plugin` interface. No dynamic plugins, no runtime magic — pure, compile-time-safe Go.
+Dreego plugins are ordinary Go packages with explicit App-bound registration.
+There is no dynamic loading, runtime discovery, or central Plugin interface.
 
-## Plugin Interface
+## Registration contract
 
 ```go
-package dreego
+type Options struct {
+    LoginPath string
+}
 
-type Plugin interface {
-    Name() string
-    RegisterRoutes(app *App)
-    Middlewares() []func(http.Handler) http.Handler
-    Assets() *embed.FS
+func Register(app *dreego.App, options Options) error {
+    if err := app.Use(authMiddleware(options)); err != nil {
+        return err
+    }
+    return app.Register(http.MethodGet, options.LoginPath, loginHandler)
 }
 ```
 
 ## Extension Points
 
-A plugin can hook into the framework at 5 points:
+A plugin registers only the App behavior it needs:
 
 1. **Middleware** — HTTP wrappers (e.g. auth checks)
 2. **Routes** — Register new paths (e.g. `/auth/login`)
-3. **Assets** — CSS/JS/Images via `//go:embed`
-4. **Transpiler** — Custom tags (e.g. `<dreego:map />`)
-5. **Context** — Extension of the request context (e.g. `c.User()`)
+3. **Context data** — request-local typed helpers owned by the plugin
+
+Assets, lifecycle hooks, and transpiler extensions require separate proven
+contracts. Runtime registration does not imply a transpiler extension API.
 
 ## Example: dreego-auth
 
@@ -41,26 +44,15 @@ package auth
 
 import "github.com/.../dreego"
 
-//go:embed assets/*
-var authAssets embed.FS
-
-type AuthPlugin struct {
+type Options struct {
     SecretKey string
 }
 
-func New(secret string) *AuthPlugin {
-    return &AuthPlugin{SecretKey: secret}
-}
-
-func (p *AuthPlugin) Name() string { return "DreegoAuth" }
-
-func (p *AuthPlugin) RegisterRoutes(app *dreego.App) {
-    app.POST("/api/auth/login", p.handleLogin)
-    app.GET("/auth/login", p.renderLoginPage)
-}
-
-func (p *AuthPlugin) Assets() *embed.FS {
-    return &authAssets
+func Register(app *dreego.App, options Options) error {
+    if err := app.Register(http.MethodPost, "/api/auth/login", handleLogin(options)); err != nil {
+        return err
+    }
+    return app.Register(http.MethodGet, "/auth/login", renderLoginPage(options))
 }
 ```
 
@@ -74,8 +66,12 @@ import (
 
 func main() {
     app := dreego.New()
-    app.UsePlugin(auth.New("super-secret-key"))
-    app.Listen(":8080")
+	if err := auth.Register(app, auth.Options{SecretKey: "super-secret-key"}); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 
@@ -131,16 +127,9 @@ func main() {
 | dreego-sitemap    | Automatic sitemap generation                     |
 | dreego-devtools   | Debug toolbar (like Laravel Debugbar)            |
 
-## Transpiler Hook for Custom Tags
+## Transpiler extensions
 
-Plugins can register their own HTML tags:
-
-```html
-<!-- In a .dreego file -->
-<dreego:map lat="52.52" lng="13.40" />
-```
-
-The transpiler:
-1. Finds `<dreego:map />`
-2. Checks `dreego.config.json` for installed plugins
-3. Replaces with Go code: `dreegomap.RenderMap(dreegomap.Props{Lat: 52.52, Lng: 13.40})`
+Runtime plugin registration does not extend `.dreego` syntax. A future
+transpiler extension must first prove a typed processor boundary, diagnostics,
+conflict handling, and deterministic builds. It is not part of the v0.1 plugin
+contract.

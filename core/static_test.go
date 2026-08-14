@@ -43,13 +43,14 @@ func TestMimeByExtCaseInsensitive(t *testing.T) {
 }
 
 func TestRegisterStaticServesContent(t *testing.T) {
-	before := len(routes)
-	RegisterStatic("/assets/app.js", "application/javascript; charset=utf-8", []byte("console.log(1)"))
+	app := New()
+	before := len(app.routes)
+	app.RegisterStatic("/assets/app.js", "application/javascript; charset=utf-8", []byte("console.log(1)"))
 
-	if len(routes) != before+1 {
-		t.Fatalf("expected %d routes, got %d", before+1, len(routes))
+	if len(app.routes) != before+1 {
+		t.Fatalf("expected %d routes, got %d", before+1, len(app.routes))
 	}
-	r := routes[len(routes)-1]
+	r := app.routes[len(app.routes)-1]
 	if r.method != "GET" {
 		t.Errorf("expected method GET, got %q", r.method)
 	}

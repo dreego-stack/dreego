@@ -39,7 +39,7 @@ func TestFormActionsGActionNoHandler(t *testing.T) {
 </form>
 </div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `dreego.Register("POST"`)
+	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `app.Register("POST"`)
 }
 
 func TestFormActionsGActionUnexported(t *testing.T) {
@@ -81,7 +81,7 @@ func TestFormActionsGActionWrongArity(t *testing.T) {
 </form>
 </div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `dreego.Register("POST"`)
+	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `app.Register("POST"`)
 }
 
 func TestFormActionsHandlerSignature(t *testing.T) {
@@ -183,7 +183,7 @@ func TestFormActionsPlainForm(t *testing.T) {
 </form>
 </div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `dreego.Register("POST"`)
+	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `app.Register("POST"`)
 }
 
 func TestFormActionsPlainPostRuntime(t *testing.T) {
@@ -199,7 +199,7 @@ func TestFormActionsPlainPostRuntime(t *testing.T) {
     <button>Submit</button>
 </form>
 </div>`,
-	}, "dreego.SetCSRF(false); ")
+	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=hello@test.com", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 200 {
 		t.Fatalf("expected 200 for plain POST, got %d", code)
@@ -219,14 +219,14 @@ func TestFormActionsValidateTags(t *testing.T) {
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/routes/get-form.dreego": "<go>\n    type ValForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func DoVal(c dreego.Context, form ValForm) error {\n        return nil\n    }\n</go>\n<div>\n<form g-action=\"DoVal\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</div>",
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "dreego.ValidateForm")
+	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "app.ValidateForm")
 }
 
 func TestFormActionsBoolBinding(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get-news.dreego": "<go>\n    type NewsForm struct {\n        Email    string `validate:\"required\"`\n        Subscribe bool\n    }\n    func SubmitNews(c dreego.Context, form NewsForm) error {\n        if form.Subscribe {\n            return c.Redirect(\"/subscribed\", 303)\n        }\n        return c.Redirect(\"/skipped\", 303)\n    }\n</go>\n<div>\n<form g-action=\"SubmitNews\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <input name=\"subscribe\" type=\"checkbox\">\n    <button type=\"submit\">Send</button>\n</form>\n</div>",
-	}, "dreego.SetCSRF(false); ")
+	}, "app.SetCSRF(false); ")
 	code, _, headers := c.Request(t, "POST", "/", "email=a@b.c&subscribe=on", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
 		t.Fatalf("status = %d, want 303 for checked", code)
@@ -247,7 +247,7 @@ func TestFormActionsIntBinding(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get-age.dreego": "<go>\n    type AgeForm struct {\n        Age int `validate:\"min=2\"`\n    }\n    func SubmitAge(c dreego.Context, form AgeForm) error {\n        if form.Age == 20 {\n            return c.Redirect(\"/adult\", 303)\n        }\n        return c.Redirect(\"/other\", 303)\n    }\n</go>\n<div>\n<form g-action=\"SubmitAge\" method=\"post\">\n    <input name=\"age\" type=\"number\">\n    <button type=\"submit\">Send</button>\n</form>\n</div>",
-	}, "dreego.SetCSRF(false); ")
+	}, "app.SetCSRF(false); ")
 	code, _, headers := c.Request(t, "POST", "/", "age=20", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
 		t.Fatalf("expected 303 for valid age, got %d", code)
@@ -265,7 +265,7 @@ func TestFormActionsSubmitValid(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/dashboard\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
-	}, "dreego.SetCSRF(false); ")
+	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=test@dreego.dev", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
 		t.Fatalf("expected 303 redirect, got %d", code)
@@ -276,7 +276,7 @@ func TestFormActionsSubmitInvalid(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
-	}, "dreego.SetCSRF(false); ")
+	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=invalid", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 200 {
 		t.Fatalf("expected 200 re-render, got %d", code)
@@ -287,7 +287,7 @@ func TestFormActionsSubmitCSRFPass(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
-	}, "dreego.SetSessionStore(dreego.NewCookieStore([]byte(\"test-secret\"))); ")
+	}, "app.SetSessionStore(dreego.NewCookieStore([]byte(\"test-secret\"))); ")
 	c.Get(t, "/health")
 	token := c.Cookie("csrf_token")
 	if token == "" {

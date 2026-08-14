@@ -24,17 +24,18 @@ Available as **`c`** in routes (including `<go>` blocks and error pages) and as 
 
 ## Server
 
-| Function | Description |
+| Method | Description |
 |----------|-------------|
-| `dreego.Listen(":8080")` | Start HTTP server with full middleware chain |
-| `dreego.ServeMux()` | Build `http.Handler` with all routes, middleware, session, CSRF |
+| `app.Listen(":8080")` | Start HTTP server with the App middleware chain |
+| `app.Handler()` | Freeze configuration and return the App's `http.Handler` |
+| `app.ServeHTTP(w, r)` | Use the App directly as an `http.Handler` |
 
 ## Session
 
 | Function | Description |
 |----------|-------------|
 | `dreego.NewCookieStore([]byte("secret-32-bytes"))` | Create HMAC-signed cookie session store |
-| `dreego.SetSessionStore(store)` | Enable sessions for all requests |
+| `app.SetSessionStore(store)` | Enable sessions for this App before build |
 
 Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Path: "/"`.
 
@@ -42,12 +43,17 @@ For AES-256-GCM session encryption see [Session Encryption](https://github.com/d
 
 ## Configuration
 
-| Function | Description |
+| Method | Description |
 |----------|-------------|
-| `dreego.SetLogging(bool)` | Enable/disable request logging (JSONL format) |
-| `dreego.SetCSRF(bool)` | Enable/disable CSRF protection (default: on) |
-| `dreego.SetCSP(value string)` | Override the Content-Security-Policy header (empty falls back to `default-src 'self'`) |
-| `dreego.SetErrorHandler(code, handler)` | Custom handler for HTTP errors (500 used by Recovery) |
+| `app.SetLogging(bool)` | Enable/disable request logging (JSONL format) before build |
+| `app.SetCSRF(bool)` | Enable/disable CSRF protection for this App before build (default: on) |
+| `app.SetCSP(value string)` | Override Content-Security-Policy before build |
+| `app.SetErrorHandler(code, handler)` | Configure an App-local error handler before build |
+| `app.SetReady(bool)` | Change readiness dynamically, including after build |
+
+Configuration freezes on the first call to `Build`, `Handler`, `ServeHTTP`, or
+`Listen`. Later configuration calls return `dreego.ErrAppBuilt`; readiness is
+the only intentionally dynamic setting.
 
 ## Configuration File
 
@@ -68,7 +74,9 @@ For AES-256-GCM session encryption see [Session Encryption](https://github.com/d
 ## Static Assets
 
 ```go
-dreego.RegisterStatic("/style.css", "text/css", []byte("body{color:red}"))
+if err := app.RegisterStatic("/style.css", "text/css", []byte("body{color:red}")); err != nil {
+    log.Fatal(err)
+}
 ```
 
 Generated automatically from `dreego/static/` by `dreego generate`. MIME type detected from file extension.
@@ -79,14 +87,24 @@ Generated automatically from `dreego/static/` by `dreego generate`. MIME type de
 package main
 
 import (
-    _ "myapp/dreego/gen"
-    dreego "github.com/dreego-stack/dreego/core"
+	"log"
+
+	"myapp/dreego/gen"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
-    store := dreego.NewCookieStore([]byte("super-secret-key-32-bytes!"))
-    dreego.SetSessionStore(store)
-    dreego.Listen(":8080")
+	app := dreego.New()
+	store := dreego.NewCookieStore([]byte("super-secret-key-32-bytes!"))
+	if err := app.SetSessionStore(store); err != nil {
+		log.Fatal(err)
+	}
+	if err := gen.Register(app); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 

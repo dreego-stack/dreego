@@ -60,7 +60,7 @@ func cmdNew(args []string) {
 		os.Exit(1)
 	}
 
-	dreegoCoreVersion := dreegoVersion()
+	dreegoCoreVersion := scaffoldVersion(dreegoVersion())
 
 	c := exec.Command("go", "mod", "init", projName)
 	c.Dir = target
@@ -109,19 +109,57 @@ func cmdNew(args []string) {
 	fmt.Printf("  cd %s && dreego generate && go run .\n", name)
 }
 
+func scaffoldVersion(version string) string {
+	if version == "" || version == "dev" || version == "(devel)" {
+		return "v0.0.0"
+	}
+	return version
+}
+
 // findLocalRepo returns the absolute path to the local dreego repo root
 // (used to replace the remote dreego dependency in generated scaffolds), or ""
 // if it cannot be located. The path is resolved relative to this source file,
 // which lives in <repo>/cli/dreego/ for a repo-local build.
 func findLocalRepo() string {
+	if repoDir := os.Getenv("DREEGO_LOCAL_REPO"); repoDir != "" {
+		if info, err := os.Stat(filepath.Join(repoDir, "go.mod")); err == nil && !info.IsDir() {
+			return repoDir
+		}
+	}
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		return ""
+		return findRepoFromWorkingModule()
 	}
 	repoDir := filepath.Join(filepath.Dir(file), "..", "..")
 	st, err := os.Stat(filepath.Join(repoDir, "go.mod"))
 	if err != nil || st.IsDir() {
-		return ""
+		return findRepoFromWorkingModule()
 	}
 	return repoDir
+}
+
+func findRepoFromWorkingModule() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	data, err := os.ReadFile(filepath.Join(wd, "go.mod"))
+	if err != nil {
+		return ""
+	}
+	prefix := "replace github.com/dreego-stack/dreego => "
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, prefix) {
+			continue
+		}
+		path := strings.TrimSpace(strings.TrimPrefix(line, prefix))
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(wd, path)
+		}
+		if info, statErr := os.Stat(filepath.Join(path, "go.mod")); statErr == nil && !info.IsDir() {
+			return filepath.Clean(path)
+		}
+	}
+	return ""
 }
