@@ -1,4 +1,11 @@
 
+## v0.0.40 - 2026-08-14
+
+- Bug: catch-all directories generate invalid Go patterns
+- Bug: double-bracket optional segments silently become required
+- Bug: duplicate route definitions silently override instead of failing
+- Bug: method attributes on go sections are ignored
+
 ## v0.0.39 - 2026-08-14
 
 - Breaking: remove dead Context.Render(name string, data any) stub and ErrRender from core
