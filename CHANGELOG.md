@@ -1,4 +1,9 @@
 
+## v0.0.41 - 2026-08-14
+
+- Breaking: remove EventBus, Queue, KVStore, Storage contracts and implementations from core
+- Docs: update plugin-interfaces.md; session.Store remains the only core infrastructure contract
+
 ## [Unreleased]
 
 - Breaking: remove EventBus, Queue, KVStore, Storage from core (plugins will own these APIs)
