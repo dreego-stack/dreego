@@ -1,4 +1,9 @@
 
+## v0.0.39 - 2026-08-14
+
+- Breaking: remove dead Context.Render(name string, data any) stub and ErrRender from core
+- Docs: replace c.Render() references in forms and form-actions docs
+
 ## v0.0.38 - 2026-08-14
 
 - Bug: lexer treats < in Go blocks, > in quoted attributes, and < > in script/style as tags
