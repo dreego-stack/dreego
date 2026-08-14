@@ -1,5 +1,5 @@
 ---
-version: minor
+version: patch
 ---
 
 - Breaking: remove EventBus, Queue, KVStore, Storage contracts and implementations from core
