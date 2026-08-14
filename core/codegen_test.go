@@ -15,11 +15,11 @@ func TestGenerateErrorHandler404(t *testing.T) {
 			},
 		},
 	}
-	out, err := GenerateErrorHandler(file, "Site", 404, "/{path...}", "abc")
+	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{path...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"renderErrorSite404", "HandleErrorSite404", "w.WriteHeader(404)", `Register("", "/{path...}", `} {
+	for _, want := range []string{"renderErrorSite404", "HandleErrorSite404", "w.WriteHeader(404)"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("404 handler missing %q, got:\n%s", want, out)
 		}
@@ -35,11 +35,11 @@ func TestGenerateErrorHandler500(t *testing.T) {
 			},
 		},
 	}
-	out, err := GenerateErrorHandler(file, "Site", 500, "/", "abc")
+	out, _, err := GenerateErrorHandler(file, "Site", 500, "/", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"renderErrorSite500", "HandleErrorSite500", "SetErrorHandler(500, "} {
+	for _, want := range []string{"renderErrorSite500", "HandleErrorSite500"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("500 handler missing %q, got:\n%s", want, out)
 		}
@@ -88,11 +88,11 @@ func TestGenerateMethodHandlerNonGET(t *testing.T) {
 			},
 		},
 	}
-	out, err := GenerateMethodHandler(file, nil, "main", "home", "/home", "abc")
+	out, _, err := GenerateMethodHandler(file, nil, "main", "home", "/home", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"renderHomePOST", "HandleHomePOST", `Register("POST", "/home", `} {
+	for _, want := range []string{"renderHomePOST", "HandleHomePOST"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("non-GET handler missing %q, got:\n%s", want, out)
 		}

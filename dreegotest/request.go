@@ -30,6 +30,16 @@ func PostForm(t *testing.T, path string, form url.Values) *Response {
 
 func serve(req *http.Request) *Response {
 	rec := httptest.NewRecorder()
-	dreego.ServeMux().ServeHTTP(rec, req)
+	testApp.Handler().ServeHTTP(rec, req)
 	return &Response{StatusCode: rec.Code, Body: rec.Body.String()}
+}
+
+var testApp = dreego.New()
+
+func Register(method, pattern string, handler http.HandlerFunc) {
+	testApp.Register(method, pattern, handler)
+}
+
+func Reset() {
+	testApp = dreego.New()
 }

@@ -35,7 +35,7 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("ProjectDir: write go.mod: %v", err)
 	}
-	mainGo := "package main\nimport _ \"t/dreego/gen\"\nfunc main() {}\n"
+	mainGo := "package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); gen.Register(app) }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("ProjectDir: write main.go: %v", err)
 	}

@@ -1,21 +1,9 @@
 package core
 
 import (
-	"net/http"
 	"path/filepath"
 	"strings"
 )
-
-func RegisterStatic(path, mime string, content []byte) {
-	data := make([]byte, len(content))
-	copy(data, content)
-
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", mime)
-		w.Write(data)
-	}
-	routes = append(routes, route{method: "GET", pattern: path, handler: handler})
-}
 
 func MimeByExt(ext string) string {
 	switch strings.ToLower(ext) {

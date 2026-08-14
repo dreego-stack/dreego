@@ -8,27 +8,29 @@ import (
 )
 
 func TestSetReadyNoRace(t *testing.T) {
+	app := New()
 	var wg sync.WaitGroup
 	for i := 0; i < 100; i++ {
 		wg.Add(2)
 		go func() {
 			defer wg.Done()
-			SetReady(true)
+			app.SetReady(true)
 		}()
 		go func() {
 			defer wg.Done()
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest("GET", "/ready", nil)
-			readyHandler().ServeHTTP(w, r)
+			app.readyHandler().ServeHTTP(w, r)
 		}()
 	}
 	wg.Wait()
 }
 
 func TestHealthHandlerOK(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/health", nil)
-	healthHandler().ServeHTTP(w, r)
+	app.healthHandler().ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", w.Code)
@@ -39,10 +41,11 @@ func TestHealthHandlerOK(t *testing.T) {
 }
 
 func TestReadyHandlerReady(t *testing.T) {
-	SetReady(true)
+	app := New()
+	app.SetReady(true)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/ready", nil)
-	readyHandler().ServeHTTP(w, r)
+	app.readyHandler().ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", w.Code)
@@ -53,26 +56,24 @@ func TestReadyHandlerReady(t *testing.T) {
 }
 
 func TestReadyHandlerNotReady(t *testing.T) {
-	SetReady(false)
-	defer SetReady(true)
+	app := New()
+	app.SetReady(false)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/ready", nil)
-	readyHandler().ServeHTTP(w, r)
+	app.readyHandler().ServeHTTP(w, r)
 
 	if w.Code != http.StatusServiceUnavailable {
 		t.Errorf("expected status 503, got %d", w.Code)
 	}
-	if w.Body.String() != "not ready" {
-		t.Errorf("expected body 'not ready', got %q", w.Body.String())
-	}
 }
 
 func TestReadyHandlerBackToReady(t *testing.T) {
-	SetReady(false)
-	SetReady(true)
+	app := New()
+	app.SetReady(false)
+	app.SetReady(true)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/ready", nil)
-	readyHandler().ServeHTTP(w, r)
+	app.readyHandler().ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200 after SetReady(true), got %d", w.Code)

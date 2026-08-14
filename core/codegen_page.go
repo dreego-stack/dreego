@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, error) {
+func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Go {
 		if g.ContentType != "" && g.ContentType != "custom" {
@@ -60,7 +60,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	if hasTypedBlocks {
 		typedCode, err := genTypedBlocks(file)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		buf.WriteString(typedCode)
 	}
@@ -68,7 +68,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	if file.Template != nil && len(file.Template.Nodes) > 0 {
 		templCode, err := genTempl(file, layout, scopeHash, true)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		buf.WriteString(templCode)
 	} else if !hasFormActions && firstMethod != "GET" {
@@ -87,32 +87,31 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	buf.WriteString("\t}\n")
 	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
 	buf.WriteString("\tw.Write([]byte(html))\n")
-	buf.WriteString("}\n\n")
+	buf.WriteString("}\n")
 
 	var postCode string
 	if hasFormActions {
 		var err error
 		postCode, err = generateFormPostHandler(file, renderFunc, postHandler, pattern)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		if !strings.HasPrefix(postCode, "//") {
 			buf.WriteString(postCode)
 		}
 	}
 
-	buf.WriteString("func init() {\n")
+	var reg strings.Builder
 	if hasFormActions {
-		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
+		reg.WriteString(fmt.Sprintf("\tapp.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
 		if postCode != "" && !strings.HasPrefix(postCode, "//") {
-			buf.WriteString(fmt.Sprintf("\tdreego.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
+			reg.WriteString(fmt.Sprintf("\tapp.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
 		}
 	} else {
-		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, getHandler))
+		reg.WriteString(fmt.Sprintf("\tapp.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, getHandler))
 	}
-	buf.WriteString("}\n")
 
-	return buf.String(), nil
+	return buf.String(), reg.String(), nil
 }
 
 func genTypedBlocks(file *File) (string, error) {

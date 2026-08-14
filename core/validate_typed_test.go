@@ -71,7 +71,8 @@ func TestBindFormSliceField(t *testing.T) {
 // typed-forms.1: custom validator registration + application. Currently RED —
 // no RegisterRule/registered-rule dispatch exists in applyRule.
 func TestRegisterRuleCustom(t *testing.T) {
-	RegisterRule("even", func(val string) string {
+	app := New()
+	app.RegisterRule("even", func(val string) string {
 		n, err := atoi(val)
 		if err != nil {
 			return "must be a number"

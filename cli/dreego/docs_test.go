@@ -43,7 +43,7 @@ func writeGoMod(t *testing.T, root, module string, reqs map[string]string) {
 func TestParseGoMod(t *testing.T) {
 	root := t.TempDir()
 	writeGoMod(t, root, "example.com/app", map[string]string{
-		"github.com/dreego-stack/dreego":    "v0.0.27",
+		"github.com/dreego-stack/dreego":     "v0.0.27",
 		"github.com/dreego-stack/plugin-sse": "v0.1.0",
 	})
 	gm, err := parseGoMod(filepath.Join(root, "go.mod"))
@@ -202,7 +202,9 @@ func TestCmdDumpAll(t *testing.T) {
 		"README.md":          "# Readme\n",
 		"CHANGELOG.md":       "# Changelog\n",
 	})
-	got := captureStdout(t, func() { cmdDump(root, "/_docs/index.md", "https://github.com/dreego-stack/dreego/blob/main", "https://raw.githubusercontent.com/dreego-stack/dreego/main") })
+	got := captureStdout(t, func() {
+		cmdDump(root, "/_docs/index.md", "https://github.com/dreego-stack/dreego/blob/main", "https://raw.githubusercontent.com/dreego-stack/dreego/main")
+	})
 	if !strings.Contains(got, "--- /_docs/index.md ---") {
 		t.Errorf("expected index separator in dump, got:\n%s", got)
 	}
@@ -216,7 +218,7 @@ func TestCmdDumpAll(t *testing.T) {
 
 func TestCmdList(t *testing.T) {
 	root := writeTestTree(t, map[string]string{
-		"go.mod": "",
+		"go.mod":             "",
 		"_docs/sitemap.json": `{"module":"github.com/dreego-stack/dreego","pages":[{"path":"/_docs/index.md","title":"Index"}]}`,
 		"_docs/index.md":     "# Index\n",
 	})

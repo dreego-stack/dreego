@@ -11,24 +11,24 @@ func handlerPointer(h http.Handler) uintptr {
 	return reflect.ValueOf(h).Pointer()
 }
 
-func TestServeMuxReturnsSameHandler(t *testing.T) {
-	Reset()
-	h1 := ServeMux()
-	h2 := ServeMux()
+func TestHandlerReturnsSameHandler(t *testing.T) {
+	app := New()
+	h1 := app.Handler()
+	h2 := app.Handler()
 	if h1 == nil {
-		t.Fatal("ServeMux returned nil")
+		t.Fatal("Handler returned nil")
 	}
 	if handlerPointer(h1) != handlerPointer(h2) {
-		t.Error("ServeMux should return the same cached handler")
+		t.Error("Handler should return the same cached handler")
 	}
 }
 
 func TestBuildIsIdempotent(t *testing.T) {
-	Reset()
-	Build()
-	h1 := builtHandler
-	Build()
-	h2 := builtHandler
+	app := New()
+	app.Build()
+	h1 := app.builtHandler
+	app.Build()
+	h2 := app.builtHandler
 	if h1 == nil {
 		t.Fatal("Build did not set handler")
 	}
@@ -37,31 +37,31 @@ func TestBuildIsIdempotent(t *testing.T) {
 	}
 }
 
-func TestResetClearsCache(t *testing.T) {
-	Reset()
-	Build()
-	if builtHandler == nil {
+func TestNewAppHasFreshState(t *testing.T) {
+	app := New()
+	app.Build()
+	if app.builtHandler == nil {
 		t.Fatal("Build did not set handler")
 	}
 
-	Register("GET", "/runtime-reset-test", func(w http.ResponseWriter, r *http.Request) {
+	app.Register("GET", "/runtime-reset-test", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	Reset()
-	if builtHandler != nil {
-		t.Error("Reset should set builtHandler to nil")
+	app2 := New()
+	if app2.builtHandler != nil {
+		t.Error("New app should not have a built handler")
 	}
 
-	h2 := ServeMux()
-	if h2 == nil {
-		t.Fatal("ServeMux returned nil")
-	}
+	app2.Register("GET", "/runtime-reset-test", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h2 := app2.Handler()
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/runtime-reset-test", nil)
 	h2.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
-		t.Errorf("Reset/ServeMux should build a fresh handler that includes routes registered after the previous build, got %d", rr.Code)
+		t.Errorf("fresh app should serve routes registered before build, got %d", rr.Code)
 	}
 }

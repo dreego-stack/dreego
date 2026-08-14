@@ -29,7 +29,7 @@ func TestMiddlewareCSPOverride(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>csp override</p></div>`,
-	}, `dreego.SetCSP("default-src 'none'"); `)
+	}, `app.SetCSP("default-src 'none'"); `)
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	if !strings.Contains(strings.ToLower(headers.Get("Content-Security-Policy")), "default-src 'none'") {
 		t.Fatalf("custom CSP not applied, got: %q", headers.Get("Content-Security-Policy"))
@@ -51,7 +51,7 @@ func TestMiddlewareCSRFCookieSameSite(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>csrf samesite</p></div>`,
-	}, `dreego.SetSessionStore(dreego.NewCookieStore([]byte("secret-key-32-bytes!"))); `)
+	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("secret-key-32-bytes!"))); `)
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	cookies := strings.Join(headers.Values("Set-Cookie"), "\n")
 	if !strings.Contains(cookies, "csrf_token") {
@@ -66,7 +66,7 @@ func TestMiddlewareCSRFDisabled(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>csrf off</p></div>`,
-	}, `dreego.SetSessionStore(dreego.NewCookieStore([]byte("test"))); dreego.SetCSRF(false); `)
+	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("test"))); app.SetCSRF(false); `)
 	code, _ := c.Get(t, "/")
 	if code != 200 {
 		t.Fatalf("status = %d, want 200", code)
@@ -124,7 +124,7 @@ func TestMiddlewareReadyRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>root</p></div>`,
-	}, `dreego.SetReady(false); `)
+	}, `app.SetReady(false); `)
 	_, body := c.Get(t, "/ready")
 	if body != "not ready" {
 		t.Fatalf("/ready not returning 'not ready', got %q", body)
@@ -147,7 +147,8 @@ func TestMiddlewareRequestIDAccept(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
-	}, `dreego.SetLogging(false); `)
+	}, `app.SetLogging(false); `)
+
 	custom := "my-custom-request-id"
 	_, _, headers := c.Request(t, "GET", "/health", "", map[string]string{"X-Request-ID": custom})
 	if got := headers.Get("X-Request-ID"); got != custom {
@@ -159,7 +160,7 @@ func TestMiddlewareRequestIDRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
-	}, `dreego.SetLogging(false); `)
+	}, `app.SetLogging(false); `)
 	_, _, headers := c.Request(t, "GET", "/health", "", nil)
 	id := headers.Get("X-Request-ID")
 	if id == "" {

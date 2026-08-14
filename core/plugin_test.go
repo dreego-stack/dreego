@@ -9,7 +9,6 @@ import (
 	"testing"
 )
 
-// Test 1: Interface satisfaction.
 func TestPluginInterfaceSatisfaction(t *testing.T) {
 	var p Plugin = &testPlugin{name: "satisfaction"}
 	if p.Name() != "satisfaction" {
@@ -17,14 +16,13 @@ func TestPluginInterfaceSatisfaction(t *testing.T) {
 	}
 }
 
-// Test 2: UsePlugin registers plugin routes.
 func TestUsePluginRegistersRoutes(t *testing.T) {
-	Reset()
-	UsePlugin(&routePlugin{})
+	app := New()
+	app.UsePlugin(&routePlugin{})
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin-route", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("plugin-registered route returned %d, want %d", rr.Code, http.StatusOK)
@@ -34,14 +32,13 @@ func TestUsePluginRegistersRoutes(t *testing.T) {
 	}
 }
 
-// Test 3: UsePlugin collects and injects middleware into the Build() stack.
 func TestUsePluginCollectsMiddleware(t *testing.T) {
-	Reset()
-	UsePlugin(&headerPlugin{})
+	app := New()
+	app.UsePlugin(&headerPlugin{})
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin-middleware", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
@@ -51,24 +48,22 @@ func TestUsePluginCollectsMiddleware(t *testing.T) {
 	}
 }
 
-// Test 4: UsePlugin registers lifecycle hooks; StartPlugins/ShutdownPlugins
-// call OnStart/OnShutdown on every registered plugin.
 func TestUsePluginLifecycle(t *testing.T) {
-	Reset()
+	app := New()
 
 	first := &lifecyclePlugin{}
 	second := &lifecyclePlugin{}
-	UsePlugin(first)
-	UsePlugin(second)
+	app.UsePlugin(first)
+	app.UsePlugin(second)
 
-	if err := StartPlugins(context.Background()); err != nil {
+	if err := app.StartPlugins(context.Background()); err != nil {
 		t.Fatalf("StartPlugins returned error: %v", err)
 	}
 	if !first.started || !second.started {
 		t.Error("StartPlugins must call OnStart on every registered plugin")
 	}
 
-	if err := ShutdownPlugins(context.Background()); err != nil {
+	if err := app.ShutdownPlugins(context.Background()); err != nil {
 		t.Fatalf("ShutdownPlugins returned error: %v", err)
 	}
 	if !first.shutdown || !second.shutdown {
@@ -76,41 +71,31 @@ func TestUsePluginLifecycle(t *testing.T) {
 	}
 }
 
-// Test 4b: Lifecycle errors propagate to the caller.
 func TestUsePluginLifecycleErrors(t *testing.T) {
-	Reset()
-
-	UsePlugin(&lifecyclePlugin{startErr: context.Canceled})
-	if err := StartPlugins(context.Background()); err == nil {
+	app := New()
+	app.UsePlugin(&lifecyclePlugin{startErr: context.Canceled})
+	if err := app.StartPlugins(context.Background()); err == nil {
 		t.Error("StartPlugins must propagate an OnStart error")
 	}
 
-	Reset()
-	UsePlugin(&lifecyclePlugin{shutErr: context.DeadlineExceeded})
-	if err := ShutdownPlugins(context.Background()); err == nil {
+	app2 := New()
+	app2.UsePlugin(&lifecyclePlugin{shutErr: context.DeadlineExceeded})
+	if err := app2.ShutdownPlugins(context.Background()); err == nil {
 		t.Error("ShutdownPlugins must propagate an OnShutdown error")
 	}
 }
 
-// Test 5: Plugin middleware runs in FIFO order — the first registered plugin
-// is the outermost middleware and runs first on request entry.
-//
-// Defined FIFO semantics: UsePlugin(pluginA); UsePlugin(pluginB) means on a
-// request A runs first, then B, then the handler. This is the standard Go
-// middleware convention (e.g. Chi). The current Build() loop
-// `for _, mw := range pluginMiddlewares { h = mw(h) }` produces LIFO (B first),
-// so this test is RED against the current implementation.
 func TestPluginMiddlewareFIFOOrder(t *testing.T) {
-	Reset()
+	app := New()
 
 	var log []string
 	var mu sync.Mutex
-	UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
-	UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
+	app.UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
+	app.UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin-order", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
@@ -121,30 +106,26 @@ func TestPluginMiddlewareFIFOOrder(t *testing.T) {
 	}
 }
 
-// Test 6: Middleware order is fixated on the first Build(). Registering a
-// plugin after the handler is already built must not change the order.
 func TestPluginMiddlewareOrderFixatedOnFirstBuild(t *testing.T) {
-	Reset()
+	app := New()
 
 	var log []string
 	var mu sync.Mutex
-	UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
+	app.UsePlugin(&orderPlugin{tag: "A", log: &log, mu: &mu})
 
-	// First Build() fixates the stack.
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin-order", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)
 	}
 
-	// Registering B after the first Build() must not change the order.
-	UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
+	app.UsePlugin(&orderPlugin{tag: "B", log: &log, mu: &mu})
 
 	log = nil
 	rr = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/plugin-order", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 
 	want := []string{"A"}
 	if !reflect.DeepEqual(log, want) {
@@ -152,16 +133,14 @@ func TestPluginMiddlewareOrderFixatedOnFirstBuild(t *testing.T) {
 	}
 }
 
-// Test 7: A nil plugin middleware entry must not panic; the stack stays stable
-// and the route still serves.
 func TestPluginMiddlewareNilEntryStable(t *testing.T) {
-	Reset()
+	app := New()
 
-	UsePlugin(&nilMiddlewarePlugin{})
+	app.UsePlugin(&nilMiddlewarePlugin{})
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin-nil-mw", nil)
-	ServeMux().ServeHTTP(rr, req)
+	app.Handler().ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("route returned %d, want %d", rr.Code, http.StatusOK)

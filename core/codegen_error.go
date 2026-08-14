@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, error) {
+func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
 
 	safeName := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
@@ -38,7 +38,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 			var err error
 			headCode, err = genHead(file.Head.Content, "b")
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 		}
 		if !suppressScope {
@@ -51,7 +51,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 		for _, n := range file.Template.Nodes {
 			code, err := genTemplateNode(n, 1)
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 			buf.WriteString(code)
 			if headPending && n.Type == NodeText && strings.HasPrefix(n.Content, "<!") {
@@ -96,13 +96,12 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 	buf.WriteString("\tw.Write([]byte(html))\n")
 	buf.WriteString("}\n\n")
 
-	buf.WriteString("func init() {\n")
+	var reg strings.Builder
 	if code == 404 {
-		buf.WriteString(fmt.Sprintf("\tdreego.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
+		reg.WriteString(fmt.Sprintf("\tapp.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
 	} else if code == 500 {
-		buf.WriteString(fmt.Sprintf("\tdreego.SetErrorHandler(%d, %s)\n", code, handlerName))
+		reg.WriteString(fmt.Sprintf("\tapp.SetErrorHandler(%d, %s)\n", code, handlerName))
 	}
-	buf.WriteString("}\n")
 
-	return buf.String(), nil
+	return buf.String(), reg.String(), nil
 }

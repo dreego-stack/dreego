@@ -26,6 +26,7 @@ func Run(force bool) error {
 		return err
 	}
 	var allSources []string
+	var allRegistrations []string
 
 	var settings *Settings
 	var genDir string
@@ -138,11 +139,12 @@ func Run(force bool) error {
 					errCode = 500
 				}
 				catchPattern := errorCatchPattern(pattern)
-				src, err := GenerateErrorHandler(file, pkgName, errCode, catchPattern, scopeHash)
+				src, reg, err := GenerateErrorHandler(file, pkgName, errCode, catchPattern, scopeHash)
 				if err != nil {
 					return fmt.Errorf("error generating error page %s: %w", fpath, err)
 				}
 				allSources = append(allSources, src)
+				allRegistrations = append(allRegistrations, reg)
 				continue
 			}
 
@@ -154,11 +156,12 @@ func Run(force bool) error {
 				routeSources[key] = fpath
 				routePatterns[key] = true
 			}
-			src, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
+			src, reg, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
 			if err != nil {
 				return fmt.Errorf("error generating %s: %w", fpath, err)
 			}
 			allSources = append(allSources, src)
+			allRegistrations = append(allRegistrations, reg)
 		}
 
 		return nil
@@ -179,6 +182,8 @@ func Run(force bool) error {
 	if err != nil {
 		return fmt.Errorf("static assets: %w", err)
 	}
+
+	settings = loadSettings(genDir)
 
 	src := strings.Join(allSources, "")
 	compSrc := strings.Join(compSrcs, "")
@@ -204,8 +209,24 @@ func Run(force bool) error {
 	compImports = append(compImports, "\"strings\"")
 	compImportLine := strings.Join(compImports, "\n\t")
 
+	var configReg strings.Builder
+	if settings != nil {
+		configReg.WriteString(fmt.Sprintf("\tapp.SetLogging(%t)\n", settings.Logging.Enabled))
+		for _, rd := range settings.Redirects {
+			configReg.WriteString(fmt.Sprintf("\tapp.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
+		}
+		for _, rw := range settings.Rewrites {
+			configReg.WriteString(fmt.Sprintf("\tapp.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
+		}
+	}
+	configReg.WriteString(staticSrc)
+
 	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", routeImportLine)
 	routesOut += src
+	routesOut += "func Register(app *dreego.App) {\n"
+	routesOut += configReg.String()
+	routesOut += strings.Join(allRegistrations, "")
+	routesOut += "}\n"
 
 	if !isUpToDate(filepath.Join(genDir, "routes.go"), routesOut) {
 		if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
@@ -223,8 +244,7 @@ func Run(force bool) error {
 		}
 	}
 
-	settings = loadSettings(genDir)
-	if err := writeDreeGo(genDir, settings, staticSrc); err != nil {
+	if err := touchDreeGo(genDir); err != nil {
 		return fmt.Errorf("error writing gen/dree.go: %w", err)
 	}
 
@@ -235,36 +255,10 @@ func Run(force bool) error {
 	return nil
 }
 
-func writeDreeGo(genDir string, settings *Settings, staticSrc string) error {
-	var buf strings.Builder
-	buf.WriteString("package gen\n\n")
-
-	hasCore := settings != nil || staticSrc != ""
-	if hasCore || staticSrc != "" {
-		buf.WriteString("import (\n")
-		buf.WriteString("\tdreego \"github.com/dreego-stack/dreego/core\"\n")
-		buf.WriteString(")\n\n")
-	}
-
-	buf.WriteString("func init() {\n")
-	if settings != nil {
-		buf.WriteString(fmt.Sprintf("\tdreego.SetLogging(%t)\n", settings.Logging.Enabled))
-		for _, rd := range settings.Redirects {
-			buf.WriteString(fmt.Sprintf("\tdreego.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
-		}
-		for _, rw := range settings.Rewrites {
-			buf.WriteString(fmt.Sprintf("\tdreego.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
-		}
-	}
-	buf.WriteString("}\n")
-	if staticSrc != "" {
-		buf.WriteString("\n")
-		buf.WriteString(staticSrc)
-	}
-
-	out := buf.String()
-	if !isUpToDate(filepath.Join(genDir, "dree.go"), out) {
-		if err := os.WriteFile(filepath.Join(genDir, "dree.go"), []byte(out), 0644); err != nil {
+func touchDreeGo(genDir string) error {
+	dreeGo := "package gen\n"
+	if !isUpToDate(filepath.Join(genDir, "dree.go"), dreeGo) {
+		if err := os.WriteFile(filepath.Join(genDir, "dree.go"), []byte(dreeGo), 0644); err != nil {
 			return err
 		}
 	}
@@ -551,7 +545,6 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 	}
 
 	var buf strings.Builder
-	buf.WriteString("\nfunc init() {\n")
 
 	err = filepath.WalkDir(staticDir, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
@@ -575,7 +568,7 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 		mime := MimeByExt(ext)
 
 		content := []byte(data)
-		buf.WriteString(fmt.Sprintf("\tdreego.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
+		buf.WriteString(fmt.Sprintf("\tapp.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
 		count++
 		return nil
 	})
@@ -584,6 +577,5 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 		return "", 0, err
 	}
 
-	buf.WriteString("}\n")
 	return buf.String(), count, nil
 }

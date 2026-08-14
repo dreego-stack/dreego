@@ -6,18 +6,21 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // validatorFunc validates a single field value and returns an error message
 // (empty string means the value is valid).
 type validatorFunc func(string) string
 
-// customRules holds user-registered validators dispatched by applyRule.
-var customRules = map[string]validatorFunc{}
+var (
+	customRules   = map[string]validatorFunc{}
+	customRulesMu sync.RWMutex
+)
 
-// RegisterRule registers a named custom validator. Registered rules are
-// dispatched by applyRule alongside the built-in required/email/min/max rules.
-func RegisterRule(name string, fn func(string) string) {
+func registerCustomRule(name string, fn func(string) string) {
+	customRulesMu.Lock()
+	defer customRulesMu.Unlock()
 	customRules[name] = fn
 }
 
@@ -138,7 +141,10 @@ func applyRule(rule string, val string) string {
 			return "must be at most " + max + " characters"
 		}
 	default:
-		if fn, ok := customRules[rule]; ok {
+		customRulesMu.RLock()
+		fn, ok := customRules[rule]
+		customRulesMu.RUnlock()
+		if ok {
 			return fn(val)
 		}
 	}

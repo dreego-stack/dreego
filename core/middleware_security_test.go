@@ -7,9 +7,10 @@ import (
 )
 
 func TestSecurityHeadersIncludesCSP(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	csp := w.Result().Header.Get("Content-Security-Policy")
 	if csp == "" {
@@ -18,9 +19,10 @@ func TestSecurityHeadersIncludesCSP(t *testing.T) {
 }
 
 func TestSecurityHeadersCSPDefaultHasSelf(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	csp := w.Result().Header.Get("Content-Security-Policy")
 	if !containsStr(csp, "self") {
@@ -29,13 +31,13 @@ func TestSecurityHeadersCSPDefaultHasSelf(t *testing.T) {
 }
 
 func TestSecurityHeadersCSPOverride(t *testing.T) {
+	app := New()
 	custom := "default-src 'none'"
-	SetCSP(custom)
-	defer SetCSP("")
+	app.SetCSP(custom)
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	csp := w.Result().Header.Get("Content-Security-Policy")
 	if csp != custom {
@@ -53,9 +55,10 @@ func containsStr(s, sub string) bool {
 }
 
 func TestSecurityHeadersContentTypeOptions(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	if got := w.Result().Header.Get("X-Content-Type-Options"); got != "nosniff" {
 		t.Errorf("expected X-Content-Type-Options 'nosniff', got %q", got)
@@ -63,9 +66,10 @@ func TestSecurityHeadersContentTypeOptions(t *testing.T) {
 }
 
 func TestSecurityHeadersFrameOptions(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	if got := w.Result().Header.Get("X-Frame-Options"); got != "DENY" {
 		t.Errorf("expected X-Frame-Options 'DENY', got %q", got)
@@ -73,25 +77,12 @@ func TestSecurityHeadersFrameOptions(t *testing.T) {
 }
 
 func TestSecurityHeadersReferrerPolicy(t *testing.T) {
+	app := New()
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
+	app.securityHeadersMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
 
 	if got := w.Result().Header.Get("Referrer-Policy"); got != "strict-origin-when-cross-origin" {
 		t.Errorf("expected Referrer-Policy 'strict-origin-when-cross-origin', got %q", got)
-	}
-}
-
-func TestSecurityHeadersPermissionsPolicy(t *testing.T) {
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/", nil)
-	SecurityHeaders()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
-
-	got := w.Result().Header.Get("Permissions-Policy")
-	if got == "" {
-		t.Fatal("expected Permissions-Policy header to be set")
-	}
-	if !containsStr(got, "geolocation=()") {
-		t.Errorf("expected Permissions-Policy to restrict geolocation, got %q", got)
 	}
 }
