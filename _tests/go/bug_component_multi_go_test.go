@@ -12,7 +12,7 @@ func TestBugComponentMultiGo(t *testing.T) {
 		"dreego/components/Greet.dreego": `Component Greet (name string)
 <go>greeting := "hello"</go>
 <go>msg := greeting + " world"</go>
-<div>{msg} {name}</div>`,
+<div>{{ msg }} {{ name }}</div>`,
 		"dreego/routes/get.dreego": `<div><@Greet name="Ada"/></div>`,
 	})
 	dreegotest.MustContain(t, gen["dreego/gen/components.go"], `greeting := "hello"`)

@@ -104,7 +104,7 @@ func TestRoutingMultiSegment(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/a/get.dreego": `<go>a:=c.Param("a")</go>
-<div><p>{a}</p></div>`,
+<div><p>{{ a }}</p></div>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -115,8 +115,8 @@ func TestRoutingMultiSegment(t *testing.T) {
 func TestRoutingNestedRoutes(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/about/get.dreego":        `<div><p>about page</p></div>`,
-		"dreego/routes/users/about/get.dreego":  `<div><p>users about page</p></div>`,
+		"dreego/routes/about/get.dreego":       `<div><p>about page</p></div>`,
+		"dreego/routes/users/about/get.dreego": `<div><p>users about page</p></div>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

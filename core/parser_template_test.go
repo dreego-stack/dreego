@@ -11,7 +11,7 @@ func TestParseEachClauseMissingAs(t *testing.T) {
 }
 
 func TestParseEachClauseValid(t *testing.T) {
-	tokens, err := Lex(`<div>{#each items as item}<p>{x}</p>{/each}</div>`)
+	tokens, err := Lex(`<div>{#each items as item}<p>{{ x }}</p>{/each}</div>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestParseElseInsideElse(t *testing.T) {
 }
 
 func TestParseExpressionMultipleFilters(t *testing.T) {
-	tokens, err := Lex(`<div>{x|upper|raw}</div>`)
+	tokens, err := Lex(`<div>{{ x|upper|raw }}</div>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}

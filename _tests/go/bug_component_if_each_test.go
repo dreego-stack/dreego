@@ -10,11 +10,11 @@ func TestBugComponentIfEach(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"dreego/components/List.dreego": `Component List (items []string)
-<ul>
+<div><ul>
 {#each items as item}
-    <li>{item}</li>
+    <li>{{ item }}</li>
 {/each}
-</ul>`,
+</ul></div>`,
 		"dreego/routes/get.dreego": `<go>items := []string{"a", "b"}</go>
 <div><@List items={items}/></div>`,
 	})

@@ -65,17 +65,17 @@ func TestFormatImportEmpty(t *testing.T) {
 }
 
 func TestFormatExpressionsPipeNormalization(t *testing.T) {
-	in := `{ name | upper }`
+	in := `{{ name | upper }}`
 	out := formatExpressions(in)
-	if !strings.Contains(out, "{name|upper}") {
+	if !strings.Contains(out, "{{ name|upper }}") {
 		t.Errorf("formatExpressions must normalize pipe spacing, got: %q", out)
 	}
 }
 
 func TestFormatExpressionsRemovesExtraSpaces(t *testing.T) {
-	in := `{  count   }`
+	in := `{{  count   }}`
 	out := formatExpressions(in)
-	if !strings.Contains(out, "{count}") {
+	if !strings.Contains(out, "{{ count }}") {
 		t.Errorf("formatExpressions must collapse spaces, got: %q", out)
 	}
 }
@@ -124,9 +124,9 @@ func TestFormatSectionsNoSections(t *testing.T) {
 }
 
 func TestFormatFullDocument(t *testing.T) {
-	in := "Component Button (label string = Hi)\n\nimport dreego github.com/dreego-stack/dreego\n\n<div>\n  <p>{ label | upper }</p>\n</div>\n"
+	in := "Component Button (label string = Hi)\n\nimport dreego github.com/dreego-stack/dreego\n\n<div>\n  <p>{{ label | upper }}</p>\n</div>\n"
 	out := Format(in)
-	for _, want := range []string{"Component Button (label string = Hi)", "import dreego github.com/dreego-stack/dreego", "{label|upper}"} {
+	for _, want := range []string{"Component Button (label string = Hi)", "import dreego github.com/dreego-stack/dreego", "{{ label|upper }}"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("Format missing %q, got:\n%s", want, out)
 		}

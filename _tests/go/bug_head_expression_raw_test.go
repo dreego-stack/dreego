@@ -13,9 +13,9 @@ func TestBugHeadExpressionRaw(t *testing.T) {
 type Doc struct{ Title string }
 doc := Doc{Title: "PeerNet Docs"}
 </go>
-<head><title>{doc.Title} — PeerNet Docs</title></head>
-<div><h1>{doc.Title}</h1></div>`,
+<head><title>{{ doc.Title }} — PeerNet Docs</title></head>
+<div><h1>{{ doc.Title }}</h1></div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "{doc.Title}")
+	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "{{ doc.Title }}")
 	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "doc.Title")
 }

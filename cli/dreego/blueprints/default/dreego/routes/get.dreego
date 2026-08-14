@@ -7,7 +7,7 @@
 </go>
 
 <div>
-    <h1>{message}</h1>
+    <h1>{{ message }}</h1>
     <p>Edit <code>dreego/routes/get.dreego</code> and reload.</p>
 </div>
 

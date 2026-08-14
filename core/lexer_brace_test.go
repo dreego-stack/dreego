@@ -61,12 +61,45 @@ func TestScanBraceUnclosedIf(t *testing.T) {
 }
 
 func TestScanBraceUnclosedExpression(t *testing.T) {
-	_, _, err := scanBraceAt("{foo")
+	_, _, err := scanBraceAt("{{ foo")
 	if err == nil {
 		t.Fatal("expected error for unclosed expression, got nil")
 	}
 	if !strings.Contains(err.Error(), "unclosed expression at position 0") {
 		t.Fatalf("expected 'unclosed expression at position 0', got %q", err.Error())
+	}
+}
+
+func TestScanBraceDoubleExpression(t *testing.T) {
+	tok, pos, err := scanBraceAt("{{ user.Name }}")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if tok.Type != TokenExpression {
+		t.Fatalf("expected TokenExpression, got %v", tok.Type)
+	}
+	if tok.Value != "user.Name" {
+		t.Fatalf("expected expression user.Name, got %q", tok.Value)
+	}
+	if pos != len("{{ user.Name }}") {
+		t.Fatalf("expected position %d, got %d", len("{{ user.Name }}"), pos)
+	}
+}
+
+func TestLexSingleBraceIsLiteralText(t *testing.T) {
+	tokens, err := Lex(`<div>{value}</div>`)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	if len(file.Template.Nodes) != 1 || file.Template.Nodes[0].Type != NodeText {
+		t.Fatalf("single braces must remain literal text, got %+v", file.Template.Nodes)
+	}
+	if file.Template.Nodes[0].Content != "{value}" {
+		t.Fatalf("expected literal {value}, got %q", file.Template.Nodes[0].Content)
 	}
 }
 

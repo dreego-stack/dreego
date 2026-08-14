@@ -23,7 +23,7 @@ func Lex(input string) ([]Token, error) {
 				nextCh = '<'
 				break
 			}
-			if !inSection && input[i] == '{' {
+			if !inSection && input[i] == '{' && isTemplateBrace(input[i:]) {
 				nextPos = i
 				nextCh = '{'
 				break

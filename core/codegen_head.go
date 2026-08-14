@@ -9,7 +9,7 @@ func genHead(html string, bufName string) (string, error) {
 	var out strings.Builder
 	rest := html
 	for rest != "" {
-		open := strings.IndexByte(rest, '{')
+		open := strings.Index(rest, "{{")
 		if open < 0 {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, goLiteral(rest)))
 			break
@@ -18,12 +18,13 @@ func genHead(html string, bufName string) (string, error) {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, goLiteral(rest[:open])))
 			rest = rest[open:]
 		}
-		closeIdx := strings.IndexByte(rest, '}')
+		closeIdx := strings.Index(rest[2:], "}}")
 		if closeIdx < 0 {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, goLiteral(rest)))
 			break
 		}
-		expr, filters := parseExpression(rest[1:closeIdx])
+		closeIdx += 2
+		expr, filters := parseExpression(strings.TrimSpace(rest[2:closeIdx]))
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
 		raw := false
 		for _, f := range filters {
@@ -39,7 +40,7 @@ func genHead(html string, bufName string) (string, error) {
 		} else {
 			out.WriteString(fmt.Sprintf("%s.WriteString(html.EscapeString(%s))\n", bufName, code))
 		}
-		rest = rest[closeIdx+1:]
+		rest = rest[closeIdx+2:]
 	}
 	return out.String(), nil
 }

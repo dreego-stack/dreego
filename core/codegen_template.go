@@ -12,7 +12,8 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		if n.Content == "" {
 			return "", nil
 		}
-		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, goLiteral(n.Content)), nil
+		code, _ := compTextSection(n.Content, false)
+		return fmt.Sprintf("%sb.WriteString(%s)\n", indent, code), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false

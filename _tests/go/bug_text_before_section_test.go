@@ -8,12 +8,18 @@ import (
 
 func TestBugTextBeforeSection(t *testing.T) {
 	t.Parallel()
-	gen := dreegotest.Build(t, map[string]string{
+	dreegotest.MustBuildFail(t, map[string]string{
 		"dreego/routes/get.dreego": `<!doctype html>
 <html lang="en">
 <go>msg := "hi"</go>
-<div><p>{msg}</p></div>`,
+<div><p>{{ msg }}</p></div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], `html.EscapeString("msg := \"hi\""`)
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], `msg := "hi"`)
+}
+
+func TestBugRootComponentCallRejected(t *testing.T) {
+	t.Parallel()
+	dreegotest.MustBuildFail(t, map[string]string{
+		"dreego/components/Card.dreego": "Component Card ()\n<div>Card</div>",
+		"dreego/routes/get.dreego":      `<@Card />`,
+	})
 }

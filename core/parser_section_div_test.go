@@ -86,7 +86,7 @@ func TestParseEachInsideSingleQuotedAttrRejected(t *testing.T) {
 }
 
 func TestParseIfOutsideDivAttrStillWorks(t *testing.T) {
-	tokens, err := Lex(`{#if cond}<div class="nav active">x</div>{/if}`)
+	tokens, err := Lex(`<div>{#if cond}<span class="nav active">x</span>{/if}</div>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}

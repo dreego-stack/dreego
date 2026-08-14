@@ -48,9 +48,10 @@ Impact:
 - Routing, conflict detection, testing, and generated registration stay simple.
 - Shared rendering may need a component or Go helper.
 
-Recommendation: Option B. Explicit routes fit Dreego's simplicity goal.
-
-Decision: Pending.
+Decision: Option B. Optional segments are removed. Every method file owns one
+explicit route pattern, which keeps registration, conflicts, and tests
+predictable. Browser-language detection and translated content are a separate
+i18n concern and do not create implicit routes.
 
 ## Decision 2: `g-action` and HTTP method ownership
 

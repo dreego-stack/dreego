@@ -31,15 +31,7 @@ func (p *Parser) Parse() (*File, error) {
 		}
 
 		if tok.Type != TokenTagOpen {
-			if file.Template != nil {
-				return nil, fmt.Errorf("expected section tag, got %s at position %d", tok.Type, tok.Pos)
-			}
-			nodes, err := p.parsePlainTemplate()
-			if err != nil {
-				return nil, err
-			}
-			file.Template = &TemplateSection{Nodes: nodes}
-			continue
+			return nil, fmt.Errorf("expected root section, got %s at position %d", tok.Type, tok.Pos)
 		}
 
 		switch tok.Tag {
@@ -93,19 +85,7 @@ func (p *Parser) Parse() (*File, error) {
 			}
 			file.Style = &StyleSection{Code: strings.TrimSpace(section)}
 		default:
-			if p.templateFromDiv {
-				return nil, fmt.Errorf("unknown section <%s> at position %d", tok.Tag, tok.Pos)
-			}
-			nodes, err := p.parsePlainTemplate()
-			if err != nil {
-				return nil, err
-			}
-			if file.Template == nil {
-				file.Template = &TemplateSection{Nodes: nodes}
-			} else {
-				file.Template.Nodes = append(file.Template.Nodes, nodes...)
-			}
-			continue
+			return nil, fmt.Errorf("expected root section, got <%s> at position %d", tok.Tag, tok.Pos)
 		}
 	}
 
@@ -128,24 +108,6 @@ func (p *Parser) peek() Token {
 		return p.tokens[p.pos+1]
 	}
 	return Token{Type: TokenEOF}
-}
-
-func (p *Parser) parsePlainTemplate() ([]TemplateNode, error) {
-	var nodes []TemplateNode
-	for {
-		tok := p.current()
-		if tok.Type == TokenEOF {
-			return nodes, nil
-		}
-		if tok.Type == TokenTagOpen && isSectionTag(tok.Tag) && tok.Tag != "div" {
-			return nodes, nil
-		}
-		node, err := p.parseTemplateNode("root")
-		if err != nil {
-			return nil, err
-		}
-		nodes = append(nodes, node)
-	}
 }
 
 func isSectionTag(tag string) bool {

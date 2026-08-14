@@ -7,7 +7,7 @@ import "strings"
 // <meta name="description">, the layout's corresponding tag is dropped
 // from the layout head prefix so the merged output carries exactly one.
 // Detection is static (tag structure only), so dynamic tag content like
-// <title>{pageTitle}</title> still triggers dedupe.
+// <title>{{ pageTitle }}</title> still triggers dedupe.
 func dedupeHeadMerge(layoutPrefix, routeHead string) string {
 	if strings.Contains(routeHead, "<title") {
 		layoutPrefix = stripTitleTag(layoutPrefix)

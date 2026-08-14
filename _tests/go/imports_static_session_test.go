@@ -9,8 +9,8 @@ import (
 func TestImportsBasic(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{title}</h2></article></div>",
-		"dreego/routes/get.dreego":      `import "dreego/components/Card"
+		"dreego/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2></article></div>",
+		"dreego/routes/get.dreego": `import "dreego/components/Card"
 <div><@Card title="Imported!"/></div>`,
 	})
 }
@@ -27,7 +27,7 @@ func TestImportsMultiFile(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/components/button/Login.dreego": "Component Login ()\n<div><button>Login</button></div>",
-		"dreego/routes/get.dreego":              `import "dreego/components/button"
+		"dreego/routes/get.dreego": `import "dreego/components/button"
 <div><@Login/></div>`,
 	})
 }
@@ -61,7 +61,7 @@ c.SetSessionVal("key","val")
 c.DelSessionVal("key")
 v:=c.SessionVal("key")
 </go>
-<div><p>{v}</p></div>`,
+<div><p>{{ v }}</p></div>`,
 	})
 }
 
@@ -73,7 +73,7 @@ c.SetSessionVal("a","1")
 c.DestroySession()
 v:=c.SessionVal("a")
 </go>
-<div><p>{v}</p></div>`,
+<div><p>{{ v }}</p></div>`,
 	})
 }
 
@@ -81,7 +81,7 @@ func TestSessionNoStore(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>v:=c.SessionVal("x")</go>
-<div><p>{v}</p></div>`,
+<div><p>{{ v }}</p></div>`,
 	})
 }
 

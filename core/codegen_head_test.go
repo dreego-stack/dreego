@@ -49,15 +49,15 @@ func TestGenTemplNoHeadWithoutLayout(t *testing.T) {
 	}
 }
 
-// genHead must resolve a bare {title} expression to a Go expression and escape
+// genHead must resolve a {{ title }} expression to a Go expression and escape
 // it by default.
 func TestGenHeadExpression(t *testing.T) {
-	out, err := genHead(`<title>{title}</title>`, "b")
+	out, err := genHead(`<title>{{ title }}</title>`, "b")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if !strings.Contains(out, `fmt.Sprintf("%v", title)`) {
-		t.Errorf("genHead must resolve {title} to an expression, got:\n%s", out)
+		t.Errorf("genHead must resolve {{ title }} to an expression, got:\n%s", out)
 	}
 	if !strings.Contains(out, "html.EscapeString") {
 		t.Errorf("genHead must escape by default, got:\n%s", out)
@@ -66,7 +66,7 @@ func TestGenHeadExpression(t *testing.T) {
 
 // genHead with raw + upper filters: upper wraps, raw skips escaping.
 func TestGenHeadFilterRawUpper(t *testing.T) {
-	out, err := genHead(`<title>{title|raw|upper}</title>`, "b")
+	out, err := genHead(`<title>{{ title|raw|upper }}</title>`, "b")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -81,11 +81,11 @@ func TestGenHeadFilterRawUpper(t *testing.T) {
 // genHead must not panic or error on an unclosed brace, and must still emit the
 // remaining literal text.
 func TestGenHeadUnclosedBrace(t *testing.T) {
-	out, err := genHead(`<title>{title</title>`, "b")
+	out, err := genHead(`<title>{{ title</title>`, "b")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "{title</title>") {
+	if !strings.Contains(out, "{{ title</title>") {
 		t.Errorf("genHead unclosed brace must keep the literal remainder, got:\n%s", out)
 	}
 }

@@ -19,9 +19,9 @@ SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, dep
 
 <div>
     <h1>Login</h1>
-    {#if c.Errors("email")}<p class="error">{c.Errors("email")}</p>{/if}
+    {#if c.Errors("email")}<p class="error">{{ c.Errors("email") }}</p>{/if}
     <form g-action="Login" method="post">
-        <input name="email" type="email" value="{c.Old("email")}">
+        <input name="email" type="email" value="{{ c.Old("email") }}">
         <button type="submit">Login</button>
     </form>
 </div>
@@ -52,8 +52,8 @@ Four principles:
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
 ### Template & Components
-- **Template Logic** — `{var}`, `{#if}...{#else}...{/if}`, `{#each items as item}...{#each else}...{/each}`
-- **Template Helpers** — `{$loop.Index}`, `{var|raw}`, `{var|upper}`, `{#verbatim}`
+- **Template Logic** — `{{ value }}`, `{#if}...{#else}...{/if}`, `{#each items as item}...{#each else}...{/each}`
+- **Template Helpers** — `{{ $loop.Index }}`, `{{ value|raw }}`, `{{ value|upper }}`, `{#verbatim}`
 - **Component System** — `dreego/components/`, `<@Card title="x">...<\@Card>`, named slots, scoped CSS
 - **Layout System** — `dreego/layouts/default.dreego` with `{#slot}` + `{#head}`
 - **CSS Scoping** — `data-scope` via source hash, automatically applied

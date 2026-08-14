@@ -10,16 +10,16 @@ import (
 func TestBugErrorPageDoctype(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/404.dreego": `<!doctype html>
-<html lang="en">
-<head>
+		"dreego/routes/404.dreego": `<head>
     <meta charset="utf-8">
     <title>Not Found</title>
 </head>
+<div><!doctype html>
+<html lang="en">
 <body>
     <div><p>Not Found</p></div>
 </body>
-</html>`,
+</html></div>`,
 	})
 	code, body := c.Get(t, "/missing")
 	if code != 404 {

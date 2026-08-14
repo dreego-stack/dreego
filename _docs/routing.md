@@ -31,7 +31,9 @@ dreego/routes/
 |----------------------|--------------------------|-----------------------|
 | `[id]`               | `/users/{id}`            | `c.Param("id")`       |
 | `[...catchall]`      | `/blog/{catchall...}`    | `c.Param("catchall")` |
-| `[[optional]]`       | `/{optional}`            | `c.Param("optional")` |
+
+Optional segments are not supported. Define each route explicitly so one
+method file always owns one route pattern.
 
 ## Route Groups `(name)/`
 
@@ -83,7 +85,7 @@ A single route can serve multiple content types via `<go type="...">` blocks:
 </go>
 
 <div>
-    <h1>{user.Name}</h1>
+    <h1>{{ user.Name }}</h1>
 </div>
 ```
 

@@ -23,7 +23,7 @@ Component Card (title string)
 
 <div>
     <article class="card">
-        <h2>{title}</h2>
+        <h2>{{ title }}</h2>
         <div>{#slot}</div>
     </article>
 </div>
@@ -34,7 +34,16 @@ Component Card (title string)
 
 ## Usage
 
-Components are automatically discovered from `dreego/components/`. No `import` needed.
+Component declarations and imports are header directives. They are the only
+content allowed outside the five root sections: `<go>`, `<head>`, `<div>`,
+`<style>`, and `<script>`. Free text, HTML, and component calls at the root are
+generation errors.
+
+```dreego
+import Card "components/Card.dreego"
+
+<div><@Card title="Hello" /></div>
+```
 
 **Self-closing:**
 
@@ -54,26 +63,28 @@ Components are automatically discovered from `dreego/components/`. No `import` n
 
 ## Attribute Props
 
-Props can be passed inside any HTML attribute, both in the component call and in the component body. A `{prop}` (or `{expr}`) placeholder inside a quoted attribute value is resolved to the Go expression.
+Dynamic text and HTML attribute values use `{{ expression }}`. Component props
+use `{expression}` without quotes so the generated Go value keeps its type.
 
 **In the call:**
 
 ```html
-<div><@Card link="mailto:{email}"/></div>
+<div><@Card count={count} /></div>
 ```
 
 **In the component body:**
 
 ```html
 Component Link (url string)
-<a href="{url}">{#slot}</a>
+<div><a href="{{ url }}">{#slot}</a></div>
 ```
 
 ```html
 <div><@Link url="https://dreego.dev">Home</@Link></div>
 ```
 
-The attribute expression is HTML-escaped before emission, so `href="{url}"` with untrusted `url` input is safe.
+The HTML attribute expression is escaped before emission, so
+`href="{{ url }}"` with untrusted input is safe.
 
 ## Rules
 
@@ -83,7 +94,8 @@ The attribute expression is HTML-escaped before emission, so `href="{url}"` with
 4. **Scoped Styles** — `data-scope` per component. No leak to parent.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.
-7. **Attribute Props** — `{prop}` inside a quoted attribute value is resolved and escaped.
+7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value.
+8. **Typed props** — `prop={expression}` passes a Go value without converting it to a string.
 
 ## Scoped CSS
 
@@ -112,7 +124,7 @@ Component Card (title string)
 <div>
     <article>
         {#slot header}{/slot}
-        <h2>{title}</h2>
+        <h2>{{ title }}</h2>
         {#slot}
     </article>
 </div>
@@ -120,10 +132,14 @@ Component Card (title string)
 
 **Route:**
 ```html
+import Card "components/Card.dreego"
+
+<div>
 <@Card title="Hi">
     {#slot header}<strong>HEADER</strong>{/slot}
     <p>Default content here</p>
 </@Card>
+</div>
 ```
 
 - `{#slot header}{/slot}` — Placeholder in component (empty body)
@@ -162,7 +178,7 @@ Component Greeting (name string)
     greeting := "Hello, " + ctx.Query("lang")
 </go>
 <div>
-    <h1>{greeting}, {name}!</h1>
+    <h1>{{ greeting }}, {{ name }}!</h1>
 </div>
 ```
 

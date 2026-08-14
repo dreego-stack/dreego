@@ -101,10 +101,12 @@ go get github.com/dreego-stack/dreego-community-auth@v0.1.0
 | `about/get.dreego`                | GET    | `/about`                 | —                     |
 | `users/[id]/get.dreego`           | GET    | `/users/{id}`            | `c.Param("id")`       |
 | `blog/[...catchall]/get.dreego`   | GET    | `/blog/{catchall...}`    | `c.Param("catchall")` |
-| `docs/[[lang]]/get.dreego`        | GET    | `/docs/{lang}` (optional)| `c.Param("lang")`     |
 | `(auth)/login/get.dreego`         | GET    | `/login`                 | —                     |
 
-Priority: Static > Dynamic > Optional > Catch-All
+Optional segments are deliberately unsupported. Each method file owns one
+explicit route pattern.
+
+Priority: Static > Dynamic > Catch-All
 
 Conflict detection: `dreego generate` throws an error if two routes claim the same pattern:
 ```
@@ -267,5 +269,5 @@ Configurable via `dreego.config.json`:
 - Plugin components are located under `<plugin>/components/` (convention)
 - `dreego generate` finds them via `go list` + filesystem
 - User components shadow plugin components (explicit namespace fallback)
-- `[...catchall]`, `[[optional]]`, `(group)/` are added in lexer/parser
+- `[...catchall]` and `(group)/` are added in lexer/parser
 - Duplicate route detection throws build errors

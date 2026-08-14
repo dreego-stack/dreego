@@ -21,9 +21,17 @@ A `.dreego` file is divided into **5 clearly separated sections**:
 
 1. **`<head>`** — Component-specific meta tags, scripts, CSS links
 2. **`<go>`** — Server-side Go code (data fetching, logic)
-3. **Template (HTML)** — The markup with Dreego template syntax
+3. **`<div>`** — The one template root containing HTML and component calls
 4. **`<script>`** — Client-side JavaScript (V1: Vanilla JS)
 5. **`<style>`** — Scoped CSS (automatically with hashes)
+
+Only these five section tags may appear at the file root. `Component` and
+`import` header directives may appear before them. Free text, HTML elements,
+and `<@Component>` calls outside `<div>` are generation errors.
+
+Escaped output uses `{{ expression }}`. Control flow keeps its distinct
+`{#if}`, `{#each}`, and slot syntax. Typed component props use unquoted Go
+expressions such as `<@Card count={count} />`.
 
 ## Rationale
 
@@ -46,7 +54,7 @@ The `<head>` tag is a core innovation for plugins and performance:
 - The transpiler must be able to parse and separate the 5 sections
 - Each section is processed differently:
   - `<go>` → Go code (server)
-  - Template → Go code (HTML generation)
+  - `<div>` → Go code (HTML generation)
   - `<style>` → Collected, scoped, into CSS file
   - `<script>` → Extracted, embedded in HTML
   - `<head>` → Dynamically injected into the final HTML head
