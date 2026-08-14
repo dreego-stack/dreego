@@ -8,7 +8,7 @@ the git tag is the single source of truth.
 
 Changelog format:
 - version=none: prepend changelog lines at the very top of the file
-- version=patch|minor|major: prepend a version block (blank line,
+- version=patch: prepend a version block (blank line,
   '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog lines.
 
 Prints 'new=vX.Y.Z' or 'new=none' on stdout for the workflow to consume.
@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PR_MD = ROOT / "pr.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
-VALID_VERSIONS = ("none", "patch", "minor", "major")
+VALID_VERSIONS = ("none", "patch")
 
 
 def fail(msg):
@@ -57,7 +57,7 @@ def parse_pr_md(text):
         if line.startswith("version:"):
             version = line.split(":", 1)[1].strip()
     if version is None:
-        fail("pr.md frontmatter must contain 'version: none|patch|minor|major'")
+        fail("pr.md frontmatter must contain 'version: none|patch' (minor/major are blocked in the v0.0.x phase)")
     if version not in VALID_VERSIONS:
         fail(f"pr.md version must be one of {VALID_VERSIONS}, got '{version}'")
     lines = [l.strip() for l in body.splitlines() if l.strip()]
@@ -74,13 +74,6 @@ def next_version(current, bump):
     major, minor, patch = (int(g) for g in m.groups())
     if bump == "patch":
         patch += 1
-    elif bump == "minor":
-        minor += 1
-        patch = 0
-    elif bump == "major":
-        major += 1
-        minor = 0
-        patch = 0
     return f"v{major}.{minor}.{patch}"
 
 

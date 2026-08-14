@@ -42,6 +42,10 @@ func (p *Parser) Parse() (*File, error) {
 			}
 			section.Method = "GET"
 			section.ContentType = parseGoAttrs(tok.Attr)
+			if m := parseGoMethod(tok.Attr); m != "" {
+				section.Method = m
+				section.MethodExplicit = true
+			}
 			file.Go = append(file.Go, *section)
 		case "div":
 			section, err := p.parseDivSection()
@@ -126,6 +130,21 @@ func parseGoAttrs(attrs string) string {
 		if strings.HasPrefix(part, "type=") {
 			v := strings.TrimPrefix(part, "type=")
 			return strings.Trim(v, "\"'")
+		}
+	}
+	return ""
+}
+
+// parseGoMethod extracts an explicit method= attribute from a <go> section's
+// attributes. It returns "" when no method attribute is present.
+func parseGoMethod(attrs string) string {
+	if attrs == "" {
+		return ""
+	}
+	for _, part := range strings.Fields(attrs) {
+		if strings.HasPrefix(part, "method=") {
+			v := strings.Trim(strings.TrimPrefix(part, "method="), "\"'")
+			return strings.ToUpper(v)
 		}
 	}
 	return ""

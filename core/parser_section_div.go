@@ -69,7 +69,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 	case TokenExpression:
 		p.advance()
 		expr, filters := parseExpression(tok.Value)
-		return TemplateNode{Type: NodeExpression, Content: expr, Filters: filters}, nil
+		return TemplateNode{Type: NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
 	case TokenIfOpen:
 		cond := tok.Value
 		p.advance()

@@ -42,3 +42,6 @@ smd.toml
 
 # Git worktrees
 .worktrees/
+
+# Python
+__pycache__/

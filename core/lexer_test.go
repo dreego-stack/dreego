@@ -26,12 +26,12 @@ func TestLexUnexpectedClosingTag(t *testing.T) {
 }
 
 func TestLexMismatchedClosingTag(t *testing.T) {
-	_, err := Lex("<go>...</style>")
+	_, err := Lex("<head>...</style>")
 	if err == nil {
 		t.Fatal("expected error for mismatched closing tag, got nil")
 	}
-	if !strings.Contains(err.Error(), "mismatched closing tag </style>, expected </go>") {
-		t.Fatalf("expected 'mismatched closing tag </style>, expected </go>', got %q", err.Error())
+	if !strings.Contains(err.Error(), "mismatched closing tag </style>, expected </head>") {
+		t.Fatalf("expected 'mismatched closing tag </style>, expected </head>', got %q", err.Error())
 	}
 }
 
@@ -140,11 +140,9 @@ func TestScanComponentUnclosed(t *testing.T) {
 	}
 }
 
-// Item 9 (v0.0.25-feedback2): the lexer has no Go-string awareness — <...>
-// inside a <go> section lexes as tag tokens, NOT as string content. This
-// documents the current (deliberately kept) behavior: the fix lives in
-// parseGoSection (option b, raw reconstruction), not in the lexer.
-func TestLexGoSectionLtLexesAsTags(t *testing.T) {
+// A <go> section body is raw text: <...> inside it must NOT lex as tags, so
+// Go comparisons and strings survive verbatim.
+func TestLexGoSectionLtIsRawText(t *testing.T) {
 	tokens, err := Lex(`<go>msg := "TO: <HASH>"</go>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
@@ -158,7 +156,7 @@ func TestLexGoSectionLtLexesAsTags(t *testing.T) {
 			kinds = append(kinds, tok.Type.String()+"("+tok.Tag+")")
 		}
 	}
-	want := "TagOpen(go), TagOpen(HASH), TagClose(go)"
+	want := "TagOpen(go), TagClose(go)"
 	if strings.Join(kinds, ", ") != want {
 		t.Fatalf("expected %q, got %q", want, strings.Join(kinds, ", "))
 	}

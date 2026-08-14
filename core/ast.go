@@ -24,13 +24,15 @@ type TemplateNode struct {
 	Attrs        string
 	SelfClose    bool
 	Filters      []string
+	Pos          int
 }
 
 type GoSection struct {
-	Code        string
-	Method      string
-	ContentType string
-	Action      string
+	Code           string
+	Method         string
+	MethodExplicit bool
+	ContentType    string
+	Action         string
 }
 
 type File struct {

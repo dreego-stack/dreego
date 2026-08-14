@@ -155,7 +155,8 @@ All three targets share the same `EvalTemplate` core — only context factory an
 func indexSSR(w http.ResponseWriter, r *http.Request) {
     ctx := dreego.NewSSRContext(r, w)
     user, err := loadUser(ctx)
-    ctx.Render("index", map[string]any{"user": user})
+    _ = user
+    _ = err
 }
 ```
 

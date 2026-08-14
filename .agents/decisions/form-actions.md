@@ -71,7 +71,7 @@ No Dreego handling. The developer is responsible themselves.
 ```
 CSRF Check → r.ParseForm() → Struct Mapping → validate.Struct(form)
   → c.SaveOld(form) + c.SaveErrors(err) → Handler Call
-  → c.Redirect() | c.Render() | error
+  → c.Redirect() | error
 ```
 
 ## Naming
@@ -84,10 +84,9 @@ CSRF Check → r.ParseForm() → Struct Mapping → validate.Struct(form)
 
 Handler MUST do one of:
 - `return c.Redirect(url)` — PRG pattern
-- `return c.Render(template, data)` — Render template
 - `return err` — Error page or flash+redirect
 
-`return nil` without redirect/render is not allowed.
+`return nil` without redirect is not allowed.
 
 ## Progressive Enhancement
 

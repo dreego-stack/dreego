@@ -117,7 +117,7 @@ Every change lands via a pull request. The PR must contain a `pr.md` (copy `pr.m
 
 ```yaml
 ---
-version: patch        # none | patch | minor | major
+version: patch
 ---
 
 - Bug: fix X
@@ -126,8 +126,10 @@ version: patch        # none | patch | minor | major
 
 - `version: none` — no version bump, changelog lines only (e.g. dependabot updates)
 - `version: patch` — `0.0.x` +1
-- `version: minor` — `0.x.0` +1
-- `version: major` — `x.0.0` +1
+
+NEVER use `version: minor` or `version: major` while in the v0.0.x phase —
+a minor bump would tag v0.1.0 before v0.1 stabilization. Only `none` and
+`patch` are allowed until the v0.1 release.
 
 ## Todo Workflow
 

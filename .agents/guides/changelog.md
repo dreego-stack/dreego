@@ -15,7 +15,7 @@ Keep CHANGELOG.md up to date with every meaningful change.
 ## When to use
 
 - Every change lands via a pull request with a `pr.md` (see AGENTS.md Commit Convention)
-- The `pr.md` frontmatter declares the version bump: `none | patch | minor | major`
+- The `pr.md` frontmatter declares the version bump: `none | patch` — `minor` and `major` are blocked until the v0.1 release
 - The changelog lines in `pr.md` become the CHANGELOG entry
 
 ## Format

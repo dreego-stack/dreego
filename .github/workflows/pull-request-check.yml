@@ -39,8 +39,8 @@ jobs:
           for line in fm.strip().splitlines():
               if line.strip().startswith('version:'):
                   version = line.split(':', 1)[1].strip()
-          if version not in ('none', 'patch', 'minor', 'major'):
-              print(f"error: pr.md version must be none|patch|minor|major, got '{version}'")
+          if version not in ('none', 'patch'):
+              print(f"error: pr.md version must be none|patch (minor/major blocked in v0.0.x phase), got '{version}'")
               sys.exit(1)
           lines = [l.strip() for l in m.group(2).splitlines() if l.strip()]
           if not lines:

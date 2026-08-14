@@ -31,6 +31,7 @@ func Run(force bool) error {
 	var genDir string
 
 	routePatterns := map[string]bool{}
+	routeSources := map[string]string{}
 
 	_, compSrcs, err := scanComponents()
 	if err != nil {
@@ -82,6 +83,9 @@ func Run(force bool) error {
 
 		found++
 		pattern := buildPattern(path)
+		if seg := doubleBracketSegment(path); seg != "" {
+			return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, path)
+		}
 		routePatterns["GET"+" "+pattern] = true
 		pageName := buildPageName(path)
 
@@ -120,7 +124,9 @@ func Run(force bool) error {
 				file.Go = []GoSection{{Method: method}}
 			}
 			for i := range file.Go {
-				file.Go[i].Method = method
+				if !file.Go[i].MethodExplicit {
+					file.Go[i].Method = method
+				}
 			}
 
 			scopeHash := hex.EncodeToString(h[:])[:12]
@@ -140,8 +146,13 @@ func Run(force bool) error {
 				continue
 			}
 
-			for _, g := range file.Go {
-				routePatterns[g.Method+" "+pattern] = true
+			for _, m := range fileRegisteredMethods(file) {
+				key := m + " " + pattern
+				if prev, dup := routeSources[key]; dup {
+					return fmt.Errorf("duplicate route %s %s: %s and %s", m, pattern, prev, fpath)
+				}
+				routeSources[key] = fpath
+				routePatterns[key] = true
 			}
 			src, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
 			if err != nil {
@@ -351,6 +362,9 @@ func errorCatchPattern(dirPattern string) string {
 
 func cleanSegment(seg string) string {
 	for {
+		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
+			return ""
+		}
 		if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
 			seg = seg[1 : len(seg)-1]
 			continue
@@ -369,6 +383,9 @@ func cleanSegment(seg string) string {
 
 func patternSegment(seg string) string {
 	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
+		return ""
+	}
+	if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
 		return ""
 	}
 	wrapped := false
@@ -391,7 +408,50 @@ func patternSegment(seg string) string {
 	if seg == "" {
 		return ""
 	}
+	if strings.HasPrefix(seg, "...") {
+		return "{" + strings.TrimPrefix(seg, "...") + "...}"
+	}
 	return "{" + seg + "}"
+}
+
+// fileRegisteredMethods returns the HTTP methods GenerateMethodHandler will
+// register for a route file. It mirrors the codegen decision: a form action
+// registers GET plus POST only when the action has both a form struct and a
+// handler function; otherwise exactly one method is registered (the first
+// non-GET method, or GET).
+func fileRegisteredMethods(file *File) []string {
+	if len(file.FormActions) > 0 {
+		action := file.FormActions[0]
+		if findFormStruct(file.Go, action) != "" && findFormHandler(file.Go, action) {
+			return []string{"GET", "POST"}
+		}
+		return []string{"GET"}
+	}
+	for _, g := range file.Go {
+		if g.Method != "GET" {
+			return []string{g.Method}
+		}
+	}
+	return []string{"GET"}
+}
+
+// doubleBracketSegment returns the name of the first double-bracket segment in
+// a route directory path, or "" if the path contains none. Double brackets
+// were the historical optional-segment syntax; optional segments are not
+// supported, so generation rejects them with a source-aware diagnostic.
+func doubleBracketSegment(path string) string {
+	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
+	if idx := strings.Index(rel, "routes/"); idx >= 0 {
+		rel = rel[idx+len("routes/"):]
+	} else if strings.HasSuffix(rel, "/routes") || rel == "routes" {
+		rel = ""
+	}
+	for _, seg := range strings.Split(rel, "/") {
+		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
+			return seg
+		}
+	}
+	return ""
 }
 
 func findLayout() (*File, error) {

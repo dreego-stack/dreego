@@ -1,3 +1,4 @@
+# version: none | patch ONLY — never minor/major in v0.0.x phase
 ---
 version: patch
 ---

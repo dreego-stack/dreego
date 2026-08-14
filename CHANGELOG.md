@@ -3,6 +3,26 @@
 
 - Breaking: remove EventBus, Queue, KVStore, Storage from core (plugins will own these APIs)
 
+## v0.0.40 - 2026-08-14
+
+- Bug: catch-all directories generate invalid Go patterns
+- Bug: double-bracket optional segments silently become required
+- Bug: duplicate route definitions silently override instead of failing
+- Bug: method attributes on go sections are ignored
+
+## v0.0.39 - 2026-08-14
+
+- Breaking: remove dead Context.Render(name string, data any) stub and ErrRender from core
+- Docs: replace c.Render() references in forms and form-actions docs
+
+## v0.0.38 - 2026-08-14
+
+- Bug: lexer treats < in Go blocks, > in quoted attributes, and < > in script/style as tags
+- Bug: || in template expressions is misparsed as filter pipeline
+- Bug: unknown template filters are silently ignored instead of failing
+
+- Chore: block minor/major version bumps in the v0.0.x phase (AGENTS.md, release-prep.py, CI, pr.md.example)
+
 ## v0.0.37 - 2026-08-14
 
 - Docs: define the SSR-first roadmap and migrate open work to conflict-resistant todo item files

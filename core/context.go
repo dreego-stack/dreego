@@ -10,7 +10,6 @@ type Context interface {
 	gcontext.Context
 	Param(name string) string
 	Data(key string) any
-	Render(name string, data any) error
 	Errors(field string) string
 	Old(field string) string
 	Redirect(url string, code int) error
@@ -22,7 +21,6 @@ type Context interface {
 }
 
 var ErrRedirect = errors.New("redirect")
-var ErrRender = errors.New("render")
 
 type SSRContext struct {
 	gcontext.Context
@@ -129,10 +127,6 @@ func (c *SSRContext) CSRFToken() string {
 
 func (c *SSRContext) RequestID() string {
 	return RequestIDFromCtx(c.Context)
-}
-
-func (c *SSRContext) Render(name string, data any) error {
-	return nil
 }
 
 func (c *SSRContext) Errors(field string) string {

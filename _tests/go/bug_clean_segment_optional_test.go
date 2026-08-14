@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/dreego-stack/dreego/dreegotest"
@@ -8,9 +9,17 @@ import (
 
 func TestBugCleanSegmentOptional(t *testing.T) {
 	t.Parallel()
-	gen := dreegotest.Build(t, map[string]string{
+	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/[[opt]]/get.dreego": `<div>optional</div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "[opt]")
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], `dreego.Register("GET", "/{opt}",`)
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err == nil {
+		t.Fatalf("expected generate failure for optional segment, got success: %s", out)
+	}
+	if !strings.Contains(out, "[[opt]]") {
+		t.Fatalf("error must name the optional segment, got: %s", out)
+	}
+	if !strings.Contains(out, "dreego/routes/[[opt]]") {
+		t.Fatalf("error must include the source path, got: %s", out)
+	}
 }
