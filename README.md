@@ -39,7 +39,7 @@ Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` file
 
 Four principles:
 1. **SSR-First** — Pages render server-side. HTMX/Alpine.js for progressive enhancement, not required.
-2. **File-Based** — `dreego/routes/login/get.dreego` becomes `GET /login`. Directories define the URL; each method has its own focused file.
+2. **File-Based** — The current pre-v0.1 router maps `dreego/routes/login/get.dreego` to `GET /login`. The accepted v0.1 migration will use one route file per URL with method-specific sections.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessible by Default** — CLI output, diagnostics, blueprints, and official components are designed for screen readers, keyboards, and semantic HTML. Applications still verify their own content and conformance.
 

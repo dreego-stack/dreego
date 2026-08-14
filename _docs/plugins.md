@@ -23,11 +23,14 @@ Each plugin repository owns its `go.mod`, dependencies, versions, tests, and CI.
 
 Runtime exceptions remain narrow. A streaming or upload plugin may adjust limits for its own route or route group, but it must not silently weaken the defaults of unrelated routes.
 
-## Plugin Interface (pre-v1, provisional)
+## Current experimental API
 
-Core currently defines a single experimental `Plugin` interface. Plugins import Core, satisfy the interface, and register themselves with the runtime via `dreego.UsePlugin(p)`. Core never imports a plugin.
+The released pre-v0.1 implementation currently defines a global `Plugin`
+interface and `dreego.UsePlugin`. This section describes existing code only so
+current experiments can be understood. It is deprecated design, is not a
+compatibility promise, and will be removed by the App migration before v0.1.
 
-The contract may change before v1. Real external plugins developed after v0.1 will be used to validate lifecycle, assets, routes, middleware, and whether smaller capability interfaces should replace the current all-in-one interface.
+Do not build a new plugin against this interface expecting migration support.
 
 ```go
 // Defined in core
@@ -134,6 +137,25 @@ func (a *Auth) RegisterRoutes() {
 ```
 
 Because `dreego.Register` is idempotent (re-registering a `method`+`pattern` replaces the handler), a later-registered plugin can override a route deterministically.
+
+## Planned v0.1 registration
+
+The accepted replacement uses an explicit function bound to an App and typed
+plugin-owned options:
+
+```go
+if err := auth.Register(app, auth.Options{
+    LoginPath:  "/login",
+    CookieName: "session",
+}); err != nil {
+    log.Fatal(err)
+}
+```
+
+There is no central stable `Plugin` interface before v1. Registration order is
+source order, registration errors remain ordinary Go errors, and plugins add
+only the App behavior they need. Shared asset or lifecycle capabilities are
+introduced only after real external plugins prove a small common contract.
 
 ## Layout
 

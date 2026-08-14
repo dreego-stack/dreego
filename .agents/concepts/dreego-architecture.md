@@ -116,7 +116,7 @@ dreego/
 
 - [x] Transpiler: `.dreego` → `.go`
 - [x] 3 Sections: `<go>`, Template, `<style>`
-- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, and `{{ expression }}`
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
 - [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
 - [x] Static Assets: `dreego/static/` → inline handler + MIME types + collision check
@@ -144,7 +144,7 @@ Reusable `.dreego` components with scoped styles:
 ```
 dreego/components/Card.dreego:
   Component Card (title string)
-  <div><h2>{title}</h2>{#slot}</div>
+  <div><h2>{{ title }}</h2>{#slot}</div>
 
 dreego/routes/get.dreego:
   <div><@Card title="Hello">content</@Card></div>

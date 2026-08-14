@@ -21,9 +21,11 @@ type Store interface {
 
 Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session-redis` (planned).
 
-### Plugin Interface
+### Current Plugin Interface
 
-The plugin contract is provisional until v1. The current implementation is intentionally documented as it exists, not as a compatibility promise.
+The following fat interface exists in the released pre-v0.1 implementation.
+It is deprecated design and will be removed by the App migration; it is not a
+compatibility promise for plugin authors.
 
 ```go
 type Plugin interface {
@@ -36,9 +38,11 @@ type Plugin interface {
 }
 ```
 
-Before v1, real plugins will determine whether this all-in-one interface should become a set of smaller optional capability interfaces.
+The accepted v0.1 direction has no required central plugin interface. A plugin
+instead exposes `Register(app, typedOptions) error`. Only real plugins may later
+justify small shared capability interfaces, and compatibility begins at v1.
 
-### Middleware Hooks (Plugin)
+### Proposed Middleware Hooks (superseded)
 
 ```go
 type MiddlewareProvider interface {
@@ -46,9 +50,10 @@ type MiddlewareProvider interface {
 }
 ```
 
-Plugins that inject HTTP middleware (CSRF, auth, rate-limiting, etc.).
+This interface was exploratory and is not the accepted v0.1 contract. Plugins
+register middleware directly on their owning App.
 
-### Route Hooks (Plugin)
+### Proposed Route Hooks (superseded)
 
 ```go
 type RouteProvider interface {
@@ -56,7 +61,8 @@ type RouteProvider interface {
 }
 ```
 
-Plugins that register their own URL paths (`/admin/*`, `/api/auth/*`).
+This interface was exploratory and is not the accepted v0.1 contract. Plugins
+register routes directly on their owning App.
 
 ### Event Bus Interface
 

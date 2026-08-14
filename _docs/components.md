@@ -83,8 +83,11 @@ Component Link (url string)
 <div><@Link url="https://dreego.dev">Home</@Link></div>
 ```
 
-The HTML attribute expression is escaped before emission, so
-`href="{{ url }}"` with untrusted input is safe.
+The HTML attribute expression is escaped before emission. Escaping prevents
+attribute injection, but it does not make an arbitrary URL trustworthy. Before
+using untrusted input in `href`, `src`, or similar attributes, parse the URL and
+allow only the schemes and forms the application expects, such as relative URLs
+and `https`. Reject dangerous schemes such as `javascript`.
 
 ## Rules
 

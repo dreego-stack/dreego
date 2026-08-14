@@ -10,3 +10,5 @@ version: patch
 - Docs: require named component props, lexical slots, and generation-time validation
 - Docs: define strong generated types with explicit dynamic HTTP boundaries
 - Docs: choose explicit App-bound plugin registration functions before v1
+- Security: clarify that escaped URL attributes still require scheme validation
+- Docs: distinguish released behavior from accepted v0.1 architecture

@@ -1,5 +1,11 @@
 # File-based Routing
 
+> **Current implementation:** This page documents the released pre-v0.1
+> filename-based router. The accepted v0.1 migration will use one route file per
+> URL, with flat files or `+page.dreego` and method-specific `<go>` and `<div>`
+> sections. That target is not available until `routing-correctness.1` and the
+> App migration are implemented.
+
 Directories below `dreego/routes/` define the URL path. The filename defines
 the HTTP method. Keeping one method per file prevents a route file from growing
 into a combined implementation for every operation on the same URL.
