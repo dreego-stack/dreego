@@ -1,4 +1,3 @@
-
 ---
 type: Concept
 title: "Form Actions — Concept"
@@ -22,7 +21,7 @@ Form Actions replace manual `r.ParseForm()` + `r.FormValue()` with declarative f
     <button>Login</button>
 
     {#if errors.general}
-        <div class="error">{errors.general}</div>
+        <div class="error">{{ errors.general }}</div>
     {/if}
 </form>
 
@@ -100,13 +99,13 @@ All three modes work with the SAME form tag. HTMX and Alpine only upgrade the ex
 
 ```html
 {#if errors.email}
-    <p class="error">{errors.email}</p>
+    <p class="error">{{ errors.email }}</p>
 {/if}
 
-<input name="email" value="{old.email}" />
+<input name="email" value="{{ old.email }}" />
 
 {#if flash.success}
-    <div class="success">{flash.success}</div>
+    <div class="success">{{ flash.success }}</div>
 {/if}
 ```
 
@@ -117,12 +116,12 @@ All three modes work with the SAME form tag. HTMX and Alpine only upgrade the ex
 ## Security
 
 ### XSS (Output Encoding)
-All template variables `{variable}` are HTML-escaped:
-- `{user.Name}` → `&lt;script&gt;` becomes `&amp;lt;script&amp;gt;`
+All template expressions `{{ expression }}` are HTML-escaped:
+- `{{ user.Name }}` renders `<script>` as escaped text rather than markup
 - Prevents Stored XSS: malicious code in the DB is neutralized on display
 - Primeagen's approach: escape on DISPLAY, don't filter on storage
 
-Only `{variable|raw}` allows unescaped HTML — explicit, rare, deliberately risky.
+Only `{{ expression|raw }}` allows unescaped HTML — explicit, rare, deliberately risky.
 
 ### Auto-Escaping in Core
 Not a plugin — MUST be built into the template renderer. Otherwise every Dreego app is insecure.
