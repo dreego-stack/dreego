@@ -1,4 +1,8 @@
 
+## [Unreleased]
+
+- Breaking: remove EventBus, Queue, KVStore, Storage from core (plugins will own these APIs)
+
 ## v0.0.37 - 2026-08-14
 
 - Docs: define the SSR-first roadmap and migrate open work to conflict-resistant todo item files

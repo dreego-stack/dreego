@@ -6,7 +6,7 @@ Official plugins live in separate repos under `github.com/dreego-stack/`. Each p
 
 ## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
 
-The EventBus, Queue, KVStore, and Storage sections below describe the current pre-v0.1 implementation. They are scheduled for removal from core because optional infrastructure contracts must first be proven by real plugins. The session Store remains a core web contract.
+The session Store is the only remaining core infrastructure contract. EventBus, Queue, KVStore, and Storage were removed from core before v0.1; optional infrastructure contracts must first be proven by real plugins, which own their APIs in their own repositories.
 
 ### session.Store
 
@@ -63,105 +63,6 @@ type RouteProvider interface {
 
 This interface was exploratory and is not the accepted v0.1 contract. Plugins
 register routes directly on their owning App.
-
-### Event Bus Interface
-
-Typed pub/sub contract. Implementations may back it with in-memory storage,
-Redis, NATS or similar; core code stays transport-agnostic.
-
-```go
-type EventBus[T any] interface {
-    Publish(ctx context.Context, event T) error
-    Subscribe(ctx context.Context, handler func(T)) (Subscription, error)
-    Unsubscribe(sub Subscription)
-}
-```
-
-`Subscription` is an opaque handle identifying a registered handler:
-
-```go
-type Subscription interface {
-    ID() uint64
-}
-```
-
-Built-in: `NewInMemoryBus[T]()`. Plugins: `github.com/dreego-stack/dreego/plugins/eventbus-redis`, `github.com/dreego-stack/dreego/plugins/eventbus-nats` (planned).
-
-### Queue Interface
-
-Background job queue contract, like `database/sql`: core defines the interface,
-plugins implement it (Redis, NATS, in-memory, ...). Interface only — no
-implementation ships in core. A `Job` is an opaque unit of work: `ID` is unique
-per caller, `Name` routes the job to the worker registered for it, `Payload`
-carries opaque bytes. `Dispatch` enqueues for immediate execution,
-`DispatchAfter` for execution after a delay, `DispatchBatch` enqueues all jobs
-atomically (all-or-nothing). `Worker` registers a handler for a job name
-(registering a name twice is an error); `Use` appends job middlewares that wrap
-handlers FIFO (first registered = outermost) and apply to all workers
-registered after `Use`. Handlers may enqueue follow-up jobs (chaining) without
-deadlocking; all methods respect ctx cancellation.
-
-```go
-type JobHandler func(ctx context.Context, job Job) error
-
-type JobMiddleware func(next JobHandler) JobHandler
-
-type Job struct {
-    ID      string
-    Name    string
-    Payload []byte
-}
-
-type Queue interface {
-    Dispatch(ctx context.Context, job Job) error
-    DispatchAfter(ctx context.Context, job Job, delay time.Duration) error
-    DispatchBatch(ctx context.Context, jobs []Job) error
-    Worker(name string, handler JobHandler) error
-    Use(middlewares ...JobMiddleware)
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/jobs-redis`, `github.com/dreego-stack/dreego/plugins/jobs-memory`.
-
-### Key-Value Store Interface
-
-Like `database/sql`: core defines the contract, plugins provide the implementation (Redis, Ristretto, in-memory). Distinct from `Storage` (blobs) — KV holds small values with an optional TTL.
-
-```go
-type KVStore interface {
-    Get(ctx context.Context, key string) ([]byte, error)
-    Set(ctx context.Context, key string, val []byte, ttl time.Duration) error
-    Delete(ctx context.Context, key string) error
-    Expire(ctx context.Context, key string, ttl time.Duration) error
-}
-```
-
-Semantics:
-- Get returns the value stored under key; an error if key does not exist or ttl expired.
-- Set stores val under key with ttl; ttl <= 0 means no expiry (keep forever).
-- Delete removes key; idempotent (no error for missing key).
-- Expire sets/adjusts the ttl on an existing key; error if key does not exist.
-- All methods respect ctx cancellation.
-
-Plugins: `github.com/dreego-stack/dreego/plugins/kv-redis`, `github.com/dreego-stack/dreego/plugins/kv-memory` (planned).
-
-### Storage Interface
-
-Like `database/sql`, interface only; plugins implement (S3/R2/Local). Core stays transport-agnostic.
-
-```go
-type Storage interface {
-    Put(ctx context.Context, key string, r io.Reader) error
-    Get(ctx context.Context, key string) (io.ReadCloser, error)
-    Delete(ctx context.Context, key string) error
-    List(ctx context.Context, prefix string) ([]string, error)
-    URL(ctx context.Context, key string) (string, error)
-}
-```
-
-`Put` streams `r` under `key`; the caller must not reuse `r` after return. `Get` returns a stream the caller closes and errors on missing keys. `Delete` is idempotent. `List` returns all keys with the given prefix (no pagination in v1). `URL` returns a usable URL (signed or public, implementation-defined). All methods respect ctx cancellation.
-
-Implementations: `github.com/dreego-stack/dreego/plugins/storage-s3`, `github.com/dreego-stack/dreego/plugins/storage-local`.
 
 ## Plugin Interfaces (not yet implemented)
 
