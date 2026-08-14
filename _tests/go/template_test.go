@@ -33,7 +33,7 @@ func TestTemplateEachElse(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items := []string{}</go>
-<div>{#each items as item}<p>{item}</p>{#each else}<p>empty</p>{/each}</div>`,
+<div>{#each items as item}<p>{{ item }}</p>{#each else}<p>empty</p>{/each}</div>`,
 	})
 }
 
@@ -41,7 +41,7 @@ func TestTemplateEachEmpty(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items:=[]string{}</go>
-<div>{#each items as item}<span>{item}</span>{/each}<p>done</p></div>`,
+<div>{#each items as item}<span>{{ item }}</span>{/each}<p>done</p></div>`,
 	})
 }
 
@@ -49,7 +49,7 @@ func TestTemplateEachLoopVar(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items := []string{"a", "b", "c"}</go>
-<div>{#each items as item}<p>{$loop.Index}: {item}</p>{/each}</div>`,
+<div>{#each items as item}<p>{{ $loop.Index }}: {{ item }}</p>{/each}</div>`,
 	})
 }
 
@@ -57,7 +57,7 @@ func TestTemplateEachLoop(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items := []string{"a", "b"}</go>
-<ul>{#each items as item}<li>{item}</li>{/each}</ul>`,
+<div><ul>{#each items as item}<li>{{ item }}</li>{/each}</ul></div>`,
 	})
 }
 
@@ -65,7 +65,7 @@ func TestTemplateEachWithIf(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>items:=[]string{"a","","c"}</go>
-<div>{#each items as item}{#if item != ""}<span>{item}</span>{/if}{/each}</div>`,
+<div>{#each items as item}{#if item != ""}<span>{{ item }}</span>{/if}{/each}</div>`,
 	})
 }
 
@@ -84,7 +84,7 @@ func TestTemplateExpression(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<head><title>T</title></head>
 <go>x := "world"</go>
-<div><h1>Hello {x}</h1></div>`,
+<div><h1>Hello {{ x }}</h1></div>`,
 	})
 }
 
@@ -92,7 +92,7 @@ func TestTemplateFilters(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/routes/get.dreego": `<go>rawHtml := "<b>bold</b>"</go>
-<div><p>{rawHtml|raw}</p><p>{rawHtml}</p></div>`,
+<div><p>{{ rawHtml|raw }}</p><p>{{ rawHtml }}</p></div>`,
 	})
 }
 
@@ -123,7 +123,7 @@ func TestTemplateIfTrue(t *testing.T) {
 func TestTemplateMissingVar(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>{undefined}</p></div>`,
+		"dreego/routes/get.dreego": `<div><p>{{ undefined }}</p></div>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

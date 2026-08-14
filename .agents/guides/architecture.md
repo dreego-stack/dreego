@@ -22,14 +22,10 @@ dreego/
 │   ├── router.go
 │   ├── context.go
 │   └── middleware.go
-├── plugins/                     # Official plugins (each with own go.mod if deps needed)
-│   └── sample/
 ├── _tests/                      # Integration tests
-│   ├── core/<Category>/         # Core/framework tests
-│   └── plugins/<name>/          # Plugin tests
+│   └── go/                      # Core/framework integration tests
 ├── _docs/                       # Public documentation
 ├── go.mod                       # Root module (core + cmd/dreego)
-├── go.work                      # Links root module + plugin modules
 ├── Makefile
 └── Dockerfile
 ```
@@ -39,15 +35,14 @@ dreego/
 | Module      | Responsibility                                    | Dependencies          |
 |-------------|---------------------------------------------------|-----------------------|
 | core        | .dreego → Go code, Router, Context, Middleware     | net/http (stdlib)     |
-| plugins/*   | Official plugins (auth, db, cache, etc.)          | core + plugin-specific deps |
+| external plugins | Optional capabilities in separate repositories | core + plugin-specific deps |
 
 ## Rules
 
 - **Core never imports a plugin package** — plugins depend on Core, never the other way around
-- **Plugins with external dependencies get their own `go.mod`** inside `plugins/<name>/`
+- **Every optional plugin gets a separate repository and `go.mod`**, including dependency-free plugins
 - **Every package is independently testable**
 - **No circular dependencies**
 - **`core/` for stable, public APIs**
-- **`plugins/` for official plugins**
+- **Separate repositories for official plugins**
 - **`cmd/` for entry points only**
-- **`go.work` links all local modules for development**

@@ -10,6 +10,7 @@ Layouts are shared shells rendered around route content. A layout lives in `dree
 **`dreego/layouts/default.dreego`:**
 
 ```html
+<div>
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,13 +20,14 @@ Layouts are shared shells rendered around route content. A layout lives in `dree
     {#slot}
 </body>
 </html>
+</div>
 ```
 
 The layout defines the outer `<html>`/`<head>`/`<body>` skeleton. At codegen time the route's page content is placed into `{#slot}` and the route's `<head>` sections are merged into `{#head}`.
 
 ## Route Head Behavior
 
-- **With layout**: the route's `<head>` content (e.g. `<title>{doc.Title}</title>`) is injected into the layout's `{#head}` placeholder. Expressions in the head are resolved and escaped.
+- **With layout**: the route's `<head>` content (e.g. `<title>{{ doc.Title }}</title>`) is injected into the layout's `{#head}` placeholder. Expressions in the head are resolved and escaped.
 - **Without layout**: if no layout file exists, the route's `<head>` is emitted standalone as a full `<html>` fragment, so the page still renders with its title and meta tags.
 - **No `<head>` in route**: when the route declares no `<head>`, nothing is injected into `{#head}`.
 

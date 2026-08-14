@@ -421,7 +421,7 @@ func TestCLIFmt(t *testing.T) {
 </go>
 
 <div>
-  <p>{  msg  }</p>
+  <p>{{  msg  }}</p>
     {#if  show}
         <span>visible</span>
     {/if}
@@ -436,7 +436,7 @@ func TestCLIFmt(t *testing.T) {
 </go>
 
 <div>
-  <p>{msg}</p>
+  <p>{{ msg }}</p>
     {#if show}
         <span>visible</span>
     {/if}

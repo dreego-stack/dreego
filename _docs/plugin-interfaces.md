@@ -6,6 +6,8 @@ Official plugins live in separate repos under `github.com/dreego-stack/`. Each p
 
 ## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
 
+The EventBus, Queue, KVStore, and Storage sections below describe the current pre-v0.1 implementation. They are scheduled for removal from core because optional infrastructure contracts must first be proven by real plugins. The session Store remains a core web contract.
+
 ### session.Store
 
 ```go
@@ -19,19 +21,28 @@ type Store interface {
 
 Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session-redis` (planned).
 
-### Plugin Interface
+### Current Plugin Interface
+
+The following fat interface exists in the released pre-v0.1 implementation.
+It is deprecated design and will be removed by the App migration; it is not a
+compatibility promise for plugin authors.
 
 ```go
 type Plugin interface {
     Name() string
-    Version() string
-    Init(app *App) error
+    RegisterRoutes()
+    Middlewares() []func(http.Handler) http.Handler
+    Assets() fs.FS
+    OnStart(ctx context.Context) error
+    OnShutdown(ctx context.Context) error
 }
 ```
 
-Every plugin implements `Init()` for registering routes, middleware, services.
+The accepted v0.1 direction has no required central plugin interface. A plugin
+instead exposes `Register(app, typedOptions) error`. Only real plugins may later
+justify small shared capability interfaces, and compatibility begins at v1.
 
-### Middleware Hooks (Plugin)
+### Proposed Middleware Hooks (superseded)
 
 ```go
 type MiddlewareProvider interface {
@@ -39,9 +50,10 @@ type MiddlewareProvider interface {
 }
 ```
 
-Plugins that inject HTTP middleware (CSRF, auth, rate-limiting, etc.).
+This interface was exploratory and is not the accepted v0.1 contract. Plugins
+register middleware directly on their owning App.
 
-### Route Hooks (Plugin)
+### Proposed Route Hooks (superseded)
 
 ```go
 type RouteProvider interface {
@@ -49,7 +61,8 @@ type RouteProvider interface {
 }
 ```
 
-Plugins that register their own URL paths (`/admin/*`, `/api/auth/*`).
+This interface was exploratory and is not the accepted v0.1 contract. Plugins
+register routes directly on their owning App.
 
 ### Event Bus Interface
 

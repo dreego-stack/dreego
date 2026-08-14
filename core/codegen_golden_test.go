@@ -62,7 +62,7 @@ func assertGolden(t *testing.T, name, got string) {
 // Golden for a simple route: <head> + <div>, no layout. Covers standalone head
 // emission, the scoped wrapper div and static/expression text nodes.
 func TestGoldenSimpleRoute(t *testing.T) {
-	src := "<head>\n    <title>Home</title>\n</head>\n\n<div>\n    <h1>Welcome</h1>\n    <p>Hello, {name}!</p>\n</div>\n"
+	src := "<head>\n    <title>Home</title>\n</head>\n\n<div>\n    <h1>Welcome</h1>\n    <p>Hello, {{ name }}!</p>\n</div>\n"
 	file := parseFile(t, src)
 	got, err := GenerateMethodHandler(file, nil, "home", "index", "/", scopeHashFor(src))
 	if err != nil {
@@ -73,7 +73,7 @@ func TestGoldenSimpleRoute(t *testing.T) {
 
 // Golden for a component with props and a scoped <style> block.
 func TestGoldenComponentWithStyle(t *testing.T) {
-	src := "Component Badge (title string, tone string)\n\n<div class=\"badge\">\n    <span>{title}</span>\n    <em>{tone}</em>\n</div>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
+	src := "Component Badge (title string, tone string)\n\n<div class=\"badge\">\n    <span>{{ title }}</span>\n    <em>{{ tone }}</em>\n</div>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
 	_, _, body := ParseHeader(src)
 	file := parseFile(t, body)
 	file.Component = &ComponentDef{

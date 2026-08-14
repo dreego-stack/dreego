@@ -1,4 +1,3 @@
-
 package tests
 
 import (
@@ -17,7 +16,7 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 <go type="json">
     c.JSON(200, map[string]string{"msg": msg})
 </go>
-<div><h1>{msg}</h1></div>`,
+<div><h1>{{ msg }}</h1></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -129,7 +128,7 @@ func TestContentTypeHTMLDefault(t *testing.T) {
 		"dreego/routes/get.dreego": `<go>
     msg := "hello"
 </go>
-<div><h1>{msg}</h1></div>`,
+<div><h1>{{ msg }}</h1></div>`,
 	})
 	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "text/html")
 	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "b.WriteString")
@@ -174,7 +173,7 @@ func TestContentTypeJSONShared(t *testing.T) {
 </go>
 
 <div>
-    <h1>{msg}</h1>
+    <h1>{{ msg }}</h1>
 </div>`,
 	})
 	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "application/json")
@@ -195,7 +194,7 @@ func TestContentTypeMultiTyped(t *testing.T) {
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: name}
     c.XML(200, user)
 </go>
-<div><h1>{name}</h1></div>`,
+<div><h1>{{ name }}</h1></div>`,
 	})
 	_, jbody, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/json"})
 	if !strings.Contains(jbody, `"format":"json"`) {

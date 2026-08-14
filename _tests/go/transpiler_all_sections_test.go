@@ -10,7 +10,7 @@ func TestTranspilerAllSections(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>All</title></head>
 <go>x := "ok"</go>
-<div><p>{x}</p></div>
+<div><p>{{ x }}</p></div>
 <script>console.log("js")</script>
 <style>p { color: red; }</style>`)
 }

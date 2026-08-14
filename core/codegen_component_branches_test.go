@@ -64,7 +64,7 @@ func TestCompGenEachSubstitutesLoopInIfCond(t *testing.T) {
 // compGen full pipeline (lex → parse → codegen): {#if !$loop.Last} inside
 // {#each} must produce "if !loop.Last {".
 func TestCompGenEachLoopInIfCondFullParse(t *testing.T) {
-	input := `{#each items as item}<div>{#if !$loop.Last}, {/if}{item}</div>{/each}`
+	input := `<div>{#each items as item}<span>{#if !$loop.Last}, {/if}{{ item }}</span>{/each}</div>`
 	tokens, err := Lex(input)
 	if err != nil {
 		t.Fatalf("lex: %v", err)

@@ -12,7 +12,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | no-go | ✅ pos | Route without `<go>` |
 | unclosed-div | ✅ neg | `<div>` without `</div>` → generate FAIL |
 | mismatched-close | ✅ neg | `<div>...</go>` → generate FAIL |
-| xss-escaping | ✅ pos | `{var}` escaped `<script>` |
+| xss-escaping | ✅ pos | `{{ value }}` escaped `<script>` |
 | duplicate-head | ⬜ neg | Two `<head>` sections → generate FAIL |
 | duplicate-div | ⬜ neg | Two `<div>` sections → generate FAIL |
 | empty-div | ⬜ pos | `<div></div>` — empty template |
@@ -29,13 +29,13 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | if-true | ✅ pos | `{#if true}` renders |
 | if-false | ✅ pos | `{#if false}` does not render |
 | each-loop | ✅ pos | `{#each items as item}` with 3 items |
-| expression | ✅ pos | `{var}` in `<div>` |
+| expression | ✅ pos | `{{ value }}` in `<div>` |
 | nested-if | ⬜ pos | `{#if}{#if}{/if}{/if}` |
 | if-else | ⬜ neg | `{#else}` not yet implemented |
 | each-empty | ⬜ pos | Empty list in `{#each}` → no output |
 | each-with-if | ⬜ pos | `{#each}` with `{#if}` inside |
-| expression-missing-var | ⬜ neg | `{undefined}` → go build FAIL |
-| expression-function | ⬜ pos | `{len(items)}` as expression |
+| expression-missing-var | ⬜ neg | `{{ undefined }}` → go build FAIL |
+| expression-function | ⬜ pos | `{{ len(items) }}` as expression |
 
 ## 3. Layout
 
@@ -57,7 +57,6 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | post-method | ✅ pos | POST route |
 | dynamic | ✅ pos | `[id]` segment |
 | catchall | ✅ pos | `[...path]` segment |
-| optional | ✅ pos | `[[lang]]` segment |
 | groups | ✅ pos | `(group)/` invisible in URL |
 | 404-page | ✅ pos | Custom 404 |
 | 500-page | ✅ pos | Custom 500 |
@@ -101,7 +100,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | multi-props | ✅ pos | Component with 3+ props (`_tests/go` `TestComponentMultiProps`) |
 | prop-default | ⬜ pos | Prop with default value |
 | prop-expression | ✅ pos | Prop value from expression: `title={user.Name}` (`_tests/go` `TestComponentPropExpression`, `TestComponentPropExpr`) |
-| attr-prop-substitution | ✅ bug | `{prop}` substituted in HTML attributes: `<a href="{url}">` (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
+| attr-prop-substitution | ✅ bug | `{{ prop }}` substituted in HTML attributes: `<a href="{{ url }}">` (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
 | slot-missing | ⬜ pos | Component with `{#slot}`, call without body |
 | slot-named | ⬜ v0.0.7 | `{#slot header}` |
 | recursive | ⬜ neg | Component calls itself → error or warning |
@@ -143,7 +142,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 |------|-----|-------------|
 | component-close-tag | ✅ bug | `</@Card>` lexer fix |
 | component-quoted-attrs | ✅ bug | `title="Hello World"` with spaces |
-| component-attr-prop-substitution | ✅ bug | `{prop}` resolved inside HTML attributes (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
+| component-attr-prop-substitution | ✅ bug | `{{ prop }}` resolved inside HTML attributes (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
 | scoped-style-declarations-lost | ✅ bug | Declarations in `{}` preserved (`radial-gradient`) (`_tests/go/bug_scoped_style_declarations_lost_test.go`) |
 | scoped-style-comma-parens | ✅ bug | Selectors with commas + nested parens (`calc()`, `rgb()`) (`_tests/go/bug_scoped_style_comma_parens_test.go`) |
 | scoped-style-keyframes | ✅ bug | `@keyframes` body preserved (`_tests/go/bug_scoped_style_keyframes_test.go`) |

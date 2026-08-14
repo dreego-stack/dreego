@@ -10,7 +10,7 @@ timestamp: 2026-07-28T00:00:00Z
 # Name "dreego" / File Extension ".dreego"
 
 **Date:** 2026-07-28
-**Status:** Final (plugin paths superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) v0.0.21)
+**Status:** Final for naming; plugin paths now use separate repositories and modules
 
 ## Decision (final)
 
@@ -24,8 +24,8 @@ timestamp: 2026-07-28T00:00:00Z
 | Type             | Path                                      |
 |------------------|-------------------------------------------|
 | Core             | `github.com/dreego-stack/dreego`             |
-| Auth Plugin      | `github.com/dreego-stack/dreego/plugins/auth`  |
-| Map Plugin       | `github.com/dreego-stack/dreego/plugins/map`   |
+| Auth Plugin      | `github.com/dreego-stack/plugin-auth`          |
+| Map Plugin       | `github.com/dreego-stack/plugin-map`           |
 | UI Plugin        | `github.com/dreego-stack/dreego/plugins/ui`    |
 
 > Plugin paths superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21): official plugins live under `plugins/<name>` in this repository. Community plugins may still use separate repos.

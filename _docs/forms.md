@@ -5,7 +5,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
 ## Quick Example
 
 ```html
-<!-- dreego/routes/post-login.dreego -->
+<!-- dreego/routes/login/post.dreego -->
 <go>
     type LoginForm struct {
         Email    string `form:"email" validate:"required,email"`
@@ -23,9 +23,9 @@ Declarative server-side form handling. One struct, one function — Dreego gener
 
 <div>
     <h1>Login</h1>
-    {#if c.Errors("email")}<p class="error">{c.Errors("email")}</p>{/if}
+    {#if c.Errors("email")}<p class="error">{{ c.Errors("email") }}</p>{/if}
     <form g-action="Login" method="post">
-        <input name="email" type="email" value="{c.Old("email")}">
+        <input name="email" type="email" value="{{ c.Old("email") }}">
         <input name="password" type="password">
         <button type="submit">Login</button>
     </form>
@@ -87,7 +87,7 @@ Returns the validation error message for a field. Only available after validatio
 
 ```html
 {#if c.Errors("email")}
-    <p class="error">{c.Errors("email")}</p>
+    <p class="error">{{ c.Errors("email") }}</p>
 {/if}
 ```
 
@@ -96,7 +96,7 @@ Returns the validation error message for a field. Only available after validatio
 Returns the previously submitted value after validation failure. Useful for re-populating form fields.
 
 ```html
-<input name="email" value="{c.Old("email")}">
+<input name="email" value="{{ c.Old("email") }}">
 ```
 
 ### `c.Redirect(url string, code int) error`
@@ -120,7 +120,7 @@ CSRF is handled by the middleware, not the form handler. With `dreego.SetSession
 HTMX automatically sends the CSRF token via header. For plain HTML forms, include a hidden field:
 
 ```html
-<input type="hidden" name="csrf_token" value="{c.CSRFToken()}">
+<input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
 ```
 
 Disable CSRF for API-only routes: `dreego.SetCSRF(false)`.
@@ -134,8 +134,10 @@ Forms without `g-action` are plain HTML forms — no handler generation. Use `c.
     email := c.FormValue("email")
     c.Set("email", email)
 </go>
+<div>
 <form method="post">
     <input name="email">
     <button>Submit</button>
 </form>
+</div>
 ```

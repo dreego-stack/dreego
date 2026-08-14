@@ -27,7 +27,7 @@ mkdir -p dreego/routes
 </go>
 
 <div>
-    <h1>{message}</h1>
+    <h1>{{ message }}</h1>
 </div>
 ```
 
@@ -82,7 +82,7 @@ Component Card (title string)
 
 <div>
     <article class="card">
-        <h2>{title}</h2>
+        <h2>{{ title }}</h2>
         <div>{#slot}</div>
     </article>
 </div>
@@ -95,26 +95,30 @@ Component Card (title string)
 Use it in any route or layout:
 
 ```html
+import Card "components/Card.dreego"
+
+<div>
 <@Card title="Welcome">
     <p>This is the card body.</p>
 </@Card>
+</div>
 ```
 
-Components are auto-discovered — no import needed.
+Imports are header directives and therefore appear before the root sections.
 
 ## Dynamic Routes
 
 Create `dreego/routes/users/[id]/get.dreego`:
 
 ```html
-<head><title>User {c.Param("id")}</title></head>
+<head><title>User {{ c.Param("id") }}</title></head>
 
 <go>
     userID := c.Param("id")
 </go>
 
 <div>
-    <h1>User: {userID}</h1>
+    <h1>User: {{ userID }}</h1>
 </div>
 ```
 

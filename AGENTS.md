@@ -49,14 +49,38 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.27 tagged — Single-source versioning: the latest git tag (`vX.Y.Z`) is the single truth; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See TODO.md for next steps.
+v0.0.36 tagged — Single-source versioning: the latest git tag (`vX.Y.Z`) is the single truth; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See `_todo/` for next steps.
+
+## Product Focus
+
+Dreego brings an intuitive, Svelte- and Astro-inspired development experience to Go without hiding or bending Go. Simplicity, type safety, low resource usage, and accessible workflows are core design constraints.
+
+Accessibility is a release quality gate, not a cosmetic enhancement. CLI output, diagnostics, documentation, generated blueprints, and official components must work without relying on sight, color, or pointer input alone. Do not claim that Dreego can make arbitrary user applications automatically accessible.
+
+- Until v1, SSR is the only production target and the core priority.
+- Before v0.1, stabilize and harden the SSR core. Do not add an internal client runtime, SSG target, or expanded Wails target.
+- The highest-priority pre-v0.1 architecture change is explicit `App` ownership of all runtime state, including explicit generated registration. Do not preserve the current global API through compatibility wrappers.
+- HTMX, Alpine.js, and plain JavaScript are the supported progressive-enhancement path before v0.1.
+- Between v0.1 and v1, client islands or hydration may be explored outside the stable core. Promote them only after real applications establish the required interfaces.
+- Improved Wails support, SSG, and static deployment targets belong after v1.
+- Preserve future extension points where inexpensive, but do not add speculative abstractions or delay SSR stability for post-v1 targets.
+
+See `_docs/roadmap.md` for the public, non-binding roadmap.
+
+## Core and Plugin Boundary
+
+- Core contains the SSR framework capabilities needed by a normal Dreego application.
+- Optional capabilities, provider integrations, and features with additional dependencies live in separate plugin repositories with their own `go.mod`, releases, tests, and CI.
+- Keep optional implementations out of `core/`, even when they currently need only the standard library. SSE and WebSockets are plugins, not core packages.
+- Add a provider-neutral interface to core only after at least two real implementations prove the same small contract is necessary.
+- Remove the current speculative EventBus, Queue, KVStore, and Storage APIs before v0.1. The session Store remains part of the SSR core.
+- Plugins may register route-specific behavior through the owning `App`; they must not weaken unrelated application defaults.
 
 ## File Structure
 
 ```
 repo-root/
-├── TODO.md                 ← NEXT code changes (short, prioritized)
-├── TODO-Future.md          ← Long-term ideas (SSG, Wails, plugin ideas)
+├── _todo/                  ← One open item per file; delete the file when its PR completes
 ├── CHANGELOG.md            ← What came in which version
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
@@ -104,6 +128,20 @@ version: patch        # none | patch | minor | major
 - `version: patch` — `0.0.x` +1
 - `version: minor` — `0.x.0` +1
 - `version: major` — `x.0.0` +1
+
+## Todo Workflow
+
+Every open work item lives in its own Markdown file under `_todo/`.
+
+- `_todo/core/` — concrete framework, CLI, test, documentation, and hardening work
+- `_todo/future/` — long-term architecture ideas without a near-term commitment
+- `_todo/plugins/` — external plugin ideas; these do not expand core scope by themselves
+- One PR should normally implement one todo item.
+- Name files after the stable item ID, for example `_todo/core/server-timeouts.1.md`.
+- Concrete items record their area, phase, goal, acceptance criteria, and dependencies when applicable. Long-term idea files may remain concise until promoted into planned work.
+- Delete the item file in the PR that completes it. The PR's `pr.md`, changelog, and Git history become the completion record.
+- Do not keep completed, rejected, or superseded items in `_todo/`.
+- Add newly discovered work as a new item file instead of appending to a shared checklist.
 
 The CI (`pull_request.yml`) validates pr.md and runs `make test`. After approval, `release-prep` (manual, with PR number) applies the changelog + version to the PR branch and removes pr.md. After squash-merge, `release.yml` creates the tag. No local tags.
 
@@ -157,7 +195,15 @@ For multi-step features, repeat the cycle for each step. Commit after each step.
 2. Start time (`server.Listen()`)
 3. Runtime (per request, as local as possible)
 
-No `map[string]string`, no `interface{}` cast, no string key in core.
+Generated application APIs, component props, route contracts, and primary
+application data are strongly typed. Unknown, duplicate, and missing generated
+fields fail as early as possible.
+
+Dynamic strings remain valid at boundaries whose schemas Dreego does not own,
+including HTTP headers, URL and form values, sessions, configuration, and
+request-local extension state. Missing values and conversions must be explicit
+at those boundaries. Convert boundary data into typed application structures
+before using it as domain data. Do not claim that Core contains no string keys.
 
 ---
 
@@ -172,8 +218,8 @@ Solution: `dreego.Context` Interface. → [decisions/context-design](.agents/dec
 ### 3. Transpiler Pipeline with Extension Points
 → [decisions/typescript-v2](.agents/decisions/typescript-v2.md)
 
-### 4. Plugin Interface: First Release = Final Contract
-→ [concepts/plugin-ecosystem](.agents/concepts/plugin-ecosystem.md)
+### 4. Plugin Contracts Stay Provisional Until v1
+Real external plugins between v0.1 and v1 must validate the contract before a stability promise. → [plugin-contract.1](_todo/core/plugin-contract.1.md)
 
 ### 5. File-based Routing: Crawlable for SSG
 → [decisions/routing-and-components](.agents/decisions/routing-and-components.md)

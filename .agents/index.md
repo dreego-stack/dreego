@@ -59,8 +59,7 @@ timestamp: 2026-07-31T07:00:00Z
 
 ## Plans & Tips
 
-- [TODO](../TODO.md) — Next code changes
-- [TODO Future](../TODO-Future.md) — Long-term ideas (SSG, Wails, plugin ideas)
+- [Open work](../_todo/) — One item file per open task or idea
 - [Tips](tips.md) — 50 tips + checklist
 
 ## External Docs

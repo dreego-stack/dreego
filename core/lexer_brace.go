@@ -79,10 +79,13 @@ func scanBrace(input string, pos *int) (Token, error) {
 		return Token{Type: TokenVerbatim, Value: input[start+11 : start+11+closePos], Pos: start}, nil
 	}
 
-	end := strings.IndexByte(remaining[1:], '}')
+	if !strings.HasPrefix(remaining, "{{") {
+		return Token{}, fmt.Errorf("invalid template expression at position %d", start)
+	}
+	end := strings.Index(remaining[2:], "}}")
 	if end < 0 {
 		return Token{}, fmt.Errorf("unclosed expression at position %d", start)
 	}
-	*pos += 1 + end + 1
-	return Token{Type: TokenExpression, Value: strings.TrimSpace(remaining[1 : 1+end]), Pos: start}, nil
+	*pos += 2 + end + 2
+	return Token{Type: TokenExpression, Value: strings.TrimSpace(remaining[2 : 2+end]), Pos: start}, nil
 }

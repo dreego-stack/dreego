@@ -10,5 +10,5 @@ func TestTranspilerComment(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>T</title></head>
 <go>x := "hi"</go>
-<div><p>{x}</p></div>`)
+<div><p>{{ x }}</p></div>`)
 }

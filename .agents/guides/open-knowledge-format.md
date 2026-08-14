@@ -42,7 +42,7 @@ Required: `type`. Recommended: `title`, `description`, `tags`, `timestamp`.
 | `Concept` | `concepts/` | Feature designs, architecture overviews |
 | `Reference` | `KB/` | External research, framework comparisons |
 | `Guide` | `guides/` | Coding standards, workflows |
-| `Plan` | root | TODO.md / TODO-Future.md |
+| `Plan` | `_todo/` | One Markdown file per open item |
 | `Index` | root | index.md (TOC) |
 | `Log` | root | log.md (changelog) |
 

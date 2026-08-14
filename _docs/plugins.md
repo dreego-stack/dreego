@@ -11,13 +11,26 @@ github.com/dreego-stack/plugin-auth         ← Plugin: OAuth2, JWT, sessions (o
 github.com/dreego-stack/plugin-db   ← Plugin: SQL drivers, migrations (own go.mod)
 ```
 
-Plugins without external dependencies can also be plain packages inside the root module, but once a plugin needs a third-party dependency it gets its own `go.mod` and lives in a separate repo under `github.com/dreego-stack/`.
+All optional plugins live in separate repositories with their own `go.mod`, including plugins that currently use only the standard library.
 
 The repository root is a single Go module (`github.com/dreego-stack/dreego`). Consumers of the framework only see the packages they explicitly import.
 
-## Plugin Interface (v1, frozen)
+## Core boundary
 
-Core defines a single `Plugin` interface. Plugins import Core, satisfy the interface, and register themselves with the runtime via `dreego.UsePlugin(p)`. Core never imports a plugin.
+Core contains the SSR capabilities a normal Dreego application needs. Optional capabilities and provider integrations live in separate plugin repositories, even when an initial implementation has no third-party dependency. SSE and WebSockets are examples of plugins rather than `core/` packages.
+
+Each plugin repository owns its `go.mod`, dependencies, versions, tests, and CI. A provider-neutral interface is added to core only after at least two real implementations demonstrate the same small contract. Until then, the plugin owns its own API.
+
+Runtime exceptions remain narrow. A streaming or upload plugin may adjust limits for its own route or route group, but it must not silently weaken the defaults of unrelated routes.
+
+## Current experimental API
+
+The released pre-v0.1 implementation currently defines a global `Plugin`
+interface and `dreego.UsePlugin`. This section describes existing code only so
+current experiments can be understood. It is deprecated design, is not a
+compatibility promise, and will be removed by the App migration before v0.1.
+
+Do not build a new plugin against this interface expecting migration support.
 
 ```go
 // Defined in core
@@ -33,7 +46,7 @@ type Plugin interface {
 
 ### Registration
 
-`dreego.UsePlugin(p)` is the central v1 API. It is called at package level (typically from `main.go`), not on an app object. It registers the plugin's routes, middleware, assets and lifecycle hooks with the core runtime:
+`dreego.UsePlugin(p)` is the current pre-v1 API. It is called at package level (typically from `main.go`), not on an app object. It registers the plugin's routes, middleware, assets and lifecycle hooks with the core runtime:
 
 ```go
 func UsePlugin(p Plugin)
@@ -125,6 +138,25 @@ func (a *Auth) RegisterRoutes() {
 
 Because `dreego.Register` is idempotent (re-registering a `method`+`pattern` replaces the handler), a later-registered plugin can override a route deterministically.
 
+## Planned v0.1 registration
+
+The accepted replacement uses an explicit function bound to an App and typed
+plugin-owned options:
+
+```go
+if err := auth.Register(app, auth.Options{
+    LoginPath:  "/login",
+    CookieName: "session",
+}); err != nil {
+    log.Fatal(err)
+}
+```
+
+There is no central stable `Plugin` interface before v1. Registration order is
+source order, registration errors remain ordinary Go errors, and plugins add
+only the App behavior they need. Shared asset or lifecycle capabilities are
+introduced only after real external plugins prove a small common contract.
+
 ## Layout
 
 ```
@@ -143,7 +175,7 @@ Each plugin repo has its own `go.mod` and requires `github.com/dreego-stack/dree
 
 1. **Core never imports a plugin.** This is the invariant that keeps the dependency graph clean.
 2. **Plugins import Core.** They use `github.com/dreego-stack/dreego/core`.
-3. **Plugins with external deps get their own `go.mod`.** Plugins without external deps can live as plain packages in the root module.
+3. **Every optional plugin has its own repository and `go.mod`.** This keeps ownership and the dependency boundary consistent even when the plugin currently uses only the standard library.
 4. **One repo, one module.** The main repo is a single Go module; releases use a single tag (`v0.0.27`). Each plugin repo has its own module and its own tag.
 
 ## Planned Plugins
@@ -159,7 +191,7 @@ Each plugin repo has its own `go.mod` and requires `github.com/dreego-stack/dree
 | `db` | SQL driver registration + migrations | `golang-migrate/migrate` |
 | `i18n` | Translation loading + templating | `nicksnyder/go-i18n` |
 | `seo` | Meta tags, sitemap, JSON-LD | none |
-| `markdown` | Markdown rendering with frontmatter | `yuin/goldmark` |
+| `markdown` | Optional Markdown rendering | `yuin/goldmark` |
 | `search` | Full-text search (Meilisearch, Typesense) | `meilisearch/meilisearch-go` |
 | `jobs` | Background jobs + cron | `robfig/cron` |
 | `pwa` | Service worker generation, manifest | none |

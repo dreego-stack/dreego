@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var expressions = regexp.MustCompile(`\{([^!#/][^}]*?)\}`)
+var expressions = regexp.MustCompile(`\{\{([^}]*?)\}\}`)
 var controlOpen = regexp.MustCompile(`\{#(\w+)(\s+[^}]*?)?\}`)
 var controlClose = regexp.MustCompile(`\{/(\w+)\}`)
 var multiBlank = regexp.MustCompile(`\n{3,}`)
@@ -107,12 +107,12 @@ func formatImport(line string) string {
 
 func formatExpressions(input string) string {
 	return expressions.ReplaceAllStringFunc(input, func(m string) string {
-		inner := m[1 : len(m)-1]
+		inner := m[2 : len(m)-2]
 		inner = strings.TrimSpace(inner)
 		inner = multiSpace.ReplaceAllString(inner, " ")
 		inner = strings.ReplaceAll(inner, " |", "|")
 		inner = strings.ReplaceAll(inner, "| ", "|")
-		return "{" + inner + "}"
+		return "{{ " + inner + " }}"
 	})
 }
 

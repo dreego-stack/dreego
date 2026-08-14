@@ -10,7 +10,7 @@ func TestBugComponentAttrSpace(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (name string)
-<div>Hello {name}</div>`,
+<div>Hello {{ name }}</div>`,
 		"dreego/routes/get.dreego": `<go>name := "Ada"</go>
 <div><@Greet name={ name }/></div>`,
 	})

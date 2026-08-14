@@ -104,7 +104,7 @@ dreego/
 │   └── dreego/
 │       └── main.go           # CLI: dreego generate, dreego dev, dreego build
 ├── core/                      # Core library (single package, stdlib only)
-├── plugins/                   # Official plugins (own go.mod when deps needed)
+├── plugins/                   # No optional implementations; official plugins use separate repos
 ├── _tests/                    # Integration tests
 │   └── core/<Category>/
 ├── go.mod
@@ -116,7 +116,7 @@ dreego/
 
 - [x] Transpiler: `.dreego` → `.go`
 - [x] 3 Sections: `<go>`, Template, `<style>`
-- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, `{var|raw|upper}`
+- [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, and `{{ expression }}`
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
 - [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
 - [x] Static Assets: `dreego/static/` → inline handler + MIME types + collision check
@@ -135,7 +135,7 @@ dreego/
 - [x] Monorepo plugin layout: `plugins/` + `go.work` (v0.0.21)
 - [x] Single Binary via `go build`
 - [ ] Dev server with hot reload
-- [ ] Plugin interface (frozen contract)
+- [ ] Plugin interface validated by real external plugins before the v1 stability promise
 
 ## Components (v0.0.5+)
 
@@ -144,7 +144,7 @@ Reusable `.dreego` components with scoped styles:
 ```
 dreego/components/Card.dreego:
   Component Card (title string)
-  <div><h2>{title}</h2>{#slot}</div>
+  <div><h2>{{ title }}</h2>{#slot}</div>
 
 dreego/routes/get.dreego:
   <div><@Card title="Hello">content</@Card></div>

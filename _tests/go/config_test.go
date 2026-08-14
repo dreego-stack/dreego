@@ -10,7 +10,7 @@ import (
 func TestConfigInvalidJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/config.json":     `{ broken json !!!`,
+		"dreego/config.json":       `{ broken json !!!`,
 		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
 	})
 	code, body := c.Get(t, "/")

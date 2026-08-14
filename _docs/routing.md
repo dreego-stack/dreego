@@ -1,5 +1,15 @@
 # File-based Routing
 
+> **Current implementation:** This page documents the released pre-v0.1
+> filename-based router. The accepted v0.1 migration will use one route file per
+> URL, with flat files or `+page.dreego` and method-specific `<go>` and `<div>`
+> sections. That target is not available until `routing-correctness.1` and the
+> App migration are implemented.
+
+Directories below `dreego/routes/` define the URL path. The filename defines
+the HTTP method. Keeping one method per file prevents a route file from growing
+into a combined implementation for every operation on the same URL.
+
 ## Directory Structure
 
 ```
@@ -27,7 +37,9 @@ dreego/routes/
 |----------------------|--------------------------|-----------------------|
 | `[id]`               | `/users/{id}`            | `c.Param("id")`       |
 | `[...catchall]`      | `/blog/{catchall...}`    | `c.Param("catchall")` |
-| `[[optional]]`       | `/{optional}`            | `c.Param("optional")` |
+
+Optional segments are not supported. Define each route explicitly so one
+method file always owns one route pattern.
 
 ## Route Groups `(name)/`
 
@@ -79,7 +91,7 @@ A single route can serve multiple content types via `<go type="...">` blocks:
 </go>
 
 <div>
-    <h1>{user.Name}</h1>
+    <h1>{{ user.Name }}</h1>
 </div>
 ```
 

@@ -8,7 +8,6 @@
     {"path": "/_docs/layouts.md", "title": "Layouts"},
     {"path": "/_docs/middleware.md", "title": "Middleware"},
     {"path": "/_docs/components.md", "title": "Components"},
-    {"path": "/_docs/frontmatter.md", "title": "Frontmatter"},
     {"path": "/_docs/forms.md", "title": "Forms"},
     {"path": "/_docs/plugin-interfaces.md", "title": "Plugin Interfaces"},
     {"path": "/_docs/plugins.md", "title": "Plugins"},
@@ -18,6 +17,7 @@
     {"path": "/_docs/deployment.md", "title": "Deployment"},
     {"path": "/_docs/dev-server.md", "title": "Dev Server"},
     {"path": "/_docs/hot-reload.md", "title": "Hot Reload"},
+    {"path": "/_docs/roadmap.md", "title": "Roadmap"},
     {"path": "/README.md", "title": "README"},
     {"path": "/CHANGELOG.md", "title": "Changelog"}
   ]

@@ -142,16 +142,15 @@ func compTextWithAttrs(s string) string {
 	return code
 }
 
-// compTextSection renders a NodeText content segment to Go code, resolving {…}
+// compTextSection renders a NodeText content segment to Go code, resolving {{ … }}
 // placeholders inside quoted attribute values but leaving <script>/<style> section
-// bodies literal (the lexer treats those as raw text where {…} is not an expression).
+// bodies literal (the lexer treats those as raw text where {{ … }} is not an expression).
 // It returns the generated code and the section state after this segment so the
 // caller can carry section tracking across sibling text nodes.
 func compTextSection(content string, inSection bool) (string, bool) {
 	var parts []string
 	cur := inSection
-	inQuote := false
-	braceDepth := 0
+	var quote byte
 	start := 0
 	i := 0
 	for i < len(content) {
@@ -173,34 +172,33 @@ func compTextSection(content string, inSection bool) (string, bool) {
 			}
 			start = i
 			cur = true
-			inQuote = false
-			braceDepth = 0
+			quote = 0
 			continue
 		}
-		switch content[i] {
-		case '"':
-			if i > 0 && content[i-1] == '\\' {
-				break
+		if (content[i] == '"' || content[i] == '\'') && (i == 0 || content[i-1] != '\\') {
+			if quote == 0 {
+				quote = content[i]
+			} else if quote == content[i] {
+				quote = 0
 			}
-			inQuote = !inQuote
-		case '{':
-			if inQuote && braceDepth == 0 {
-				if start < i {
-					parts = append(parts, goLiteral(content[start:i]))
-				}
-				braceDepth = 1
-				start = i + 1
+			i++
+			continue
+		}
+		if quote != 0 && strings.HasPrefix(content[i:], "{{") {
+			closeIdx := strings.Index(content[i+2:], "}}")
+			if closeIdx < 0 {
+				i++
+				continue
 			}
-		case '}':
-			if inQuote && braceDepth > 0 {
-				braceDepth--
-				if braceDepth == 0 {
-					expr := content[start:i]
-					code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
-					parts = append(parts, fmt.Sprintf("html.EscapeString(%s)", code))
-					start = i + 1
-				}
+			if start < i {
+				parts = append(parts, goLiteral(content[start:i]))
 			}
+			expr := strings.TrimSpace(content[i+2 : i+2+closeIdx])
+			code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
+			parts = append(parts, fmt.Sprintf("html.EscapeString(%s)", code))
+			i += 2 + closeIdx + 2
+			start = i
+			continue
 		}
 		i++
 	}

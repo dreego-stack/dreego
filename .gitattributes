@@ -5,8 +5,7 @@ _docs export-ignore
 .kilo export-ignore
 .tmp export-ignore
 AGENTS.md export-ignore
-TODO.md export-ignore
-TODO-Future.md export-ignore
+_todo export-ignore
 Makefile export-ignore
 demo export-ignore
 docker-compose.yml export-ignore

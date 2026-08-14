@@ -1,272 +1,119 @@
-
 ---
 type: Decision
-title: Routing, Plugin Routes & Component System
-description: Routing, plugin route registration, and component system with namespace hierarchy
-tags: [v0.0.10]
-timestamp: 2026-07-28T00:00:00Z
+title: App-Bound Routing and Components
+description: Explicit generated registration, one route file per URL, and typed component calls
+tags: [pre-v0.1, routing, components, app]
+timestamp: 2026-08-14T00:00:00Z
 ---
-# Routing, Plugin Routes & Component System
+# App-Bound Routing and Components
 
-**Date:** 2026-07-28 (updated after review)
-**Status:** Accepted (plugin discovery in Decision 2 superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) v0.0.21)
-**Replaces:** [file-based-routing](file-based-routing.md) (updated)
+**Status:** Accepted target for v0.1; implementation is pending
 
-## Context / Open Questions
+## Context
 
-1. Go package system: Each directory = one package. `dreego/routes/about/` is package `about`. Currently `main.go` must import each route package individually (`demo/main.go:4-7`). That doesn't scale.
+The released pre-v0.1 implementation uses method filenames, generated package
+initializers, global runtime registration, implicit component discovery, and
+several historical plugin-discovery experiments. Those mechanisms conflict with
+explicit App ownership and make route and component behavior harder to reason
+about.
 
-2. Plugin routes: `dreego generate` scans `"."` — never finds external packages in the module cache or vendor. How do plugin routes get into the binary?
+This decision defines the migration target. Public documentation may continue
+to describe released behavior only when it clearly labels that behavior as
+current and provisional.
 
-3. Component namespace: If the user has `components/Button.dreego` AND `dreego-ui` also offers `Button` — how is it resolved?
+## Generated registration
 
-## Decision 1: Generated Route Import File Instead of Manual Imports
-
-`dreego generate` creates ONE central import file that imports all route packages. The user only imports this one file.
-
-```
-dreego/
-├── routes/                    ← User writes here
-│   ├── get.dreego           → dreego → init() registers GET /
-│   ├── about/get.dreego       → dreego → init() registers GET /about
-│   ├── users/[id]/get.dreego  → dreego → init() registers GET /users/{id}
-│   └── ...
-├── gen/                       ← GENERATED (committed)
-│   └── routes.go              → imports ALL route packages
-│
-main.go imports ONLY `_ "myapp/dreego/gen"`
-```
+Generated code registers explicitly with its owning App:
 
 ```go
-// dreego/gen/routes.go  (GENERATED)
-package gen
-
-import (
-    _ "myapp/dreego/routes"          // index, about, ...
-    _ "myapp/dreego/routes/about"    // if about/ is a subdirectory
-    _ "myapp/dreego/routes/users/_id_"
-    _ "github.com/dreego/dreego-auth" // Plugin with init() registration
-)
+app := dreego.New()
+gen.Register(app)
+app.Listen(":8080")
 ```
 
-Each route package (including plugin packages) registers itself via `init()` → `runtime.Register()`. `gen/routes.go` imports all — `main.go` imports only `gen`.
+Generated packages do not register routes through `init`, blank imports, or
+package-global state. Two App instances can therefore own independent routes,
+middleware, sessions, and plugins in one process.
 
-### Why Keep `init()`?
+## Route sources
 
-- Go-idiomatic: `database/sql` drivers do exactly the same
-- Plugin packages need no special treatment
-- No runtime scanning, no reflection
-- `go build` only links imported packages → tree shaking
+One `.dreego` route file owns all declared HTTP methods for one URL.
 
-## Decision 2: Plugin Routes via init() — No dreego generate Needed
+| Source | URL |
+|---|---|
+| `routes/+page.dreego` | `/` |
+| `routes/about.dreego` | `/about` |
+| `routes/about/+page.dreego` | `/about` |
+| `routes/users/[id]/+page.dreego` | `/users/{id}` |
+| `routes/blog/[...path]/+page.dreego` | `/blog/{path...}` |
+| `routes/(auth)/login.dreego` | `/login` |
 
-> **Superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21):** official plugins now live under `plugins/<name>/` in this repository. Plugin `.dreego` sources and components are discovered by filesystem scan in the same repo, not via `go list -m -json` against external module repos. The `init()` registration pattern below remains valid; only the repository/discovery model has changed. Community plugins in separate repos can still follow the original workflow.
+A flat file and `+page.dreego` resolving to the same URL conflict.
+`index.dreego` and optional segments are unsupported. Static segments take
+priority over dynamic segments, which take priority over catch-all segments.
+Route groups organize source without adding a URL segment.
 
-The plugin author commits generated `dree.go` files IN the plugin module.
+## HTTP method sections
 
-```
-plugins/auth/
-├── routes/
-│   ├── login.go          ← pre-generated (contains init() + runtime.Register)
-│   └── ...
-├── go.mod                ← module github.com/dreego-stack/dreego/plugins/auth
-```
+`<go>` and `<div>` default to GET. An explicit `method` attribute binds the
+section to another HTTP method:
 
-Plugin developer workflow (official, monorepo):
-```bash
-cd plugins/auth
-dreego generate               # generates routes/*.go
-git add routes/*.go && git commit
-```
+```dreego
+import UserResult "components/UserResult.dreego"
 
-User workflow (official, monorepo):
-```bash
-# go.work already links plugins/auth for local dev
-# main.go imports _ "github.com/dreego-stack/dreego/plugins/auth"
-```
-
-Community plugin (separate repo) workflow:
-```bash
-go get github.com/dreego-stack/dreego-community-auth@v0.1.0
-# dreego generate adds the import to gen/routes.go
-```
-
-`dreego generate` detects official plugin packages via filesystem scan under `plugins/<name>/` and community plugins via `go.mod` + `go list -m -json all`. `go build` automatically links the correct version.
-
-## Decision 3: Routing Conventions
-
-| Syntax                | Path                    | Go Param              |
-|-----------------------|-------------------------|-----------------------|
-| `get.dreego`        | `/`                     | —                     |
-| `about.dreego`        | `/about`                | —                     |
-| `[id]/get.dreego`     | `/users/{id}`           | `c.Param("id")`       |
-| `[...catchall].dreego`| `/blog/{catchall}`      | `c.Param("catchall")` |
-| `[[lang]]/get.dreego` | `/docs/{lang}` (optional)| `c.Param("lang")`    |
-| `(auth)/login.dreego` | `/login` (group in path ignored) |               |
-
-Priority: Static > Dynamic > Optional > Catch-All
-
-Conflict detection: `dreego generate` throws an error if two routes claim the same pattern:
-```
-error: route conflict: /auth/login
-  dreego/routes/auth/login.dreego
-  plugin: dreego-auth (github.com/dreego/dreego-auth)
-```
-
-### API Routes & HTTP Methods
-
-HTTP method is derived from the filename:
-
-```
-routes/api/users.get.dreego   → GET  /api/users
-routes/api/users.post.dreego  → POST /api/users
-routes/api/users.put.dreego   → PUT  /api/users
-routes/api/users.delete.dreego→ DELETE /api/users
-```
-
-Alternatively via `<go method="post">` in the `.dreego` file (like current).
-
-API routes render NO layout — only the `<div>` fragment. Detection: path contains `api/` → `layout = nil`.
-
-### Per-Route Middleware (V1)
-
-One `_middleware.go` per directory (NOT generated — the user writes it):
-
-```go
-// dreego/routes/admin/_middleware.go
-package admin
-
-import "github.com/dreego/dreego-auth"
-
-func init() {
-    runtime.RegisterMiddleware("/admin/", auth.RequireRole("admin"))
+<go method="post">
+result, err := createUser(c)
+if err != nil {
+    return "", err
 }
-```
+</go>
 
-### Redirects & Rewrites
-
-```json
-// dreego.config.json
-{
-  "redirects": [
-    { "from": "/old-blog", "to": "/blog", "status": 301 }
-  ],
-  "rewrites": [
-    { "from": "/api/v1/*", "to": "/api/v2/*" }
-  ]
-}
-```
-
-Generated in `gen/routes.go` as middleware logic before the file-based routes.
-
-## Decision 4: Component System
-
-### Three Sources — One Namespace Hierarchy
-
-```
-Priority (highest first):
-1. dreego/components/Button.dreego     ← User component (shadows plugin)
-2. dreego/layouts/default.dreego       ← Layouts (special case)
-3. Plugin assets via fs.FS             ← @dreego-ui/Button
-```
-
-Explicit disambiguation:
-```
-{#use Button from "components/Button.dreego"}     ← explicit user
-{#use Button from "@dreego-ui/Button"}            ← explicit plugin
-```
-
-Without `from` specification, search user directory first, then plugins:
-```
-{#use Button}   ← searches Button.dreego in components/, then in plugins
-```
-
-### How Does dreego generate Find Plugin Components?
-
-Plugins place `.dreego` components in a known path:
-
-```
-dreego-ui/
-├── components/               ← CONVENTION
-│   ├── Button.dreego
-│   ├── Card.dreego
-│   └── Alert.dreego
-├── dreego.go                 ← Plugin interface impl
-├── go.mod
-```
-
-`dreego generate`:
-1. Reads `go.mod` → finds `github.com/dreego/dreego-ui`
-2. `go list -m -json github.com/dreego/dreego-ui` → `Dir: /home/.../pkg/mod/...`
-3. Searches `<Dir>/components/*.dreego`
-4. In vendor mode: `vendor/github.com/dreego/dreego-ui/components/*.dreego`
-
-No plugin loading, no reflection, no import in the CLI binary. Only filesystem scan.
-
-### Component Usage in Templates
-
-```html
-<!-- dreego/routes/get.dreego -->
-{#use Button}              <!-- finds components/Button.dreego -->
-{#use Alert}               <!-- finds @dreego-ui/Alert (no user Alert) -->
-
-<div>
-    <Alert type="success">Done!</Alert>
-    <Button class="primary" disabled={isLoading}>
-        Submit
-    </Button>
+<div method="post">
+    <@UserResult result={result} />
 </div>
 ```
 
-### Component CodeGen
+Successfully reaching the end of method logic renders the matching `<div>`.
+An action returning `nil` continues to rendering. Dreego never inserts an
+automatic redirect: `c.Redirect` is explicit and suppresses rendering. A normal
+Go error enters the App error path.
 
-The transpiler generates:
-```go
-// <Button class="primary" disabled={isLoading}>Submit</Button>
-// becomes:
-renderButton(c, ButtonProps{Class: "primary", Disabled: isLoading}, func(c *Context) string {
-    return "Submit"
-})
+Duplicate generated, plugin, user, and reserved framework routes fail during
+registration or generation with both source locations. Plugins register routes
+explicitly against their owning App and cannot silently override another route.
+
+## Component imports and calls
+
+Component declarations and imports are the only directives allowed outside the
+five root sections: `<go>`, `<head>`, `<div>`, `<style>`, and `<script>`.
+
+```dreego
+import Button "components/Button.dreego"
+
+<div>
+    <@Button class="primary" disabled={isLoading}>
+        Submit
+    </@Button>
+</div>
 ```
 
-- Props: All HTML attributes are bundled as a `ComponentProps` struct
-- Children: Content between tags as a closure (corresponds to `{#slot}`)
-- Self-closing: `<Alert type="info" />` → no children parameter
-- Scoping: Each component has its own scope hash (no CSS leaking)
+Imports are explicit. There is no implicit user-versus-plugin namespace
+fallback. A plugin that provides components exposes a documented import path;
+the application chooses the imported name.
 
-### Plugin Components Without .dreego Source (V2)
-
-If a plugin provides only Go functions for performance reasons (no `.dreego` transpilation needed):
-
-```go
-// dreego-ui registers a named components map
-func (p *UIPlugin) Components() map[string]ComponentFunc {
-    return map[string]ComponentFunc{
-        "Button": renderButton,
-        "Card":   renderCard,
-    }
-}
-```
-
-`{#use Button from "@dreego-ui/Button"}` → direct function call, no transpiler pass needed.
-
-## Decision 5: dreego/routes/ vs dreego/pages/
-
-`dreego/routes/` stays. The name is established (SvelteKit, SolidStart, Next.js Pages Router). `/pages/` would be equally valid, but we stick with the existing convention.
-
-Configurable via `dreego.config.json`:
-```json
-{ "routeDir": "dreego/pages" }
-```
+Component props are named and order-independent. Unknown, duplicate, and
+missing required props fail generation with a source location. Literal and
+expression props retain their declared Go types. Nested components and
+lexically scoped default or named slots are required. Component styles remain
+scoped to the component instance contract.
 
 ## Consequences
 
-- `dreego/gen/routes.go` is generated and committed
-- Contains ALL route imports (file-based + plugin)
-- `main.go` imports only `_ "myapp/dreego/gen"`
-- Plugin developers commit `dree.go` files (pre-generated)
-- Plugin components are located under `<plugin>/components/` (convention)
-- `dreego generate` finds them via `go list` + filesystem
-- User components shadow plugin components (explicit namespace fallback)
-- `[...catchall]`, `[[optional]]`, `(group)/` are added in lexer/parser
-- Duplicate route detection throws build errors
+- `app-runtime.1` replaces global registration and `init` side effects.
+- `routing-correctness.1` implements flat files, `+page.dreego`, conflicts, and
+  method-specific sections.
+- `component-correctness.1` implements explicit imports, typed named props,
+  nesting, and lexical slots.
+- The current fat Plugin interface is not part of this target.
+- SSG, Wails expansion, and runtime client hydration do not change this v0.1
+  SSR contract.

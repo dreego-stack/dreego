@@ -25,16 +25,16 @@ timestamp: 2026-07-29T01:16:00+02:00
 ## Syntax
 
 ```html
-<!-- dreego/routes/login.dreego -->
+<!-- dreego/routes/login/post.dreego -->
 <form g-action="Login">
     <input name="email" type="email" />
     {#if c.Errors("email")}
-        <p class="error">{c.Errors("email")}</p>
+        <p class="error">{{ c.Errors("email") }}</p>
     {/if}
     <button>Login</button>
 </form>
 
-<div>Welcome {name}</div>
+<div>Welcome {{ name }}</div>
 
 <go>
     type LoginForm struct {
@@ -165,7 +165,7 @@ func renderLoginForm(c *core.SSRContext, form LoginForm, errs map[string]string)
 
 CSRF token already in `<form>` via middleware `csrf_token` hidden input. Form-actions:
 - Does NOT generate CSRF token (middleware handles it)
-- Does NOT generate hidden `<input>` (developer places `{c.CSRFToken()}` or middleware injects)
+- Does NOT generate hidden `<input>` (developer places `{{ c.CSRFToken() }}` or middleware injects)
 - CSRF check: middleware already intercepts POST/PUT/DELETE → 403. Generated code never runs if CSRF fails.
 - HTMX auto-appends CSRF header → no manual `<input>` needed for HTMX users
 
