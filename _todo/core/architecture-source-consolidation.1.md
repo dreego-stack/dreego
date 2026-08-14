@@ -1,7 +1,6 @@
 ---
 area: documentation
 phase: pre-v0.1
-depends_on: pre-v0.1-product-decisions.1
 ---
 # Consolidate normative architecture sources
 

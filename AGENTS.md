@@ -195,7 +195,15 @@ For multi-step features, repeat the cycle for each step. Commit after each step.
 2. Start time (`server.Listen()`)
 3. Runtime (per request, as local as possible)
 
-No `map[string]string`, no `interface{}` cast, no string key in core.
+Generated application APIs, component props, route contracts, and primary
+application data are strongly typed. Unknown, duplicate, and missing generated
+fields fail as early as possible.
+
+Dynamic strings remain valid at boundaries whose schemas Dreego does not own,
+including HTTP headers, URL and form values, sessions, configuration, and
+request-local extension state. Missing values and conversions must be explicit
+at those boundaries. Convert boundary data into typed application structures
+before using it as domain data. Do not claim that Core contains no string keys.
 
 ---
 

@@ -169,7 +169,7 @@ Each plugin repo has its own `go.mod` and requires `github.com/dreego-stack/dree
 | `db` | SQL driver registration + migrations | `golang-migrate/migrate` |
 | `i18n` | Translation loading + templating | `nicksnyder/go-i18n` |
 | `seo` | Meta tags, sitemap, JSON-LD | none |
-| `markdown` | Markdown rendering with frontmatter | `yuin/goldmark` |
+| `markdown` | Optional Markdown rendering | `yuin/goldmark` |
 | `search` | Full-text search (Meilisearch, Typesense) | `meilisearch/meilisearch-go` |
 | `jobs` | Background jobs + cron | `robfig/cron` |
 | `pwa` | Service worker generation, manifest | none |

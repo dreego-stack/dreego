@@ -6,12 +6,17 @@ depends_on: app-runtime.1
 # Validate the plugin contract
 
 ## Goal
-Replace the premature frozen-v1 promise with a contract proven by multiple real external plugins before v1.
+Validate whether explicit App-bound registration functions need any shared
+capability interfaces after multiple real external plugins exist.
 
 ## Acceptance criteria
 - Auth, UI, and at least one infrastructure plugin exercise different capabilities.
-- Assets are either served through a defined lifecycle or removed from the contract.
-- Server startup and shutdown integrate plugin lifecycle safely, including cleanup after partial startup failure.
-- The review decides whether routes, middleware, assets, and lifecycle become small optional capability interfaces.
+- Each plugin begins with `Register(app, typedOptions) error` and no required
+  central Plugin interface.
+- Assets use explicit App APIs only when a real plugin requires them.
+- If background work requires startup or shutdown hooks, App integrates them
+  safely, including cleanup after partial startup failure.
+- The review decides whether any proven common behavior justifies a small
+  optional capability interface.
 - Registration order, duplicate plugins, late registration, errors, and concurrency have documented semantics and tests.
 - The final compatibility promise begins at v1, not before.

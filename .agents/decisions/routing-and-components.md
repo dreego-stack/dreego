@@ -95,16 +95,18 @@ go get github.com/dreego-stack/dreego-community-auth@v0.1.0
 
 ## Decision 3: Routing Conventions
 
-| Syntax                            | Method | Path                     | Go Param              |
-|-----------------------------------|--------|--------------------------|-----------------------|
-| `get.dreego`                      | GET    | `/`                      | —                     |
-| `about/get.dreego`                | GET    | `/about`                 | —                     |
-| `users/[id]/get.dreego`           | GET    | `/users/{id}`            | `c.Param("id")`       |
-| `blog/[...catchall]/get.dreego`   | GET    | `/blog/{catchall...}`    | `c.Param("catchall")` |
-| `(auth)/login/get.dreego`         | GET    | `/login`                 | —                     |
+| Source                              | Path                     | Go Param              |
+|-------------------------------------|--------------------------|-----------------------|
+| `+page.dreego`                      | `/`                      | —                     |
+| `about.dreego`                      | `/about`                 | —                     |
+| `about/+page.dreego`                | `/about`                 | —                     |
+| `users/[id]/+page.dreego`           | `/users/{id}`            | `c.Param("id")`       |
+| `blog/[...catchall]/+page.dreego`   | `/blog/{catchall...}`    | `c.Param("catchall")` |
+| `(auth)/login.dreego`               | `/login`                 | —                     |
 
-Optional segments are deliberately unsupported. Each method file owns one
-explicit route pattern.
+Optional segments and `index.dreego` are deliberately unsupported. One route
+file owns all declared HTTP methods for one explicit URL. A flat file and a
+`+page.dreego` file that resolve to the same URL are a conflict.
 
 Priority: Static > Dynamic > Catch-All
 
@@ -117,17 +119,26 @@ error: route conflict: /auth/login
 
 ### API Routes & HTTP Methods
 
-Directories define the URL path. The method-only filename keeps each HTTP
-operation in a separate, focused file:
+`<go>` and `<div>` default to GET. Other methods are declared explicitly in
+the same route file:
 
-```
-routes/api/users/get.dreego    → GET    /api/users
-routes/api/users/post.dreego   → POST   /api/users
-routes/api/users/put.dreego    → PUT    /api/users
-routes/api/users/delete.dreego → DELETE /api/users
+```dreego
+<go method="post">
+result, err := createUser(c)
+if err != nil {
+    return "", err
+}
+</go>
+
+<div method="post">
+    <@UserResult result={result} />
+</div>
 ```
 
-API routes render NO layout — only the `<div>` fragment. Detection: path contains `api/` → `layout = nil`.
+Successfully reaching the end of method logic renders the matching `<div>`.
+An action returning `nil` therefore continues to rendering. Dreego never adds
+an automatic redirect; `c.Redirect(...)` is explicit and suppresses rendering.
+A normal Go error enters the application error path.
 
 ### Per-Route Middleware (V1)
 
@@ -171,10 +182,10 @@ Priority (highest first):
 3. Plugin assets via fs.FS             ← @dreego-ui/Button
 ```
 
-Explicit disambiguation:
-```
-{#use Button from "components/Button.dreego"}     ← explicit user
-{#use Button from "@dreego-ui/Button"}            ← explicit plugin
+Component imports are header directives outside the five root sections:
+
+```dreego
+import Button "components/Button.dreego"
 ```
 
 Without `from` specification, search user directory first, then plugins:
@@ -207,15 +218,12 @@ No plugin loading, no reflection, no import in the CLI binary. Only filesystem s
 ### Component Usage in Templates
 
 ```html
-<!-- dreego/routes/get.dreego -->
-{#use Button}              <!-- finds components/Button.dreego -->
-{#use Alert}               <!-- finds @dreego-ui/Alert (no user Alert) -->
+import Button "components/Button.dreego"
 
 <div>
-    <Alert type="success">Done!</Alert>
-    <Button class="primary" disabled={isLoading}>
+    <@Button class="primary" disabled={isLoading}>
         Submit
-    </Button>
+    </@Button>
 </div>
 ```
 
@@ -223,16 +231,19 @@ No plugin loading, no reflection, no import in the CLI binary. Only filesystem s
 
 The transpiler generates:
 ```go
-// <Button class="primary" disabled={isLoading}>Submit</Button>
+// <@Button class="primary" disabled={isLoading}>Submit</@Button>
 // becomes:
 renderButton(c, ButtonProps{Class: "primary", Disabled: isLoading}, func(c *Context) string {
     return "Submit"
 })
 ```
 
-- Props: All HTML attributes are bundled as a `ComponentProps` struct
+- Props are named and order-independent.
+- Unknown, duplicate, and missing required props fail during generation with a source location.
+- Literal and unquoted expression props retain their declared Go types.
 - Children: Content between tags as a closure (corresponds to `{#slot}`)
-- Self-closing: `<Alert type="info" />` → no children parameter
+- Self-closing: `<@Alert type="info" />` → no children parameter
+- Nested components and lexically scoped default or named slots are required.
 - Scoping: Each component has its own scope hash (no CSS leaking)
 
 ### Plugin Components Without .dreego Source (V2)

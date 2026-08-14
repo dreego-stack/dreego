@@ -1,163 +1,73 @@
-
 ---
 type: Decision
-title: Plugin Interface (Capability-based)
-description: Capability-based plugin system with Go-typical implicit interfaces
-tags: [v0.0.10]
-timestamp: 2026-07-28T00:00:00Z
+title: Provisional Plugin Registration
+description: Plugins use explicit App-bound registration functions before v1
+tags: [pre-v0.1, plugins, app]
+timestamp: 2026-08-14T00:00:00Z
 ---
-# Plugin Interface (Capability-based)
+# Provisional Plugin Registration
 
-**Date:** 2026-07-28
-**Status:** Superseded as a stability promise; capability design pending pre-v1 validation
-**Review:** GLM-5.2 Expert Review (.tmp/output2.md)
+**Date:** 2026-08-14
+**Status:** Accepted for v0.1; compatibility remains provisional until v1
 
 ## Context
 
-Dreego needs a plugin system for its plugin ecosystem. The original decision attempted to make the first interface permanent before real external plugins existed. That stability promise was withdrawn: plugin contracts remain provisional until v1 and must be validated through multiple implementations after v0.1.
+The previous design standardized a base `Plugin` interface plus optional route,
+middleware, asset, transpiler, context, and lifecycle capabilities before real
+external plugins existed. The current all-in-one implementation also exposes
+capabilities that are not fully connected to the server.
+
+Dreego needs an explicit extension mechanism for the v0.1 `App` architecture,
+but it does not need a universal plugin object or premature stability promise.
 
 ## Decision
 
-**Capability-based interfaces.** Instead of a fat single interface, plugins only implement the capabilities they need — via Go's implicit interface satisfaction.
-
-## Interface Definition
-
-```go
-package dreego
-
-import (
-    "context"
-    "io/fs"
-    "net/http"
-)
-
-type PluginID string
-
-// Base — EVERY plugin MUST implement this
-type Plugin interface {
-    ID() PluginID
-    Init(app *App, cfg map[string]any) error
-}
-
-// Inject SSR middleware (optional)
-type MiddlewareProvider interface {
-    Middlewares() []func(http.Handler) http.Handler
-}
-
-// Register routes — SSR + SSG (optional)
-type RouteRegistrar interface {
-    RegisterRoutes(r Router) error
-}
-
-// Embedded assets (CSS/JS/Images) — target-agnostic via fs.FS (optional)
-type AssetProvider interface {
-    Assets() fs.FS
-}
-
-// Custom tags like <dreego:map /> in the transpiler (optional)
-type TranspilerHook interface {
-    Namespace() string
-    ParseTag(node TagNode) (TagRenderer, error)
-}
-
-// Extend request context (optional)
-type ContextExtender interface {
-    BindContext(b *ContextBuilder)
-}
-
-// Startup/Shutdown (optional)
-type Lifecycle interface {
-    OnStart(ctx context.Context) error
-    OnShutdown(ctx context.Context) error
-}
-```
-
-## Example: dreego-auth
+Plugins are ordinary Go packages that expose an App-bound registration
+function with typed options:
 
 ```go
 package auth
 
-import (
-    "embed"
-    "github.com/dreego/dreego"
-)
-
-//go:embed assets/*
-var assets embed.FS
-
-type AuthPlugin struct {
-    secretKey string
+type Options struct {
+    LoginPath  string
+    CookieName string
 }
 
-func New(secretKey string) *AuthPlugin {
-    return &AuthPlugin{secretKey: secretKey}
-}
-
-func (p *AuthPlugin) ID() dreego.PluginID { return "dreego.io/auth" }
-
-func (p *AuthPlugin) Init(app *dreego.App, cfg map[string]any) error {
-    p.secretKey = cfg["secret"].(string)
+func Register(app *dreego.App, options Options) error {
+    app.Use(sessionMiddleware(options))
+    app.Get(options.LoginPath, loginHandler)
+    app.Post(options.LoginPath, authenticateHandler)
     return nil
-}
-
-// AuthPlugin implements MiddlewareProvider
-func (p *AuthPlugin) Middlewares() []func(http.Handler) http.Handler {
-    return []func(http.Handler) http.Handler{p.authMiddleware}
-}
-
-// AuthPlugin implements RouteRegistrar
-func (p *AuthPlugin) RegisterRoutes(r dreego.Router) error {
-    r.Get("/auth/login", p.loginPage)
-    r.Post("/api/auth/login", p.handleLogin)
-    return nil
-}
-
-// AuthPlugin implements AssetProvider
-func (p *AuthPlugin) Assets() fs.FS { return assets }
-
-// AuthPlugin implements ContextExtender
-func (p *AuthPlugin) BindContext(b *dreego.ContextBuilder) {
-    b.Set(UserKey, func(c dreego.Context) *User {
-        return c.Get(UserKey).(*User)
-    })
 }
 ```
 
-## Plugin Order
-
-Explicit via registration order — no magic:
+Applications call registration explicitly and handle errors locally:
 
 ```go
-func main() {
-    app := dreego.New()
-    app.Use(session.New())   // 1. Session (MUST be before Auth)
-    app.Use(auth.New("key")) // 2. Auth
-    app.Use(admin.New())     // 3. Admin
-    app.Listen(":8080")
+app := dreego.New()
+
+if err := auth.Register(app, auth.Options{
+    LoginPath:  "/login",
+    CookieName: "session",
+}); err != nil {
+    log.Fatal(err)
 }
 ```
 
-Middleware is wrapped in execution order (LIFO like Chi).
+There is no stable central `Plugin` interface before v1. Registration order is
+source order. Each plugin owns its typed configuration and registers only the
+routes, middleware, or other App behavior it needs.
 
-## Why Capability-based
-
-| Advantage                             | Explanation                                      |
-|---------------------------------------|--------------------------------------------------|
-| Plugins only implement what they need | `dreego-map` doesn't need middleware             |
-| New capabilities can be added additively | `Lifecycle` came later — no breaking change    |
-| Go-idiomatic                          | `io.Reader`, `fs.FS` are the same pattern        |
-| No empty methods                      | No `return nil` for unused features              |
-
-## Why `fs.FS` instead of `embed.FS`
-
-`fs.FS` is Go's standard interface for filesystems. It works target-agnostically:
-- SSR: `embed.FS` implements `fs.FS`
-- SSG: `os.DirFS` implements `fs.FS` (files on disk)
-- Wails: Custom `fs.FS` implementation possible
+Assets and startup or shutdown hooks are added through explicit App methods or
+small capability interfaces only after real plugins prove a shared contract.
+Transpiler extensions require their own validated processor boundary and are
+not implied by runtime plugin registration.
 
 ## Consequences
 
-- The current `dreego.Plugin` interface may change before v1
-- New capabilities can be added as separate interfaces
-- No central plugin registry needed — user registers explicitly
-- Plugins start with `go get` + `app.Use()`
+- The current fat `Plugin` interface is removed during the App migration.
+- Plugins live in separate repositories with their own dependencies and releases.
+- No empty lifecycle, asset, route, or middleware methods are required.
+- Registration errors are ordinary Go errors and never hidden in package `init`.
+- Auth, UI, and at least one infrastructure plugin validate common needs before v1.
+- Compatibility guarantees for a shared plugin contract begin at v1, not v0.1.

@@ -2,7 +2,6 @@
 area: architecture
 phase: v0.1-blocker
 priority: 1
-depends_on: pre-v0.1-product-decisions.1
 ---
 # Make App own all runtime state
 
