@@ -46,7 +46,7 @@ timestamp: 2026-07-29T01:16:00+02:00
             c.SetSessionVal("user", form.Email)
             return c.Redirect("/dashboard", 303)
         }
-        c.Set("error", "unknown user")
+        c.SetSessionVal("error", "unknown user")
         return c.Redirect("/login", 303)
     }
 </go>
@@ -58,7 +58,7 @@ timestamp: 2026-07-29T01:16:00+02:00
 2. **Handler signature**: `func Name(c dreego.Context, form T) error` where T is a struct with `form:""` and optional `validate:""` tags.
 3. **Return semantics**:
    - `return c.Redirect(url, code)` → sends redirect response
-   - `return err` → 500, recovery middleware catches, or set `c.Set("error", ...)` + re-render
+   - `return err` → 500, recovery middleware catches, or set `c.SetSessionVal("error", ...)` + re-render
 4. **Forms without `g-action`**: Plain `<form method="post" action="/x">` — no Dreego handling, developer calls `c.FormValue()` manually.
 5. **No g-action on GET**: `g-action` is POST/PUT/DELETE only. GET uses `c.Query()`.
 6. **File-based method wins**: `post.dreego` sets method=POST for all handlers in that file. `<go method="post">` attribute overrides.
