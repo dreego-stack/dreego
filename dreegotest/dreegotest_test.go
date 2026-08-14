@@ -11,14 +11,13 @@ import (
 )
 
 func TestGetReturnsStatusAndBody(t *testing.T) {
-	dreegotest.Reset()
-	dreegotest.Register("GET", "/dgt-hello", func(w http.ResponseWriter, r *http.Request) {
+	app := dreego.New()
+	app.Register("GET", "/dgt-hello", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello, World"))
 	})
-	defer dreegotest.Reset()
-
-	resp := dreegotest.Get(t, "/dgt-hello")
+	client := dreegotest.NewApp(app)
+	resp := client.Get(t, "/dgt-hello")
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", resp.StatusCode, http.StatusOK)
 	}
@@ -28,29 +27,25 @@ func TestGetReturnsStatusAndBody(t *testing.T) {
 }
 
 func TestGetReturnsNonOKStatus(t *testing.T) {
-	dreegotest.Reset()
-	dreegotest.Register("GET", "/dgt-missing", func(w http.ResponseWriter, r *http.Request) {
+	app := dreego.New()
+	app.Register("GET", "/dgt-missing", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "nope", http.StatusNotFound)
 	})
-	defer dreegotest.Reset()
-
-	resp := dreegotest.Get(t, "/dgt-missing")
+	resp := dreegotest.NewApp(app).Get(t, "/dgt-missing")
 	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("StatusCode = %d, want %d", resp.StatusCode, http.StatusNotFound)
 	}
 }
 
 func TestPostFormBindsValues(t *testing.T) {
-	dreegotest.Reset()
-	dreegotest.Register("POST", "/dgt-submit", func(w http.ResponseWriter, r *http.Request) {
+	app := dreego.New()
+	app.Register("POST", "/dgt-submit", func(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("got:" + name))
 	})
-	defer dreegotest.Reset()
-
 	form := url.Values{"name": {"world"}}
-	resp := dreegotest.PostForm(t, "/dgt-submit", form)
+	resp := dreegotest.NewApp(app).PostForm(t, "/dgt-submit", form)
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("StatusCode = %d, want %d", resp.StatusCode, http.StatusOK)
 	}
@@ -60,15 +55,13 @@ func TestPostFormBindsValues(t *testing.T) {
 }
 
 func TestPostFormSetsFormContentType(t *testing.T) {
-	dreegotest.Reset()
+	app := dreego.New()
 	var contentType string
-	dreegotest.Register("POST", "/dgt-ctype", func(w http.ResponseWriter, r *http.Request) {
+	app.Register("POST", "/dgt-ctype", func(w http.ResponseWriter, r *http.Request) {
 		contentType = r.Header.Get("Content-Type")
 		w.WriteHeader(http.StatusOK)
 	})
-	defer dreegotest.Reset()
-
-	dreegotest.PostForm(t, "/dgt-ctype", url.Values{"a": {"1"}})
+	dreegotest.NewApp(app).PostForm(t, "/dgt-ctype", url.Values{"a": {"1"}})
 	if !strings.HasPrefix(contentType, "application/x-www-form-urlencoded") {
 		t.Errorf("Content-Type = %q, want application/x-www-form-urlencoded", contentType)
 	}

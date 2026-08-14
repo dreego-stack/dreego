@@ -98,9 +98,9 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 
 	var reg strings.Builder
 	if code == 404 {
-		reg.WriteString(fmt.Sprintf("\tapp.Register(\"\", \"%s\", %s)\n", catchPattern, handlerName))
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", "", catchPattern, handlerName)))
 	} else if code == 500 {
-		reg.WriteString(fmt.Sprintf("\tapp.SetErrorHandler(%d, %s)\n", code, handlerName))
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.SetErrorHandler(%d, %s)", code, handlerName)))
 	}
 
 	return buf.String(), reg.String(), nil

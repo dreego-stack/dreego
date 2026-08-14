@@ -165,8 +165,8 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 
 | Test | Type | Description |
 |------|-----|-------------|
-| dreegotest-basic | ✅ unit | `dreegotest.Get` simulates GET + reads body |
-| dreegotest-form | ✅ unit | `dreegotest.PostForm` validates form submission |
+| dreegotest-basic | ✅ unit | `dreegotest.NewApp(app).Get` simulates GET + reads body |
+| dreegotest-form | ✅ unit | `dreegotest.NewApp(app).PostForm` validates form submission |
 | dreegotest-render | ✅ unit | `dreegotest.RenderComponent` renders with props + XSS escape |
 
 ## Summary

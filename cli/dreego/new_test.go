@@ -47,3 +47,14 @@ func TestFindLocalRepoMissing(t *testing.T) {
 		t.Error("expected go.mod to be a regular file, not a directory")
 	}
 }
+
+func TestScaffoldVersionForDevelopmentBuild(t *testing.T) {
+	for _, version := range []string{"", "dev", "(devel)"} {
+		if got := scaffoldVersion(version); got != "v0.0.0" {
+			t.Errorf("scaffoldVersion(%q) = %q, want v0.0.0", version, got)
+		}
+	}
+	if got := scaffoldVersion("v0.0.41"); got != "v0.0.41" {
+		t.Errorf("release version changed to %q", got)
+	}
+}

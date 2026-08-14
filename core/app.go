@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,21 +13,21 @@ import (
 )
 
 type App struct {
-	mu                sync.Mutex
-	routes            []route
-	redirects         []redirectRule
-	rewrites          []rewriteRule
-	loggingEnabled    bool
-	csrfEnabled       bool
-	errorHandlers     map[int]http.HandlerFunc
-	sessionStore      Store
-	builtHandler      http.Handler
-	plugins           []Plugin
-	pluginMiddlewares []func(http.Handler) http.Handler
-	pluginAssets      []fs.FS
-	ready             atomic.Bool
-	cspHeader         string
-	built             bool
+	mu             sync.RWMutex
+	routes         []route
+	redirects      []redirectRule
+	rewrites       []rewriteRule
+	loggingEnabled bool
+	csrfEnabled    bool
+	errorHandlers  map[int]http.HandlerFunc
+	sessionStore   Store
+	builtHandler   http.Handler
+	middlewares    []func(http.Handler) http.Handler
+	customRules    map[string]validatorFunc
+	ready          atomic.Bool
+	cspHeader      string
+	built          bool
+	buildDone      chan struct{}
 }
 
 func New() *App {
@@ -36,109 +35,40 @@ func New() *App {
 		loggingEnabled: true,
 		csrfEnabled:    true,
 		errorHandlers:  map[int]http.HandlerFunc{},
+		customRules:    map[string]validatorFunc{},
 		cspHeader:      defaultCSP,
+		buildDone:      make(chan struct{}),
 	}
 	a.ready.Store(true)
 	return a
-}
-
-func (a *App) Register(method, pattern string, handler http.HandlerFunc) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	for i, r := range a.routes {
-		if r.method == method && r.pattern == pattern {
-			a.routes[i].handler = handler
-			return
-		}
-	}
-	a.routes = append(a.routes, route{method, pattern, handler})
-}
-
-func (a *App) RegisterRedirect(from, to string, status int) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.redirects = append(a.redirects, redirectRule{from: from, to: to, status: status})
-}
-
-func (a *App) RegisterRewrite(from, to string) {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.rewrites = append(a.rewrites, rewriteRule{from: from, to: to})
-}
-
-func (a *App) RegisterStatic(path, mime string, content []byte) {
-	data := make([]byte, len(content))
-	copy(data, content)
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", mime)
-		w.Write(data)
-	}
-	a.Register("GET", path, handler)
-}
-
-func (a *App) UsePlugin(p Plugin) {
-	p.RegisterRoutes(a)
-	a.pluginMiddlewares = append(a.pluginMiddlewares, p.Middlewares()...)
-	a.pluginAssets = append(a.pluginAssets, p.Assets())
-	a.plugins = append(a.plugins, p)
-}
-
-func (a *App) StartPlugins(ctx context.Context) error {
-	for _, p := range a.plugins {
-		if err := p.OnStart(ctx); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (a *App) ShutdownPlugins(ctx context.Context) error {
-	for _, p := range a.plugins {
-		if err := p.OnShutdown(ctx); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (a *App) SetLogging(enabled bool) {
-	a.loggingEnabled = enabled
-}
-
-func (a *App) SetCSRF(enabled bool) {
-	a.csrfEnabled = enabled
-}
-
-func (a *App) SetErrorHandler(code int, handler http.HandlerFunc) {
-	a.errorHandlers[code] = handler
-}
-
-func (a *App) SetSessionStore(s Store) {
-	a.sessionStore = s
-}
-
-func (a *App) SessionStore() Store {
-	return a.sessionStore
-}
-
-func (a *App) SetCSP(value string) {
-	a.cspHeader = value
 }
 
 func (a *App) SetReady(r bool) {
 	a.ready.Store(r)
 }
 
-func (a *App) RegisterRule(name string, fn func(string) string) {
-	registerCustomRule(name, fn)
-}
-
 func (a *App) Build() {
 	a.mu.Lock()
-	defer a.mu.Unlock()
 	if a.built {
+		a.mu.Unlock()
 		return
 	}
+	a.built = true
+	buildDone := a.buildDone
+	a.mu.Unlock()
+
+	completed := false
+	defer func() {
+		if completed {
+			return
+		}
+		a.mu.Lock()
+		a.built = false
+		close(buildDone)
+		a.buildDone = make(chan struct{})
+		a.mu.Unlock()
+	}()
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", a.healthHandler())
@@ -153,11 +83,11 @@ func (a *App) Build() {
 	}
 
 	var h http.Handler = mux
-	for i := len(a.pluginMiddlewares) - 1; i >= 0; i-- {
-		if a.pluginMiddlewares[i] == nil {
+	for i := len(a.middlewares) - 1; i >= 0; i-- {
+		if a.middlewares[i] == nil {
 			continue
 		}
-		h = a.pluginMiddlewares[i](h)
+		h = a.middlewares[i](h)
 	}
 	h = a.redirectRewriteMiddleware(h)
 	if a.sessionStore != nil && a.csrfEnabled {
@@ -173,13 +103,32 @@ func (a *App) Build() {
 	h = Compress()(h)
 	h = a.securityHeadersMiddleware(h)
 	h = Recovery(a.errorHandlers[500])(h)
+	a.mu.Lock()
 	a.builtHandler = h
-	a.built = true
+	close(buildDone)
+	a.mu.Unlock()
+	completed = true
 }
 
 func (a *App) Handler() http.Handler {
-	a.Build()
-	return a.builtHandler
+	for {
+		a.Build()
+		a.mu.RLock()
+		h := a.builtHandler
+		built := a.built
+		buildDone := a.buildDone
+		a.mu.RUnlock()
+		if h != nil {
+			return h
+		}
+		if !built {
+			continue
+		}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			<-buildDone
+			a.Handler().ServeHTTP(w, r)
+		})
+	}
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {

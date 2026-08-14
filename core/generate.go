@@ -188,16 +188,7 @@ func Run(force bool) error {
 	src := strings.Join(allSources, "")
 	compSrc := strings.Join(compSrcs, "")
 
-	routeImports := []string{}
-	if strings.Contains(src, "fmt.") {
-		routeImports = append(routeImports, "\"fmt\"")
-	}
-	if strings.Contains(src, "html.EscapeString") {
-		routeImports = append(routeImports, "\"html\"")
-	}
-	routeImports = append(routeImports, "\"net/http\"")
-	routeImports = append(routeImports, "\"strings\"")
-	routeImportLine := strings.Join(routeImports, "\n\t")
+	routeImportLine := routeImports(src)
 
 	compImports := []string{}
 	if strings.Contains(compSrc, "fmt.") {
@@ -211,22 +202,22 @@ func Run(force bool) error {
 
 	var configReg strings.Builder
 	if settings != nil {
-		configReg.WriteString(fmt.Sprintf("\tapp.SetLogging(%t)\n", settings.Logging.Enabled))
+		configReg.WriteString(registrationStatement(fmt.Sprintf("app.SetLogging(%t)", settings.Logging.Enabled)))
 		for _, rd := range settings.Redirects {
-			configReg.WriteString(fmt.Sprintf("\tapp.RegisterRedirect(\"%s\", \"%s\", %d)\n", rd.From, rd.To, rd.Status))
+			configReg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRedirect(%q, %q, %d)", rd.From, rd.To, rd.Status)))
 		}
 		for _, rw := range settings.Rewrites {
-			configReg.WriteString(fmt.Sprintf("\tapp.RegisterRewrite(\"%s\", \"%s\")\n", rw.From, rw.To))
+			configReg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRewrite(%q, %q)", rw.From, rw.To)))
 		}
 	}
 	configReg.WriteString(staticSrc)
 
 	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", routeImportLine)
 	routesOut += src
-	routesOut += "func Register(app *dreego.App) {\n"
+	routesOut += "func Register(app *dreego.App) error {\n"
 	routesOut += configReg.String()
 	routesOut += strings.Join(allRegistrations, "")
-	routesOut += "}\n"
+	routesOut += "\treturn nil\n}\n"
 
 	if !isUpToDate(filepath.Join(genDir, "routes.go"), routesOut) {
 		if err := os.WriteFile(filepath.Join(genDir, "routes.go"), []byte(routesOut), 0644); err != nil {
@@ -253,6 +244,20 @@ func Run(force bool) error {
 	fmt.Printf("Generated gen/routes.go + gen/components.go + gen/dree.go\n")
 	fmt.Printf("in %.2fms\n", float64(elapsed.Microseconds())/1000.0)
 	return nil
+}
+
+func routeImports(src string) string {
+	imports := []string{}
+	if strings.Contains(src, "fmt.") {
+		imports = append(imports, "\"fmt\"")
+	}
+	if strings.Contains(src, "html.EscapeString") {
+		imports = append(imports, "\"html\"")
+	}
+	if src != "" {
+		imports = append(imports, "\"net/http\"", "\"strings\"")
+	}
+	return strings.Join(imports, "\n\t")
 }
 
 func touchDreeGo(genDir string) error {
@@ -568,7 +573,7 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 		mime := MimeByExt(ext)
 
 		content := []byte(data)
-		buf.WriteString(fmt.Sprintf("\tapp.RegisterStatic(%q, %q, %#v)\n", urlPath, mime, content))
+		buf.WriteString(registrationStatement(fmt.Sprintf("app.RegisterStatic(%q, %q, %#v)", urlPath, mime, content)))
 		count++
 		return nil
 	})

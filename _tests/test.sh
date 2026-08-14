@@ -20,6 +20,7 @@ DREEGO_BIN="$(mktemp -d)/dreego"
 }
 export DREEGO_BIN
 export REPO_DIR
+export DREEGO_LOCAL_REPO="$REPO_DIR"
 
 # Install curl once, before any parallel test starts. Every server test needs
 # curl; doing apk add concurrently per-test races on apk's database lock and

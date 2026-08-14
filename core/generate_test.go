@@ -1,6 +1,16 @@
 package core
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+func TestRouteImportsWithoutRoutes(t *testing.T) {
+	imports := routeImports("")
+	if strings.Contains(imports, "net/http") || strings.Contains(imports, "strings") {
+		t.Fatalf("empty route source has unused imports: %s", imports)
+	}
+}
 
 func TestBuildPattern(t *testing.T) {
 	cases := map[string]string{

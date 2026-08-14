@@ -103,15 +103,20 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 
 	var reg strings.Builder
 	if hasFormActions {
-		reg.WriteString(fmt.Sprintf("\tapp.Register(\"GET\", \"%s\", %s)\n", pattern, getHandler))
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", "GET", pattern, getHandler)))
 		if postCode != "" && !strings.HasPrefix(postCode, "//") {
-			reg.WriteString(fmt.Sprintf("\tapp.Register(\"POST\", \"%s\", %s)\n", pattern, postHandler))
+			handler := fmt.Sprintf("func(w http.ResponseWriter, r *http.Request) { %s(app, w, r) }", postHandler)
+			reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", "POST", pattern, handler)))
 		}
 	} else {
-		reg.WriteString(fmt.Sprintf("\tapp.Register(\"%s\", \"%s\", %s)\n", firstMethod, pattern, getHandler))
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", firstMethod, pattern, getHandler)))
 	}
 
 	return buf.String(), reg.String(), nil
+}
+
+func registrationStatement(call string) string {
+	return fmt.Sprintf("\tif err := %s; err != nil {\n\t\treturn err\n\t}\n", call)
 }
 
 func genTypedBlocks(file *File) (string, error) {

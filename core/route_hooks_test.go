@@ -9,7 +9,9 @@ import (
 
 func TestPluginRegistersMultipleRoutes(t *testing.T) {
 	app := New()
-	app.UsePlugin(&multiRoutePlugin{})
+	if err := registerMultiRoutes(app); err != nil {
+		t.Fatal(err)
+	}
 
 	cases := []struct {
 		method string
@@ -36,7 +38,9 @@ func TestPluginRegistersMultipleRoutes(t *testing.T) {
 
 func TestPluginRoutesInNewApp(t *testing.T) {
 	app := New()
-	app.UsePlugin(&multiRoutePlugin{})
+	if err := registerMultiRoutes(app); err != nil {
+		t.Fatal(err)
+	}
 
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/plugin/multi", nil)
@@ -50,40 +54,54 @@ func TestPluginRoutesInNewApp(t *testing.T) {
 	}
 }
 
-func TestPluginRouteLastWinsOverridesAppRoute(t *testing.T) {
+func TestRegistrationFunctionCannotOverrideAppRoute(t *testing.T) {
 	app := New()
 
 	app.Register("GET", "/shared", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("app"))
 	})
-	app.UsePlugin(&overlapRoutePlugin{path: "/shared", marker: "plugin"})
-
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/shared", nil)
-	app.Handler().ServeHTTP(rr, req)
-
-	if got := rr.Body.String(); got != "plugin" {
-		t.Errorf("after plugin override, body = %q, want %q (last registration wins)", got, "plugin")
+	if err := registerOverlapRoute(app, "/shared", "plugin"); err == nil {
+		t.Fatal("duplicate plugin route must fail")
 	}
 }
 
-func TestPluginRouteLastWinsAppWinsOverPlugin(t *testing.T) {
+func TestAppCannotOverrideRegistrationFunctionRoute(t *testing.T) {
 	app := New()
 
-	app.UsePlugin(&overlapRoutePlugin{path: "/shared2", marker: "plugin"})
-	app.Register("GET", "/shared2", func(w http.ResponseWriter, _ *http.Request) {
+	if err := registerOverlapRoute(app, "/shared2", "plugin"); err != nil {
+		t.Fatal(err)
+	}
+	if err := app.Register("GET", "/shared2", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("app"))
-	})
-
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/shared2", nil)
-	app.Handler().ServeHTTP(rr, req)
-
-	if got := rr.Body.String(); got != "app" {
-		t.Errorf("after app override, body = %q, want %q (last registration wins)", got, "app")
+	}); err == nil {
+		t.Fatal("duplicate app route must fail")
 	}
+}
+
+func registerMultiRoutes(app *App) error {
+	routes := []struct {
+		method  string
+		pattern string
+		handler http.HandlerFunc
+	}{
+		{"GET", "/plugin/multi", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("multi-get")) }},
+		{"POST", "/plugin/multi", func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write([]byte("multi-post")) }},
+		{"GET", "/plugin/multi/{id}", func(w http.ResponseWriter, r *http.Request) { _, _ = w.Write([]byte("multi-get-" + r.PathValue("id"))) }},
+	}
+	for _, route := range routes {
+		if err := app.Register(route.method, route.pattern, route.handler); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func registerOverlapRoute(app *App, path, marker string) error {
+	return app.Register("GET", path, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(marker))
+	})
 }
 
 func TestGenerateRouterRendersRouteInfo(t *testing.T) {

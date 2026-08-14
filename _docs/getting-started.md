@@ -46,12 +46,20 @@ dreego run -d      # with debug logging (JSONL)
 package main
 
 import (
-    _ "myapp/dreego/gen"
-    dreego "github.com/dreego-stack/dreego/core"
+	"log"
+
+	"myapp/dreego/gen"
+	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
-    dreego.Listen(":8080")
+	app := dreego.New()
+	if err := gen.Register(app); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 

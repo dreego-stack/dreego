@@ -35,7 +35,7 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("ProjectDir: write go.mod: %v", err)
 	}
-	mainGo := "package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); gen.Register(app) }\n"
+	mainGo := "package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := gen.Register(app); err != nil { panic(err) } }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("ProjectDir: write main.go: %v", err)
 	}
@@ -49,6 +49,9 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 // valid require directive.
 func CLIBin(t *testing.T) string {
 	t.Helper()
+	if bin := os.Getenv("DREEGO_BIN"); bin != "" {
+		return bin
+	}
 	cliOnce.Do(func() {
 		repoRoot, err := RepoRoot()
 		if err != nil {
@@ -128,6 +131,14 @@ func runIn(t *testing.T, dir, bin string, args ...string) (string, error) {
 	t.Helper()
 	cmd := exec.Command(bin, args...)
 	cmd.Dir = dir
+	for _, value := range os.Environ() {
+		if !strings.HasPrefix(value, "DREEGO_LOCAL_REPO=") {
+			cmd.Env = append(cmd.Env, value)
+		}
+	}
+	if repoRoot, err := RepoRoot(); err == nil {
+		cmd.Env = append(cmd.Env, "DREEGO_LOCAL_REPO="+repoRoot)
+	}
 	out, err := cmd.CombinedOutput()
 	return string(out), err
 }

@@ -113,7 +113,7 @@ func Login(c dreego.Context, form LoginForm) error {
 
 ## CSRF Protection
 
-CSRF is handled by the middleware, not the form handler. With `dreego.SetSessionStore(...)`:
+CSRF is handled by the middleware, not the form handler. With `app.SetSessionStore(...)` before the app is built:
 - CSRF token is set via cookie on any GET request
 - POST/PUT/DELETE without valid token → 403
 - Token sent via `X-CSRF-Token` header or `csrf_token` form field
@@ -124,7 +124,7 @@ HTMX automatically sends the CSRF token via header. For plain HTML forms, includ
 <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
 ```
 
-Disable CSRF for API-only routes: `dreego.SetCSRF(false)`.
+Disable CSRF for an API-only app before build with `app.SetCSRF(false)`. Route-specific exemptions require a separate explicit contract and must not weaken unrelated routes.
 
 ## Without g-action
 
