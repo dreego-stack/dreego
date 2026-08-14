@@ -29,6 +29,8 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 				raw = true
 			case "upper":
 				code = fmt.Sprintf("strings.ToUpper(%s)", code)
+			default:
+				return "", fmt.Errorf("unknown filter '%s' at position %d", f, n.Pos)
 			}
 		}
 		if raw {

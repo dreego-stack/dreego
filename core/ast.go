@@ -24,6 +24,7 @@ type TemplateNode struct {
 	Attrs        string
 	SelfClose    bool
 	Filters      []string
+	Pos          int
 }
 
 type GoSection struct {
