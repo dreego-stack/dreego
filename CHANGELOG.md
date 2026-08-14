@@ -1,4 +1,8 @@
 
+## [Unreleased]
+
+- Breaking: remove EventBus, Queue, KVStore, Storage from core (plugins will own these APIs)
+
 ## v0.0.40 - 2026-08-14
 
 - Bug: catch-all directories generate invalid Go patterns
