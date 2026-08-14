@@ -17,7 +17,8 @@ Declarative server-side form handling. One struct, one function — Dreego gener
             c.SetSessionVal("user", form.Email)
             return c.Redirect("/dashboard", 303)
         }
-        return c.Render("login") // re-render with error
+        c.Set("error", "unknown user")
+        return c.Redirect("/login", 303)
     }
 </go>
 

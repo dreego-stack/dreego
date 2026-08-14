@@ -47,7 +47,7 @@ timestamp: 2026-07-29T01:16:00+02:00
             return c.Redirect("/dashboard", 303)
         }
         c.Set("error", "unknown user")
-        return c.Render("login")
+        return c.Redirect("/login", 303)
     }
 </go>
 ```
@@ -58,7 +58,6 @@ timestamp: 2026-07-29T01:16:00+02:00
 2. **Handler signature**: `func Name(c dreego.Context, form T) error` where T is a struct with `form:""` and optional `validate:""` tags.
 3. **Return semantics**:
    - `return c.Redirect(url, code)` → sends redirect response
-   - `return c.Render(name)` → re-renders named handler (uses `.dreego` filename pattern)
    - `return err` → 500, recovery middleware catches, or set `c.Set("error", ...)` + re-render
 4. **Forms without `g-action`**: Plain `<form method="post" action="/x">` — no Dreego handling, developer calls `c.FormValue()` manually.
 5. **No g-action on GET**: `g-action` is POST/PUT/DELETE only. GET uses `c.Query()`.
@@ -74,7 +73,6 @@ type Context interface {
     context.Context
     Param(name string) string
     Data(key string) any
-    Render(name string, data any) error
 
     // new for form-actions
     Errors(field string) string   // validation error for field
@@ -204,7 +202,6 @@ CSRF token already in `<form>` via middleware `csrf_token` hidden input. Form-ac
 | `form-gen-saveerrors` | `c.Set("error_...")` after validation error |
 | `form-gen-redirect` | Handler returning `c.Redirect()` compiles |
 | `form-gen-autoimports` | Auto-import `validator` when needed |
-| `form-gen-render` | Handler returning `c.Render()` compiles |
 
 ### Runtime HTTP (10)
 | Test | What |
@@ -223,7 +220,7 @@ CSRF token already in `<form>` via middleware `csrf_token` hidden input. Form-ac
 ### Implementation Order
 
 1. **Step 1**: Parser: `g-action` discovery in template, `GoSection.Action`, action→handler matching
-2. **Step 2**: Context: `Errors()`, `Old()`, `Redirect()`, `Render()` → real implementation
+2. **Step 2**: Context: `Errors()`, `Old()`, `Redirect()` → real implementation
 3. **Step 3**: Validation: `BindForm()`, `ValidateForm()` with `go-playground/validator`
 4. **Step 4**: Codegen: Form handler generation (parse → validate → dispatch → render)
 5. **Step 5**: Tests: 30 integration tests
