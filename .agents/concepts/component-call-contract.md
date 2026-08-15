@@ -55,14 +55,15 @@ routes/index.dreego:5:9: Card title: expected string, got int
 - Wrong-type expression props produce one error per mismatch.
 - Prop type checking uses simple literal inference only: it distinguishes string, int, and other literal kinds directly visible in the call. It does not infer types from arbitrary Go expressions or calling scope via AST analysis.
 
-### Self-closing with children
+### Self-closing calls
 
-A call written as `<@Card ... />` with following sibling content or nested tags
-inside the same parent is invalid only when the parser treats the self-closing
-tag as an open tag that later finds `</@Card>`. The exact diagnostic is:
+A call written as `<@Card ... />` has no children and renders every declared
+slot as empty. Nodes that follow it inside the same parent are siblings and are
+rendered normally:
 
-```
-<file>:<line>:<col>: Card: self-closing call must not contain children
+```dreego
+<@Card/>
+<p>Sibling content</p>
 ```
 
 ### Slot fallback
@@ -82,7 +83,8 @@ A call may place another component call inside a slot:
 ```
 
 The inner component is rendered first and the resulting string is inserted into
-the outer component's slot buffer.
+the outer component's slot buffer. Builder variables are selected explicitly
+during code generation; generated source is never rewritten to redirect output.
 
 ### Named slot syntax
 
@@ -102,12 +104,18 @@ Every diagnostic points to the line of the component call in the calling file,
 not the component definition. Prop-level diagnostics point to the line where
 `<@Name` appears.
 
-### Sibling slot leakage
+### Slot invocation isolation
 
-After rendering a component call with children, the slot buffer is reset so the
-next sibling call does not receive leftover content. A test with two adjacent
-`<@Card>` calls where only the first has children must show the second card with
-an empty slot.
+Before rendering a component call, existing default and named slot values are
+saved. They are restored after rendering, including across nested component
+calls. Sibling calls therefore cannot inherit content, while an outer call does
+not lose its slots when its content renders another component.
+
+### Forward component references
+
+Generation loads and registers every component contract before emitting any
+component code. Named prop and slot validation is therefore independent of
+component filenames and directory traversal order.
 
 ## Boundaries / Always Ask First Never
 
@@ -128,4 +136,3 @@ an empty slot.
 - No existing component test regresses.
 - Core remains free of external dependencies.
 - Diagnostics match the message format documented above.
-

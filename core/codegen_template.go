@@ -203,12 +203,12 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		}
 		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", %s.String())\n", indent, slotBuilder))
 		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, funcName, args))
-		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
-		buf.WriteString(fmt.Sprintf("%s\t%s.WriteString(html)\n", indent, builder))
 		buf.WriteString(restoreContextValue(indent, "slot", previousSlot))
 		for i, key := range slotKeys {
 			buf.WriteString(restoreContextValue(indent, key, previousNamedSlots[i]))
 		}
+		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
+		buf.WriteString(fmt.Sprintf("%s\t%s.WriteString(html)\n", indent, builder))
 		buf.WriteString(fmt.Sprintf("%s}\n", indent))
 		return buf.String(), nil
 	}
