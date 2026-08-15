@@ -21,7 +21,7 @@ func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestGenTemplLayoutSlotNodeUsesSlot(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestSplitLayoutTextNoPlaceholders(t *testing.T) {
 // genLayoutNode with a named NodeSlot must read the named slot from context.
 func TestGenLayoutNodeNamedSlot(t *testing.T) {
 	n := TemplateNode{Type: NodeSlot, Content: "footer"}
-	out, err := genLayoutNode(n, 1)
+	out, err := genLayoutNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

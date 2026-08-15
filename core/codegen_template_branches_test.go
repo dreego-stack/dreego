@@ -22,7 +22,7 @@ func TestGenTemplateNodeIfElseIfChain(t *testing.T) {
 			},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestGenTemplateNodeEachWithElse(t *testing.T) {
 			{Type: NodeText, Content: "empty"},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -65,7 +65,7 @@ func TestGenTemplateNodeEachLoopVar(t *testing.T) {
 			{Type: NodeExpression, Content: "$loop.Index"},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestGenTemplateNodeEachSubstitutesLoopInIfCond(t *testing.T) {
 			{Type: NodeExpression, Content: "item.Name"},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestGenTemplateNodeEachSubstitutesLoopInElseIfCond(t *testing.T) {
 			},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestGenTemplateNodeEachLoopInIfCondFullParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNode(file.Template.Nodes[0], 0)
+	out, err := genTemplateNode(NewGenerator(), file.Template.Nodes[0], 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -175,7 +175,7 @@ func TestGenTemplateNodeSlotNamed(t *testing.T) {
 		Type:    NodeSlot,
 		Content: "name",
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -188,7 +188,7 @@ func TestGenTemplateNodeSlotDefault(t *testing.T) {
 	n := TemplateNode{
 		Type: NodeSlot,
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -205,7 +205,7 @@ func TestGenTemplateNodeSlotWithChildren(t *testing.T) {
 			{Type: NodeText, Content: "fallback"},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -224,7 +224,7 @@ func TestGenTemplateNodeComponentCallSelfClose(t *testing.T) {
 		Attrs:     `label="Hi"`,
 		SelfClose: true,
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -251,7 +251,7 @@ func TestGenTemplateNodeComponentCallWithSlot(t *testing.T) {
 			{Type: NodeText, Content: "body"},
 		},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -267,7 +267,7 @@ func TestGenTemplateNodeVerbatim(t *testing.T) {
 		Type:    NodeVerbatim,
 		Content: "<b>raw</b>",
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -285,7 +285,7 @@ func TestGenTemplateNodeFilterRawUpper(t *testing.T) {
 		Content: "name",
 		Filters: []string{"raw", "upper"},
 	}
-	result, err := genTemplateNode(n, 0)
+	result, err := genTemplateNode(NewGenerator(), n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

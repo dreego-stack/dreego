@@ -18,7 +18,7 @@ func TestGenComponentCallResolvesAttrExpression(t *testing.T) {
 		Attrs:     `href={url} label="x"`,
 		SelfClose: true,
 	}
-	out, err := genComponentCall(n)
+	out, err := (&compGen{gen: NewGenerator()}).genComponentCall(n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -70,7 +70,7 @@ func TestGenerateComponentStatefulGenerator(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateComponent(file, scopeHashFor(src))
+	out, err := GenerateComponent(NewGenerator(), file, scopeHashFor(src))
 	if err != nil {
 		t.Fatalf("GenerateComponent: %v", err)
 	}
@@ -112,7 +112,7 @@ func TestGenerateComponentAppliesPropDefaults(t *testing.T) {
 	file := parseFile(t, body)
 	file.Component = comp
 
-	out, err := GenerateComponent(file, scopeHashFor(src))
+	out, err := GenerateComponent(NewGenerator(), file, scopeHashFor(src))
 	if err != nil {
 		t.Fatalf("GenerateComponent: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestGenerateComponentBoolDefaultNotApplied(t *testing.T) {
 	file := parseFile(t, body)
 	file.Component = comp
 
-	out, err := GenerateComponent(file, scopeHashFor(src))
+	out, err := GenerateComponent(NewGenerator(), file, scopeHashFor(src))
 	if err != nil {
 		t.Fatalf("GenerateComponent: %v", err)
 	}

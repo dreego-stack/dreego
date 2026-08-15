@@ -17,7 +17,7 @@ func TestGenerateErrorHandlerScopeDivNotBeforeDoctype(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{p...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{p...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestGenerateErrorHandlerHeadBeforeScopeDiv(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{p...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{p...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestGenerateErrorHandlerScopeDivKeptWithoutDoctype(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{p...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{p...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestGenerateErrorHandlerHeadAfterDoctype(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{p...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{p...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestGenerateErrorHandlerStyleUnscopedWithDoctype(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{p...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{p...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

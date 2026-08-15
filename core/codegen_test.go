@@ -15,7 +15,7 @@ func TestGenerateErrorHandler404(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 404, "/{path...}", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 404, "/{path...}", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestGenerateErrorHandler500(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateErrorHandler(file, "Site", 500, "/", "abc")
+	out, _, err := GenerateErrorHandler(NewGenerator(), file, "Site", 500, "/", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestGenerateMethodHandlerNonGET(t *testing.T) {
 			},
 		},
 	}
-	out, _, err := GenerateMethodHandler(file, nil, "main", "home", "/home", "abc")
+	out, _, err := GenerateMethodHandler(NewGenerator(), file, nil, "main", "home", "/home", "abc")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

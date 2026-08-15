@@ -17,7 +17,7 @@ func TestGenTemplEmitsHeadStandaloneWithoutLayout(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, nil, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, nil, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestGenTemplNoHeadWithoutLayout(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, nil, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, nil, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestGenTemplHeadAfterDoctypeWithoutLayout(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, nil, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, nil, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

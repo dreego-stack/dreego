@@ -25,7 +25,7 @@ func TestGenTemplHeadMergeDedupesTitle(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -55,7 +55,7 @@ func TestGenTemplHeadMergeDedupesMetaDescription(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestGenTemplHeadMergeKeepsLayoutTitleWithoutRouteTitle(t *testing.T) {
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestGenTemplHeadMergeKeepsCharsetAndLinkWhenStrippingDescription(t *testing
 		},
 	}
 
-	out, err := genTempl(file, layout, "abc123", true)
+	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

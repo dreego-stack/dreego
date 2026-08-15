@@ -10,7 +10,7 @@ func TestGenTemplateNodeExpressionEscapesHTML(t *testing.T) {
 		Type:    NodeExpression,
 		Content: "name",
 	}
-	result, err := genTemplateNode(n, 1)
+	result, err := genTemplateNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestGenTemplateNodeIfRecursivelyEscapes(t *testing.T) {
 			{Type: NodeExpression, Content: "name"},
 		},
 	}
-	result, err := genTemplateNode(n, 1)
+	result, err := genTemplateNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -47,13 +47,13 @@ func TestGenTemplateNodeEachRecursivelyEscapes(t *testing.T) {
 			{Type: NodeExpression, Content: "item.Name"},
 		},
 	}
-	result, err := genTemplateNode(n, 1)
+	result, err := genTemplateNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if !strings.Contains(result, "html.EscapeString") {
-		t.Errorf("{#each} child expression must use html.EscapeString, got:\n%s", result)
+		t.Errorf("{#if} child expression must use html.EscapeString, got:\n%s", result)
 	}
 }
 
@@ -62,7 +62,7 @@ func TestGenTemplateNodeTextNoEscape(t *testing.T) {
 		Type:    NodeText,
 		Content: "hello",
 	}
-	result, err := genTemplateNode(n, 1)
+	result, err := genTemplateNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNode(file.Template.Nodes[0], 0)
+	out, err := genTemplateNode(NewGenerator(), file.Template.Nodes[0], 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestGenTemplateNodeCompNestedIfInElseNotDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNodeComp(file.Template.Nodes[0])
+	out, err := genTemplateNodeComp(NewGenerator(), file.Template.Nodes[0])
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -121,7 +121,7 @@ func TestGenTemplateNodeCompNestedIfInElseNotDropped(t *testing.T) {
 }
 
 func TestGenTemplateNodeCompReturnsErrorForUnsupportedNode(t *testing.T) {
-	_, err := genTemplateNodeComp(TemplateNode{Type: TemplateNodeType(999)})
+	_, err := genTemplateNodeComp(NewGenerator(), TemplateNode{Type: TemplateNodeType(999)})
 	if err == nil {
 		t.Fatal("expected error for unsupported template node type in component codegen")
 	}
@@ -143,7 +143,7 @@ func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
 	}
 	var out strings.Builder
 	for _, n := range file.Template.Nodes {
-		code, err := genTemplateNodeComp(n)
+		code, err := genTemplateNodeComp(NewGenerator(), n)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -160,7 +160,7 @@ func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
 
 func TestGenTemplateNodeRouteAttrExpressionEscapesValue(t *testing.T) {
 	n := TemplateNode{Type: NodeText, Content: `<a href="{{ url }}">link</a>`}
-	got, err := genTemplateNode(n, 1)
+	got, err := genTemplateNode(NewGenerator(), n, 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
