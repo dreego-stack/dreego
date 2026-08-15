@@ -97,13 +97,14 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 
 	provided, err := parseCallAttrs(attrs)
 	if err != nil {
-		return "", fmt.Errorf("%s: %s : %w", sourceRef(src, pos), comp.Name, err)
+		return "", fmt.Errorf("%s: %s: %w", sourceRef(src, pos), comp.Name, err)
 	}
 
 	seen := map[string]bool{}
 	providedMap := map[string]string{}
 	var dups []string
 	var unknowns []string
+	var wrongType *propTypeError
 	for _, a := range provided {
 		if seen[a.Name] {
 			dups = append(dups, a.Name)
@@ -114,7 +115,13 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 			unknowns = append(unknowns, a.Name)
 			continue
 		}
-		providedMap[a.Name] = attrExpressionValue(a.Value)
+		prop := propByName(comp, a.Name)
+		expr := attrExpressionValue(a.Value)
+		if mismatch := checkPropLiteralType(prop, expr, a.Value); mismatch != nil {
+			wrongType = &propTypeError{prop: a.Name, got: mismatch.got, want: mismatch.want}
+			break
+		}
+		providedMap[a.Name] = expr
 	}
 
 	var missing []string
@@ -126,13 +133,16 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 
 	loc := sourceRef(src, pos)
 	if len(dups) > 0 {
-		return "", fmt.Errorf("%s: %s \"%s\": duplicate prop \"%s\"", loc, comp.Name, dups[0], dups[0])
+		return "", fmt.Errorf("%s: %s %s: duplicate prop \"%s\"", loc, comp.Name, dups[0], dups[0])
 	}
 	if len(unknowns) > 0 {
-		return "", fmt.Errorf("%s: %s \"%s\": unknown prop \"%s\"", loc, comp.Name, unknowns[0], unknowns[0])
+		return "", fmt.Errorf("%s: %s %s: unknown prop \"%s\"", loc, comp.Name, unknowns[0], unknowns[0])
+	}
+	if wrongType != nil {
+		return "", fmt.Errorf("%s: %s %s: expected %s, got %s", loc, comp.Name, wrongType.prop, wrongType.want, wrongType.got)
 	}
 	if len(missing) > 0 {
-		return "", fmt.Errorf("%s: %s \"%s\": missing required prop \"%s\"", loc, comp.Name, missing[0], missing[0])
+		return "", fmt.Errorf("%s: %s %s: missing required prop \"%s\"", loc, comp.Name, missing[0], missing[0])
 	}
 
 	var args []string
@@ -149,6 +159,55 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 		}
 	}
 	return strings.Join(args, ", "), nil
+}
+
+func propByName(comp *ComponentDef, name string) Prop {
+	for _, p := range comp.Props {
+		if p.Name == name {
+			return p
+		}
+	}
+	return Prop{}
+}
+
+type propTypeError struct {
+	prop string
+	want string
+	got  string
+}
+
+func checkPropLiteralType(prop Prop, expr, rawValue string) *propTypeError {
+	if !isExpressionValue(rawValue) {
+		return nil
+	}
+	if prop.Type == "" {
+		return nil
+	}
+	kind := classifyExpression(expr)
+	if kind == exprKindOther {
+		return nil
+	}
+	want := propTypeKind(prop.Type)
+	if kind != want {
+		return &propTypeError{prop: prop.Name, want: prop.Type, got: kindName(kind)}
+	}
+	return nil
+}
+
+func isExpressionValue(raw string) bool {
+	raw = strings.TrimSpace(raw)
+	return len(raw) >= 2 && raw[0] == '{' && raw[len(raw)-1] == '}' && strings.Count(raw, "{") == 1 && strings.Count(raw, "}") == 1
+}
+
+func propTypeKind(typ string) exprKind {
+	switch typ {
+	case "string":
+		return exprKindStringLiteral
+	case "int", "int32", "int64", "uint", "uint32", "uint64":
+		return exprKindIntLiteral
+	default:
+		return exprKindOther
+	}
 }
 
 func propExists(comp *ComponentDef, name string) bool {

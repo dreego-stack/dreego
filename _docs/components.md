@@ -65,6 +65,8 @@ import Card "components/Card.dreego"
 
 Dynamic text and HTML attribute values use `{{ expression }}`. Component props
 use `{expression}` without quotes so the generated Go value keeps its type.
+`prop={expr}` passes the Go expression `expr` directly to the generated
+component call.
 
 **In the call:**
 
@@ -83,6 +85,21 @@ Component Link (url string)
 <div><@Link url="https://dreego.dev">Home</@Link></div>
 ```
 
+Simple literal expressions (`"..."`, integer literals) are type-checked
+against the declared prop type at `dreego generate` time. Non-literal expressions
+are accepted unchecked because the transpiler does not evaluate Go scope.
+
+```dreego
+Component Card (title string)
+<div><@Card title={42}/></div>
+```
+
+Error:
+
+```text
+routes/index.dreego:4:18: Card title: expected string, got int
+```
+
 The HTML attribute expression is escaped before emission. Escaping prevents
 attribute injection, but it does not make an arbitrary URL trustworthy. Before
 using untrusted input in `href`, `src`, or similar attributes, parse the URL and
@@ -98,7 +115,7 @@ and `https`. Reject dangerous schemes such as `javascript`.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.
 7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value.
-8. **Typed props** — `prop={expression}` passes a Go value without converting it to a string.
+8. **Typed props** — `prop={expression}` passes a Go expression value without converting it to a string.
 9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
 
 ## Named Prop Contract
