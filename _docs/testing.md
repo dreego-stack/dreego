@@ -91,6 +91,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 |------|-----|-------------|
 | basic | ✅ pos | Prop + rendering |
 | self-closing | ✅ pos | `<@Icon/>` without body |
+| self-close-slot-fallback | ✅ pos | `<@Card/>` renders empty default slot; children after self-close → generate FAIL |
 | not-found | ✅ pos | `<@Missing/>` → go build FAIL |
 | scoped-style | ✅ pos | Component CSS does not leak |
 | with-go | ✅ pos | `<go>` in component |
@@ -100,7 +101,10 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | multi-props | ✅ pos | Component with 3+ props (`_tests/go` `TestComponentMultiProps`) |
 | prop-default | ⬜ pos | Prop with default value |
 | prop-expression | ✅ pos | Prop value from expression: `title={user.Name}` (`_tests/go` `TestComponentPropExpression`, `TestComponentPropExpr`) |
+| expr-prop-type-check | ✅ neg | String literal, int literal, and wrong-type literal checked at `dreego generate` (`_tests/go/component_call_expr_props_test.go`) |
+| named-prop-contract | ✅ neg | Order, missing, unknown, and duplicate props fail at `dreego generate` (`_tests/go/component_call_named_props_test.go`) |
 | attr-prop-substitution | ✅ bug | `{{ prop }}` substituted in HTML attributes: `<a href="{{ url }}">` (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
+| named-slot-isolation | ✅ pos | Named slot render, unknown slot error, sibling isolation, nested component in slot (`_tests/go/component_call_named_slots_test.go`) |
 | slot-missing | ⬜ pos | Component with `{#slot}`, call without body |
 | slot-named | ⬜ v0.0.7 | `{#slot header}` |
 | recursive | ⬜ neg | Component calls itself → error or warning |
@@ -173,7 +177,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 
 | Status | Count |
 |--------|-------|
-| ✅ Implemented | 36 |
+| ✅ Implemented | 40 |
 | ⬜ Planned (v0.0.7) | 30 |
 | ⬜ Named Slots (v0.0.8) | 4 |
 

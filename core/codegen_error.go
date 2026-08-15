@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
+func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
 
 	safeName := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
@@ -49,7 +49,7 @@ func GenerateErrorHandler(file *File, pkgName string, code int, catchPattern str
 		}
 		headPending := suppressScope && headCode != ""
 		for _, n := range file.Template.Nodes {
-			code, err := genTemplateNode(n, 1)
+			code, err := genTemplateNode(gen, n, 1)
 			if err != nil {
 				return "", "", err
 			}

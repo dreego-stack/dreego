@@ -51,6 +51,9 @@ import Card "components/Card.dreego"
 <div><@Card title="Hello"/></div>
 ```
 
+A self-closing call renders empty default and named slots. Content after the
+tag belongs to the parent and remains a normal sibling.
+
 **With children (default slot):**
 
 ```html
@@ -61,10 +64,25 @@ import Card "components/Card.dreego"
 </div>
 ```
 
+## Self-closing Calls and Slot Fallback
+
+`<@Card/>` is allowed and renders an empty default slot.
+
+The following paragraph is a sibling of the component:
+
+```html
+<div><@Card/><p>Sibling content</p></div>
+```
+
+Use `<@Card>...</@Card>` when content should populate the component's slots.
+`<@Card></@Card>` is valid and also renders with empty slots.
+
 ## Attribute Props
 
 Dynamic text and HTML attribute values use `{{ expression }}`. Component props
 use `{expression}` without quotes so the generated Go value keeps its type.
+`prop={expr}` passes the Go expression `expr` directly to the generated
+component call.
 
 **In the call:**
 
@@ -83,6 +101,21 @@ Component Link (url string)
 <div><@Link url="https://dreego.dev">Home</@Link></div>
 ```
 
+Simple literal expressions (`"..."`, integer literals) are type-checked
+against the declared prop type at `dreego generate` time. Non-literal expressions
+are accepted unchecked because the transpiler does not evaluate Go scope.
+
+```dreego
+Component Card (title string)
+<div><@Card title={42}/></div>
+```
+
+Error:
+
+```text
+routes/index.dreego:4:18: Card title: expected string, got int
+```
+
 The HTML attribute expression is escaped before emission. Escaping prevents
 attribute injection, but it does not make an arbitrary URL trustworthy. Before
 using untrusted input in `href`, `src`, or similar attributes, parse the URL and
@@ -98,7 +131,47 @@ and `https`. Reject dangerous schemes such as `javascript`.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.
 7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value.
-8. **Typed props** — `prop={expression}` passes a Go value without converting it to a string.
+8. **Typed props** — `prop={expression}` passes a Go expression value without converting it to a string.
+9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
+
+## Named Prop Contract
+
+Component props are **named** and **order-independent**. The set of props passed in a call is validated against the component declaration at `dreego generate`.
+
+- Missing required props are errors.
+- Unknown props are errors.
+- Duplicate props are errors.
+- Prop order in the call does not have to match the declaration order.
+
+**Component:**
+
+```
+Component Card (title string)
+```
+
+**Valid call:**
+
+```dreego
+<div><@Card title="Items"/></div>
+```
+
+**Invalid calls:**
+
+```dreego
+<div><@Card title="Items" count={3}/></div>
+<div><@Card title="Items" title="Again"/></div>
+<div><@Card/></div>
+```
+
+Error examples from `dreego generate`:
+
+```text
+routes/index.dreego:4:3: Card "count": unknown prop "count"
+routes/index.dreego:5:3: Card "title": duplicate prop "title"
+routes/index.dreego:6:3: Card "title": missing required prop "title"
+```
+
+The error includes the source file, line, column, component name, and prop name so the failure is easy to locate without running `go build`.
 
 ## Scoped CSS
 
@@ -149,6 +222,9 @@ import Card "components/Card.dreego"
 - `{#slot header}content{/slot}` — Definition in the route (with body)
 - `{#slot}` — Default slot (no `{/slot}` needed)
 - Multiple named slots per component possible
+- Unknown named slots fail at `dreego generate` with error `routes/index.dreego:4:3: Card: unknown slot "footer"`
+- Nested slot declarations inside slot content are not allowed and fail with `nested slot declaration is not allowed`
+- Slot content is scoped to exactly one component invocation; sibling calls never inherit another call's slot content
 
 ## Generated Go Code
 

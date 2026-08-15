@@ -6,11 +6,12 @@ import (
 )
 
 type compGen struct {
+	gen       *generator
 	inSection bool
 }
 
-func genTemplateNodeComp(n TemplateNode) (string, error) {
-	g := &compGen{}
+func genTemplateNodeComp(gen *generator, n TemplateNode) (string, error) {
+	g := &compGen{gen: gen}
 	return g.node(n)
 }
 
@@ -123,18 +124,23 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 		}
 		return "b.WriteString(ctx.Get(\"slot\"))", nil
 	case NodeComponentCall:
-		return genComponentCall(n)
+		return g.genComponentCall(n)
 	case NodeVerbatim:
 		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content)), nil
 	}
 	return "", fmt.Errorf("unsupported component node type %d", n.Type)
 }
 
-func genComponentCall(n TemplateNode) (string, error) {
+func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 	parts := strings.SplitN(n.Tag, ".", 2)
 	funcName := parts[len(parts)-1]
+	def := g.gen.lookupDef(funcName)
 	if n.SelfClose {
-		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, extractAttrValues(n.Attrs)), nil
+		args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, args), nil
 	}
 	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag), nil
 }
@@ -219,7 +225,7 @@ func sectionCloseLen(s string) int {
 	return 0
 }
 
-func GenerateComponent(file *File, scopeHash string) (string, error) {
+func GenerateComponent(gen *generator, file *File, scopeHash string) (string, error) {
 	comp := file.Component
 	if comp == nil {
 		return "", fmt.Errorf("no component definition")
@@ -254,7 +260,7 @@ func GenerateComponent(file *File, scopeHash string) (string, error) {
 
 	if file.Template != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
-		g := &compGen{}
+		g := &compGen{gen: gen}
 		for _, n := range file.Template.Nodes {
 			code, err := g.node(n)
 			if err != nil {

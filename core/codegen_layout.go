@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func genLayoutNode(n TemplateNode, depth int) (string, error) {
+func genLayoutNode(gen *generator, n TemplateNode, depth int) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	if n.Type == NodeSlot {
 		if n.Content != "" {
@@ -28,7 +28,7 @@ func genLayoutNode(n TemplateNode, depth int) (string, error) {
 		}
 		return out, nil
 	}
-	return genTemplateNode(n, depth)
+	return genTemplateNode(gen, n, depth)
 }
 
 func splitLayoutText(s string) []string {

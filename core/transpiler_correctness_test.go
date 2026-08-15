@@ -195,7 +195,7 @@ func TestGenTemplateNodeUnknownFilterErrors(t *testing.T) {
 		Filters: []string{"nosuchfilter"},
 		Pos:     42,
 	}
-	_, err := genTemplateNode(n, 0)
+	_, err := genTemplateNode(NewGenerator(), n, 0)
 	if err == nil {
 		t.Fatal("expected error for unknown filter, got nil")
 	}
@@ -213,7 +213,7 @@ func TestGenTemplateNodeCompUnknownFilterErrors(t *testing.T) {
 		Filters: []string{"nosuchfilter"},
 		Pos:     7,
 	}
-	_, err := genTemplateNodeComp(n)
+	_, err := genTemplateNodeComp(NewGenerator(), n)
 	if err == nil {
 		t.Fatal("expected error for unknown filter, got nil")
 	}

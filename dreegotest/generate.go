@@ -104,6 +104,7 @@ func generate(src string) (string, error) {
 		return "", err
 	}
 	file.Imports = imports
+	file.SourceContent = src
 	if len(file.Go) == 0 {
 		file.Go = []dreego.GoSection{{Method: "GET"}}
 	}
@@ -114,7 +115,8 @@ func generate(src string) (string, error) {
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	out, _, err := dreego.GenerateMethodHandler(file, nil, "routes", "index", "/{$}", scopeHash)
+	gen := dreego.NewGenerator()
+	out, _, err := dreego.GenerateMethodHandler(gen, file, nil, "routes", "index", "/{$}", scopeHash)
 	return out, err
 }
 
@@ -133,10 +135,12 @@ func generateComponent(src string) (string, error) {
 		return "", err
 	}
 	file.Component = comp
+	file.SourceContent = src
 	if len(file.Go) == 0 {
 		file.Go = []dreego.GoSection{{Method: ""}}
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	return dreego.GenerateComponent(file, scopeHash)
+	gen := dreego.NewGenerator()
+	return dreego.GenerateComponent(gen, file, scopeHash)
 }

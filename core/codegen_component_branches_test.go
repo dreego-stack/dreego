@@ -19,7 +19,7 @@ func TestCompGenEachWithElse(t *testing.T) {
 			{Type: NodeText, Content: "empty"},
 		},
 	}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestCompGenEachSubstitutesLoopInIfCond(t *testing.T) {
 			{Type: NodeExpression, Content: "item.Name"},
 		},
 	}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -73,7 +73,7 @@ func TestCompGenEachLoopInIfCondFullParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNodeComp(file.Template.Nodes[0])
+	out, err := genTemplateNodeComp(NewGenerator(), file.Template.Nodes[0])
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestCompGenIfElseIfChain(t *testing.T) {
 			},
 		},
 	}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestCompGenIfElseMixedChildren(t *testing.T) {
 			{Type: NodeText, Content: "fallback"},
 		},
 	}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestCompGenIfElseMixedChildren(t *testing.T) {
 // compGen NodeSlot with a name must read the named slot from the context.
 func TestCompGenSlotNamed(t *testing.T) {
 	n := TemplateNode{Type: NodeSlot, Content: "header"}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -168,7 +168,7 @@ func TestCompGenSlotNamed(t *testing.T) {
 // compGen NodeSlot without a name must read the default slot.
 func TestCompGenSlotDefault(t *testing.T) {
 	n := TemplateNode{Type: NodeSlot}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -180,7 +180,7 @@ func TestCompGenSlotDefault(t *testing.T) {
 // compGen NodeVerbatim must emit the raw content without escaping.
 func TestCompGenVerbatim(t *testing.T) {
 	n := TemplateNode{Type: NodeVerbatim, Content: "<b>raw</b>"}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -200,7 +200,7 @@ func TestCompGenFilterRawUpper(t *testing.T) {
 		Content: "name",
 		Filters: []string{"raw", "upper"},
 	}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -215,7 +215,7 @@ func TestCompGenFilterRawUpper(t *testing.T) {
 // compGen NodeExpression without raw must escape by default.
 func TestCompGenExpressionEscapesByDefault(t *testing.T) {
 	n := TemplateNode{Type: NodeExpression, Content: "name"}
-	out, err := genTemplateNodeComp(n)
+	out, err := genTemplateNodeComp(NewGenerator(), n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -233,7 +233,7 @@ func TestGenComponentCallNonSelfClose(t *testing.T) {
 		Attrs:     `href="/x"`,
 		SelfClose: false,
 	}
-	out, err := genComponentCall(n)
+	out, err := (&compGen{gen: NewGenerator()}).genComponentCall(n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

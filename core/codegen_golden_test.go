@@ -64,7 +64,7 @@ func assertGolden(t *testing.T, name, got string) {
 func TestGoldenSimpleRoute(t *testing.T) {
 	src := "<head>\n    <title>Home</title>\n</head>\n\n<div>\n    <h1>Welcome</h1>\n    <p>Hello, {{ name }}!</p>\n</div>\n"
 	file := parseFile(t, src)
-	got, _, err := GenerateMethodHandler(file, nil, "home", "index", "/", scopeHashFor(src))
+	got, _, err := GenerateMethodHandler(NewGenerator(), file, nil, "home", "index", "/", scopeHashFor(src))
 	if err != nil {
 		t.Fatalf("GenerateMethodHandler: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestGoldenComponentWithStyle(t *testing.T) {
 			{Name: "tone", Type: "string"},
 		},
 	}
-	got, err := GenerateComponent(file, scopeHashFor(src))
+	got, err := GenerateComponent(NewGenerator(), file, scopeHashFor(src))
 	if err != nil {
 		t.Fatalf("GenerateComponent: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestGoldenRouteWithLayout(t *testing.T) {
 	file := parseFile(t, routeSrc)
 	layout := parseFile(t, layoutSrc)
 
-	got, _, err := GenerateMethodHandler(file, layout, "about", "about", "/about", scopeHashFor(routeSrc))
+	got, _, err := GenerateMethodHandler(NewGenerator(), file, layout, "about", "about", "/about", scopeHashFor(routeSrc))
 	if err != nil {
 		t.Fatalf("GenerateMethodHandler: %v", err)
 	}

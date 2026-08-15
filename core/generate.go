@@ -17,9 +17,30 @@ var methodExt = map[string]string{
 	"delete": "DELETE",
 }
 
+type Generator struct {
+	defs map[string]*ComponentDef
+	src  string
+}
+
+func NewGenerator() *Generator {
+	return &Generator{defs: map[string]*ComponentDef{}}
+}
+
+func (g *Generator) registerDef(name string, def *ComponentDef) {
+	g.defs[name] = def
+}
+
+func (g *Generator) lookupDef(name string) *ComponentDef {
+	return g.defs[name]
+}
+
+type generator = Generator
+
 func Run(force bool) error {
 	start := time.Now()
 	var found int
+
+	gen := NewGenerator()
 
 	layout, err := findLayout()
 	if err != nil {
@@ -34,7 +55,7 @@ func Run(force bool) error {
 	routePatterns := map[string]bool{}
 	routeSources := map[string]string{}
 
-	_, compSrcs, err := scanComponents()
+	_, compSrcs, err := scanComponents(gen)
 	if err != nil {
 		return err
 	}
@@ -103,7 +124,9 @@ func Run(force bool) error {
 				}
 			}
 
-			_, imports, body := ParseHeader(string(data))
+			raw := string(data)
+			_, imports, body := ParseHeader(raw)
+			bodyOffset := len(raw) - len(body)
 
 			tokens, err := Lex(body)
 			if err != nil {
@@ -116,8 +139,9 @@ func Run(force bool) error {
 				return fmt.Errorf("error parsing %s: %w", fpath, err)
 			}
 			file.Imports = imports
-
+			file.SourceContent = raw
 			if file.Template != nil {
+				setNodeSource(file.Template.Nodes, fpath, bodyOffset)
 				file.FormActions = scanFormActions(file.Template.Nodes)
 			}
 
@@ -133,13 +157,14 @@ func Run(force bool) error {
 			scopeHash := hex.EncodeToString(h[:])[:12]
 			pkgName := filepath.Base(path)
 
+			gen.src = raw
 			if base == "404" || base == "500" {
 				errCode := 404
 				if base == "500" {
 					errCode = 500
 				}
 				catchPattern := errorCatchPattern(pattern)
-				src, reg, err := GenerateErrorHandler(file, pkgName, errCode, catchPattern, scopeHash)
+				src, reg, err := GenerateErrorHandler(gen, file, pkgName, errCode, catchPattern, scopeHash)
 				if err != nil {
 					return fmt.Errorf("error generating error page %s: %w", fpath, err)
 				}
@@ -156,7 +181,7 @@ func Run(force bool) error {
 				routeSources[key] = fpath
 				routePatterns[key] = true
 			}
-			src, reg, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
+			src, reg, err := GenerateMethodHandler(gen, file, layout, pkgName, pageName, pattern, scopeHash)
 			if err != nil {
 				return fmt.Errorf("error generating %s: %w", fpath, err)
 			}
@@ -474,6 +499,7 @@ func findLayout() (*File, error) {
 				return fmt.Errorf("error parsing layout %s: %w", path, err)
 			}
 			if f != nil {
+				f.SourceContent = string(data)
 				layout = f
 			}
 		}
@@ -488,59 +514,6 @@ func findLayout() (*File, error) {
 func isLayoutDir(path string) bool {
 	return strings.HasSuffix(path, "/layouts") || strings.Contains(path, "/layouts/") ||
 		strings.HasSuffix(path, "/components") || strings.Contains(path, "/components/")
-}
-
-func scanComponents() (genDir string, sources []string, err error) {
-	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
-			return nil
-		}
-		if !strings.Contains(path, "/components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
-			return nil
-		}
-
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("error reading component %s: %w", path, err)
-		}
-		raw := string(data)
-
-		comp, _, body := ParseHeader(raw)
-		if comp == nil || comp.Name == "" {
-			return nil
-		}
-
-		h := sha256.Sum256(data)
-		scopeHash := hex.EncodeToString(h[:])[:12]
-
-		if genDir == "" {
-			genDir = detectGenDir(path)
-		}
-
-		tokens, err := Lex(body)
-		if err != nil {
-			return fmt.Errorf("error lexing component %s: %w", path, err)
-		}
-
-		p := NewParser(tokens)
-		file, err := p.Parse()
-		if err != nil {
-			return fmt.Errorf("error parsing component %s: %w", path, err)
-		}
-		file.Component = comp
-
-		if len(file.Go) == 0 {
-			file.Go = []GoSection{{Method: ""}}
-		}
-
-		src, err := GenerateComponent(file, scopeHash)
-		if err != nil {
-			return fmt.Errorf("error generating component %s: %w", path, err)
-		}
-		sources = append(sources, src)
-		return nil
-	})
-	return
 }
 
 func generateStaticAssets(routePatterns map[string]bool) (src string, count int, err error) {

@@ -25,6 +25,7 @@ type TemplateNode struct {
 	SelfClose    bool
 	Filters      []string
 	Pos          int
+	Source       string
 }
 
 type GoSection struct {
@@ -36,20 +37,23 @@ type GoSection struct {
 }
 
 type File struct {
-	Head        *HeadSection
-	Go          []GoSection
-	Template    *TemplateSection
-	Script      *ScriptSection
-	Style       *StyleSection
-	Component   *ComponentDef
-	Imports     []Import
-	FormActions []string
+	Head          *HeadSection
+	Go            []GoSection
+	Template      *TemplateSection
+	Script        *ScriptSection
+	Style         *StyleSection
+	Component     *ComponentDef
+	Imports       []Import
+	FormActions   []string
+	SourceContent string
 }
 
 type ComponentDef struct {
-	Name  string
-	Props []Prop
-	Slots []string
+	Name           string
+	Props          []Prop
+	Slots          []string
+	HasDefaultSlot bool
+	HasNamedSlot   bool
 }
 
 type Prop struct {
