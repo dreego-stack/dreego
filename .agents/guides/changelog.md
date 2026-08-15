@@ -8,6 +8,10 @@ timestamp: 2026-07-28T00:00:00Z
 ---
 # Skill: changelog
 
+## Rule: Agents NEVER edit CHANGELOG.md directly
+
+Agents NEVER edit CHANGELOG.md directly. New changelog lines belong ONLY in the PR's `pr.md`. `release-prep` applies them to CHANGELOG.md after approval at merge time. If you see a vX.Y.Z header missing in CHANGELOG.md, that is normal — it will be added by release-prep.
+
 ## Purpose
 
 Keep CHANGELOG.md up to date with every meaningful change.
