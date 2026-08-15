@@ -157,6 +157,18 @@ The CI (`pull_request.yml`) validates pr.md and runs `make test`. After approval
 
 All commands run inside `smd` (Docker container). Never run `make test`, `go build`, or any dev command directly on the host. The smd container uses `golang:1.22-alpine`. Install curl once per session: `smd apk add --no-cache curl`.
 
+## Git Operations
+
+All git operations run on the HOST via the shell subagent — never inside the
+smd container. The smd image has no git, and worktree `.git` files point to
+host paths that do not exist in the container.
+
+- Worktree setup: `git worktree add -b <branch> .worktrees/<name>` (shell agent)
+- Commits: `git -C <repo>/.worktrees/<name> add/commit` (shell agent, host)
+- Push and PR creation: `git -C <repo>/.worktrees/<name> push origin <branch>` and `gh pr create` (shell agent)
+- Never run `git checkout`, `git reset`, or `git stash` on main.
+- Main must stay clean; only the `.gitignore` entry for `.worktrees/` may appear uncommitted.
+
 ## Coding Rules
 
 - Max 300 lines per file, one logical thing per file
