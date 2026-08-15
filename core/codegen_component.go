@@ -231,12 +231,6 @@ func GenerateComponent(gen *generator, file *File, scopeHash string) (string, er
 		return "", fmt.Errorf("no component definition")
 	}
 
-	if file.Template != nil {
-		if err := validateSelfClosingCalls(gen, file.Template.Nodes, file.SourceContent); err != nil {
-			return "", err
-		}
-	}
-
 	var buf strings.Builder
 
 	declParams, implParams, callArgs, variadicName := componentParams(comp)

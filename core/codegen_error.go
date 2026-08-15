@@ -29,9 +29,6 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 	}
 
 	if file.Template != nil {
-		if err := validateSelfClosingCalls(gen, file.Template.Nodes, file.SourceContent); err != nil {
-			return "", "", err
-		}
 		suppressScope := false
 		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText {
 			suppressScope = strings.HasPrefix(file.Template.Nodes[0].Content, "<!")
