@@ -57,10 +57,20 @@ run_suite() {
     for pkg in ./core/... ./cli/dreego/...; do
         go_run=$((go_run + 1))
         go_out="$run_dir/gotest-$go_run.out"
-        if ! (cd "$REPO_DIR" && go test "$pkg" > "$go_out" 2>&1); then
+        if ! (cd "$REPO_DIR" && go list "$pkg" > /dev/null 2>&1); then
+            go_failed=$((go_failed + 1))
+            echo "-> FAIL -> missing package $pkg"
+            continue
+        fi
+        if ! (cd "$REPO_DIR" && go test -v "$pkg" > "$go_out" 2>&1); then
             go_failed=$((go_failed + 1))
             echo "-> FAIL -> go test $pkg"
             cat "$go_out"
+        fi
+        if grep -q -- '--- SKIP:' "$go_out" 2>/dev/null; then
+            go_failed=$((go_failed + 1))
+            echo "-> FAIL -> skipped tests in $pkg"
+            grep -- '--- SKIP:' "$go_out"
         fi
         go_count=$((go_count + $(cd "$REPO_DIR" && go test -list '^Test' "$pkg" 2>/dev/null | grep -c '^Test')))
     done
@@ -74,12 +84,22 @@ run_suite() {
 
     goit_count=$(cd "$REPO_DIR" && go test -list '^Test' ./_tests/go/... 2>/dev/null | grep -c '^Test')
     goit_out="$run_dir/gotest-goit.out"
-    if ! (cd "$REPO_DIR" && go test ./_tests/go/... > "$goit_out" 2>&1); then
+    if ! (cd "$REPO_DIR" && go list ./_tests/go/... > /dev/null 2>&1); then
+        echo "-> FAIL -> missing package ./_tests/go/..."
+        FAIL=$((FAIL + 1))
+    elif ! (cd "$REPO_DIR" && go test -v ./_tests/go/... > "$goit_out" 2>&1); then
         echo "-> FAIL -> go test ./_tests/go/..."
         cat "$goit_out"
         FAIL=$((FAIL + 1))
     else
         echo "==> PASS <=> _tests/go (Go integration tests, $goit_count) <========="
+    fi
+    if grep -q -- '--- SKIP:' "$goit_out" 2>/dev/null; then
+        if grep -v -- '--- SKIP: TestCLIVersionDrift' "$goit_out" | grep -q -- '--- SKIP:'; then
+            echo "-> FAIL -> skipped tests in ./_tests/go/..."
+            grep -- '--- SKIP:' "$goit_out"
+            FAIL=$((FAIL + 1))
+        fi
     fi
 
     export DREEGO_PORT_BASE
