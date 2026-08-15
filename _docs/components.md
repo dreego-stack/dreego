@@ -51,6 +51,8 @@ import Card "components/Card.dreego"
 <div><@Card title="Hello"/></div>
 ```
 
+A self-closing call renders an empty default slot. Whitespace after the tag is ignored.
+
 **With children (default slot):**
 
 ```html
@@ -60,6 +62,18 @@ import Card "components/Card.dreego"
     </@Card>
 </div>
 ```
+
+## Self-closing Calls and Slot Fallback
+
+`<@Card/>` is allowed and renders an empty default slot.
+
+`<@Card/>...content...</@Card>` is invalid because the trailing content makes the call non-self-closing. `dreego generate` reports:
+
+```text
+routes/index.dreego:3:5: Card: self-closing call must not contain children
+```
+
+`<@Card></@Card>` is valid and renders with an empty default slot.
 
 ## Attribute Props
 

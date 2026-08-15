@@ -6,6 +6,17 @@ import (
 )
 
 func GenerateMethodHandler(gen *generator, file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+	if file.Template != nil {
+		if err := validateSelfClosingCalls(gen, file.Template.Nodes, file.SourceContent); err != nil {
+			return "", "", err
+		}
+	}
+	if layout != nil && layout.Template != nil {
+		if err := validateSelfClosingCalls(gen, layout.Template.Nodes, layout.SourceContent); err != nil {
+			return "", "", err
+		}
+	}
+
 	hasTypedBlocks := false
 	for _, g := range file.Go {
 		if g.ContentType != "" && g.ContentType != "custom" {

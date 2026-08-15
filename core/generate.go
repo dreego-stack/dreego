@@ -138,6 +138,7 @@ func Run(force bool) error {
 				return fmt.Errorf("error parsing %s: %w", fpath, err)
 			}
 			file.Imports = imports
+			file.SourceContent = raw
 			if file.Template != nil {
 				setNodeSource(file.Template.Nodes, fpath, bodyOffset)
 				file.FormActions = scanFormActions(file.Template.Nodes)
@@ -496,6 +497,7 @@ func findLayout() (*File, error) {
 				return fmt.Errorf("error parsing layout %s: %w", path, err)
 			}
 			if f != nil {
+				f.SourceContent = string(data)
 				layout = f
 			}
 		}
@@ -551,8 +553,11 @@ func scanComponents(gen *generator) (genDir string, sources []string, err error)
 			return fmt.Errorf("error parsing component %s: %w", path, err)
 		}
 		file.Component = comp
+		file.SourceContent = raw
 		if file.Template != nil {
 			setNodeSource(file.Template.Nodes, path, len(raw)-len(body))
+			comp.HasDefaultSlot = hasDefaultSlot(file.Template.Nodes)
+			comp.HasNamedSlot = hasNamedSlot(file.Template.Nodes) || len(comp.Slots) > 0
 		}
 
 		if len(file.Go) == 0 {

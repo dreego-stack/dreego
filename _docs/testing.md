@@ -91,6 +91,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 |------|-----|-------------|
 | basic | ✅ pos | Prop + rendering |
 | self-closing | ✅ pos | `<@Icon/>` without body |
+| self-close-slot-fallback | ✅ pos | `<@Card/>` renders empty default slot; children after self-close → generate FAIL |
 | not-found | ✅ pos | `<@Missing/>` → go build FAIL |
 | scoped-style | ✅ pos | Component CSS does not leak |
 | with-go | ✅ pos | `<go>` in component |
@@ -175,7 +176,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 
 | Status | Count |
 |--------|-------|
-| ✅ Implemented | 38 |
+| ✅ Implemented | 39 |
 | ⬜ Planned (v0.0.7) | 30 |
 | ⬜ Named Slots (v0.0.8) | 4 |
 

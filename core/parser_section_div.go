@@ -162,7 +162,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			return TemplateNode{}, err
 		}
 		p.advance()
-		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true}, nil
+		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true, Pos: tok.Pos}, nil
 	case TokenComponentTagOpen:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 			return TemplateNode{}, err
@@ -172,7 +172,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		if err != nil {
 			return TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children}, nil
+		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children, Pos: tok.Pos}, nil
 	case TokenSlotClose:
 		return TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
 	case TokenElse:

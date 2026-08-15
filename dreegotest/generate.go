@@ -104,6 +104,7 @@ func generate(src string) (string, error) {
 		return "", err
 	}
 	file.Imports = imports
+	file.SourceContent = src
 	if len(file.Go) == 0 {
 		file.Go = []dreego.GoSection{{Method: "GET"}}
 	}
@@ -134,6 +135,7 @@ func generateComponent(src string) (string, error) {
 		return "", err
 	}
 	file.Component = comp
+	file.SourceContent = src
 	if len(file.Go) == 0 {
 		file.Go = []dreego.GoSection{{Method: ""}}
 	}
