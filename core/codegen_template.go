@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func genTemplateNode(n TemplateNode, depth int) (string, error) {
+func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
 	case NodeText:
@@ -35,7 +35,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
-			code, err := genTemplateNode(child, depth+1)
+			code, err := genTemplateNode(gen, child, depth+1)
 			if err != nil {
 				return "", err
 			}
@@ -52,7 +52,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
 				for _, child := range ec.Children {
-					code, err := genTemplateNode(child, depth+1)
+					code, err := genTemplateNode(gen, child, depth+1)
 					if err != nil {
 						return "", err
 					}
@@ -61,7 +61,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 					for _, child := range ec.ElseChildren {
-						code, err := genTemplateNode(child, depth+1)
+						code, err := genTemplateNode(gen, child, depth+1)
 						if err != nil {
 							return "", err
 						}
@@ -72,7 +72,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		} else {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, ec := range n.ElseChildren {
-				code, err := genTemplateNode(ec, depth+1)
+				code, err := genTemplateNode(gen, ec, depth+1)
 				if err != nil {
 					return "", err
 				}
@@ -95,7 +95,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		buf.WriteString(fmt.Sprintf("%s\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code, err := genTemplateNode(child, forDepth+1)
+			code, err := genTemplateNode(gen, child, forDepth+1)
 			if err != nil {
 				return "", err
 			}
@@ -106,7 +106,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		if hasElse {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, child := range n.ElseChildren {
-				code, err := genTemplateNode(child, depth+1)
+				code, err := genTemplateNode(gen, child, depth+1)
 				if err != nil {
 					return "", err
 				}
@@ -121,7 +121,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 			buf.WriteString(fmt.Sprintf("%s{\n", indent))
 			buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
 			for _, child := range n.Children {
-				code, err := genTemplateNode(child, depth+2)
+				code, err := genTemplateNode(gen, child, depth+2)
 				if err != nil {
 					return "", err
 				}
@@ -143,7 +143,11 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {
 			funcName = n.Tag[idx+1:]
 		}
-		args := extractAttrValues(n.Attrs)
+		def := gen.lookupDef(funcName)
+		args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
+		if err != nil {
+			return "", err
+		}
 		if n.SelfClose {
 			return fmt.Sprintf("%sb.WriteString(func() string { h, _ := %s(%s).Render(c); return h }())\n", indent, funcName, args), nil
 		}
@@ -155,7 +159,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar sb strings.Builder\n", indent))
 				for _, sc := range child.Children {
-					code, err := genTemplateNode(sc, depth+3)
+					code, err := genTemplateNode(gen, sc, depth+3)
 					if err != nil {
 						return "", err
 					}
@@ -165,7 +169,7 @@ func genTemplateNode(n TemplateNode, depth int) (string, error) {
 				buf.WriteString(fmt.Sprintf("%s\t\tc.Set(\"slot_%s\", sb.String())\n", indent, child.Content))
 				buf.WriteString(fmt.Sprintf("%s\t}\n", indent))
 			} else {
-				code, err := genTemplateNode(child, depth+2)
+				code, err := genTemplateNode(gen, child, depth+2)
 				if err != nil {
 					return "", err
 				}

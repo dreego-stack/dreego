@@ -100,6 +100,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | multi-props | ✅ pos | Component with 3+ props (`_tests/go` `TestComponentMultiProps`) |
 | prop-default | ⬜ pos | Prop with default value |
 | prop-expression | ✅ pos | Prop value from expression: `title={user.Name}` (`_tests/go` `TestComponentPropExpression`, `TestComponentPropExpr`) |
+| named-prop-contract | ✅ neg | Order, missing, unknown, and duplicate props fail at `dreego generate` (`_tests/go/component_call_named_props_test.go`) |
 | attr-prop-substitution | ✅ bug | `{{ prop }}` substituted in HTML attributes: `<a href="{{ url }}">` (`_tests/go/bug_component_attr_prop_substitution_test.go`) |
 | slot-missing | ⬜ pos | Component with `{#slot}`, call without body |
 | slot-named | ⬜ v0.0.7 | `{#slot header}` |
@@ -173,7 +174,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 
 | Status | Count |
 |--------|-------|
-| ✅ Implemented | 36 |
+| ✅ Implemented | 37 |
 | ⬜ Planned (v0.0.7) | 30 |
 | ⬜ Named Slots (v0.0.8) | 4 |
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+func GenerateMethodHandler(gen *generator, file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Go {
 		if g.ContentType != "" && g.ContentType != "custom" {
@@ -66,7 +66,7 @@ func GenerateMethodHandler(file *File, layout *File, pkgName string, baseName st
 	}
 
 	if file.Template != nil && len(file.Template.Nodes) > 0 {
-		templCode, err := genTempl(file, layout, scopeHash, true)
+		templCode, err := genTempl(gen, file, layout, scopeHash, true)
 		if err != nil {
 			return "", "", err
 		}

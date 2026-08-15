@@ -17,9 +17,29 @@ var methodExt = map[string]string{
 	"delete": "DELETE",
 }
 
+type Generator struct {
+	defs map[string]*ComponentDef
+}
+
+func NewGenerator() *Generator {
+	return &Generator{defs: map[string]*ComponentDef{}}
+}
+
+func (g *Generator) registerDef(name string, def *ComponentDef) {
+	g.defs[name] = def
+}
+
+func (g *Generator) lookupDef(name string) *ComponentDef {
+	return g.defs[name]
+}
+
+type generator = Generator
+
 func Run(force bool) error {
 	start := time.Now()
 	var found int
+
+	gen := NewGenerator()
 
 	layout, err := findLayout()
 	if err != nil {
@@ -34,7 +54,7 @@ func Run(force bool) error {
 	routePatterns := map[string]bool{}
 	routeSources := map[string]string{}
 
-	_, compSrcs, err := scanComponents()
+	_, compSrcs, err := scanComponents(gen)
 	if err != nil {
 		return err
 	}
@@ -103,7 +123,9 @@ func Run(force bool) error {
 				}
 			}
 
-			_, imports, body := ParseHeader(string(data))
+			raw := string(data)
+			_, imports, body := ParseHeader(raw)
+			bodyOffset := len(raw) - len(body)
 
 			tokens, err := Lex(body)
 			if err != nil {
@@ -116,8 +138,8 @@ func Run(force bool) error {
 				return fmt.Errorf("error parsing %s: %w", fpath, err)
 			}
 			file.Imports = imports
-
 			if file.Template != nil {
+				setNodeSource(file.Template.Nodes, fpath, bodyOffset)
 				file.FormActions = scanFormActions(file.Template.Nodes)
 			}
 
@@ -139,7 +161,7 @@ func Run(force bool) error {
 					errCode = 500
 				}
 				catchPattern := errorCatchPattern(pattern)
-				src, reg, err := GenerateErrorHandler(file, pkgName, errCode, catchPattern, scopeHash)
+				src, reg, err := GenerateErrorHandler(gen, file, pkgName, errCode, catchPattern, scopeHash)
 				if err != nil {
 					return fmt.Errorf("error generating error page %s: %w", fpath, err)
 				}
@@ -156,7 +178,7 @@ func Run(force bool) error {
 				routeSources[key] = fpath
 				routePatterns[key] = true
 			}
-			src, reg, err := GenerateMethodHandler(file, layout, pkgName, pageName, pattern, scopeHash)
+			src, reg, err := GenerateMethodHandler(gen, file, layout, pkgName, pageName, pattern, scopeHash)
 			if err != nil {
 				return fmt.Errorf("error generating %s: %w", fpath, err)
 			}
@@ -490,7 +512,7 @@ func isLayoutDir(path string) bool {
 		strings.HasSuffix(path, "/components") || strings.Contains(path, "/components/")
 }
 
-func scanComponents() (genDir string, sources []string, err error) {
+func scanComponents(gen *generator) (genDir string, sources []string, err error) {
 	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
@@ -509,6 +531,7 @@ func scanComponents() (genDir string, sources []string, err error) {
 		if comp == nil || comp.Name == "" {
 			return nil
 		}
+		gen.registerDef(comp.Name, comp)
 
 		h := sha256.Sum256(data)
 		scopeHash := hex.EncodeToString(h[:])[:12]
@@ -528,12 +551,15 @@ func scanComponents() (genDir string, sources []string, err error) {
 			return fmt.Errorf("error parsing component %s: %w", path, err)
 		}
 		file.Component = comp
+		if file.Template != nil {
+			setNodeSource(file.Template.Nodes, path, len(raw)-len(body))
+		}
 
 		if len(file.Go) == 0 {
 			file.Go = []GoSection{{Method: ""}}
 		}
 
-		src, err := GenerateComponent(file, scopeHash)
+		src, err := GenerateComponent(gen, file, scopeHash)
 		if err != nil {
 			return fmt.Errorf("error generating component %s: %w", path, err)
 		}

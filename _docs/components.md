@@ -99,6 +99,46 @@ and `https`. Reject dangerous schemes such as `javascript`.
 6. **Slots** — `{#slot}` in component template = child content.
 7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value.
 8. **Typed props** — `prop={expression}` passes a Go value without converting it to a string.
+9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
+
+## Named Prop Contract
+
+Component props are **named** and **order-independent**. The set of props passed in a call is validated against the component declaration at `dreego generate`.
+
+- Missing required props are errors.
+- Unknown props are errors.
+- Duplicate props are errors.
+- Prop order in the call does not have to match the declaration order.
+
+**Component:**
+
+```
+Component Card (title string)
+```
+
+**Valid call:**
+
+```dreego
+<div><@Card title="Items"/></div>
+```
+
+**Invalid calls:**
+
+```dreego
+<div><@Card title="Items" count={3}/></div>
+<div><@Card title="Items" title="Again"/></div>
+<div><@Card/></div>
+```
+
+Error examples from `dreego generate`:
+
+```text
+routes/index.dreego:4:3: Card "count": unknown prop "count"
+routes/index.dreego:5:3: Card "title": duplicate prop "title"
+routes/index.dreego:6:3: Card "title": missing required prop "title"
+```
+
+The error includes the source file, line, column, component name, and prop name so the failure is easy to locate without running `go build`.
 
 ## Scoped CSS
 
