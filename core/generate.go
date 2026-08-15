@@ -19,6 +19,7 @@ var methodExt = map[string]string{
 
 type Generator struct {
 	defs map[string]*ComponentDef
+	src  string
 }
 
 func NewGenerator() *Generator {
@@ -156,6 +157,7 @@ func Run(force bool) error {
 			scopeHash := hex.EncodeToString(h[:])[:12]
 			pkgName := filepath.Base(path)
 
+			gen.src = raw
 			if base == "404" || base == "500" {
 				errCode := 404
 				if base == "500" {
@@ -554,8 +556,13 @@ func scanComponents(gen *generator) (genDir string, sources []string, err error)
 		}
 		file.Component = comp
 		file.SourceContent = raw
+		bodyOffset := len(raw) - len(body)
 		if file.Template != nil {
-			setNodeSource(file.Template.Nodes, path, len(raw)-len(body))
+			setNodeSource(file.Template.Nodes, path, bodyOffset)
+			declaredSlots := collectSlotNames(file.Template.Nodes)
+			if len(declaredSlots) > 0 {
+				comp.Slots = mergeUnique(comp.Slots, declaredSlots)
+			}
 			comp.HasDefaultSlot = hasDefaultSlot(file.Template.Nodes)
 			comp.HasNamedSlot = hasNamedSlot(file.Template.Nodes) || len(comp.Slots) > 0
 		}
@@ -564,6 +571,7 @@ func scanComponents(gen *generator) (genDir string, sources []string, err error)
 			file.Go = []GoSection{{Method: ""}}
 		}
 
+		gen.src = raw
 		src, err := GenerateComponent(gen, file, scopeHash)
 		if err != nil {
 			return fmt.Errorf("error generating component %s: %w", path, err)

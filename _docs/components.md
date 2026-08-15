@@ -220,6 +220,9 @@ import Card "components/Card.dreego"
 - `{#slot header}content{/slot}` — Definition in the route (with body)
 - `{#slot}` — Default slot (no `{/slot}` needed)
 - Multiple named slots per component possible
+- Unknown named slots fail at `dreego generate` with error `routes/index.dreego:4:3: Card: unknown slot "footer"`
+- Nested slot declarations inside slot content are not allowed and fail with `nested slot declaration is not allowed`
+- Slot content is scoped to exactly one component invocation; sibling calls never inherit another call's slot content
 
 ## Generated Go Code
 

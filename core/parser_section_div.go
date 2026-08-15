@@ -145,7 +145,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		if err != nil {
 			return TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children}, nil
+		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children, Pos: tok.Pos}, nil
 	case TokenTagOpen:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 			return TemplateNode{}, err

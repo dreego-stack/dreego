@@ -154,8 +154,19 @@ func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) 
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%s{\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\tvar cb strings.Builder\n", indent))
+		var slotKeys []string
 		for _, child := range n.Children {
-			if child.Type == NodeSlot && child.Content != "" && len(child.Children) > 0 {
+			if child.Type == NodeSlot && child.Content != "" {
+				if nested := findNestedSlot(child.Children); nested != nil {
+					return "", nestedSlotError(n, def, nested, gen.src)
+				}
+				if err := validateSlotName(def, child.Content, n.Source, gen.src, n.Pos); err != nil {
+					return "", err
+				}
+				slotKeys = append(slotKeys, "slot_"+child.Content)
+				if len(child.Children) == 0 {
+					continue
+				}
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar sb strings.Builder\n", indent))
 				for _, sc := range child.Children {
@@ -169,6 +180,9 @@ func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) 
 				buf.WriteString(fmt.Sprintf("%s\t\tc.Set(\"slot_%s\", sb.String())\n", indent, child.Content))
 				buf.WriteString(fmt.Sprintf("%s\t}\n", indent))
 			} else {
+				if nested := findNestedSlot([]TemplateNode{child}); nested != nil {
+					return "", nestedSlotError(n, def, nested, gen.src)
+				}
 				code, err := genTemplateNode(gen, child, depth+2)
 				if err != nil {
 					return "", err
@@ -181,6 +195,10 @@ func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) 
 		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, funcName, args))
 		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\tb.WriteString(html)\n", indent))
+		buf.WriteString(fmt.Sprintf("%s\tc.Delete(\"slot\")\n", indent))
+		for _, key := range slotKeys {
+			buf.WriteString(fmt.Sprintf("%s\tc.Delete(\"%s\")\n", indent, key))
+		}
 		buf.WriteString(fmt.Sprintf("%s}\n", indent))
 		return buf.String(), nil
 	}

@@ -65,6 +65,13 @@ func (c *SSRContext) Set(key string, value any) {
 	c.data[key] = value
 }
 
+func (c *SSRContext) Delete(key string) {
+	if c.data == nil {
+		return
+	}
+	delete(c.data, key)
+}
+
 func (c *SSRContext) Get(key string) string {
 	if c.data == nil {
 		return ""
