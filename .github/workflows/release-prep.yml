@@ -1,0 +1,48 @@
+name: release-prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to prepare (applies pr.md to the PR branch)'
+        required: true
+
+concurrency:
+  group: release-prep
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.inputs.pr_number }}/head
+          fetch-depth: 0
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        id: prep
+        run: |
+          python3 _scripts/release-prep.py | tee /tmp/prep.out
+          echo "new_version=$(grep '^new=' /tmp/prep.out | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR head branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRefName --jq .headRefName)
+          echo "head_ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push to PR branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: apply pr.md changelog (release-prep)"
+          git push origin "HEAD:refs/heads/${{ steps.branch.outputs.head_ref }}"

@@ -51,6 +51,14 @@ run_suite() {
         echo "==> PASS <=> No binary files <========="
     fi
 
+    if ! (cd "$REPO_DIR" && python3 _scripts/release-prep-test.py > "$run_dir/release-prep-test.out" 2>&1); then
+        echo "-> FAIL -> release-prep contract tests"
+        cat "$run_dir/release-prep-test.out"
+        FAIL=$((FAIL + 1))
+    else
+        echo "==> PASS <=> release-prep contract tests <========="
+    fi
+
     go_failed=0
     go_count=0
     go_run=0

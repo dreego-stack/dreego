@@ -1,4 +1,4 @@
-name: pull-request-check
+name: pull_request
 
 on:
   pull_request:
@@ -7,6 +7,13 @@ on:
       pr_number:
         description: 'PR number to check (fork PRs only)'
         required: true
+
+concurrency:
+  group: pr-check-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   check:
