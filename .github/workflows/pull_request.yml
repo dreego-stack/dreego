@@ -41,7 +41,8 @@ jobs:
           python3 - "$latest_tag" "$top_version" <<'EOF'
           import sys
           def vtuple(v):
-              parts = v.strip().lstrip("v").split(".")
+              v = v.strip().lstrip("v").split()[0]
+              parts = v.split(".")
               return tuple(int(x) for x in parts[:3])
           latest, top = sys.argv[1], sys.argv[2]
           if vtuple(top) > vtuple(latest):
