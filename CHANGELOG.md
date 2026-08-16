@@ -1,4 +1,10 @@
 
+## v0.0.48 - 2026-08-16
+
+- Feat: add reproducible core benchmarks for code generation and representative requests (core/benchmark_test.go)
+- Docs: add _docs/benchmarks.md with measured conditions and reference results
+- Docs: qualify "no hidden overhead" claim in README until measurements support it
+
 ## v0.0.47 - 2026-08-16
 
 - Security: render every `{{ expression }}` through a context-aware safe-value rule (text, attribute, URL, script, style, meta refresh) instead of a single HTML escape
