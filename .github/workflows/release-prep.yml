@@ -23,6 +23,28 @@ jobs:
           ref: refs/pull/${{ github.event.inputs.pr_number }}/head
           fetch-depth: 0
 
+      - name: "Guard: same-repo PR only"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head_repo=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.name')
+          base_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json baseRepository --jq '.baseRepository.owner.login')
+          head_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepositoryOwner --jq '.headRepositoryOwner.login' 2>/dev/null || gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.owner.login' 2>/dev/null || echo "")
+          if [ -n "$head_owner" ] && [ "$head_owner" != "$base_owner" ]; then
+            echo "error: release-prep only supports same-repo PRs; rebase fork PR into a same-repo PR first (head owner: $head_owner, base owner: $base_owner)"
+            exit 1
+          fi
+          echo "ok: same-repo PR (head repo: $head_repo, base owner: $base_owner)"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: make test
+        run: make test
+
       - name: Apply pr.md (changelog + version + remove pr.md)
         id: prep
         run: |
