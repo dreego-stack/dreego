@@ -59,7 +59,7 @@ func TestGenHeadExpression(t *testing.T) {
 	if !strings.Contains(out, `fmt.Sprintf("%v", title)`) {
 		t.Errorf("genHead must resolve {{ title }} to an expression, got:\n%s", out)
 	}
-	if !strings.Contains(out, "html.EscapeString") {
+	if !strings.Contains(out, "dreego.SafeText") {
 		t.Errorf("genHead must escape by default, got:\n%s", out)
 	}
 }
@@ -73,7 +73,7 @@ func TestGenHeadFilterRawUpper(t *testing.T) {
 	if !strings.Contains(out, "strings.ToUpper") {
 		t.Errorf("genHead upper filter must wrap in strings.ToUpper, got:\n%s", out)
 	}
-	if strings.Contains(out, "html.EscapeString") {
+	if strings.Contains(out, "dreego.SafeText") {
 		t.Errorf("genHead raw filter must skip escaping, got:\n%s", out)
 	}
 }

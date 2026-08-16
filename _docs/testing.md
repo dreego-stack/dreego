@@ -13,6 +13,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 | unclosed-div | ✅ neg | `<div>` without `</div>` → generate FAIL |
 | mismatched-close | ✅ neg | `<div>...</go>` → generate FAIL |
 | xss-escaping | ✅ pos | `{{ value }}` escaped `<script>` |
+| output-context | ✅ pos | malicious values in text, attribute, URL, script, style contexts |
 | duplicate-head | ⬜ neg | Two `<head>` sections → generate FAIL |
 | duplicate-div | ⬜ neg | Two `<div>` sections → generate FAIL |
 | empty-div | ⬜ pos | `<div></div>` — empty template |

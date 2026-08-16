@@ -7,6 +7,115 @@ import (
 	"unicode"
 )
 
+// attrNameAt returns the name of the attribute whose value contains the byte
+// at index i of a tag string, or "" when the position is not inside an
+// attribute value. Quoted and unquoted values are recognized, and whitespace
+// around "=" is tolerated. It is used to pick the safe-value rule for an
+// expression placeholder inside an attribute.
+func attrNameAt(tag string, i int) string {
+	if i < 0 || i >= len(tag) {
+		return ""
+	}
+	pos := 0
+	for pos < len(tag) {
+		pos = skipAttrSpace(tag, pos)
+		if pos >= len(tag) {
+			return ""
+		}
+		nameStart := pos
+		for pos < len(tag) && tag[pos] != '=' && !isAttrSpace(tag[pos]) {
+			pos++
+		}
+		name := tag[nameStart:pos]
+		pos = skipAttrSpace(tag, pos)
+		if pos >= len(tag) || tag[pos] != '=' {
+			continue
+		}
+		pos = skipAttrSpace(tag, pos+1)
+		if pos >= len(tag) {
+			return ""
+		}
+		if tag[pos] == '"' || tag[pos] == '\'' {
+			quote := tag[pos]
+			pos++
+			valStart := pos
+			for pos < len(tag) && tag[pos] != quote {
+				pos++
+			}
+			if pos >= len(tag) {
+				return ""
+			}
+			if i >= valStart && i < pos {
+				return name
+			}
+			pos++
+			continue
+		}
+		valStart := pos
+		for pos < len(tag) && !isAttrSpace(tag[pos]) && tag[pos] != '>' {
+			pos++
+		}
+		if i >= valStart && i < pos {
+			return name
+		}
+	}
+	return ""
+}
+
+// isURLAttr reports whether an attribute name carries a URL value that must be
+// scheme-validated (href, src, action, and the srcset family).
+func isURLAttr(name string) bool {
+	switch strings.ToLower(name) {
+	case "href", "src", "action", "srcset", "poster", "cite", "formaction", "data", "background", "longdesc", "usemap", "xlink:href":
+		return true
+	}
+	return false
+}
+
+// isScriptAttr reports whether an attribute name carries a script value (event
+// handler attributes such as onclick, onload, onerror, the Alpine/HTMX event
+// directives x-on:* and @*, the HTMX response-trigger directives hx-on:* and
+// hx-on::*, and the Alpine evaluator directives x-data, x-init, x-effect,
+// x-html, x-show, x-model, x-text, and x-transition). The plain "on" prefix
+// must be followed by a letter so attributes like "once" or "only" are
+// conservatively JSON-encoded rather than mistaken for event handlers that do
+// not exist.
+func isScriptAttr(name string) bool {
+	n := strings.ToLower(name)
+	if strings.HasPrefix(n, "on") && len(n) > 2 && n[2] >= 'a' && n[2] <= 'z' {
+		return true
+	}
+	switch {
+	case strings.HasPrefix(n, "x-on:"), strings.HasPrefix(n, "x-on."), strings.HasPrefix(n, "@"):
+		return true
+	case strings.HasPrefix(n, "hx-on:"):
+		return true
+	}
+	switch n {
+	case "x-data", "x-init", "x-effect", "x-html", "x-show", "x-model", "x-text", "x-transition":
+		return true
+	}
+	return false
+}
+
+// attrContext picks the safe-value rule name for an attribute by name. It
+// returns "SafeScript", "SafeURL", "SafeStyle", or "SafeAttr". Alpine style
+// bindings (x-bind:style, :style) are treated as style context; other directive
+// attributes fall back to SafeAttr, which still prevents attribute breakout.
+func attrContext(name string) string {
+	n := strings.ToLower(name)
+	if isScriptAttr(name) {
+		return "SafeScript"
+	}
+	if isURLAttr(name) {
+		return "SafeURL"
+	}
+	if n == "style" || n == "x-bind:style" || n == ":style" {
+		return "SafeStyle"
+	}
+	return "SafeAttr"
+}
+
 func goLiteral(s string) string {
 	if strings.Contains(s, "`") {
 		return strconv.Quote(s)
@@ -29,98 +138,6 @@ func toPascalCase(s string) string {
 		}
 	}
 	return result.String()
-}
-
-func scopeCSS(css string, hash string) string {
-	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
-	var result strings.Builder
-	scopeRange(&result, css, 0, len(css), prefix)
-	return strings.TrimSpace(result.String())
-}
-
-func scopeRange(b *strings.Builder, css string, start, end int, prefix string) {
-	i := start
-	for i < end {
-		if css[i] == '{' {
-			sel := strings.TrimSpace(css[start:i])
-			close := matchBrace(css, i, end)
-			innerStart, innerEnd := i+1, close
-			b.WriteString(scopedHeader(sel, prefix))
-			b.WriteByte('{')
-			if strings.HasPrefix(sel, "@keyframes") {
-				b.WriteString(css[innerStart:innerEnd])
-			} else if !strings.HasPrefix(sel, "@") && sel != "" {
-				b.WriteString(css[innerStart:innerEnd])
-			} else {
-				scopeRange(b, css, innerStart, innerEnd, prefix)
-			}
-			b.WriteByte('}')
-			start = close + 1
-			i = close + 1
-			continue
-		}
-		i++
-	}
-	if start < end {
-		b.WriteString(css[start:end])
-	}
-}
-
-func scopedHeader(sel string, prefix string) string {
-	if sel == "" {
-		return ""
-	}
-	if strings.HasPrefix(sel, "@") {
-		return sel
-	}
-	return scopeSelector(sel, prefix)
-}
-
-func scopeSelector(sel string, prefix string) string {
-	parts := splitTopLevelComma(sel)
-	scoped := make([]string, len(parts))
-	for i, p := range parts {
-		scoped[i] = prefix + strings.TrimSpace(p)
-	}
-	return strings.Join(scoped, ",\n")
-}
-
-func splitTopLevelComma(sel string) []string {
-	var parts []string
-	depth := 0
-	start := 0
-	for i := 0; i < len(sel); i++ {
-		switch sel[i] {
-		case '(', '[':
-			depth++
-		case ')', ']':
-			if depth > 0 {
-				depth--
-			}
-		case ',':
-			if depth == 0 {
-				parts = append(parts, sel[start:i])
-				start = i + 1
-			}
-		}
-	}
-	return append(parts, sel[start:])
-}
-
-func matchBrace(css string, open, end int) int {
-	depth := 1
-	for i := open + 1; i < end; i++ {
-		switch css[i] {
-		case '{':
-			depth++
-		case '}':
-			depth--
-			if depth == 0 {
-				return i
-			}
-		}
-	}
-	return end
 }
 
 func extractAttrValues(attrs string) string {

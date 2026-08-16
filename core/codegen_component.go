@@ -37,7 +37,7 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 		if raw {
 			return fmt.Sprintf("b.WriteString(%s)", code), nil
 		}
-		return fmt.Sprintf("b.WriteString(html.EscapeString(%s))", code), nil
+		return fmt.Sprintf("b.WriteString(dreego.SafeText(%s))", code), nil
 	case NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
@@ -143,86 +143,6 @@ func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, args), nil
 	}
 	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag), nil
-}
-
-func compTextWithAttrs(s string) string {
-	code, _ := compTextSection(s, false)
-	return code
-}
-
-// compTextSection renders a NodeText content segment to Go code, resolving {{ … }}
-// placeholders inside quoted attribute values but leaving <script>/<style> section
-// bodies literal (the lexer treats those as raw text where {{ … }} is not an expression).
-// It returns the generated code and the section state after this segment so the
-// caller can carry section tracking across sibling text nodes.
-func compTextSection(content string, inSection bool) (string, bool) {
-	var parts []string
-	cur := inSection
-	var quote byte
-	start := 0
-	i := 0
-	for i < len(content) {
-		if cur {
-			if closeLen := sectionCloseLen(content[i:]); closeLen > 0 {
-				end := i + closeLen
-				parts = append(parts, goLiteral(content[start:end]))
-				start = end
-				i = end
-				cur = false
-				continue
-			}
-			i++
-			continue
-		}
-		if strings.HasPrefix(content[i:], "<script") || strings.HasPrefix(content[i:], "<style") {
-			if start < i {
-				parts = append(parts, goLiteral(content[start:i]))
-			}
-			start = i
-			cur = true
-			quote = 0
-			continue
-		}
-		if (content[i] == '"' || content[i] == '\'') && (i == 0 || content[i-1] != '\\') {
-			if quote == 0 {
-				quote = content[i]
-			} else if quote == content[i] {
-				quote = 0
-			}
-			i++
-			continue
-		}
-		if quote != 0 && strings.HasPrefix(content[i:], "{{") {
-			closeIdx := strings.Index(content[i+2:], "}}")
-			if closeIdx < 0 {
-				i++
-				continue
-			}
-			if start < i {
-				parts = append(parts, goLiteral(content[start:i]))
-			}
-			expr := strings.TrimSpace(content[i+2 : i+2+closeIdx])
-			code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
-			parts = append(parts, fmt.Sprintf("html.EscapeString(%s)", code))
-			i += 2 + closeIdx + 2
-			start = i
-			continue
-		}
-		i++
-	}
-	if start < len(content) {
-		parts = append(parts, goLiteral(content[start:]))
-	}
-	return strings.Join(parts, " + "), cur
-}
-
-func sectionCloseLen(s string) int {
-	for _, tag := range []string{"</script>", "</style>"} {
-		if strings.HasPrefix(s, tag) {
-			return len(tag)
-		}
-	}
-	return 0
 }
 
 func GenerateComponent(gen *generator, file *File, scopeHash string) (string, error) {

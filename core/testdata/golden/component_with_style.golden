@@ -6,12 +6,12 @@ func Badge(title string, tone string) dreego.Component {
 		b.WriteString(`
     `)
 		b.WriteString(`<span>`)
-		b.WriteString(html.EscapeString(fmt.Sprintf("%v", title)))
+		b.WriteString(dreego.SafeText(fmt.Sprintf("%v", title)))
 		b.WriteString(`</span>`)
 		b.WriteString(`
     `)
 		b.WriteString(`<em>`)
-		b.WriteString(html.EscapeString(fmt.Sprintf("%v", tone)))
+		b.WriteString(dreego.SafeText(fmt.Sprintf("%v", tone)))
 		b.WriteString(`</em>`)
 		b.WriteString(`
 `)
