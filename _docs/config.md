@@ -28,15 +28,42 @@ When `false`, no request logging is performed. A plugin (`plugin-logging`) can t
 
 ## redirects
 
-| Field    | Type   | Description                                 |
-|----------|--------|---------------------------------------------|
-| `from`   | string | Source path                                  |
-| `to`     | string | Target path or external URL                  |
-| `status` | int    | HTTP status: `301` (permanent), `302` (temp) |
+| Field    | Type   | Description                                          |
+|----------|--------|------------------------------------------------------|
+| `from`   | string | Source path (exact) or `/*` wildcard                 |
+| `to`     | string | Target path (exact) or `/*` wildcard                 |
+| `status` | int    | Redirect status: `301`, `302`, `303`, `307`, `308`   |
+
+### Semantics
+
+- **Exact** (`from` without `/*`): matches only the exact path. `/api`
+  matches `/api` but not `/api/v1` and not `/apiary`.
+- **Wildcard** (`from` ending in `/*`): matches the base path and any
+  path below it at a **segment boundary**. `/api/*` matches `/api` and
+  `/api/users/1` but does **not** match `/apiary` (near-prefix collision).
+- The suffix after the matched prefix is appended to the target prefix.
+  `/api/*` → `/v2/*` rewrites `/api/users/1` to `/v2/users/1`.
+
+### Validation (configuration time)
+
+Invalid rules fail during `RegisterRedirect` (at generation/startup), never
+at request time:
+
+- Empty or non-`/`-prefixed `from`/`to`
+- Trailing `/` (except root `/`), double slashes `//`
+- `*` outside a trailing `/*`, or multiple `/*`
+- Status outside `{301, 302, 303, 307, 308}`
+- Self-loops (`from == to`) and wildcard loops (`/api/*` → `/api/v2/*`,
+  which redirects back under the same prefix)
 
 ## rewrites
 
 | Field  | Type   | Description                               |
 |--------|--------|-------------------------------------------|
-| `from` | string | Source path pattern (e.g. `/api/v1/*`)    |
-| `to`   | string | Target path (e.g. `/api/v2/*`)            |
+| `from` | string | Source path (exact) or `/*` wildcard      |
+| `to`   | string | Target path (exact) or `/*` wildcard      |
+
+Rewrites share the exact/wildcard semantics and validation rules of
+redirects (minus the status code). A rewrite changes the request path
+transparently before the router sees it; redirects send an HTTP redirect
+response.
