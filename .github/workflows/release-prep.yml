@@ -1,0 +1,74 @@
+name: release-prep
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to prepare (applies pr.md to the PR branch)'
+        required: true
+
+concurrency:
+  group: release-prep
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.inputs.pr_number }}/head
+          fetch-depth: 0
+
+      - name: "Guard: same-repo PR only"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head_repo=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.name')
+          base_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json baseRepository --jq '.baseRepository.owner.login')
+          head_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepositoryOwner --jq '.headRepositoryOwner.login' 2>/dev/null || gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.owner.login' 2>/dev/null || echo "")
+          if [ -z "$head_owner" ]; then
+            echo "error: could not determine head repository owner for PR ${{ github.event.inputs.pr_number }}"
+            exit 1
+          fi
+          if [ "$head_owner" != "$base_owner" ]; then
+            echo "error: release-prep only supports same-repo PRs; rebase fork PR into a same-repo PR first (head owner: $head_owner, base owner: $base_owner)"
+            exit 1
+          fi
+          echo "ok: same-repo PR (head repo: $head_repo, base owner: $base_owner)"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: make test
+        run: make test
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        id: prep
+        run: |
+          python3 _scripts/release-prep.py | tee /tmp/prep.out
+          echo "new_version=$(grep '^new=' /tmp/prep.out | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR head branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ref=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRefName --jq .headRefName)
+          echo "head_ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push to PR branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: apply pr.md changelog (release-prep)"
+          git push origin "HEAD:refs/heads/${{ steps.branch.outputs.head_ref }}"

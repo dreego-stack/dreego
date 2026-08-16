@@ -23,7 +23,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path.cwd()
 PR_MD = ROOT / "pr.md"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
@@ -94,6 +94,11 @@ def main():
 
     if new_version:
         entry = f"\n## {new_version} - {today}\n\n{lines_text}"
+        if f"## {new_version} -" in old:
+            print(f"new={new_version}")
+            print(f"skipped: version {new_version} already in CHANGELOG", file=sys.stderr)
+            PR_MD.unlink()
+            return
     else:
         entry = lines_text
 
