@@ -1,4 +1,9 @@
 
+## v0.0.45 - 2026-08-16
+
+- Chore: split core/lexer.go into focused files (lexer_tag.go, lexer_component.go); no behavior change
+- Feat: add lexer and parser fuzz targets (FuzzLexer, FuzzParser, FuzzParserPreservesGoSection) checking crashes, determinism, bounded output, and source preservation
+
 ## v0.0.44 - 2026-08-16
 
 - Feat: dreegotest generation parity test — `_tests/go/parity_test.go` compares CLI `generate` output with the `dreegotest` generation path for the same fixtures; any divergence fails CI with a diff
