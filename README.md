@@ -50,6 +50,7 @@ Four principles:
 - **File-based Routing** — `dreego/routes/get.dreego` → `GET /`, `dreego/routes/login/post.dreego` → `POST /login`
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
+
 ### Template & Components
 - **Template Logic** — `{{ value }}`, `{#if}...{#else}...{/if}`, `{#each items as item}...{#each else}...{/each}`
 - **Template Helpers** — `{{ $loop.Index }}`, `{{ value|raw }}`, `{{ value|upper }}`, `{#verbatim}`

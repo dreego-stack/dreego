@@ -23,6 +23,9 @@ without external dependencies.
 | `BenchmarkRequestJSON` | Full request through the built handler chain: JSON API response |
 | `BenchmarkRequestSimple` | Full request through the built handler chain: minimal handler |
 
+`BenchmarkRequestPage` uses a hand-written render function that mirrors the
+shape of the generated code, not the actual transpiler output.
+
 ## Reference Results
 
 Measured 2026-08-15 in the smd container (`golang:1.22-alpine`, linux/arm64,

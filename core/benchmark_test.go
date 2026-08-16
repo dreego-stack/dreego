@@ -103,6 +103,10 @@ func benchRenderPage(c *SSRContext) (string, error) {
 	b.WriteString(`<h1>`)
 	b.WriteString(html.EscapeString(fmt.Sprintf("%v", "Benchmark")))
 	b.WriteString(`</h1>`)
+	show := true
+	if show {
+		b.WriteString(`<p>visible</p>`)
+	}
 	items := []string{"a", "b", "c"}
 	for i, item := range items {
 		loop := EachLoop{Index: i, First: i == 0, Last: i == len(items)-1, Even: i%2 == 0, Odd: i%2 != 0}
