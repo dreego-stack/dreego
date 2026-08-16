@@ -9,7 +9,13 @@ timestamp: 2026-07-28T00:00:00Z
 # Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Accepted — pipeline core is current; see note below
+
+> **Historical note:** The compile-time transpiler pipeline is current. The
+> three-target codegen (SSR/SSG/Wails) is superseded: until v1, SSR is the only
+> production target. The `Target` interface and target-agnostic `render(ctx)`
+> output are no longer required for v0.1. See
+> [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
 ## Context

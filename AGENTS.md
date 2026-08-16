@@ -221,26 +221,26 @@ before using it as domain data. Do not claim that Core contains no string keys.
 
 ---
 
-## Architecture Guarantees for V2
+## Architecture Guarantees
 
-### 1. Target-Agnostic Transpiler Pipeline
-V1: `TargetSSR`, V2: `TargetSSG`, `TargetWails`. → [decisions/ssg-wails-v2](.agents/decisions/ssg-wails-v2.md)
+Until v1, SSR is the only production target and the core priority. SSG,
+expanded Wails support, and static deployment targets belong after v1; the
+former V2 preparation (Target interface, reserved CLI flags) is no longer
+required — extension points are preserved only where inexpensive, without
+speculative abstractions. See [decisions/ssg-wails-v2](.agents/decisions/ssg-wails-v2.md)
+(superseded) and the Product Focus section above.
 
-### 2. `<go>` Block: No hard `*http.Request`
+### 1. `<go>` Block: No hard `*http.Request`
 Solution: `dreego.Context` Interface. → [decisions/context-design](.agents/decisions/context-design.md)
 
-### 3. Transpiler Pipeline with Extension Points
-→ [decisions/typescript-v2](.agents/decisions/typescript-v2.md)
-
-### 4. Plugin Contracts Stay Provisional Until v1
+### 2. Plugin Contracts Stay Provisional Until v1
 Real external plugins between v0.1 and v1 must validate the contract before a stability promise. → [plugin-contract.1](_todo/core/plugin-contract.1.md)
 
-### 5. File-based Routing: Crawlable for SSG
+### 3. File-based Routing
+Filename-based routing is the released pre-v0.1 implementation; the accepted
+v0.1 target is one route file per URL (`+page.dreego` and method sections).
 → [decisions/routing-and-components](.agents/decisions/routing-and-components.md)
 
-### 6. Asset System: Dual-Mode (Embedded + Disk)
+### 4. Asset System: Dual-Mode (Embedded + Disk)
 
-### 7. Template Rendering without HTTP Server
-
-### 8. CLI Interface: Reserved Flags
-`dreego build --static | --wails | --mobile`
+### 5. Template Rendering without HTTP Server

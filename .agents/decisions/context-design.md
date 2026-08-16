@@ -9,7 +9,13 @@ timestamp: 2026-07-28T00:00:00Z
 # Context Design (Interface + Target Structs)
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Accepted — Context interface is current; see note below
+
+> **Historical note:** The slim `dreego.Context` interface and the rule that
+> `<go>` blocks never depend on a hard `*http.Request` remain current. The
+> three concrete target structs (SSR/SSG/Wails) are superseded: until v1, SSR
+> is the only production target and `SSRContext` is the concrete context. See
+> [ssg-wails-v2](ssg-wails-v2.md) and [_docs/runtime.md](../../_docs/runtime.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output1.md)
 
 ## Context

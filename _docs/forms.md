@@ -118,7 +118,15 @@ CSRF is handled by the middleware, not the form handler. With `app.SetSessionSto
 - POST/PUT/DELETE without valid token → 403
 - Token sent via `X-CSRF-Token` header or `csrf_token` form field
 
-HTMX automatically sends the CSRF token via header. For plain HTML forms, include a hidden field:
+HTMX does not send the CSRF token automatically. For HTMX requests, either keep
+the hidden field in the form (HTMX serializes form fields, so the token is
+submitted as `csrf_token`) or configure the header once via `hx-headers`:
+
+```html
+<body hx-headers='{"X-CSRF-Token": "{{ c.CSRFToken() }}"}'>
+```
+
+For plain HTML forms, include a hidden field:
 
 ```html
 <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
