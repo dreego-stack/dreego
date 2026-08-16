@@ -35,7 +35,7 @@ dreego generate && go run .
 
 ## Philosophy
 
-Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing, no hidden overhead. Your app is a plain Go binary using `net/http`.
+Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing. Your app is a plain Go binary using `net/http`. See [Benchmarks](_docs/benchmarks.md) for measured code-generation and request performance.
 
 Four principles:
 1. **SSR-First** — Pages render server-side. HTMX/Alpine.js for progressive enhancement, not required.
@@ -50,7 +50,6 @@ Four principles:
 - **File-based Routing** — `dreego/routes/get.dreego` → `GET /`, `dreego/routes/login/post.dreego` → `POST /login`
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
-
 ### Template & Components
 - **Template Logic** — `{{ value }}`, `{#if}...{#else}...{/if}`, `{#each items as item}...{#each else}...{/each}`
 - **Template Helpers** — `{{ $loop.Index }}`, `{{ value|raw }}`, `{{ value|upper }}`, `{#verbatim}`

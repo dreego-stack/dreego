@@ -25,6 +25,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 ## Development
 
 - [Testing](https://github.com/dreego-stack/dreego/blob/main/_docs/testing.md) — Integration Test Strategy
+- [Benchmarks](https://github.com/dreego-stack/dreego/blob/main/_docs/benchmarks.md) — Code generation and request benchmarks
 - [Deployment](https://github.com/dreego-stack/dreego/blob/main/_docs/deployment.md) — Build, Cross-Compile, Containers
 - [Architecture](https://github.com/dreego-stack/dreego/blob/main/.agents/concepts/dreego-architecture.md) — Architecture Overview
 - [Dev Server](https://github.com/dreego-stack/dreego/blob/main/_docs/dev-server.md) — `dreego dev` watcher + auto-reload
