@@ -18,6 +18,8 @@ timestamp: 2026-07-28T00:00:00Z
 > [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
+**Current state: SSR-only until v1.** Only the SSR codegen pass is current; the SSG and Wails codegen examples below are historical and superseded. See [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
+
 ## Context
 
 Dreego is a compile-time transpiler. `.dreego` files must be converted to Go code — for 3 targets (SSR, SSG, Wails).
@@ -187,4 +189,4 @@ func IndexWails(ctx *dreego.WailsContext) (string, error) {
 
 - Generated files: `pages/index_dreego.go` (not committed)
 - `dreego generate` must run before `go build`
-- Transpiler is target-agnostic — target is selected via CLI flag
+- Transpiler emits SSR handlers; multi-target codegen is deferred past v1

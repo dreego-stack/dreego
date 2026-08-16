@@ -79,8 +79,10 @@ generates a POST handler for this route that parses the form, maps it to the
 
 ### Step 2: The server handler
 
+The `g-action` handler definition lives in the POST route file (`post.dreego`) for the same URL — Dreego's method-filename routing maps `post.dreego` to the POST method on that route.
+
 ```dreego
-<!-- dreego/routes/posts/[id]/get.dreego -->
+<!-- dreego/routes/posts/[id]/post.dreego -->
 <go>
     type CommentForm struct {
         Author string `form:"author" validate:"required,max=80"`
@@ -195,6 +197,9 @@ cover. It follows the same rule: enhance, never require.
   scripts and styles so HTMX, Alpine.js, and scoped CSS work out of the box.
   If you tighten the CSP with `app.SetCSP`, you must allow the scripts you
   actually load — see [Middleware](middleware.md).
+- **CDN origins:** If scripts are loaded from a CDN (e.g. `unpkg.com`), the
+  CDN origin must be included in `script-src` (e.g.
+  `script-src 'self' 'unsafe-inline' https://unpkg.com`).
 
 ## Failure Behavior
 

@@ -61,4 +61,4 @@ Interactivity comes not through a client-side framework, but through:
 - No client-side router needed
 - No API layer between template and database
 - HTMX + Alpine.js are the supported progressive-enhancement path; plain JavaScript is always available
-- V2: SSG (Static Site Generation) for purely static pages
+- Historical: V2: SSG (Static Site Generation) for purely static pages (deferred past v1; see [ssg-wails-v2](ssg-wails-v2.md))

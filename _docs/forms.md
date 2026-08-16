@@ -40,6 +40,8 @@ The `g-action="Login"` attribute on the `<form>` tells Dreego to generate a POST
 4. Calls `Login(c, form)` on success
 5. Re-renders the page with errors on validation failure
 
+The `g-action` handler definition lives in the POST route file (`post.dreego`) for the same URL — Dreego's method-filename routing maps `post.dreego` to the POST method on that route.
+
 ## Generated Pipeline
 
 ```

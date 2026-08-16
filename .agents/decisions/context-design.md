@@ -18,6 +18,8 @@ timestamp: 2026-07-28T00:00:00Z
 > [ssg-wails-v2](ssg-wails-v2.md) and [_docs/runtime.md](../../_docs/runtime.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output1.md)
 
+**Current state: SSR-only until v1.** `SSRContext` is the only concrete context in use; the `SSGContext` and `WailsContext` examples below are historical and superseded. See [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
+
 ## Context
 
 The `<go>` block in `.dreego` files needs a context for data access. Dreego supports three rendering targets:
