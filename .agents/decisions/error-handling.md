@@ -109,13 +109,13 @@ func IsDev() bool { return os.Getenv("APP_ENV") != "production" }
 CodeGen generates handlers that return `ValidationError`. Rendering:
 
 ```html
-<input name="email" value="{c.Old("email")}" />
+<input name="email" value="{{ c.Old("email") }}" />
 {#if c.Errors("email")}
-  <p class="error">{c.Errors("email")}</p>
+  <p class="error">{{ c.Errors("email") }}</p>
 {/if}
 
 {#if c.Flash("success")}
-  <div class="success">{c.Flash("success")}</div>
+  <div class="success">{{ c.Flash("success") }}</div>
 {/if}
 ```
 

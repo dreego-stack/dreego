@@ -9,7 +9,14 @@ timestamp: 2026-07-28T00:00:00Z
 # SSG & Wails Integration in V2
 
 **Date:** 2026-07-28
-**Status:** Accepted (planned for V2)
+**Status:** Superseded (historical) — see note below
+
+> **Superseded:** The multi-target timeline changed. Until v1, SSR is the only
+> production target and the core priority. SSG and expanded Wails support belong
+> after v1, and the "architecture preparation in V1" (Target interface, reserved
+> CLI flags) is no longer required — extension points are preserved only where
+> inexpensive, without speculative abstractions. See AGENTS.md "Product Focus"
+> and [_docs/roadmap.md](../../_docs/roadmap.md).
 
 ## Context
 

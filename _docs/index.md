@@ -12,6 +12,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Middleware](https://github.com/dreego-stack/dreego/blob/main/_docs/middleware.md) — Middleware System
 - [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md) — SSRContext, Listen, sessions, config
 - [Session Encryption](https://github.com/dreego-stack/dreego/blob/main/_docs/session-encryption.md) — AES-256-GCM encrypted session cookies
+- [Progressive Enhancement](https://github.com/dreego-stack/dreego/blob/main/_docs/progressive-enhancement.md) — HTMX, Alpine.js, and plain JavaScript without an internal client runtime
 
 ## Framework
 

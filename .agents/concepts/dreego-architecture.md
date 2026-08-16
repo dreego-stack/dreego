@@ -8,6 +8,12 @@ timestamp: 2026-07-31T07:00:00Z
 ---
 # Dreego Architecture
 
+> **Historical note:** The layered architecture is current. The monorepo plugin
+> layout (`plugins/` + `go.work`, v0.0.21) is superseded — official plugins use
+> separate repositories and modules. Tailwind is not a core dependency; it is a
+> plugin. Core is dependency-free (stdlib only). See AGENTS.md "Core and Plugin
+> Boundary" and [monorepo-plugin-layout](../decisions/monorepo-plugin-layout.md).
+
 ## Overview
 
 Dreego is a compile-time web framework for Go. It consists of two main components:

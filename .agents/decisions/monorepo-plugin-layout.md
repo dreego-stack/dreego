@@ -8,7 +8,7 @@ timestamp: 2026-07-31T07:00:00Z
 # Monorepo Plugin Layout
 
 **Date:** 2026-07-31
-**Status:** Superseded — official optional plugins now use separate repositories and modules
+**Status:** Superseded (historical) — official optional plugins now use separate repositories and modules
 **Supersedes:** separate-repo statements in [name-dreego](name-dreego.md) and [routing-and-components](routing-and-components.md)
 
 ## Context

@@ -9,8 +9,16 @@ timestamp: 2026-07-28T00:00:00Z
 # Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Accepted — pipeline core is current; see note below
+
+> **Historical note:** The compile-time transpiler pipeline is current. The
+> three-target codegen (SSR/SSG/Wails) is superseded: until v1, SSR is the only
+> production target. The `Target` interface and target-agnostic `render(ctx)`
+> output are no longer required for v0.1. See
+> [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
+
+**Current state: SSR-only until v1.** Only the SSR codegen pass is current; the SSG and Wails codegen examples below are historical and superseded. See [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
 
 ## Context
 
@@ -181,4 +189,4 @@ func IndexWails(ctx *dreego.WailsContext) (string, error) {
 
 - Generated files: `pages/index_dreego.go` (not committed)
 - `dreego generate` must run before `go build`
-- Transpiler is target-agnostic — target is selected via CLI flag
+- Transpiler emits SSR handlers; multi-target codegen is deferred past v1

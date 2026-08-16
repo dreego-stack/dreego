@@ -8,6 +8,15 @@ timestamp: 2026-07-28T00:00:00Z
 ---
 # Form Actions — g-action + Generated Handlers
 
+**Date:** 2026-07-28
+**Status:** Accepted — generated pipeline is current; see note below
+
+> **Historical note:** The generated `g-action` pipeline is current. The
+> dependency on `go-playground/validator` is superseded — validation uses
+> built-in validators in Core (see [_docs/forms.md](../../_docs/forms.md)). The
+> `dreego.Context` interface and target-agnostic handler signature remain
+> current (see [context-design](context-design.md)).
+
 ## Decision
 
 **Declarative form handlers via `g-action`.** The developer defines a struct + function — Dreego generates CSRF check, form parsing, validation, and handler call.
@@ -48,9 +57,9 @@ Not as magic template variables, but via context:
 
 ```html
 {#if c.Errors("email")}
-    <p class="error">{c.Errors("email")}</p>
+    <p class="error">{{ c.Errors("email") }}</p>
 {/if}
-<input name="email" value="{c.Old("email")}" />
+<input name="email" value="{{ c.Old("email") }}" />
 ```
 
 Rationale: Works in tests without an HTTP server (AGENTS.md guarantee #7).
@@ -103,7 +112,7 @@ Only `{variable|raw}` bypasses escaping — explicit, rare, consciously risky.
 
 ## Consequences
 
-- `go-playground/validator` is a core dependency
+- Validation uses built-in validators in Core; no external validator dependency
 - CSRF check via middleware, not hardcoded in the action handler
 - File uploads: Part of `g-action` via `multipart.Form` (V1)
 - `g-upload` for chunked/streaming only in V2

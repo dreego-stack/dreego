@@ -10,7 +10,14 @@ timestamp: 2026-07-28T00:00:00Z
 # Technology Stack for Dreego V1
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Superseded (historical) — see note below
+
+> **Superseded:** The chosen stack (go-chi/chi router, go-playground/validator,
+> embedded Tailwind CLI) is no longer the v0.1 contract. The current contract
+> uses `net/http` 1.22+ enhanced routing, built-in form validators, and a
+> dependency-free Core. Tailwind integration is a plugin, not a core
+> dependency. See [routing-and-components](routing-and-components.md),
+> [_docs/forms.md](../../_docs/forms.md), and AGENTS.md "Core and Plugin Boundary".
 
 ## Context
 

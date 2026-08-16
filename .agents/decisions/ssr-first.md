@@ -9,7 +9,14 @@ timestamp: 2026-07-28T00:00:00Z
 # SSR-First Architecture
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Accepted — SSR-first remains the v0.1 contract; see note below
+
+> **Historical note:** The interactivity stack is narrowed for v0.1. HTMX,
+> Alpine.js, and plain JavaScript remain the supported progressive-enhancement
+> path. Datastar/SSE-based real-time updates are no longer a core option — SSE
+> and WebSockets are plugins, not core packages (AGENTS.md "Core and Plugin
+> Boundary"). Tailwind is not a fixed core dependency; it is a plugin. There is
+> no internal client runtime before v0.1.
 
 ## Context
 
@@ -53,5 +60,5 @@ Interactivity comes not through a client-side framework, but through:
 
 - No client-side router needed
 - No API layer between template and database
-- Tailwind + HTMX + Alpine.js are fixed core dependencies
-- V2: SSG (Static Site Generation) for purely static pages
+- HTMX + Alpine.js are the supported progressive-enhancement path; plain JavaScript is always available
+- Historical: V2: SSG (Static Site Generation) for purely static pages (deferred past v1; see [ssg-wails-v2](ssg-wails-v2.md))

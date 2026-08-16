@@ -13,6 +13,7 @@
     {"path": "/_docs/plugins.md", "title": "Plugins"},
     {"path": "/_docs/runtime.md", "title": "Runtime API"},
     {"path": "/_docs/session-encryption.md", "title": "Session Encryption"},
+    {"path": "/_docs/progressive-enhancement.md", "title": "Progressive Enhancement"},
     {"path": "/_docs/testing.md", "title": "Testing"},
     {"path": "/_docs/deployment.md", "title": "Deployment"},
     {"path": "/_docs/dev-server.md", "title": "Dev Server"},

@@ -8,6 +8,13 @@ timestamp: 2026-07-28T00:00:00Z
 ---
 # Signals & Svelte Runes — Concept for Dreego
 
+> **Historical note:** The Level 2 client-side options (Alpine.js, Datastar)
+> are narrowed for v0.1. HTMX, Alpine.js, and plain JavaScript are the supported
+> progressive-enhancement path; there is no internal client runtime before v0.1.
+> Datastar/SSE-based real-time updates are not a core option — SSE and
+> WebSockets are plugins. See AGENTS.md "Product Focus" and
+> [_docs/progressive-enhancement.md](../../_docs/progressive-enhancement.md).
+
 ## What are Signals?
 
 Signals are a reactive state primitive. Simplified:
