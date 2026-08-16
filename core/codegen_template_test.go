@@ -15,8 +15,8 @@ func TestGenTemplateNodeExpressionEscapesHTML(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, "html.EscapeString") {
-		t.Errorf("expression node must use html.EscapeString, got:\n%s", result)
+	if !strings.Contains(result, "dreego.SafeText") {
+		t.Errorf("expression node must use dreego.SafeText, got:\n%s", result)
 	}
 }
 
@@ -33,8 +33,8 @@ func TestGenTemplateNodeIfRecursivelyEscapes(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, "html.EscapeString") {
-		t.Errorf("{#if} child expression must use html.EscapeString, got:\n%s", result)
+	if !strings.Contains(result, "dreego.SafeText") {
+		t.Errorf("{#if} child expression must use dreego.SafeText, got:\n%s", result)
 	}
 }
 
@@ -52,8 +52,8 @@ func TestGenTemplateNodeEachRecursivelyEscapes(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(result, "html.EscapeString") {
-		t.Errorf("{#if} child expression must use html.EscapeString, got:\n%s", result)
+	if !strings.Contains(result, "dreego.SafeText") {
+		t.Errorf("{#if} child expression must use dreego.SafeText, got:\n%s", result)
 	}
 }
 
@@ -67,8 +67,8 @@ func TestGenTemplateNodeTextNoEscape(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if strings.Contains(result, "html.EscapeString") {
-		t.Errorf("static text must NOT use html.EscapeString, got:\n%s", result)
+	if strings.Contains(result, "dreego.SafeText") {
+		t.Errorf("static text must NOT use dreego.SafeText, got:\n%s", result)
 	}
 }
 
@@ -128,9 +128,8 @@ func TestGenTemplateNodeCompReturnsErrorForUnsupportedNode(t *testing.T) {
 }
 
 // An attribute expression in a component body must be escaped (XSS-safe).
-// `<a href="{{ url }}">` must generate html.EscapeString for the url value so a
-// quote in the value cannot break out of the attribute. Currently the whole
-// tag is a literal NodeText and {{ url }} is emitted verbatim with no escaping.
+// `<a href="{{ url }}">` must generate a safe-value call for the url value so a
+// quote in the value cannot break out of the attribute.
 func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
 	body := `<div><a href="{{ url }}">{{ label }}</a></div>`
 	tokens, err := Lex(body)
@@ -153,8 +152,8 @@ func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
 	if strings.Contains(got, "{{ url }}") {
 		t.Errorf("attribute expression {{ url }} left literal, must be resolved. got:\n%s", got)
 	}
-	if !strings.Contains(got, "html.EscapeString") {
-		t.Errorf("attribute expression must be html-escaped (XSS-safe), got:\n%s", got)
+	if !strings.Contains(got, "dreego.SafeURL") {
+		t.Errorf("href attribute expression must be scheme-validated (XSS-safe), got:\n%s", got)
 	}
 }
 
@@ -167,7 +166,7 @@ func TestGenTemplateNodeRouteAttrExpressionEscapesValue(t *testing.T) {
 	if !strings.Contains(got, `fmt.Sprintf("%v", url)`) {
 		t.Fatalf("route attribute expression was not generated: %s", got)
 	}
-	if !strings.Contains(got, "html.EscapeString") {
-		t.Fatalf("route attribute expression must be escaped: %s", got)
+	if !strings.Contains(got, "dreego.SafeURL") {
+		t.Fatalf("route href attribute expression must be scheme-validated: %s", got)
 	}
 }

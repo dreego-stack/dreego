@@ -274,7 +274,7 @@ func TestGenTemplateNodeVerbatim(t *testing.T) {
 	if !strings.Contains(result, "`<b>raw</b>`") {
 		t.Errorf("verbatim must emit literal content, got:\n%s", result)
 	}
-	if strings.Contains(result, "html.EscapeString") {
+	if strings.Contains(result, "dreego.SafeText") {
 		t.Errorf("verbatim must NOT escape, got:\n%s", result)
 	}
 }
@@ -292,7 +292,7 @@ func TestGenTemplateNodeFilterRawUpper(t *testing.T) {
 	if !strings.Contains(result, "strings.ToUpper") {
 		t.Errorf("upper filter must wrap in strings.ToUpper, got:\n%s", result)
 	}
-	if strings.Contains(result, "html.EscapeString") {
-		t.Errorf("raw filter must skip html.EscapeString, got:\n%s", result)
+	if strings.Contains(result, "dreego.SafeText") {
+		t.Errorf("raw filter must skip dreego.SafeText, got:\n%s", result)
 	}
 }

@@ -34,7 +34,7 @@ func TestGenComponentCallResolvesAttrExpression(t *testing.T) {
 // text inside <script>/<style> sections. The lexer treats those sections as raw
 // text blocks where {…} is NOT a Go expression, so compTextWithAttrs must leave
 // them untouched. Currently it replaces {x} inside "<script>const s = "{x}";"
-// with html.EscapeString(fmt.Sprintf("%v", x)).
+// with dreego.SafeText / dreego.SafeAttr (context-dependent escaping).
 func TestCompTextWithAttrsLeavesScriptStyleBodiesUntouched(t *testing.T) {
 	cases := []string{
 		`<script>const s = "{x}";</script>`,

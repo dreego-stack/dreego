@@ -186,8 +186,9 @@ func TestAttrValQuotedBoolString(t *testing.T) {
 // concatPlaceholders builds a component-call argument for a quoted attribute
 // value with mixed literal text and multiple {…} placeholders. Escaping must be
 // deferred to the prop-injection point (the component body escapes its own
-// placeholders), so the call argument must NOT itself wrap the expression in
-// html.EscapeString. Otherwise multi-placeholder calls would be double-escaped.
+// placeholders via dreego.SafeText/dreego.SafeAttr), so the call argument must
+// NOT itself escape the expression. Otherwise multi-placeholder calls would be
+// double-escaped.
 func TestConcatPlaceholdersDoesNotEscape(t *testing.T) {
 	out := concatPlaceholders(`href="{a}-{b}"`)
 	if strings.Contains(out, "html.EscapeString") {

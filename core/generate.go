@@ -219,9 +219,6 @@ func Run(force bool) error {
 	if strings.Contains(compSrc, "fmt.") {
 		compImports = append(compImports, "\"fmt\"")
 	}
-	if strings.Contains(compSrc, "html.EscapeString") {
-		compImports = append(compImports, "\"html\"")
-	}
 	compImports = append(compImports, "\"strings\"")
 	compImportLine := strings.Join(compImports, "\n\t")
 
@@ -275,9 +272,6 @@ func routeImports(src string) string {
 	imports := []string{}
 	if strings.Contains(src, "fmt.") {
 		imports = append(imports, "\"fmt\"")
-	}
-	if strings.Contains(src, "html.EscapeString") {
-		imports = append(imports, "\"html\"")
 	}
 	if src != "" {
 		imports = append(imports, "\"net/http\"", "\"strings\"")

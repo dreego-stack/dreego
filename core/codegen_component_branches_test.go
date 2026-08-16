@@ -187,13 +187,13 @@ func TestCompGenVerbatim(t *testing.T) {
 	if !strings.Contains(out, "`<b>raw</b>`") {
 		t.Errorf("compGen verbatim must emit literal content, got:\n%s", out)
 	}
-	if strings.Contains(out, "html.EscapeString") {
+	if strings.Contains(out, "dreego.SafeText") {
 		t.Errorf("compGen verbatim must NOT escape, got:\n%s", out)
 	}
 }
 
 // compGen NodeExpression with raw + upper filters: upper must wrap the value,
-// raw must skip html.EscapeString.
+// raw must skip dreego.SafeText.
 func TestCompGenFilterRawUpper(t *testing.T) {
 	n := TemplateNode{
 		Type:    NodeExpression,
@@ -207,8 +207,8 @@ func TestCompGenFilterRawUpper(t *testing.T) {
 	if !strings.Contains(out, "strings.ToUpper") {
 		t.Errorf("compGen upper filter must wrap in strings.ToUpper, got:\n%s", out)
 	}
-	if strings.Contains(out, "html.EscapeString") {
-		t.Errorf("compGen raw filter must skip html.EscapeString, got:\n%s", out)
+	if strings.Contains(out, "dreego.SafeText") {
+		t.Errorf("compGen raw filter must skip dreego.SafeText, got:\n%s", out)
 	}
 }
 
@@ -219,7 +219,7 @@ func TestCompGenExpressionEscapesByDefault(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "html.EscapeString") {
+	if !strings.Contains(out, "dreego.SafeText") {
 		t.Errorf("compGen expression must escape by default, got:\n%s", out)
 	}
 }

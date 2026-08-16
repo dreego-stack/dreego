@@ -34,7 +34,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		if raw {
 			return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 		}
-		return fmt.Sprintf(`%s%s.WriteString(html.EscapeString(%s))`+"\n", indent, builder, code), nil
+		return fmt.Sprintf(`%s%s.WriteString(dreego.SafeText(%s))`+"\n", indent, builder, code), nil
 	case NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))

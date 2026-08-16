@@ -13,7 +13,7 @@ b.WriteString(`<title>Home</title>`)
     `)
 	b.WriteString(`<p>`)
 	b.WriteString(`Hello, `)
-	b.WriteString(html.EscapeString(fmt.Sprintf("%v", name)))
+	b.WriteString(dreego.SafeText(fmt.Sprintf("%v", name)))
 	b.WriteString(`!`)
 	b.WriteString(`</p>`)
 	b.WriteString(`

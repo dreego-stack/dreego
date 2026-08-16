@@ -117,10 +117,11 @@ routes/index.dreego:4:18: Card title: expected string, got int
 ```
 
 The HTML attribute expression is escaped before emission. Escaping prevents
-attribute injection, but it does not make an arbitrary URL trustworthy. Before
-using untrusted input in `href`, `src`, or similar attributes, parse the URL and
-allow only the schemes and forms the application expects, such as relative URLs
-and `https`. Reject dangerous schemes such as `javascript`.
+attribute injection, but it does not make an arbitrary URL trustworthy. URL
+attributes (`href`, `src`, `action`, …) are additionally scheme-validated:
+values with unsafe schemes such as `javascript:` are replaced with `#`. See
+[Output Safety](https://github.com/dreego-stack/dreego/blob/main/_docs/security.md)
+for the exact context rules and the `|raw` opt-in.
 
 ## Rules
 
@@ -130,7 +131,7 @@ and `https`. Reject dangerous schemes such as `javascript`.
 4. **Scoped Styles** — `data-scope` per component. No leak to parent.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.
-7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value.
+7. **Expressions** — `{{ expression }}` renders escaped text or an HTML attribute value, with context-aware rules (see [Output Safety](https://github.com/dreego-stack/dreego/blob/main/_docs/security.md)).
 8. **Typed props** — `prop={expression}` passes a Go expression value without converting it to a string.
 9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
 
@@ -235,7 +236,7 @@ func Card(title string) dreego.Component {
         b.WriteString("<div data-scope=\"abc123\">")
         b.WriteString(`<article class="card">`)
         b.WriteString(`<h2>`)
-        b.WriteString(html.EscapeString(fmt.Sprintf("%v", title)))
+        b.WriteString(dreego.SafeText(fmt.Sprintf("%v", title)))
         b.WriteString(`</h2>`)
         b.WriteString(ctx.Get("slot"))
         b.WriteString(`</article>`)
