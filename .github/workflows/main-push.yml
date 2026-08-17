@@ -1,0 +1,67 @@
+name: main-push
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: make test
+        run: make test
+
+      - name: Check for pr.md
+        id: check
+        run: |
+          if [ -f pr.md ]; then
+            echo "has_pr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_pr=false" >> "$GITHUB_OUTPUT"
+            echo "no pr.md, nothing to process"
+          fi
+
+      - name: Apply pr.md (changelog + version + remove pr.md)
+        id: prep
+        if: steps.check.outputs.has_pr == 'true'
+        run: |
+          python3 _scripts/release-prep.py | tee /tmp/prep.out
+          echo "new_version=$(grep '^new=' /tmp/prep.out | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push to main
+        if: steps.check.outputs.has_pr == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: apply pr.md changelog (release-prep)"
+          git push origin main
+
+      - name: Create tag if version bumped
+        if: steps.check.outputs.has_pr == 'true' && steps.prep.outputs.new_version != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          new="${{ steps.prep.outputs.new_version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$new$"; then
+            echo "tag $new already exists, skipping"
+            exit 0
+          fi
+          git tag "$new"
+          git push origin "$new"
+          echo "created tag $new"

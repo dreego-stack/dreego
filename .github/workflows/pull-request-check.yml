@@ -1,4 +1,4 @@
-name: pull_request
+name: pull-request-check
 
 on:
   pull_request:
@@ -7,13 +7,6 @@ on:
       pr_number:
         description: 'PR number to check (fork PRs only)'
         required: true
-
-concurrency:
-  group: pr-check-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number || github.event.pull_request.number }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
   check:
@@ -25,35 +18,14 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', github.event.inputs.pr_number) || github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: "pr.md exists or release-prep already applied"
+      - name: pr.md exists
         run: |
-          if [ -f pr.md ]; then
-            echo "ok: pr.md present"
-            exit 0
-          fi
-          echo "pr.md absent — checking whether release-prep already applied the changelog"
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          top_version=$(grep -m1 '^## v[0-9]' CHANGELOG.md | sed 's/^## //; s/ - .*//' || true)
-          if [ -z "$top_version" ]; then
-            echo "error: pr.md missing and CHANGELOG.md has no version header — copy pr.md.example and fill in version + changelog lines"
+          if [ ! -f pr.md ]; then
+            echo "error: pr.md missing — copy pr.md.example and fill in version + changelog lines"
             exit 1
           fi
-          python3 - "$latest_tag" "$top_version" <<'EOF'
-          import sys
-          def vtuple(v):
-              v = v.strip().lstrip("v").split()[0]
-              parts = v.split(".")
-              return tuple(int(x) for x in parts[:3])
-          latest, top = sys.argv[1], sys.argv[2]
-          if vtuple(top) > vtuple(latest):
-              print(f"ok: release-prep already applied changelog {top} (latest tag {latest}) — pr.md correctly removed")
-              sys.exit(0)
-          print(f"error: pr.md missing and CHANGELOG top version {top} is not newer than latest tag {latest}")
-          sys.exit(1)
-          EOF
 
       - name: pr.md format valid
-        if: hashFiles('pr.md') != ''
         run: |
           python3 - <<'EOF'
           import re, sys
