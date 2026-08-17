@@ -28,8 +28,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           head_repo=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.name')
-          base_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json baseRepository --jq '.baseRepository.owner.login')
-          head_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepositoryOwner --jq '.headRepositoryOwner.login' 2>/dev/null || gh pr view "${{ github.event.inputs.pr_number }}" --json headRepository --jq '.headRepository.owner.login' 2>/dev/null || echo "")
+          base_owner=$(echo "${{ github.repository }}" | cut -d/ -f1)
+          head_owner=$(gh pr view "${{ github.event.inputs.pr_number }}" --json headRepositoryOwner --jq '.headRepositoryOwner.login' 2>/dev/null || echo "")
           if [ -z "$head_owner" ]; then
             echo "error: could not determine head repository owner for PR ${{ github.event.inputs.pr_number }}"
             exit 1
