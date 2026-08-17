@@ -48,8 +48,11 @@ func TestSSRContextJSONEncodeError(t *testing.T) {
 	if body == "" {
 		t.Fatal("expected an error body, got empty")
 	}
-	if !strings.Contains(body, "unsupported type") {
-		t.Errorf("expected unsupported type error in body, got %q", body)
+	if !strings.Contains(body, http.StatusText(http.StatusInternalServerError)) {
+		t.Errorf("expected generic error body, got %q", body)
+	}
+	if strings.Contains(body, "unsupported type") {
+		t.Errorf("internal cause must not be disclosed, got %q", body)
 	}
 }
 

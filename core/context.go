@@ -22,15 +22,19 @@ type Context interface {
 	DelSessionVal(key string)
 	CSRFToken() string
 	RequestID() string
+	FormError() error
+	SessionError() error
 }
 
 var ErrRedirect = errors.New("redirect")
 
 type SSRContext struct {
 	gcontext.Context
-	W    http.ResponseWriter
-	R    *http.Request
-	data map[string]any
+	W          http.ResponseWriter
+	R          *http.Request
+	data       map[string]any
+	formErr    error
+	sessionErr error
 }
 
 // NewSSR builds an SSRContext. A nil r is tolerated: the context falls back to
@@ -89,10 +93,18 @@ func (c *SSRContext) Query(key string) string {
 }
 
 func (c *SSRContext) FormValue(key string) string {
+	if c.R == nil {
+		return ""
+	}
 	if err := c.R.ParseForm(); err != nil {
+		c.formErr = err
 		return ""
 	}
 	return c.R.FormValue(key)
+}
+
+func (c *SSRContext) FormError() error {
+	return c.formErr
 }
 
 func (c *SSRContext) SessionVal(key string) string {
@@ -100,7 +112,11 @@ func (c *SSRContext) SessionVal(key string) string {
 	if s == nil {
 		return ""
 	}
-	v, _ := s.Get(c.R, key)
+	v, err := s.Get(c.R, key)
+	if err != nil {
+		c.sessionErr = err
+		return ""
+	}
 	return v
 }
 
@@ -110,6 +126,7 @@ func (c *SSRContext) SetSessionVal(key, value string) {
 		return
 	}
 	if err := s.Set(c.W, c.R, key, value, nil); err != nil {
+		c.sessionErr = err
 		sessionWriteError(c.W, err)
 	}
 }
@@ -120,6 +137,7 @@ func (c *SSRContext) DelSessionVal(key string) {
 		return
 	}
 	if err := s.Delete(c.W, c.R, key); err != nil {
+		c.sessionErr = err
 		sessionWriteError(c.W, err)
 	}
 }
@@ -130,6 +148,7 @@ func (c *SSRContext) DestroySession() {
 		return
 	}
 	if err := s.Destroy(c.W, c.R); err != nil {
+		c.sessionErr = err
 		sessionWriteError(c.W, err)
 	}
 }
@@ -137,6 +156,10 @@ func (c *SSRContext) DestroySession() {
 func sessionWriteError(w http.ResponseWriter, err error) {
 	sessionLogger.Error("session write failed", "error", err)
 	http.Error(w, "internal server error", http.StatusInternalServerError)
+}
+
+func (c *SSRContext) SessionError() error {
+	return c.sessionErr
 }
 
 func (c *SSRContext) CSRFToken() string {

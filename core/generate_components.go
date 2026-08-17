@@ -42,7 +42,10 @@ func loadComponents() ([]componentSource, string, error) {
 	var components []componentSource
 	var genDir string
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
+		if walkErr != nil {
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
 		if !isInDreegoRoot(path) {
