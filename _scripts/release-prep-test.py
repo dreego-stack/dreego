@@ -124,27 +124,27 @@ def test_failure_paths():
 
 
 def test_workflow_contract():
-    expected = ["pull_request.yml", "release-prep.yml", "release.yml"]
+    expected = ["main-push.yml", "pull-request-check.yml"]
     for name in expected:
         check(f"workflow {name} exists", (WORKFLOWS / name).exists())
-    check("workflow main-push.yml removed", not (WORKFLOWS / "main-push.yml").exists())
-    check("workflow pull-request-check.yml removed", not (WORKFLOWS / "pull-request-check.yml").exists())
+    check("workflow pull_request.yml removed", not (WORKFLOWS / "pull_request.yml").exists())
+    check("workflow release-prep.yml removed", not (WORKFLOWS / "release-prep.yml").exists())
+    check("workflow release.yml removed", not (WORKFLOWS / "release.yml").exists())
 
     for name in expected:
         text = (WORKFLOWS / name).read_text()
-        check(f"workflow {name} has concurrency", "concurrency:" in text, name)
         check(f"workflow {name} valid yaml", yaml_ok(text), name)
 
-    prep = (WORKFLOWS / "release-prep.yml").read_text()
-    check("release-prep runs on PR ref", "refs/pull/" in prep)
-    check("release-prep serialized globally", "group: release-prep" in prep)
+    main_push = (WORKFLOWS / "main-push.yml").read_text()
+    check("main-push runs make test before pr.md processing",
+          main_push.index("make test") < main_push.index("Apply pr.md"))
+    check("main-push processes pr.md on main", "release-prep.py" in main_push)
+    check("main-push creates tag after pr.md", "Create tag" in main_push)
+    check("main-push serialized globally", "group: main-push" in main_push)
 
-    release = (WORKFLOWS / "release.yml").read_text()
-    check("release runs make test before tag", release.index("make test") < release.index("Create tag"))
-    check("release serialized globally", "group: release" in release)
-
-    pr_check = (WORKFLOWS / "pull_request.yml").read_text()
-    check("pull_request validates pr.md", "pr.md" in pr_check)
+    pr_check = (WORKFLOWS / "pull-request-check.yml").read_text()
+    check("pull-request-check validates pr.md", "pr.md" in pr_check)
+    check("pull-request-check runs make test", "make test" in pr_check)
 
 
 def yaml_ok(text):
