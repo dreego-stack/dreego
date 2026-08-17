@@ -16,6 +16,7 @@
     {"path": "/_docs/progressive-enhancement.md", "title": "Progressive Enhancement"},
     {"path": "/_docs/security.md", "title": "Output Safety"},
     {"path": "/_docs/testing.md", "title": "Testing"},
+    {"path": "/_docs/reference-apps.md", "title": "Reference Applications"},
     {"path": "/_docs/deployment.md", "title": "Deployment"},
     {"path": "/_docs/dev-server.md", "title": "Dev Server"},
     {"path": "/_docs/hot-reload.md", "title": "Hot Reload"},

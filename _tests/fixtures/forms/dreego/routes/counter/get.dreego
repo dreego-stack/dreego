@@ -1,0 +1,16 @@
+<head>
+    <title>Counter</title>
+</head>
+
+<go>
+    count := c.SessionVal("count")
+</go>
+
+<div>
+    <h1>Counter</h1>
+    <p>Count: {{ len(count) }}</p>
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
+        <button type="submit">Increment</button>
+    </form>
+</div>

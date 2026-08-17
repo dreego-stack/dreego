@@ -1,0 +1,7 @@
+<go>
+    n := c.SessionVal("count")
+    c.SetSessionVal("count", n+"x")
+</go>
+<div>
+    <p>incremented</p>
+</div>

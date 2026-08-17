@@ -1,0 +1,13 @@
+<head>
+    <title>User</title>
+</head>
+
+<go>
+    id := c.Param("id")
+</go>
+
+<div>
+    <h1>User {{ id }}</h1>
+    <p>Dynamic segments use [brackets] in the file name.</p>
+    <a href="/">Back home</a>
+</div>

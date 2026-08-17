@@ -1,0 +1,21 @@
+<head>
+    <title>Entries</title>
+</head>
+
+<go>
+    empty := len(entries) == 0
+</go>
+
+<div>
+    <h1>Entries</h1>
+    {#if empty}
+        <p>No entries yet</p>
+    {#else}
+        <ul>
+        {#each entries as entry}
+            <li>{{ entry }}</li>
+        {/each}
+        </ul>
+    {/if}
+    <p><a href="/">Post a message</a></p>
+</div>

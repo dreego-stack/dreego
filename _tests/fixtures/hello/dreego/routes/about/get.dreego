@@ -1,0 +1,9 @@
+<head>
+    <title>About</title>
+</head>
+
+<div>
+    <h1>About this app</h1>
+    <p>One route file per URL, one method per file.</p>
+    <a href="/">Back home</a>
+</div>

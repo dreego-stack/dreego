@@ -1,0 +1,17 @@
+<head>
+    <title>Hello</title>
+    <meta name="description" content="Minimal Dreego app">
+</head>
+
+<go>
+    message := "Hello from Dreego"
+</go>
+
+<div>
+    <h1>{{ message }}</h1>
+    <p>This is the minimal Dreego reference app.</p>
+    <nav>
+        <a href="/about">About</a>
+        <a href="/users/1">User 1</a>
+    </nav>
+</div>

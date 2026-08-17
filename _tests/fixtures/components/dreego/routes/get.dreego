@@ -1,0 +1,25 @@
+<head>
+    <title>Shop</title>
+</head>
+
+<go>
+    type Product struct {
+        Name    string
+        Price   string
+        InStock bool
+    }
+    products := []Product{
+        {Name: "Dreego Mug", Price: "$12", InStock: true},
+        {Name: "Dreego Tee", Price: "$24", InStock: false},
+    }
+</go>
+
+<div>
+    <@PageShell title="Welcome to the shop">
+        <div class="grid">
+        {#each products as product}
+            <@ProductCard name={product.Name} price={product.Price} inStock={product.InStock}/>
+        {/each}
+        </div>
+    </@PageShell>
+</div>
