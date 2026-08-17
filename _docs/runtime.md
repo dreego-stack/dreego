@@ -90,10 +90,10 @@ requirement.
 
 | Function | Description |
 |----------|-------------|
-| `dreego.NewCookieStore([]byte("secret-32-bytes"))` | Create HMAC-signed cookie session store |
+| `dreego.NewCookieStore([]byte("01234567890123456789012345678901"))` | Create HMAC-signed cookie session store (secret must be at least 32 bytes) |
 | `app.SetSessionStore(store)` | Enable sessions for this App before build |
 
-Session cookies use secure defaults: `HttpOnly: true`, `Secure: TLS-aware`, `Path: "/"`.
+Session cookies use secure defaults: `HttpOnly: true`, `SameSite: Lax`, `Secure: TLS-aware`, `Path: "/"`.
 
 For AES-256-GCM session encryption see [Session Encryption](https://github.com/dreego-stack/dreego/blob/main/_docs/session-encryption.md).
 
@@ -152,7 +152,7 @@ import (
 
 func main() {
 	app := dreego.New()
-	store := dreego.NewCookieStore([]byte("super-secret-key-32-bytes!"))
+	store := dreego.NewCookieStore([]byte("01234567890123456789012345678902"))
 	if err := app.SetSessionStore(store); err != nil {
 		log.Fatal(err)
 	}

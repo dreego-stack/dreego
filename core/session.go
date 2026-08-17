@@ -7,80 +7,158 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 )
 
-type CookieStore struct {
-	secret []byte
-	name   string
-	rand   randReader
-}
+const minSecretLen = 32
+const maxCookieSize = 4096
+
+var ErrSessionTooLarge = errors.New("dreego: encoded session state exceeds cookie size limit")
 
 type randReader interface {
 	Read(p []byte) (n int, err error)
 }
 
+type CookieStore struct {
+	secret         []byte
+	name           string
+	rand           randReader
+	policy         CookiePolicy
+	trustedProxies map[string]bool
+}
+
+type CookiePolicy struct {
+	SameSite http.SameSite
+	Secure   bool
+	HttpOnly bool
+	Path     string
+	Encrypt  bool
+}
+
 func NewCookieStore(secret []byte) *CookieStore {
-	return &CookieStore{secret: secret, name: "dreego_session", rand: randReader(rand.Reader)}
+	if len(secret) < minSecretLen {
+		panic("dreego: session secret must be at least 32 bytes")
+	}
+	return &CookieStore{
+		secret: secret,
+		name:   "dreego_session",
+		rand:   randReader(rand.Reader),
+		policy: CookiePolicy{
+			SameSite: http.SameSiteLaxMode,
+			HttpOnly: true,
+			Path:     "/",
+		},
+		trustedProxies: map[string]bool{},
+	}
+}
+
+func (s *CookieStore) SetCookiePolicy(p CookiePolicy) {
+	if p.SameSite != 0 {
+		s.policy.SameSite = p.SameSite
+	}
+	if p.Secure {
+		s.policy.Secure = true
+	}
+	if p.HttpOnly {
+		s.policy.HttpOnly = true
+	}
+	if p.Path != "" {
+		s.policy.Path = p.Path
+	}
+	if p.Encrypt {
+		s.policy.Encrypt = true
+	}
+}
+
+func (s *CookieStore) SetTrustedProxies(addrs []string) {
+	m := map[string]bool{}
+	for _, a := range addrs {
+		m[a] = true
+	}
+	s.trustedProxies = m
+}
+
+func (s *CookieStore) Name() string { return s.name }
+
+func (s *CookieStore) Validate() error {
+	if len(s.secret) < minSecretLen {
+		return errors.New("dreego: session secret must be at least 32 bytes")
+	}
+	return nil
 }
 
 func (s *CookieStore) Get(r *http.Request, key string) (string, error) {
-	m := s.load(r)
+	m, err := s.load(r)
+	if err != nil {
+		return "", err
+	}
 	return m[key], nil
 }
 
 func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value string, opts *Options) error {
-	m := s.load(r)
+	m, err := s.load(r)
+	if err != nil {
+		m = map[string]string{}
+	}
 	if value == "" {
 		delete(m, key)
 	} else {
 		m[key] = value
 	}
 	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
-	encoded, err := s.sign(m, opt(opts, func(o *Options) bool { return o.Encrypt }))
+	encoded, err := s.sign(m, s.resolveEncrypt(opts))
 	if err != nil {
 		return err
+	}
+	if len(encoded) > maxCookieSize {
+		return ErrSessionTooLarge
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.name,
 		Value:    encoded,
 		MaxAge:   opt(opts, func(o *Options) int { return o.MaxAge }),
-		Secure:   opt(opts, func(o *Options) bool { return o.Secure }),
-		HttpOnly: opt(opts, func(o *Options) bool { return o.HttpOnly }),
-		Path:     optStr(opts, func(o *Options) string { return o.Path }, "/"),
+		Secure:   s.resolveSecure(r, opts),
+		HttpOnly: s.resolveHttpOnly(opts),
+		SameSite: s.resolveSameSite(),
+		Path:     s.resolvePath(opts),
 	})
 	return nil
 }
 
-func (s *CookieStore) load(r *http.Request) map[string]string {
+func (s *CookieStore) load(r *http.Request) (map[string]string, error) {
 	if m, ok := r.Context().Value(ctxKey{}).(map[string]string); ok {
-		return m
+		return m, nil
 	}
 	ck, err := r.Cookie(s.name)
 	if err != nil {
-		return map[string]string{}
+		return map[string]string{}, nil
 	}
 	data, ok := s.verify(ck.Value)
 	if !ok {
-		return map[string]string{}
+		return nil, errors.New("dreego: session cookie failed integrity verification")
 	}
 	var m map[string]string
 	if err := json.Unmarshal(data, &m); err != nil {
-		return map[string]string{}
+		return nil, errors.New("dreego: session cookie payload is not valid JSON")
 	}
-	return m
+	return m, nil
 }
 
 func (s *CookieStore) Delete(w http.ResponseWriter, r *http.Request, key string) error {
-	return s.Set(w, r, key, "", nil)
+	return s.Set(w, r, key, "", s.policyToOptions(r))
 }
 
 func (s *CookieStore) Destroy(w http.ResponseWriter, r *http.Request) error {
 	http.SetCookie(w, &http.Cookie{
-		Name:   s.name,
-		Value:  "",
-		MaxAge: -1,
-		Path:   "/",
+		Name:     s.name,
+		Value:    "",
+		MaxAge:   -1,
+		Secure:   s.resolveSecure(r, nil),
+		HttpOnly: s.resolveHttpOnly(nil),
+		SameSite: s.resolveSameSite(),
+		Path:     s.resolvePath(nil),
 	})
 	return nil
 }
@@ -124,4 +202,71 @@ func (s *CookieStore) verify(value string) ([]byte, bool) {
 		return decryptPayload(key.enc, data[1:])
 	}
 	return data, true
+}
+
+func (s *CookieStore) resolveSecure(r *http.Request, opts *Options) bool {
+	if opts != nil && opts.Secure {
+		return true
+	}
+	if s.policy.Secure {
+		return true
+	}
+	return isTLS(r, s.trustedProxies)
+}
+
+func (s *CookieStore) resolveHttpOnly(opts *Options) bool {
+	if opts != nil && opts.HttpOnly {
+		return true
+	}
+	return s.policy.HttpOnly
+}
+
+func (s *CookieStore) resolveSameSite() http.SameSite {
+	if s.policy.SameSite != 0 {
+		return s.policy.SameSite
+	}
+	return http.SameSiteLaxMode
+}
+
+func (s *CookieStore) resolvePath(opts *Options) string {
+	if opts != nil && opts.Path != "" {
+		return opts.Path
+	}
+	if s.policy.Path != "" {
+		return s.policy.Path
+	}
+	return "/"
+}
+
+func (s *CookieStore) resolveEncrypt(opts *Options) bool {
+	if opts != nil && opts.Encrypt {
+		return true
+	}
+	return s.policy.Encrypt
+}
+
+func (s *CookieStore) policyToOptions(r *http.Request) *Options {
+	return &Options{
+		Secure:   s.resolveSecure(r, nil),
+		HttpOnly: s.resolveHttpOnly(nil),
+		Path:     s.resolvePath(nil),
+		Encrypt:  s.policy.Encrypt,
+	}
+}
+
+func isTLS(r *http.Request, trustedProxies map[string]bool) bool {
+	if r.TLS != nil {
+		return true
+	}
+	if len(trustedProxies) == 0 {
+		return false
+	}
+	host := r.RemoteAddr
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	if !trustedProxies[host] {
+		return false
+	}
+	return r.Header.Get("X-Forwarded-Proto") == "https"
 }

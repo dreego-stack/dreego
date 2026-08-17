@@ -7,7 +7,7 @@ import (
 )
 
 func TestSessionCookieSameSiteDefault(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -32,7 +32,7 @@ func TestSessionCookieSameSiteDefault(t *testing.T) {
 }
 
 func TestSessionCookieSecurePassedThrough(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 

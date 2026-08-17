@@ -51,14 +51,14 @@ func TestMiddlewareCSRFCookieSameSite(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>csrf samesite</p></div>`,
-	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("secret-key-32-bytes!"))); `)
+	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("01234567890123456789012345678901"))); `)
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	cookies := strings.Join(headers.Values("Set-Cookie"), "\n")
 	if !strings.Contains(cookies, "csrf_token") {
 		t.Fatalf("no csrf_token cookie, headers: %v", headers)
 	}
-	if !strings.Contains(strings.ToLower(cookies), "samesite") {
-		t.Fatalf("csrf cookie has no SameSite, headers: %v", headers)
+	if !strings.Contains(strings.ToLower(cookies), "samesite=strict") {
+		t.Fatalf("csrf cookie SameSite must be Strict, headers: %v", headers)
 	}
 }
 
@@ -66,7 +66,7 @@ func TestMiddlewareCSRFDisabled(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><p>csrf off</p></div>`,
-	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("test"))); app.SetCSRF(false); `)
+	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("01234567890123456789012345678902"))); app.SetCSRF(false); `)
 	code, _ := c.Get(t, "/")
 	if code != 200 {
 		t.Fatalf("status = %d, want 200", code)

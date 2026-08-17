@@ -125,7 +125,7 @@ func TestSSRContextDestroySessionNilStore(t *testing.T) {
 }
 
 func TestSSRContextSessionVal(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	r = WithStore(r, store)
@@ -145,7 +145,7 @@ func TestSSRContextSessionVal(t *testing.T) {
 }
 
 func TestSSRContextCSRFToken(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	r = WithStore(r, store)

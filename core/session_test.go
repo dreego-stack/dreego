@@ -10,7 +10,7 @@ import (
 )
 
 func TestCookieStoreSetAndGet(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -34,7 +34,7 @@ func TestCookieStoreSetAndGet(t *testing.T) {
 }
 
 func TestCookieStoreDelete(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -63,7 +63,7 @@ func TestCookieStoreDelete(t *testing.T) {
 }
 
 func TestCookieStoreDestroy(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -91,7 +91,7 @@ func TestCookieStoreDestroy(t *testing.T) {
 }
 
 func TestCookieStoreOptions(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -126,41 +126,32 @@ func TestCookieStoreOptions(t *testing.T) {
 }
 
 func TestCookieStoreVerifyInvalidBase64(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	r := httptest.NewRequest("GET", "/", nil)
 	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: "!!!not-base64!!!"})
 
-	val, err := store.Get(r, "key")
-	if err != nil {
-		t.Fatalf("Get failed: %v", err)
-	}
-	if val != "" {
-		t.Errorf("expected empty value for invalid base64, got %q", val)
+	_, err := store.Get(r, "key")
+	if err == nil {
+		t.Error("expected error for invalid base64 cookie, got nil")
 	}
 }
 
 func TestCookieStoreVerifyTooShort(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
-	// Valid base64 but shorter than sha256.Size (32 bytes).
+	store := NewCookieStore(testSecret)
 	short := base64.RawURLEncoding.EncodeToString([]byte("short"))
 	r := httptest.NewRequest("GET", "/", nil)
 	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: short})
 
-	val, err := store.Get(r, "key")
-	if err != nil {
-		t.Fatalf("Get failed: %v", err)
-	}
-	if val != "" {
-		t.Errorf("expected empty value for too-short cookie, got %q", val)
+	_, err := store.Get(r, "key")
+	if err == nil {
+		t.Error("expected error for too-short cookie, got nil")
 	}
 }
 
 func TestCookieStoreCorruptJSON(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
-	// Build a valid signature over a non-JSON payload so verify() passes
-	// but json.Unmarshal in load() rejects it.
+	store := NewCookieStore(testSecret)
 	payload := []byte("{not valid json")
-	mac := hmac.New(sha256.New, deriveKeys([]byte("secret-key")).sig)
+	mac := hmac.New(sha256.New, deriveKeys(testSecret).sig)
 	mac.Write(payload)
 	sig := mac.Sum(nil)
 	value := base64.RawURLEncoding.EncodeToString(append(sig, payload...))
@@ -168,40 +159,23 @@ func TestCookieStoreCorruptJSON(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
 	r.AddCookie(&http.Cookie{Name: "dreego_session", Value: value})
 
-	val, err := store.Get(r, "key")
-	if err != nil {
-		t.Fatalf("Get failed: %v", err)
-	}
-	if val != "" {
-		t.Errorf("expected empty value for corrupt JSON, got %q", val)
+	_, err := store.Get(r, "key")
+	if err == nil {
+		t.Error("expected error for corrupt JSON, got nil")
 	}
 }
 
-func TestCookieStoreEmptySecret(t *testing.T) {
-	store := NewCookieStore([]byte{})
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/", nil)
-
-	err := store.Set(w, r, "key", "value", nil)
-	if err != nil {
-		t.Fatalf("Set with empty secret failed: %v", err)
-	}
-
-	req := httptest.NewRequest("GET", "/", nil)
-	for _, c := range w.Result().Cookies() {
-		req.AddCookie(c)
-	}
-	val, err := store.Get(req, "key")
-	if err != nil {
-		t.Fatalf("Get with empty secret failed: %v", err)
-	}
-	if val != "value" {
-		t.Errorf("expected value 'value' with empty secret, got %q", val)
-	}
+func TestCookieStoreEmptySecretPanics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for empty secret")
+		}
+	}()
+	NewCookieStore([]byte{})
 }
 
 func TestCookieStoreSetEmptyValueDeletes(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 

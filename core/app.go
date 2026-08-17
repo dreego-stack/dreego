@@ -69,6 +69,12 @@ func (a *App) Build() {
 		a.mu.Unlock()
 	}()
 
+	if v, ok := a.sessionStore.(storeValidator); ok {
+		if err := v.Validate(); err != nil {
+			panic(err)
+		}
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", a.healthHandler())

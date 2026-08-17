@@ -6,7 +6,7 @@ import (
 )
 
 func TestCookieStoreTamperDetection(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -18,17 +18,14 @@ func TestCookieStoreTamperDetection(t *testing.T) {
 		req.AddCookie(c)
 	}
 
-	val, err := store.Get(req, "role")
-	if err != nil {
-		t.Fatalf("tampered data should return empty, not error: %v", err)
-	}
-	if val != "" {
-		t.Errorf("tampered cookie should return empty, got '%s'", val)
+	_, err := store.Get(req, "role")
+	if err == nil {
+		t.Error("tampered cookie should return error, got nil")
 	}
 }
 
 func TestCookieStoreMultipleKeys(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 

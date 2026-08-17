@@ -287,7 +287,7 @@ func TestFormActionsSubmitCSRFPass(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
-	}, "app.SetSessionStore(dreego.NewCookieStore([]byte(\"test-secret\"))); ")
+	}, "app.SetSessionStore(dreego.NewCookieStore([]byte(\"01234567890123456789012345678903\"))); ")
 	c.Get(t, "/health")
 	token := c.Cookie("csrf_token")
 	if token == "" {
