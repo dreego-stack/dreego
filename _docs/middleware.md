@@ -55,11 +55,35 @@ Always on. Applied after Recovery, before Compression.
 
 Gzip compression for all responses, core-fixed:
 
-- Checks `Accept-Encoding: gzip` header
+- Negotiates via `Accept-Encoding` q-values: `gzip`, `gzip;q=0.5`, `*` (case-insensitive)
+- `gzip;q=0` disables compression, also when a wildcard with a non-zero q-value is present
 - Compresses response body via `compress/gzip`
 - Sets `Content-Encoding: gzip`
+- Always appends `Vary: Accept-Encoding` (existing `Vary` values are preserved)
+- Removes a stale `Content-Length` when compressing; preserves it when not compressing
+- Skips HEAD responses and responses with status 204, 304, or an existing `Content-Encoding`
+
+Responses are buffered in memory before being sent, so a panic in a downstream
+handler can be turned into one plain error response (see Panic Recovery below).
+Calling `Flush()` commits the buffered gzip member and continues with a new
+member — multi-member gzip streams are valid per RFC 1952 and decompress
+transparently. Handlers using `io.Copy` stay compressed. Informational 1xx
+responses (e.g. 103 Early Hints) are forwarded to the client immediately and
+never become the final status.
+
+The wrapped writer preserves `http.Flusher`, `http.Hijacker`, `http.Pusher`,
+`io.ReaderFrom`, and exposes `Unwrap()`. `Hijack`/`Push` return
+`http.ErrNotSupported` when the upstream writer does not support them.
 
 Applied after Security Headers, before RequestLogging.
+
+## Panic Recovery (v0.0.14)
+
+`Recovery` runs outside Compression. When a handler panics, any buffered
+compressed bytes are discarded and one plain 500 response (plus `Vary:
+Accept-Encoding`) is written with the intended status and no `Content-Encoding`.
+Responses already committed to the wire via `Flush` cannot be rewound; the
+panic handler output follows the partial stream.
 
 ## RequestLogging
 
