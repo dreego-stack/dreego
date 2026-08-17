@@ -84,7 +84,7 @@ Four principles:
 - **CLI** — `dreego init`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
 - **Auto-Imports** — `fmt`, `html`, `strings`, `net/http` added to generated code as needed
-- **147 Integration Tests** — Docker-based, all pass
+- **Accessibility Checks** — `dreego generate` warns about missing image alternatives and unassociated form labels; CLI output is color-free and screen-reader-linear
 
 ## Quick Start
 

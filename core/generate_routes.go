@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -204,7 +205,11 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 	bodyOffset := len(raw) - len(body)
 	if file.Template != nil {
 		setNodeSource(file.Template.Nodes, fpath, bodyOffset)
+		setSourceText(file.Template.Nodes, raw)
 		file.FormActions = scanFormActions(file.Template.Nodes)
+		for _, d := range a11yDiagnostics(file.Template.Nodes) {
+			fmt.Fprintf(os.Stderr, "warning: %s\n", d)
+		}
 	}
 	return file, raw, nil
 }

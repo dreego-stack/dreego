@@ -152,6 +152,7 @@ func buildPlan(_ bool) (genPlan, genStats, error) {
 			if perr != nil {
 				return perr
 			}
+
 			if len(file.Go) == 0 {
 				file.Go = []GoSection{{Method: method}}
 			}
