@@ -16,3 +16,7 @@ type Options struct {
 	Path     string
 	Encrypt  bool
 }
+
+type storeValidator interface {
+	Validate() error
+}

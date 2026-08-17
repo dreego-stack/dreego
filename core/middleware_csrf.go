@@ -3,26 +3,32 @@ package core
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func CSRF(store Store) func(http.Handler) http.Handler {
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, _ := store.Get(r, "csrf_token")
+			token, err := store.Get(r, "csrf_token")
+			if err != nil {
+				logger.Error("csrf token read failed", "error", err)
+			}
 			if token == "" {
 				token = generateCSRFToken()
-				store.Set(w, r, "csrf_token", token, &Options{
-					HttpOnly: true,
-					Path:     "/",
-				})
+				if err := store.Set(w, r, "csrf_token", token, nil); err != nil {
+					logger.Error("csrf token write failed", "error", err)
+				}
 			}
+			secure := isSecureForCSRF(r, store)
 			http.SetCookie(w, &http.Cookie{
 				Name:     "csrf_token",
 				Value:    token,
 				Path:     "/",
 				HttpOnly: false,
-				Secure:   r.TLS != nil,
+				Secure:   secure,
 				SameSite: http.SameSiteStrictMode,
 			})
 
@@ -40,6 +46,16 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func isSecureForCSRF(r *http.Request, store Store) bool {
+	if r.TLS != nil {
+		return true
+	}
+	if cs, ok := store.(*CookieStore); ok {
+		return isTLS(r, cs.trustedProxies)
+	}
+	return false
 }
 
 func generateCSRFToken() string {

@@ -8,7 +8,7 @@ import (
 )
 
 func TestCSRFCookieSecureWithTLS(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	mw := CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
@@ -31,7 +31,7 @@ func TestCSRFCookieSecureWithTLS(t *testing.T) {
 }
 
 func TestCSRFCookieSecureWithoutTLS(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	mw := CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
@@ -53,7 +53,7 @@ func TestCSRFCookieSecureWithoutTLS(t *testing.T) {
 }
 
 func TestCSRFCookieSameSiteSet(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	mw := CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
@@ -69,7 +69,7 @@ func TestCSRFCookieSameSiteSet(t *testing.T) {
 	if csrfReadable == nil {
 		t.Fatal("expected readable csrf_token cookie")
 	}
-	if csrfReadable.SameSite == 0 {
-		t.Error("expected readable csrf cookie SameSite set")
+	if csrfReadable.SameSite != http.SameSiteStrictMode {
+		t.Errorf("expected readable csrf cookie SameSite=Strict, got %v", csrfReadable.SameSite)
 	}
 }

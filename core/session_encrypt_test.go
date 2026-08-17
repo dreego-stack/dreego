@@ -16,7 +16,7 @@ func (shortReader) Read(p []byte) (int, error) {
 }
 
 func TestCookieStoreEncryptDefaultReadable(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -34,7 +34,7 @@ func TestCookieStoreEncryptDefaultReadable(t *testing.T) {
 }
 
 func TestCookieStoreEncryptPropagatesError(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	store.rand = &shortReader{}
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
@@ -53,7 +53,7 @@ func TestCookieStoreEncryptPropagatesError(t *testing.T) {
 }
 
 func TestCookieStoreEncryptValueNotPlaintext(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -84,7 +84,7 @@ func TestCookieStoreEncryptValueNotPlaintext(t *testing.T) {
 }
 
 func TestCookieStoreEncryptRoundTrip(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -102,7 +102,7 @@ func TestCookieStoreEncryptRoundTrip(t *testing.T) {
 }
 
 func TestCookieStoreEncryptTamperRejected(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -114,27 +114,27 @@ func TestCookieStoreEncryptTamperRejected(t *testing.T) {
 		req.AddCookie(c)
 	}
 
-	val, _ := store.Get(req, "role")
-	if val != "" {
-		t.Errorf("tampered encrypted cookie should return empty, got '%s'", val)
+	_, err := store.Get(req, "role")
+	if err == nil {
+		t.Error("tampered encrypted cookie should return error, got nil")
 	}
 }
 
 func TestCookieStoreEncryptKeyRotationRejected(t *testing.T) {
-	store := NewCookieStore([]byte("secret-key"))
+	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
 	store.Set(w, r, "role", "admin", &Options{Encrypt: true})
 
-	other := NewCookieStore([]byte("other-secret"))
+	other := NewCookieStore(testSecret2)
 	req := httptest.NewRequest("GET", "/", nil)
 	for _, c := range w.Result().Cookies() {
 		req.AddCookie(c)
 	}
 
-	val, _ := other.Get(req, "role")
-	if val != "" {
-		t.Errorf("cookie encrypted with different key should be rejected, got '%s'", val)
+	_, err := other.Get(req, "role")
+	if err == nil {
+		t.Error("cookie encrypted with different key should be rejected with error, got nil")
 	}
 }

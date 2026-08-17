@@ -3,8 +3,12 @@ package core
 import (
 	gcontext "context"
 	"errors"
+	"log/slog"
 	"net/http"
+	"os"
 )
+
+var sessionLogger = slog.New(slog.NewJSONHandler(os.Stderr, nil))
 
 type Context interface {
 	gcontext.Context
@@ -105,11 +109,9 @@ func (c *SSRContext) SetSessionVal(key, value string) {
 	if s == nil {
 		return
 	}
-	s.Set(c.W, c.R, key, value, &Options{
-		HttpOnly: true,
-		Secure:   c.R.TLS != nil,
-		Path:     "/",
-	})
+	if err := s.Set(c.W, c.R, key, value, nil); err != nil {
+		sessionWriteError(c.W, err)
+	}
 }
 
 func (c *SSRContext) DelSessionVal(key string) {
@@ -117,7 +119,9 @@ func (c *SSRContext) DelSessionVal(key string) {
 	if s == nil {
 		return
 	}
-	s.Delete(c.W, c.R, key)
+	if err := s.Delete(c.W, c.R, key); err != nil {
+		sessionWriteError(c.W, err)
+	}
 }
 
 func (c *SSRContext) DestroySession() {
@@ -125,7 +129,14 @@ func (c *SSRContext) DestroySession() {
 	if s == nil {
 		return
 	}
-	s.Destroy(c.W, c.R)
+	if err := s.Destroy(c.W, c.R); err != nil {
+		sessionWriteError(c.W, err)
+	}
+}
+
+func sessionWriteError(w http.ResponseWriter, err error) {
+	sessionLogger.Error("session write failed", "error", err)
+	http.Error(w, "internal server error", http.StatusInternalServerError)
 }
 
 func (c *SSRContext) CSRFToken() string {
