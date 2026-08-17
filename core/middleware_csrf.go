@@ -54,7 +54,7 @@ func isSecureForCSRF(r *http.Request, store Store) bool {
 		return true
 	}
 	if cs, ok := store.(*CookieStore); ok {
-		return isTLS(r, cs.trustedProxies)
+		return isTLS(r, cs.TrustedProxies())
 	}
 	return false
 }
