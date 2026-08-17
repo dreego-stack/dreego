@@ -203,8 +203,8 @@ func TestRedirectTrailingSlashCanonical(t *testing.T) {
 	if rr.Code != http.StatusMovedPermanently {
 		t.Fatalf("/api/ should redirect, got %d", rr.Code)
 	}
-	if loc := rr.Header().Get("Location"); !strings.HasPrefix(loc, "/v2") {
-		t.Fatalf("/api/ Location = %q, want prefix /v2", loc)
+	if loc := rr.Header().Get("Location"); loc != "/v2/" {
+		t.Fatalf("/api/ Location = %q, want /v2/", loc)
 	}
 }
 

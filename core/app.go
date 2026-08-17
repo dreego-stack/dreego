@@ -164,6 +164,7 @@ func (a *App) redirectRewriteMiddleware(next http.Handler) http.Handler {
 			if target, ok := applyRewrite(rw, r.URL.Path); ok {
 				r2 := r.Clone(r.Context())
 				r2.URL.Path = target
+				r2.URL.RawPath = ""
 				r = r2
 			}
 		}
