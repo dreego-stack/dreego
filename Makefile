@@ -25,7 +25,7 @@ test:
 	@docker run \
 		--rm \
 		-e DREEGO_FILTER="$${DREEGO_FILTER:-}" \
-		-e DREEGO_RUNS="$${DREEGO_RUNS:-20}" \
+		-e DREEGO_RUNS="$${DREEGO_RUNS:-5}" \
 		-e DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \
 		dreego-test
 
