@@ -1,4 +1,10 @@
 
+## v0.0.56 - 2026-08-17
+
+- Feat: add four reference applications under _tests/fixtures/ (hello, forms, components, plugin) that verify the complete public CLI-to-HTTP workflow
+- Feat: add dreegotest.ServeFixture helper that copies a fixture, runs dreego generate, builds, starts, and returns an HTTP client
+- Docs: document the reference applications in _docs/reference-apps.md
+
 ## v0.0.54 - 2026-08-17
 
 - Feat: session cookies use a documented SameSite=Lax default and a configurable CookiePolicy that Set/Delete/Destroy/CSRF cannot silently downgrade (Secure, HttpOnly, SameSite, encryption)
