@@ -103,39 +103,16 @@ func cmdGenerate(args []string) {
 			check = true
 		}
 	}
-	if !check {
-		if err := dreego.Run(force); err != nil {
+	if check {
+		if err := dreego.RunCheck(); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
+		return
 	}
-	if check {
-		var genFile string
-		filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-			if genFile != "" || err != nil || info.IsDir() {
-				return nil
-			}
-			if strings.Contains(path, "/gen/routes.go") {
-				genFile = path
-			}
-			return nil
-		})
-		if genFile == "" {
-			fmt.Fprintf(os.Stderr, "no generated files found, run dreego generate first\n")
-			os.Exit(1)
-		}
-		genInfo, _ := os.Stat(genFile)
-		filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() || !strings.HasSuffix(path, ".dreego") {
-				return nil
-			}
-			if info.ModTime().After(genInfo.ModTime()) {
-				fmt.Fprintf(os.Stderr, "stale: %s is newer than %s\n", path, genFile)
-				os.Exit(1)
-			}
-			return nil
-		})
-		fmt.Println("generated code is up-to-date")
+	if err := dreego.Run(force); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }
 
