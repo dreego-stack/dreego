@@ -1,0 +1,29 @@
+<head>
+    <title>Product</title>
+</head>
+
+<go>
+    type Product struct {
+        Name    string
+        Price   string
+        InStock bool
+    }
+    products := []Product{
+        {Name: "Dreego Mug", Price: "$12", InStock: true},
+        {Name: "Dreego Tee", Price: "$24", InStock: false},
+    }
+    id := c.Param("id")
+    var product Product
+    if id == "1" {
+        product = products[0]
+    } else {
+        product = products[1]
+    }
+</go>
+
+<div>
+    <@PageShell title="Product detail">
+        <@ProductCard name={product.Name} price={product.Price} inStock={product.InStock}/>
+        <p><a href="/">Back to shop</a></p>
+    </@PageShell>
+</div>

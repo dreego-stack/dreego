@@ -1,0 +1,35 @@
+<head>
+    <title>Guestbook</title>
+</head>
+
+<go>
+    type EntryForm struct {
+        Name    string `form:"name" validate:"required"`
+        Message string `form:"message" validate:"required"`
+    }
+
+    var entries []string
+
+    func AddEntry(c dreego.Context, form EntryForm) error {
+        entries = append(entries, form.Name+": "+form.Message)
+        return c.Redirect("/entries", 303)
+    }
+</go>
+
+<div>
+    <h1>Guestbook</h1>
+    <p>Post a message with the g-action form handler.</p>
+    <form g-action="AddEntry" method="post">
+        <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
+        <label>Name
+            <input name="name" type="text" value="{{ c.Old("name") }}">
+        </label>
+        {#if c.Errors("name") != ""}<p class="error">{{ c.Errors("name") }}</p>{/if}
+        <label>Message
+            <input name="message" type="text" value="{{ c.Old("message") }}">
+        </label>
+        {#if c.Errors("message") != ""}<p class="error">{{ c.Errors("message") }}</p>{/if}
+        <button type="submit">Post</button>
+    </form>
+    <p><a href="/entries">View entries</a></p>
+</div>

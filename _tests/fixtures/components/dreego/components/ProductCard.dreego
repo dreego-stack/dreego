@@ -1,0 +1,18 @@
+Component ProductCard (name string, price string, inStock bool)
+
+<div>
+    <article class="product-card">
+        <h2>{{ name }}</h2>
+        <p class="price">{{ price }}</p>
+        {#if inStock}
+            <p class="badge">In stock</p>
+        {#else}
+            <p class="badge">Sold out</p>
+        {/if}
+    </article>
+</div>
+
+<style>
+.product-card { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; }
+.badge { font-weight: bold; }
+</style>
