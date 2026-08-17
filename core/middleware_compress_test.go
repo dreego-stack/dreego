@@ -209,6 +209,25 @@ func TestCompressSkipsPreEncoded(t *testing.T) {
 	}
 }
 
+func TestCompressSkipsAlreadyCompressedContentType(t *testing.T) {
+	mw := Compress()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write([]byte("binary png bytes"))
+	}))
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	r.Header.Set("Accept-Encoding", "gzip")
+	mw.ServeHTTP(w, r)
+
+	if got := w.Header().Get("Content-Encoding"); got == "gzip" {
+		t.Errorf("must NOT compress already-compressed content type image/png, got %q", got)
+	}
+	if w.Body.String() != "binary png bytes" {
+		t.Errorf("expected body preserved, got %q", w.Body.String())
+	}
+}
+
 func TestCompressRemovesContentLength(t *testing.T) {
 	mw := Compress()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", "11")

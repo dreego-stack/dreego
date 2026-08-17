@@ -13,7 +13,7 @@ Dreego has a middleware chain with fixed order:
 
 \* `RequestLogging` is Core-Conditional: default on, deactivatable via `dreego/config.json`.
 
-## Health Checks (v0.0.14)
+## Health Checks
 
 Built-in `GET /health` and `GET /ready` endpoints, always available:
 
@@ -27,7 +27,7 @@ app.SetReady(true)  // signal ready
 
 Health endpoints are registered before user routes — they cannot be overridden.
 
-## Security Headers (v0.0.14, CSP v0.0.20)
+## Security Headers (CSP since v0.0.20)
 
 Core-fixed middleware that sets security headers on every response:
 
@@ -51,7 +51,7 @@ Call `app.SetCSP` before `app.Build`, `app.Handler`, `app.ServeHTTP`, or `app.Li
 
 Always on. Applied after Recovery, before Compression.
 
-## Compression (v0.0.14)
+## Compression
 
 Gzip compression for all responses, core-fixed:
 
@@ -77,7 +77,7 @@ The wrapped writer preserves `http.Flusher`, `http.Hijacker`, `http.Pusher`,
 
 Applied after Security Headers, before RequestLogging.
 
-## Panic Recovery (v0.0.14)
+## Panic Recovery
 
 `Recovery` runs outside Compression. When a handler panics, any buffered
 compressed bytes are discarded and one plain 500 response (plus `Vary:

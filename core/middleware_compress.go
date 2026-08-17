@@ -78,6 +78,15 @@ func (w *gzipResponseWriter) decide() {
 		w.bypass = true
 		return
 	}
+	ct := w.Header().Get("Content-Type")
+	if i := strings.IndexByte(ct, ';'); i >= 0 {
+		ct = ct[:i]
+	}
+	ct = strings.ToLower(strings.TrimSpace(ct))
+	if isAlreadyCompressedContentType(ct) {
+		w.bypass = true
+		return
+	}
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {
@@ -87,7 +96,7 @@ func (w *gzipResponseWriter) WriteHeader(code int) {
 		w.ResponseWriter.WriteHeader(code)
 		return
 	}
-	if w.written && !w.bypass {
+	if w.written {
 		return
 	}
 	w.status = code
@@ -203,6 +212,23 @@ func (w *gzipResponseWriter) ReadFrom(src io.Reader) (int64, error) {
 
 func (w *gzipResponseWriter) Unwrap() http.ResponseWriter {
 	return w.ResponseWriter
+}
+
+func isAlreadyCompressedContentType(ct string) bool {
+	if strings.HasPrefix(ct, "image/") ||
+		strings.HasPrefix(ct, "video/") ||
+		strings.HasPrefix(ct, "audio/") {
+		return true
+	}
+	switch ct {
+	case "application/zip",
+		"application/gzip",
+		"application/x-gzip",
+		"application/x-bzip2",
+		"application/x-7z-compressed":
+		return true
+	}
+	return false
 }
 
 func acceptsGzip(header string) bool {
