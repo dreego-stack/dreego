@@ -2,6 +2,7 @@ package core
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"log/slog"
 	"net/http"
@@ -38,7 +39,7 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 					r.ParseForm()
 					clientToken = r.FormValue("csrf_token")
 				}
-				if clientToken != token {
+				if subtle.ConstantTimeCompare([]byte(clientToken), []byte(token)) != 1 {
 					http.Error(w, "invalid csrf token", http.StatusForbidden)
 					return
 				}
