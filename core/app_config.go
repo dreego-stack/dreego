@@ -63,6 +63,9 @@ func (a *App) RegisterRedirect(from, to string, status int) error {
 	if err := a.mutable(); err != nil {
 		return err
 	}
+	if err := validateRedirect(from, to, status); err != nil {
+		return err
+	}
 	a.redirects = append(a.redirects, redirectRule{from: from, to: to, status: status})
 	return nil
 }
@@ -71,6 +74,9 @@ func (a *App) RegisterRewrite(from, to string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if err := a.mutable(); err != nil {
+		return err
+	}
+	if err := validateRewrite(from, to); err != nil {
 		return err
 	}
 	a.rewrites = append(a.rewrites, rewriteRule{from: from, to: to})

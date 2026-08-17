@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -162,8 +161,11 @@ func (a *App) Listen(addr string) error {
 func (a *App) redirectRewriteMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for _, rw := range a.rewrites {
-			if matchRewrite(rw, r.URL.Path) {
-				r.URL.Path = strings.Replace(r.URL.Path, strings.TrimSuffix(rw.from, "/*"), strings.TrimSuffix(rw.to, "/*"), 1)
+			if target, ok := applyRewrite(rw, r.URL.Path); ok {
+				r2 := r.Clone(r.Context())
+				r2.URL.Path = target
+				r2.URL.RawPath = ""
+				r = r2
 			}
 		}
 
