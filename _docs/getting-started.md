@@ -1,46 +1,75 @@
 # Getting Started
 
-## Installation
+This guide is the canonical path from installation to a running Dreego
+application. The same commands run in CI as a black-box test, so the steps
+below are guaranteed to work on a clean machine with Go 1.22 or newer.
+
+## Prerequisites
+
+Dreego requires Go 1.22 or newer. Check your installation:
+
+```bash
+go version
+```
+
+If `go` is not found, install it from https://go.dev/doc/install. If the
+version is older than 1.22, upgrade before continuing — generated code uses
+Go 1.22 features and `go mod` directives.
+
+## 1. Install the CLI
 
 ```bash
 go install github.com/dreego-stack/dreego/cli/dreego@latest
 ```
 
-## New Project
+This installs the `dreego` binary into your `GOPATH/bin` directory. Make sure
+that directory is on your `PATH` (the Go installer usually adds it).
+
+## 2. Create a project
 
 ```bash
-mkdir myapp && cd myapp
-go mod init myapp
-mkdir -p dreego/routes
+dreego new myapp
+cd myapp
 ```
 
-## First Page
+`dreego new` scaffolds a project from the `landing` blueprint:
 
-```html
-<!-- dreego/routes/get.dreego -->
-<head>
-    <title>My App</title>
-</head>
+- writes `main.go`, `go.mod`, `Dockerfile`, `.gitignore`
+- writes the `dreego/` tree: `routes/`, `layouts/`, `components/`, `config.json`
+- runs `go mod init` and `go mod tidy` against the published `dreego` module
+  (resolved from the public Go proxy — no `replace` directive)
 
-<go>
-    message := "Hello from Dreego!"
-</go>
+The project name must be a valid Go module path segment (letters, digits,
+hyphens, underscores; must start with a letter). `dreego new myapp` creates a
+module named `myapp`; `dreego new github.com/me/myapp` is also accepted.
 
-<div>
-    <h1>{{ message }}</h1>
-</div>
-```
-
-## Build & Run
+## 3. Generate and run
 
 ```bash
-dreego generate    # transpiles .dreego → Go code
-dreego build       # generate + go build
-dreego run         # build + start server
+dreego generate    # transpiles .dreego files → dreego/gen/*.go
+go run .            # builds and starts the server on :8080
+```
+
+Open http://localhost:8080 in your browser. The landing page rendered is the
+one defined in `dreego/routes/get.dreego`.
+
+For day-to-day development:
+
+```bash
+dreego build       # generate + go build → build/bin/<name>
+dreego run         # build + start server (dev only)
 dreego run -d      # with debug logging (JSONL)
+dreego dev         # watch .dreego files, rebuild + restart on change
 ```
+
+> **Note:** `dreego build` and `dreego run` are dev tools, not for production.
+> Production builds use `go build` (or `dreego build --target <os/arch>` for
+> cross-compilation) plus the Dockerfile that `dreego new` wrote.
 
 ## main.go
+
+The scaffolded `main.go` uses the explicit App API — no globals, no hidden
+state, no runtime registration magic:
 
 ```go
 package main
@@ -48,8 +77,8 @@ package main
 import (
 	"log"
 
-	"myapp/dreego/gen"
 	dreego "github.com/dreego-stack/dreego/core"
+	"myapp/dreego/gen"
 )
 
 func main() {
@@ -62,6 +91,11 @@ func main() {
 	}
 }
 ```
+
+`dreego.New()` returns an `*App` that owns all runtime state (router,
+middleware, session store, server config). `gen.Register(app)` wires the
+generated routes and components into the `App`. `app.Listen(":8080")` starts
+the HTTP server with the configured timeouts.
 
 ## Adding a Layout
 
@@ -131,6 +165,17 @@ Create `dreego/routes/users/[id]/get.dreego`:
 ```
 
 Visiting `/users/42` shows "User: 42".
+
+## Troubleshooting
+
+| Symptom | Cause / Fix |
+|---------|-------------|
+| `dreego: command not found` | `go install` put the binary in `$(go env GOPATH)/bin`; add it to `PATH`. |
+| `go: command not found` | Install Go 1.22+ from https://go.dev/doc/install. |
+| `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.22. Upgrade. |
+| `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
+| `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
+| `dreego generate: no routes found` | Create at least `dreego/routes/get.dreego` (the scaffold already does). |
 
 ## See Also
 

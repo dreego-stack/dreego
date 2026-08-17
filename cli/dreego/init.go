@@ -18,6 +18,17 @@ func cmdInit(args []string) {
 		os.Exit(1)
 	}
 	target := args[0]
+	if !validInitPath(target) {
+		fmt.Fprintf(os.Stderr, "error: invalid init path %q\n", target)
+		fmt.Fprintf(os.Stderr, "  the path must be a non-empty directory name (use '.' for the current directory).\n")
+		os.Exit(1)
+	}
+
+	if !goAvailable() {
+		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
+		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.22 or newer. Install it from https://go.dev/doc/install and retry.\n")
+		os.Exit(1)
+	}
 
 	if err := os.MkdirAll(target, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -66,4 +77,18 @@ func moduleName(dir string) string {
 		}
 	}
 	return filepath.Base(dir)
+}
+
+// validInitPath reports whether path is a usable target directory for
+// `dreego init`. It accepts '.' and relative/absolute single-segment names
+// but rejects empty paths and names that contain shell metacharacters or
+// path separators in unusual combinations.
+func validInitPath(path string) bool {
+	if path == "" {
+		return false
+	}
+	if strings.ContainsAny(path, " \t\"'\\`$;|&<>(){}[]!*?") {
+		return false
+	}
+	return true
 }

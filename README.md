@@ -28,7 +28,7 @@ SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, dep
 ```
 
 ```bash
-dreego generate && go run .
+dreego new myapp && cd myapp && dreego generate && go run .
 ```
 
 → **[Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md)**
@@ -88,19 +88,56 @@ Four principles:
 
 ## Quick Start
 
+Requires Go 1.22 or newer (`go version`). The `dreego new` command scaffolds a
+project, writes a `go.mod` that requires the published `dreego` module, and
+runs `go mod tidy` so the build resolves from the public Go proxy. No
+repository-local `replace` directive is needed for a release-installed CLI.
+
 ```bash
+# 1. Install the Dreego CLI
 go install github.com/dreego-stack/dreego/cli/dreego@latest
-dreego init myapp
+
+# 2. Scaffold a new project (writes go.mod, main.go, dreego/ tree, runs go mod tidy)
+dreego new myapp
+
+# 3. Generate Go code from .dreego files and run the server
 cd myapp
-go mod init myapp
-go mod edit -replace github.com/dreego-stack/dreego/core=../dreego/core  # or use go get
 dreego generate
 go run .
+# → http://localhost:8080
 
 # or build for production
 dreego build --target linux/amd64
 docker build -t myapp .
 ```
+
+`main.go` uses the explicit App API — no globals, no hidden state:
+
+```go
+package main
+
+import (
+	"log"
+
+	dreego "github.com/dreego-stack/dreego/core"
+	"myapp/dreego/gen"
+)
+
+func main() {
+	app := dreego.New()
+	if err := gen.Register(app); err != nil {
+		log.Fatal(err)
+	}
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+If `dreego new` cannot resolve the `dreego` dependency (e.g. no network, or the
+CLI was built from an untagged checkout), set `DREEGO_LOCAL_REPO=/path/to/dreego`
+to point the scaffold at a local checkout via a `replace` directive. This is a
+developer escape hatch and is not part of the canonical path.
 
 ## Architecture
 
