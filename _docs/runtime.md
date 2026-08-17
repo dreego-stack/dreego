@@ -27,8 +27,64 @@ Available as **`c`** in routes (including `<go>` blocks and error pages) and as 
 | Method | Description |
 |----------|-------------|
 | `app.Listen(":8080")` | Start HTTP server with the App middleware chain |
+| `app.Shutdown(ctx)` | Gracefully shut down a running server (drains active requests) |
 | `app.Handler()` | Freeze configuration and return the App's `http.Handler` |
 | `app.ServeHTTP(w, r)` | Use the App directly as an `http.Handler` |
+
+`Listen` blocks until the server stops. It installs SIGINT/SIGTERM handlers,
+drains active requests within the shutdown deadline, and returns a non-nil
+error if draining did not finish in time so the caller can decide how to
+report the unfinished work. Signal subscriptions are released when `Listen`
+returns, so repeated server lifecycles do not leak goroutines.
+
+### Server timeouts and limits
+
+`app.SetServerConfig(ServerConfig)` tunes the HTTP server before build:
+
+| Field | Default | Effect |
+|-------|---------|--------|
+| `ReadHeaderTimeout` | 10s | Aborts clients that send headers too slowly (slowloris protection) |
+| `ReadTimeout` | 30s | Caps the total time to read the request, including the body |
+| `WriteTimeout` | 30s | Caps the time from end-of-headers to fully writing the response |
+| `IdleTimeout` | 120s | Closes keep-alive connections that are idle longer than this |
+| `MaxHeaderBytes` | 1 MiB | Rejects oversized request headers with a 431 response |
+| `ShutdownTimeout` | 10s | Deadline for draining active requests during shutdown |
+
+Connection and header timeouts are app-wide server policy for v0.1; they
+cannot be relaxed for a single route. Zero values fall back to the secure
+defaults in the table above, so timeouts and limits cannot be disabled for
+v0.1 — enforced defaults are the point. Without them, a missing
+`ReadHeaderTimeout` would remove slowloris protection, a missing
+`ReadTimeout` would let clients hold a connection open while streaming the
+body indefinitely, and a missing `WriteTimeout` would let slow clients block
+response goroutines.
+
+### Request body limits
+
+Use the `MaxBodyReader(max int64)` middleware to cap the request body for a
+specific route without weakening unrelated routes:
+
+```go
+upload := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	if _, err := io.Copy(io.Discard, r.Body); err != nil {
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+})
+
+app.Use(core.MaxBodyReader(1 << 20)) // 1 MiB application-wide default
+app.Register("POST", "/upload", upload) // inherits the default
+large := core.MaxBodyReader(64 << 20)(upload)
+app.Register("POST", "/large-upload", large.ServeHTTP)
+```
+
+Reads past the limit fail with `*http.MaxBytesError`, the same error stdlib
+`http.MaxBytesReader` returns. As with stdlib, the handler must map that
+error to a `413 Payload Too Large` response; it is not sent automatically.
+Streaming and upload exceptions are intentionally not built into core; raise
+the limit per-route through handler composition when a real plugin proves the
+requirement.
 
 ## Session
 
@@ -50,6 +106,7 @@ For AES-256-GCM session encryption see [Session Encryption](https://github.com/d
 | `app.SetCSP(value string)` | Override Content-Security-Policy before build |
 | `app.SetErrorHandler(code, handler)` | Configure an App-local error handler before build |
 | `app.SetReady(bool)` | Change readiness dynamically, including after build |
+| `app.SetServerConfig(ServerConfig)` | Tune HTTP server timeouts and limits before build |
 
 Configuration freezes on the first call to `Build`, `Handler`, `ServeHTTP`, or
 `Listen`. Later configuration calls return `dreego.ErrAppBuilt`; readiness is

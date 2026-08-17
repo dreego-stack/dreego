@@ -3,12 +3,10 @@ package core
 import (
 	"context"
 	"net/http"
-	"os"
 	"os/signal"
 	"sync"
 	"sync/atomic"
 	"syscall"
-	"time"
 )
 
 type App struct {
@@ -27,6 +25,9 @@ type App struct {
 	cspHeader      string
 	built          bool
 	buildDone      chan struct{}
+	server         *http.Server
+	serverConfig   ServerConfig
+	shutdownDone   chan error
 }
 
 func New() *App {
@@ -136,24 +137,60 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) Listen(addr string) error {
 	a.Build()
+	cfg := a.serverConfig.withDefaults()
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: a.Handler(),
+		Addr:              addr,
+		Handler:           a.Handler(),
+		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
+		ReadTimeout:       cfg.ReadTimeout,
+		WriteTimeout:      cfg.WriteTimeout,
+		IdleTimeout:       cfg.IdleTimeout,
+		MaxHeaderBytes:    cfg.MaxHeaderBytes,
 	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	a.mu.Lock()
+	a.server = srv
+	shutdownDone := make(chan error, 1)
+	a.shutdownDone = shutdownDone
+	a.mu.Unlock()
 
-	go func() {
-		<-quit
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	sigCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	serverErr := make(chan error, 1)
+	go func() { serverErr <- srv.ListenAndServe() }()
+
+	select {
+	case <-sigCtx.Done():
+		shutCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 		defer cancel()
-		srv.Shutdown(ctx)
-	}()
+		err := srv.Shutdown(shutCtx)
+		if serr := <-serverErr; serr != nil && serr != http.ErrServerClosed {
+			return serr
+		}
+		return err
+	case err := <-serverErr:
+		if err == http.ErrServerClosed {
+			return <-shutdownDone
+		}
+		return err
+	}
+}
 
-	err := srv.ListenAndServe()
-	if err == http.ErrServerClosed {
+func (a *App) Shutdown(ctx context.Context) error {
+	a.mu.Lock()
+	srv := a.server
+	done := a.shutdownDone
+	a.mu.Unlock()
+	if srv == nil {
 		return nil
+	}
+	err := srv.Shutdown(ctx)
+	if done != nil {
+		select {
+		case done <- err:
+		default:
+		}
 	}
 	return err
 }
