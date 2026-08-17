@@ -12,7 +12,7 @@ func TestComponentCallNamedPropsOrder(t *testing.T) {
 	files := map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (first string, second string)
 <div><p>{{ first }} {{ second }}</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Greet second="World" first="Hello"/></div>`,
+		"dreego/routes/get.dreego":       `<div><@Greet second="World" first="Hello"/></div>`,
 	}
 	gen := dreegotest.Build(t, files)
 	if !strings.Contains(gen["dreego/gen/components.go"], "Greet(") {
@@ -25,7 +25,7 @@ func TestComponentCallMissingProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (first string, second string)
 <div><p>{{ first }} {{ second }}</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Greet first="Hello"/></div>`,
+		"dreego/routes/get.dreego":       `<div><@Greet first="Hello"/></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -47,7 +47,7 @@ func TestComponentCallUnknownProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (first string)
 <div><p>{{ first }}</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Greet first="Hello" second="World"/></div>`,
+		"dreego/routes/get.dreego":       `<div><@Greet first="Hello" second="World"/></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -69,7 +69,7 @@ func TestComponentCallDuplicateProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (first string)
 <div><p>{{ first }}</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Greet first="Hello" first="Again"/></div>`,
+		"dreego/routes/get.dreego":       `<div><@Greet first="Hello" first="Again"/></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -91,7 +91,7 @@ func TestComponentCallNamedPropsHTTP(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"dreego/components/Greet.dreego": `Component Greet (first string, second string)
 <div><p>{{ first }} {{ second }}</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Greet second="World" first="Hello"/></div>`,
+		"dreego/routes/get.dreego":       `<div><@Greet second="World" first="Hello"/></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
