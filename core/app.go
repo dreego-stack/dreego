@@ -160,19 +160,31 @@ func (a *App) Listen(addr string) error {
 	serverErr := make(chan error, 1)
 	go func() { serverErr <- srv.ListenAndServe() }()
 
+	clearState := func() {
+		a.mu.Lock()
+		a.server = nil
+		a.shutdownDone = nil
+		a.mu.Unlock()
+	}
+
 	select {
 	case <-sigCtx.Done():
 		shutCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 		defer cancel()
 		err := srv.Shutdown(shutCtx)
 		if serr := <-serverErr; serr != nil && serr != http.ErrServerClosed {
+			clearState()
 			return serr
 		}
+		clearState()
 		return err
 	case err := <-serverErr:
 		if err == http.ErrServerClosed {
-			return <-shutdownDone
+			rerr := <-shutdownDone
+			clearState()
+			return rerr
 		}
+		clearState()
 		return err
 	}
 }

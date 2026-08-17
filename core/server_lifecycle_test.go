@@ -1,13 +1,10 @@
 package core
 
 import (
-	"bytes"
-	"errors"
+	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"runtime"
 	"sync"
@@ -16,31 +13,6 @@ import (
 	"testing"
 	"time"
 )
-
-func freePort(t *testing.T) int {
-	t.Helper()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("listen: %v", err)
-	}
-	port := ln.Addr().(*net.TCPAddr).Port
-	ln.Close()
-	return port
-}
-
-func waitListen(t *testing.T, port int) {
-	t.Helper()
-	deadline := time.Now().Add(5 * time.Second)
-	for time.Now().Before(deadline) {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), 100*time.Millisecond)
-		if err == nil {
-			conn.Close()
-			return
-		}
-		time.Sleep(20 * time.Millisecond)
-	}
-	t.Fatalf("server on port %d did not start", port)
-}
 
 func TestListenAppliesServerTimeouts(t *testing.T) {
 	app := New()
@@ -145,6 +117,83 @@ func TestListenWaitsForShutdownCompletion(t *testing.T) {
 	}
 }
 
+func TestShutdownExternalDrainsServer(t *testing.T) {
+	app := New()
+	if err := app.SetLogging(false); err != nil {
+		t.Fatal(err)
+	}
+	var inFlight sync.WaitGroup
+	inFlight.Add(1)
+	completed := atomic.Bool{}
+	app.Register("GET", "/slow", func(w http.ResponseWriter, r *http.Request) {
+		defer inFlight.Done()
+		time.Sleep(200 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("done"))
+		completed.Store(true)
+	})
+
+	port := freePort(t)
+	errCh := make(chan error, 1)
+	go func() { errCh <- app.Listen(fmt.Sprintf("127.0.0.1:%d", port)) }()
+	waitListen(t, port)
+
+	go func() {
+		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/slow", port))
+		if err == nil {
+			io.Copy(io.Discard, resp.Body)
+			resp.Body.Close()
+		}
+	}()
+	time.Sleep(80 * time.Millisecond)
+
+	start := time.Now()
+	shutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	shutErr := make(chan error, 1)
+	go func() { shutErr <- app.Shutdown(shutCtx) }()
+
+	select {
+	case err := <-errCh:
+		elapsed := time.Since(start)
+		if err != nil {
+			t.Fatalf("Listen returned error: %v", err)
+		}
+		if elapsed < 100*time.Millisecond {
+			t.Fatalf("Listen returned before request drained: %v", elapsed)
+		}
+		if !completed.Load() {
+			t.Fatal("in-flight request did not complete before shutdown exit")
+		}
+	case <-time.After(15 * time.Second):
+		t.Fatal("Listen did not return after external Shutdown")
+	}
+
+	select {
+	case serr := <-shutErr:
+		if serr != nil {
+			t.Fatalf("Shutdown returned error: %v", serr)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Shutdown did not return")
+	}
+
+	if err := app.Shutdown(context.Background()); err != nil {
+		t.Fatalf("post-Listen Shutdown should be a no-op, got: %v", err)
+	}
+
+	app.mu.RLock()
+	staleServer := app.server
+	staleDone := app.shutdownDone
+	app.mu.RUnlock()
+	if staleServer != nil {
+		t.Fatal("app.server not cleared after Listen returned")
+	}
+	if staleDone != nil {
+		t.Fatal("app.shutdownDone not cleared after Listen returned")
+	}
+}
+
 func TestListenPropagatesShutdownFailure(t *testing.T) {
 	app := New()
 	if err := app.SetLogging(false); err != nil {
@@ -228,68 +277,5 @@ func TestListenNoGoroutineLeakAcrossLifecycles(t *testing.T) {
 	after := runtime.NumGoroutine()
 	if after > before+2 {
 		t.Fatalf("goroutine leak: before=%d after=%d", before, after)
-	}
-}
-
-func TestMaxBodyReader(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		_, err := io.Copy(io.Discard, r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusRequestEntityTooLarge)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-	}
-	wrapped := MaxBodyReader(100)(http.HandlerFunc(handler))
-
-	oversized := make([]byte, 200)
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("POST", "/upload", bytes.NewReader(oversized))
-	req.ContentLength = int64(len(oversized))
-	wrapped.ServeHTTP(rec, req)
-	if rec.Code != http.StatusRequestEntityTooLarge {
-		t.Fatalf("oversized: expected 413, got %d", rec.Code)
-	}
-
-	rec2 := httptest.NewRecorder()
-	req2 := httptest.NewRequest("POST", "/upload", bytes.NewReader([]byte("hello")))
-	req2.ContentLength = 5
-	wrapped.ServeHTTP(rec2, req2)
-	if rec2.Code != http.StatusOK {
-		t.Fatalf("under limit: expected 200, got %d", rec2.Code)
-	}
-}
-
-func TestDefaultServerTimeoutsAreSecure(t *testing.T) {
-	c := DefaultServerConfig()
-	cases := map[string]struct {
-		got  any
-		zero any
-	}{
-		"ReadHeaderTimeout": {c.ReadHeaderTimeout, time.Duration(0)},
-		"ReadTimeout":       {c.ReadTimeout, time.Duration(0)},
-		"WriteTimeout":      {c.WriteTimeout, time.Duration(0)},
-		"IdleTimeout":       {c.IdleTimeout, time.Duration(0)},
-		"MaxHeaderBytes":    {c.MaxHeaderBytes, 0},
-		"ShutdownTimeout":   {c.ShutdownTimeout, time.Duration(0)},
-	}
-	for name, tc := range cases {
-		if tc.got == tc.zero {
-			t.Errorf("%s default not set", name)
-		}
-	}
-}
-
-func TestSetServerConfigBeforeBuild(t *testing.T) {
-	app := New()
-	custom := DefaultServerConfig()
-	custom.ReadHeaderTimeout = 5 * time.Second
-	custom.ShutdownTimeout = 3 * time.Second
-	if err := app.SetServerConfig(custom); err != nil {
-		t.Fatalf("SetServerConfig: %v", err)
-	}
-	app.Build()
-	if err := app.SetServerConfig(custom); !errors.Is(err, ErrAppBuilt) {
-		t.Fatalf("expected ErrAppBuilt after build, got %v", err)
 	}
 }
