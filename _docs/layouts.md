@@ -1,9 +1,28 @@
 # Layouts
 
-Layouts are shared shells rendered around route content. A layout lives in `dreego/layouts/default.dreego` and uses two special placeholders:
+Layouts are shared shells rendered around route content. A layout lives in a
+`layouts` directory inside the project root and uses two special placeholders:
 
 - `{#slot}` — where the route content is injected.
 - `{#head}` — where the route's `<head>` markup is merged.
+
+## Layout Discovery
+
+Layout discovery is restricted to the project's `dreego/` tree. Layout files
+outside the project root (e.g. `vendor/…/dreego/layouts`, `subapp/dreego/layouts`)
+are ignored.
+
+A layout file is named `default.dreego` (or the legacy `layout.dreego`). Layouts
+resolve per route by a route-local cascade:
+
+1. The route's own scope (e.g. `dreego/routes/blog/layouts/default.dreego` for
+   `dreego/routes/blog/…`).
+2. Each parent route scope up to the root (`dreego/layouts/default.dreego`).
+
+The first matching layout in the cascade wins. Only one layout file per scope
+is allowed: `default.dreego` and `layout.dreego` in the same `layouts`
+directory is an ambiguous-layout error and fails `dreego generate` with a
+diagnostic naming both files.
 
 ## Syntax
 
@@ -40,4 +59,5 @@ The layout wrapping is emitted as `c.Set("slot", pageContent)` / `c.Set("head", 
 1. `{#slot}` — required to render route content; always available.
 2. `{#head}` — optional; collects the route's `<head>` sections.
 3. Route `<head>` works with or without a layout.
-4. Only one layout file is used per route group (`default.dreego`).
+4. One layout file per `layouts` directory; `default.dreego` and `layout.dreego` together is an error.
+5. Layout lookup is route-local and cascades through documented parent directories.

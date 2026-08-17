@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/dreego-stack/dreego/dreegotest"
 )
@@ -193,10 +192,12 @@ func TestCLICheckStale(t *testing.T) {
 		t.Fatalf("initial check failed, got: %s", out)
 	}
 	src := filepath.Join(dir, "dreego/routes/get.dreego")
-	future := time.Now().Add(2 * time.Second)
-	os.Chtimes(src, future, future)
+	if err := os.WriteFile(src, []byte(`<head><title>T2</title></head>
+<div><p>changed</p></div>`), 0644); err != nil {
+		t.Fatalf("edit source: %v", err)
+	}
 	if _, err := dreegotest.RunCLI(t, dir, "generate", "--check"); err == nil {
-		t.Fatal("expected stale but got up-to-date")
+		t.Fatal("expected stale content to fail check, got up-to-date")
 	}
 }
 
@@ -207,8 +208,8 @@ func TestCLICheckNoGen(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected non-zero exit when no generated files exist")
 	}
-	if !strings.Contains(out, "no generated files found") {
-		t.Fatalf("expected 'no generated files found' message, got: %s", out)
+	if !strings.Contains(strings.ToLower(out), "missing") {
+		t.Fatalf("expected 'missing' diagnostic, got: %s", out)
 	}
 }
 

@@ -3,13 +3,13 @@
 ## dreego generate
 
 ```bash
-dreego generate [--force]
+dreego generate [--force] [--check]
 ```
 
 Transpiles `.dreego` files in `dreego/routes/` and `dreego/components/` to Go code. Produces split-gen output: `gen/routes.go` + `gen/components.go` + `gen/dree.go` (config + static assets). Files are only written when content changes.
 
 - `--force`: Forces complete regeneration (ignores cache)
-- `--check`: CI mode — exits non-zero when generated files are stale
+- `--check`: CI mode — regenerates the expected output in memory and compares it byte-for-byte against the files on disk. No working-tree modification. Exits non-zero with a path-level diff (`missing:`, `extra:`, `stale:`) when any generated file (routes, components, layouts, static assets, config) is missing, extra, or stale. Timestamp manipulation cannot produce a false pass.
 
 ## dreego build
 

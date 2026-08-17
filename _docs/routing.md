@@ -6,6 +6,11 @@
 > sections. That target is not available until `routing-correctness.1` and the
 > App migration are implemented.
 
+Route discovery is restricted to the project's `dreego/routes/` tree.
+Directories named `routes` outside the project root (e.g. `vendor/…/dreego/routes`,
+`node_modules/…/dreego/routes`, `subapp/dreego/routes`) are ignored. Only the
+top-level `dreego/` directory is treated as the project root.
+
 Directories below `dreego/routes/` define the URL path. The filename defines
 the HTTP method. Keeping one method per file prevents a route file from growing
 into a combined implementation for every operation on the same URL.

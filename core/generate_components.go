@@ -45,7 +45,11 @@ func loadComponents() ([]componentSource, string, error) {
 		if walkErr != nil || d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
-		if !strings.Contains(path, "/components/") && !strings.HasSuffix(filepath.Dir(path), "/components") {
+		if !isInDreegoRoot(path) {
+			return nil
+		}
+		dir := filepath.Dir(path)
+		if !isDreegoComponentsDir(dir) {
 			return nil
 		}
 		component, err := loadComponent(path)
