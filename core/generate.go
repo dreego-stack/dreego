@@ -90,7 +90,7 @@ func buildPlan(_ bool) (genPlan, genStats, error) {
 
 	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
-			return nil
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
 		if !d.IsDir() {
 			return nil
@@ -114,7 +114,7 @@ func buildPlan(_ bool) (genPlan, genStats, error) {
 
 		entries, err := os.ReadDir(path)
 		if err != nil {
-			return nil
+			return fmt.Errorf("error reading directory %s: %w", path, err)
 		}
 		var dreegoFiles []string
 		for _, e := range entries {
@@ -143,7 +143,10 @@ func buildPlan(_ bool) (genPlan, genStats, error) {
 		layout := resolveLayoutForRoute(path, layouts)
 
 		for _, fpath := range dreegoFiles {
-			data, _ := os.ReadFile(fpath)
+			data, err := os.ReadFile(fpath)
+			if err != nil {
+				return fmt.Errorf("error reading %s: %w", fpath, err)
+			}
 			h := sha256.Sum256(data)
 			baseName := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
 			method := methodForFile(baseName)

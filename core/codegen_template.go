@@ -153,7 +153,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 			return "", err
 		}
 		if n.SelfClose {
-			return fmt.Sprintf("%s%s.WriteString(func() string { h, _ := %s(%s).Render(c); return h }())\n", indent, builder, funcName, args), nil
+			return fmt.Sprintf("%s%s.WriteString(func() string { h, err := %s(%s).Render(c); if err != nil { panic(err) }; return h }())\n", indent, builder, funcName, args), nil
 		}
 		slotBuilder := fmt.Sprintf("slotBuilder%d", depth)
 		previousSlot := fmt.Sprintf("previousSlot%d", depth)

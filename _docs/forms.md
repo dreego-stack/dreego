@@ -40,6 +40,12 @@ The `g-action="Login"` attribute on the `<form>` tells Dreego to generate a POST
 4. Calls `Login(c, form)` on success
 5. Re-renders the page with errors on validation failure
 
+Form parsing and binding failures stay distinguishable from valid empty
+values: a parse or bind error is stored as `c.Errors("_form")` and the page is
+re-rendered with that field set, while an empty form binds to zero values
+without an error. Bind errors surface a user-facing message; Go type errors
+(such as `strconv` messages) are not disclosed to the client.
+
 The `g-action` handler definition lives in the POST route file (`post.dreego`) for the same URL — Dreego's method-filename routing maps `post.dreego` to the POST method on that route.
 
 ## Generated Pipeline
@@ -48,11 +54,12 @@ The `g-action` handler definition lives in the POST route file (`post.dreego`) f
 POST /login
   → r.ParseForm()
   → Struct mapping (form:"email" → LoginForm.Email)
+  → On parse/bind failure: error stored as c.Errors("_form") → re-render GET template
   → Validation (validate:"required,email" → errors map)
   → On validation fail: SaveErrors + SaveOld → re-render GET template
   → On success: call Login(c, form)
     → c.Redirect(url, 303) → ErrRedirect → handler returns
-    → Any other error → 500
+    → Any other error → 500 (generic message, cause logged)
     → nil return → default redirect to GET
 ```
 

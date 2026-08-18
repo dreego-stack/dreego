@@ -9,7 +9,7 @@ func NewHandler(render func(*SSRContext) (string, error)) http.HandlerFunc {
 		ctx := NewSSR(w, r)
 		html, err := render(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

@@ -10,17 +10,26 @@ Available as **`c`** in routes (including `<go>` blocks and error pages) and as 
 |--------|---------|-------------|
 | `c.Param("id")` | `string` | URL path parameter from `[id]` segment |
 | `c.Query("ref")` | `string` | URL query parameter `?ref=x` |
-| `c.FormValue("name")` | `string` | POST form value (calls `ParseForm`) |
+| `c.FormValue("name")` | `string` | POST form value (calls `ParseForm`; returns `""` on parse failure) |
+| `c.FormError()` | `error` | Non-nil when the last `FormValue` call failed to parse the form body; `nil` for a valid empty form |
 | `c.Data("key")` | `any` | Arbitrary data stored in context |
 | `c.Set("key", val)` | — | Store data for use between nested calls |
 | `c.Get("key")` | `string` | Retrieve string data (used for slot passing) |
-| `c.SessionVal("key")` | `string` | Session value (requires `SetSessionStore`) |
+| `c.SessionVal("key")` | `string` | Session value (requires `SetSessionStore`; `""` on store failure) |
 | `c.SetSessionVal("k","v")` | — | Write session value (secure defaults) |
 | `c.DelSessionVal("key")` | — | Delete single session key |
 | `c.DestroySession()` | — | Destroy entire session |
 | `c.CSRFToken()` | `string` | Current CSRF token (from session) |
+| `c.SessionError()` | `error` | Non-nil when the last session read/write/delete/destroy call failed; `nil` otherwise |
 | `c.R` | `*http.Request` | Raw request (use sparingly) |
 | `c.W` | `http.ResponseWriter` | Raw writer (use sparingly) |
+
+Session and form failures are not silently dropped. `FormError()` and
+`SessionError()` expose the underlying cause to the application so a route can
+decide how to respond. Generated handlers and middleware respond with a
+generic `500 Internal Server Error` and never disclose filesystem paths,
+database details, or Go type errors to clients; the internal cause remains
+available to the application and to structured logs.
 
 ## Server
 

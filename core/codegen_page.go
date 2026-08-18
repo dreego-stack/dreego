@@ -82,7 +82,7 @@ func GenerateMethodHandler(gen *generator, file *File, layout *File, pkgName str
 	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")
 	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", renderFunc))
 	buf.WriteString("\tif err != nil {\n")
-	buf.WriteString("\t\thttp.Error(w, err.Error(), http.StatusInternalServerError)\n")
+	buf.WriteString("\t\thttp.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)\n")
 	buf.WriteString("\t\treturn\n")
 	buf.WriteString("\t}\n")
 	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")

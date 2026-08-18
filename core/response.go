@@ -11,7 +11,7 @@ import (
 func (c *SSRContext) JSON(status int, data any) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(data); err != nil {
-		http.Error(c.W, err.Error(), http.StatusInternalServerError)
+		http.Error(c.W, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	c.W.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -22,7 +22,7 @@ func (c *SSRContext) JSON(status int, data any) {
 func (c *SSRContext) XML(status int, data any) {
 	var buf bytes.Buffer
 	if err := xml.NewEncoder(&buf).Encode(data); err != nil {
-		http.Error(c.W, err.Error(), http.StatusInternalServerError)
+		http.Error(c.W, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	c.W.Header().Set("Content-Type", "application/xml; charset=utf-8")
