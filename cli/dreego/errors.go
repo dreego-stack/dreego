@@ -13,6 +13,9 @@ var posRe = regexp.MustCompile(`at position (\d+)`)
 
 func formatGenerateError(err error) string {
 	msg := err.Error()
+	if strings.Contains(msg, "generated code is out of date") {
+		return msg + "Fix: run `dreego generate` to transpile .dreego files into Go code\n"
+	}
 	file, rest := splitErrorFile(msg)
 	if file == "" {
 		return msg

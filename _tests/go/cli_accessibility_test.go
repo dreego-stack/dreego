@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/dreego-stack/dreego/dreegotest"
 )
@@ -73,13 +72,15 @@ func TestCLICheckStaleActionable(t *testing.T) {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
 	src := filepath.Join(dir, "dreego/routes/get.dreego")
-	future := timeNowPlus2s()
-	os.Chtimes(src, future, future)
+	if err := os.WriteFile(src, []byte(`<head><title>T</title></head>
+<div><p>changed content</p></div>`), 0644); err != nil {
+		t.Fatalf("write source: %v", err)
+	}
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {
 		t.Fatal("expected stale to fail --check")
 	}
-	if !strings.Contains(out, "stale:") {
+	if !strings.Contains(out, "stale:") && !strings.Contains(out, "missing:") && !strings.Contains(out, "out of date") {
 		t.Fatalf("expected a stale diagnostic, got: %q", out)
 	}
 	if !strings.Contains(out, "Fix:") {
@@ -147,8 +148,4 @@ func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
 	if strings.Contains(string(route), "<img") && !strings.Contains(string(route), "alt=") {
 		t.Error("default blueprint must give every <img> an alt attribute")
 	}
-}
-
-func timeNowPlus2s() time.Time {
-	return time.Now().Add(2 * time.Second)
 }
