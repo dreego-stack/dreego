@@ -1,4 +1,11 @@
 
+## v0.0.61 - 2026-08-18
+
+- Docs: add compatibility policy defining the breaking-change policy and the v0.1 stability promise
+- Docs: document that the plugin contract stays explicitly provisional until v1 and is excluded from the v0.1 stability promise
+- Fix: remove the dead exported FieldError type (never used by generated code or applications)
+- Docs: correct stale MiddlewareProvider reference in middleware.md to the actual app.Use() plugin model
+
 ## v0.0.60 - 2026-08-18
 
 - Feat: one canonical quick-start path in README and _docs/getting-started.md (dreego new → generate → go run .)
