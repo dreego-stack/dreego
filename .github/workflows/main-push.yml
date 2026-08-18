@@ -25,47 +25,36 @@ jobs:
           go-version: '1.22'
           cache: false
 
-      - name: make test
-        run: make test
-
-      - name: Check for pr.md
-        id: check
-        run: |
-          if [ -f pr.md ]; then
-            echo "has_pr=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_pr=false" >> "$GITHUB_OUTPUT"
-            echo "no pr.md, nothing to process"
-          fi
-
-      - name: Apply pr.md (changelog + version + remove pr.md)
-        id: prep
-        if: steps.check.outputs.has_pr == 'true'
-        run: |
-          python3 _scripts/release-prep.py | tee /tmp/prep.out
-          echo "new_version=$(grep '^new=' /tmp/prep.out | cut -d= -f2)" >> "$GITHUB_OUTPUT"
-
-      - name: Commit and push to main
-        if: steps.check.outputs.has_pr == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Test and release latest main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "docs: apply pr.md changelog (release-prep)"
-          git push origin main
 
-      - name: Create tag if version bumped
-        if: steps.check.outputs.has_pr == 'true' && steps.prep.outputs.new_version != 'none'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          new="${{ steps.prep.outputs.new_version }}"
-          if git ls-remote --tags origin | grep -q "refs/tags/$new$"; then
-            echo "tag $new already exists, skipping"
-            exit 0
-          fi
-          git tag "$new"
-          git push origin "$new"
-          echo "created tag $new"
+          for attempt in $(seq 1 5); do
+            git fetch origin main --tags
+            git checkout -B release-work origin/main
+            make test
+
+            if ! find .changes -maxdepth 1 -type f -name '*.md' ! -name README.md | grep -q .; then
+              echo "no pending change files"
+              exit 0
+            fi
+
+            python3 _scripts/release-prep.py | tee /tmp/release-prep.out
+            new=$(grep '^new=' /tmp/release-prep.out | cut -d= -f2)
+            git add -A
+            git commit -m "docs: apply pending release notes"
+
+            if git push origin HEAD:main; then
+              if [ "$new" != none ]; then
+                git tag "$new"
+                git push origin "$new"
+              fi
+              exit 0
+            fi
+
+            echo "main advanced during release attempt $attempt; retrying latest main"
+          done
+
+          echo "release failed after five concurrent-update retries" >&2
+          exit 1

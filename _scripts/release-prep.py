@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Apply a PR's pr.md to CHANGELOG.md and print the next version.
+"""Apply pending change files to CHANGELOG.md and print the next version.
 
-Reads pr.md from the current directory, validates the version field,
+Reads .changes/*.md from the current directory, validates each version field,
 computes the next version from the latest git tag (vX.Y.Z), prepends a
-CHANGELOG entry, and removes pr.md. The VERSION file is no longer used —
+CHANGELOG entry, and removes the processed files. The VERSION file is no longer used —
 the git tag is the single source of truth.
 
 Changelog format:
@@ -24,7 +24,7 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path.cwd()
-PR_MD = ROOT / "pr.md"
+CHANGES = ROOT / ".changes"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
 VALID_VERSIONS = ("none", "patch")
@@ -46,10 +46,10 @@ def latest_tag():
     return sorted(tags, key=lambda t: [int(x) for x in t[1:].split(".")])[-1]
 
 
-def parse_pr_md(text):
+def parse_change(text, source):
     m = re.match(r"^---\s*\n(.*?)\n---\s*\n?(.*)$", text, re.DOTALL)
     if not m:
-        fail("pr.md must start with YAML frontmatter (--- ... ---)")
+        fail(f"{source} must start with YAML frontmatter (--- ... ---)")
     fm, body = m.group(1), m.group(2)
     version = None
     for line in fm.strip().splitlines():
@@ -57,12 +57,12 @@ def parse_pr_md(text):
         if line.startswith("version:"):
             version = line.split(":", 1)[1].strip()
     if version is None:
-        fail("pr.md frontmatter must contain 'version: none|patch' (minor/major are blocked in the v0.0.x phase)")
+        fail(f"{source} frontmatter must contain 'version: none|patch'")
     if version not in VALID_VERSIONS:
-        fail(f"pr.md version must be one of {VALID_VERSIONS}, got '{version}'")
+        fail(f"{source} version must be one of {VALID_VERSIONS}, got '{version}'")
     lines = [l.strip() for l in body.splitlines() if l.strip()]
     if not lines:
-        fail("pr.md has no changelog lines")
+        fail(f"{source} has no changelog lines")
     lines = [l[2:].strip() if l.startswith("- ") else l for l in lines]
     return version, lines
 
@@ -72,15 +72,20 @@ def next_version(current, bump):
     if not m:
         fail(f"latest tag has invalid format: '{current}'")
     major, minor, patch = (int(g) for g in m.groups())
+    if major != 0 or minor != 0:
+        fail(f"latest tag must be v0.0.x during the pre-v0.1 phase, got '{current}'")
     if bump == "patch":
         patch += 1
     return f"v{major}.{minor}.{patch}"
 
 
 def main():
-    if not PR_MD.exists():
-        fail("pr.md not found in PR branch")
-    version, lines = parse_pr_md(PR_MD.read_text())
+    files = sorted(p for p in CHANGES.glob("*.md") if p.name != "README.md")
+    if not files:
+        fail("no pending .changes/*.md files found")
+    parsed = [parse_change(p.read_text(), p.relative_to(ROOT)) for p in files]
+    version = "patch" if any(v == "patch" for v, _ in parsed) else "none"
+    lines = [line for _, change_lines in parsed for line in change_lines]
 
     current = latest_tag()
     new_version = next_version(current, version) if version != "none" else None
@@ -97,14 +102,16 @@ def main():
         if f"## {new_version} -" in old:
             print(f"new={new_version}")
             print(f"skipped: version {new_version} already in CHANGELOG", file=sys.stderr)
-            PR_MD.unlink()
+            for path in files:
+                path.unlink()
             return
     else:
         entry = lines_text
 
     CHANGELOG.write_text(entry + old)
 
-    PR_MD.unlink()
+    for path in files:
+        path.unlink()
     print(f"new={new_version or 'none'}")
     print(f"applied: version={version} new={new_version or '(none)'} lines={len(lines)}", file=sys.stderr)
 
