@@ -18,35 +18,37 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', github.event.inputs.pr_number) || github.event.pull_request.head.sha }}
           fetch-depth: 0
 
-      - name: pr.md exists
+      - name: Validate change file
         run: |
-          if [ ! -f pr.md ]; then
-            echo "error: pr.md missing — copy pr.md.example and fill in version + changelog lines"
+          git fetch origin main
+          base=$(git merge-base HEAD origin/main)
+          files=$(git diff --diff-filter=A --name-only "$base" HEAD -- '.changes/*.md' | grep -v '^.changes/README.md$' || true)
+          count=$(printf '%s\n' "$files" | grep -c . || true)
+          if [ "$count" -ne 1 ]; then
+            echo "error: expected exactly one new .changes/*.md file, found $count"
             exit 1
           fi
 
-      - name: pr.md format valid
-        run: |
           python3 - <<'EOF'
-          import re, sys
-          text = open('pr.md').read()
-          m = re.match(r'^---\s*\n(.*?)\n---\s*\n?(.*)$', text, re.DOTALL)
-          if not m:
-              print('error: pr.md must start with YAML frontmatter (--- ... ---)')
+          import pathlib, re, subprocess, sys
+          base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/main'], text=True).strip()
+          names = subprocess.check_output(['git', 'diff', '--diff-filter=A', '--name-only', base, 'HEAD', '--', '.changes/*.md'], text=True).splitlines()
+          files = [pathlib.Path(name) for name in names if name != '.changes/README.md']
+          path = files[0]
+          text = path.read_text()
+          match = re.match(r'^---\s*\n(.*?)\n---\s*\n?(.*)$', text, re.DOTALL)
+          if not match:
+              print(f'error: {path} must start with YAML frontmatter')
               sys.exit(1)
-          fm = m.group(1)
-          version = None
-          for line in fm.strip().splitlines():
-              if line.strip().startswith('version:'):
-                  version = line.split(':', 1)[1].strip()
+          version = next((line.split(':', 1)[1].strip() for line in match.group(1).splitlines() if line.strip().startswith('version:')), None)
           if version not in ('none', 'patch'):
-              print(f"error: pr.md version must be none|patch (minor/major blocked in v0.0.x phase), got '{version}'")
+              print(f'error: version must be none or patch, got {version!r}')
               sys.exit(1)
-          lines = [l.strip() for l in m.group(2).splitlines() if l.strip()]
+          lines = [line for line in match.group(2).splitlines() if line.strip()]
           if not lines:
-              print('error: pr.md has no changelog lines')
+              print(f'error: {path} has no changelog lines')
               sys.exit(1)
-          print(f"ok: version={version} lines={len(lines)}")
+          print(f'ok: {path} version={version} lines={len(lines)}')
           EOF
 
       - name: Set up Go
@@ -55,9 +57,8 @@ jobs:
           go-version: '1.22'
           cache: false
 
-      - name: go test -race (core + integration, cgo on ubuntu)
-        run: |
-          CGO_ENABLED=1 go test -race ./core/... ./_tests/go/...
+      - name: go test -race
+        run: CGO_ENABLED=1 go test -race ./core/... ./_tests/go/...
 
       - name: make test
         run: make test

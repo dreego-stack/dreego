@@ -20,6 +20,10 @@ func SafeAttr(v any) string {
 	return html.EscapeString(fmt.Sprintf("%v", v))
 }
 
+func SafeSrcdoc(v any) string {
+	return html.EscapeString(html.EscapeString(fmt.Sprintf("%v", v)))
+}
+
 // SafeURL renders v for a URL attribute such as href, src, or action. Values
 // with an unsafe or unknown scheme (javascript:, data:, vbscript:, file:, …)
 // are replaced with "#". Relative URLs and http, https, mailto, and tel are

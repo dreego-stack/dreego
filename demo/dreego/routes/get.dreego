@@ -40,7 +40,7 @@
                 <@FeatureCard icon="📦" title="Single Binary" text="One file. Assets, templates, server — all compiled into a single deployable binary." />
                 <@FeatureCard icon="🎨" title="Components" text="Reusable, typed, scoped — build your UI library with .dreego components." />
                 <@FeatureCard icon="🔒" title="Type-Safe" text="Go catches errors at build time, not runtime. No stringly-typed anything." />
-                <@FeatureCard icon="🚀" title="SSR-First" text="Server-rendered HTML with auto XSS escaping. Fast, SEO-friendly, accessible." />
+                <@FeatureCard icon="🚀" title="SSR-First" text="Server-rendered HTML with context-aware escaping. Fast, SEO-friendly, and ready for your accessibility work." />
                 <@FeatureCard icon="🛠️" title="CLI Tooling" text="Scaffold, generate, format, build, deploy — everything from the terminal." />
             </div>
         </div>
@@ -48,8 +48,8 @@
 
     <section id="pricing" class="py-24">
         <div class="max-w-6xl mx-auto px-6">
-            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">Pricing</p>
-            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Simple, transparent pricing</h2>
+            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">Example content</p>
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">Replace these placeholder plans with your own product</h2>
             <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
 
                 <div class="bg-white rounded-2xl p-8 ring-1 ring-slate-200 flex flex-col">
@@ -59,7 +59,7 @@
                     <ul class="space-y-3 text-sm text-slate-600 mb-8 flex-1">
                         <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Unlimited routes</li>
                         <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Community support</li>
-                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> MIT License</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> MPL-2.0 framework license</li>
                     </ul>
                     <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">Get started</a>
                 </div>
@@ -72,7 +72,7 @@
                     <ul class="space-y-3 text-sm text-slate-300 mb-8 flex-1">
                         <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Everything in Free</li>
                         <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Priority support</li>
-                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Commercial license</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Placeholder benefit</li>
                         <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">&check;</span> Advanced components</li>
                     </ul>
                     <a href="/signup" class="block text-center py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">Start free trial</a>
@@ -86,7 +86,7 @@
                         <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Everything in Pro</li>
                         <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Dedicated support</li>
                         <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> SSO + Audit logs</li>
-                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> SLA guarantee</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-500 font-bold">&check;</span> Placeholder benefit</li>
                     </ul>
                     <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">Contact sales</a>
                 </div>

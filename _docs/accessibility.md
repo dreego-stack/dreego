@@ -8,7 +8,7 @@ Dreego does **not** make arbitrary user applications automatically accessible. T
 
 - No ANSI color codes: meaning never relies on color alone.
 - Help text starts with the program name and a linear `usage:` line for screen readers.
-- Errors lead with `file:line:col`, the cause, and a practical `Fix:` action.
+- Generator diagnostics lead with `file:line:col`, the cause, and a practical `Fix:` action.
 - Interactive workflows (`dev`, `run`) have non-interactive equivalents and stable exit codes.
 
 ## Transpiler Diagnostics
@@ -24,11 +24,15 @@ Limits: the checker scans static markup in `.dreego` templates. Dynamically comp
 
 ## Blueprints
 
-`dreego new` and `dreego init` scaffold projects with:
+`dreego new` scaffolds a landing-page example with:
 
 - A layout using `<main>`, `<nav aria-label="Primary">`, a skip-link to `#main`, and `{#slot}`.
-- Routes and components that give every `<img>` an `alt`.
-- Visible focus styles (Tailwind `focus:` variants) and landmark roles.
+- Routes and components whose images include an `alt` attribute.
+- Visible focus styles (Tailwind `focus:` variants) and semantic landmarks.
+
+`dreego init` intentionally creates a minimal route without a shared layout.
+Add the landmarks, navigation, skip link, and focus styles required by the
+application before shipping it.
 
 ## Documentation
 
@@ -47,6 +51,6 @@ Automated checks cover static markup and CLI behavior. Before claiming accessibi
 
 ## See Also
 
-- [Testing](_docs/testing.md) — Accessibility test entries
-- [CLI](_docs/cli.md) — CLI reference
-- [Getting Started](_docs/getting-started.md) — Tutorial
+- [Testing](testing.md) — Accessibility test entries
+- [CLI](cli.md) — CLI reference
+- [Getting Started](getting-started.md) — Tutorial

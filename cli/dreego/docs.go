@@ -7,19 +7,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"runtime"
 	"sort"
 	"strings"
 )
 
 const coreModule = "github.com/dreego-stack/dreego"
 const pluginOrgPrefix = "github.com/dreego-stack/"
-const feedbackURL = "https://github.com/dreego-stack/dreego/issues/new"
-
-var headingPattern = regexp.MustCompile(`^#{1,6}\s+(.*)`)
-var codeBlockPattern = regexp.MustCompile("`{3}[^`]*`{3}")
-var linkPattern = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 
 var modCacheDir = ""
 
@@ -301,68 +294,4 @@ func cmdList() {
 		}
 	}
 	fmt.Println()
-}
-
-func printJSON(webBase, path string, body []byte) {
-	text := string(body)
-
-	var headings []string
-	for _, line := range strings.Split(text, "\n") {
-		if m := headingPattern.FindStringSubmatch(line); m != nil {
-			headings = append(headings, strings.TrimSpace(m[1]))
-		}
-	}
-
-	var codeBlocks []string
-	for _, m := range codeBlockPattern.FindAllString(text, -1) {
-		codeBlocks = append(codeBlocks, m)
-	}
-
-	var links [][2]string
-	for _, m := range linkPattern.FindAllStringSubmatch(text, -1) {
-		if len(m) >= 3 {
-			links = append(links, [2]string{m[1], m[2]})
-		}
-	}
-
-	doc := map[string]any{
-		"path":        path,
-		"source":      webBase + path,
-		"headings":    headings,
-		"code_blocks": codeBlocks,
-		"links":       links,
-		"length":      len(text),
-	}
-
-	out, _ := json.MarshalIndent(doc, "", "  ")
-	fmt.Println(string(out))
-}
-
-func printDoc(body []byte, webBase, rawBase string) {
-	out := string(body)
-	out = strings.ReplaceAll(out, webBase, "")
-	out = strings.ReplaceAll(out, rawBase, "")
-	fmt.Print(out)
-	fmt.Println()
-}
-
-func cmdFeedback() {
-	fmt.Printf("Opening %s\n", feedbackURL)
-	openBrowser(feedbackURL)
-}
-
-func openBrowser(url string) {
-	var err error
-	switch runtime.GOOS {
-	case "darwin":
-		err = exec.Command("open", url).Start()
-	case "linux":
-		err = exec.Command("xdg-open", url).Start()
-	default:
-		err = exec.Command("cmd", "/c", "start", url).Start()
-	}
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not open browser: %v\n", err)
-		fmt.Fprintf(os.Stderr, "visit: %s\n", url)
-	}
 }

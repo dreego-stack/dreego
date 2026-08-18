@@ -43,6 +43,12 @@ The project name must be a valid Go module path segment (letters, digits,
 hyphens, underscores; must start with a letter). `dreego new myapp` creates a
 module named `myapp`; `dreego new github.com/me/myapp` is also accepted.
 
+The landing starter loads Tailwind's browser script from its CDN and its
+generated `main.go` explicitly allows that origin in the Content Security
+Policy. This is convenient for evaluating the blueprint. For production,
+replace the browser script with locally built CSS and remove the CDN origin
+from the policy.
+
 ## 3. Generate and run
 
 ```bash

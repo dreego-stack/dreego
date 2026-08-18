@@ -217,7 +217,10 @@ func cmdRun(args []string) {
 		os.Exit(1)
 	}
 
-	c.Wait()
+	if err := c.Wait(); err != nil {
+		fmt.Fprintf(os.Stderr, "server exited with an error: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func findMain() (projDir, pkg, name string) {

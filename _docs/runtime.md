@@ -1,6 +1,6 @@
 # Runtime API
 
-Full API surface available after `import dreego "github.com/dreego-stack/dreego/core"`.
+This guide covers the primary runtime APIs available after `import dreego "github.com/dreego-stack/dreego/core"`. The exported Go package remains the complete API reference.
 
 ## SSRContext
 
@@ -94,9 +94,10 @@ large := core.MaxBodyReader(64 << 20)(upload)
 app.Register("POST", "/large-upload", large.ServeHTTP)
 ```
 
-Reads past the limit fail with `*http.MaxBytesError`, the same error stdlib
-`http.MaxBytesReader` returns. As with stdlib, the handler must map that
-error to a `413 Payload Too Large` response; it is not sent automatically.
+Application middleware runs before CSRF form parsing, so an app-wide
+`MaxBodyReader` limit also protects CSRF-protected form posts. CSRF maps an
+oversized form to `413 Payload Too Large`. Other handlers receive the stdlib
+`*http.MaxBytesError` and must map it to a response themselves.
 Streaming and upload exceptions are intentionally not built into core; raise
 the limit per-route through handler composition when a real plugin proves the
 requirement.
@@ -109,6 +110,10 @@ requirement.
 | `app.SetSessionStore(store)` | Enable sessions for this App before build |
 
 Session cookies use secure defaults: `HttpOnly: true`, `SameSite: Lax`, `Secure: TLS-aware`, `Path: "/"`.
+
+Configure a non-root path once with `CookiePolicy.Path`. Per-call path
+overrides are rejected with `ErrCookiePathOverride`, ensuring `Delete` and
+`Destroy` always expire the same browser cookie that `Set` created.
 
 For AES-256-GCM session encryption see [Session Encryption](https://github.com/dreego-stack/dreego/blob/main/_docs/session-encryption.md).
 

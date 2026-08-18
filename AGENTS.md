@@ -49,7 +49,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-v0.0.36 tagged — Single-source versioning: the latest git tag (`vX.Y.Z`) is the single truth; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with a `pr.md` (version bump + changelog lines), the tag is created by CI after merge. See `_todo/` for next steps.
+The latest `v0.0.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. See `_todo/` for next steps.
 
 ## Product Focus
 
@@ -85,7 +85,7 @@ repo-root/
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
 ├── go.mod                  ← Single root module (one tag per release)
-├── pr.md.example           ← PR metadata template (version + changelog lines)
+├── .changes/               ← One unique release-note file per pull request
 ├── _docs/                  ← Public documentation
 ├── _tests/                 ← Integration tests (Docker, `make test`)
 │   └── core/<Category>/    ← Core/framework test suites
@@ -93,7 +93,7 @@ repo-root/
 │
 ├── core/                   ← Core package (single package, no external deps)
 ├── cli/dreego/             ← CLI binary
-├── .github/workflows/      ← CI: pull_request.yml, release-prep.yml, release.yml
+├── .github/workflows/      ← CI: pull-request-check.yml, main-push.yml
 │
 .agents/                    ← Knowledge Base (OKF format)
 ├── index.md                 ← Start here (OKF TOC)
@@ -113,7 +113,7 @@ repo-root/
 
 ## Commit Convention
 
-Every change lands via a pull request. The PR must contain a `pr.md` (copy `pr.md.example`) with YAML frontmatter:
+Every change lands via a pull request. The PR must contain exactly one uniquely named `.changes/*.md` file with YAML frontmatter:
 
 ```yaml
 ---
@@ -141,11 +141,11 @@ Every open work item lives in its own Markdown file under `_todo/`.
 - One PR should normally implement one todo item.
 - Name files after the stable item ID, for example `_todo/core/server-timeouts.1.md`.
 - Concrete items record their area, phase, goal, acceptance criteria, and dependencies when applicable. Long-term idea files may remain concise until promoted into planned work.
-- Delete the item file in the PR that completes it. The PR's `pr.md`, changelog, and Git history become the completion record.
+- Delete the item file in the PR that completes it. The PR's change file, changelog, and Git history become the completion record.
 - Do not keep completed, rejected, or superseded items in `_todo/`.
 - Add newly discovered work as a new item file instead of appending to a shared checklist.
 
-The CI (`pull_request.yml`) validates pr.md and runs `make test`. After approval, `release-prep` (manual, with PR number) applies the changelog + version to the PR branch and removes pr.md. After squash-merge, `release.yml` creates the tag. No local tags.
+The CI (`pull-request-check.yml`) validates the change file and runs the race and full test suites. After merge, serialized `main-push.yml` refreshes to the latest `main`, reruns the suite, combines every pending change file, pushes the changelog commit with retry protection, and creates the tag. No local tags.
 
 ## Project: dreego
 
@@ -171,7 +171,7 @@ host paths that do not exist in the container.
 
 ## Coding Rules
 
-- Max 300 lines per file, one logical thing per file
+- Max 300 lines per handwritten file, one logical thing per file. Generated fixture output is exempt and must not be manually split.
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
@@ -198,7 +198,7 @@ Every feature follows this cycle:
 2. **Code** — Implement in `core/` (one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `make test`) — must be GREEN
-5. **PR** — Create a PR with `pr.md` (version bump + changelog lines); CI validates it
+5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it
 6. **KB** — Update `.agents/log.md` + relevant concept/decision docs
 
 For multi-step features, repeat the cycle for each step. Commit after each step.

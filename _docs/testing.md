@@ -46,8 +46,8 @@ Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go` or `core/*_
 ## Accessibility Tests
 
 - CLI output is color-free and screen-reader-linear (`_tests/go/cli_accessibility_test.go`).
-- Errors lead with `file:line:col`, the cause, and a practical `Fix:` action.
-- Blueprints use semantic HTML (`<main>`, `<nav>`, skip link, `{#slot}`) and give every `<img>` an `alt`.
+- Generator diagnostics lead with `file:line:col`, the cause, and a practical `Fix:` action.
+- The landing blueprint uses semantic HTML (`<main>`, `<nav>`, skip link, `{#slot}`) and gives every `<img>` an `alt`. The minimal `init` blueprint is tested as a minimal route, not as a complete accessible application shell.
 - The transpiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`core/a11y_check_test.go`).
 
 ## Running Tests
@@ -60,6 +60,6 @@ go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for C
 
 ## See Also
 
-- [Accessibility](_docs/accessibility.md) — Framework accessibility guarantees
-- [CLI](_docs/cli.md) — CLI reference
-- [Getting Started](_docs/getting-started.md) — Tutorial
+- [Accessibility](accessibility.md) — Framework accessibility guarantees
+- [CLI](cli.md) — CLI reference
+- [Getting Started](getting-started.md) — Tutorial

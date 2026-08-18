@@ -8,10 +8,11 @@ import (
 type compGen struct {
 	gen       *generator
 	inSection bool
+	builder   string
 }
 
 func genTemplateNodeComp(gen *generator, n TemplateNode) (string, error) {
-	g := &compGen{gen: gen}
+	g := &compGen{gen: gen, builder: "b"}
 	return g.node(n)
 }
 
@@ -20,7 +21,7 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 	case NodeText:
 		code, next := compTextSection(n.Content, g.inSection)
 		g.inSection = next
-		return fmt.Sprintf("b.WriteString(%s)", code), nil
+		return fmt.Sprintf("%s.WriteString(%s)", g.builder, code), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false
@@ -35,9 +36,9 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 			}
 		}
 		if raw {
-			return fmt.Sprintf("b.WriteString(%s)", code), nil
+			return fmt.Sprintf("%s.WriteString(%s)", g.builder, code), nil
 		}
-		return fmt.Sprintf("b.WriteString(dreego.SafeText(%s))", code), nil
+		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.builder, code), nil
 	case NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
@@ -120,13 +121,13 @@ func (g *compGen) node(n TemplateNode) (string, error) {
 		return buf.String(), nil
 	case NodeSlot:
 		if n.Content != "" {
-			return fmt.Sprintf("b.WriteString(ctx.Get(\"slot_%s\"))", n.Content), nil
+			return fmt.Sprintf("%s.WriteString(ctx.Get(\"slot_%s\"))", g.builder, n.Content), nil
 		}
-		return "b.WriteString(ctx.Get(\"slot\"))", nil
+		return fmt.Sprintf("%s.WriteString(ctx.Get(\"slot\"))", g.builder), nil
 	case NodeComponentCall:
 		return g.genComponentCall(n)
 	case NodeVerbatim:
-		return fmt.Sprintf("b.WriteString(%s)", goLiteral(n.Content)), nil
+		return fmt.Sprintf("%s.WriteString(%s)", g.builder, goLiteral(n.Content)), nil
 	}
 	return "", fmt.Errorf("unsupported component node type %d", n.Type)
 }
@@ -135,14 +136,76 @@ func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 	parts := strings.SplitN(n.Tag, ".", 2)
 	funcName := parts[len(parts)-1]
 	def := g.gen.lookupDef(funcName)
+	if def == nil {
+		return "", fmt.Errorf("%s: unknown component %s", sourceRef(n.Source, n.Pos), funcName)
+	}
+	args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
+	if err != nil {
+		return "", err
+	}
 	if n.SelfClose {
-		args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
+		return fmt.Sprintf("{ html, err := %s(%s).Render(ctx); if err != nil { return \"\", err }; %s.WriteString(html) }", funcName, args, g.builder), nil
+	}
+
+	id := n.Pos
+	slotBuilder := fmt.Sprintf("slotBuilder%d", id)
+	previousSlot := fmt.Sprintf("previousSlot%d", id)
+	var buf strings.Builder
+	buf.WriteString("{\n")
+	buf.WriteString(fmt.Sprintf("\t%s := ctx.Data(\"slot\")\n", previousSlot))
+	buf.WriteString(fmt.Sprintf("\tvar %s strings.Builder\n", slotBuilder))
+	var slotKeys []string
+	var previousNamedSlots []string
+	defaultGen := &compGen{gen: g.gen, builder: slotBuilder}
+	for _, child := range n.Children {
+		if child.Type == NodeSlot && child.Content != "" {
+			if nested := findNestedSlot(child.Children); nested != nil {
+				return "", nestedSlotError(n, def, nested, g.gen.src)
+			}
+			if err := validateSlotName(def, child.Content, n.Source, g.gen.src, n.Pos); err != nil {
+				return "", err
+			}
+			key := "slot_" + child.Content
+			slotKeys = append(slotKeys, key)
+			previous := fmt.Sprintf("previousNamedSlot%d_%d", id, len(slotKeys))
+			previousNamedSlots = append(previousNamedSlots, previous)
+			buf.WriteString(fmt.Sprintf("\t%s := ctx.Data(%q)\n", previous, key))
+			namedBuilder := fmt.Sprintf("namedSlotBuilder%d_%d", id, len(slotKeys))
+			buf.WriteString(fmt.Sprintf("\tvar %s strings.Builder\n", namedBuilder))
+			childGen := &compGen{gen: g.gen, builder: namedBuilder}
+			for _, slotChild := range child.Children {
+				code, err := childGen.node(slotChild)
+				if err != nil {
+					return "", err
+				}
+				buf.WriteString("\t" + code + "\n")
+			}
+			buf.WriteString(fmt.Sprintf("\tctx.Set(%q, %s.String())\n", key, namedBuilder))
+			continue
+		}
+		if nested := findNestedSlot([]TemplateNode{child}); nested != nil {
+			return "", nestedSlotError(n, def, nested, g.gen.src)
+		}
+		code, err := defaultGen.node(child)
 		if err != nil {
 			return "", err
 		}
-		return fmt.Sprintf("%s(%s).Render(ctx)", funcName, args), nil
+		buf.WriteString("\t" + code + "\n")
 	}
-	return fmt.Sprintf("b.WriteString(\"<@%s>\")", n.Tag), nil
+	buf.WriteString(fmt.Sprintf("\tctx.Set(\"slot\", %s.String())\n", slotBuilder))
+	buf.WriteString(fmt.Sprintf("\thtml, err := %s(%s).Render(ctx)\n", funcName, args))
+	buf.WriteString(restoreComponentContextValue("slot", previousSlot))
+	for i, key := range slotKeys {
+		buf.WriteString(restoreComponentContextValue(key, previousNamedSlots[i]))
+	}
+	buf.WriteString("\tif err != nil { return \"\", err }\n")
+	buf.WriteString(fmt.Sprintf("\t%s.WriteString(html)\n", g.builder))
+	buf.WriteString("}")
+	return buf.String(), nil
+}
+
+func restoreComponentContextValue(key, previous string) string {
+	return fmt.Sprintf("\tif %s == nil { ctx.Delete(%q) } else { ctx.Set(%q, %s) }\n", previous, key, key, previous)
 }
 
 func GenerateComponent(gen *generator, file *File, scopeHash string) (string, error) {
@@ -180,7 +243,7 @@ func GenerateComponent(gen *generator, file *File, scopeHash string) (string, er
 
 	if file.Template != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
-		g := &compGen{gen: gen}
+		g := &compGen{gen: gen, builder: "b"}
 		for _, n := range file.Template.Nodes {
 			code, err := g.node(n)
 			if err != nil {

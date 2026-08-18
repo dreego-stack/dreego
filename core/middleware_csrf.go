@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -21,25 +22,32 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 				token = generateCSRFToken()
 				if err := store.Set(w, r, "csrf_token", token, nil); err != nil {
 					logger.Error("csrf token write failed", "error", err)
-					token = ""
+					http.Error(w, "internal server error", http.StatusInternalServerError)
+					return
 				}
 			}
-			if token != "" {
-				secure := isSecureForCSRF(r, store)
-				http.SetCookie(w, &http.Cookie{
-					Name:     "csrf_token",
-					Value:    token,
-					Path:     "/",
-					HttpOnly: false,
-					Secure:   secure,
-					SameSite: http.SameSiteStrictMode,
-				})
-			}
+			secure := isSecureForCSRF(r, store)
+			http.SetCookie(w, &http.Cookie{
+				Name:     "csrf_token",
+				Value:    token,
+				Path:     "/",
+				HttpOnly: false,
+				Secure:   secure,
+				SameSite: http.SameSiteStrictMode,
+			})
 
 			if isUnsafeMethod(r.Method) {
 				clientToken := r.Header.Get("X-CSRF-Token")
 				if clientToken == "" {
-					r.ParseForm()
+					if err := r.ParseForm(); err != nil {
+						var maxErr *http.MaxBytesError
+						if errors.As(err, &maxErr) {
+							http.Error(w, "request body too large", http.StatusRequestEntityTooLarge)
+						} else {
+							http.Error(w, "invalid form body", http.StatusBadRequest)
+						}
+						return
+					}
 					clientToken = r.FormValue("csrf_token")
 				}
 				if subtle.ConstantTimeCompare([]byte(clientToken), []byte(token)) != 1 {

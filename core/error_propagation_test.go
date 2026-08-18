@@ -233,11 +233,11 @@ func TestCSRFStoreFailureReachesErrorPath(t *testing.T) {
 		hit = true
 	})).ServeHTTP(w, r)
 
-	if !hit {
-		t.Fatal("handler must still run when CSRF store read fails (recovery on verification failure)")
+	if hit {
+		t.Fatal("handler ran after CSRF token persistence failed")
 	}
-	if w.Code == http.StatusInternalServerError {
-		t.Fatalf("store read failure must not abort the request, got 500")
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d, want 500", w.Code)
 	}
 	if strings.Contains(w.Body.String(), "store read failure") {
 		t.Errorf("internal cause disclosed in body: %q", w.Body.String())

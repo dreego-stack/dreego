@@ -9,6 +9,7 @@ func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET 
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
+		inSection := false
 		headCode, err := genHead(file.Head.Content, "b")
 		if err != nil {
 			return "", err
@@ -25,7 +26,7 @@ func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET 
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Template.Nodes {
-			code, err := genTemplateNode(gen, n, 1)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
 			}
@@ -39,11 +40,12 @@ func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET 
 			buf.WriteString("\tb.WriteString(\"</div>\")\n")
 		}
 	} else {
+		inSection := false
 		if isGET {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Template.Nodes {
-			code, err := genTemplateNode(gen, n, 1)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
 			}
@@ -109,8 +111,9 @@ func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET 
 		}
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
 		if layout.Template != nil {
+			inSection := false
 			for _, n := range layout.Template.Nodes {
-				code, err := genLayoutNode(gen, n, 1)
+				code, err := genLayoutNodeState(gen, n, 1, &inSection)
 				if err != nil {
 					return "", err
 				}

@@ -10,7 +10,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Rule: Agents NEVER edit CHANGELOG.md directly
 
-Agents NEVER edit CHANGELOG.md directly. New changelog lines belong ONLY in the PR's `pr.md`. `release-prep` applies them to CHANGELOG.md after approval at merge time. If you see a vX.Y.Z header missing in CHANGELOG.md, that is normal — it will be added by release-prep.
+Agents NEVER edit CHANGELOG.md directly. New changelog lines belong only in the PR's unique `.changes/*.md` file. `release-prep` applies all pending files to CHANGELOG.md after merge. If a vX.Y.Z header is missing in CHANGELOG.md, that is normal until release-prep runs.
 
 ## Purpose
 
@@ -18,9 +18,9 @@ Keep CHANGELOG.md up to date with every meaningful change.
 
 ## When to use
 
-- Every change lands via a pull request with a `pr.md` (see AGENTS.md Commit Convention)
-- The `pr.md` frontmatter declares the version bump: `none | patch` — `minor` and `major` are blocked until the v0.1 release
-- The changelog lines in `pr.md` become the CHANGELOG entry
+- Every change lands via a pull request with one `.changes/*.md` file
+- The change-file frontmatter declares `none | patch`; larger bumps are blocked before v0.1
+- Concurrent pending files are combined into one release entry
 
 ## Format
 
@@ -43,10 +43,9 @@ Keep CHANGELOG.md up to date with every meaningful change.
 ## Workflow
 
 1. Change code
-2. Create a PR with `pr.md` (copy `pr.md.example`): `version:` + changelog lines
-3. CI (`pull_request.yml`) validates pr.md and runs `make test`
-4. After approval, run `release-prep` (manual, with PR number) — it applies the changelog + version to the PR branch and removes pr.md
-5. Squash-merge the PR
-6. `release.yml` creates the tag after merge
+2. Add a uniquely named `.changes/*.md` file with `version:` and changelog lines
+3. CI (`pull-request-check.yml`) validates the file and runs the test suites
+4. Squash-merge the PR
+5. Serialized `main-push.yml` tests the latest main, combines pending files, updates the changelog, and creates the tag
 
 No local tags, no `git tag -a`, no `git push --tags`.

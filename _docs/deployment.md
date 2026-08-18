@@ -30,19 +30,25 @@ GOOS=linux GOARCH=arm64 dreego build
 
 ## Container
 
-A production Dockerfile uses a 3-stage build with `FROM scratch`:
+The landing blueprint uses a two-stage build and a non-root distroless runtime:
 
 ```dockerfile
-FROM golang:1.22-alpine AS build
+FROM golang:1.22-alpine AS builder
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN go build -o /dreego .
+RUN CGO_ENABLED=0 go build -o /app/bin/server .
 
-FROM scratch
-COPY --from=build /dreego /dreego
-COPY --from=build /app/dreego/static /dreego/static
-ENTRYPOINT ["/dreego"]
+FROM gcr.io/distroless/static:nonroot
+COPY --from=builder /app/bin/server /server
+EXPOSE 8080
+USER nonroot
+ENTRYPOINT ["/server"]
 ```
+
+Generated static assets are embedded in the binary. No separate
+`dreego/static` directory is copied into the runtime image.
 
 ## Runtime
 

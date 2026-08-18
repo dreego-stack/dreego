@@ -92,6 +92,7 @@ func TestCookieStoreDestroy(t *testing.T) {
 
 func TestCookieStoreOptions(t *testing.T) {
 	store := NewCookieStore(testSecret)
+	store.SetCookiePolicy(CookiePolicy{Path: "/app"})
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 
@@ -101,7 +102,9 @@ func TestCookieStoreOptions(t *testing.T) {
 		HttpOnly: true,
 		Path:     "/app",
 	}
-	store.Set(w, r, "key", "value", opts)
+	if err := store.Set(w, r, "key", "value", opts); err != nil {
+		t.Fatal(err)
+	}
 
 	cookies := w.Result().Cookies()
 	if len(cookies) != 1 {

@@ -126,6 +126,13 @@ func TestCLIBlueprintSemanticHTML(t *testing.T) {
 	if strings.Contains(string(route), "<img") && !strings.Contains(string(route), "alt=") {
 		t.Error("landing route must give every <img> an alt attribute")
 	}
+	mainGo, err := os.ReadFile(filepath.Join(sub, "main.go"))
+	if err != nil {
+		t.Fatalf("read main.go: %v", err)
+	}
+	if !strings.Contains(string(mainGo), "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com") {
+		t.Error("landing CSP must allow its Tailwind development script")
+	}
 
 	if out, err := dreegotest.RunCLI(t, sub, "generate"); err != nil {
 		t.Fatalf("generate in scaffold: %v\n%s", err, out)

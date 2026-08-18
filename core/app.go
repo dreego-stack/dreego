@@ -10,6 +10,8 @@ import (
 	"syscall"
 )
 
+var ErrServerRunning = errors.New("dreego: server already running")
+
 type App struct {
 	mu             sync.RWMutex
 	routes         []route
@@ -90,18 +92,18 @@ func (a *App) Build() {
 	}
 
 	var h http.Handler = mux
-	for i := len(a.middlewares) - 1; i >= 0; i-- {
-		if a.middlewares[i] == nil {
-			continue
-		}
-		h = a.middlewares[i](h)
-	}
 	h = a.redirectRewriteMiddleware(h)
 	if a.sessionStore != nil && a.csrfEnabled {
 		h = CSRF(a.sessionStore)(h)
 	}
 	if a.sessionStore != nil {
 		h = a.sessionMiddleware(h)
+	}
+	for i := len(a.middlewares) - 1; i >= 0; i-- {
+		if a.middlewares[i] == nil {
+			continue
+		}
+		h = a.middlewares[i](h)
 	}
 	if a.loggingEnabled {
 		h = RequestLogging()(h)
@@ -144,12 +146,6 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) Listen(addr string) error {
 	a.Build()
-	a.mu.Lock()
-	if a.server != nil {
-		a.mu.Unlock()
-		return errors.New("dreego: server already running")
-	}
-	a.mu.Unlock()
 	cfg := a.serverConfig.withDefaults()
 	srv := &http.Server{
 		Addr:              addr,
@@ -162,6 +158,10 @@ func (a *App) Listen(addr string) error {
 	}
 
 	a.mu.Lock()
+	if a.server != nil {
+		a.mu.Unlock()
+		return ErrServerRunning
+	}
 	a.server = srv
 	shutdownDone := make(chan error, 1)
 	a.shutdownDone = shutdownDone

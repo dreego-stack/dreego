@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/dreego-stack/dreego/dreegotest"
@@ -91,11 +92,12 @@ func TestComponentNotFound(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"dreego/routes/get.dreego": `<div><@Missing/></div>`,
 	})
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err == nil {
+		t.Fatalf("generate accepted an unknown component:\n%s", out)
 	}
-	if dreegotest.BuildInDirOK(t, dir) {
-		t.Fatal("expected build failure but succeeded")
+	if !strings.Contains(out, "unknown component Missing") {
+		t.Fatalf("unexpected diagnostic:\n%s", out)
 	}
 }
 

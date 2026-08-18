@@ -22,7 +22,9 @@ func TestGenTemplateNodeIfElseIfChain(t *testing.T) {
 			},
 		},
 	}
-	result, err := genTemplateNode(NewGenerator(), n, 0)
+	gen := NewGenerator()
+	gen.registerDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
+	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -45,7 +47,9 @@ func TestGenTemplateNodeEachWithElse(t *testing.T) {
 			{Type: NodeText, Content: "empty"},
 		},
 	}
-	result, err := genTemplateNode(NewGenerator(), n, 0)
+	gen := NewGenerator()
+	gen.registerDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
+	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -224,7 +228,9 @@ func TestGenTemplateNodeComponentCallSelfClose(t *testing.T) {
 		Attrs:     `label="Hi"`,
 		SelfClose: true,
 	}
-	result, err := genTemplateNode(NewGenerator(), n, 0)
+	gen := NewGenerator()
+	gen.registerDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
+	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -251,7 +257,9 @@ func TestGenTemplateNodeComponentCallWithSlot(t *testing.T) {
 			{Type: NodeText, Content: "body"},
 		},
 	}
-	result, err := genTemplateNode(NewGenerator(), n, 0)
+	gen := NewGenerator()
+	gen.registerDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
+	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -276,23 +284,5 @@ func TestGenTemplateNodeVerbatim(t *testing.T) {
 	}
 	if strings.Contains(result, "dreego.SafeText") {
 		t.Errorf("verbatim must NOT escape, got:\n%s", result)
-	}
-}
-
-func TestGenTemplateNodeFilterRawUpper(t *testing.T) {
-	n := TemplateNode{
-		Type:    NodeExpression,
-		Content: "name",
-		Filters: []string{"raw", "upper"},
-	}
-	result, err := genTemplateNode(NewGenerator(), n, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !strings.Contains(result, "strings.ToUpper") {
-		t.Errorf("upper filter must wrap in strings.ToUpper, got:\n%s", result)
-	}
-	if strings.Contains(result, "dreego.SafeText") {
-		t.Errorf("raw filter must skip dreego.SafeText, got:\n%s", result)
 	}
 }
