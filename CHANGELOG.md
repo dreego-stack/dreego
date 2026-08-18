@@ -1,4 +1,10 @@
 
+## v0.0.57 - 2026-08-18
+
+- Feat: CI runs core and integration tests with -race on the ubuntu runner (cgo)
+- Fix: protect CookieStore policy and trustedProxies with sync.RWMutex; route isSecureForCSRF through locked accessor
+- Test: add concurrent-access tests for routes, app config, session store, cookie policy, CSRF middleware, ready handler
+
 ## v0.0.56 - 2026-08-17
 
 - Feat: add four reference applications under _tests/fixtures/ (hello, forms, components, plugin) that verify the complete public CLI-to-HTTP workflow
