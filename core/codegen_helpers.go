@@ -104,6 +104,9 @@ func isScriptAttr(name string) bool {
 // attributes fall back to SafeAttr, which still prevents attribute breakout.
 func attrContext(name string) string {
 	n := strings.ToLower(name)
+	if n == "srcdoc" {
+		return "SafeSrcdoc"
+	}
 	if isScriptAttr(name) {
 		return "SafeScript"
 	}

@@ -49,6 +49,16 @@ func (s *CookieStore) resolvePath(opts *Options) string {
 	return "/"
 }
 
+func (s *CookieStore) validatePathOverride(opts *Options) error {
+	if opts == nil || opts.Path == "" {
+		return nil
+	}
+	if opts.Path != s.resolvePath(nil) {
+		return ErrCookiePathOverride
+	}
+	return nil
+}
+
 func (s *CookieStore) resolveEncrypt(opts *Options) bool {
 	if opts != nil && opts.Encrypt {
 		return true

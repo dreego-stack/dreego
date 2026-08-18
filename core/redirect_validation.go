@@ -50,7 +50,7 @@ func validateRewrite(from, to string) error {
 }
 
 func validateRedirectPair(from, to string) error {
-	if strings.HasSuffix(from, "/*") && to == "/" {
+	if strings.HasSuffix(from, "/*") && (to == "/" || to == "/*") {
 		return fmt.Errorf("dreego: redirect/rewrite target %q with wildcard pattern %q emits //-prefixed targets", to, from)
 	}
 	if !strings.HasSuffix(from, "/*") && strings.HasSuffix(to, "/*") {

@@ -16,6 +16,7 @@ const minSecretLen = 32
 const maxCookieSize = 4096
 
 var ErrSessionTooLarge = errors.New("dreego: encoded session state exceeds cookie size limit")
+var ErrCookiePathOverride = errors.New("dreego: per-call cookie path overrides are not allowed; configure CookiePolicy.Path")
 
 type randReader interface {
 	Read(p []byte) (n int, err error)
@@ -113,6 +114,9 @@ func (s *CookieStore) Get(r *http.Request, key string) (string, error) {
 }
 
 func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value string, opts *Options) error {
+	if err := s.validatePathOverride(opts); err != nil {
+		return err
+	}
 	m, err := s.load(r)
 	if err != nil {
 		m = map[string]string{}
