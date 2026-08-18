@@ -12,11 +12,6 @@ import (
 // (empty string means the value is valid).
 type validatorFunc func(string) string
 
-type FieldError struct {
-	Field   string
-	Message string
-}
-
 func BindForm(r *http.Request, target any) error {
 	if err := r.ParseForm(); err != nil {
 		return err

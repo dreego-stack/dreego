@@ -34,6 +34,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 
 ## Meta
 
+- [Compatibility](https://github.com/dreego-stack/dreego/blob/main/_docs/compatibility.md) — Breaking-change policy and the v0.1 stability promise
 - [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Product direction, release phases, and plugin ideas
 - [README](https://github.com/dreego-stack/dreego/blob/main/README.md)
 - [CHANGELOG](https://github.com/dreego-stack/dreego/blob/main/CHANGELOG.md)

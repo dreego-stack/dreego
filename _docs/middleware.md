@@ -109,4 +109,7 @@ Configured in `dreego/config.json` → `redirects` and `rewrites`.
 
 ## Plugin Middleware
 
-Plugins implement `MiddlewareProvider` and inject their own middleware into the chain. Order = `app.Use()` order.
+Plugins register middleware through `app.Use()` in source order. There is no
+central `MiddlewareProvider` interface before v1; a plugin exposes an explicit
+`Register(app, options) error` function that calls `app.Use` and `app.Register`
+directly. See [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md).

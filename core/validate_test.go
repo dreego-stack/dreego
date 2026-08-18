@@ -183,16 +183,6 @@ func TestSaveErrors(t *testing.T) {
 	}
 }
 
-func TestFieldError(t *testing.T) {
-	fe := FieldError{Field: "name", Message: "is required"}
-	if fe.Field != "name" {
-		t.Errorf("expected 'name', got '%s'", fe.Field)
-	}
-	if fe.Message != "is required" {
-		t.Errorf("expected 'is required', got '%s'", fe.Message)
-	}
-}
-
 func TestValidateFormPtr(t *testing.T) {
 	f := &validateFormRequired{Name: ""}
 	errs := ValidateForm(f)
