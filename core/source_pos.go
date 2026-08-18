@@ -32,3 +32,11 @@ func setNodeSource(nodes []TemplateNode, src string, posOffset int) {
 		setNodeSource(nodes[i].ElseChildren, src, posOffset)
 	}
 }
+
+func setSourceText(nodes []TemplateNode, src string) {
+	for i := range nodes {
+		nodes[i].SourceText = src
+		setSourceText(nodes[i].Children, src)
+		setSourceText(nodes[i].ElseChildren, src)
+	}
+}

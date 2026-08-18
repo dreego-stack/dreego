@@ -22,6 +22,9 @@ func parseFile(t *testing.T, src string) *File {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
+	if file.Template != nil {
+		setSourceText(file.Template.Nodes, src)
+	}
 	return file
 }
 

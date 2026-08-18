@@ -15,6 +15,7 @@
     {"path": "/_docs/session-encryption.md", "title": "Session Encryption"},
     {"path": "/_docs/progressive-enhancement.md", "title": "Progressive Enhancement"},
     {"path": "/_docs/security.md", "title": "Output Safety"},
+    {"path": "/_docs/accessibility.md", "title": "Accessibility"},
     {"path": "/_docs/testing.md", "title": "Testing"},
     {"path": "/_docs/reference-apps.md", "title": "Reference Applications"},
     {"path": "/_docs/deployment.md", "title": "Deployment"},

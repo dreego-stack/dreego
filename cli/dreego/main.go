@@ -105,13 +105,13 @@ func cmdGenerate(args []string) {
 	}
 	if check {
 		if err := dreego.RunCheck(); err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "%s\n", formatGenerateError(err))
 			os.Exit(1)
 		}
 		return
 	}
 	if err := dreego.Run(force); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "%s\n", formatGenerateError(err))
 		os.Exit(1)
 	}
 }

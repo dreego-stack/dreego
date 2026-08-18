@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-func (p *Parser) parseIfNodes() ([]TemplateNode, error) {
+func (p *Parser) parseIfNodes(openPos int) ([]TemplateNode, error) {
 	var nodes []TemplateNode
 
 	for {
 		tok := p.current()
 		if tok.Type == TokenEOF {
-			return nil, fmt.Errorf("unclosed {#if}")
+			return nil, fmt.Errorf("unclosed {#if} at position %d", openPos)
 		}
 		if tok.Type == TokenIfClose || tok.Type == TokenElse || tok.Type == TokenElseIf {
 			break

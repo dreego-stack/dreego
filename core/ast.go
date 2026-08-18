@@ -26,6 +26,7 @@ type TemplateNode struct {
 	Filters      []string
 	Pos          int
 	Source       string
+	SourceText   string
 }
 
 type GoSection struct {

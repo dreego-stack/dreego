@@ -65,15 +65,16 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 	switch tok.Type {
 	case TokenText:
 		p.advance()
-		return TemplateNode{Type: NodeText, Content: tok.Value}, nil
+		return TemplateNode{Type: NodeText, Content: tok.Value, Pos: tok.Pos}, nil
 	case TokenExpression:
 		p.advance()
 		expr, filters := parseExpression(tok.Value)
 		return TemplateNode{Type: NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
 	case TokenIfOpen:
 		cond := tok.Value
+		openPos := tok.Pos
 		p.advance()
-		children, err := p.parseIfNodes()
+		children, err := p.parseIfNodes(openPos)
 		if err != nil {
 			return TemplateNode{}, err
 		}
@@ -88,8 +89,9 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 				break
 			}
 			elseCond := p.current().Value
+			elsePos := p.current().Pos
 			p.advance()
-			elseIfChildren, err := p.parseIfNodes()
+			elseIfChildren, err := p.parseIfNodes(elsePos)
 			if err != nil {
 				return TemplateNode{}, err
 			}
@@ -135,7 +137,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children, ElseChildren: elseChildren}, nil
 	case TokenTagClose:
 		p.advance()
-		return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)}, nil
+		return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag), Pos: tok.Pos}, nil
 	case TokenSlot:
 		p.advance()
 		return TemplateNode{Type: NodeSlot, Content: tok.Value}, nil
@@ -156,7 +158,7 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			content += " " + tok.Attr
 		}
 		content += ">"
-		return TemplateNode{Type: NodeText, Content: content}, nil
+		return TemplateNode{Type: NodeText, Content: content, Pos: tok.Pos}, nil
 	case TokenComponentSelfClose:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 			return TemplateNode{}, err
