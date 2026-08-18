@@ -44,8 +44,8 @@ func collectLabelForIDs(nodes []TemplateNode) map[string]bool {
 
 func collectLabelForIDsIn(n *TemplateNode, ids map[string]bool) {
 	if n.Type == NodeText {
-		for _, m := range labelRe.FindAllStringSubmatch(n.Content, -1) {
-			if forID := strings.TrimSpace(m[1]); forID != "" {
+		for _, label := range labelRe.FindAllString(n.Content, -1) {
+			if forID := strings.TrimSpace(a11yAttrValue(label, "for")); forID != "" {
 				ids[forID] = true
 			}
 		}
@@ -77,11 +77,13 @@ func walkA11y(n *TemplateNode, labelForIDs map[string]bool, diags *[]Diagnostic)
 	}
 }
 
-var imgRe = regexp.MustCompile(`<img\b([^>]*)>`)
-var inputRe = regexp.MustCompile(`<input\b([^>]*)>`)
-var labelRe = regexp.MustCompile(`<label\b[^>]*\bfor\s*=\s*"([^"]*)"`)
-var attrDoubleRe = regexp.MustCompile(`\b(\w[\w-]*)\s*=\s*"([^"]*)"`)
-var attrSingleRe = regexp.MustCompile(`\b(\w[\w-]*)\s*=\s*'([^']*)'`)
+var imgRe = regexp.MustCompile(`(?i)<img\b([^>]*)>`)
+var inputRe = regexp.MustCompile(`(?i)<input\b([^>]*)>`)
+var labelRe = regexp.MustCompile(`(?i)<label\b[^>]*>`)
+var labelOpenRe = regexp.MustCompile(`(?i)<label\b[^>]*>`)
+var labelCloseRe = regexp.MustCompile(`(?i)</label\s*>`)
+var attrDoubleRe = regexp.MustCompile(`(?i)\b(\w[\w-]*)\s*=\s*"([^"]*)"`)
+var attrSingleRe = regexp.MustCompile(`(?i)\b(\w[\w-]*)\s*=\s*'([^']*)'`)
 
 func checkImgAlt(n *TemplateNode, diags *[]Diagnostic) {
 	for _, m := range imgRe.FindAllStringSubmatchIndex(n.Content, -1) {
@@ -104,12 +106,15 @@ func checkImgAlt(n *TemplateNode, diags *[]Diagnostic) {
 func checkInputLabel(n *TemplateNode, labelForIDs map[string]bool, diags *[]Diagnostic) {
 	for _, m := range inputRe.FindAllStringSubmatchIndex(n.Content, -1) {
 		full := n.Content[m[0]:m[1]]
-		typ := a11yAttrValue(full, "type")
+		typ := strings.ToLower(a11yAttrValue(full, "type"))
 		if typ == "hidden" || typ == "submit" || typ == "button" || typ == "reset" {
 			continue
 		}
 		id := a11yAttrValue(full, "id")
 		if id != "" && labelForIDs[id] {
+			continue
+		}
+		if a11yWrappedByLabel(n.SourceText, n.Pos+m[0], n.Pos+m[1]) {
 			continue
 		}
 		pos := n.Pos + m[0]
@@ -127,12 +132,12 @@ func checkInputLabel(n *TemplateNode, labelForIDs map[string]bool, diags *[]Diag
 
 func a11yHasAttr(attrs, name string) bool {
 	for _, m := range attrDoubleRe.FindAllStringSubmatch(attrs, -1) {
-		if m[1] == name {
+		if strings.EqualFold(m[1], name) {
 			return true
 		}
 	}
 	for _, m := range attrSingleRe.FindAllStringSubmatch(attrs, -1) {
-		if m[1] == name {
+		if strings.EqualFold(m[1], name) {
 			return true
 		}
 	}
@@ -141,14 +146,27 @@ func a11yHasAttr(attrs, name string) bool {
 
 func a11yAttrValue(tag, name string) string {
 	for _, m := range attrDoubleRe.FindAllStringSubmatch(tag, -1) {
-		if m[1] == name {
+		if strings.EqualFold(m[1], name) {
 			return m[2]
 		}
 	}
 	for _, m := range attrSingleRe.FindAllStringSubmatch(tag, -1) {
-		if m[1] == name {
+		if strings.EqualFold(m[1], name) {
 			return m[2]
 		}
 	}
 	return ""
+}
+
+func a11yWrappedByLabel(content string, start, end int) bool {
+	opens := labelOpenRe.FindAllStringIndex(content[:start], -1)
+	if len(opens) == 0 {
+		return false
+	}
+	closes := labelCloseRe.FindAllStringIndex(content[:start], -1)
+	lastOpen := opens[len(opens)-1][0]
+	if len(closes) > 0 && closes[len(closes)-1][0] > lastOpen {
+		return false
+	}
+	return labelCloseRe.FindStringIndex(content[end:]) != nil
 }

@@ -68,3 +68,21 @@ func TestA11yCheckFormGetsDiagnostics(t *testing.T) {
 		t.Fatalf("diagnostic must name input, got %q", d[0])
 	}
 }
+
+func TestA11yCheckIsCaseInsensitive(t *testing.T) {
+	src := `<div><IMG SRC="/logo.png" ALT="Logo"><LABEL FOR="email">Email</LABEL><INPUT ID="email" TYPE="EMAIL"></div>`
+	f := parseFile(t, src)
+	setNodeSource(f.Template.Nodes, "route.dreego", 0)
+	if d := a11yCheck(f.Template.Nodes); len(d) != 0 {
+		t.Fatalf("uppercase markup produced diagnostics: %q", d)
+	}
+}
+
+func TestA11yCheckRecognizesWrappedLabel(t *testing.T) {
+	src := `<div><label>Email <input name="email" type="email"></label></div>`
+	f := parseFile(t, src)
+	setNodeSource(f.Template.Nodes, "route.dreego", 0)
+	if d := a11yCheck(f.Template.Nodes); len(d) != 0 {
+		t.Fatalf("wrapped label produced diagnostics: %q", d)
+	}
+}
