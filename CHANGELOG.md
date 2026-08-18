@@ -1,4 +1,11 @@
 
+## v0.0.59 - 2026-08-18
+
+- Feat: add a11y diagnostics for missing image alt and unassociated form labels in the transpiler
+- Feat: CLI errors now lead with file:line:col, cause, and a Fix: action; color-free output
+- Feat: blueprints use semantic HTML (main, nav, skip link) and accessible image defaults
+- Docs: add accessibility guarantees doc; fix docs drift (stale test counts, explicit App API)
+
 ## v0.0.58 - 2026-08-18
 
 - Fix: generation aborts with affected path and wrapped cause on filesystem walk, directory read, and source read failures
