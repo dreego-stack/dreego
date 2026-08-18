@@ -67,3 +67,11 @@ Rewrites share the exact/wildcard semantics and validation rules of
 redirects (minus the status code). A rewrite changes the request path
 transparently before the router sees it; redirects send an HTTP redirect
 response.
+
+## Ordering vs. middleware
+
+Rewrites are applied just before routing, after user middleware registered via
+`app.Use`. Middleware therefore sees the **original** request path, not the
+rewritten one — match middleware patterns against the source path (for example
+match `/api/*` even when `/api/*` rewrites to `/v2/*`). Access logs record the
+pre-rewrite path.

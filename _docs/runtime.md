@@ -70,6 +70,12 @@ response goroutines.
 
 ### Request body limits
 
+Request-body limits are **the application's responsibility** — Dreego does not
+apply an implicit body cap by default (only header limits are enforced by the
+server). An unguarded route that accepts a request body is therefore exposed to
+unbounded uploads; wrap your POST/PUT routes with `MaxBodyReader` to set a sane
+limit.
+
 Use the `MaxBodyReader(max int64)` middleware to cap the request body for a
 specific route without weakening unrelated routes:
 

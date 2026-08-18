@@ -17,7 +17,10 @@ type layoutEntry struct {
 func discoverLayouts() (map[string]*layoutEntry, error) {
 	entries := map[string]*layoutEntry{}
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || !d.IsDir() {
+		if walkErr != nil {
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
+		}
+		if !d.IsDir() {
 			return nil
 		}
 		base := filepath.Base(path)
@@ -35,7 +38,7 @@ func discoverLayouts() (map[string]*layoutEntry, error) {
 		}
 		dirEntries, err := os.ReadDir(path)
 		if err != nil {
-			return nil
+			return fmt.Errorf("error reading directory %s: %w", path, err)
 		}
 		for _, e := range dirEntries {
 			if e.IsDir() {

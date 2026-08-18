@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os/signal"
 	"sync"
@@ -143,6 +144,12 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) Listen(addr string) error {
 	a.Build()
+	a.mu.Lock()
+	if a.server != nil {
+		a.mu.Unlock()
+		return errors.New("dreego: server already running")
+	}
+	a.mu.Unlock()
 	cfg := a.serverConfig.withDefaults()
 	srv := &http.Server{
 		Addr:              addr,

@@ -78,7 +78,10 @@ func readDiskFiles(genDir string) (map[string]string, error) {
 		return disk, nil
 	}
 	err = filepath.WalkDir(genDir, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() {
+		if walkErr != nil {
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
+		}
+		if d.IsDir() {
 			return nil
 		}
 		if filepath.Ext(path) != ".go" {
@@ -95,7 +98,7 @@ func readDiskFiles(genDir string) (map[string]string, error) {
 	return disk, err
 }
 
-func applyPlan(plan genPlan) error {
+func applyPlan(plan genPlan, force bool) error {
 	if err := os.MkdirAll(plan.genDir, 0755); err != nil {
 		return err
 	}
@@ -117,7 +120,7 @@ func applyPlan(plan genPlan) error {
 	sort.Strings(paths)
 	for _, p := range paths {
 		content := plan.files[p]
-		if isUpToDate(p, content) {
+		if !force && isUpToDate(p, content) {
 			continue
 		}
 		if err := os.WriteFile(p, []byte(content), 0644); err != nil {

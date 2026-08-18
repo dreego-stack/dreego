@@ -175,6 +175,7 @@ func (s *CookieStore) Destroy(w http.ResponseWriter, r *http.Request) error {
 		SameSite: s.resolveSameSite(),
 		Path:     s.resolvePath(nil),
 	})
+	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, map[string]string{}))
 	return nil
 }
 
