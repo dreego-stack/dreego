@@ -22,7 +22,12 @@ func scanComponents(gen *generator) (string, []string, error) {
 	if err != nil {
 		return "", nil, err
 	}
+	pathsByName := map[string]string{}
 	for _, component := range components {
+		if previous, exists := pathsByName[component.def.Name]; exists {
+			return "", nil, fmt.Errorf("duplicate component %s: %s and %s", component.def.Name, previous, component.path)
+		}
+		pathsByName[component.def.Name] = component.path
 		gen.registerDef(component.def.Name, component.def)
 	}
 

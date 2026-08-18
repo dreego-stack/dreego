@@ -6,17 +6,24 @@ import (
 )
 
 func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) {
-	return genTemplateNodeTo(gen, n, depth, "b")
+	inSection := false
+	return genTemplateNodeToState(gen, n, depth, "b", &inSection)
 }
 
 func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string) (string, error) {
+	inSection := false
+	return genTemplateNodeToState(gen, n, depth, builder, &inSection)
+}
+
+func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder string, inSection *bool) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
 	case NodeText:
 		if n.Content == "" {
 			return "", nil
 		}
-		code, _ := compTextSection(n.Content, false)
+		code, next := compTextSection(n.Content, *inSection)
+		*inSection = next
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 	case NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
@@ -39,7 +46,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
-			code, err := genTemplateNodeTo(gen, child, depth+1, builder)
+			code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
 			if err != nil {
 				return "", err
 			}
@@ -56,7 +63,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
 				for _, child := range ec.Children {
-					code, err := genTemplateNodeTo(gen, child, depth+1, builder)
+					code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
 					if err != nil {
 						return "", err
 					}
@@ -65,7 +72,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 					for _, child := range ec.ElseChildren {
-						code, err := genTemplateNodeTo(gen, child, depth+1, builder)
+						code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
 						if err != nil {
 							return "", err
 						}
@@ -76,7 +83,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		} else {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, ec := range n.ElseChildren {
-				code, err := genTemplateNodeTo(gen, ec, depth+1, builder)
+				code, err := genTemplateNodeToState(gen, ec, depth+1, builder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -99,7 +106,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		buf.WriteString(fmt.Sprintf("%s\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code, err := genTemplateNodeTo(gen, child, forDepth+1, builder)
+			code, err := genTemplateNodeToState(gen, child, forDepth+1, builder, inSection)
 			if err != nil {
 				return "", err
 			}
@@ -110,7 +117,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 		if hasElse {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, child := range n.ElseChildren {
-				code, err := genTemplateNodeTo(gen, child, depth+1, builder)
+				code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -126,7 +133,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 			buf.WriteString(fmt.Sprintf("%s{\n", indent))
 			buf.WriteString(fmt.Sprintf("%s\tvar %s strings.Builder\n", indent, slotBuilder))
 			for _, child := range n.Children {
-				code, err := genTemplateNodeTo(gen, child, depth+2, slotBuilder)
+				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -148,6 +155,9 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 			funcName = n.Tag[idx+1:]
 		}
 		def := gen.lookupDef(funcName)
+		if def == nil {
+			return "", fmt.Errorf("%s: unknown component %s", sourceRef(n.Source, n.Pos), funcName)
+		}
 		args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
 		if err != nil {
 			return "", err
@@ -182,7 +192,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar %s strings.Builder\n", indent, namedSlotBuilder))
 				for _, sc := range child.Children {
-					code, err := genTemplateNodeTo(gen, sc, depth+3, namedSlotBuilder)
+					code, err := genTemplateNodeToState(gen, sc, depth+3, namedSlotBuilder, inSection)
 					if err != nil {
 						return "", err
 					}
@@ -194,7 +204,7 @@ func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string
 				if nested := findNestedSlot([]TemplateNode{child}); nested != nil {
 					return "", nestedSlotError(n, def, nested, gen.src)
 				}
-				code, err := genTemplateNodeTo(gen, child, depth+2, slotBuilder)
+				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
 				if err != nil {
 					return "", err
 				}

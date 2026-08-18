@@ -48,8 +48,9 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		headPending := suppressScope && headCode != ""
+		inSection := false
 		for _, n := range file.Template.Nodes {
-			code, err := genTemplateNode(gen, n, 1)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", "", err
 			}

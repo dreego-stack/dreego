@@ -39,8 +39,8 @@ func parseCallAttrs(attrs string) ([]callAttr, error) {
 			if !inQuote && braceDepth > 0 {
 				braceDepth--
 			}
-		case ' ':
-			if !inQuote && braceDepth == 0 {
+		default:
+			if isAttrSpace(ch) && !inQuote && braceDepth == 0 {
 				if start < i {
 					attr, err := parseCallAttr(attrs[start:i])
 					if err != nil {
@@ -92,7 +92,7 @@ func attrExpressionValue(val string) string {
 
 func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (string, error) {
 	if comp == nil {
-		return extractAttrValues(attrs), nil
+		return "", fmt.Errorf("%s: unknown component", sourceRef(src, pos))
 	}
 
 	provided, err := parseCallAttrs(attrs)

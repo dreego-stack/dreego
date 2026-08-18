@@ -224,8 +224,8 @@ func TestCompGenExpressionEscapesByDefault(t *testing.T) {
 	}
 }
 
-// genComponentCall for a non-self-close node must return a literal <@Tag>
-// placeholder, not invoke the component.
+// genComponentCall for a non-self-close node must render the child component
+// and preserve its default slot.
 func TestGenComponentCallNonSelfClose(t *testing.T) {
 	n := TemplateNode{
 		Type:      NodeComponentCall,
@@ -233,14 +233,16 @@ func TestGenComponentCallNonSelfClose(t *testing.T) {
 		Attrs:     `href="/x"`,
 		SelfClose: false,
 	}
-	out, err := (&compGen{gen: NewGenerator()}).genComponentCall(n)
+	gen := NewGenerator()
+	gen.registerDef("Link", &ComponentDef{Name: "Link", Props: []Prop{{Name: "href", Type: "string"}}, HasDefaultSlot: true})
+	out, err := (&compGen{gen: gen, builder: "b"}).genComponentCall(n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "<@Nav.Link>") {
-		t.Errorf("non-self-close genComponentCall must emit <@Nav.Link> placeholder, got:\n%s", out)
+	if strings.Contains(out, "<@Nav.Link>") {
+		t.Errorf("non-self-close genComponentCall emitted a literal placeholder:\n%s", out)
 	}
-	if strings.Contains(out, ".Render(ctx)") {
-		t.Errorf("non-self-close genComponentCall must NOT invoke the component, got:\n%s", out)
+	if !strings.Contains(out, ".Render(ctx)") {
+		t.Errorf("non-self-close genComponentCall must invoke the component, got:\n%s", out)
 	}
 }
