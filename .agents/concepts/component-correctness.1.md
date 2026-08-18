@@ -67,11 +67,10 @@ Each increment adds HTTP-level assertions on rendered output.
 
 ## Final PR wrap-up
 
-1. Create `pr.md` from `pr.md.example` with `version: patch` and changelog lines
+1. Create one `.changes/*.md` file with `version: patch` and changelog lines
    for increments A–D.
-2. Update `CHANGELOG.md` with the same entries under the next patch version.
-3. Update `.agents/log.md` with a summary of the work.
-4. Delete `_todo/core/component-correctness.1.md`.
+2. Update the relevant knowledge-base concept documents.
+3. Delete `_todo/core/component-correctness.1.md`.
 
 Run `make test` and confirm all new and existing tests pass before opening the
 PR.

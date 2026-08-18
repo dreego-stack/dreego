@@ -40,6 +40,11 @@ Session cookies use secure defaults:
 
 Pass `&dreego.Options{Encrypt: true, Secure: true, HttpOnly: true}` to override per call. A configurable `CookiePolicy` on the store can set app-wide defaults that cannot be silently downgraded: `Set`, `Delete`, `Destroy`, and CSRF writes all preserve the policy and cannot drop `Secure`, `HttpOnly`, `SameSite`, or encryption. `SetCookiePolicy` merges partial policies with the secure defaults — for example, passing only `SameSite: Strict` keeps `HttpOnly: true` and `Path: "/"`.
 
+Cookie paths are app-wide policy rather than a per-call option. Set
+`CookiePolicy.Path` once. Passing a different `Options.Path` to `Set` returns
+`ErrCookiePathOverride`, preventing cookies that `Delete` or `Destroy` cannot
+expire at the same path.
+
 ## Trusted TLS Proxies
 
 Behind a TLS-terminating reverse proxy, set `Secure: true` only when the request arrives from an explicitly trusted proxy. Configure trusted proxy addresses on the store:

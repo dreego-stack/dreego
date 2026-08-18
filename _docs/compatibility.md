@@ -26,7 +26,7 @@ Two constraints apply even before v0.1:
    real application or plugin, or it is removed rather than kept "for later".
    Dead exports are a form of premature freezing.
 2. **Documented changes.** Every breaking change lands through a pull request
-   with a `pr.md` changelog line that states what changed and why. The
+   with a `.changes/*.md` changelog line that states what changed and why. The
    changelog is the migration record.
 
 ## The v0.1 stability promise

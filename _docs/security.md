@@ -15,6 +15,7 @@ dangerous in a URL, attribute, script, or style context.
 | Script | `<button onclick="{{ v }}">` | `SafeScript` | JSON-encodes the value, then HTML-escapes |
 | Style | `<div style="{{ v }}">` | `SafeStyle` | HTML-escapes, so `</style>` and `<!--` are inert in any case |
 | Meta refresh | `<meta http-equiv="refresh" content="{{ v }}">` | `SafeRefresh` | Validates the `url=` value, then HTML-escapes |
+| Nested document | `<iframe srcdoc="{{ v }}">` | `SafeSrcdoc` | Escapes twice so markup remains text when the browser parses the nested document |
 | Raw | `{{ v\|raw }}` | `SafeRaw` | No escaping — explicit opt-in for trusted values |
 
 The URL rule applies to `href`, `src`, `action`, `srcset`, `poster`, `cite`,

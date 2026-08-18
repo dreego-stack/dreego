@@ -41,7 +41,7 @@ Four principles:
 1. **SSR-First** — Pages render server-side. HTMX/Alpine.js for progressive enhancement, not required.
 2. **File-Based** — The current pre-v0.1 router maps `dreego/routes/login/get.dreego` to `GET /login`. The accepted v0.1 migration will use one route file per URL with method-specific sections.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
-4. **Accessible by Default** — CLI output, diagnostics, blueprints, and official components are designed for screen readers, keyboards, and semantic HTML. Applications still verify their own content and conformance.
+4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
 
 ## Features
 
@@ -186,7 +186,7 @@ github.com/dreego-stack/
 | `_docs/forms.md` | g-action forms, validation, redirects, error handling |
 | `_docs/components.md` | Component system, slots, scoped CSS |
 | `_docs/hot-reload.md` | Hot reload with Air (.air.toml config) |
-| `_docs/runtime.md` | Full Go API reference |
+| `_docs/runtime.md` | Practical guide to the main Go runtime APIs |
 | `_docs/getting-started.md` | Step-by-step tutorial |
 
 ## License
