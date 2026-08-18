@@ -35,7 +35,7 @@ func Run(force bool) error {
 	if err != nil {
 		return err
 	}
-	if err := applyPlan(plan); err != nil {
+	if err := applyPlan(plan, force); err != nil {
 		return err
 	}
 	elapsed := time.Since(start)
@@ -68,7 +68,7 @@ type genStats struct {
 	static     int
 }
 
-func buildPlan(_ bool) (genPlan, genStats, error) {
+func buildPlan(force bool) (genPlan, genStats, error) {
 	gen := NewGenerator()
 
 	layouts, err := discoverLayouts()

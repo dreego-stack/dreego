@@ -35,30 +35,6 @@ There is no central Plugin interface before v1. Plugin packages expose a typed
 directly. Shared capability interfaces are introduced only after multiple real
 plugins prove the same small contract.
 
-## Plugin Interfaces (not yet implemented)
-
-### Email Interface
-
-```go
-type Mailer interface {
-    Send(ctx context.Context, msg Message) error
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/mail-smtp`, `github.com/dreego-stack/dreego/plugins/mail-resend`.
-
-### Cache Interface
-
-```go
-type Cache interface {
-    Get(ctx context.Context, key string) ([]byte, error)
-    Set(ctx context.Context, key string, val []byte, ttl time.Duration) error
-    Delete(ctx context.Context, key string) error
-}
-```
-
-Implementations: `github.com/dreego-stack/dreego/plugins/cache-redis`, `github.com/dreego-stack/dreego/plugins/cache-memory`.
-
 ## Plugin Layout
 
 Official plugins live in separate repos under `github.com/dreego-stack/`:

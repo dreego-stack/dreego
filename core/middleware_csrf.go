@@ -21,17 +21,20 @@ func CSRF(store Store) func(http.Handler) http.Handler {
 				token = generateCSRFToken()
 				if err := store.Set(w, r, "csrf_token", token, nil); err != nil {
 					logger.Error("csrf token write failed", "error", err)
+					token = ""
 				}
 			}
-			secure := isSecureForCSRF(r, store)
-			http.SetCookie(w, &http.Cookie{
-				Name:     "csrf_token",
-				Value:    token,
-				Path:     "/",
-				HttpOnly: false,
-				Secure:   secure,
-				SameSite: http.SameSiteStrictMode,
-			})
+			if token != "" {
+				secure := isSecureForCSRF(r, store)
+				http.SetCookie(w, &http.Cookie{
+					Name:     "csrf_token",
+					Value:    token,
+					Path:     "/",
+					HttpOnly: false,
+					Secure:   secure,
+					SameSite: http.SameSiteStrictMode,
+				})
+			}
 
 			if isUnsafeMethod(r.Method) {
 				clientToken := r.Header.Get("X-CSRF-Token")

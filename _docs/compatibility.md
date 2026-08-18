@@ -42,6 +42,9 @@ path:
   `Listen`, `Shutdown`).
 - `SSRContext` and the `Context` interface used by generated form handlers.
 - The session `Store` interface and `CookieStore`/`CookiePolicy`/`Options`.
+- `ServerConfig` and `DefaultServerConfig` (the type set by `SetServerConfig`).
+- The exported error sentinels used by applications: `ErrAppBuilt`,
+  `ErrRouteConflict`, `ErrSessionTooLarge`, `ErrRedirect`.
 - The output-safety helpers (`SafeText`, `SafeAttr`, `SafeURL`, `SafeScript`,
   `SafeStyle`, `SafeRefresh`, `SafeRaw`).
 - The middleware constructors (`RequestLogging`, `Compress`, `Recovery`,

@@ -16,7 +16,10 @@ func generateStaticAssets(routePatterns map[string]bool) (src string, count int,
 	var buf strings.Builder
 
 	err = filepath.WalkDir(staticDir, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() {
+		if walkErr != nil {
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
+		}
+		if d.IsDir() {
 			return nil
 		}
 
