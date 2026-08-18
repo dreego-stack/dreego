@@ -8,8 +8,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"net"
 	"net/http"
+	"sync"
 )
 
 const minSecretLen = 32
@@ -22,6 +22,7 @@ type randReader interface {
 }
 
 type CookieStore struct {
+	mu             sync.RWMutex
 	secret         []byte
 	name           string
 	rand           randReader
@@ -55,6 +56,8 @@ func NewCookieStore(secret []byte) *CookieStore {
 }
 
 func (s *CookieStore) SetCookiePolicy(p CookiePolicy) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if p.SameSite != 0 {
 		s.policy.SameSite = p.SameSite
 	}
@@ -77,10 +80,22 @@ func (s *CookieStore) SetTrustedProxies(addrs []string) {
 	for _, a := range addrs {
 		m[a] = true
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.trustedProxies = m
 }
 
 func (s *CookieStore) Name() string { return s.name }
+
+func (s *CookieStore) TrustedProxies() map[string]bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	proxies := make(map[string]bool, len(s.trustedProxies))
+	for k, v := range s.trustedProxies {
+		proxies[k] = v
+	}
+	return proxies
+}
 
 func (s *CookieStore) Validate() error {
 	if len(s.secret) < minSecretLen {
@@ -202,71 +217,4 @@ func (s *CookieStore) verify(value string) ([]byte, bool) {
 		return decryptPayload(key.enc, data[1:])
 	}
 	return data, true
-}
-
-func (s *CookieStore) resolveSecure(r *http.Request, opts *Options) bool {
-	if opts != nil && opts.Secure {
-		return true
-	}
-	if s.policy.Secure {
-		return true
-	}
-	return isTLS(r, s.trustedProxies)
-}
-
-func (s *CookieStore) resolveHttpOnly(opts *Options) bool {
-	if opts != nil && opts.HttpOnly {
-		return true
-	}
-	return s.policy.HttpOnly
-}
-
-func (s *CookieStore) resolveSameSite() http.SameSite {
-	if s.policy.SameSite != 0 {
-		return s.policy.SameSite
-	}
-	return http.SameSiteLaxMode
-}
-
-func (s *CookieStore) resolvePath(opts *Options) string {
-	if opts != nil && opts.Path != "" {
-		return opts.Path
-	}
-	if s.policy.Path != "" {
-		return s.policy.Path
-	}
-	return "/"
-}
-
-func (s *CookieStore) resolveEncrypt(opts *Options) bool {
-	if opts != nil && opts.Encrypt {
-		return true
-	}
-	return s.policy.Encrypt
-}
-
-func (s *CookieStore) policyToOptions(r *http.Request) *Options {
-	return &Options{
-		Secure:   s.resolveSecure(r, nil),
-		HttpOnly: s.resolveHttpOnly(nil),
-		Path:     s.resolvePath(nil),
-		Encrypt:  s.policy.Encrypt,
-	}
-}
-
-func isTLS(r *http.Request, trustedProxies map[string]bool) bool {
-	if r.TLS != nil {
-		return true
-	}
-	if len(trustedProxies) == 0 {
-		return false
-	}
-	host := r.RemoteAddr
-	if h, _, err := net.SplitHostPort(host); err == nil {
-		host = h
-	}
-	if !trustedProxies[host] {
-		return false
-	}
-	return r.Header.Get("X-Forwarded-Proto") == "https"
 }
