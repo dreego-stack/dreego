@@ -1,4 +1,9 @@
 
+## v0.0.63 - 2026-08-18
+
+- Bug: harden SSR generation, request security, sessions, middleware, and CLI failures
+- Chore: make concurrent releases merge-safe and align documentation with implemented behavior
+
 ## v0.0.62 - 2026-08-18
 
 - Fix: propagate directory-walk errors in generate check, layout discovery, and static-asset scan (no silent skip)
