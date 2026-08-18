@@ -183,8 +183,8 @@ func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 		"dreego/routes/get.dreego": `<div><p>ok</p></div>`,
 	}, "app.SetSessionStore(failStore{}); app.SetLogging(false); ")
 	code, body := c.Get(t, "/")
-	if code != 500 {
-		t.Fatalf("status = %d, want 500", code)
+	if code != 200 {
+		t.Fatalf("status = %d, want 200 (csrf store failure recovers, does not abort request)", code)
 	}
 	if strings.Contains(body, "store") {
 		t.Fatalf("csrf cause disclosed in body: %q", body)

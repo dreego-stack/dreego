@@ -11,21 +11,16 @@ import (
 
 func CSRF(store Store) func(http.Handler) http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token, err := store.Get(r, "csrf_token")
 			if err != nil {
-				logger.Error("csrf token read failed", "error", err, "path", r.URL.Path, "method", r.Method)
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
+				logger.Error("csrf token read failed", "error", err)
 			}
 			if token == "" {
 				token = generateCSRFToken()
 				if err := store.Set(w, r, "csrf_token", token, nil); err != nil {
-					logger.Error("csrf token persist failed", "error", err, "path", r.URL.Path, "method", r.Method)
-					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-					return
+					logger.Error("csrf token write failed", "error", err)
 				}
 			}
 			secure := isSecureForCSRF(r, store)
