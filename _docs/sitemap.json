@@ -20,6 +20,7 @@
     {"path": "/_docs/deployment.md", "title": "Deployment"},
     {"path": "/_docs/dev-server.md", "title": "Dev Server"},
     {"path": "/_docs/hot-reload.md", "title": "Hot Reload"},
+    {"path": "/_docs/compatibility.md", "title": "Compatibility Policy"},
     {"path": "/_docs/roadmap.md", "title": "Roadmap"},
     {"path": "/README.md", "title": "README"},
     {"path": "/CHANGELOG.md", "title": "Changelog"}

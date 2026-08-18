@@ -4,6 +4,11 @@ Dreego plugins are ordinary Go packages in separate repositories. Each plugin
 owns its `go.mod`, dependencies, releases, tests, CI, and typed configuration.
 Core never imports a plugin package.
 
+> **Provisional until v1.** The plugin contract is explicitly excluded from the
+> v0.1 stability promise. It is validated by real external plugins between v0.1
+> and v1 and may change until then. See
+> [Compatibility](https://github.com/dreego-stack/dreego/blob/main/_docs/compatibility.md).
+
 ## Registration
 
 Before v1 there is no central `Plugin` interface. A plugin exposes an explicit

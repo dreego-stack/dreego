@@ -4,6 +4,11 @@ Dreego plugins use explicit App-bound registration functions. Core interfaces
 exist only for proven framework contracts such as sessions; plugins do not
 implement a central Plugin interface.
 
+> **Provisional until v1.** The plugin contract is explicitly excluded from the
+> v0.1 stability promise. It is validated by real external plugins between v0.1
+> and v1 and may change until then. See
+> [Compatibility](https://github.com/dreego-stack/dreego/blob/main/_docs/compatibility.md).
+
 Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`. Core never imports any plugin package.
 
 ## Core Interfaces (in `github.com/dreego-stack/dreego/core`)
