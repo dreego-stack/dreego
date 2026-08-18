@@ -16,7 +16,19 @@ func cmdNew(args []string) {
 		os.Exit(1)
 	}
 	name := args[0]
+	if !validProjectName(name) {
+		fmt.Fprintf(os.Stderr, "error: invalid project name %q\n", name)
+		fmt.Fprintf(os.Stderr, "  the name must be a Go module path segment: start with a letter, use only letters, digits, '-', '_', '.', and '/'.\n")
+		fmt.Fprintf(os.Stderr, "  examples: myapp, github.com/me/myapp\n")
+		os.Exit(1)
+	}
 	projName := filepath.Base(name)
+
+	if !goAvailable() {
+		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
+		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.22 or newer. Install it from https://go.dev/doc/install and retry.\n")
+		os.Exit(1)
+	}
 
 	target, _ := filepath.Abs(name)
 	if _, err := os.Stat(target); err == nil {
@@ -100,9 +112,13 @@ func cmdNew(args []string) {
 	c = exec.Command("go", "mod", "tidy")
 	c.Env = append(os.Environ(), "GOWORK=off")
 	c.Dir = target
-	c.Stdout, c.Stderr = nil, os.Stderr
-	if err := c.Run(); err != nil {
+	out, err := c.CombinedOutput()
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "warning: go mod tidy failed: %v\n", err)
+		if s := strings.TrimSpace(string(out)); s != "" {
+			fmt.Fprintf(os.Stderr, "  %s\n", s)
+		}
+		fmt.Fprintf(os.Stderr, "  if the dreego module cannot be resolved (no network, or the CLI was built from an untagged checkout), set DREEGO_LOCAL_REPO=/path/to/dreego to use a local checkout.\n")
 	}
 
 	fmt.Printf("Done!\n")
@@ -162,4 +178,51 @@ func findRepoFromWorkingModule() string {
 		}
 	}
 	return ""
+}
+
+// validProjectName reports whether name is a usable Go module path segment
+// for a scaffolded project. It allows multi-segment paths like
+// github.com/me/myapp but rejects names that would produce an invalid module
+// statement (digits-first, spaces, shell metacharacters, empty).
+func validProjectName(name string) bool {
+	if name == "" || name == "." || name == ".." {
+		return false
+	}
+	if strings.ContainsAny(name, " \t\"'\\`$;|&<>(){}[]!*?") {
+		return false
+	}
+	for _, seg := range strings.Split(name, "/") {
+		if seg == "" || seg == "." || seg == ".." {
+			return false
+		}
+		if !isValidFirstChar(seg[0]) {
+			return false
+		}
+		for i := 0; i < len(seg); i++ {
+			if !isValidNameChar(seg[i]) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func isValidFirstChar(b byte) bool {
+	return (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z')
+}
+
+func isValidNameChar(b byte) bool {
+	if isValidFirstChar(b) {
+		return true
+	}
+	if b >= '0' && b <= '9' {
+		return true
+	}
+	return b == '-' || b == '_' || b == '.'
+}
+
+// goAvailable reports whether the 'go' executable can be found on PATH.
+func goAvailable() bool {
+	_, err := exec.LookPath("go")
+	return err == nil
 }
