@@ -74,7 +74,7 @@ func cmdNew(args []string) {
 
 	dreegoCoreVersion := scaffoldVersion(dreegoVersion())
 
-	c := exec.Command("go", "mod", "init", projName)
+	c := exec.Command("go", "mod", "init", name)
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
 	if err := c.Run(); err != nil {
