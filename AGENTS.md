@@ -160,6 +160,8 @@ The CI (`pull-request-check.yml`) validates the change file and runs the race an
 
 All commands run inside `smd` (Docker container). Never run `make test`, `go build`, or any dev command directly on the host. The smd container uses `golang:1.22-alpine`. Install curl once per session: `smd apk add --no-cache curl`.
 
+The `smd.toml` configuration exists ONLY at the repo root. Never create `smd.toml` in subdirectories (e.g. `core/`, `demo/`, worktrees copy the root file when a container image is needed).
+
 ## Git Operations
 
 All git operations run on the HOST via the shell subagent — never inside the
