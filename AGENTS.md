@@ -92,7 +92,8 @@ repo-root/
 │   └── fixtures/           ← Reference apps for integration tests
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
-├── core/                   ← Runtime framework (public API, no external deps)
+├── core/                   ← Runtime framework facade (public API re-exports, no external deps)
+├── core/internal/          ← Runtime implementation split into session/, server/, middleware/, context/, validate/
 ├── internal/transpiler/    ← Transpiler (.dreego → Go), used by CLI and dreegotest
 ├── cli/dreego/             ← CLI binary
 ├── .github/workflows/      ← CI: pull-request-check.yml, main-push.yml
@@ -177,7 +178,7 @@ host paths that do not exist in the container.
 - No code comments (except where needed for clarity)
 - Go 1.22+, prefer standard library
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
-- Core code in `core/` (no external deps — enforced by `_scripts/check-core-deps.sh` in CI)
+- Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate — no external deps, enforced by `_scripts/check-core-deps.sh` in CI)
 - Transpiler in `internal/transpiler/` (no external deps, same CI check; importable only from within this repo: CLI, dreegotest)
 - CLI in `cli/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
@@ -198,7 +199,7 @@ Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
 Every feature follows this cycle:
 
 1. **`_tests/`** — Create integration test in `_tests/go/<name>_test.go` using `dreegotest` (see `_docs/testing.md` and existing `_tests/go/*_test.go` for the pattern)
-2. **Code** — Implement in `core/` or `internal/transpiler/` (one logical thing per file, max 300 lines)
+2. **Code** — Implement in `core/internal/` or `internal/transpiler/`; public API lives in `core/` (facade, one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `make test`) — must be GREEN
 5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it

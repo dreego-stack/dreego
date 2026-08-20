@@ -5,7 +5,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 ## Test Layout
 
 - `internal/transpiler/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./internal/transpiler/...`).
-- `core/*_test.go` — unit tests for the runtime framework (run with `go test ./core/...`).
+- `core/*_test.go` and `core/internal/*/*_test.go` — unit tests for the runtime framework facade and its internal packages (run with `go test ./core/...`).
 - `_tests/go/*_test.go` — integration tests that build a real project, run the CLI, and assert on generated code and HTTP behavior.
 - `dreegotest/` — shared helpers: `ProjectDir`, `RunCLI`, `Build`, `MustBuild`, `NewApp`, `RenderComponent`.
 
@@ -42,7 +42,7 @@ Props, self-closing calls, default and named slots, scoped CSS, nested component
 `<form g-action>` generation, int/bool binding, validation, PRG redirect, error re-render with `c.Errors` and `c.Old`.
 
 ### Bugs (Regression)
-Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, or `internal/transpiler/*_test.go`.
+Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, `core/internal/*/*_test.go`, or `internal/transpiler/*_test.go`.
 
 ## Accessibility Tests
 

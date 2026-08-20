@@ -6,7 +6,7 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-for pkg in ./core/ ./internal/transpiler/; do
+for pkg in ./core/... ./internal/transpiler/...; do
 	deps=$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' "$pkg" 2>/dev/null | grep -v '^github.com/dreego-stack/dreego' | grep -v '^$' || true)
 
 	if [ -n "$deps" ]; then

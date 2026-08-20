@@ -30,6 +30,7 @@ v0.1 contract from the Current and Provisional sections alone.
 - [Sections in Dreego](decisions/sections-in-dreego.md) — head, go, div, script, style
 - [Line Limit 300](decisions/line-limit-300.md) — Max 300 lines per file
 - [Transpiler as internal subpackage](decisions/transpiler-subpackage.md) — Transpiler in `internal/transpiler/`, core is runtime-only
+- [Core runtime split into internal subpackages](decisions/core-internal-subpackages.md) — `core/internal/` holds session/server/middleware/context/validate; `core/` re-exports the public API
 
 ## Decisions — Provisional
 

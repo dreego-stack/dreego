@@ -10,6 +10,15 @@ import (
 	"time"
 )
 
+type mockStore struct{}
+
+func (mockStore) Get(*http.Request, string) (string, error) { return "", nil }
+func (mockStore) Set(http.ResponseWriter, *http.Request, string, string, *Options) error {
+	return nil
+}
+func (mockStore) Delete(http.ResponseWriter, *http.Request, string) error { return nil }
+func (mockStore) Destroy(http.ResponseWriter, *http.Request) error        { return nil }
+
 func okHandler(http.ResponseWriter, *http.Request) {}
 
 func TestNewAppReturnsNonNil(t *testing.T) {
