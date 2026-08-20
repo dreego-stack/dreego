@@ -1,4 +1,20 @@
 
+## v0.0.64 - 2026-08-20
+
+- Fix: App.Build() returns an error instead of panicking on invalid config
+- Fix: session values no longer visible in the request when the cookie write fails
+- Fix: Bind limits JSON request bodies to 1 MiB
+- Fix: redirect and rewrite cycles are detected at build time
+- Fix: BindForm returns an error instead of panicking on a non-pointer target
+- Feat: startup warnings for missing session store and invalid config
+- Feat: responseWriter supports http.ResponseController unwrap
+- Feat: dreegotest assertion helpers, typed responses, FreePort/WaitForPort, MustScaffold
+- Feat: dev watcher skips .git, node_modules, build, .worktrees
+- Chore: remove dead code, unused parser/codegen helpers, legacy GenerateRouter/NewHandler surface
+- Chore: remove dead legacy test-suite path in the test runner
+- Chore: add CONTRIBUTING.md, complete README docs table and docs sitemap
+- Chore: fix AGENTS.md file structure sketch, ignore tmp/
+
 ## v0.0.63 - 2026-08-18
 
 - Bug: harden SSR generation, request security, sessions, middleware, and CLI failures
