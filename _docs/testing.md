@@ -4,7 +4,8 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 
 ## Test Layout
 
-- `core/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./core/...`).
+- `internal/transpiler/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./internal/transpiler/...`).
+- `core/*_test.go` — unit tests for the runtime framework (run with `go test ./core/...`).
 - `_tests/go/*_test.go` — integration tests that build a real project, run the CLI, and assert on generated code and HTTP behavior.
 - `dreegotest/` — shared helpers: `ProjectDir`, `RunCLI`, `Build`, `MustBuild`, `NewApp`, `RenderComponent`.
 
@@ -41,20 +42,21 @@ Props, self-closing calls, default and named slots, scoped CSS, nested component
 `<form g-action>` generation, int/bool binding, validation, PRG redirect, error re-render with `c.Errors` and `c.Old`.
 
 ### Bugs (Regression)
-Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go` or `core/*_test.go`.
+Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, or `internal/transpiler/*_test.go`.
 
 ## Accessibility Tests
 
 - CLI output is color-free and screen-reader-linear (`_tests/go/cli_accessibility_test.go`).
 - Generator diagnostics lead with `file:line:col`, the cause, and a practical `Fix:` action.
 - The landing blueprint uses semantic HTML (`<main>`, `<nav>`, skip link, `{#slot}`) and gives every `<img>` an `alt`. The minimal `init` blueprint is tested as a minimal route, not as a complete accessible application shell.
-- The transpiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`core/a11y_check_test.go`).
+- The transpiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`internal/transpiler/a11y_check_test.go`).
 
 ## Running Tests
 
 ```bash
 make test                              # Docker-based full suite
-go test ./core/...                     # core unit tests only
+go test ./core/...                     # runtime unit tests only
+go test ./internal/transpiler/...     # transpiler unit tests only
 go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for CLI builds)
 ```
 

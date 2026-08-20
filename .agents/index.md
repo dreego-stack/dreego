@@ -29,6 +29,7 @@ v0.1 contract from the Current and Provisional sections alone.
 - [No Catch Tag](decisions/no-catch-tag.md) — Errors via {#if hasError}, no separate tag
 - [Sections in Dreego](decisions/sections-in-dreego.md) — head, go, div, script, style
 - [Line Limit 300](decisions/line-limit-300.md) — Max 300 lines per file
+- [Transpiler as internal subpackage](decisions/transpiler-subpackage.md) — Transpiler in `internal/transpiler/`, core is runtime-only
 
 ## Decisions — Provisional
 

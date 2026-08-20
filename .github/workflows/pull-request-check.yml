@@ -58,7 +58,7 @@ jobs:
           cache: false
 
       - name: go test -race
-        run: CGO_ENABLED=1 go test -race ./core/... ./_tests/go/...
+        run: CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
 
       - name: make test
         run: make test

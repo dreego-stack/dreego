@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	dreego "github.com/dreego-stack/dreego/core"
+	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
 )
 
 // detectChanges scans dir for .dreego files and compares their modtimes
@@ -71,7 +71,7 @@ func shouldRestart(changed []string) bool {
 }
 
 func cmdDev(args []string) {
-	if err := dreego.Run(false); err != nil {
+	if err := transpiler.Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
 		os.Exit(1)
 	}

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	dreego "github.com/dreego-stack/dreego/core"
+	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
 )
 
 // Generate transpiles a .dreego source string to generated Go code using the
-// core pipeline directly (ParseHeader → Lex → Parse → GenerateMethodHandler).
+// transpiler pipeline directly (ParseHeader → Lex → Parse → GenerateMethodHandler).
 // It replaces shell tests that run `dreego generate` and grep the output.
 func Generate(t *testing.T, src string) string {
 	t.Helper()
@@ -74,7 +74,7 @@ func MustNotContain(t *testing.T, out, want string) {
 }
 
 // GenerateComponent transpiles a .dreego component source to generated Go code
-// using the core pipeline directly (ParseHeader → Lex → Parse → GenerateComponent).
+// using the transpiler pipeline directly (ParseHeader → Lex → Parse → GenerateComponent).
 func GenerateComponent(t *testing.T, src string) string {
 	t.Helper()
 	out, err := generateComponent(src)
@@ -93,12 +93,12 @@ func MustCompileComponent(t *testing.T, src string) {
 }
 
 func generate(src string) (string, error) {
-	_, imports, body := dreego.ParseHeader(src)
-	tokens, err := dreego.Lex(body)
+	_, imports, body := transpiler.ParseHeader(src)
+	tokens, err := transpiler.Lex(body)
 	if err != nil {
 		return "", err
 	}
-	p := dreego.NewParser(tokens)
+	p := transpiler.NewParser(tokens)
 	file, err := p.Parse()
 	if err != nil {
 		return "", err
@@ -106,7 +106,7 @@ func generate(src string) (string, error) {
 	file.Imports = imports
 	file.SourceContent = src
 	if len(file.Go) == 0 {
-		file.Go = []dreego.GoSection{{Method: "GET"}}
+		file.Go = []transpiler.GoSection{{Method: "GET"}}
 	}
 	for i := range file.Go {
 		if !file.Go[i].MethodExplicit {
@@ -115,21 +115,21 @@ func generate(src string) (string, error) {
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	gen := dreego.NewGenerator()
-	out, _, err := dreego.GenerateMethodHandler(gen, file, nil, "routes", "index", "/{$}", scopeHash)
+	gen := transpiler.NewGenerator()
+	out, _, err := transpiler.GenerateMethodHandler(gen, file, nil, "routes", "index", "/{$}", scopeHash)
 	return out, err
 }
 
 func generateComponent(src string) (string, error) {
-	comp, _, body := dreego.ParseHeader(src)
+	comp, _, body := transpiler.ParseHeader(src)
 	if comp == nil || comp.Name == "" {
 		return "", nil
 	}
-	tokens, err := dreego.Lex(body)
+	tokens, err := transpiler.Lex(body)
 	if err != nil {
 		return "", err
 	}
-	p := dreego.NewParser(tokens)
+	p := transpiler.NewParser(tokens)
 	file, err := p.Parse()
 	if err != nil {
 		return "", err
@@ -137,10 +137,10 @@ func generateComponent(src string) (string, error) {
 	file.Component = comp
 	file.SourceContent = src
 	if len(file.Go) == 0 {
-		file.Go = []dreego.GoSection{{Method: ""}}
+		file.Go = []transpiler.GoSection{{Method: ""}}
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	gen := dreego.NewGenerator()
-	return dreego.GenerateComponent(gen, file, scopeHash)
+	gen := transpiler.NewGenerator()
+	return transpiler.GenerateComponent(gen, file, scopeHash)
 }

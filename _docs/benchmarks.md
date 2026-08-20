@@ -7,11 +7,13 @@ to track regressions — they do not enforce machine-specific absolute timings.
 ## Running
 
 ```bash
+go test ./internal/transpiler/ -bench=. -benchtime=1s -run=^$ -count=3
 go test ./core/ -bench=. -benchtime=1s -run=^$ -count=3
 ```
 
-Benchmarks live in `core/benchmark_test.go` and run in the `core` package
-without external dependencies.
+Benchmarks live in `internal/transpiler/benchmark_test.go` (code generation)
+and `core/benchmark_test.go` (request pipeline) and run without external
+dependencies.
 
 ## Benchmarks
 
