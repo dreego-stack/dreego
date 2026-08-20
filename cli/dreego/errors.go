@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	dreego "github.com/dreego-stack/dreego/core"
+	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
 )
 
 var posRe = regexp.MustCompile(`at position (\d+)`)
@@ -27,7 +27,7 @@ func formatGenerateError(err error) string {
 		fmt.Sscanf(m[1], "%d", &pos)
 		if data, e := os.ReadFile(file); e == nil {
 			raw := string(data)
-			_, _, body := dreego.ParseHeader(raw)
+			_, _, body := transpiler.ParseHeader(raw)
 			loc = lineCol(raw, pos+len(raw)-len(body))
 		}
 	}

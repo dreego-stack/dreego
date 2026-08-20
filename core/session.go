@@ -121,19 +121,23 @@ func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value str
 	if err != nil {
 		m = map[string]string{}
 	}
-	if value == "" {
-		delete(m, key)
-	} else {
-		m[key] = value
+	next := make(map[string]string, len(m)+1)
+	for k, v := range m {
+		next[k] = v
 	}
-	encoded, err := s.sign(m, s.resolveEncrypt(opts))
+	if value == "" {
+		delete(next, key)
+	} else {
+		next[key] = value
+	}
+	encoded, err := s.sign(next, s.resolveEncrypt(opts))
 	if err != nil {
 		return err
 	}
 	if len(encoded) > maxCookieSize {
 		return ErrSessionTooLarge
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
+	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, next))
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.name,
 		Value:    encoded,

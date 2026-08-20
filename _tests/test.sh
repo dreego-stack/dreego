@@ -62,7 +62,7 @@ run_suite() {
     go_failed=0
     go_count=0
     go_run=0
-    for pkg in ./core/... ./cli/dreego/...; do
+    for pkg in ./core/... ./internal/transpiler/... ./cli/dreego/...; do
         go_run=$((go_run + 1))
         go_out="$run_dir/gotest-$go_run.out"
         if ! (cd "$REPO_DIR" && go list "$pkg" > /dev/null 2>&1); then

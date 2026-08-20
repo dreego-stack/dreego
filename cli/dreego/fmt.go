@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	dreego "github.com/dreego-stack/dreego/core"
+	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
 )
 
 func cmdFmt(args []string) {
@@ -49,7 +49,7 @@ func cmdFmt(args []string) {
 		}
 
 		original := string(data)
-		formatted := dreego.Format(original)
+		formatted := transpiler.Format(original)
 
 		if formatted == original {
 			if !check && !write {
