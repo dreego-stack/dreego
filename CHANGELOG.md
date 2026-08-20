@@ -1,3 +1,5 @@
+- Refactor: split the runtime into `core/internal/` subpackages (server, session, middleware, context, validate); `core/` re-exports the public API, import path unchanged
+
 - Refactor: move the transpiler out of `core/` into `internal/transpiler/` (CLI and dreegotest are its only consumers; `core/` is now the runtime framework only, public import path unchanged)
 
 ## v0.0.64 - 2026-08-20
