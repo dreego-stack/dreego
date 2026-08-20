@@ -88,7 +88,8 @@ repo-root/
 ├── .changes/               ← One unique release-note file per pull request
 ├── _docs/                  ← Public documentation
 ├── _tests/                 ← Integration tests (Docker, `make test`)
-│   └── core/<Category>/    ← Core/framework test suites
+│   ├── go/                 ← Go integration tests (bug regressions, transpiler, blackbox, CLI)
+│   └── fixtures/           ← Reference apps for integration tests
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
 ├── core/                   ← Core package (single package, no external deps)

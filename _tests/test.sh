@@ -110,31 +110,6 @@ run_suite() {
         fi
     fi
 
-    export DREEGO_PORT_BASE
-    for test_dir in $(find "$DIR/core" -type d 2>/dev/null | sort); do
-        test_script="$test_dir/test.sh"
-        [ -f "$test_script" ] || continue
-        name="${test_dir#$DIR/}"
-        if [ -n "$FILTER" ] && ! echo "$name" | grep -Eq "$FILTER"; then
-            continue
-        fi
-        result_file="$run_dir/$(echo "$name" | tr '/' '_')"
-        export DREEGO_PORT=$port_counter
-        port_counter=$((port_counter + 1))
-        (
-            if sh "$test_script" >/dev/null 2>&1; then
-                echo "PASS" > "$result_file"
-            else
-                echo "-> FAIL -> $name" > "$result_file"
-            fi
-        ) &
-        RUNNING=$((RUNNING + 1))
-        if [ "$RUNNING" -ge "$JOBS" ]; then
-            wait -n 2>/dev/null || true
-            RUNNING=$((RUNNING - 1))
-        fi
-    done
-
     wait
 
     for f in "$run_dir"/*; do
