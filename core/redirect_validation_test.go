@@ -1,7 +1,10 @@
 package core
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestRegisterRedirectRejectsInvalidStatus(t *testing.T) {
@@ -192,5 +195,103 @@ func TestRegisterRewriteRejectsWhenBuilt(t *testing.T) {
 	app.Build()
 	if err := app.RegisterRewrite("/old/*", "/new/*"); err == nil {
 		t.Fatal("registering rewrite after Build should fail")
+	}
+}
+
+func TestBuildRejectsTwoHopRedirectCycle(t *testing.T) {
+	t.Parallel()
+	app := New()
+	if err := app.RegisterRedirect("/a", "/b", http.StatusFound); err != nil {
+		t.Fatalf("register /a -> /b: %v", err)
+	}
+	if err := app.RegisterRedirect("/b", "/a", http.StatusFound); err != nil {
+		t.Fatalf("register /b -> /a: %v", err)
+	}
+	assertBuildCycleError(t, app)
+}
+
+func TestBuildRejectsThreeHopRedirectCycle(t *testing.T) {
+	t.Parallel()
+	app := New()
+	for _, c := range []struct{ from, to string }{
+		{"/a", "/b"},
+		{"/b", "/c"},
+		{"/c", "/a"},
+	} {
+		if err := app.RegisterRedirect(c.from, c.to, http.StatusFound); err != nil {
+			t.Fatalf("register %s -> %s: %v", c.from, c.to, err)
+		}
+	}
+	assertBuildCycleError(t, app)
+}
+
+func TestBuildRejectsMixedRewriteRedirectCycle(t *testing.T) {
+	t.Parallel()
+	app := New()
+	if err := app.RegisterRewrite("/a", "/b"); err != nil {
+		t.Fatalf("register rewrite /a -> /b: %v", err)
+	}
+	if err := app.RegisterRedirect("/b", "/a", http.StatusFound); err != nil {
+		t.Fatalf("register redirect /b -> /a: %v", err)
+	}
+	assertBuildCycleError(t, app)
+}
+
+func TestBuildRejectsCycleAcrossDuplicateFrom(t *testing.T) {
+	t.Parallel()
+	app := New()
+	if err := app.RegisterRewrite("/a", "/b"); err != nil {
+		t.Fatalf("register rewrite /a -> /b: %v", err)
+	}
+	if err := app.RegisterRedirect("/a", "/c", http.StatusFound); err != nil {
+		t.Fatalf("register redirect /a -> /c: %v", err)
+	}
+	if err := app.RegisterRedirect("/c", "/a", http.StatusFound); err != nil {
+		t.Fatalf("register redirect /c -> /a: %v", err)
+	}
+	assertBuildCycleError(t, app)
+}
+
+func TestBuildAcceptsAcyclicRedirectChain(t *testing.T) {
+	t.Parallel()
+	app := New()
+	if err := app.RegisterRedirect("/a", "/b", http.StatusFound); err != nil {
+		t.Fatalf("register /a -> /b: %v", err)
+	}
+	if err := app.RegisterRewrite("/b", "/c"); err != nil {
+		t.Fatalf("register rewrite /b -> /c: %v", err)
+	}
+	assertBuildSucceeds(t, app)
+}
+
+func assertBuildCycleError(t *testing.T, app *App) {
+	t.Helper()
+	if err := app.Build(); err == nil {
+		t.Fatal("expected Build to return an error on redirect/rewrite cycle")
+	}
+	if app.built {
+		t.Fatal("expected app state to be reset after a failed Build")
+	}
+	if h := app.Handler(); h == nil {
+		t.Fatal("expected Handler to return a handler after a failed Build")
+	}
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/", nil)
+	done := make(chan struct{})
+	go func() {
+		app.Handler().ServeHTTP(rec, req)
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Handler blocked after a failed Build; app state was not reset")
+	}
+}
+
+func assertBuildSucceeds(t *testing.T, app *App) {
+	t.Helper()
+	if err := app.Build(); err != nil {
+		t.Fatalf("Build failed unexpectedly: %v", err)
 	}
 }

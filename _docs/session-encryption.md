@@ -27,7 +27,7 @@ Encryption applies to the whole session payload as a single JSON blob, not to in
 
 ## Secret Requirements
 
-The secret must be at least 32 bytes. `NewCookieStore` panics during construction when the secret is empty or shorter than 32 bytes. `App.Build()` also validates the store via the `Validate()` method and panics when an unsafe secret reaches startup.
+The secret must be at least 32 bytes. `NewCookieStore` panics during construction when the secret is empty or shorter than 32 bytes. `App.Build()` also validates the store via the `Validate()` method and returns an error (instead of panicking) when an unsafe secret reaches startup.
 
 ## Cookie Defaults
 

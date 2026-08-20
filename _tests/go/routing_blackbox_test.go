@@ -14,12 +14,8 @@ func TestRoutingBlackboxCatchall(t *testing.T) {
 <div><p>blog:{{ p }}</p></div>`,
 	})
 	code, body := c.Get(t, "/blog/hello/world")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "blog:hello/world") {
-		t.Fatalf("catchall param missing, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "blog:hello/world")
 }
 
 func TestRoutingBlackboxCatchallRoot(t *testing.T) {
@@ -29,12 +25,8 @@ func TestRoutingBlackboxCatchallRoot(t *testing.T) {
 <div><p>root:{{ p }}</p></div>`,
 	})
 	code, body := c.Get(t, "/a/b/c")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "root:a/b/c") {
-		t.Fatalf("catchall param missing, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "root:a/b/c")
 }
 
 func TestRoutingBlackboxGroup(t *testing.T) {
@@ -43,12 +35,8 @@ func TestRoutingBlackboxGroup(t *testing.T) {
 		"dreego/routes/(admin)/dashboard/get.dreego": `<div><p>admin dashboard</p></div>`,
 	})
 	code, body := c.Get(t, "/dashboard")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "admin dashboard") {
-		t.Fatalf("group route body missing, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "admin dashboard")
 	code, _ = c.Get(t, "/admin/dashboard")
 	if code == 200 {
 		t.Fatal("group segment must not appear in the URL")
@@ -62,12 +50,8 @@ func TestRoutingBlackboxDynamic(t *testing.T) {
 <div><p>user:{{ id }}</p></div>`,
 	})
 	code, body := c.Get(t, "/users/42")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "user:42") {
-		t.Fatalf("dynamic param missing, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "user:42")
 }
 
 func TestRoutingBlackboxMethods(t *testing.T) {

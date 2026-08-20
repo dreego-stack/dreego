@@ -3,7 +3,6 @@ package tests
 import (
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,7 +10,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/dreego-stack/dreego/dreegotest"
 )
@@ -31,17 +29,8 @@ import (
 // listening port via DREEGO_PORT so the binary does not bind :8080.
 func TestQuickStartScaffold(t *testing.T) {
 	t.Parallel()
-	parent := t.TempDir()
-	appName := "myapp"
+	sub := dreegotest.MustScaffold(t, "myapp")
 
-	if out, err := dreegotest.RunCLI(t, parent, "new", appName); err != nil {
-		t.Fatalf("dreego new: %v\n%s", err, out)
-	}
-	sub := filepath.Join(parent, appName)
-
-	if out, err := dreegotest.RunCLI(t, sub, "generate"); err != nil {
-		t.Fatalf("dreego generate: %v\n%s", err, out)
-	}
 	if _, err := os.Stat(filepath.Join(sub, "dreego/gen/routes.go")); err != nil {
 		t.Fatalf("gen/routes.go not produced: %v", err)
 	}
@@ -56,10 +45,10 @@ func TestQuickStartScaffold(t *testing.T) {
 		t.Fatalf("binary not executable at %s", bin)
 	}
 
-	port := freePortQuick(t)
+	port := dreegotest.FreePort(t)
 	proc := exec.Command(bin)
 	proc.Dir = sub
-	proc.Env = append(os.Environ(), "DREEGO_PORT="+port)
+	proc.Env = append(os.Environ(), "DREEGO_PORT="+fmt.Sprintf("%d", port))
 	out, _ := os.CreateTemp("", "quick-start-*.log")
 	proc.Stdout = out
 	proc.Stderr = out
@@ -72,9 +61,9 @@ func TestQuickStartScaffold(t *testing.T) {
 		out.Close()
 		os.Remove(out.Name())
 	})
-	waitForPortQuick(t, port)
+	dreegotest.WaitForPort(t, port)
 
-	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s/", port))
+	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
 	if err != nil {
 		t.Fatalf("GET /: %v", err)
 	}
@@ -191,29 +180,4 @@ func TestQuickStartScaffoldBuilds(t *testing.T) {
 	if !dreegotest.BuildInDirOK(t, sub) {
 		t.Fatal("scaffolded project must build")
 	}
-}
-
-func freePortQuick(t *testing.T) string {
-	t.Helper()
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("freePort: %v", err)
-	}
-	port := fmt.Sprintf("%d", ln.Addr().(*net.TCPAddr).Port)
-	ln.Close()
-	return port
-}
-
-func waitForPortQuick(t *testing.T, port string) {
-	t.Helper()
-	deadline := time.Now().Add(15 * time.Second)
-	for time.Now().Before(deadline) {
-		conn, err := net.DialTimeout("tcp", "127.0.0.1:"+port, 100*time.Millisecond)
-		if err == nil {
-			conn.Close()
-			return
-		}
-		time.Sleep(50 * time.Millisecond)
-	}
-	t.Fatalf("server on port %s did not start in time", port)
 }

@@ -179,15 +179,54 @@ github.com/dreego-stack/
 
 ## Documentation
 
+### Getting Started
+
+| Doc | Topic |
+|-----|-------|
+| `_docs/index.md` | Documentation index and navigation |
+| `_docs/getting-started.md` | Step-by-step tutorial |
+| `_docs/cli.md` | CLI Reference |
+| `_docs/config.md` | dreego/config.json |
+
+### Guides
+
 | Doc | Topic |
 |-----|-------|
 | `_docs/routing.md` | File-based routing, dynamic segments, content-type routing |
+| `_docs/layouts.md` | Layouts, `{#slot}` and `{#head}` |
 | `_docs/middleware.md` | Health, security, compression, session, CSRF |
-| `_docs/forms.md` | g-action forms, validation, redirects, error handling |
 | `_docs/components.md` | Component system, slots, scoped CSS |
-| `_docs/hot-reload.md` | Hot reload with Air (.air.toml config) |
+| `_docs/forms.md` | g-action forms, validation, redirects, error handling |
+| `_docs/session-encryption.md` | AES-256-GCM encrypted session cookies |
+| `_docs/progressive-enhancement.md` | HTMX, Alpine.js, plain JavaScript |
+| `_docs/security.md` | Context-aware escaping, output safety |
+| `_docs/accessibility.md` | Accessibility guarantees and blueprint defaults |
+
+### Reference
+
+| Doc | Topic |
+|-----|-------|
 | `_docs/runtime.md` | Practical guide to the main Go runtime APIs |
-| `_docs/getting-started.md` | Step-by-step tutorial |
+| `_docs/plugin-interfaces.md` | Plugin interface contracts |
+| `_docs/plugins.md` | Plugin model, middleware and route hooks |
+| `_docs/compatibility.md` | Breaking-change policy and the v0.1 promise |
+| `_docs/roadmap.md` | Product direction and release phases |
+
+### Testing & Ops
+
+| Doc | Topic |
+|-----|-------|
+| `_docs/testing.md` | Integration test strategy |
+| `_docs/benchmarks.md` | Code generation and request benchmarks |
+| `_docs/reference-apps.md` | Reference applications under `_tests/fixtures/` |
+| `_docs/dev-server.md` | `dreego dev` watcher and auto-reload |
+| `_docs/hot-reload.md` | Hot reload with Air (.air.toml config) |
+| `_docs/deployment.md` | Build, cross-compile, containers |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the PR workflow, commit
+conventions, and local development setup.
 
 ## License
 

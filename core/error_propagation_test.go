@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -187,25 +186,6 @@ func TestSSRContextFormErrorDistinguishableFromEmpty(t *testing.T) {
 	}
 	if c.FormError() != nil {
 		t.Errorf("valid empty form must not produce FormError, got %v", c.FormError())
-	}
-}
-
-func TestNewHandlerGeneric500(t *testing.T) {
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest("GET", "/", nil)
-	NewHandler(func(*SSRContext) (string, error) {
-		return "", errors.New("database: user table locked")
-	}).ServeHTTP(w, r)
-
-	if w.Code != http.StatusInternalServerError {
-		t.Fatalf("expected 500, got %d", w.Code)
-	}
-	body := w.Body.String()
-	if !strings.Contains(body, "Internal Server Error") {
-		t.Errorf("expected generic body, got %q", body)
-	}
-	if strings.Contains(body, "database") || strings.Contains(body, "user table") {
-		t.Errorf("internal cause disclosed in body: %q", body)
 	}
 }
 

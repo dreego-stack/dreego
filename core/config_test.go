@@ -1,8 +1,11 @@
 package core
 
 import (
+	"bytes"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -65,5 +68,42 @@ func TestLoadConfigInvalidJSON(t *testing.T) {
 	}
 	if s != nil {
 		t.Errorf("expected nil Settings on error, got %+v", s)
+	}
+}
+
+func TestLoadSettingsWarnsOnInvalidConfig(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "config.json"), []byte(`{not valid`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	genDir := filepath.Join(root, "gen")
+	os.MkdirAll(genDir, 0o755)
+
+	var buf bytes.Buffer
+	old := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, nil)))
+	defer slog.SetDefault(old)
+
+	s := loadSettings(genDir)
+	if s != nil {
+		t.Fatalf("expected nil Settings for invalid config, got %+v", s)
+	}
+	if !strings.Contains(buf.String(), "config.json is invalid") {
+		t.Errorf("expected warning about invalid config, got %q", buf.String())
+	}
+}
+
+func TestWarnMissingSessionStore(t *testing.T) {
+	var buf bytes.Buffer
+	old := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, nil)))
+	defer slog.SetDefault(old)
+
+	app := New()
+	app.warnMissingSessionStore()
+
+	out := buf.String()
+	if !strings.Contains(out, "no session store is configured") {
+		t.Errorf("expected warning about missing session store, got %q", out)
 	}
 }

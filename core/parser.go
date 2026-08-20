@@ -114,14 +114,6 @@ func (p *Parser) peek() Token {
 	return Token{Type: TokenEOF}
 }
 
-func isSectionTag(tag string) bool {
-	switch tag {
-	case "go", "div", "head", "script", "style":
-		return true
-	}
-	return false
-}
-
 func parseGoAttrs(attrs string) string {
 	if attrs == "" {
 		return ""

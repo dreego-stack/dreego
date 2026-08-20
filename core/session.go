@@ -126,7 +126,6 @@ func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value str
 	} else {
 		m[key] = value
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
 	encoded, err := s.sign(m, s.resolveEncrypt(opts))
 	if err != nil {
 		return err
@@ -134,6 +133,7 @@ func (s *CookieStore) Set(w http.ResponseWriter, r *http.Request, key, value str
 	if len(encoded) > maxCookieSize {
 		return ErrSessionTooLarge
 	}
+	*r = *r.WithContext(context.WithValue(r.Context(), ctxKey{}, m))
 	http.SetCookie(w, &http.Cookie{
 		Name:     s.name,
 		Value:    encoded,

@@ -16,7 +16,11 @@ func BindForm(r *http.Request, target any) error {
 	if err := r.ParseForm(); err != nil {
 		return err
 	}
-	v := reflect.ValueOf(target).Elem()
+	rv := reflect.ValueOf(target)
+	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+		return fmt.Errorf("dreego: BindForm target must be a non-nil pointer, got %T", target)
+	}
+	v := rv.Elem()
 	t := v.Type()
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)

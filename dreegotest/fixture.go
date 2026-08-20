@@ -66,7 +66,7 @@ func ServeFixture(t *testing.T, name string) *Client {
 	if _, err := RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("ServeFixture: generate %s: %v", name, err)
 	}
-	port := freePort(t)
+	port := FreePort(t)
 	bin := filepath.Join(dir, "server")
 	build := exec.Command("go", "build", "-o", bin, ".")
 	build.Dir = dir
@@ -83,6 +83,6 @@ func ServeFixture(t *testing.T, name string) *Client {
 		proc.Process.Kill()
 		proc.Wait()
 	})
-	waitForPort(t, port)
+	WaitForPort(t, port)
 	return &Client{base: fmt.Sprintf("http://127.0.0.1:%d", port), jar: newJar()}
 }

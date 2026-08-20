@@ -108,12 +108,9 @@ func TestAppValidatesSessionStoreSecretAtBuild(t *testing.T) {
 	if err := app.SetSessionStore(storeWithFailedValidation{}); err != nil {
 		t.Fatalf("SetSessionStore failed: %v", err)
 	}
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("expected panic when building app with invalid store")
-		}
-	}()
-	app.Build()
+	if err := app.Build(); err == nil {
+		t.Fatal("expected error when building app with invalid store")
+	}
 }
 
 func TestNewCookieStoreShortSecretPanics(t *testing.T) {

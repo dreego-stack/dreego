@@ -22,7 +22,16 @@ func detectChanges(dir string, mtimes map[string]time.Time) (changed []string, u
 	seen := make(map[string]bool)
 
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(path, ".dreego") {
+		if err != nil {
+			return nil
+		}
+		if info.IsDir() {
+			if shouldSkipDir(info.Name()) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
 		rel := strings.TrimPrefix(path, dir+string(os.PathSeparator))
@@ -43,6 +52,16 @@ func detectChanges(dir string, mtimes map[string]time.Time) (changed []string, u
 	}
 
 	return changed, updated
+}
+
+// shouldSkipDir reports whether the watcher should not descend into a
+// directory. VCS, dependency, and build output directories are excluded.
+func shouldSkipDir(name string) bool {
+	switch name {
+	case ".git", "node_modules", "build", ".worktrees":
+		return true
+	}
+	return false
 }
 
 // shouldRestart reports whether a server restart is required. Any .dreego

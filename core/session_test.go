@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -165,6 +166,22 @@ func TestCookieStoreCorruptJSON(t *testing.T) {
 	_, err := store.Get(r, "key")
 	if err == nil {
 		t.Error("expected error for corrupt JSON, got nil")
+	}
+}
+
+func TestOversizedSetSessionValNotVisibleInSameRequest(t *testing.T) {
+	store := NewCookieStore(testSecret)
+	w := httptest.NewRecorder()
+	r := WithStore(httptest.NewRequest("GET", "/", nil), store)
+	c := NewSSR(w, r)
+
+	c.SetSessionVal("big", strings.Repeat("x", maxCookieSize+1))
+
+	if got := c.SessionVal("big"); got != "" {
+		t.Errorf("oversized session value must not be visible in the same request, got %q", got)
+	}
+	if c.SessionError() == nil {
+		t.Error("expected SessionError to be set after oversized write")
 	}
 }
 

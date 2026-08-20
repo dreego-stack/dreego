@@ -35,10 +35,6 @@ func extractFromNode(n TemplateNode, actions *[]string, seen map[string]bool) {
 	}
 }
 
-func actionFuncName(action string) string {
-	return action
-}
-
 func findFormStruct(goSections []GoSection, action string) string {
 	combined := ""
 	for _, g := range goSections {

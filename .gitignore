@@ -5,6 +5,7 @@
 
 # Temp / debug
 .tmp/
+tmp/
 .tmp-review-cli
 .dreego-review-bin
 .review/

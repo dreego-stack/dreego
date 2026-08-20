@@ -115,9 +115,8 @@ func TestMiddlewareHealthRuntime(t *testing.T) {
 		"dreego/routes/get.dreego": `<div><p>root</p></div>`,
 	})
 	code, body := c.Get(t, "/health")
-	if code != 200 || body != "ok" {
-		t.Fatalf("/health not ok, status=%d body=%q", code, body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustEqual(t, body, "ok")
 }
 
 func TestMiddlewareReadyRuntime(t *testing.T) {
@@ -151,9 +150,7 @@ func TestMiddlewareRequestIDAccept(t *testing.T) {
 
 	custom := "my-custom-request-id"
 	_, _, headers := c.Request(t, "GET", "/health", "", map[string]string{"X-Request-ID": custom})
-	if got := headers.Get("X-Request-ID"); got != custom {
-		t.Fatalf("expected %s, got %q", custom, got)
-	}
+	dreegotest.MustHeader(t, headers, "X-Request-ID", custom)
 }
 
 func TestMiddlewareRequestIDRuntime(t *testing.T) {

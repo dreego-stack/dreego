@@ -1,7 +1,6 @@
 package core
 
 import (
-	"path/filepath"
 	"strings"
 )
 
@@ -30,8 +29,4 @@ func MimeByExt(ext string) string {
 	default:
 		return "application/octet-stream"
 	}
-}
-
-func staticPattern(filePath string) string {
-	return "/" + filepath.ToSlash(filePath)
 }

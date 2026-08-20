@@ -122,6 +122,20 @@ func TestSSRContextBindError(t *testing.T) {
 	}
 }
 
+func TestSSRContextBindBodyLimit(t *testing.T) {
+	big := strings.Repeat("x", maxBindBodySize+1)
+	body := `{"name":"` + big + `"}`
+	r := httptest.NewRequest("POST", "/", strings.NewReader(body))
+	c := NewSSR(httptest.NewRecorder(), r)
+
+	var target struct {
+		Name string `json:"name"`
+	}
+	if err := c.Bind(&target); err == nil {
+		t.Fatal("expected error when binding oversized body, got nil")
+	}
+}
+
 func TestSSRContextWrite(t *testing.T) {
 	rec := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)

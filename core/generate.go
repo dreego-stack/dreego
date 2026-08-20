@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -280,6 +281,10 @@ func loadSettings(genDir string) *Settings {
 	settingsPath := filepath.Join(genDir, "..", "config.json")
 	s, err := LoadConfig(settingsPath)
 	if err != nil {
+		if !os.IsNotExist(err) {
+			slog.Warn("dreego: config.json is invalid; using defaults",
+				"path", settingsPath, "error", err)
+		}
 		return nil
 	}
 	return s
