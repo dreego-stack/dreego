@@ -26,7 +26,7 @@ type Store interface {
 }
 ```
 
-Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/dreego/plugins/session-redis` (planned).
+Built-in: `CookieStore`. Plugin: `github.com/dreego-stack/plugin-session-redis` (planned).
 
 ### Plugin registration
 
