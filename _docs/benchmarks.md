@@ -13,7 +13,8 @@ go test ./core/ -bench=. -benchtime=1s -run=^$ -count=3
 
 Benchmarks live in `internal/transpiler/benchmark_test.go` (code generation)
 and `core/benchmark_test.go` (request pipeline) and run without external
-dependencies.
+dependencies. `core/benchmark_test.go` exercises the public facade; the
+internal runtime packages under `core/internal/` hold their own unit tests.
 
 ## Benchmarks
 

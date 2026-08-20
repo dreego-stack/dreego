@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestNewSSRNilRequest(t *testing.T) {
@@ -172,7 +174,7 @@ func TestSSRContextRequestIDMissing(t *testing.T) {
 
 func TestSSRContextRequestIDPresent(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = r.WithContext(context.WithValue(r.Context(), requestIDKey, "abc123"))
+	r = r.WithContext(context.WithValue(r.Context(), middleware.RequestIDKey, "abc123"))
 	c := NewSSR(nil, r)
 	if got := c.RequestID(); got != "abc123" {
 		t.Errorf("expected request id 'abc123', got %q", got)
