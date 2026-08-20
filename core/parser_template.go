@@ -130,10 +130,38 @@ func parseExpression(raw string) (expr string, filters []string) {
 	}
 	var parts []string
 	start := 0
+	var quote byte
+	escaped := false
 	for i := 0; i < len(raw); i++ {
-		if raw[i] == '|' && (i+1 >= len(raw) || raw[i+1] != '|') && (i == 0 || raw[i-1] != '|') {
-			parts = append(parts, raw[start:i])
-			start = i + 1
+		c := raw[i]
+		if quote != 0 {
+			if quote == '`' {
+				if c == '`' {
+					quote = 0
+				}
+				continue
+			}
+			if escaped {
+				escaped = false
+				continue
+			}
+			if c == '\\' {
+				escaped = true
+				continue
+			}
+			if c == quote {
+				quote = 0
+			}
+			continue
+		}
+		switch c {
+		case '"', '\'', '`':
+			quote = c
+		case '|':
+			if (i+1 >= len(raw) || raw[i+1] != '|') && (i == 0 || raw[i-1] != '|') {
+				parts = append(parts, raw[start:i])
+				start = i + 1
+			}
 		}
 	}
 	parts = append(parts, raw[start:])

@@ -82,10 +82,50 @@ func scanBrace(input string, pos *int) (Token, error) {
 	if !strings.HasPrefix(remaining, "{{") {
 		return Token{}, fmt.Errorf("invalid template expression at position %d", start)
 	}
-	end := strings.Index(remaining[2:], "}}")
+	end := findExprEnd(remaining[2:])
 	if end < 0 {
 		return Token{}, fmt.Errorf("unclosed expression at position %d", start)
 	}
 	*pos += 2 + end + 2
 	return Token{Type: TokenExpression, Value: strings.TrimSpace(remaining[2 : 2+end]), Pos: start}, nil
+}
+
+// findExprEnd returns the index of the closing "}}" in s, where s is the
+// content after "{{", skipping "}}" inside string literals. Returns -1 when
+// no closing delimiter exists.
+func findExprEnd(s string) int {
+	var quote byte
+	escaped := false
+	for i := 0; i+1 < len(s); i++ {
+		c := s[i]
+		if quote != 0 {
+			if quote == '`' {
+				if c == '`' {
+					quote = 0
+				}
+				continue
+			}
+			if escaped {
+				escaped = false
+				continue
+			}
+			if c == '\\' {
+				escaped = true
+				continue
+			}
+			if c == quote {
+				quote = 0
+			}
+			continue
+		}
+		switch c {
+		case '"', '\'', '`':
+			quote = c
+		case '}':
+			if s[i+1] == '}' {
+				return i
+			}
+		}
+	}
+	return -1
 }

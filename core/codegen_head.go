@@ -20,7 +20,7 @@ func genHead(html string, bufName string) (string, error) {
 			pos += open
 			rest = rest[open:]
 		}
-		closeIdx := strings.Index(rest[2:], "}}")
+		closeIdx := findExprEnd(rest[2:])
 		if closeIdx < 0 {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, goLiteral(rest)))
 			break

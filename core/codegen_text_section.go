@@ -65,7 +65,7 @@ func compTextSection(content string, inSection bool) (string, bool) {
 			continue
 		}
 		if quote != 0 && strings.HasPrefix(content[i:], "{{") {
-			closeIdx := strings.Index(content[i+2:], "}}")
+			closeIdx := findExprEnd(content[i+2:])
 			if closeIdx < 0 {
 				i++
 				continue
