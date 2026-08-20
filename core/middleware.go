@@ -27,6 +27,10 @@ func (rw *responseWriter) Flush() {
 	}
 }
 
+func (rw *responseWriter) Unwrap() http.ResponseWriter {
+	return rw.ResponseWriter
+}
+
 func RequestLogging() func(http.Handler) http.Handler {
 	logger := slog.New(&jsonlHandler{w: os.Stderr})
 

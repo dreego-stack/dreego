@@ -1,8 +1,8 @@
 ---
 type: Index
 title: Dreego Knowledge Base
-description: Agent Knowledge Bundle for Dreego — Go web framework v0.0.44
-tags: [index, v0.0.44]
+description: Agent Knowledge Bundle for Dreego — Go web framework v0.0.63
+tags: [index, v0.0.63]
 timestamp: 2026-08-15T00:00:00Z
 ---
 

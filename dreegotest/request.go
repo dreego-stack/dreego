@@ -13,6 +13,16 @@ import (
 type Response struct {
 	StatusCode int
 	Body       string
+	Header     http.Header
+	Cookies    []*http.Cookie
+}
+
+// Location returns the Location header value of the response.
+func (r *Response) Location() string {
+	if r == nil || r.Header == nil {
+		return ""
+	}
+	return r.Header.Get("Location")
 }
 
 type AppClient struct {
@@ -39,5 +49,10 @@ func (c *AppClient) PostForm(t *testing.T, path string, form url.Values) *Respon
 func (c *AppClient) serve(req *http.Request) *Response {
 	rec := httptest.NewRecorder()
 	c.handler.ServeHTTP(rec, req)
-	return &Response{StatusCode: rec.Code, Body: rec.Body.String()}
+	return &Response{
+		StatusCode: rec.Code,
+		Body:       rec.Body.String(),
+		Header:     rec.Header(),
+		Cookies:    rec.Result().Cookies(),
+	}
 }

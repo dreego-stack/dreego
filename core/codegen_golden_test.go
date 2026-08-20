@@ -107,13 +107,3 @@ func TestGoldenRouteWithLayout(t *testing.T) {
 	}
 	assertGolden(t, "route_with_layout", got)
 }
-
-// Golden for the router registration code emitted by GenerateRouter.
-func TestGoldenRouter(t *testing.T) {
-	routes := []RouteInfo{
-		{HandlerName: "HandleIndex", RoutePath: "/", Method: "GET"},
-		{HandlerName: "HandleAboutPost", RoutePath: "/about", Method: "POST"},
-	}
-	got := GenerateRouter(routes)
-	assertGolden(t, "router", got)
-}

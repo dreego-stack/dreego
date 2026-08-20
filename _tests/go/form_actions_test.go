@@ -201,9 +201,7 @@ func TestFormActionsPlainPostRuntime(t *testing.T) {
 </div>`,
 	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=hello@test.com", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
-	if code != 200 {
-		t.Fatalf("expected 200 for plain POST, got %d", code)
-	}
+	dreegotest.MustStatus(t, code, 200)
 }
 
 func TestFormActionsStructTags(t *testing.T) {
@@ -278,9 +276,7 @@ func TestFormActionsSubmitInvalid(t *testing.T) {
 		"dreego/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
 	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=invalid", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
-	if code != 200 {
-		t.Fatalf("expected 200 re-render, got %d", code)
-	}
+	dreegotest.MustStatus(t, code, 200)
 }
 
 func TestFormActionsSubmitCSRFPass(t *testing.T) {

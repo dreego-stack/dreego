@@ -3,12 +3,31 @@ package core
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 )
 
 var ErrAppBuilt = errors.New("dreego: app configuration is frozen")
 var ErrRouteConflict = errors.New("dreego: route conflict")
+
+func (a *App) handleMux(fn func()) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("dreego: conflicting route patterns: %v", recovered)
+		}
+	}()
+	fn()
+	return nil
+}
+
+func (a *App) warnMissingSessionStore() {
+	slog.Warn("dreego: CSRF is enabled but no session store is configured; CSRF protection will not be active")
+}
+
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.Handler().ServeHTTP(w, r)
+}
 
 func (a *App) mutable() error {
 	if a.built {

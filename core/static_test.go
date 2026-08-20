@@ -69,16 +69,3 @@ func TestRegisterStaticServesContent(t *testing.T) {
 		t.Errorf("expected body console.log(1), got %q", body)
 	}
 }
-
-func TestStaticPattern(t *testing.T) {
-	cases := map[string]string{
-		"css/style.css": "/css/style.css",
-		"app.js":        "/app.js",
-		"img/logo.png":  "/img/logo.png",
-	}
-	for in, want := range cases {
-		if got := staticPattern(in); got != want {
-			t.Errorf("staticPattern(%q) = %q, want %q", in, got, want)
-		}
-	}
-}

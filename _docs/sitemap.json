@@ -2,6 +2,7 @@
   "module": "github.com/dreego-stack/dreego",
   "pages": [
     {"path": "/_docs/index.md", "title": "Documentation Index"},
+    {"path": "/_docs/getting-started.md", "title": "Getting Started"},
     {"path": "/_docs/cli.md", "title": "CLI Reference"},
     {"path": "/_docs/config.md", "title": "Configuration"},
     {"path": "/_docs/routing.md", "title": "File-based Routing"},
@@ -17,6 +18,7 @@
     {"path": "/_docs/security.md", "title": "Output Safety"},
     {"path": "/_docs/accessibility.md", "title": "Accessibility"},
     {"path": "/_docs/testing.md", "title": "Testing"},
+    {"path": "/_docs/benchmarks.md", "title": "Benchmarks"},
     {"path": "/_docs/reference-apps.md", "title": "Reference Applications"},
     {"path": "/_docs/deployment.md", "title": "Deployment"},
     {"path": "/_docs/dev-server.md", "title": "Dev Server"},

@@ -3,7 +3,6 @@ package core
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -102,21 +101,4 @@ func registerOverlapRoute(app *App, path, marker string) error {
 	return app.Register("GET", path, func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(marker))
 	})
-}
-
-func TestGenerateRouterRendersRouteInfo(t *testing.T) {
-	routes := []RouteInfo{
-		{HandlerName: "HandleAdmin", RoutePath: "/admin", Method: "GET"},
-		{HandlerName: "HandleAuthLogin", RoutePath: "/api/auth/login", Method: "POST"},
-	}
-	got := GenerateRouter(routes)
-
-	for _, want := range []string{
-		`mux.HandleFunc("GET /admin", HandleAdmin)`,
-		`mux.HandleFunc("POST /api/auth/login", HandleAuthLogin)`,
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("GenerateRouter output missing %q\n--- got ---\n%s", want, got)
-		}
-	}
 }

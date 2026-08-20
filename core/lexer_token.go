@@ -20,8 +20,6 @@ const (
 	TokenSlot
 	TokenSlotOpen
 	TokenSlotClose
-	TokenComponentHeader
-	TokenImport
 	TokenComponentTagOpen
 	TokenComponentTagClose
 	TokenComponentSelfClose

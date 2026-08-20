@@ -125,3 +125,57 @@ func redirectLoops(from, to string) bool {
 	toPrefix := strings.TrimSuffix(to, "/*")
 	return toPrefix == fromPrefix || strings.HasPrefix(toPrefix, fromPrefix+"/")
 }
+
+// detectRedirectCycle reports whether following redirect/rewrite targets
+// transitively forms a cycle. Each rule is an edge from -> to; a cycle such as
+// /a -> /b plus /b -> /a must fail registration.
+func detectRedirectCycle(rules map[string][]string) error {
+	const (
+		white = 0
+		gray  = 1
+		black = 2
+	)
+	color := make(map[string]int)
+	var visit func(path string) bool
+	visit = func(path string) bool {
+		switch color[path] {
+		case gray:
+			return true
+		case black:
+			return false
+		}
+		color[path] = gray
+		for _, next := range rules[path] {
+			if visit(next) {
+				return true
+			}
+		}
+		color[path] = black
+		return false
+	}
+	for from := range rules {
+		if visit(from) {
+			return fmt.Errorf("dreego: redirect/rewrite cycle detected involving %q", from)
+		}
+	}
+	return nil
+}
+
+// validateRedirectCycles builds a transitively-closed graph over the redirect
+// and rewrite rules and reports a cycle. Rewrites are applied before redirects,
+// so the union of both rule sets forms a single rewrite/redirect chain. When
+// multiple rules share the same from, every target is considered so a cycle
+// among any combination of rules is detected.
+func validateRedirectCycles(redirects []redirectRule, rewrites []rewriteRule) error {
+	edges := make(map[string][]string)
+	for _, r := range rewrites {
+		edges[r.from] = append(edges[r.from], r.to)
+	}
+	for _, r := range redirects {
+		edges[r.from] = append(edges[r.from], r.to)
+	}
+	if err := detectRedirectCycle(edges); err != nil {
+		return err
+	}
+	return nil
+}

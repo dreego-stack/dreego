@@ -118,14 +118,9 @@ func TestValidateFormPtrNil(t *testing.T) {
 func TestBindFormNonPtr(t *testing.T) {
 	f := bindFormStruct{}
 	r := &http.Request{Form: url.Values{"name": {"Alice"}}}
-	func() {
-		defer func() {
-			if recover() == nil {
-				t.Error("expected panic for non-pointer target")
-			}
-		}()
-		BindForm(r, f)
-	}()
+	if err := BindForm(r, f); err == nil {
+		t.Fatal("expected error for non-pointer target")
+	}
 }
 
 func TestSaveOldEmptyStruct(t *testing.T) {

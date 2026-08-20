@@ -117,9 +117,41 @@ func TestDetectChangesIgnoresNonDreego(t *testing.T) {
 	}
 }
 
+func TestDetectChangesSkipsDirs(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "page.dreego", "page / {}\n")
+	for _, sub := range []string{".git", "node_modules", "build", ".worktrees"} {
+		if err := os.MkdirAll(filepath.Join(dir, sub), 0755); err != nil {
+			t.Fatal(err)
+		}
+		writeFile(t, dir, sub+"/nested.dreego", "page /nested {}\n")
+	}
+
+	changed, _ := detectChanges(dir, map[string]time.Time{})
+
+	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+		t.Errorf("expected skipped dirs not to be scanned, got %v", changed)
+	}
+}
+
 func TestShouldRestartTrueOnChange(t *testing.T) {
 	if !shouldRestart([]string{"page.dreego"}) {
 		t.Error("expected restart on .dreego change")
+	}
+}
+
+func TestShouldSkipDir(t *testing.T) {
+	skipped := map[string]bool{".git": true, "node_modules": true, "build": true, ".worktrees": true}
+	for name, want := range skipped {
+		if got := shouldSkipDir(name); got != want {
+			t.Errorf("shouldSkipDir(%q) = %v, want %v", name, got, want)
+		}
+	}
+	kept := []string{"dreego", "routes", "components", "gen"}
+	for _, name := range kept {
+		if shouldSkipDir(name) {
+			t.Errorf("shouldSkipDir(%q) = true, want false", name)
+		}
 	}
 }
 

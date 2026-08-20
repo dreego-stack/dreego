@@ -38,7 +38,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		t.Fatalf("Serve: %v", err)
 	}
 
-	port := freePort(t)
+	port := FreePort(t)
 
 	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
@@ -79,7 +79,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		proc.Wait()
 	})
 
-	waitForPort(t, port)
+	WaitForPort(t, port)
 
 	return &Client{base: fmt.Sprintf("http://127.0.0.1:%d", port), jar: newJar()}
 }
@@ -122,6 +122,14 @@ func (c *Client) Cookie(name string) string {
 	return ""
 }
 
+// CSRFToken returns the readable csrf_token cookie value set by the server, or
+// "" if none. The session cookie (dreego_session) is signed and encrypted by
+// core, so it cannot be decoded from the wire without the app secret; use a
+// fixture-provided route to assert on session values.
+func (c *Client) CSRFToken() string {
+	return c.Cookie("csrf_token")
+}
+
 // Get performs a GET request and returns status code and body.
 func (c *Client) Get(t *testing.T, path string) (int, string) {
 	t.Helper()
@@ -155,18 +163,18 @@ func (c *Client) Request(t *testing.T, method, path, body string, headers map[st
 	return resp.StatusCode, string(respBody), resp.Header
 }
 
-func freePort(t *testing.T) int {
+func FreePort(t *testing.T) int {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		t.Fatalf("freePort: %v", err)
+		t.Fatalf("FreePort: %v", err)
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
 	ln.Close()
 	return port
 }
 
-func waitForPort(t *testing.T, port int) {
+func WaitForPort(t *testing.T, port int) {
 	t.Helper()
 	deadline := time.Now().Add(10 * time.Second)
 	for time.Now().Before(deadline) {
@@ -177,5 +185,5 @@ func waitForPort(t *testing.T, port int) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	t.Fatalf("waitForPort: server on port %d did not start in time", port)
+	t.Fatalf("WaitForPort: server on port %d did not start in time", port)
 }

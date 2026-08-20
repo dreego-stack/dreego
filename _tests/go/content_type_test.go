@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/dreego-stack/dreego/dreegotest"
@@ -19,12 +18,8 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 <div><h1>{{ msg }}</h1></div>`,
 	})
 	code, body := c.Get(t, "/")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "<h1>hello</h1>") {
-		t.Fatalf("no HTML fallback, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "<h1>hello</h1>")
 }
 
 func TestContentTypeAcceptJSON(t *testing.T) {
@@ -35,12 +30,8 @@ func TestContentTypeAcceptJSON(t *testing.T) {
 </go>`,
 	})
 	code, body, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/json"})
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, `"ok"`) {
-		t.Fatalf("no JSON response, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, `"ok"`)
 }
 
 func TestContentTypeAcceptXML(t *testing.T) {
@@ -52,12 +43,8 @@ func TestContentTypeAcceptXML(t *testing.T) {
 </go>`,
 	})
 	code, body, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/xml"})
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, "<user>") {
-		t.Fatalf("no XML response, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "<user>")
 }
 
 func TestContentTypeBindError(t *testing.T) {
@@ -77,12 +64,8 @@ func TestContentTypeBindError(t *testing.T) {
 		"Accept":       "application/json",
 		"Content-Type": "application/json",
 	})
-	if code != 400 {
-		t.Fatalf("status = %d, want 400", code)
-	}
-	if !strings.Contains(body, `"error"`) {
-		t.Fatalf("no error response, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 400)
+	dreegotest.MustContainBody(t, body, `"error"`)
 }
 
 func TestContentTypeBindPost(t *testing.T) {
@@ -99,15 +82,9 @@ func TestContentTypeBindPost(t *testing.T) {
 		"Accept":       "application/json",
 		"Content-Type": "application/json",
 	})
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
-	}
-	if !strings.Contains(body, `"name":"Lukas"`) {
-		t.Fatalf("Bind not working, got: %s", body)
-	}
-	if !strings.Contains(body, `"echo":true`) {
-		t.Fatalf("no echo field, got: %s", body)
-	}
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, `"name":"Lukas"`)
+	dreegotest.MustContainBody(t, body, `"echo":true`)
 }
 
 func TestContentTypeCustomBasic(t *testing.T) {
@@ -197,17 +174,11 @@ func TestContentTypeMultiTyped(t *testing.T) {
 <div><h1>{{ name }}</h1></div>`,
 	})
 	_, jbody, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/json"})
-	if !strings.Contains(jbody, `"format":"json"`) {
-		t.Fatalf("JSON broken, got: %s", jbody)
-	}
+	dreegotest.MustContainBody(t, jbody, `"format":"json"`)
 	_, xbody, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/xml"})
-	if !strings.Contains(xbody, "<user>") {
-		t.Fatalf("XML broken, got: %s", xbody)
-	}
+	dreegotest.MustContainBody(t, xbody, "<user>")
 	_, hbody := c.Get(t, "/")
-	if !strings.Contains(hbody, "<h1>Lukas</h1>") {
-		t.Fatalf("HTML broken, got: %s", hbody)
-	}
+	dreegotest.MustContainBody(t, hbody, "<h1>Lukas</h1>")
 }
 
 func TestContentTypeXMLBasic(t *testing.T) {

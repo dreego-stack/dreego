@@ -30,6 +30,23 @@ func TestResponseWriterWriteHeader(t *testing.T) {
 	}
 }
 
+func TestResponseWriterUnwrap(t *testing.T) {
+	rec := httptest.NewRecorder()
+	rw := &responseWriter{ResponseWriter: rec}
+	if got := rw.Unwrap(); got != rec {
+		t.Errorf("expected Unwrap to return the underlying writer")
+	}
+}
+
+func TestResponseControllerReachesUnderlyingWriter(t *testing.T) {
+	rec := httptest.NewRecorder()
+	rw := &responseWriter{ResponseWriter: rec}
+	rc := http.NewResponseController(rw)
+	if err := rc.Flush(); err != nil {
+		t.Fatalf("ResponseController.Flush through Unwrap failed: %v", err)
+	}
+}
+
 func TestJSONLHandlerOutput(t *testing.T) {
 	var buf bytes.Buffer
 	h := &jsonlHandler{w: &buf}

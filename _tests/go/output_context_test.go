@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/dreego-stack/dreego/dreegotest"
@@ -14,12 +13,8 @@ func TestOutputContextTextEscapesMarkup(t *testing.T) {
 <div><p>{{ v }}</p></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "<script>alert(1)</script>") {
-		t.Fatalf("text context must escape script markup, got: %s", body)
-	}
-	if !strings.Contains(body, "&lt;script&gt;alert(1)&lt;/script&gt;") {
-		t.Fatalf("text context must render escaped markup, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
+	dreegotest.MustContainBody(t, body, "&lt;script&gt;alert(1)&lt;/script&gt;")
 }
 
 func TestOutputContextAttrEscapesQuotes(t *testing.T) {
@@ -29,12 +24,8 @@ func TestOutputContextAttrEscapesQuotes(t *testing.T) {
 <div><a title="{{ v }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, `" onmouseover="`) {
-		t.Fatalf("attribute context must escape quotes, got: %s", body)
-	}
-	if !strings.Contains(body, "&#34; onmouseover=&#34;alert(1)") {
-		t.Fatalf("attribute context must render escaped quotes, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, `" onmouseover="`)
+	dreegotest.MustContainBody(t, body, "&#34; onmouseover=&#34;alert(1)")
 }
 
 func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
@@ -44,12 +35,8 @@ func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
 <div><a href="{{ u }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "javascript:") {
-		t.Fatalf("URL context must reject javascript: scheme, got: %s", body)
-	}
-	if !strings.Contains(body, `href="#`) {
-		t.Fatalf("URL context must replace unsafe scheme with #, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "javascript:")
+	dreegotest.MustContainBody(t, body, `href="#`)
 }
 
 func TestOutputContextURLAllowsHTTPS(t *testing.T) {
@@ -59,9 +46,7 @@ func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 <div><a href="{{ u }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if !strings.Contains(body, `href="https://example.com/x"`) {
-		t.Fatalf("URL context must keep https URLs, got: %s", body)
-	}
+	dreegotest.MustContainBody(t, body, `href="https://example.com/x"`)
 }
 
 func TestOutputContextURLRejectsDataScheme(t *testing.T) {
@@ -71,12 +56,8 @@ func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 <div><img src="{{ u }}"></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "data:text/html") {
-		t.Fatalf("URL context must reject data: scheme, got: %s", body)
-	}
-	if !strings.Contains(body, `src="#`) {
-		t.Fatalf("URL context must replace unsafe scheme with #, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "data:text/html")
+	dreegotest.MustContainBody(t, body, `src="#`)
 }
 
 func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
@@ -86,15 +67,9 @@ func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
 <div><button onclick="{{ s }}">go</button></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "<script>alert(1)</script>") {
-		t.Fatalf("script context must not emit raw script markup, got: %s", body)
-	}
-	if !strings.Contains(body, `\u003cscript\u003e`) {
-		t.Fatalf("script context must JSON-encode the value, got: %s", body)
-	}
-	if !strings.Contains(body, "&#34;") {
-		t.Fatalf("script context must escape quotes, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
+	dreegotest.MustContainBody(t, body, `\u003cscript\u003e`)
+	dreegotest.MustContainBody(t, body, "&#34;")
 }
 
 func TestOutputContextStyleNeutralizesBreakout(t *testing.T) {
@@ -104,12 +79,8 @@ func TestOutputContextStyleNeutralizesBreakout(t *testing.T) {
 <div><div style="{{ s }}">x</div></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "</style>") {
-		t.Fatalf("style context must neutralize </style>, got: %s", body)
-	}
-	if strings.Contains(body, "<script>alert(1)</script>") {
-		t.Fatalf("style context must escape markup, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "</style>")
+	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
 }
 
 func TestOutputContextRawOptInPassesThrough(t *testing.T) {
@@ -119,9 +90,7 @@ func TestOutputContextRawOptInPassesThrough(t *testing.T) {
 <div><p>{{ h|raw }}</p></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if !strings.Contains(body, "<b>trusted</b>") {
-		t.Fatalf("raw opt-in must pass trusted HTML through, got: %s", body)
-	}
+	dreegotest.MustContainBody(t, body, "<b>trusted</b>")
 }
 
 func TestOutputContextComponentURLRejectsJavascript(t *testing.T) {
@@ -133,10 +102,6 @@ func TestOutputContextComponentURLRejectsJavascript(t *testing.T) {
 <div><@Link url={u}/></div>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "javascript:") {
-		t.Fatalf("component URL context must reject javascript: scheme, got: %s", body)
-	}
-	if !strings.Contains(body, `href="#`) {
-		t.Fatalf("component URL context must replace unsafe scheme with #, got: %s", body)
-	}
+	dreegotest.MustNotContainBody(t, body, "javascript:")
+	dreegotest.MustContainBody(t, body, `href="#`)
 }

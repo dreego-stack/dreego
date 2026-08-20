@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os/signal"
 	"sync"
@@ -50,14 +51,16 @@ func (a *App) SetReady(r bool) {
 	a.ready.Store(r)
 }
 
-func (a *App) Build() {
+func (a *App) Build() error {
 	a.mu.Lock()
 	if a.built {
 		a.mu.Unlock()
-		return
+		return nil
 	}
 	a.built = true
 	buildDone := a.buildDone
+	redirects := append([]redirectRule(nil), a.redirects...)
+	rewrites := append([]rewriteRule(nil), a.rewrites...)
 	a.mu.Unlock()
 
 	completed := false
@@ -72,23 +75,34 @@ func (a *App) Build() {
 		a.mu.Unlock()
 	}()
 
+	if err := validateRedirectCycles(redirects, rewrites); err != nil {
+		return err
+	}
+
+	if a.csrfEnabled && a.sessionStore == nil {
+		a.warnMissingSessionStore()
+	}
+
 	if v, ok := a.sessionStore.(storeValidator); ok {
 		if err := v.Validate(); err != nil {
-			panic(err)
+			return fmt.Errorf("dreego: session store validation failed: %w", err)
 		}
 	}
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /health", a.healthHandler())
-	mux.HandleFunc("GET /ready", a.readyHandler())
-
-	for _, r := range a.routes {
-		if r.method != "" {
-			mux.HandleFunc(r.method+" "+r.pattern, r.handler)
-		} else {
-			mux.HandleFunc(r.pattern, r.handler)
+	if err := a.handleMux(func() {
+		mux.HandleFunc("GET /health", a.healthHandler())
+		mux.HandleFunc("GET /ready", a.readyHandler())
+		for _, r := range a.routes {
+			if r.method != "" {
+				mux.HandleFunc(r.method+" "+r.pattern, r.handler)
+			} else {
+				mux.HandleFunc(r.pattern, r.handler)
+			}
 		}
+	}); err != nil {
+		return err
 	}
 
 	var h http.Handler = mux
@@ -117,11 +131,16 @@ func (a *App) Build() {
 	close(buildDone)
 	a.mu.Unlock()
 	completed = true
+	return nil
 }
 
 func (a *App) Handler() http.Handler {
 	for {
-		a.Build()
+		if err := a.Build(); err != nil {
+			return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			})
+		}
 		a.mu.RLock()
 		h := a.builtHandler
 		built := a.built
@@ -140,12 +159,10 @@ func (a *App) Handler() http.Handler {
 	}
 }
 
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	a.Handler().ServeHTTP(w, r)
-}
-
 func (a *App) Listen(addr string) error {
-	a.Build()
+	if err := a.Build(); err != nil {
+		return err
+	}
 	cfg := a.serverConfig.withDefaults()
 	srv := &http.Server{
 		Addr:              addr,

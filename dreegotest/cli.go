@@ -152,6 +152,24 @@ func MustBuildInDir(t *testing.T, dir string) {
 	}
 }
 
+// MustScaffold runs the canonical quick-start ritual: `dreego new <name>`,
+// `dreego generate`, then `go build` in the generated project. It returns the
+// project directory. It replaces shell tests that re-implement the
+// init+generate+build steps by hand.
+func MustScaffold(t *testing.T, name string) string {
+	t.Helper()
+	parent := t.TempDir()
+	if out, err := RunCLI(t, parent, "new", name); err != nil {
+		t.Fatalf("dreego new %s: %v\n%s", name, err, out)
+	}
+	dir := filepath.Join(parent, name)
+	if out, err := RunCLI(t, dir, "generate"); err != nil {
+		t.Fatalf("dreego generate: %v\n%s", err, out)
+	}
+	MustBuildInDir(t, dir)
+	return dir
+}
+
 // BuildInDirOK runs `go build` in dir and returns whether it succeeded. It
 // replaces shell tests that assert on the go build exit status.
 func BuildInDirOK(t *testing.T, dir string) bool {

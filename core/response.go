@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const maxBindBodySize = 1 << 20
+
 func (c *SSRContext) JSON(status int, data any) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(data); err != nil {
@@ -31,7 +33,8 @@ func (c *SSRContext) XML(status int, data any) {
 }
 
 func (c *SSRContext) Bind(target any) error {
-	return json.NewDecoder(c.R.Body).Decode(target)
+	body := http.MaxBytesReader(c.W, c.R.Body, maxBindBodySize)
+	return json.NewDecoder(body).Decode(target)
 }
 
 func (c *SSRContext) Write(status int, contentType string, body []byte) {

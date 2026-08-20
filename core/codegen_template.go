@@ -10,11 +10,6 @@ func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) 
 	return genTemplateNodeToState(gen, n, depth, "b", &inSection)
 }
 
-func genTemplateNodeTo(gen *generator, n TemplateNode, depth int, builder string) (string, error) {
-	inSection := false
-	return genTemplateNodeToState(gen, n, depth, builder, &inSection)
-}
-
 func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder string, inSection *bool) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
