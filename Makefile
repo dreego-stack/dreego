@@ -1,10 +1,10 @@
 .PHONY: up down build generate dev clean dx dx-clean test install-hooks
 
 up:
-	docker compose up -d
+	cd demo && docker compose up -d
 
 down:
-	docker compose down
+	cd demo && docker compose down
 
 build:
 	go build -ldflags "-X main.version=$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -o bin/dreego ./cli/dreego

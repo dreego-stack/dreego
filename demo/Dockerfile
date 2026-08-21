@@ -1,12 +1,11 @@
-FROM golang:1.22-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+FROM golang:1.22-alpine AS build
+WORKDIR /src
 COPY . .
-RUN CGO_ENABLED=0 go build -o /app/bin/server .
+RUN go build -o /dreego ./cli/dreego
+RUN cd demo && /dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
 
-FROM gcr.io/distroless/static:nonroot
-COPY --from=builder /app/bin/server /server
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /app /app
 EXPOSE 8080
-USER nonroot
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/app"]
