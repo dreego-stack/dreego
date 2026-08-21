@@ -13,12 +13,15 @@ func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 			},
 		},
 	}
-	layout := &File{
-		Template: &TemplateSection{
-			Nodes: []TemplateNode{
-				{Type: NodeText, Content: "<html>{#slot}</html>"},
+	layout := &layoutEntry{
+		file: &File{
+			Template: &TemplateSection{
+				Nodes: []TemplateNode{
+					{Type: NodeText, Content: "<html>{#slot}</html>"},
+				},
 			},
 		},
+		name: "Default",
 	}
 
 	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
@@ -30,7 +33,7 @@ func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 		"pageContent := b.String()",
 		"b.Reset()",
 		`c.Set("slot", pageContent)`,
-		`b.WriteString(c.Get("slot"))`,
+		"layouts.Default(c, pageContent, head)",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("generated layout code missing %q, got:\n%s", want, out)
@@ -46,12 +49,15 @@ func TestGenTemplLayoutSlotNodeUsesSlot(t *testing.T) {
 			},
 		},
 	}
-	layout := &File{
-		Template: &TemplateSection{
-			Nodes: []TemplateNode{
-				{Type: NodeSlot},
+	layout := &layoutEntry{
+		file: &File{
+			Template: &TemplateSection{
+				Nodes: []TemplateNode{
+					{Type: NodeSlot},
+				},
 			},
 		},
+		name: "Default",
 	}
 
 	out, err := genTempl(NewGenerator(), file, layout, "abc123", true)
@@ -62,8 +68,8 @@ func TestGenTemplLayoutSlotNodeUsesSlot(t *testing.T) {
 	if !strings.Contains(out, `c.Set("slot", pageContent)`) {
 		t.Errorf("expected page content set into slot, got:\n%s", out)
 	}
-	if !strings.Contains(out, `b.WriteString(c.Get("slot"))`) {
-		t.Errorf("expected layout to render slot, got:\n%s", out)
+	if !strings.Contains(out, "layouts.Default(c, pageContent, head)") {
+		t.Errorf("expected layout call, got:\n%s", out)
 	}
 }
 

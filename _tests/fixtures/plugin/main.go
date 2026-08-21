@@ -5,8 +5,8 @@ import (
 	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"pluginapp/dreego/gen"
 	"pluginapp/plugin"
+	"pluginapp/www"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	if err := plugin.Register(app, plugin.Options{Prefix: "/plugin"}); err != nil {
 		log.Fatal(err)
 	}
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	addr := ":8080"

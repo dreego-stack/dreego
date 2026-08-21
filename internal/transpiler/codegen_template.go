@@ -157,8 +157,9 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		if err != nil {
 			return "", err
 		}
+		callName := gen.qualify(funcName)
 		if n.SelfClose {
-			return fmt.Sprintf("%s%s.WriteString(func() string { h, err := %s(%s).Render(c); if err != nil { panic(err) }; return h }())\n", indent, builder, funcName, args), nil
+			return fmt.Sprintf("%s%s.WriteString(func() string { h, err := %s(%s).Render(c); if err != nil { panic(err) }; return h }())\n", indent, builder, callName, args), nil
 		}
 		slotBuilder := fmt.Sprintf("slotBuilder%d", depth)
 		previousSlot := fmt.Sprintf("previousSlot%d", depth)
@@ -207,7 +208,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 			}
 		}
 		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", %s.String())\n", indent, slotBuilder))
-		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, funcName, args))
+		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, callName, args))
 		buf.WriteString(restoreContextValue(indent, "slot", previousSlot))
 		for i, key := range slotKeys {
 			buf.WriteString(restoreContextValue(indent, key, previousNamedSlots[i]))

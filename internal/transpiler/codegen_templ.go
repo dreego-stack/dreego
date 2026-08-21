@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET bool) (string, error) {
+func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string, isGET bool) (string, error) {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
@@ -72,55 +72,88 @@ func genTempl(gen *generator, file *File, layout *File, scopeHash string, isGET 
 		buf.WriteString("\tpageContent := b.String()\n")
 		buf.WriteString("\tb.Reset()\n")
 
-		if layout.Head != nil && layout.Head.Content != "" {
-			headContent := layout.Head.Content
-			if strings.Contains(headContent, "{#head}") {
-				parts := strings.SplitN(headContent, "{#head}", 2)
-				prefix := parts[0]
-				if file.Head != nil {
-					prefix = dedupeHeadMerge(prefix, file.Head.Content)
-				}
-				if prefix != "" {
-					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(prefix)))
-				}
-				if file.Head != nil {
-					headCode, err := genHead(file.Head.Content, "b")
-					if err != nil {
-						return "", err
-					}
-					buf.WriteString(headCode)
-				} else {
-					buf.WriteString("\tb.WriteString(\"\")\n")
-				}
-				if len(parts) > 1 && parts[1] != "" {
-					buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(parts[1])))
-				}
-			} else {
-				buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headContent)))
-			}
-		}
-
 		if file.Head != nil {
-			buf.WriteString("\tvar headBuf strings.Builder\n")
-			headCode, err := genHead(file.Head.Content, "headBuf")
+			headCode, err := genHead(file.Head.Content, "b")
 			if err != nil {
 				return "", err
 			}
 			buf.WriteString(headCode)
-			buf.WriteString("\tc.Set(\"head\", headBuf.String())\n")
 		}
+		buf.WriteString("\tpageHead := b.String()\n")
+		buf.WriteString("\tb.Reset()\n")
+
+		layoutHead := ""
+		if layout.file.Head != nil {
+			layoutHead = layout.file.Head.Content
+		}
+		headPrefix, headSuffix := splitHeadPlaceholder(layoutHead)
+		if headPrefix != "" {
+			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", goLiteral(headPrefix)))
+			buf.WriteString("\tif strings.Contains(pageHead, \"<title\") {\n")
+			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
+			buf.WriteString("\t}\n")
+			buf.WriteString("\tif strings.Contains(pageHead, `name=\"description\"`) || strings.Contains(pageHead, `name='description'`) {\n")
+			buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
+			buf.WriteString("\t}\n")
+			buf.WriteString("\tb.WriteString(layoutHead)\n")
+		}
+		buf.WriteString("\tb.WriteString(pageHead)\n")
+		if headSuffix != "" {
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headSuffix)))
+		}
+
+		buf.WriteString("\thead := b.String()\n")
+		buf.WriteString("\tb.Reset()\n")
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
-		if layout.Template != nil {
-			inSection := false
-			for _, n := range layout.Template.Nodes {
-				code, err := genLayoutNodeState(gen, n, 1, &inSection)
-				if err != nil {
-					return "", err
-				}
-				buf.WriteString(code)
-			}
-		}
+
+		layoutPkg := "layouts"
+		layoutPath := gen.module + "/" + gen.rootRel + "/layouts"
+		gen.addImport(gen.pkg, layoutPkg, layoutPath)
+		buf.WriteString(fmt.Sprintf("\thtml, err := %s.%s(c, pageContent, head)\n", layoutPkg, layout.name))
+		buf.WriteString("\tif err != nil { return \"\", err }\n")
+		buf.WriteString("\tb.WriteString(html)\n")
 	}
 
 	return buf.String(), nil
+}
+
+func headMergeHelpers() string {
+	return `
+func stripTitleTag(s string) string {
+	for {
+		open := strings.Index(s, "<title")
+		if open < 0 {
+			return s
+		}
+		closeIdx := strings.Index(s[open:], "</title>")
+		if closeIdx < 0 {
+			return s
+		}
+		end := open + closeIdx + len("</title>")
+		s = s[:open] + s[end:]
+	}
+}
+
+func stripMetaDescriptionTag(s string) string {
+	offset := 0
+	for {
+		open := strings.Index(s[offset:], "<meta")
+		if open < 0 {
+			return s
+		}
+		open += offset
+		end := strings.IndexByte(s[open:], '>')
+		if end < 0 {
+			return s
+		}
+		tag := s[open : open+end+1]
+		if strings.Contains(tag, "name=\"description\"") || strings.Contains(tag, "name='description'") {
+			s = s[:open] + s[open+end+1:]
+			offset = open
+			continue
+		}
+		offset = open + end + 1
+	}
+}
+`
 }

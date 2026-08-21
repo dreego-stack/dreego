@@ -9,8 +9,8 @@ import (
 func TestBugStraySlotClose(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"dreego/components/Card.dreego": `Component Card ()
+		"www/components/Card.dreego": `Component Card ()
 <div><article>{#slot header}</article></div>`,
-		"dreego/routes/get.dreego": `<div><@Card>{/slot}</@Card></div>`,
+		"www/routes/get.dreego": `<div><@Card>{/slot}</@Card></div>`,
 	})
 }

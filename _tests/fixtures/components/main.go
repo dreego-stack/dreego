@@ -4,13 +4,13 @@ import (
 	"log"
 	"os"
 
-	"components/dreego/gen"
+	"components/www"
 	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
 	app := dreego.New()
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	addr := ":8080"

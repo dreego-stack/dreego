@@ -8,5 +8,7 @@ import (
 
 func TestBugGenerateWithoutRoutesBuilds(t *testing.T) {
 	t.Parallel()
-	dreegotest.MustBuild(t, nil)
+	dreegotest.MustBuild(t, map[string]string{
+		"www/dreego.config.json": `{}`,
+	})
 }

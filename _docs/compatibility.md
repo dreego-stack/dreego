@@ -9,7 +9,7 @@ stability promise and beyond.
 "Public API" means every exported identifier in `github.com/dreego-stack/dreego/core`
 that an application or plugin can import and use: types, functions, methods,
 interfaces, constants, and variables. It also covers the `.dreego` template
-language, the generated `gen.Register(app)` contract, and the `dreego/config.json`
+language, the generated `www.Register(app)` contract, and the `dreego.config.json`
 schema.
 
 ## Before v0.1
@@ -49,8 +49,8 @@ path:
   `SafeStyle`, `SafeRefresh`, `SafeRaw`).
 - The middleware constructors (`RequestLogging`, `Compress`, `Recovery`,
   `RequestID`, `CSRF`, `MaxBodyReader`).
-- The `.dreego` template language and the generated `gen.Register(app)` contract.
-- The `dreego/config.json` schema.
+- The `.dreego` template language and the generated `www.Register(app)` contract.
+- The `dreego.config.json` schema.
 
 ## After v0.1, before v1
 

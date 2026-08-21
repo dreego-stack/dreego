@@ -1,31 +1,12 @@
 package transpiler
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestIsInsideDreegoProjectRoot(t *testing.T) {
-	cases := map[string]bool{
-		"dreego/routes":                      true,
-		"dreego/routes/about":                true,
-		"dreego/components":                  true,
-		"dreego/layouts":                     true,
-		"dreego/layouts/default.dreego":      true,
-		"vendor/x/dreego/routes":             false,
-		"node_modules/y/dreego/components":   false,
-		"subapp/dreego/routes":               false,
-		"./dreego/routes/get.dreego":         true,
-		"./vendor/z/dreego/routes":           false,
-		"./sub/dreego/components/Foo.dreego": false,
-	}
-	for in, want := range cases {
-		if got := isInDreegoRoot(in); got != want {
-			t.Errorf("isInDreegoRoot(%q) = %v, want %v", in, got, want)
-		}
-	}
-}
-
-func TestIsSkippedOutsideRootDir(t *testing.T) {
+func TestIsSkippedDir(t *testing.T) {
 	cases := map[string]bool{
 		"vendor":        true,
 		"node_modules":  true,
@@ -44,19 +25,42 @@ func TestIsSkippedOutsideRootDir(t *testing.T) {
 	}
 }
 
-func TestIsGeneratedDir(t *testing.T) {
-	cases := map[string]bool{
-		"dreego/gen":               true,
-		"dreego/gen/sub":           true,
-		"dreego/routes":            false,
-		"dreego/routes/dreego/gen": false,
-		"vendor/x/dreego/gen":      false,
-		"dreego/components":        false,
-		"gen":                      false,
+func TestIsWebsiteRoot(t *testing.T) {
+	dir := t.TempDir()
+	sub := filepath.Join(dir, "www")
+	if err := os.MkdirAll(sub, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if isWebsiteRoot(sub) {
+		t.Error("dir without config must not be a website root")
+	}
+	if err := os.WriteFile(filepath.Join(sub, configFileName), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if !isWebsiteRoot(sub) {
+		t.Error("dir with config must be a website root")
+	}
+}
+
+func TestSanitizePkgName(t *testing.T) {
+	cases := map[string]string{
+		"www":     "www",
+		"my-site": "my_site",
+		"my.site": "my_site",
+		"123app":  "pkg123app",
+		"":        "app",
+		"über":    "",
 	}
 	for in, want := range cases {
-		if got := isGeneratedDir(in); got != want {
-			t.Errorf("isGeneratedDir(%q) = %v, want %v", in, got, want)
+		got := sanitizePkgName(in)
+		if want == "" {
+			if got == "" {
+				t.Errorf("sanitizePkgName(%q) must not be empty", in)
+			}
+			continue
+		}
+		if got != want {
+			t.Errorf("sanitizePkgName(%q) = %q, want %q", in, got, want)
 		}
 	}
 }

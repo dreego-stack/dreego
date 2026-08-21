@@ -38,7 +38,7 @@ application before shipping it.
 
 - Descriptive headings and links, short navigable sections, copyable commands.
 - Test counts are described by layout, not by unstable numbers.
-- Examples use the explicit `App` API (`app := dreego.New(); gen.Register(app)`).
+- Examples use the explicit `App` API (`app := dreego.New(); www.Register(app)`).
 
 ## Manual Verification
 

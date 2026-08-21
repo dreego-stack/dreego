@@ -10,8 +10,8 @@ import (
 func TestConfigInvalidJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/config.json":       `{ broken json !!!`,
-		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
+		"www/dreego.config.json": `{ broken json !!!`,
+		"www/routes/get.dreego":  `<div><p>hello</p></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -25,12 +25,12 @@ func TestConfigInvalidJSON(t *testing.T) {
 func TestConfigRedirect(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/config.json": `{
+		"www/dreego.config.json": `{
     "redirects": [
         { "from": "/old", "to": "/new", "status": 301 }
     ]
 }`,
-		"dreego/routes/get.dreego": `<div><p>new page</p></div>`,
+		"www/routes/get.dreego": `<div><p>new page</p></div>`,
 	})
 	code, _, headers := c.Request(t, "GET", "/old", "", nil)
 	if code != 301 {
@@ -44,12 +44,12 @@ func TestConfigRedirect(t *testing.T) {
 func TestConfigRewrite(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/config.json": `{
+		"www/dreego.config.json": `{
     "rewrites": [
         { "from": "/old", "to": "/new" }
     ]
 }`,
-		"dreego/routes/new/index.dreego": `<div><p>rewritten content</p></div>`,
+		"www/routes/new/index.dreego": `<div><p>rewritten content</p></div>`,
 	})
 	code, body := c.Get(t, "/old")
 	if code != 200 {

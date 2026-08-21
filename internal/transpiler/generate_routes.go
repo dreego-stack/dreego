@@ -14,22 +14,144 @@ var methodExt = map[string]string{
 	"delete": "DELETE",
 }
 
-func routeDirRel(path string) string {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	if idx := strings.Index(rel, "dreego/routes/"); idx >= 0 {
-		return rel[idx+len("dreego/routes/"):]
-	}
-	if idx := strings.Index(rel, "routes/"); idx >= 0 {
-		return rel[idx+len("routes/"):]
-	}
-	if strings.HasSuffix(rel, "/routes") || rel == "routes" {
-		return ""
-	}
-	return rel
+type routeDir struct {
+	dir  string
+	pkg  string
+	src  string
+	regs []string
 }
 
-func buildPageName(path string) string {
-	rel := routeDirRel(path)
+func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
+	rd := &routeDir{dir: filepath.Join(root, "routes"), pkg: "routes"}
+	routePatterns := map[string]bool{}
+	found := 0
+	routeSources := map[string]string{}
+
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return fmt.Errorf("error walking %s: %w", path, walkErr)
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		if !isRoutesDir(root, path) {
+			return nil
+		}
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			return fmt.Errorf("error reading directory %s: %w", path, err)
+		}
+		var dreegoFiles []string
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".dreego") {
+				dreegoFiles = append(dreegoFiles, filepath.Join(path, e.Name()))
+			}
+		}
+		if len(dreegoFiles) == 0 {
+			return nil
+		}
+
+		rel := routeDirRel(root, path)
+		pattern := buildPattern(rel)
+		if seg := doubleBracketSegment(rel); seg != "" {
+			return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, path)
+		}
+		pageName := buildPageName(rel)
+		layout := resolveLayoutForRoute(rel, layouts)
+
+		gen.pkg = "routes"
+
+		var src strings.Builder
+		var regs []string
+		needsHeadHelpers := false
+
+		for _, fpath := range dreegoFiles {
+			data, err := os.ReadFile(fpath)
+			if err != nil {
+				return fmt.Errorf("error reading %s: %w", fpath, err)
+			}
+			baseName := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
+			method := methodForFile(baseName)
+
+			file, raw, perr := parseRouteFile(gen, fpath, data)
+			if perr != nil {
+				return perr
+			}
+
+			if len(file.Go) == 0 {
+				file.Go = []GoSection{{Method: method}}
+			}
+			for i := range file.Go {
+				if !file.Go[i].MethodExplicit {
+					file.Go[i].Method = method
+				}
+			}
+
+			scopeHash := hashOf(data)
+			gen.src = raw
+
+			if baseName == "404" || baseName == "500" {
+				errCode := 404
+				if baseName == "500" {
+					errCode = 500
+				}
+				catchPattern := errorCatchPattern(pattern)
+				if errCode == 404 {
+					catchKey := "GET" + " " + catchPattern
+					if prev, dup := routeSources[catchKey]; dup {
+						return fmt.Errorf("duplicate catch-all %s: %s and %s", catchPattern, prev, fpath)
+					}
+					routeSources[catchKey] = fpath
+				}
+				s, reg, err := GenerateErrorHandler(gen, file, "routes", errCode, catchPattern, scopeHash)
+				if err != nil {
+					return fmt.Errorf("error generating error page %s: %w", fpath, err)
+				}
+				src.WriteString(s)
+				regs = append(regs, reg)
+				continue
+			}
+
+			for _, m := range fileRegisteredMethods(file) {
+				key := m + " " + pattern
+				if prev, dup := routeSources[key]; dup {
+					return fmt.Errorf("duplicate route %s %s: %s and %s", m, pattern, prev, fpath)
+				}
+				routeSources[key] = fpath
+				routePatterns[key] = true
+			}
+
+			s, reg, err := GenerateMethodHandler(gen, file, layout, "routes", pageName, pattern, scopeHash)
+			if err != nil {
+				return fmt.Errorf("error generating %s: %w", fpath, err)
+			}
+			src.WriteString(s)
+			regs = append(regs, reg)
+			if layout != nil {
+				needsHeadHelpers = true
+			}
+		}
+
+		if needsHeadHelpers {
+			src.WriteString(headMergeHelpers())
+		}
+
+		rd.src += src.String()
+		rd.regs = append(rd.regs, regs...)
+		found++
+		return nil
+	})
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	if found == 0 {
+		return nil, routePatterns, 0, nil
+	}
+	return []routeDir{*rd}, routePatterns, found, nil
+}
+
+func buildPageName(rel string) string {
 	parts := []string{}
 	for _, seg := range strings.Split(rel, "/") {
 		if seg == "" {
@@ -43,8 +165,7 @@ func buildPageName(path string) string {
 	return strings.Join(parts, "_")
 }
 
-func buildPattern(path string) string {
-	rel := routeDirRel(path)
+func buildPattern(rel string) string {
 	if rel == "" || rel == "." {
 		return "/{$}"
 	}
@@ -141,29 +262,13 @@ func fileRegisteredMethods(file *File) []string {
 	return []string{"GET"}
 }
 
-func doubleBracketSegment(path string) string {
-	rel := routeDirRel(path)
+func doubleBracketSegment(rel string) string {
 	for _, seg := range strings.Split(rel, "/") {
 		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
 			return seg
 		}
 	}
 	return ""
-}
-
-func detectGenDir(firstRoutePath string) string {
-	idx := strings.Index(firstRoutePath, "dreego/routes")
-	if idx < 0 {
-		idx = strings.Index(firstRoutePath, "dreego"+string(filepath.Separator)+"routes")
-	}
-	if idx >= 0 {
-		return firstRoutePath[:idx] + "dreego/gen"
-	}
-	return "dreego/gen"
-}
-
-func findGenDirFallback() string {
-	return "dreego/gen"
 }
 
 func methodForFile(base string) string {
@@ -175,17 +280,6 @@ func methodForFile(base string) string {
 		}
 	}
 	return method
-}
-
-func routeImports(src string) string {
-	imports := []string{}
-	if strings.Contains(src, "fmt.") {
-		imports = append(imports, "\"fmt\"")
-	}
-	if src != "" {
-		imports = append(imports, "\"net/http\"", "\"strings\"")
-	}
-	return strings.Join(imports, "\n\t")
 }
 
 func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, error) {

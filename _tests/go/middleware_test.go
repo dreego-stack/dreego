@@ -10,7 +10,7 @@ import (
 func TestMiddlewareCompressRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>compress test</p></div>`,
+		"www/routes/get.dreego": `<div><p>compress test</p></div>`,
 	})
 	_, _, headers := c.Request(t, "GET", "/", "", map[string]string{"Accept-Encoding": "gzip"})
 	if !strings.Contains(strings.ToLower(headers.Get("Content-Encoding")), "gzip") {
@@ -21,14 +21,14 @@ func TestMiddlewareCompressRuntime(t *testing.T) {
 func TestMiddlewareCompression(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>ok</p></div>`,
+		"www/routes/get.dreego": `<div><p>ok</p></div>`,
 	})
 }
 
 func TestMiddlewareCSPOverride(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>csp override</p></div>`,
+		"www/routes/get.dreego": `<div><p>csp override</p></div>`,
 	}, `app.SetCSP("default-src 'none'"); `)
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	if !strings.Contains(strings.ToLower(headers.Get("Content-Security-Policy")), "default-src 'none'") {
@@ -39,7 +39,7 @@ func TestMiddlewareCSPOverride(t *testing.T) {
 func TestMiddlewareCSPRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>csp test</p></div>`,
+		"www/routes/get.dreego": `<div><p>csp test</p></div>`,
 	})
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	if headers.Get("Content-Security-Policy") == "" {
@@ -50,7 +50,7 @@ func TestMiddlewareCSPRuntime(t *testing.T) {
 func TestMiddlewareCSRFCookieSameSite(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>csrf samesite</p></div>`,
+		"www/routes/get.dreego": `<div><p>csrf samesite</p></div>`,
 	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("01234567890123456789012345678901"))); `)
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	cookies := strings.Join(headers.Values("Set-Cookie"), "\n")
@@ -65,7 +65,7 @@ func TestMiddlewareCSRFCookieSameSite(t *testing.T) {
 func TestMiddlewareCSRFDisabled(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>csrf off</p></div>`,
+		"www/routes/get.dreego": `<div><p>csrf off</p></div>`,
 	}, `app.SetSessionStore(dreego.NewCookieStore([]byte("01234567890123456789012345678902"))); app.SetCSRF(false); `)
 	code, _ := c.Get(t, "/")
 	if code != 200 {
@@ -88,7 +88,7 @@ func TestMiddlewareCSRFToken(t *testing.T) {
 func TestMiddlewareHeadersRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>hello</p></div>`,
+		"www/routes/get.dreego": `<div><p>hello</p></div>`,
 	})
 	_, _, headers := c.Request(t, "GET", "/", "", nil)
 	if !strings.Contains(headers.Get("X-Content-Type-Options"), "nosniff") {
@@ -105,14 +105,14 @@ func TestMiddlewareHeadersRuntime(t *testing.T) {
 func TestMiddlewareHealthChecks(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>ok</p></div>`,
+		"www/routes/get.dreego": `<div><p>ok</p></div>`,
 	})
 }
 
 func TestMiddlewareHealthRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>root</p></div>`,
+		"www/routes/get.dreego": `<div><p>root</p></div>`,
 	})
 	code, body := c.Get(t, "/health")
 	dreegotest.MustStatus(t, code, 200)
@@ -122,7 +122,7 @@ func TestMiddlewareHealthRuntime(t *testing.T) {
 func TestMiddlewareReadyRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>root</p></div>`,
+		"www/routes/get.dreego": `<div><p>root</p></div>`,
 	}, `app.SetReady(false); `)
 	_, body := c.Get(t, "/ready")
 	if body != "not ready" {
@@ -145,7 +145,7 @@ func TestMiddlewareRecoveryPanic(t *testing.T) {
 func TestMiddlewareRequestIDAccept(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
+		"www/routes/get.dreego": `<div><h1>hello</h1></div>`,
 	}, `app.SetLogging(false); `)
 
 	custom := "my-custom-request-id"
@@ -156,7 +156,7 @@ func TestMiddlewareRequestIDAccept(t *testing.T) {
 func TestMiddlewareRequestIDRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
+		"www/routes/get.dreego": `<div><h1>hello</h1></div>`,
 	}, `app.SetLogging(false); `)
 	_, _, headers := c.Request(t, "GET", "/health", "", nil)
 	id := headers.Get("X-Request-ID")
@@ -171,6 +171,6 @@ func TestMiddlewareRequestIDRuntime(t *testing.T) {
 func TestMiddlewareSecurityHeaders(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><p>ok</p></div>`,
+		"www/routes/get.dreego": `<div><p>ok</p></div>`,
 	})
 }

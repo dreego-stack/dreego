@@ -5,7 +5,7 @@ import (
 	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"§$name$§/dreego/gen"
+	"§$name$§/www"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	if err := app.SetCSP("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self'; base-uri 'self'; form-action 'self'"); err != nil {
 		log.Fatal(err)
 	}
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	addr := ":8080"

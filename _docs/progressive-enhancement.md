@@ -36,7 +36,7 @@ A comment form on a blog post. The requirements:
 ### Step 1: The server-rendered form (no JavaScript)
 
 ```dreego
-<!-- dreego/routes/posts/[id]/get.dreego -->
+<!-- www/routes/posts/[id]/get.dreego -->
 <go>
     post, err := loadPost(c.Param("id"))
     if err != nil {
@@ -82,7 +82,7 @@ generates a POST handler for this route that parses the form, maps it to the
 The `g-action` handler definition lives in the POST route file (`post.dreego`) for the same URL — Dreego's method-filename routing maps `post.dreego` to the POST method on that route.
 
 ```dreego
-<!-- dreego/routes/posts/[id]/post.dreego -->
+<!-- www/routes/posts/[id]/post.dreego -->
 <go>
     type CommentForm struct {
         Author string `form:"author" validate:"required,max=80"`

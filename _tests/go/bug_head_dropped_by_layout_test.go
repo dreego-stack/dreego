@@ -9,11 +9,11 @@ import (
 func TestBugHeadDroppedByLayout(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/layouts/default.dreego": `<head><title>Layout Title</title></head>
+		"www/layouts/default.dreego": `<head><title>Layout Title</title></head>
 <div>{#slot}</div>`,
-		"dreego/routes/get.dreego": `<head><script src="route-script.js"></script></head>
+		"www/routes/get.dreego": `<head><script src="route-script.js"></script></head>
 <div><p>hi</p></div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "Layout Title")
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "route-script.js")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "Layout Title")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "route-script.js")
 }

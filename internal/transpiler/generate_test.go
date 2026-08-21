@@ -1,28 +1,19 @@
 package transpiler
 
 import (
-	"strings"
 	"testing"
 )
 
-func TestRouteImportsWithoutRoutes(t *testing.T) {
-	imports := routeImports("")
-	if strings.Contains(imports, "net/http") || strings.Contains(imports, "strings") {
-		t.Fatalf("empty route source has unused imports: %s", imports)
-	}
-}
-
 func TestBuildPattern(t *testing.T) {
 	cases := map[string]string{
-		"./routes":                    "/{$}",
-		"./routes/":                   "/{$}",
-		"./routes/about":              "/about",
-		"./routes/blog/[id]":          "/blog/{id}",
-		"./routes/blog/_slug_":        "/blog/{slug}",
-		"./routes/blog/(optional)":    "/blog",
-		"./routes/blog/[id]/edit":     "/blog/{id}/edit",
-		"./routes/blog/(group)/[id]":  "/blog/{id}",
-		"./routes/blog/[...catchall]": "/blog/{catchall...}",
+		"":                   "/{$}",
+		"about":              "/about",
+		"blog/[id]":          "/blog/{id}",
+		"blog/_slug_":        "/blog/{slug}",
+		"blog/(optional)":    "/blog",
+		"blog/[id]/edit":     "/blog/{id}/edit",
+		"blog/(group)/[id]":  "/blog/{id}",
+		"blog/[...catchall]": "/blog/{catchall...}",
 	}
 	for in, want := range cases {
 		if got := buildPattern(in); got != want {
@@ -33,12 +24,12 @@ func TestBuildPattern(t *testing.T) {
 
 func TestBuildPageName(t *testing.T) {
 	cases := map[string]string{
-		"./routes":                 "index",
-		"./routes/about":           "about",
-		"./routes/blog/[id]":       "blog_id",
-		"./routes/blog/_slug_":     "blog_slug",
-		"./routes/blog/(optional)": "blog_optional",
-		"./routes/blog/[id]/edit":  "blog_id_edit",
+		"":                "index",
+		"about":           "about",
+		"blog/[id]":       "blog_id",
+		"blog/_slug_":     "blog_slug",
+		"blog/(optional)": "blog_optional",
+		"blog/[id]/edit":  "blog_id_edit",
 	}
 	for in, want := range cases {
 		if got := buildPageName(in); got != want {
@@ -80,12 +71,12 @@ func TestPatternSegment(t *testing.T) {
 
 func TestDoubleBracketSegment(t *testing.T) {
 	cases := map[string]string{
-		"./routes":                   "",
-		"./routes/blog/[id]":         "",
-		"./routes/blog/[[opt]]":      "[[opt]]",
-		"./routes/blog/[[opt]]/get":  "[[opt]]",
-		"./routes/blog/[id]/[[opt]]": "[[opt]]",
-		"./routes/blog/[[a]]/[[b]]":  "[[a]]",
+		"":                  "",
+		"blog/[id]":         "",
+		"blog/[[opt]]":      "[[opt]]",
+		"blog/[[opt]]/get":  "[[opt]]",
+		"blog/[id]/[[opt]]": "[[opt]]",
+		"blog/[[a]]/[[b]]":  "[[a]]",
 	}
 	for in, want := range cases {
 		if got := doubleBracketSegment(in); got != want {

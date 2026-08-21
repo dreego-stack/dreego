@@ -6,19 +6,19 @@
 > sections. That target is not available until `routing-correctness.1` and the
 > App migration are implemented.
 
-Route discovery is restricted to the project's `dreego/routes/` tree.
-Directories named `routes` outside the project root (e.g. `vendor/…/dreego/routes`,
-`node_modules/…/dreego/routes`, `subapp/dreego/routes`) are ignored. Only the
-top-level `dreego/` directory is treated as the project root.
+Route discovery is restricted to the website root's `routes/` tree. The
+website root is any directory containing `dreego.config.json`. Directories
+named `routes` outside a website root (e.g. `vendor/…/www/routes`,
+`node_modules/…/www/routes`, `subapp/www/routes`) are ignored.
 
-Directories below `dreego/routes/` define the URL path. The filename defines
+Directories below `www/routes/` define the URL path. The filename defines
 the HTTP method. Keeping one method per file prevents a route file from growing
 into a combined implementation for every operation on the same URL.
 
 ## Directory Structure
 
 ```
-dreego/routes/
+www/routes/
 ├── get.dreego                  → GET /
 ├── 404.dreego                  → GET /* (catch-all)
 ├── 500.dreego                  → Panic → 500

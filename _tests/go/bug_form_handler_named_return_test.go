@@ -9,7 +9,7 @@ import (
 func TestBugFormHandlerNamedReturn(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
 type LoginForm struct {
 }
 func Save(c *dreego.SSRContext, form LoginForm) (err error) {
@@ -23,5 +23,5 @@ func Save(c *dreego.SSRContext, form LoginForm) (err error) {
   </form>
 </div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "var form LoginForm")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "var form LoginForm")
 }

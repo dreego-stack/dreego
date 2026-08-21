@@ -20,9 +20,9 @@ tmp_dir = "build/air"
   cmd = "dreego generate && go build -o ./build/air/main . && ./build/air/main"
   bin = "./build/air/main"
   full_bin = "APP_ENV=dev ./build/air/main"
-  watch_dir = "dreego"
+  watch_dir = "www"
   include_ext = ["go", "dreego", "json"]
-  exclude_dir = ["dreego/gen", "dreego/static", "build"]
+  exclude_dir = ["www/static", "build"]
   delay = 500
 
 [misc]

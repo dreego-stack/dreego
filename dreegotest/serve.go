@@ -44,7 +44,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
-	mainGo := fmt.Sprintf("package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); %sif err := gen.Register(app); err != nil { panic(err) }; if err := app.Listen(\":%d\"); err != nil { panic(err) } }\n", setup, port)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := app.Listen(\":%d\"); err != nil { panic(err) } }\n", setup, port)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}
@@ -57,6 +57,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 			t.Fatalf("Serve: write %s: %v", path, err)
 		}
 	}
+	ensureConfig(t, dir, files)
 
 	if _, err := RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("Serve: generate failed: %v", err)

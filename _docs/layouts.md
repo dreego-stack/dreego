@@ -9,15 +9,15 @@ Layouts are shared shells rendered around route content. A layout lives in a
 ## Layout Discovery
 
 Layout discovery is restricted to the project's `dreego/` tree. Layout files
-outside the project root (e.g. `vendor/…/dreego/layouts`, `subapp/dreego/layouts`)
+outside the project root (e.g. `vendor/…/www/layouts`, `subapp/www/layouts`)
 are ignored.
 
 A layout file is named `default.dreego` (or the legacy `layout.dreego`). Layouts
 resolve per route by a route-local cascade:
 
-1. The route's own scope (e.g. `dreego/routes/blog/layouts/default.dreego` for
-   `dreego/routes/blog/…`).
-2. Each parent route scope up to the root (`dreego/layouts/default.dreego`).
+1. The route's own scope (e.g. `www/routes/blog/layouts/default.dreego` for
+   `www/routes/blog/…`).
+2. Each parent route scope up to the root (`www/layouts/default.dreego`).
 
 The first matching layout in the cascade wins. Only one layout file per scope
 is allowed: `default.dreego` and `layout.dreego` in the same `layouts`
@@ -26,7 +26,7 @@ diagnostic naming both files.
 
 ## Syntax
 
-**`dreego/layouts/default.dreego`:**
+**`www/layouts/default.dreego`:**
 
 ```html
 <div>

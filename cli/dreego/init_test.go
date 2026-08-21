@@ -12,11 +12,11 @@ func TestDefaultBlueprintGenImport(t *testing.T) {
 	}
 	content := string(data)
 
-	if !strings.Contains(content, `"§$name$§/dreego/gen"`) {
-		t.Errorf("default main.go.tmpl must import \"§$name$§/dreego/gen\" (module-qualified, placeholder), got:\n%s", content)
+	if !strings.Contains(content, `"§$name$§/www"`) {
+		t.Errorf("default main.go.tmpl must import \"§$name$§/www\" (module-qualified, placeholder), got:\n%s", content)
 	}
-	if !strings.Contains(content, "gen.Register(app)") {
-		t.Errorf("default main.go.tmpl must call gen.Register(app), got:\n%s", content)
+	if !strings.Contains(content, "www.Register(app)") {
+		t.Errorf("default main.go.tmpl must call www.Register(app), got:\n%s", content)
 	}
 	if !strings.Contains(content, "app.Listen") {
 		t.Errorf("default main.go.tmpl must call app.Listen, got:\n%s", content)
@@ -30,10 +30,10 @@ func TestLandingBlueprintGenImport(t *testing.T) {
 	}
 	content := string(data)
 
-	if !strings.Contains(content, `"§$name$§/dreego/gen"`) {
-		t.Errorf("landing main.go.tmpl must import \"§$name$§/dreego/gen\", got:\n%s", content)
+	if !strings.Contains(content, `"§$name$§/www"`) {
+		t.Errorf("landing main.go.tmpl must import \"§$name$§/www\", got:\n%s", content)
 	}
-	if !strings.Contains(content, "gen.Register(app)") {
-		t.Errorf("landing main.go.tmpl must call gen.Register(app), got:\n%s", content)
+	if !strings.Contains(content, "www.Register(app)") {
+		t.Errorf("landing main.go.tmpl must call www.Register(app), got:\n%s", content)
 	}
 }

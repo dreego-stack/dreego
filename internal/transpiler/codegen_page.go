@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GenerateMethodHandler(gen *generator, file *File, layout *File, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Go {
 		if g.ContentType != "" && g.ContentType != "custom" {
@@ -74,7 +74,6 @@ func GenerateMethodHandler(gen *generator, file *File, layout *File, pkgName str
 	} else if !hasFormActions && firstMethod != "GET" {
 		buf.WriteString("\tb.WriteString(\"OK\")\n")
 	}
-
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
 

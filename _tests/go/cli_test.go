@@ -118,7 +118,7 @@ func TestCLIInit(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "main.go")); err != nil {
 		t.Fatalf("missing main.go: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "dreego/routes/get.dreego")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "www/routes/get.dreego")); err != nil {
 		t.Fatalf("missing get.dreego: %v", err)
 	}
 }
@@ -142,11 +142,11 @@ func TestCLIInitImport(t *testing.T) {
 		t.Fatalf("init: %v\n%s", err, out)
 	}
 	mainGo, _ := os.ReadFile(filepath.Join(dir, "main.go"))
-	if !strings.Contains(string(mainGo), `"t/dreego/gen"`) {
-		t.Fatalf("main.go does not import \"t/dreego/gen\": %s", mainGo)
+	if !strings.Contains(string(mainGo), `"t/www"`) {
+		t.Fatalf("main.go does not import \"t/www\": %s", mainGo)
 	}
-	if !strings.Contains(string(mainGo), "gen.Register(app)") {
-		t.Fatalf("main.go does not call gen.Register(app): %s", mainGo)
+	if !strings.Contains(string(mainGo), "www.Register(app)") {
+		t.Fatalf("main.go does not call www.Register(app): %s", mainGo)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -177,7 +177,7 @@ func TestCLICheck(t *testing.T) {
 func TestCLICheckStale(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego": `<head><title>T</title></head>
+		"www/routes/get.dreego": `<head><title>T</title></head>
 <div><p>check me</p></div>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
@@ -190,7 +190,7 @@ func TestCLICheckStale(t *testing.T) {
 	if !strings.Contains(out, "up-to-date") {
 		t.Fatalf("initial check failed, got: %s", out)
 	}
-	src := filepath.Join(dir, "dreego/routes/get.dreego")
+	src := filepath.Join(dir, "www/routes/get.dreego")
 	if err := os.WriteFile(src, []byte(`<head><title>T2</title></head>
 <div><p>changed</p></div>`), 0644); err != nil {
 		t.Fatalf("edit source: %v", err)
@@ -202,7 +202,10 @@ func TestCLICheckStale(t *testing.T) {
 
 func TestCLICheckNoGen(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/dreego.config.json": `{}`,
+		"www/routes/get.dreego":  `<div><p>hi</p></div>`,
+	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {
 		t.Fatal("expected non-zero exit when no generated files exist")

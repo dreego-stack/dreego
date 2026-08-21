@@ -73,7 +73,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		return "", err
 	}
-	mainGo := "package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := gen.Register(app); err != nil { panic(err) } }\n"
+	mainGo := "package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := www.Register(app); err != nil { panic(err) } }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		return "", err
 	}
@@ -86,6 +86,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 			return "", err
 		}
 	}
+	ensureConfig(t, dir, files)
 
 	// Run codegen in a subprocess (the cached CLI binary) instead of in-process
 	// with a global os.Chdir. This makes build() safe for t.Parallel().
@@ -106,6 +107,32 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", fmt.Errorf("go build failed: %v\n%s", err, out)
 	}
 	return dir, nil
+}
+
+// ensureConfig writes a dreego.config.json into every website root implied by
+// the given files (a directory containing routes/, components/, or layouts/)
+// unless the test already provided one. This keeps the new root-marker model
+// transparent for tests that only care about routes/components.
+func ensureConfig(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	roots := map[string]bool{}
+	for path := range files {
+		parts := strings.Split(filepath.ToSlash(path), "/")
+		for i, p := range parts {
+			if p == "routes" || p == "components" || p == "layouts" {
+				root := filepath.Join(append([]string{dir}, parts[:i]...)...)
+				roots[root] = true
+			}
+		}
+	}
+	for root := range roots {
+		cfg := filepath.Join(root, "dreego.config.json")
+		if _, err := os.Stat(cfg); os.IsNotExist(err) {
+			if err := os.WriteFile(cfg, []byte("{}"), 0644); err != nil {
+				t.Fatalf("ensureConfig: %v", err)
+			}
+		}
+	}
 }
 
 func RepoRoot() (string, error) {

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"forms/dreego/gen"
+	"forms/www"
 	dreego "github.com/dreego-stack/dreego/core"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	if err := app.SetSessionStore(store); err != nil {
 		log.Fatal(err)
 	}
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	addr := ":8080"

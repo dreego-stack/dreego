@@ -15,7 +15,7 @@ import (
 func TestDeploymentCrossCompile(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego": `<div><h1>hello</h1></div>`,
+		"www/routes/get.dreego": `<div><h1>hello</h1></div>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -49,9 +49,10 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 
 	goMod := "module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644)
-	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t\"t/dreego/gen\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := app.SetLogging(false); err != nil { panic(err) }; if err := gen.Register(app); err != nil { panic(err) }; if err := app.Listen(\":%d\"); err != nil { panic(err) } }\n", port)), 0644)
-	os.MkdirAll(filepath.Join(dir, "dreego", "routes"), 0755)
-	os.WriteFile(filepath.Join(dir, "dreego", "routes", "get.dreego"), []byte("<div><h1>hello</h1></div>"), 0644)
+	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := app.SetLogging(false); err != nil { panic(err) }; if err := www.Register(app); err != nil { panic(err) }; if err := app.Listen(\":%d\"); err != nil { panic(err) } }\n", port)), 0644)
+	os.MkdirAll(filepath.Join(dir, "www", "routes"), 0755)
+	os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte("<div><h1>hello</h1></div>"), 0644)
+	os.WriteFile(filepath.Join(dir, "www", "dreego.config.json"), []byte("{}"), 0644)
 
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

@@ -143,8 +143,9 @@ func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	callName := g.gen.qualify(funcName)
 	if n.SelfClose {
-		return fmt.Sprintf("{ html, err := %s(%s).Render(ctx); if err != nil { return \"\", err }; %s.WriteString(html) }", funcName, args, g.builder), nil
+		return fmt.Sprintf("{ html, err := %s(%s).Render(ctx); if err != nil { return \"\", err }; %s.WriteString(html) }", callName, args, g.builder), nil
 	}
 
 	id := n.Pos
@@ -193,7 +194,7 @@ func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 		buf.WriteString("\t" + code + "\n")
 	}
 	buf.WriteString(fmt.Sprintf("\tctx.Set(\"slot\", %s.String())\n", slotBuilder))
-	buf.WriteString(fmt.Sprintf("\thtml, err := %s(%s).Render(ctx)\n", funcName, args))
+	buf.WriteString(fmt.Sprintf("\thtml, err := %s(%s).Render(ctx)\n", callName, args))
 	buf.WriteString(restoreComponentContextValue("slot", previousSlot))
 	for i, key := range slotKeys {
 		buf.WriteString(restoreComponentContextValue(key, previousNamedSlots[i]))
