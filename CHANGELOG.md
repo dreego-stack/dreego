@@ -1,3 +1,5 @@
+- Chore: remove empty `plugins/` directory; fix plugin repo reference in docs (separate repo, not `dreego/plugins/`)
+
 - Refactor: split the runtime into `core/internal/` subpackages (server, session, middleware, context, validate); `core/` re-exports the public API, import path unchanged
 
 - Refactor: move the transpiler out of `core/` into `internal/transpiler/` (CLI and dreegotest are its only consumers; `core/` is now the runtime framework only, public import path unchanged)
