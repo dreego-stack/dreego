@@ -1,3 +1,10 @@
+
+## v0.0.65 - 2026-08-21
+
+- Breaking: generated output is now per-directory — `dreego/gen/` is gone; every directory with `.dreego` sources gets its own `dree.go` (`www/routes/dree.go`, `www/components/dree.go`, `www/layouts/dree.go`, plus `www/dree.go` with `Register(app)`)
+- Breaking: the website root is any directory with `dreego.config.json` (renamed from `config.json`); website directories are freely named, multiple websites per repo are supported
+- Feat: user code now imports only the website package (`"myapp/www"`) and calls `www.Register(app)` — no generated `gen` import
+
 - Chore: remove empty `plugins/` directory; fix plugin repo reference in docs (separate repo, not `dreego/plugins/`)
 
 - Refactor: split the runtime into `core/internal/` subpackages (server, session, middleware, context, validate); `core/` re-exports the public API, import path unchanged
