@@ -9,11 +9,11 @@ import (
 func TestBugEachLoopInCond(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>items := []string{"a", "b", "c"}</go>
+		"www/routes/get.dreego": `<go>items := []string{"a", "b", "c"}</go>
 <div>
 {#each items as item}<div>{#if !$loop.Last}, {/if}{{ item }}</div>{/each}
 </div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "loop.Last")
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "$loop")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "loop.Last")
+	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "$loop")
 }

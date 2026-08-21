@@ -127,7 +127,7 @@ for the exact context rules and the `|raw` opt-in.
 
 1. **`Component` line** — Always line 1 of the file.
 2. **`<@Name>`** — Component call. `@` prefix distinguishes from HTML tags.
-3. **File-based Discovery** — `dreego/components/Card.dreego` → `<@Card>`.
+3. **File-based Discovery** — `www/components/Card.dreego` → `<@Card>`.
 4. **Scoped Styles** — `data-scope` per component. No leak to parent.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.

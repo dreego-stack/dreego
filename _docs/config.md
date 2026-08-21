@@ -1,6 +1,6 @@
-# dreego/config.json
+# dreego.config.json
 
-The configuration file is located at `dreego/config.json` in the project root.
+The configuration file is located at `dreego.config.json` in the project root.
 
 ## Schema
 

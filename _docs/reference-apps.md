@@ -13,13 +13,13 @@ build the binary, start it, and assert on HTTP responses.
 
 Teaches the smallest possible Dreego app:
 
-- `dreego/routes/get.dreego` — one route file per URL, one method per file
+- `www/routes/get.dreego` — one route file per URL, one method per file
 - `<head>` with `<title>` and meta tags
 - `<go>` block with a local variable rendered via `{{ message }}`
-- `dreego/routes/about/get.dreego` — nested directory route
-- `dreego/routes/users/[id]/get.dreego` — dynamic segment with `c.Param("id")`
-- `dreego/routes/404.dreego` — custom not-found page
-- `main.go` — `dreego.New()` + `gen.Register(app)` + `app.Listen(addr)`
+- `www/routes/about/get.dreego` — nested directory route
+- `www/routes/users/[id]/get.dreego` — dynamic segment with `c.Param("id")`
+- `www/routes/404.dreego` — custom not-found page
+- `main.go` — `dreego.New()` + `www.Register(app)` + `app.Listen(addr)`
 
 Run it:
 
@@ -47,7 +47,7 @@ Teaches declarative form handling and session state:
 - hidden `csrf_token` field with `c.CSRFToken()` (CSRF is on by default)
 - `c.Redirect("/entries", 303)` Post-Redirect-Get
 - `{#if}` / `{#each}` template logic on the entries page
-- `c.SessionVal` / `c.SetSessionVal` in `dreego/routes/counter/` — a plain
+- `c.SessionVal` / `c.SetSessionVal` in `www/routes/counter/` — a plain
   POST route (no `g-action`) that increments a session counter
 - `main.go` — `dreego.NewCookieStore(secret)` + `app.SetSessionStore(store)`
 
@@ -79,7 +79,7 @@ Teaches the component system:
   content
 - `<@ProductCard name={product.Name} .../>` — expression props from a Go struct
 - `{#each products as product}` — loop over a slice
-- `dreego/routes/products/[id]/get.dreego` — dynamic route reusing the same
+- `www/routes/products/[id]/get.dreego` — dynamic route reusing the same
   components
 
 Run it:
@@ -103,8 +103,8 @@ the owning App before the generated routes.
 - `plugin/plugin.go` — `Register(app *dreego.App, options Options) error` using
   `app.Register(http.MethodGet, ...)` with static and `{id}` patterns
 - `main.go` — `plugin.Register(app, plugin.Options{Prefix: "/plugin"})` before
-  `gen.Register(app)`
-- `dreego/routes/get.dreego` — the app's own home page
+  `www.Register(app)`
+- `www/routes/get.dreego` — the app's own home page
 
 Run it:
 

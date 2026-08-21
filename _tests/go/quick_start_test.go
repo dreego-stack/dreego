@@ -31,7 +31,7 @@ func TestQuickStartScaffold(t *testing.T) {
 	t.Parallel()
 	sub := dreegotest.MustScaffold(t, "myapp")
 
-	if _, err := os.Stat(filepath.Join(sub, "dreego/gen/routes.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(sub, "www/dree.go")); err != nil {
 		t.Fatalf("gen/routes.go not produced: %v", err)
 	}
 

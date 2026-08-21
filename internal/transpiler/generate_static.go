@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func generateStaticAssets(routePatterns map[string]bool) (src string, count int, err error) {
-	staticDir := filepath.Join("dreego", "static")
+func generateStaticAssets(root string, routePatterns map[string]bool) (src string, count int, err error) {
+	staticDir := filepath.Join(root, "static")
 	if _, e := os.Stat(staticDir); os.IsNotExist(e) {
 		return "", 0, nil
 	}

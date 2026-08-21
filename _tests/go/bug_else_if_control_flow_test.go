@@ -9,7 +9,7 @@ import (
 func TestBugElseIfControlFlow(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>score := 85</go>
+		"www/routes/get.dreego": `<go>score := 85</go>
 <div>
 {#if score >= 90}
 A
@@ -20,5 +20,5 @@ C
 {/if}
 </div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "{#else if")
+	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "{#else if")
 }

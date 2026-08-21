@@ -10,9 +10,9 @@ import (
 func TestBugNestedNonSelfClosingComponentRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Child.dreego":  "Component Child ()\n<div><section>{#slot}</section></div>",
-		"dreego/components/Parent.dreego": "Component Parent ()\n<div><@Child><strong>inside</strong></@Child></div>",
-		"dreego/routes/get.dreego":        "<div><@Parent/></div>",
+		"www/components/Child.dreego":  "Component Child ()\n<div><section>{#slot}</section></div>",
+		"www/components/Parent.dreego": "Component Parent ()\n<div><@Child><strong>inside</strong></@Child></div>",
+		"www/routes/get.dreego":        "<div><@Parent/></div>",
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "<@Child>") || !strings.Contains(body, "<strong>inside</strong>") {
@@ -23,9 +23,9 @@ func TestBugNestedNonSelfClosingComponentRenders(t *testing.T) {
 func TestBugNestedSelfClosingComponentRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Child.dreego":  "Component Child ()\n<div><strong>child</strong></div>",
-		"dreego/components/Parent.dreego": "Component Parent ()\n<div><@Child/></div>",
-		"dreego/routes/get.dreego":        "<div><@Parent/></div>",
+		"www/components/Child.dreego":  "Component Child ()\n<div><strong>child</strong></div>",
+		"www/components/Parent.dreego": "Component Parent ()\n<div><@Child/></div>",
+		"www/routes/get.dreego":        "<div><@Parent/></div>",
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, "<strong>child</strong>") {

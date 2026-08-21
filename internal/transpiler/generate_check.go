@@ -9,8 +9,8 @@ import (
 )
 
 type genPlan struct {
-	files  map[string]string
-	genDir string
+	files map[string]string
+	roots []string
 }
 
 type diffKind int
@@ -65,44 +65,41 @@ func diffReport(d []fileDiff) string {
 	return b.String()
 }
 
-func readDiskFiles(genDir string) (map[string]string, error) {
+func readDiskFiles(roots []string) (map[string]string, error) {
 	disk := map[string]string{}
-	info, err := os.Stat(genDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return disk, nil
-		}
-		return nil, err
-	}
-	if !info.IsDir() {
-		return disk, nil
-	}
-	err = filepath.WalkDir(genDir, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return fmt.Errorf("error walking %s: %w", path, walkErr)
-		}
-		if d.IsDir() {
+	for _, root := range roots {
+		err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return fmt.Errorf("error walking %s: %w", path, walkErr)
+			}
+			if d.IsDir() {
+				return nil
+			}
+			if filepath.Base(path) != "dree.go" {
+				return nil
+			}
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			rel, _ := filepath.Rel(".", path)
+			disk[filepath.ToSlash(rel)] = string(data)
 			return nil
+		})
+		if err != nil {
+			return nil, err
 		}
-		if filepath.Ext(path) != ".go" {
-			return nil
-		}
-		data, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return readErr
-		}
-		rel, _ := filepath.Rel(".", path)
-		disk[filepath.ToSlash(rel)] = string(data)
-		return nil
-	})
-	return disk, err
+	}
+	return disk, nil
 }
 
 func applyPlan(plan genPlan, force bool) error {
-	if err := os.MkdirAll(plan.genDir, 0755); err != nil {
-		return err
+	for _, root := range plan.roots {
+		if err := os.MkdirAll(root, 0755); err != nil {
+			return err
+		}
 	}
-	disk, err := readDiskFiles(plan.genDir)
+	disk, err := readDiskFiles(plan.roots)
 	if err != nil {
 		return err
 	}

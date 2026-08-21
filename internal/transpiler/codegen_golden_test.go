@@ -99,7 +99,7 @@ func TestGoldenRouteWithLayout(t *testing.T) {
 	layoutSrc := "<head></head>\n<div><!doctype html><html><head>{#head}</head><body><main>{#slot}</main></body></html></div>\n"
 
 	file := parseFile(t, routeSrc)
-	layout := parseFile(t, layoutSrc)
+	layout := &layoutEntry{file: parseFile(t, layoutSrc), name: "Default"}
 
 	got, _, err := GenerateMethodHandler(NewGenerator(), file, layout, "about", "about", "/about", scopeHashFor(routeSrc))
 	if err != nil {

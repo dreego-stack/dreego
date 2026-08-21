@@ -9,11 +9,11 @@ import (
 func TestBugComponentQuotedProp(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/components/Card.dreego": `Component Card (title string, active bool)
+		"www/components/Card.dreego": `Component Card (title string, active bool)
 <div><h1>{{ title }}</h1><span>{{ active }}</span></div>`,
-		"dreego/routes/get.dreego": `<go>myTitle := "Hello"</go>
+		"www/routes/get.dreego": `<go>myTitle := "Hello"</go>
 <div><@Card title={myTitle} active={true}/></div>`,
 	})
-	dreegotest.MustNotContain(t, gen["dreego/gen/routes.go"], "{myTitle}")
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "Card(myTitle, true)")
+	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "{myTitle}")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "Card(myTitle, true)")
 }

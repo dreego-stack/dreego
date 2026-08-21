@@ -10,8 +10,8 @@ import (
 func TestComponentCallNamedSlotRender(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card (title string)\n<div><article>{#slot header}{/slot}<h2>{{ title }}</h2><div>{#slot}</div></article></div>",
-		"dreego/routes/get.dreego":      `<div><@Card title="Hi">{#slot header}<strong>HEADER</strong>{/slot}<p>body</p></@Card></div>`,
+		"www/components/Card.dreego": "Component Card (title string)\n<div><article>{#slot header}{/slot}<h2>{{ title }}</h2><div>{#slot}</div></article></div>",
+		"www/routes/get.dreego":      `<div><@Card title="Hi">{#slot header}<strong>HEADER</strong>{/slot}<p>body</p></@Card></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -31,14 +31,14 @@ func TestComponentCallNamedSlotRender(t *testing.T) {
 func TestComponentCallNamedSlotUnknownError(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card ()\n<div><article>{#slot header}{/slot}<div>{#slot}</div></article></div>",
-		"dreego/routes/get.dreego":      "<div>\n  <@Card>{#slot footer}<p>extra</p>{/slot}</@Card>\n</div>",
+		"www/components/Card.dreego": "Component Card ()\n<div><article>{#slot header}{/slot}<div>{#slot}</div></article></div>",
+		"www/routes/get.dreego":      "<div>\n  <@Card>{#slot footer}<p>extra</p>{/slot}</@Card>\n</div>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("expected generate error for unknown slot, got success: %s", out)
 	}
-	want := "dreego/routes/get.dreego:2:3: Card: unknown slot \"footer\""
+	want := "www/routes/get.dreego:2:3: Card: unknown slot \"footer\""
 	if !strings.Contains(out, want) {
 		t.Fatalf("expected error\n%s\ngot:\n%s", want, out)
 	}
@@ -47,14 +47,14 @@ func TestComponentCallNamedSlotUnknownError(t *testing.T) {
 func TestComponentCallNamedSlotNestedDeclarationError(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card ()\n<div><article>{#slot}</article></div>",
-		"dreego/routes/get.dreego":      `<div><@Card>{#slot header}{#slot footer}<p>x</p>{/slot}{/slot}</@Card></div>`,
+		"www/components/Card.dreego": "Component Card ()\n<div><article>{#slot}</article></div>",
+		"www/routes/get.dreego":      `<div><@Card>{#slot header}{#slot footer}<p>x</p>{/slot}{/slot}</@Card></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("expected generate error for nested slot declaration, got success: %s", out)
 	}
-	want := "dreego/routes/get.dreego:1:27: Card: nested slot declaration is not allowed"
+	want := "www/routes/get.dreego:1:27: Card: nested slot declaration is not allowed"
 	if !strings.Contains(out, want) {
 		t.Fatalf("expected error\n%s\ngot:\n%s", want, out)
 	}
@@ -63,8 +63,8 @@ func TestComponentCallNamedSlotNestedDeclarationError(t *testing.T) {
 func TestComponentCallNamedSlotSiblingIsolation(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2>{#slot header}{/slot}<div>{#slot}</div></article></div>",
-		"dreego/routes/get.dreego": `<div>
+		"www/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2>{#slot header}{/slot}<div>{#slot}</div></article></div>",
+		"www/routes/get.dreego": `<div>
 <@Card title="First">{#slot header}<strong>only first</strong>{/slot}<p>first body</p></@Card>
 <@Card title="Second"/>
 </div>`,
@@ -105,9 +105,9 @@ func TestComponentCallNamedSlotSiblingIsolation(t *testing.T) {
 func TestComponentCallNestedComponentInNamedSlot(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Icon.dreego": "Component Icon (name string)\n<div><span class=\"icon\">{{ name }}</span></div>",
-		"dreego/components/Card.dreego": "Component Card ()\n<div><article>{#slot header}{/slot}</article></div>",
-		"dreego/routes/get.dreego":      `<div><@Card>{#slot header}<@Icon name="star"/>{/slot}</@Card></div>`,
+		"www/components/Icon.dreego": "Component Icon (name string)\n<div><span class=\"icon\">{{ name }}</span></div>",
+		"www/components/Card.dreego": "Component Card ()\n<div><article>{#slot header}{/slot}</article></div>",
+		"www/routes/get.dreego":      `<div><@Card>{#slot header}<@Icon name="star"/>{/slot}</@Card></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -121,8 +121,8 @@ func TestComponentCallNestedComponentInNamedSlot(t *testing.T) {
 func TestComponentCallNamedSlotHTTP(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Page.dreego": "Component Page ()\n<div><header>{#slot header}{/slot}</header><main>{#slot}</main></div>",
-		"dreego/routes/get.dreego":      `<div><@Page>{#slot header}<nav>menu</nav>{/slot}<p>content</p></@Page></div>`,
+		"www/components/Page.dreego": "Component Page ()\n<div><header>{#slot header}{/slot}</header><main>{#slot}</main></div>",
+		"www/routes/get.dreego":      `<div><@Page>{#slot header}<nav>menu</nav>{/slot}<p>content</p></@Page></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

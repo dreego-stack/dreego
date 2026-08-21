@@ -1,9 +1,12 @@
 package transpiler
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 )
+
+const configFileName = "dreego.config.json"
 
 func isSkippedDir(name string) bool {
 	switch name {
@@ -13,82 +16,91 @@ func isSkippedDir(name string) bool {
 	return strings.HasPrefix(name, ".") && name != "." && name != ".."
 }
 
-func isInDreegoRoot(path string) bool {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	if rel == "dreego" || strings.HasPrefix(rel, "dreego/") {
-		return true
-	}
-	return false
+func isWebsiteRoot(path string) bool {
+	info, err := os.Stat(filepath.Join(path, configFileName))
+	return err == nil && !info.IsDir()
 }
 
-func isGeneratedDir(path string) bool {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	return rel == "dreego/gen" || strings.HasPrefix(rel, "dreego/gen/")
+func findWebsiteRoots() ([]string, error) {
+	var roots []string
+	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		base := filepath.Base(path)
+		if base == "." {
+			return nil
+		}
+		if strings.HasPrefix(base, ".") {
+			return filepath.SkipDir
+		}
+		if isSkippedDir(base) {
+			return filepath.SkipDir
+		}
+		if isWebsiteRoot(path) {
+			roots = append(roots, path)
+			return filepath.SkipDir
+		}
+		return nil
+	})
+	return roots, err
 }
 
-func isDreegoRoutesDir(path string) bool {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	if !isInDreegoRoot(rel) {
-		return false
+func isRoutesDir(root, path string) bool {
+	rel := relToRoot(root, path)
+	return rel == "routes" || strings.HasPrefix(rel, "routes/")
+}
+
+func isComponentsDir(root, path string) bool {
+	rel := relToRoot(root, path)
+	return rel == "components" || strings.HasPrefix(rel, "components/")
+}
+
+func isLayoutsDir(root, path string) bool {
+	rel := relToRoot(root, path)
+	return rel == "layouts" || strings.HasPrefix(rel, "layouts/") || strings.HasSuffix(rel, "/layouts")
+}
+
+func isStaticDir(root, path string) bool {
+	rel := relToRoot(root, path)
+	return rel == "static" || strings.HasPrefix(rel, "static/")
+}
+
+func relToRoot(root, path string) string {
+	rel, err := filepath.Rel(root, path)
+	if err != nil {
+		return ""
 	}
-	parts := strings.Split(rel, "/")
-	for i, p := range parts {
-		if p == "dreego" && i+1 < len(parts) && parts[i+1] == "routes" {
-			rest := strings.Join(parts[i+2:], "/")
-			if rest == "" {
-				return true
-			}
-			for _, seg := range strings.Split(rest, "/") {
-				if seg == "components" || seg == "layouts" {
-					return false
-				}
-			}
-			return true
+	return filepath.ToSlash(rel)
+}
+
+func routeDirRel(root, path string) string {
+	rel := relToRoot(root, path)
+	if rel == "routes" {
+		return ""
+	}
+	return strings.TrimPrefix(rel, "routes/")
+}
+
+func sanitizePkgName(name string) string {
+	var b strings.Builder
+	for _, r := range name {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '-', r == '.', r == ' ':
+			b.WriteRune('_')
 		}
 	}
-	return false
-}
-
-func isDreegoComponentsDir(path string) bool {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	if !isInDreegoRoot(rel) {
-		return false
+	s := b.String()
+	if s == "" {
+		return "app"
 	}
-	parts := strings.Split(rel, "/")
-	for i, p := range parts {
-		if p == "dreego" && i+1 < len(parts) && parts[i+1] == "components" {
-			rest := strings.Join(parts[i+2:], "/")
-			if rest == "" {
-				return true
-			}
-			for _, seg := range strings.Split(rest, "/") {
-				if seg == "routes" || seg == "layouts" || seg == "static" || seg == "gen" {
-					return false
-				}
-			}
-			return true
-		}
+	if s[0] >= '0' && s[0] <= '9' {
+		s = "pkg" + s
 	}
-	return false
-}
-
-func isDreegoLayoutsDir(path string) bool {
-	rel := filepath.ToSlash(strings.TrimPrefix(path, "./"))
-	if !isInDreegoRoot(rel) {
-		return false
-	}
-	base := filepath.Base(rel)
-	if base != "layouts" {
-		return false
-	}
-	parts := strings.Split(rel, "/")
-	for i, p := range parts {
-		if p == "dreego" && i+1 < len(parts) {
-			rest := strings.Join(parts[i+1:], "/")
-			if rest == "layouts" || strings.Contains(rest, "/layouts") {
-				return true
-			}
-		}
-	}
-	return false
+	return s
 }

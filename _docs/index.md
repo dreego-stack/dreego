@@ -6,7 +6,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 
 - [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md) — Quick Start guide
 - [CLI](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md) — CLI Reference
-- [Config](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md) — dreego/config.json
+- [Config](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md) — dreego.config.json
 - [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — File-based Routing
 - [Layouts](https://github.com/dreego-stack/dreego/blob/main/_docs/layouts.md) — `{#slot}` / `{#head}` and route head behavior
 - [Middleware](https://github.com/dreego-stack/dreego/blob/main/_docs/middleware.md) — Middleware System

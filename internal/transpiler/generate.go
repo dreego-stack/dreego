@@ -7,17 +7,29 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
 
 type Generator struct {
-	defs map[string]*ComponentDef
-	src  string
+	defs      map[string]*ComponentDef
+	src       string
+	pkg       string
+	module    string
+	rootRel   string
+	compPkgs  map[string]string
+	compPaths map[string]string
+	imports   map[string]map[string]string
 }
 
 func NewGenerator() *Generator {
-	return &Generator{defs: map[string]*ComponentDef{}}
+	return &Generator{
+		defs:      map[string]*ComponentDef{},
+		compPkgs:  map[string]string{},
+		compPaths: map[string]string{},
+		imports:   map[string]map[string]string{},
+	}
 }
 
 func (g *Generator) registerDef(name string, def *ComponentDef) {
@@ -26,6 +38,29 @@ func (g *Generator) registerDef(name string, def *ComponentDef) {
 
 func (g *Generator) lookupDef(name string) *ComponentDef {
 	return g.defs[name]
+}
+
+func (g *Generator) registerCompPkg(name, pkg, relDir string) {
+	g.compPkgs[name] = pkg
+	g.compPaths[pkg] = relDir
+}
+
+func (g *Generator) addImport(pkg, alias, path string) {
+	if g.imports[pkg] == nil {
+		g.imports[pkg] = map[string]string{}
+	}
+	g.imports[pkg][alias] = path
+}
+
+func (g *Generator) qualify(funcName string) string {
+	pkg := g.compPkgs[funcName]
+	if pkg == "" || pkg == g.pkg {
+		return funcName
+	}
+	rel := g.compPaths[pkg]
+	path := g.module + "/" + g.rootRel + "/" + rel
+	g.addImport(g.pkg, pkg, path)
+	return pkg + "." + funcName
 }
 
 type generator = Generator
@@ -41,7 +76,7 @@ func Run(force bool) error {
 	}
 	elapsed := time.Since(start)
 	fmt.Printf("Found %d routes + %d components + %d static\n", stats.routes, stats.components, stats.static)
-	fmt.Printf("Generated gen/routes.go + gen/components.go + gen/dree.go\n")
+	fmt.Printf("Generated %d dree.go files\n", len(plan.files))
 	fmt.Printf("in %.2fms\n", float64(elapsed.Microseconds())/1000.0)
 	return nil
 }
@@ -51,7 +86,7 @@ func RunCheck() error {
 	if err != nil {
 		return err
 	}
-	disk, err := readDiskFiles(plan.genDir)
+	disk, err := readDiskFiles(plan.roots)
 	if err != nil {
 		return err
 	}
@@ -70,203 +105,201 @@ type genStats struct {
 }
 
 func buildPlan(force bool) (genPlan, genStats, error) {
-	gen := NewGenerator()
-
-	layouts, err := discoverLayouts()
+	module := modulePath()
+	roots, err := findWebsiteRoots()
 	if err != nil {
 		return genPlan{}, genStats{}, err
 	}
-
-	_, compSrcs, err := scanComponents(gen)
-	if err != nil {
-		return genPlan{}, genStats{}, err
+	if len(roots) == 0 {
+		return genPlan{}, genStats{}, fmt.Errorf("no website found: create a %s file in the website root directory", configFileName)
 	}
 
-	var allSources []string
-	var allRegistrations []string
-	routePatterns := map[string]bool{}
-	routeSources := map[string]string{}
-	var found int
-	var genDir string
-
-	err = filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return fmt.Errorf("error walking %s: %w", path, walkErr)
-		}
-		if !d.IsDir() {
-			return nil
-		}
-		base := filepath.Base(path)
-		if base == "." {
-			return nil
-		}
-		if strings.HasPrefix(base, ".") {
-			return filepath.SkipDir
-		}
-		if isSkippedDir(base) {
-			return filepath.SkipDir
-		}
-		if isDreegoLayoutsDir(path) || isDreegoComponentsDir(path) {
-			return nil
-		}
-		if isGeneratedDir(path) {
-			return filepath.SkipDir
-		}
-
-		entries, err := os.ReadDir(path)
+	files := map[string]string{}
+	var stats genStats
+	for _, root := range roots {
+		rootFiles, rootStats, err := buildRootPlan(root, module)
 		if err != nil {
-			return fmt.Errorf("error reading directory %s: %w", path, err)
+			return genPlan{}, genStats{}, err
 		}
-		var dreegoFiles []string
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".dreego") {
-				dreegoFiles = append(dreegoFiles, filepath.Join(path, e.Name()))
-			}
+		for p, c := range rootFiles {
+			files[p] = c
 		}
-		if len(dreegoFiles) == 0 {
-			return nil
-		}
-		if !isDreegoRoutesDir(path) {
-			return nil
-		}
+		stats.routes += rootStats.routes
+		stats.components += rootStats.components
+		stats.static += rootStats.static
+	}
+	return genPlan{files: files, roots: roots}, stats, nil
+}
 
-		if genDir == "" {
-			genDir = detectGenDir(path)
-		}
+func buildRootPlan(root, module string) (map[string]string, genStats, error) {
+	gen := NewGenerator()
+	gen.module = module
+	gen.rootRel = relToRoot(".", root)
+	gen.pkg = sanitizePkgName(filepath.Base(root))
 
-		found++
-		pattern := buildPattern(path)
-		if seg := doubleBracketSegment(path); seg != "" {
-			return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, path)
-		}
-		routePatterns["GET"+" "+pattern] = true
-		pageName := buildPageName(path)
-		layout := resolveLayoutForRoute(path, layouts)
-
-		for _, fpath := range dreegoFiles {
-			data, err := os.ReadFile(fpath)
-			if err != nil {
-				return fmt.Errorf("error reading %s: %w", fpath, err)
-			}
-			h := sha256.Sum256(data)
-			baseName := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
-			method := methodForFile(baseName)
-
-			file, raw, perr := parseRouteFile(gen, fpath, data)
-			if perr != nil {
-				return perr
-			}
-
-			if len(file.Go) == 0 {
-				file.Go = []GoSection{{Method: method}}
-			}
-			for i := range file.Go {
-				if !file.Go[i].MethodExplicit {
-					file.Go[i].Method = method
-				}
-			}
-
-			scopeHash := hex.EncodeToString(h[:])[:12]
-			pkgName := filepath.Base(path)
-
-			gen.src = raw
-			if baseName == "404" || baseName == "500" {
-				errCode := 404
-				if baseName == "500" {
-					errCode = 500
-				}
-				catchPattern := errorCatchPattern(pattern)
-				if errCode == 404 {
-					catchKey := "GET" + " " + catchPattern
-					if prev, dup := routeSources[catchKey]; dup {
-						return fmt.Errorf("duplicate catch-all %s: %s and %s", catchPattern, prev, fpath)
-					}
-					routeSources[catchKey] = fpath
-					routePatterns[catchKey] = true
-				}
-				src, reg, err := GenerateErrorHandler(gen, file, pkgName, errCode, catchPattern, scopeHash)
-				if err != nil {
-					return fmt.Errorf("error generating error page %s: %w", fpath, err)
-				}
-				allSources = append(allSources, src)
-				allRegistrations = append(allRegistrations, reg)
-				continue
-			}
-
-			for _, m := range fileRegisteredMethods(file) {
-				key := m + " " + pattern
-				if prev, dup := routeSources[key]; dup {
-					return fmt.Errorf("duplicate route %s %s: %s and %s", m, pattern, prev, fpath)
-				}
-				routeSources[key] = fpath
-				routePatterns[key] = true
-			}
-			src, reg, err := GenerateMethodHandler(gen, file, layout, pkgName, pageName, pattern, scopeHash)
-			if err != nil {
-				return fmt.Errorf("error generating %s: %w", fpath, err)
-			}
-			allSources = append(allSources, src)
-			allRegistrations = append(allRegistrations, reg)
-		}
-
-		return nil
-	})
+	layouts, err := discoverLayouts(root)
 	if err != nil {
-		return genPlan{}, genStats{}, err
+		return nil, genStats{}, err
 	}
 
-	if genDir == "" {
-		genDir = findGenDirFallback()
-	}
-
-	staticSrc, staticCount, err := generateStaticAssets(routePatterns)
+	compSrcs, compPkgs, err := scanComponents(gen, root)
 	if err != nil {
-		return genPlan{}, genStats{}, fmt.Errorf("static assets: %w", err)
+		return nil, genStats{}, err
 	}
 
-	settings := loadSettings(genDir)
-	src := strings.Join(allSources, "")
-	compSrc := strings.Join(compSrcs, "")
-
-	routeImportLine := routeImports(src)
-
-	compImports := []string{}
-	if strings.Contains(compSrc, "fmt.") {
-		compImports = append(compImports, "\"fmt\"")
+	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, root, layouts)
+	if err != nil {
+		return nil, genStats{}, err
 	}
-	compImports = append(compImports, "\"strings\"")
-	compImportLine := strings.Join(compImports, "\n\t")
 
-	var configReg strings.Builder
+	staticSrc, staticCount, err := generateStaticAssets(root, routePatterns)
+	if err != nil {
+		return nil, genStats{}, fmt.Errorf("static assets: %w", err)
+	}
+
+	settings := loadSettings(root)
+	files := map[string]string{}
+
+	for _, rd := range routeDirs {
+		imports := gen.imports[rd.pkg]
+		importLine := buildImportLine(imports, rd.pkg)
+		stdImports := stdImportsFor(rd.src)
+		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", rd.pkg, importLine)
+		if stdImports != "" {
+			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", rd.pkg, stdImports, importLine)
+		}
+		out += rd.src
+		out += "func Register(app *dreego.App) error {\n"
+		out += strings.Join(rd.regs, "")
+		out += "\treturn nil\n}\n"
+		files[filepath.Join(rd.dir, "dree.go")] = out
+	}
+
+	if len(compSrcs) > 0 {
+		for pkgDir, srcs := range compSrcs {
+			rel := relToRoot(root, pkgDir)
+			pkg := sanitizePkgName(filepath.Base(pkgDir))
+			imports := gen.imports[pkg]
+			importLine := buildImportLine(imports, pkg)
+			stdImports := stdImportsFor(strings.Join(srcs, ""))
+			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
+			compOut += strings.Join(srcs, "")
+			files[filepath.Join(pkgDir, "dree.go")] = compOut
+			_ = rel
+		}
+	}
+
+	layoutSrcs, err := generateLayouts(gen, root, layouts)
+	if err != nil {
+		return nil, genStats{}, err
+	}
+	if len(layoutSrcs) > 0 {
+		layoutDir := filepath.Join(root, "layouts")
+		imports := gen.imports["layouts"]
+		importLine := buildImportLine(imports, "layouts")
+		stdImports := stdImportsFor(strings.Join(layoutSrcs, ""))
+		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
+		layoutOut += strings.Join(layoutSrcs, "")
+		layoutOut += headMergeHelpers()
+		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
+	}
+
+	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings)
+	files[filepath.Join(root, "dree.go")] = rootOut
+
+	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
+}
+
+func buildImportLine(imports map[string]string, selfPkg string) string {
+	if len(imports) == 0 {
+		return ""
+	}
+	var lines []string
+	for alias, path := range imports {
+		if alias == selfPkg {
+			lines = append(lines, fmt.Sprintf("%q", path))
+		} else {
+			lines = append(lines, fmt.Sprintf("%s %q", alias, path))
+		}
+	}
+	sort.Strings(lines)
+	return strings.Join(lines, "\n\t")
+}
+
+func stdImportsFor(src string) string {
+	var imports []string
+	if strings.Contains(src, "strings.") {
+		imports = append(imports, "\"strings\"")
+	}
+	if strings.Contains(src, "http.") {
+		imports = append(imports, "\"net/http\"")
+	}
+	if strings.Contains(src, "fmt.") {
+		imports = append(imports, "\"fmt\"")
+	}
+	return strings.Join(imports, "\n\t")
+}
+
+func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings) string {
+	pkg := sanitizePkgName(filepath.Base(root))
+	var imports []string
+	var regCalls []string
+	for _, rd := range routeDirs {
+		imports = append(imports, fmt.Sprintf("%s %q", rd.pkg, module+"/"+relToRoot(".", root)+"/"+relToRoot(root, rd.dir)))
+		regCalls = append(regCalls, fmt.Sprintf("\tif err := %s.Register(app); err != nil {\n\t\treturn err\n\t}\n", rd.pkg))
+	}
+	importLine := strings.Join(imports, "\n\t")
+
+	var b strings.Builder
+	b.WriteString(fmt.Sprintf("package %s\n\n", pkg))
+	if len(imports) > 0 {
+		b.WriteString("import (\n\t" + importLine + "\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n")
+	} else {
+		b.WriteString("import (\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n")
+	}
+	b.WriteString("func Register(app *dreego.App) error {\n")
 	if settings != nil {
-		configReg.WriteString(registrationStatement(fmt.Sprintf("app.SetLogging(%t)", settings.Logging.Enabled)))
+		b.WriteString(registrationStatement(fmt.Sprintf("app.SetLogging(%t)", settings.Logging.Enabled)))
 		for _, rd := range settings.Redirects {
-			configReg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRedirect(%q, %q, %d)", rd.From, rd.To, rd.Status)))
+			b.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRedirect(%q, %q, %d)", rd.From, rd.To, rd.Status)))
 		}
 		for _, rw := range settings.Rewrites {
-			configReg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRewrite(%q, %q)", rw.From, rw.To)))
+			b.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRewrite(%q, %q)", rw.From, rw.To)))
 		}
 	}
-	configReg.WriteString(staticSrc)
-
-	routesOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", routeImportLine)
-	routesOut += src
-	routesOut += "func Register(app *dreego.App) error {\n"
-	routesOut += configReg.String()
-	routesOut += strings.Join(allRegistrations, "")
-	routesOut += "\treturn nil\n}\n"
-
-	files := map[string]string{
-		filepath.Join(genDir, "routes.go"): routesOut,
-		filepath.Join(genDir, "dree.go"):   "package gen\n",
+	b.WriteString(staticSrc)
+	for _, call := range regCalls {
+		b.WriteString(call)
 	}
-	if compSrc != "" {
-		compOut := fmt.Sprintf("package gen\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", compImportLine)
-		compOut += compSrc
-		files[filepath.Join(genDir, "components.go")] = compOut
-	}
+	b.WriteString("\treturn nil\n}\n")
+	return b.String()
+}
 
-	return genPlan{files: files, genDir: genDir}, genStats{routes: found, components: len(compSrcs), static: staticCount}, nil
+func modulePath() string {
+	data, err := os.ReadFile("go.mod")
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if rest, ok := strings.CutPrefix(line, "module "); ok {
+			return strings.TrimSpace(rest)
+		}
+	}
+	return ""
+}
+
+func loadSettings(root string) *Settings {
+	settingsPath := filepath.Join(root, configFileName)
+	s, err := LoadConfig(settingsPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			slog.Warn("dreego: "+configFileName+" is invalid; using defaults",
+				"path", settingsPath, "error", err)
+		}
+		return nil
+	}
+	return s
 }
 
 func isUpToDate(path, content string) bool {
@@ -277,15 +310,7 @@ func isUpToDate(path, content string) bool {
 	return string(existing) == content
 }
 
-func loadSettings(genDir string) *Settings {
-	settingsPath := filepath.Join(genDir, "..", "config.json")
-	s, err := LoadConfig(settingsPath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			slog.Warn("dreego: config.json is invalid; using defaults",
-				"path", settingsPath, "error", err)
-		}
-		return nil
-	}
-	return s
+func hashOf(data []byte) string {
+	h := sha256.Sum256(data)
+	return hex.EncodeToString(h[:])[:12]
 }

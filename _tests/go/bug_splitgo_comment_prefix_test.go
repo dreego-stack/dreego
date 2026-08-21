@@ -9,7 +9,7 @@ import (
 func TestBugSplitGoCommentPrefix(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
 // UserForm holds the login data
 type UserForm struct {
 }
@@ -24,5 +24,5 @@ func Save(c *dreego.SSRContext, form UserForm) error {
   </form>
 </div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "type UserForm struct")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "type UserForm struct")
 }

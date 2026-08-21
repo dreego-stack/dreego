@@ -10,12 +10,12 @@ import (
 func TestBugErrorPageLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/layouts/default.dreego": `<head>
+		"www/layouts/default.dreego": `<head>
     <title>Layout Site</title>
     {#head}
 </head>
 <div><main>{#slot}</main></div>`,
-		"dreego/routes/404.dreego": `<head>
+		"www/routes/404.dreego": `<head>
     <meta charset="utf-8">
     <title>Not Found</title>
     <link rel="stylesheet" href="/err.css">

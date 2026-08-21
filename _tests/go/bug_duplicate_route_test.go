@@ -10,17 +10,17 @@ import (
 func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego":   `<div><p>get</p></div>`,
-		"dreego/routes/index.dreego": `<div><p>index</p></div>`,
+		"www/routes/get.dreego":   `<div><p>get</p></div>`,
+		"www/routes/index.dreego": `<div><p>index</p></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("expected generate failure for duplicate route, got success: %s", out)
 	}
-	if !strings.Contains(out, "dreego/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/get.dreego") {
 		t.Fatalf("error must name the first source path, got: %s", out)
 	}
-	if !strings.Contains(out, "dreego/routes/index.dreego") {
+	if !strings.Contains(out, "www/routes/index.dreego") {
 		t.Fatalf("error must name the second source path, got: %s", out)
 	}
 }
@@ -28,9 +28,9 @@ func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
 func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego": `<go method="post">msg := "posted"</go>
+		"www/routes/get.dreego": `<go method="post">msg := "posted"</go>
 <div><p>{{ msg }}</p></div>`,
-		"dreego/routes/post.dreego": `<div><p>post</p></div>`,
+		"www/routes/post.dreego": `<div><p>post</p></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -39,7 +39,7 @@ func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
 	if !strings.Contains(out, "POST") {
 		t.Fatalf("error must name the conflicting method, got: %s", out)
 	}
-	if !strings.Contains(out, "dreego/routes/get.dreego") || !strings.Contains(out, "dreego/routes/post.dreego") {
+	if !strings.Contains(out, "www/routes/get.dreego") || !strings.Contains(out, "www/routes/post.dreego") {
 		t.Fatalf("error must name both source paths, got: %s", out)
 	}
 }
@@ -47,13 +47,13 @@ func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
 func TestBugDuplicateRouteFormWithoutHandler(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"dreego/routes/get.dreego": `<div>
+		"www/routes/get.dreego": `<div>
 <form g-action="Missing" method="post">
     <input name="x">
     <button>OK</button>
 </form>
 </div>`,
-		"dreego/routes/post.dreego": `<div><p>post</p></div>`,
+		"www/routes/post.dreego": `<div><p>post</p></div>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err != nil {

@@ -12,28 +12,19 @@ type layoutEntry struct {
 	rel    string
 	source string
 	file   *File
+	name   string
 }
 
-func discoverLayouts() (map[string]*layoutEntry, error) {
+func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 	entries := map[string]*layoutEntry{}
-	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
 		if !d.IsDir() {
 			return nil
 		}
-		base := filepath.Base(path)
-		if base == "." {
-			return nil
-		}
-		if strings.HasPrefix(base, ".") {
-			return filepath.SkipDir
-		}
-		if isSkippedDir(base) {
-			return filepath.SkipDir
-		}
-		if !isDreegoLayoutsDir(path) {
+		if !isLayoutsDir(root, path) {
 			return nil
 		}
 		dirEntries, err := os.ReadDir(path)
@@ -63,8 +54,12 @@ func discoverLayouts() (map[string]*layoutEntry, error) {
 			}
 			if f != nil {
 				f.SourceContent = string(data)
-				rel := layoutScopeRel(path)
-				entries[rel+":"+name] = &layoutEntry{rel: rel, source: full, file: f}
+				rel := layoutScopeRel(root, path)
+				funcName := "Layout"
+				if name == "default.dreego" {
+					funcName = "Default"
+				}
+				entries[rel+":"+name] = &layoutEntry{rel: rel, source: full, file: f, name: funcName}
 			}
 		}
 		return nil
@@ -101,24 +96,23 @@ func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
 	return fmt.Errorf("%s", strings.Join(ambiguous, "; "))
 }
 
-func layoutScopeRel(layoutsDir string) string {
-	rel := filepath.ToSlash(strings.TrimPrefix(layoutsDir, "./"))
-	idx := strings.Index(rel, "dreego/routes/")
-	if idx < 0 {
+func layoutScopeRel(root, layoutsDir string) string {
+	rel := relToRoot(root, layoutsDir)
+	if rel == "layouts" {
 		return ""
 	}
-	rest := rel[idx+len("dreego/routes/"):]
-	return strings.TrimSuffix(rest, "/layouts")
+	rel = strings.TrimSuffix(rel, "/layouts")
+	rel = strings.TrimPrefix(rel, "routes/")
+	return rel
 }
 
-func resolveLayoutForRoute(routePath string, layouts map[string]*layoutEntry) *File {
-	routeRel := routeDirRel(routePath)
+func resolveLayoutForRoute(routeRel string, layouts map[string]*layoutEntry) *layoutEntry {
 	routeRel = strings.TrimPrefix(routeRel, "/")
 	scopes := cascadeScopes(routeRel)
 	for _, scope := range scopes {
 		for _, name := range []string{"default.dreego", "layout.dreego"} {
 			if e, ok := layouts[scope+":"+name]; ok {
-				return e.file
+				return e
 			}
 		}
 	}
@@ -147,4 +141,36 @@ func cascadeScopes(routeRel string) []string {
 		scopes[i], scopes[j] = scopes[j], scopes[i]
 	}
 	return scopes
+}
+
+func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntry) ([]string, error) {
+	var srcs []string
+	scopes := map[string]bool{}
+	for _, e := range layouts {
+		scopes[e.rel] = true
+	}
+	var scopeList []string
+	for s := range scopes {
+		scopeList = append(scopeList, s)
+	}
+	sort.Strings(scopeList)
+
+	for _, scope := range scopeList {
+		for _, name := range []string{"default.dreego", "layout.dreego"} {
+			e, ok := layouts[scope+":"+name]
+			if !ok {
+				continue
+			}
+			funcName := "Layout"
+			if name == "default.dreego" {
+				funcName = "Default"
+			}
+			src, err := GenerateLayout(gen, e.file, funcName)
+			if err != nil {
+				return nil, err
+			}
+			srcs = append(srcs, src)
+		}
+	}
+	return srcs, nil
 }

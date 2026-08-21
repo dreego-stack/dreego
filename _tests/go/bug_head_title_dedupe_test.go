@@ -10,13 +10,13 @@ import (
 func TestBugHeadTitleDedupe(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/layouts/default.dreego": `<head>
+		"www/layouts/default.dreego": `<head>
     <title>Site</title>
     <meta name="description" content="site desc">
     {#head}
 </head>
 <div><main>{#slot}</main></div>`,
-		"dreego/routes/get.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
+		"www/routes/get.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
 <div><h1>Page</h1></div>`,
 	})
 	_, body := c.Get(t, "/")

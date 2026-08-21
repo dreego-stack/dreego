@@ -35,7 +35,7 @@ cd myapp
 `dreego new` scaffolds a project from the `landing` blueprint:
 
 - writes `main.go`, `go.mod`, `Dockerfile`, `.gitignore`
-- writes the `dreego/` tree: `routes/`, `layouts/`, `components/`, `config.json`
+- writes the `www/` tree: `routes/`, `layouts/`, `components/`, `dreego.config.json`
 - runs `go mod init` and `go mod tidy` against the published `dreego` module
   (resolved from the public Go proxy — no `replace` directive)
 
@@ -52,12 +52,12 @@ from the policy.
 ## 3. Generate and run
 
 ```bash
-dreego generate    # transpiles .dreego files → dreego/gen/*.go
+dreego generate    # transpiles .dreego files → dree.go per directory
 go run .            # builds and starts the server on :8080
 ```
 
 Open http://localhost:8080 in your browser. The landing page rendered is the
-one defined in `dreego/routes/get.dreego`.
+one defined in `www/routes/get.dreego`.
 
 For day-to-day development:
 
@@ -84,12 +84,12 @@ import (
 	"log"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"myapp/dreego/gen"
+	"myapp/www"
 )
 
 func main() {
 	app := dreego.New()
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	if err := app.Listen(":8080"); err != nil {
@@ -99,13 +99,13 @@ func main() {
 ```
 
 `dreego.New()` returns an `*App` that owns all runtime state (router,
-middleware, session store, server config). `gen.Register(app)` wires the
+middleware, session store, server config). `www.Register(app)` wires the
 generated routes and components into the `App`. `app.Listen(":8080")` starts
 the HTTP server with the configured timeouts.
 
 ## Adding a Layout
 
-Create `dreego/layouts/default.dreego` — wraps all pages:
+Create `www/layouts/default.dreego` — wraps all pages:
 
 ```html
 <head><title>My App</title></head>
@@ -123,7 +123,7 @@ Create `dreego/layouts/default.dreego` — wraps all pages:
 
 ## Creating a Component
 
-Create `dreego/components/Card.dreego`:
+Create `www/components/Card.dreego`:
 
 ```
 Component Card (title string)
@@ -156,7 +156,7 @@ Imports are header directives and therefore appear before the root sections.
 
 ## Dynamic Routes
 
-Create `dreego/routes/users/[id]/get.dreego`:
+Create `www/routes/users/[id]/get.dreego`:
 
 ```html
 <head><title>User {{ c.Param("id") }}</title></head>
@@ -181,7 +181,7 @@ Visiting `/users/42` shows "User: 42".
 | `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.22. Upgrade. |
 | `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
 | `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
-| `dreego generate: no routes found` | Create at least `dreego/routes/get.dreego` (the scaffold already does). |
+| `dreego generate: no routes found` | Create at least `www/routes/get.dreego` (the scaffold already does). |
 
 ## See Also
 

@@ -11,7 +11,7 @@ Dreego has a middleware chain with fixed order:
       → Router (mux)
 ```
 
-\* `RequestLogging` is Core-Conditional: default on, deactivatable via `dreego/config.json`.
+\* `RequestLogging` is Core-Conditional: default on, deactivatable via `dreego.config.json`.
 
 ## Health Checks
 
@@ -105,7 +105,7 @@ Configuration:
 
 Executed before the router. Redirects redirect (301/302), rewrites change the path transparently.
 
-Configured in `dreego/config.json` → `redirects` and `rewrites`.
+Configured in `dreego.config.json` → `redirects` and `rewrites`.
 
 ## Plugin Middleware
 

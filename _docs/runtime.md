@@ -134,7 +134,7 @@ the only intentionally dynamic setting.
 
 ## Configuration File
 
-`dreego/config.json` controls redirects, rewrites, and logging:
+`dreego.config.json` controls redirects, rewrites, and logging:
 
 ```json
 {
@@ -166,7 +166,7 @@ package main
 import (
 	"log"
 
-	"myapp/dreego/gen"
+	"myapp/www"
 	dreego "github.com/dreego-stack/dreego/core"
 )
 
@@ -176,7 +176,7 @@ func main() {
 	if err := app.SetSessionStore(store); err != nil {
 		log.Fatal(err)
 	}
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	if err := app.Listen(":8080"); err != nil {

@@ -9,7 +9,7 @@ import (
 func TestBugTextBeforeSection(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"dreego/routes/get.dreego": `<!doctype html>
+		"www/routes/get.dreego": `<!doctype html>
 <html lang="en">
 <go>msg := "hi"</go>
 <div><p>{{ msg }}</p></div>`,
@@ -19,7 +19,7 @@ func TestBugTextBeforeSection(t *testing.T) {
 func TestBugRootComponentCallRejected(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"dreego/components/Card.dreego": "Component Card ()\n<div>Card</div>",
-		"dreego/routes/get.dreego":      `<@Card />`,
+		"www/components/Card.dreego": "Component Card ()\n<div>Card</div>",
+		"www/routes/get.dreego":      `<@Card />`,
 	})
 }

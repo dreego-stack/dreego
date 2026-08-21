@@ -9,9 +9,9 @@ import (
 func TestBugComponentScriptBodyLiteral(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/components/Snippet.dreego": `Component Snippet (x string)
+		"www/components/Snippet.dreego": `Component Snippet (x string)
 <div><script>const s = "literal {x}";</script></div>`,
-		"dreego/routes/get.dreego": `<div><@Snippet x=42/></div>`,
+		"www/routes/get.dreego": `<div><@Snippet x=42/></div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/components.go"], "literal {x}")
+	dreegotest.MustContain(t, gen["www/components/dree.go"], "literal {x}")
 }

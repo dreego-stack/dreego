@@ -36,7 +36,7 @@ Props, self-closing calls, default and named slots, scoped CSS, nested component
 `init`, `new`, `generate` (including `--force` and `--check`), `build`, `run`, `dev`, `docs`, `fmt`, `version`. Stale detection and no-argument help. Accessibility of CLI output (no color, screen-reader-linear help, actionable error format).
 
 ### Config
-`dreego/config.json` redirects, rewrites, logging toggle, invalid JSON.
+`dreego.config.json` redirects, rewrites, logging toggle, invalid JSON.
 
 ### Form Actions
 `<form g-action>` generation, int/bool binding, validation, PRG redirect, error re-render with `c.Errors` and `c.Old`.

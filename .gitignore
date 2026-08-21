@@ -29,7 +29,6 @@ cli/dreego/dreego
 dreego_router.go
 handle_*.go
 dree.go
-dreego/gen/
 
 # smd
 _smd/

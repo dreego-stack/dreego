@@ -3,13 +3,13 @@ package main
 import (
 	"log"
 
-	"demo/dreego/gen"
+	"demo/www"
 	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func main() {
 	app := dreego.New()
-	if err := gen.Register(app); err != nil {
+	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	if err := app.Listen(":8080"); err != nil {

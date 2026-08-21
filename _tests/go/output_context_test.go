@@ -9,7 +9,7 @@ import (
 func TestOutputContextTextEscapesMarkup(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>v := "<script>alert(1)</script>"</go>
+		"www/routes/get.dreego": `<go>v := "<script>alert(1)</script>"</go>
 <div><p>{{ v }}</p></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -20,7 +20,7 @@ func TestOutputContextTextEscapesMarkup(t *testing.T) {
 func TestOutputContextAttrEscapesQuotes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>v := ` + "`\" onmouseover=\"alert(1)`" + `</go>
+		"www/routes/get.dreego": `<go>v := ` + "`\" onmouseover=\"alert(1)`" + `</go>
 <div><a title="{{ v }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -31,7 +31,7 @@ func TestOutputContextAttrEscapesQuotes(t *testing.T) {
 func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
 <div><a href="{{ u }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -42,7 +42,7 @@ func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
 func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>u := "https://example.com/x"</go>
+		"www/routes/get.dreego": `<go>u := "https://example.com/x"</go>
 <div><a href="{{ u }}">link</a></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -52,7 +52,7 @@ func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>u := "data:text/html,<script>alert(1)</script>"</go>
+		"www/routes/get.dreego": `<go>u := "data:text/html,<script>alert(1)</script>"</go>
 <div><img src="{{ u }}"></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -63,7 +63,7 @@ func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
+		"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
 <div><button onclick="{{ s }}">go</button></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -75,7 +75,7 @@ func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
 func TestOutputContextStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>s := "red; } </style><script>alert(1)</script>"</go>
+		"www/routes/get.dreego": `<go>s := "red; } </style><script>alert(1)</script>"</go>
 <div><div style="{{ s }}">x</div></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -86,7 +86,7 @@ func TestOutputContextStyleNeutralizesBreakout(t *testing.T) {
 func TestOutputContextRawOptInPassesThrough(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>h := "<b>trusted</b>"</go>
+		"www/routes/get.dreego": `<go>h := "<b>trusted</b>"</go>
 <div><p>{{ h|raw }}</p></div>`,
 	})
 	_, body := c.Get(t, "/")
@@ -96,9 +96,9 @@ func TestOutputContextRawOptInPassesThrough(t *testing.T) {
 func TestOutputContextComponentURLRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Link.dreego": `Component Link (url string)
+		"www/components/Link.dreego": `Component Link (url string)
 <div><a href="{{ url }}">go</a></div>`,
-		"dreego/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
 <div><@Link url={u}/></div>`,
 	})
 	_, body := c.Get(t, "/")

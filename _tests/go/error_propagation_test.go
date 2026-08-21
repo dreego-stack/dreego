@@ -10,7 +10,7 @@ import (
 func TestErrorPropagationGeneric500NoDisclosure(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
     panic("database: connection to db.internal:5432 failed")
 </go>
 <div><p>ok</p></div>`,
@@ -30,12 +30,12 @@ func TestErrorPropagationGeneric500NoDisclosure(t *testing.T) {
 func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"dreego/components/Boom.dreego": `Component Boom ()
+		"www/components/Boom.dreego": `Component Boom ()
 <go>
     panic("component render failure")
 </go>
 <div><p>boom</p></div>`,
-		"dreego/routes/get.dreego": `<div><@Boom/></div>`,
+		"www/routes/get.dreego": `<div><@Boom/></div>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 500 {
@@ -49,7 +49,7 @@ func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 func TestErrorPropagationFormBindGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
 type Form struct {
     Age int
 }
@@ -80,7 +80,7 @@ func Save(c dreego.Context, form Form) error {
 func TestErrorPropagationFormActionGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
 type Form struct {
     Name string
 }
@@ -133,7 +133,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"dreego/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<go>
 if c.SessionError() != nil {
     panic(c.SessionError())
 }
@@ -180,7 +180,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"dreego/routes/get.dreego": `<div><p>ok</p></div>`,
+		"www/routes/get.dreego": `<div><p>ok</p></div>`,
 	}, "app.SetSessionStore(failStore{}); app.SetLogging(false); ")
 	code, body := c.Get(t, "/")
 	if code != 500 {

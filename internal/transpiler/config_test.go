@@ -73,22 +73,20 @@ func TestLoadConfigInvalidJSON(t *testing.T) {
 
 func TestLoadSettingsWarnsOnInvalidConfig(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "config.json"), []byte(`{not valid`), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, configFileName), []byte(`{not valid`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	genDir := filepath.Join(root, "gen")
-	os.MkdirAll(genDir, 0o755)
 
 	var buf bytes.Buffer
 	old := slog.Default()
 	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, nil)))
 	defer slog.SetDefault(old)
 
-	s := loadSettings(genDir)
+	s := loadSettings(root)
 	if s != nil {
 		t.Fatalf("expected nil Settings for invalid config, got %+v", s)
 	}
-	if !strings.Contains(buf.String(), "config.json is invalid") {
+	if !strings.Contains(buf.String(), configFileName+" is invalid") {
 		t.Errorf("expected warning about invalid config, got %q", buf.String())
 	}
 }

@@ -15,7 +15,7 @@ func TestBugLandingConfigType(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
 		t.Fatalf("new: %v\n%s", err, out)
 	}
-	config, err := os.ReadFile(filepath.Join(dir, "testapp/dreego/config.json"))
+	config, err := os.ReadFile(filepath.Join(dir, "testapp/www/dreego.config.json"))
 	if err != nil {
 		t.Fatalf("read config.json: %v", err)
 	}

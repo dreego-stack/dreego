@@ -1,8 +1,6 @@
 package transpiler
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,49 +13,47 @@ type componentSource struct {
 	file      *File
 	def       *ComponentDef
 	scopeHash string
+	pkgDir    string
 }
 
-func scanComponents(gen *generator) (string, []string, error) {
-	components, genDir, err := loadComponents()
+func scanComponents(gen *Generator, root string) (map[string][]string, map[string]string, error) {
+	components, err := loadComponents(gen, root)
 	if err != nil {
-		return "", nil, err
+		return nil, nil, err
 	}
 	pathsByName := map[string]string{}
 	for _, component := range components {
 		if previous, exists := pathsByName[component.def.Name]; exists {
-			return "", nil, fmt.Errorf("duplicate component %s: %s and %s", component.def.Name, previous, component.path)
+			return nil, nil, fmt.Errorf("duplicate component %s: %s and %s", component.def.Name, previous, component.path)
 		}
 		pathsByName[component.def.Name] = component.path
 		gen.registerDef(component.def.Name, component.def)
 	}
 
-	sources := make([]string, 0, len(components))
+	sourcesByPkg := map[string][]string{}
+	gen.pkg = "components"
 	for _, component := range components {
 		gen.src = component.raw
 		src, err := GenerateComponent(gen, component.file, component.scopeHash)
 		if err != nil {
-			return "", nil, fmt.Errorf("error generating component %s: %w", component.path, err)
+			return nil, nil, fmt.Errorf("error generating component %s: %w", component.path, err)
 		}
-		sources = append(sources, src)
+		sourcesByPkg[component.pkgDir] = append(sourcesByPkg[component.pkgDir], src)
 	}
-	return genDir, sources, nil
+	return sourcesByPkg, pathsByName, nil
 }
 
-func loadComponents() ([]componentSource, string, error) {
+func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 	var components []componentSource
-	var genDir string
-	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
 		if d.IsDir() || !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
-		if !isInDreegoRoot(path) {
-			return nil
-		}
 		dir := filepath.Dir(path)
-		if !isDreegoComponentsDir(dir) {
+		if !isComponentsDir(root, dir) {
 			return nil
 		}
 		component, err := loadComponent(path)
@@ -67,13 +63,32 @@ func loadComponents() ([]componentSource, string, error) {
 		if component.def == nil {
 			return nil
 		}
-		if genDir == "" {
-			genDir = detectGenDir(path)
+		rel := relToRoot(root, dir)
+		pkgDir := dir
+		pkg := "components"
+		if rel != "components" {
+			segments := strings.Split(strings.TrimPrefix(rel, "components/"), "/")
+			valid := []string{}
+			for _, seg := range segments {
+				if seg == "" {
+					continue
+				}
+				if sanitizePkgName(seg) != seg {
+					break
+				}
+				valid = append(valid, seg)
+			}
+			if len(valid) > 0 {
+				pkgDir = filepath.Join(append([]string{root, "components"}, valid...)...)
+				pkg = sanitizePkgName(valid[len(valid)-1])
+			}
 		}
+		component.pkgDir = pkgDir
+		gen.registerCompPkg(component.def.Name, pkg, relToRoot(root, pkgDir))
 		components = append(components, component)
 		return nil
 	})
-	return components, genDir, err
+	return components, err
 }
 
 func loadComponent(path string) (componentSource, error) {
@@ -95,13 +110,12 @@ func loadComponent(path string) (componentSource, error) {
 		return componentSource{}, fmt.Errorf("error parsing component %s: %w", path, err)
 	}
 	prepareComponentFile(file, def, path, raw, len(raw)-len(body))
-	hash := sha256.Sum256(data)
 	return componentSource{
 		path:      path,
 		raw:       raw,
 		file:      file,
 		def:       def,
-		scopeHash: hex.EncodeToString(hash[:])[:12],
+		scopeHash: hashOf(data),
 	}, nil
 }
 

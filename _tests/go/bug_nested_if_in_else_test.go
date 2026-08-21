@@ -9,7 +9,7 @@ import (
 func TestBugNestedIfInElse(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"dreego/routes/get.dreego": `<go>score := 85</go>
+		"www/routes/get.dreego": `<go>score := 85</go>
 <div>
 {#if score >= 90}
 A
@@ -23,5 +23,5 @@ D
 {/if}
 </div>`,
 	})
-	dreegotest.MustContain(t, gen["dreego/gen/routes.go"], "if score >= 80")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "if score >= 80")
 }
