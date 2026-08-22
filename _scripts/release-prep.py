@@ -4,10 +4,13 @@
 Reads .changes/*.md from the current directory, validates each version field,
 computes the next version from the latest git tag (vX.Y.Z), prepends a
 CHANGELOG entry, and removes the processed files. The VERSION file is no longer used —
-the git tag is the single source of truth.
+the git tag is the single source of truth. When only version=none files are
+pending, nothing is applied: the files stay pending and are processed together
+with the next version=patch file.
 
 Changelog format:
-- version=none: prepend changelog lines at the very top of the file
+- version=none: deferred — the change file stays pending until a patch
+  file arrives; then all pending files (none + patch) are applied together
 - version=patch: prepend a version block (blank line,
   '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog lines.
 
@@ -87,8 +90,14 @@ def main():
     version = "patch" if any(v == "patch" for v, _ in parsed) else "none"
     lines = [line for _, change_lines in parsed for line in change_lines]
 
+    if version == "none":
+        for path in files:
+            print(f"deferred: {path.relative_to(ROOT)} (no version bump)", file=sys.stderr)
+        print("new=none")
+        return
+
     current = latest_tag()
-    new_version = next_version(current, version) if version != "none" else None
+    new_version = next_version(current, version)
 
     today = date.today().isoformat()
     old = CHANGELOG.read_text() if CHANGELOG.exists() else ""
@@ -97,23 +106,20 @@ def main():
 
     lines_text = "\n".join(f"- {l}" for l in lines) + "\n"
 
-    if new_version:
-        entry = f"\n## {new_version} - {today}\n\n{lines_text}"
-        if f"## {new_version} -" in old:
-            print(f"new={new_version}")
-            print(f"skipped: version {new_version} already in CHANGELOG", file=sys.stderr)
-            for path in files:
-                path.unlink()
-            return
-    else:
-        entry = lines_text
+    entry = f"\n## {new_version} - {today}\n\n{lines_text}"
+    if f"## {new_version} -" in old:
+        print(f"new={new_version}")
+        print(f"skipped: version {new_version} already in CHANGELOG", file=sys.stderr)
+        for path in files:
+            path.unlink()
+        return
 
     CHANGELOG.write_text(entry + old)
 
     for path in files:
         path.unlink()
-    print(f"new={new_version or 'none'}")
-    print(f"applied: version={version} new={new_version or '(none)'} lines={len(lines)}", file=sys.stderr)
+    print(f"new={new_version}")
+    print(f"applied: version={version} new={new_version} lines={len(lines)}", file=sys.stderr)
 
 
 if __name__ == "__main__":

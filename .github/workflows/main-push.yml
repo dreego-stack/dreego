@@ -40,16 +40,25 @@ jobs:
               exit 0
             fi
 
+            if grep -Eq '^version: (major|minor)$' .changes/*.md; then
+              echo "error: version major/minor is forbidden before v0.1" >&2
+              exit 1
+            fi
+
             python3 _scripts/release-prep.py | tee /tmp/release-prep.out
             new=$(grep '^new=' /tmp/release-prep.out | cut -d= -f2)
+
+            if [ "$new" = none ]; then
+              echo "only none-pending change files; keeping them pending"
+              exit 0
+            fi
+
             git add -A
             git commit -m "docs: apply pending release notes"
 
             if git push origin HEAD:main; then
-              if [ "$new" != none ]; then
-                git tag "$new"
-                git push origin "$new"
-              fi
+              git tag "$new"
+              git push origin "$new"
               exit 0
             fi
 

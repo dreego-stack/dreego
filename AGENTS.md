@@ -49,7 +49,7 @@ Two models share the work with strict role separation:
 
 ## Current Phase: pre v0.1
 
-The latest `v0.0.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. See `_todo/` for next steps.
+The latest `v0.0.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. `version: none` files are never applied on their own — they stay pending until a `version: patch` file triggers the release. See `_todo/` for next steps.
 
 ## Product Focus
 
@@ -116,8 +116,9 @@ version: patch
 - Feat: add Y
 ```
 
-- `version: none` — no version bump, changelog lines only (e.g. dependabot updates)
-- `version: patch` — `0.0.x` +1
+- `version: none` — no version bump; the change file stays pending and is
+  applied together with the next `version: patch` release (e.g. dependabot updates)
+- `version: patch` — `0.0.x` +1, applies all pending files at once
 
 NEVER use `version: minor` or `version: major` while in the v0.0.x phase —
 a minor bump would tag v0.1.0 before v0.1 stabilization. Only `none` and
@@ -137,7 +138,7 @@ Every open work item lives in its own Markdown file under `_todo/`.
 - Do not keep completed, rejected, or superseded items in `_todo/`.
 - Add newly discovered work as a new item file instead of appending to a shared checklist.
 
-The CI (`pull-request-check.yml`) validates the change file and runs the race and full test suites. After merge, serialized `main-push.yml` refreshes to the latest `main`, reruns the suite, combines every pending change file, pushes the changelog commit with retry protection, and creates the tag. No local tags.
+The CI (`pull-request-check.yml`) validates the change file and runs the race and full test suites. After merge, serialized `main-push.yml` refreshes to the latest `main`, reruns the suite, combines every pending change file, pushes the changelog commit with retry protection, and creates the tag. `version: none` files are never applied on their own: they stay pending until a `version: patch` file triggers the release. No local tags.
 
 ## Project: dreego
 
