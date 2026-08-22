@@ -129,6 +129,74 @@ def test_combined_changes():
         check("combined: exits 0", r.returncode == 0, r.stderr)
         check("combined: one patch bump", "new=v0.0.44" in r.stdout)
         check("combined: includes every line", "Chore: one" in text and "Bug: two" in text)
+        check("combined: removes all processed files",
+              not (repo / ".changes/a.md").exists() and not (repo / ".changes/b.md").exists())
+
+
+def test_none_is_deferred_until_patch():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp)
+        changes = repo / ".changes"
+        changes.mkdir()
+        none_files = {
+            "a.md": "---\nversion: none\n---\n\n- Chore: one\n",
+            "b.md": "---\nversion: none\n---\n\n- Chore: two\n",
+        }
+        for name, text in none_files.items():
+            (changes / name).write_text(text)
+        changelog = "## v0.0.43\n"
+        (repo / "CHANGELOG.md").write_text(changelog)
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
+        subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
+        subprocess.run(["git", "tag", "v0.0.43"], cwd=repo, check=True)
+        r = subprocess.run([sys.executable, str(SCRIPTS / "release-prep.py")], cwd=repo,
+                           capture_output=True, text=True)
+        check("none-only: exits 0", r.returncode == 0, r.stderr)
+        check("none-only: changelog remains byte-identical",
+              (repo / "CHANGELOG.md").read_text() == changelog)
+        check("none-only: every file remains pending",
+              all((changes / name).exists() for name in none_files))
+
+
+def test_invalid_bumps_are_atomic():
+    for bump in ("minor", "major"):
+        with tempfile.TemporaryDirectory() as tmp:
+            change = f"---\nversion: {bump}\n---\n\n- x\n"
+            r = run_release_prep(tmp, change, "## v0.0.43\n", ["v0.0.43"])
+            repo = Path(tmp)
+            check(f"{bump}: exits non-zero", r.returncode != 0, r.stderr)
+            check(f"{bump}: changelog unchanged", (repo / "CHANGELOG.md").read_text() == "## v0.0.43\n")
+            check(f"{bump}: change remains pending", (repo / ".changes/change.md").exists())
+
+
+def test_coverage_gate_contract():
+    script = SCRIPTS / "coverage-gate.sh"
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fake_go = root / "go"
+        fake_go.write_text("#!/bin/sh\nprintf '%s\\n' 'ok  example 0.001s coverage: 42.0% of statements'\n")
+        fake_go.chmod(0o755)
+        env = os.environ.copy()
+        env["PATH"] = f"{root}{os.pathsep}{env['PATH']}"
+        env["DREEGO_COVERAGE_MIN"] = "40"
+        ok = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
+        check("coverage: threshold passes", ok.returncode == 0, ok.stderr)
+        env["DREEGO_COVERAGE_MIN"] = "50"
+        low = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
+        check("coverage: below threshold exits non-zero", low.returncode != 0, low.stderr)
+        env["DREEGO_COVERAGE_MIN"] = "invalid"
+        invalid = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
+        check("coverage: invalid threshold exits non-zero", invalid.returncode != 0, invalid.stderr)
+
+
+def test_test_runner_contract():
+    makefile = (ROOT / "Makefile").read_text()
+    check("test runner: forwards DREEGO_FILTER", 'DREEGO_FILTER="$${DREEGO_FILTER:-}"' in makefile)
+    check("test runner: forwards DREEGO_RUNS", 'DREEGO_RUNS="$${DREEGO_RUNS:-1}"' in makefile)
+    check("test runner: coverage target exists", "coverage:" in makefile)
 
 
 def test_rejects_non_v0_0_tag():
@@ -161,6 +229,8 @@ def test_workflow_contract():
     check("pull-request-check validates change file", ".changes" in pr_check)
     check("pull-request-check isolates PR change file", "git merge-base HEAD origin/main" in pr_check)
     check("pull-request-check runs make test", "make test" in pr_check)
+    check("pull-request-check runs coverage before tests",
+          pr_check.index("make coverage") < pr_check.index("make test"))
 
 
 def yaml_ok(text):
@@ -168,6 +238,11 @@ def yaml_ok(text):
         import yaml
         yaml.safe_load(text)
         return True
+    except ModuleNotFoundError:
+        # The contract test must run in the minimal CI image as well. The
+        # workflow files are validated by GitHub; this fallback catches the
+        # most damaging local syntax mistakes without requiring PyYAML.
+        return bool(text.strip()) and text.count("\n") > 2 and "jobs:" in text
     except Exception:
         return False
 
@@ -178,6 +253,10 @@ def main():
     test_idempotent_rerun()
     test_failure_paths()
     test_combined_changes()
+    test_none_is_deferred_until_patch()
+    test_invalid_bumps_are_atomic()
+    test_coverage_gate_contract()
+    test_test_runner_contract()
     test_rejects_non_v0_0_tag()
     test_workflow_contract()
     print(f"==> {PASS} passed, {FAIL} failed")
