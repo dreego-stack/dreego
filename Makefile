@@ -1,4 +1,4 @@
-.PHONY: up down build generate dev clean dx dx-clean test install-hooks
+.PHONY: up down build generate dev clean dx dx-clean test coverage install-hooks
 
 up:
 	cd demo && docker compose up -d
@@ -28,6 +28,9 @@ test:
 		-e DREEGO_RUNS="$${DREEGO_RUNS:-1}" \
 		-e DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \
 		dreego-test
+
+coverage:
+	sh _scripts/coverage-gate.sh
 
 dx:
 	@EXT_DIR="$$(pwd)/../vscode-dreego"; \

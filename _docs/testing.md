@@ -68,6 +68,7 @@ counterpart to the Go integration tests.
 
 ```bash
 make test                              # Docker-based full suite
+make coverage                          # core coverage gate (35% minimum per package)
 go test ./core/...                     # runtime unit tests only
 go test ./internal/transpiler/...     # transpiler unit tests only
 go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for CLI builds)
