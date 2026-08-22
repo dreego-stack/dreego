@@ -31,7 +31,6 @@ dree.go
 
 # smd
 _smd/
-smd.toml
 
 # VS Code extension
 *.vsix

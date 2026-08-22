@@ -12,8 +12,9 @@ root — it is the authoritative source for conventions.
 - Run the full suite with `make test` (Docker-based; builds the `_tests/`
   image and runs the race and integration suites). For a fast subset:
   `go test ./core/... ./cli/dreego/...`.
-- All commands may also be run inside the `smd` container (`smd make test`);
-  this is optional and never required for contributions.
+- All commands may also be run inside the `smd` container. Use
+  `smd sh _tests/test.sh` for the full suite; this is optional and never
+  required for contributions.
 - Never create binaries in the repo — use `/tmp` or `./tmp`.
 
 ## Language
