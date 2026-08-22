@@ -19,7 +19,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 ## Framework
 
 - [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — Component System (`<@Name>`, slots, scoped CSS)
-- [Template Logic](https://github.com/dreego-stack/dreego/blob/main/.agents/concepts/template-logic.md) — `{#if}`, `{#each}`, `$loop`, `{#verbatim}`, filters
+- [Template Logic](https://github.com/dreego-stack/dreego/blob/main/_docs/template-logic.md) — `{#if}`, `{#each}`, `$loop`, `{#verbatim}`, filters
 - [Plugin Interfaces](https://github.com/dreego-stack/dreego/blob/main/_docs/plugin-interfaces.md) — Plugin System (planned)
 - [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md) — Plugin model, middleware + route hooks
 
@@ -29,8 +29,12 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Reference Applications](https://github.com/dreego-stack/dreego/blob/main/_docs/reference-apps.md) — End-to-end example apps under `_tests/fixtures/`
 - [Benchmarks](https://github.com/dreego-stack/dreego/blob/main/_docs/benchmarks.md) — Code generation and request benchmarks
 - [Deployment](https://github.com/dreego-stack/dreego/blob/main/_docs/deployment.md) — Build, Cross-Compile, Containers
-- [Architecture](https://github.com/dreego-stack/dreego/blob/main/.agents/concepts/dreego-architecture.md) — Architecture Overview
+- [Architecture](https://github.com/dreego-stack/dreego/blob/main/_docs/dreego-architecture.md) — Architecture Overview
 - [Dev Server](https://github.com/dreego-stack/dreego/blob/main/_docs/dev-server.md) — `dreego dev` watcher + auto-reload
+
+## Decisions
+
+- [Architecture Decisions](https://github.com/dreego-stack/dreego/tree/main/_docs/decisions) — ADRs (context design, routing, middleware, forms, session, transpiler, ...)
 
 ## Meta
 

@@ -98,21 +98,10 @@ repo-root/
 ├── cli/dreego/             ← CLI binary
 ├── .github/workflows/      ← CI: pull-request-check.yml, main-push.yml
 │
-.agents/                    ← Knowledge Base (OKF format)
-├── index.md                 ← Start here (OKF TOC)
-├── log.md                   ← Change history
-├── tips.md                  ← 50 tips + checklist
-├── KB/                      ← Reference material
-├── decisions/               ← Architecture decisions (ADR)
-├── concepts/                ← Worked-out concepts
-└── guides/                  ← Coding standards, skills, OKF conventions
+└── _docs/decisions/        ← Architecture decisions (ADR)
 ```
 
 ## Skills
-
-- [Knowledge Base](.agents/guides/knowledge-base.md) — How the knowledge base is maintained
-- [Changelog](.agents/guides/changelog.md) — How CHANGELOG.md and versioning works
-- [Open Knowledge Format](.agents/guides/open-knowledge-format.md) — OKF conventions (YAML frontmatter, types, links)
 
 ## Commit Convention
 
@@ -205,7 +194,7 @@ Every feature follows this cycle:
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `make test`) — must be GREEN
 5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it
-6. **KB** — Update `.agents/log.md` + relevant concept/decision docs
+6. **Docs** — Update `_docs/` + relevant decision docs in `_docs/decisions/`
 
 For multi-step features, repeat the cycle for each step. Commit after each step.
 
@@ -233,11 +222,11 @@ Until v1, SSR is the only production target and the core priority. SSG,
 expanded Wails support, and static deployment targets belong after v1; the
 former V2 preparation (Target interface, reserved CLI flags) is no longer
 required — extension points are preserved only where inexpensive, without
-speculative abstractions. See [decisions/ssg-wails-v2](.agents/decisions/ssg-wails-v2.md)
+speculative abstractions. See [decisions/ssg-wails-v2](_docs/decisions/ssg-wails-v2.md)
 (superseded) and the Product Focus section above.
 
 ### 1. `<go>` Block: No hard `*http.Request`
-Solution: `dreego.Context` Interface. → [decisions/context-design](.agents/decisions/context-design.md)
+Solution: `dreego.Context` Interface. → [decisions/context-design](_docs/decisions/context-design.md)
 
 ### 2. Plugin Contracts Stay Provisional Until v1
 Real external plugins between v0.1 and v1 must validate the contract before a stability promise. → [plugin-contract.1](_todo/core/plugin-contract.1.md)
@@ -245,7 +234,7 @@ Real external plugins between v0.1 and v1 must validate the contract before a st
 ### 3. File-based Routing
 Filename-based routing is the released pre-v0.1 implementation; the accepted
 v0.1 target is one route file per URL (`+page.dreego` and method sections).
-→ [decisions/routing-and-components](.agents/decisions/routing-and-components.md)
+→ [decisions/routing-and-components](_docs/decisions/routing-and-components.md)
 
 ### 4. Asset System: Dual-Mode (Embedded + Disk)
 

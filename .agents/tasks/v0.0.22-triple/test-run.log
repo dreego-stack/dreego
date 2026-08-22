@@ -1,5 +1,0 @@
-==> PASS <=> GO Tests <=========
-FAIL core/Routing/servemux-cache
-FAIL core/Template/component-nested-if-else
-==> FAIL <=> 145 Passed <=> 2 Failed ===
-Error: exit status 1

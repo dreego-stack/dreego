@@ -83,7 +83,7 @@ Every feature follows this cycle:
 3. `_docs/` — update relevant documentation.
 4. Test — `go test ./_tests/go/ -run <TestName>` (or `make test`) — GREEN.
 5. PR — one `.changes/*.md` file (version bump + changelog lines).
-6. `.agents/` — update `.agents/log.md` and relevant concept/decision docs.
+6. `_docs/` — update decision docs in `_docs/decisions/`.
 
 ## Style Rules
 

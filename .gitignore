@@ -1,7 +1,6 @@
 # Kilo / editor
 .kilo/
 .idea/
-.agents/log.md
 
 # Temp / debug
 .tmp/

@@ -28,7 +28,9 @@ timestamp: 2026-07-28T00:00:00Z
 | Map Plugin       | `github.com/dreego-stack/plugin-map`           |
 | UI Plugin        | `github.com/dreego-stack/dreego/plugins/ui`    |
 
-> Plugin paths superseded by [monorepo-plugin-layout](monorepo-plugin-layout.md) (v0.0.21): official plugins live under `plugins/<name>` in this repository. Community plugins may still use separate repos.
+> Plugin paths superseded (v0.0.21): official plugins initially lived under
+> `plugins/<name>` in this repository, then moved to separate repositories
+> under `github.com/dreego-stack/`. See AGENTS.md "Core and Plugin Boundary".
 
 ## Consequences
 
