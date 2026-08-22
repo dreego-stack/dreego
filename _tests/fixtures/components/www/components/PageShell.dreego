@@ -2,8 +2,12 @@ Component PageShell (title string)
 
 <div>
     <header>
-        <h1>{{ title }}</h1>
-        <nav><a href="/">Shop</a></nav>
+        <h1>
+            {{ title }}</h1>
+        <nav>
+            <a href="/">
+                Shop</a>
+        </nav>
     </header>
     <main>{#slot}</main>
 </div>

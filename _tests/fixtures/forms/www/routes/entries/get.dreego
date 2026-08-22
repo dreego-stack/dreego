@@ -7,15 +7,21 @@
 </go>
 
 <div>
-    <h1>Entries</h1>
+    <h1>
+        Entries</h1>
     {#if empty}
-        <p>No entries yet</p>
+        <p>
+            No entries yet</p>
     {#else}
         <ul>
         {#each entries as entry}
-            <li>{{ entry }}</li>
+            <li>
+                {{ entry }}</li>
         {/each}
         </ul>
     {/if}
-    <p><a href="/">Post a message</a></p>
+    <p>
+        <a href="/">
+            Post a message</a>
+    </p>
 </div>

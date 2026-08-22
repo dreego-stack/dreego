@@ -7,10 +7,13 @@
 </go>
 
 <div>
-    <h1>Counter</h1>
-    <p>Count: {{ len(count) }}</p>
+    <h1>
+        Counter</h1>
+    <p>
+        Count: {{ len(count) }}</p>
     <form method="post">
         <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
-        <button type="submit">Increment</button>
+        <button type="submit">
+            Increment</button>
     </form>
 </div>

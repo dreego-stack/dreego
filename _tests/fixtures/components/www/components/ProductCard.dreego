@@ -2,12 +2,16 @@ Component ProductCard (name string, price string, inStock bool)
 
 <div>
     <article class="product-card">
-        <h2>{{ name }}</h2>
-        <p class="price">{{ price }}</p>
+        <h2>
+            {{ name }}</h2>
+        <p class="price">
+            {{ price }}</p>
         {#if inStock}
-            <p class="badge">In stock</p>
+            <p class="badge">
+                In stock</p>
         {#else}
-            <p class="badge">Sold out</p>
+            <p class="badge">
+                Sold out</p>
         {/if}
     </article>
 </div>

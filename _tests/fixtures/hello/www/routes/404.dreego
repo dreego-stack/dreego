@@ -3,7 +3,10 @@
 </head>
 
 <div>
-    <h1>Page not found</h1>
-    <p>The URL you requested does not exist.</p>
-    <a href="/">Back home</a>
+    <h1>
+        Page not found</h1>
+    <p>
+        The URL you requested does not exist.</p>
+    <a href="/">
+        Back home</a>
 </div>

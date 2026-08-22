@@ -24,6 +24,9 @@
 <div>
     <@PageShell title="Product detail">
         <@ProductCard name={product.Name} price={product.Price} inStock={product.InStock}/>
-        <p><a href="/">Back to shop</a></p>
+        <p>
+            <a href="/">
+                Back to shop</a>
+        </p>
     </@PageShell>
 </div>

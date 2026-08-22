@@ -17,19 +17,33 @@
 </go>
 
 <div>
-    <h1>Guestbook</h1>
-    <p>Post a message with the g-action form handler.</p>
+    <h1>
+        Guestbook</h1>
+    <p>
+        Post a message with the g-action form handler.</p>
     <form g-action="AddEntry" method="post">
         <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
-        <label>Name
+        <label>
+            Name
             <input name="name" type="text" value="{{ c.Old("name") }}">
         </label>
-        {#if c.Errors("name") != ""}<p class="error">{{ c.Errors("name") }}</p>{/if}
-        <label>Message
+        {#if c.Errors("name") != ""}
+            <p class="error">
+                {{ c.Errors("name") }}</p>
+        {/if}
+        <label>
+            Message
             <input name="message" type="text" value="{{ c.Old("message") }}">
         </label>
-        {#if c.Errors("message") != ""}<p class="error">{{ c.Errors("message") }}</p>{/if}
-        <button type="submit">Post</button>
+        {#if c.Errors("message") != ""}
+            <p class="error">
+                {{ c.Errors("message") }}</p>
+        {/if}
+        <button type="submit">
+            Post</button>
     </form>
-    <p><a href="/entries">View entries</a></p>
+    <p>
+        <a href="/entries">
+            View entries</a>
+    </p>
 </div>

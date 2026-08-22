@@ -3,5 +3,6 @@
     c.SetSessionVal("count", n+"x")
 </go>
 <div>
-    <p>incremented</p>
+    <p>
+        incremented</p>
 </div>

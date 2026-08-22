@@ -3,11 +3,22 @@
 </head>
 
 <div>
-    <h1>Plugin demo</h1>
-    <p>This app registers a local plugin package before the generated routes.</p>
+    <h1>
+        Plugin demo</h1>
+    <p>
+        This app registers a local plugin package before the generated routes.</p>
     <ul>
-        <li><a href="/plugin/hello">Plugin hello</a></li>
-        <li><a href="/plugin/hello/42">Plugin hello 42</a></li>
-        <li><a href="/plugin/health">Plugin health</a></li>
+        <li>
+            <a href="/plugin/hello">
+                Plugin hello</a>
+        </li>
+        <li>
+            <a href="/plugin/hello/42">
+                Plugin hello 42</a>
+        </li>
+        <li>
+            <a href="/plugin/health">
+                Plugin health</a>
+        </li>
     </ul>
 </div>
