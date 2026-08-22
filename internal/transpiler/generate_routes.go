@@ -51,14 +51,6 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			return nil
 		}
 
-		rel := routeDirRel(root, path)
-		pattern := buildPattern(rel)
-		if seg := doubleBracketSegment(rel); seg != "" {
-			return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, path)
-		}
-		pageName := buildPageName(rel)
-		layout := resolveLayoutForRoute(rel, layouts)
-
 		gen.pkg = "routes"
 
 		var src strings.Builder
@@ -66,6 +58,13 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 		needsHeadHelpers := false
 
 		for _, fpath := range dreegoFiles {
+			rel := routeFileRel(root, path, filepath.Base(fpath))
+			pattern := buildPattern(rel)
+			if seg := doubleBracketSegment(rel); seg != "" {
+				return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath)
+			}
+			pageName := buildPageName(rel)
+			layout := resolveLayoutForRoute(rel, layouts)
 			data, err := os.ReadFile(fpath)
 			if err != nil {
 				return fmt.Errorf("error reading %s: %w", fpath, err)
@@ -84,6 +83,11 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			for i := range file.Go {
 				if !file.Go[i].MethodExplicit {
 					file.Go[i].Method = method
+				}
+			}
+			for i := range file.Templates {
+				if !file.Templates[i].MethodExplicit {
+					file.Templates[i].Method = method
 				}
 			}
 
@@ -138,7 +142,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 
 		rd.src += src.String()
 		rd.regs = append(rd.regs, regs...)
-		found++
+		found += len(regs)
 		return nil
 	})
 	if err != nil {
@@ -149,6 +153,27 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 		return nil, routePatterns, 0, nil
 	}
 	return []routeDir{*rd}, routePatterns, found, nil
+}
+
+func routeFileRel(root, dir, name string) string {
+	rel := routeDirRel(root, dir)
+	base := strings.TrimSuffix(name, ".dreego")
+	if base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
+		return rel
+	}
+	if rel == "" {
+		return base
+	}
+	return filepath.ToSlash(filepath.Join(rel, base))
+}
+
+func isLegacyMethodFile(base string) bool {
+	for prefix := range methodExt {
+		if base == prefix || strings.HasPrefix(base, prefix+"-") {
+			return true
+		}
+	}
+	return false
 }
 
 func buildPageName(rel string) string {
@@ -254,12 +279,27 @@ func fileRegisteredMethods(file *File) []string {
 		}
 		return []string{"GET"}
 	}
-	for _, g := range file.Go {
-		if g.Method != "GET" {
-			return []string{g.Method}
+	seen := map[string]bool{}
+	methods := []string{}
+	add := func(method string) {
+		if method == "" {
+			method = "GET"
+		}
+		if !seen[method] {
+			seen[method] = true
+			methods = append(methods, method)
 		}
 	}
-	return []string{"GET"}
+	for _, g := range file.Go {
+		add(g.Method)
+	}
+	for _, t := range file.Templates {
+		add(t.Method)
+	}
+	if len(methods) == 0 {
+		add("GET")
+	}
+	return methods
 }
 
 func doubleBracketSegment(rel string) string {

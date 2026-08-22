@@ -77,8 +77,8 @@ def test_none_path():
         check("none: prints none", "new=none" in r.stdout, r.stdout)
         changelog = (Path(tmp) / "CHANGELOG.md").read_text()
         check("none: no version header", "## v0.0.44" not in changelog)
-        check("none: line prepended", changelog.startswith("- Chore: bump dep\n"), changelog[:60])
-        check("none: change removed", not (Path(tmp) / ".changes/change.md").exists())
+        check("none: changelog unchanged", changelog == "## v0.0.43 - 2026-08-15\n\n- old\n", changelog[:60])
+        check("none: change remains pending", (Path(tmp) / ".changes/change.md").exists())
 
 
 def test_idempotent_rerun():

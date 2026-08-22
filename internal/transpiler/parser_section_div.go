@@ -15,7 +15,17 @@ func (p *Parser) parseDivSection() (*TemplateSection, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &TemplateSection{Nodes: nodes}, nil
+	method, explicit := parseDivMethod(tok.Attr)
+	return &TemplateSection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil
+}
+
+func parseDivMethod(attrs string) (string, bool) {
+	for _, part := range strings.Fields(attrs) {
+		if strings.HasPrefix(part, "method=") {
+			return strings.ToUpper(strings.Trim(strings.TrimPrefix(part, "method="), "\"'")), true
+		}
+	}
+	return "GET", false
 }
 
 func (p *Parser) parseDivNodes() ([]TemplateNode, error) {

@@ -1,19 +1,17 @@
 # File-based Routing
 
-> **Current implementation:** This page documents the released pre-v0.1
-> filename-based router. The accepted v0.1 migration will use one route file per
-> URL, with flat files or `+page.dreego` and method-specific `<go>` and `<div>`
-> sections. That target is not available until `routing-correctness.1` and the
-> App migration are implemented.
+> **Current implementation:** Routes support flat files or `+page.dreego`, with
+> method-specific `<go>` and `<div>` sections. Legacy method filenames remain
+> supported for migration.
 
 Route discovery is restricted to the website root's `routes/` tree. The
 website root is any directory containing `dreego.config.json`. Directories
 named `routes` outside a website root (e.g. `vendor/…/www/routes`,
 `node_modules/…/www/routes`, `subapp/www/routes`) are ignored.
 
-Directories below `www/routes/` define the URL path. The filename defines
-the HTTP method. Keeping one method per file prevents a route file from growing
-into a combined implementation for every operation on the same URL.
+Directories below `www/routes/` define the URL path. A flat `.dreego` filename
+defines the final static path segment; `+page.dreego` defines the directory
+route. Legacy method filenames still define the method for old projects.
 
 ## Directory Structure
 
@@ -56,6 +54,24 @@ Group directories do **not** appear in the URL. They serve code organization:
 ```
 
 ## HTTP Methods
+
+One route file may define multiple methods. Sections without `method` default
+to GET. A request renders only the sections matching its method:
+
+```dreego
+<go>
+    page := loadPage(c)
+</go>
+<div>{{ page.Title }}</div>
+
+<go method="post">
+    result := savePage(c)
+</go>
+<div method="post">Saved: {{ result }}</div>
+```
+
+Components, imports, layouts, styles, and scripts remain route-level resources.
+The method controls only the route logic and rendered `<div>` section.
 
 Each route has a method file in the directory:
 
@@ -106,7 +122,8 @@ A single route can serve multiple content types via `<go type="...">` blocks:
 | `xml` | `application/xml` | `c.XML()`, auto-detect via `Accept` header |
 | *(none)* | `text/html` | Default — renders `<div>` template |
 
-- `<go>` without `type` runs **always** (shared logic)
+- `<go>` without `method` runs for GET; method-specific `<go>` blocks run only
+  for their matching method
 - Typed `<go>` blocks run conditionally based on `Accept` header
 - Pure JSON/XML routes (no `<div>`) skip template rendering entirely
 - Raw content: `c.Write(status, contentType, body)` for FlatBuffers/Protobuf/etc.

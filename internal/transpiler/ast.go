@@ -41,6 +41,7 @@ type File struct {
 	Head          *HeadSection
 	Go            []GoSection
 	Template      *TemplateSection
+	Templates     []TemplateSection
 	Script        *ScriptSection
 	Style         *StyleSection
 	Component     *ComponentDef
@@ -73,7 +74,9 @@ type HeadSection struct {
 }
 
 type TemplateSection struct {
-	Nodes []TemplateNode
+	Nodes          []TemplateNode
+	Method         string
+	MethodExplicit bool
 }
 
 type ScriptSection struct {

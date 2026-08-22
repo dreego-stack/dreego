@@ -96,11 +96,26 @@ func TestRoutingBlackboxNested(t *testing.T) {
 	}
 }
 
+func TestRoutingBlackboxFlatRoutes(t *testing.T) {
+	t.Parallel()
+	c := dreegotest.Serve(t, map[string]string{
+		"www/routes/+page.dreego":            `<div><p>home</p></div>`,
+		"www/routes/about.dreego":            `<div><p>about flat</p></div>`,
+		"www/routes/users/[id]/+page.dreego": `<go>id := c.Param("id")</go><div><p>user:{{ id }}</p></div>`,
+	})
+	code, body := c.Get(t, "/about")
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "about flat")
+	code, body = c.Get(t, "/users/42")
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "user:42")
+}
+
 func TestRoutingBlackboxMethodAttr(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/routes/get.dreego": `<go method="post">msg := "posted"</go>
-<div><p>{{ msg }}</p></div>`,
+<div method="post"><p>{{ msg }}</p></div>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/", "", nil)
 	if code != 200 || !strings.Contains(body, "posted") {
@@ -109,5 +124,27 @@ func TestRoutingBlackboxMethodAttr(t *testing.T) {
 	code, _ = c.Get(t, "/")
 	if code == 200 {
 		t.Fatal("GET / must not match a route registered only for POST")
+	}
+}
+
+func TestRoutingBlackboxMethodSections(t *testing.T) {
+	t.Parallel()
+	c := dreegotest.Serve(t, map[string]string{
+		"www/routes/about.dreego": `<go>msg := "get"</go>
+<div><p>{{ msg }}</p></div>
+<go method="post">msg := "post"</go>
+<div method="post"><p>{{ msg }}</p></div>`,
+	})
+	code, body := c.Get(t, "/about")
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "get")
+	if strings.Contains(body, "post") {
+		t.Fatal("GET must not render POST template")
+	}
+	code, body, _ = c.Request(t, "POST", "/about", "", nil)
+	dreegotest.MustStatus(t, code, 200)
+	dreegotest.MustContainBody(t, body, "post")
+	if strings.Contains(body, "get") {
+		t.Fatal("POST must not render GET template")
 	}
 }

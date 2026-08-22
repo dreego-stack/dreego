@@ -7,7 +7,7 @@ timestamp: 2026-08-14T00:00:00Z
 ---
 # App-Bound Routing and Components
 
-**Status:** Accepted target for v0.1; implementation is pending
+**Status:** Accepted and implemented for the pre-v0.1 routing slice
 
 ## Context
 
@@ -110,8 +110,9 @@ scoped to the component instance contract.
 ## Consequences
 
 - `app-runtime.1` replaces global registration and `init` side effects.
-- `routing-correctness.1` implements flat files, `+page.dreego`, conflicts, and
-  method-specific sections.
+- `routing-correctness.1` covers the remaining routing hardening and migration
+  work; flat files, `+page.dreego`, conflicts, and method-specific sections are
+  implemented.
 - `component-correctness.1` implements explicit imports, typed named props,
   nesting, and lexical slots.
 - The current fat Plugin interface is not part of this target.

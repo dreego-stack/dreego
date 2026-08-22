@@ -3,6 +3,7 @@ package transpiler
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -62,5 +63,55 @@ func TestSanitizePkgName(t *testing.T) {
 		if got != want {
 			t.Errorf("sanitizePkgName(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestRouteFileRelSupportsFlatAndLegacyRoutes(t *testing.T) {
+	root := filepath.Join("/tmp", "site")
+	cases := map[string]string{
+		"routes/about.dreego":            "about",
+		"routes/+page.dreego":            "",
+		"routes/users/[id]/+page.dreego": "users/[id]",
+		"routes/(auth)/login.dreego":     "(auth)/login",
+		"routes/post.dreego":             "",
+		"routes/admin/post-users.dreego": "admin",
+	}
+	for path, want := range cases {
+		dir := filepath.Dir(filepath.Join(root, path))
+		name := filepath.Base(path)
+		if got := routeFileRel(root, dir, name); got != want {
+			t.Errorf("routeFileRel(%q) = %q, want %q", path, got, want)
+		}
+	}
+}
+
+func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
+	root := writeTestProject(t, map[string]string{
+		"routes/about.dreego":            "<div>about</div>",
+		"routes/+page.dreego":            "<div>home</div>",
+		"routes/users/[id]/+page.dreego": "<div>user</div>",
+		"routes/(auth)/login.dreego":     "<div>login</div>",
+	})
+	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Fatalf("scanRoutes count = %d, want 4", count)
+	}
+	src := strings.Join(dirs[0].regs, "")
+	for _, want := range []string{"app.Register(\"GET\", \"/about\"", "app.Register(\"GET\", \"/{$}\"", "app.Register(\"GET\", \"/users/{id}\"", "app.Register(\"GET\", \"/login\""} {
+		if !strings.Contains(src, want) {
+			t.Errorf("generated source missing %q", want)
+		}
+	}
+
+	duplicateRoot := writeTestProject(t, map[string]string{
+		"routes/about.dreego":        "<div>one</div>",
+		"routes/(auth)/about.dreego": "<div>two</div>",
+	})
+	_, _, _, err = scanRoutes(NewGenerator(), duplicateRoot, map[string]*layoutEntry{})
+	if err == nil || !strings.Contains(err.Error(), "about.dreego") {
+		t.Fatalf("expected duplicate source paths in error, got %v", err)
 	}
 }

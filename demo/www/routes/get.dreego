@@ -1,186 +1,54 @@
 <head>
-    <title>demo</title>
+    <title>Dreego Demo Lab</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="demo — Built with Dreego">
+    <meta name="description" content="A small collection of Dreego applications and patterns.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
 </head>
 
-<div class="min-h-screen bg-white font-sans">
-
-    <nav class="fixed top-0 inset-x-0 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold text-slate-900">
-                demo</a>
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-                <a href="#features" class="hover:text-slate-900">
-                    Features</a>
-                <a href="#pricing" class="hover:text-slate-900">
-                    Pricing</a>
-                <a href="/docs" class="hover:text-slate-900">
-                    Docs</a>
+<div class="min-h-screen bg-[#f7f7f3] text-slate-950">
+    <header class="border-b border-slate-200 bg-[#f7f7f3]">
+        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5" aria-label="Main navigation">
+            <a href="/" class="font-mono text-sm font-bold tracking-tight">dreego / demo</a>
+            <div class="flex items-center gap-5 text-sm text-slate-600">
+                <a href="#projects" class="hover:text-slate-950">Projects</a>
+                <a href="#notes" class="hover:text-slate-950">Notes</a>
+                <a href="https://github.com/dreego-stack/dreego" class="rounded-full bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-700">Source</a>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="/login" class="text-sm font-medium text-slate-600 hover:text-slate-900 hidden sm:block">
-                    Sign in</a>
-                <a href="/signup" class="text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 px-4 py-2.5 rounded-lg transition-colors">
-                    Get started →</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-[1.2fr_.8fr] md:items-end md:py-28">
+            <div>
+                <p class="mb-6 font-mono text-xs uppercase tracking-[0.24em] text-emerald-700">A living demo</p>
+                <h1 class="max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl">Small apps. Real routes. Plain Go.</h1>
+                <p class="mt-8 max-w-xl text-lg leading-8 text-slate-600">This site is the Dreego demo lab: a few focused applications that show how the framework behaves when it is used instead of advertised.</p>
             </div>
-        </div>
-    </nav>
+            <aside class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">Current build</p>
+                <dl class="mt-6 space-y-4 text-sm">
+                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">Rendering</dt><dd class="font-medium">SSR / net/http</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">Routes</dt><dd class="font-medium">file-based</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-500">Output</dt><dd class="font-medium">generated Go</dd></div>
+                </dl>
+            </aside>
+        </section>
 
-    <@Hero
-        badge="New in 2026"
-        title="Build modern web apps with Go"
-        subtitle="Dreego compiles .dreego templates into native Go code — zero runtime overhead, single binary deploy, SSR-first."
-        cta1="Start building free"
-        cta2="Documentation →"
-    />
-
-    <section id="features" class="py-24 bg-slate-50/50">
-        <div class="max-w-6xl mx-auto px-6">
-            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">
-                Why Dreego</p>
-            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">
-                Everything you need</h2>
-            <div class="grid md:grid-cols-3 gap-px bg-slate-200 rounded-2xl overflow-hidden">
-                <@FeatureCard icon="⚡" title="Compile-Time" text=".dreego files become native Go code. No runtime template engine, no reflection, zero overhead." />
-                <@FeatureCard icon="📦" title="Single Binary" text="One file. Assets, templates, server — all compiled into a single deployable binary." />
-                <@FeatureCard icon="🎨" title="Components" text="Reusable, typed, scoped — build your UI library with .dreego components." />
-                <@FeatureCard icon="🔒" title="Type-Safe" text="Go catches errors at build time, not runtime. No stringly-typed anything." />
-                <@FeatureCard icon="🚀" title="SSR-First" text="Server-rendered HTML with context-aware escaping. Fast, SEO-friendly, and ready for your accessibility work." />
-                <@FeatureCard icon="🛠️" title="CLI Tooling" text="Scaffold, generate, format, build, deploy — everything from the terminal." />
-            </div>
-        </div>
-    </section>
-
-    <section id="pricing" class="py-24">
-        <div class="max-w-6xl mx-auto px-6">
-            <p class="text-sm font-bold text-blue-600 text-center mb-4 uppercase tracking-widest">
-                Example content</p>
-            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-16 tracking-tight">
-                Replace these placeholder plans with your own product</h2>
-            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-
-                <div class="bg-white rounded-2xl p-8 ring-1 ring-slate-200 flex flex-col">
-                    <h3 class="text-lg font-bold text-slate-900">
-                        Free</h3>
-                    <p class="text-sm text-slate-500 mt-1 mb-4">
-                        For side projects and learning.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold">$0</span><span class="text-slate-400">/mo</span></div>
-                    <ul class="space-y-3 text-sm text-slate-600 mb-8 flex-1">
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> Unlimited routes</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> Community support</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> MPL-2.0 framework license</li>
-                    </ul>
-                    <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">
-                        Get started</a>
+        <section id="projects" class="border-y border-slate-200 bg-white">
+            <div class="mx-auto max-w-6xl px-6 py-20">
+                <div class="mb-10 flex flex-wrap items-end justify-between gap-5">
+                    <div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">01 / projects</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">Two applications, one module.</h2></div>
+                    <p class="max-w-sm text-sm leading-6 text-slate-500">The demo repo can contain multiple website roots. Each one owns its routes and generated package.</p>
                 </div>
-
-                <div class="bg-slate-900 rounded-2xl p-8 ring-1 ring-slate-900 flex flex-col relative">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        POPULAR</div>
-                    <h3 class="text-lg font-bold text-white">
-                        Pro</h3>
-                    <p class="text-sm text-slate-400 mt-1 mb-4">
-                        For professional developers.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold text-white">$29</span><span class="text-slate-400">/mo</span></div>
-                    <ul class="space-y-3 text-sm text-slate-300 mb-8 flex-1">
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-bold">&check;</span> Everything in Free</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-bold">&check;</span> Priority support</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-bold">&check;</span> Placeholder benefit</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-bold">&check;</span> Advanced components</li>
-                    </ul>
-                    <a href="/signup" class="block text-center py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">
-                        Start free trial</a>
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 ring-1 ring-slate-200 flex flex-col">
-                    <h3 class="text-lg font-bold text-slate-900">
-                        Enterprise</h3>
-                    <p class="text-sm text-slate-500 mt-1 mb-4">
-                        For teams and organizations.</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold">$99</span><span class="text-slate-400">/mo</span></div>
-                    <ul class="space-y-3 text-sm text-slate-600 mb-8 flex-1">
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> Everything in Pro</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> Dedicated support</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> SSO + Audit logs</li>
-                        <li class="flex items-center gap-2">
-                            <span class="text-emerald-500 font-bold">&check;</span> Placeholder benefit</li>
-                    </ul>
-                    <a href="/signup" class="block text-center py-3 font-semibold rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 transition-colors text-slate-700">
-                        Contact sales</a>
+                <div class="grid gap-5 md:grid-cols-2">
+                    <a href="/" class="group rounded-3xl border border-slate-200 bg-[#f7f7f3] p-7 transition hover:-translate-y-1 hover:border-slate-400"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-700">www</span><span class="text-slate-400 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Demo Lab</h3><p class="mt-3 max-w-sm leading-7 text-slate-600">The public-facing index for experiments, route examples, and framework notes.</p></a>
+                    <a href="//saas.localhost:8080" class="group rounded-3xl border border-slate-200 bg-slate-950 p-7 text-white transition hover:-translate-y-1 hover:bg-slate-800"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-300">saas.localhost</span><span class="text-slate-500 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Ledgerboard</h3><p class="mt-3 max-w-sm leading-7 text-slate-300">A small subscription dashboard showing a real app-shaped Dreego project.</p></a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="py-24 bg-slate-900">
-        <div class="max-w-3xl mx-auto px-6 text-center">
-            <h2 class="text-4xl font-extrabold text-white mb-4 tracking-tight">
-                Ready to build something great?</h2>
-            <p class="text-lg text-slate-400 mb-10">
-                Start building with Dreego today — it's free and open source.</p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="/signup" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors text-lg shadow-xl shadow-blue-600/25">
-                    Get started free →</a>
-                <a href="/docs" class="px-8 py-3.5 ring-1 ring-slate-600 hover:ring-slate-400 text-slate-300 hover:text-white font-semibold rounded-xl transition-all text-lg">
-                    Documentation</a>
-            </div>
-        </div>
-    </section>
+        <section id="notes" class="mx-auto max-w-6xl px-6 py-20"><div class="grid gap-8 md:grid-cols-[.7fr_1.3fr]"><div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">02 / notes</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">What to look for.</h2></div><div class="grid gap-5 sm:grid-cols-3"><article><p class="font-mono text-sm text-emerald-700">routes/</p><h3 class="mt-3 font-semibold">One URL, one file</h3><p class="mt-2 text-sm leading-6 text-slate-500">Flat files and <code>+page.dreego</code> keep route ownership visible.</p></article><article><p class="font-mono text-sm text-emerald-700">methods</p><h3 class="mt-3 font-semibold">GET and POST together</h3><p class="mt-2 text-sm leading-6 text-slate-500">Method sections keep logic and rendered output scoped to the request.</p></article><article><p class="font-mono text-sm text-emerald-700">output</p><h3 class="mt-3 font-semibold">Go after generation</h3><p class="mt-2 text-sm leading-6 text-slate-500">The generated result stays close to ordinary Go and net/http.</p></article></div></div></section>
+    </main>
 
-    <footer class="py-16 border-t border-slate-200">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                        demo</h4>
-                    <p class="text-sm text-slate-500">
-                        Built with Dreego.</p>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                        Product</h4>
-                    <a href="#features" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        Features</a>
-                    <a href="#pricing" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        Pricing</a>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                        Resources</h4>
-                    <a href="/docs" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        Docs</a>
-                    <a href="/blog" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        Blog</a>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                        Company</h4>
-                    <a href="/about" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        About</a>
-                    <a href="/privacy" class="block text-sm text-slate-500 hover:text-slate-700 mb-2">
-                        Privacy</a>
-                </div>
-            </div>
-            <div class="border-t border-slate-200 pt-8 text-center">
-                <p class="text-sm text-slate-400">&copy; 2026 demo</p>
-            </div>
-        </div>
-    </footer>
-
+    <footer class="border-t border-slate-200"><div class="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-6 py-8 text-sm text-slate-500"><span class="font-mono">dreego / demo lab</span><span>Built to be inspected.</span></div></footer>
 </div>
