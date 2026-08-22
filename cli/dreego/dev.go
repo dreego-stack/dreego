@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,6 +13,8 @@ import (
 
 	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
 )
+
+const devServerStopTimeout = 2 * time.Second
 
 // detectChanges scans dir for .dreego files and compares their modtimes
 // against the previous map. It returns the changed files (relative paths)
@@ -106,8 +109,9 @@ func cmdDev(args []string) {
 		select {
 		case <-sig:
 			if server != nil && server.Process != nil {
-				server.Process.Signal(syscall.SIGTERM)
-				server.Process.Wait()
+				if err := stopServer(server, devServerStopTimeout); err != nil {
+					fmt.Fprintf(os.Stderr, "stop error: %v\n", err)
+				}
 			}
 			fmt.Println("\ndreego dev: stopped")
 			return
@@ -140,11 +144,10 @@ func startServer(bin string) (*exec.Cmd, error) {
 
 func restartServer(server **exec.Cmd, bin string) {
 	if *server != nil && (*server).Process != nil {
-		// Graceful stop: send TERM and reap the process with Wait(). This
-		// blocks until the server exits; a misbehaving server could hang the
-		// watcher, but that is acceptable for the dev tool.
-		(*server).Process.Signal(syscall.SIGTERM)
-		(*server).Wait()
+		if err := stopServer(*server, devServerStopTimeout); err != nil {
+			fmt.Fprintf(os.Stderr, "restart stop error: %v\n", err)
+			return
+		}
 	}
 	c, err := startServer(bin)
 	if err != nil {
@@ -152,4 +155,30 @@ func restartServer(server **exec.Cmd, bin string) {
 		return
 	}
 	*server = c
+}
+
+func stopServer(cmd *exec.Cmd, timeout time.Duration) error {
+	if cmd == nil || cmd.Process == nil {
+		return nil
+	}
+	if err := cmd.Process.Signal(syscall.SIGTERM); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		return err
+	}
+	done := make(chan struct{})
+	go func() {
+		_ = cmd.Wait()
+		close(done)
+	}()
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	select {
+	case <-done:
+		return nil
+	case <-timer.C:
+		if err := cmd.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+			return err
+		}
+		<-done
+		return nil
+	}
 }
