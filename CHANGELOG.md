@@ -1,3 +1,11 @@
+
+## v0.0.67 - 2026-08-22
+
+- Chore: move architecture decision records from `.agents/` to `_docs/decisions/` and remove the deprecated `.agents` knowledge base
+- Feat: support method-specific route sections in one `.dreego` file
+- Feat: support flat route files and `+page.dreego` URL ownership
+- Chore: defer `version: none` change files until a `version: patch` release triggers them, and block `version: major`/`minor` in main-push CI
+
 - Chore: reformat all `.dreego` files (block layout) and fix invalid single-brace expressions in the demo to `{{ }}`
 
 - Chore: remove completed todo items, trim dev-watcher item to open scope
