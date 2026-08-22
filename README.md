@@ -139,6 +139,22 @@ CLI was built from an untagged checkout), set `DREEGO_LOCAL_REPO=/path/to/dreego
 to point the scaffold at a local checkout via a `replace` directive. This is a
 developer escape hatch and is not part of the canonical path.
 
+## VS Code Extension
+
+Syntax highlighting, snippets, and `dreego.config.json` validation for
+`.dreego` files. Install via a symlinked clone — always up to date:
+
+```sh
+git clone --depth 1 https://github.com/dreego-stack/vscode-dreego ~/dev/vscode-dreego
+cd ~/dev/vscode-dreego
+./install.sh
+```
+
+Restart VS Code afterwards. Uninstall: `./install.sh uninstall` in the same
+directory. The install script links `~/.vscode/extensions/dreego` to the
+checkout, so use a permanent directory (not `/tmp`, which is cleared on
+reboot). Source: https://github.com/dreego-stack/vscode-dreego
+
 ## Architecture
 
 A website lives in its own directory — any name, marked by a

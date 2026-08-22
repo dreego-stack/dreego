@@ -30,10 +30,10 @@ test:
 		dreego-test
 
 dx:
-	@EXT_DIR="$$(pwd)/.vscode/extensions/dreego"; \
+	@EXT_DIR="$$(pwd)/../vscode-dreego"; \
 	TARGET="$$HOME/.vscode/extensions/dreego"; \
 	rm -rf "$$TARGET" 2>/dev/null; \
-	ln -s "$$EXT_DIR" "$$TARGET" && echo "dreego extension installed — restart VS Code"
+	ln -s "$$EXT_DIR" "$$TARGET" && echo "dreego extension installed from vscode-dreego (https://github.com/dreego-stack/vscode-dreego) — restart VS Code"
 
 dx-clean:
 	@rm -rf "$$HOME/.vscode/extensions/dreego" 2>/dev/null
