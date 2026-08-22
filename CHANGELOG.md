@@ -1,4 +1,9 @@
 
+## v0.0.66 - 2026-08-22
+
+- Feat: move the VS Code extension to its own repository (`github.com/dreego-stack/vscode-dreego`) with shell-based install
+- Docs: README section for the VS Code extension install
+
 ## v0.0.65 - 2026-08-21
 
 - Breaking: generated output is now per-directory — `dreego/gen/` is gone; every directory with `.dreego` sources gets its own `dree.go` (`www/routes/dree.go`, `www/components/dree.go`, `www/layouts/dree.go`, plus `www/dree.go` with `Register(app)`)
