@@ -52,15 +52,16 @@ func (p *Parser) Parse() (*File, error) {
 			if err != nil {
 				return nil, err
 			}
-			if p.templateFromDiv {
-				return nil, fmt.Errorf("duplicate <div> section at position %d", tok.Pos)
+			for _, existing := range file.Templates {
+				if existing.Method == section.Method {
+					return nil, fmt.Errorf("duplicate <div> section for method %s at position %d", section.Method, tok.Pos)
+				}
 			}
-			if file.Template == nil {
+			if file.Template == nil && section.Method == "GET" {
 				file.Template = section
-				p.templateFromDiv = true
-			} else {
-				file.Template.Nodes = append(file.Template.Nodes, section.Nodes...)
 			}
+			file.Templates = append(file.Templates, *section)
+			p.templateFromDiv = true
 		case "head":
 			section, err := p.parseNonDivSection("head")
 			if err != nil {

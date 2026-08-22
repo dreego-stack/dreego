@@ -6,6 +6,47 @@ import (
 )
 
 func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+	if len(file.FormActions) > 0 {
+		return generateMethodHandler(gen, file, layout, pkgName, baseName, pattern, scopeHash)
+	}
+	methods := fileRegisteredMethods(file)
+	var src, regs strings.Builder
+	for _, method := range methods {
+		copy := *file
+		copy.Go = nil
+		for _, section := range file.Go {
+			if section.Method == method || (method == "GET" && section.Method == "") {
+				copy.Go = append(copy.Go, section)
+			}
+		}
+		if len(copy.Go) == 0 {
+			copy.Go = []GoSection{{Method: method}}
+		}
+		copy.Template = templateForMethod(file, method)
+		part, reg, err := generateMethodHandler(gen, &copy, layout, pkgName, baseName, pattern, scopeHash)
+		if err != nil {
+			return "", "", err
+		}
+		src.WriteString(part)
+		regs.WriteString(reg)
+	}
+	return src.String(), regs.String(), nil
+}
+
+func templateForMethod(file *File, method string) *TemplateSection {
+	for i := range file.Templates {
+		if file.Templates[i].Method == method {
+			section := file.Templates[i]
+			return &section
+		}
+	}
+	if len(file.Templates) > 0 {
+		return nil
+	}
+	return file.Template
+}
+
+func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Go {
 		if g.ContentType != "" && g.ContentType != "custom" {
