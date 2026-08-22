@@ -1,4 +1,8 @@
 
+## v0.0.68 - 2026-08-22
+
+- Test: add a core coverage measurement and CI gate
+
 ## v0.0.67 - 2026-08-22
 
 - Chore: move architecture decision records from `.agents/` to `_docs/decisions/` and remove the deprecated `.agents` knowledge base
