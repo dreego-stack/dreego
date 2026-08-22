@@ -1,3 +1,5 @@
+- Chore: reformat all `.dreego` files (block layout) and fix invalid single-brace expressions in the demo to `{{ }}`
+
 - Chore: remove completed todo items, trim dev-watcher item to open scope
 - Chore: drop stale `.gitattributes` entries (`.vscode`, `Dockerfile`, `go.work`)
 
