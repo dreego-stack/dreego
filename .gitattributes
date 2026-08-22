@@ -1,13 +1,10 @@
 _tests export-ignore
 _docs export-ignore
 .agents export-ignore
-.vscode export-ignore
 .kilo export-ignore
 .tmp export-ignore
 AGENTS.md export-ignore
 _todo export-ignore
 Makefile export-ignore
 demo export-ignore
-Dockerfile export-ignore
-go.work export-ignore
 smd.toml export-ignore

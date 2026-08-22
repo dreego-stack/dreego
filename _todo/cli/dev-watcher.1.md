@@ -2,13 +2,11 @@
 area: dx
 phase: pre-v0.1
 ---
-# Dev watcher skips and restart timeout
+# Dev watcher restart kill timeout
 
 ## Goal
-The dev watcher skips `.git`, `node_modules`, and build directories. Add a kill
-timeout to `restartServer`.
+`restartServer` must not hang the watcher when a server ignores SIGTERM.
 
 ## Acceptance criteria
-- The watcher skips `.git`, `node_modules`, and build dirs.
 - `restartServer` has a kill timeout.
-- A watcher test covers the skips.
+- A watcher test covers the timeout.
