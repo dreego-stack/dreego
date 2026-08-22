@@ -51,6 +51,15 @@ run_suite() {
         echo "==> PASS <=> No binary files <========="
     fi
 
+    if ! out=$(sh "$DIR/sh/import-check.sh" 2>&1); then
+        echo "$out" | grep -E '^(FAIL|->)' || true
+        echo "==> FAIL   <=>  import-check <==========="
+        FAIL=$((FAIL + 1))
+    else
+        echo "$out" | grep -E '^PASS' || true
+        echo "==> PASS <=> import-check <========="
+    fi
+
     if ! (cd "$REPO_DIR" && python3 _scripts/release-prep-test.py > "$run_dir/release-prep-test.out" 2>&1); then
         echo "-> FAIL -> release-prep contract tests"
         cat "$run_dir/release-prep-test.out"

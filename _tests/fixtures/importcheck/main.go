@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
 
-	"demo/www"
 	dreego "github.com/dreego-stack/dreego/core"
+	"importcheck/www"
 )
 
 func main() {
@@ -15,7 +16,11 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	if err := app.Listen(":8080"); err != nil {
+	addr := ":8080"
+	if port := os.Getenv("PORT"); port != "" {
+		addr = ":" + port
+	}
+	if err := app.Listen(addr); err != nil {
 		log.Fatal(err)
 	}
 }

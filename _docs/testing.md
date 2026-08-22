@@ -7,6 +7,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 - `internal/transpiler/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./internal/transpiler/...`).
 - `core/*_test.go` and `core/internal/*/*_test.go` — unit tests for the runtime framework facade and its internal packages (run with `go test ./core/...`).
 - `_tests/go/*_test.go` — integration tests that build a real project, run the CLI, and assert on generated code and HTTP behavior.
+- `_tests/sh/*.sh` — shell-level black-box checks run as part of `make test` (see below).
 - `dreegotest/` — shared helpers: `ProjectDir`, `RunCLI`, `Build`, `MustBuild`, `NewApp`, `RenderComponent`.
 
 ## Areas Covered
@@ -44,6 +45,18 @@ Props, self-closing calls, default and named slots, scoped CSS, nested component
 ### Bugs (Regression)
 Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, `core/internal/*/*_test.go`, or `internal/transpiler/*_test.go`.
 
+### Shell Checks (`_tests/sh/`)
+
+`_tests/test.sh` also runs shell-level black-box checks. Each script builds a
+fixture app, starts it, and asserts on the HTTP response — a browser-free
+counterpart to the Go integration tests.
+
+- `import-check.sh` — builds `_tests/fixtures/importcheck` (a page whose
+  `<head>` declares the Tailwind CDN script), starts the server, and verifies
+  the rendered HTML still contains the `<script src="https://cdn.tailwindcss.com">`
+  tag. Set `DREEGO_BIN` to reuse an already-built CLI binary, or the script
+  builds one itself.
+
 ## Accessibility Tests
 
 - CLI output is color-free and screen-reader-linear (`_tests/go/cli_accessibility_test.go`).
@@ -58,6 +71,7 @@ make test                              # Docker-based full suite
 go test ./core/...                     # runtime unit tests only
 go test ./internal/transpiler/...     # transpiler unit tests only
 go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for CLI builds)
+sh _tests/sh/import-check.sh           # Tailwind CDN import black-box check
 ```
 
 ## See Also
