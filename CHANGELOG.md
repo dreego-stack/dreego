@@ -1,4 +1,12 @@
 
+## v0.0.70 - 2026-08-23
+
+- Feat: add accessible layout shell to default (init) blueprint with skip link, main landmark, and lang attribute
+- Feat: add aria-label and skip link to PageShell component fixture
+- Docs: add Accessibility section to components.md covering nav labels, landmarks, skip links, and decorative elements
+- Test: add a11y_runtime_test.go asserting rendered HTML retains accessibility attributes
+- Test: strengthen cli_accessibility_test to verify default blueprint skip-link and main landmark
+
 ## v0.0.69 - 2026-08-23
 
 - Bug: prevent the dev watcher from hanging when a server ignores SIGTERM
