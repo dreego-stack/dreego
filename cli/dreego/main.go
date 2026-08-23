@@ -142,6 +142,10 @@ func cmdBuildE(args []string) error {
 		return err
 	}
 
+	if err := runBuildHooks(wd()); err != nil {
+		return err
+	}
+
 	projDir, pkg, name := findMain()
 	outDir := filepath.Join(projDir, "build", "bin")
 	os.MkdirAll(outDir, 0755)
