@@ -135,6 +135,73 @@ for the exact context rules and the `|raw` opt-in.
 8. **Typed props** — `prop={expression}` passes a Go expression value without converting it to a string.
 9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
 
+## Accessibility
+
+Components are the building blocks users compose into pages. Accessible
+components make accessible pages possible; inaccessible components make them
+impossible.
+
+### Required defaults
+
+Every component that renders a landmark or interactive element should follow
+these defaults:
+
+- **`<nav>`** — add `aria-label` (e.g. `aria-label="Primary"`) so screen readers
+  announce the navigation region by name. Multiple `<nav>` elements on a page
+  require distinct labels.
+- **`<main>`** — give it `id="main"` so a page-level skip link (`<a href="#main">`)
+  can jump past repeated headers. One `<main>` per page.
+- **Headings** — use heading levels in document order (`h1` then `h2` then `h3`).
+  Do not skip levels for styling; use CSS for size.
+- **Sections with headings** — when a `<section>` has a visible heading, link
+  them with `aria-labelledby`:
+  ```dreego
+  <section aria-labelledby="features-title">
+      <h2 id="features-title">Features</h2>
+  </section>
+  ```
+- **Images** — every `<img>` needs `alt`. Decorative images use `alt=""`.
+  The transpiler emits a diagnostic when `alt` is missing.
+- **Form controls** — every `<input>` needs an associated `<label>` (via
+  `for`/`id` or wrapping). The transpiler emits a diagnostic when no label is
+  found.
+- **Buttons vs links** — use `<button>` for actions, `<a>` for navigation.
+  Do not simulate buttons with `<div onclick>`.
+
+### Skip link pattern
+
+A page shell or layout should include a skip link as the first focusable
+element so keyboard users can jump to the main content:
+
+```dreego
+Component PageShell (title string)
+
+<div>
+    <a href="#main" class="skip-link">skip to content</a>
+    <header>...</header>
+    <main id="main">{#slot}</main>
+</div>
+```
+
+Visually hide the link until it receives focus:
+
+```css
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100; }
+```
+
+### Decorative elements
+
+Purely decorative `<div>`/`<span>` blocks (icons drawn with CSS, color swatches,
+terminal-window chrome) should carry `aria-hidden="true"` so assistive
+technology skips them.
+
+Dreego does not make arbitrary user applications automatically accessible.
+These defaults remove the common, mechanical barriers; semantic intent and
+testing remain the author's responsibility. See
+[Accessibility](https://github.com/dreego-stack/dreego/blob/main/_docs/accessibility.md)
+for the full guide.
+
 ## Named Prop Contract
 
 Component props are **named** and **order-independent**. The set of props passed in a call is validated against the component declaration at `dreego generate`.
