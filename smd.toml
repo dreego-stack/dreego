@@ -1,0 +1,29 @@
+[project]
+  name = "dreego"
+
+[container]
+  workdir = "/app"
+
+[security]
+  allow_env = []
+
+[volume]
+  enabled = false
+  [volume.packages]
+
+[port]
+
+[session]
+  ports = []
+
+[live]
+  mount_pwd = true
+  ports = ["8080:8080"]
+
+[temp]
+  allow_env = []
+  mount_pwd = true
+  read_only = false
+
+[dockerfile]
+  lines = ["FROM docker.io/golang:1.22-alpine", "RUN apk add --no-cache curl gcc git make musl-dev python3"]
