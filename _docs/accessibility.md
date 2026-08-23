@@ -30,9 +30,7 @@ Limits: the checker scans static markup in `.dreego` templates. Dynamically comp
 - Routes and components whose images include an `alt` attribute.
 - Visible focus styles (Tailwind `focus:` variants) and semantic landmarks.
 
-`dreego init` intentionally creates a minimal route without a shared layout.
-Add the landmarks, navigation, skip link, and focus styles required by the
-application before shipping it.
+`dreego init` ships a minimal accessible layout (`www/layouts/default.dreego`) with a skip link, `<main id="main">` landmark, and `<html lang="en">`. The route stays intentionally small (a heading and a paragraph) so you can see the scaffolded structure. Add navigation, footer, and any application-specific landmarks as you build.
 
 ## Documentation
 
