@@ -1,4 +1,9 @@
 
+## v0.0.69 - 2026-08-23
+
+- Bug: prevent the dev watcher from hanging when a server ignores SIGTERM
+- Chore: finish the remaining pre-v0.1 hardening and make the smd test environment reproducible
+
 ## v0.0.68 - 2026-08-22
 
 - Test: add a core coverage measurement and CI gate
