@@ -9,7 +9,9 @@ timestamp: 2026-07-28T00:00:00Z
 # SSR-First Architecture
 
 **Date:** 2026-07-28
-**Status:** Accepted — SSR-first remains the v0.1 contract; see note below
+**Status:** Accepted for the v0.1 foundation; post-v1 target restriction
+superseded by
+[Target-neutral application and first-party targets](target-neutral-application-and-first-party-targets.md)
 
 > **Historical note:** The interactivity stack is narrowed for v0.1. HTMX,
 > Alpine.js, and plain JavaScript remain the supported progressive-enhancement
@@ -61,4 +63,6 @@ Interactivity comes not through a client-side framework, but through:
 - No client-side router needed
 - No API layer between template and database
 - HTMX + Alpine.js are the supported progressive-enhancement path; plain JavaScript is always available
-- Historical: V2: SSG (Static Site Generation) for purely static pages (deferred past v1; see [ssg-wails-v2](ssg-wails-v2.md))
+- Planned v0.x: target-neutral rendering, SSG, and Wails build on the proven SSR
+  foundation; see
+  [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).

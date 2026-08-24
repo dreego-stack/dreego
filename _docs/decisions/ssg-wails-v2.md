@@ -9,14 +9,13 @@ timestamp: 2026-07-28T00:00:00Z
 # SSG & Wails Integration in V2
 
 **Date:** 2026-07-28
-**Status:** Superseded (historical) — see note below
+**Status:** Superseded by
+[Target-neutral application and first-party targets](target-neutral-application-and-first-party-targets.md)
 
-> **Superseded:** The multi-target timeline changed. Until v1, SSR is the only
-> production target and the core priority. SSG and expanded Wails support belong
-> after v1, and the "architecture preparation in V1" (Target interface, reserved
-> CLI flags) is no longer required — extension points are preserved only where
-> inexpensive, without speculative abstractions. See AGENTS.md "Product Focus"
-> and [_docs/roadmap.md](../../_docs/roadmap.md).
+> **Superseded:** SSR remains the v0.1 foundation, but target-neutral rendering,
+> SSG, and Wails are now planned for the long v0.x line. The new direction uses
+> explicit first-party target packages and proven capabilities rather than the
+> universal `Target` interface proposed here.
 
 ## Context
 

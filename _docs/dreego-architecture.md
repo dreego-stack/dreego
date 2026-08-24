@@ -8,6 +8,15 @@ timestamp: 2026-07-31T07:00:00Z
 ---
 # Dreego Architecture
 
+> **Current and planned boundaries:** This document primarily explains the
+> released SSR implementation and therefore uses the current `<go>`, `<div>`,
+> and `<script>` syntax. The accepted v0.x direction introduces a target-neutral
+> App and renderer, explicit SSR/SSG/Wails target packages, DreeJS, and the
+> planned `<server>`, `<body>`, and `<client>` names. See the
+> [target decision](decisions/target-neutral-application-and-first-party-targets.md),
+> [section decision](decisions/semantic-sections-and-language-processors.md),
+> and [`_plan/`](../_plan/README.md).
+
 > **Historical note:** The layered architecture is current. The monorepo plugin
 > layout (`plugins/` + `go.work`, v0.0.21) is superseded — official plugins use
 > separate repositories and modules. Tailwind is not a core dependency; it is a

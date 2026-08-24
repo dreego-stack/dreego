@@ -1,8 +1,8 @@
 # Compatibility Policy
 
 This document defines when and how Dreego may change its public API. It is the
-contract that governs the transition from the pre-v0.1 phase into the v0.1
-stability promise and beyond.
+contract that governs the transition from the pre-v0.1 phase into the v0.1 SSR
+baseline and eventually the v1 stability promise.
 
 ## Scope
 
@@ -20,6 +20,10 @@ change is required to harden the SSR core. This is the phase in which the API
 is reviewed against real applications and plugins and prematurely frozen
 interfaces are revised.
 
+The planned semantic-section rename from `<go>`, `<div>`, and root `<script>`
+to `<server>`, `<body>`, and `<client>` must complete before v0.1. It is an
+intentional breaking change and does not receive compatibility aliases.
+
 Two constraints apply even before v0.1:
 
 1. **No speculative exports.** An exported identifier must be exercised by a
@@ -29,11 +33,13 @@ Two constraints apply even before v0.1:
    with a `.changes/*.md` changelog line that states what changed and why. The
    changelog is the migration record.
 
-## The v0.1 stability promise
+## The v0.1 SSR promise
 
-At v0.1, the following contracts are declared stable for the SSR target. Dreego
-commits to not breaking them without a documented deprecation and migration
-path:
+At v0.1, the following contracts form the supported SSR baseline. Dreego
+commits to changing them only through the documented pre-v1 process below. The
+v0.1 label does not freeze the current `/core` import path until v1: the planned
+v0.2 target-neutral root-package migration is an explicit pre-v1 breaking
+change with its own migration guide.
 
 - `App` and its configuration, registration, and lifecycle methods
   (`New`, `Register`, `RegisterRedirect`, `RegisterRewrite`, `RegisterStatic`,
@@ -49,7 +55,8 @@ path:
   `SafeStyle`, `SafeRefresh`, `SafeRaw`).
 - The middleware constructors (`RequestLogging`, `Compress`, `Recovery`,
   `RequestID`, `CSRF`, `MaxBodyReader`).
-- The `.dreego` template language and the generated `www.Register(app)` contract.
+- The post-migration `.dreego` template language and generated
+  `www.Register(app)` contract.
 - The `dreego.config.json` schema.
 
 ## After v0.1, before v1
@@ -58,8 +65,9 @@ Between v0.1 and v1, the stable contracts above may still change, but only
 through a documented process:
 
 1. The change is announced in the changelog with a clear migration note.
-2. Where practical, the old identifier is deprecated and kept for at least one
-   minor release before removal.
+2. Where practical, the old identifier is deprecated before removal. A
+   deliberate architecture migration may remove an obsolete package atomically
+   when wrappers would preserve conflicting ownership or semantics.
 3. Breaking changes are batched into minor releases, never silently shipped in
    a patch.
 

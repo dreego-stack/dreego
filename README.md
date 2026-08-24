@@ -1,6 +1,9 @@
 # dreego — Go Web Framework
 
-SSR-First web framework for Go. Write `.dreego` files, transpile to Go code, deploy as single binary. File-based routing, built-in form handling, compile-time validation — no runtime magic.
+SSR-first web framework and evolving Go-native application platform. Write
+`.dreego` files, transpile to Go code, and deploy the current SSR target as a
+single binary. File-based routing, built-in form handling, and compile-time
+validation work without runtime template parsing.
 
 ```html
 <!-- www/routes/login/post.dreego -->
@@ -38,10 +41,42 @@ dreego new myapp && cd myapp && dreego generate && go run .
 Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing. Your app is a plain Go binary using `net/http`. See [Benchmarks](_docs/benchmarks.md) for measured code-generation and request performance.
 
 Four principles:
-1. **SSR-First** — Pages render server-side. HTMX/Alpine.js for progressive enhancement, not required.
+1. **SSR-First, Not SSR-Only** — SSR is the current production foundation.
+   Target-neutral rendering, SSG, Wails, and optional DreeJS browser behavior
+   are planned for the long v0.x line.
 2. **File-Based** — The current pre-v0.1 router maps `www/routes/login/get.dreego` to `GET /login`. The accepted v0.1 migration will use one route file per URL with method-specific sections.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
+
+### Direction after v0.1
+
+Dreego is intended to let one typed application and component model serve
+multiple explicit first-party targets:
+
+```text
+target-neutral App + renderer
+├── target/ssr
+├── target/ssg
+└── target/wails
+
+optional browser behavior
+└── DreeJS: local, fetch, poll, stream, live
+```
+
+The future root sections describe purpose while an optional `lang` selects the
+source processor: `server`, `head`, `body`, `style`, and `client`. The currently
+released syntax remains `<go>`, `<head>`, `<div>`, `<style>`, and `<script>`
+until the pre-v0.1 migration is implemented.
+
+Static components produce no DreeJS runtime. Components that request browser
+behavior receive only the modules they use. JavaScript remains the built-in,
+dependency-free client language; external plugins may provide checked
+TypeScript, Markdown bodies, Lua-to-JavaScript, or other processors without
+adding their dependencies to the Dreego core.
+
+See the public [Roadmap](_docs/roadmap.md), detailed
+[implementation plans](_plan/README.md), and accepted
+[target architecture decision](_docs/decisions/target-neutral-application-and-first-party-targets.md).
 
 ## Features
 
@@ -190,6 +225,12 @@ Multiple websites can share one module — each directory with a
 
 Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`; Core stays dependency-free and never imports a plugin package.
 
+Provider integrations such as Stripe, MapLibre, auth, storage, Tailwind, SSE,
+and WebSockets remain external. Optional language processors such as
+TypeScript, Markdown, and Lua also remain external and may manage pinned tools
+after explicit approval. SSR, SSG, Wails, and DreeJS stay in the monorepo
+because they share the compiler and rendering contracts.
+
 ```
 github.com/dreego-stack/
 ├── dreego/             # main repo (core + CLI, single module)
@@ -235,6 +276,7 @@ github.com/dreego-stack/
 | `_docs/plugins.md` | Plugin model, middleware and route hooks |
 | `_docs/compatibility.md` | Breaking-change policy and the v0.1 promise |
 | `_docs/roadmap.md` | Product direction and release phases |
+| `_plan/README.md` | Detailed phased architecture and implementation guidance |
 
 ### Testing & Ops
 

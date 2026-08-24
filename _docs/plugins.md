@@ -49,17 +49,24 @@ Registration order is source order. Duplicate routes fail instead of silently
 overriding another handler. Registration after `Build`, `Handler`, `ServeHTTP`,
 or `Listen` returns `dreego.ErrAppBuilt`.
 
-## Core boundary
+## Framework boundary
 
-Core contains the SSR capabilities required by a normal Dreego application.
-Optional capabilities, provider integrations, SSE, and WebSockets live in
-separate plugin repositories, even when an implementation currently needs only
-the standard library.
+The current core contains the SSR capabilities required by a normal Dreego
+application. Planned first-party SSR, SSG, Wails, and DreeJS capabilities stay
+in the monorepo because they share compiler, renderer, asset, and diagnostic
+contracts. Optional provider integrations, SSE, and WebSockets live in separate
+plugin repositories, even when an implementation currently needs only the
+standard library.
 
 A provider-neutral interface is added to Core only after at least two real
 implementations demonstrate the same small contract. Assets and lifecycle hooks
 remain plugin-owned until real plugins prove that an App-level contract is
 necessary. Plugin contracts remain provisional until v1.
+
+Optional language processors such as TypeScript, Markdown, and Lua also live in
+separate repositories. They will use a versioned compiler-process boundary and
+may manage pinned external tools after explicit approval. They do not execute
+inside core through Go's native `plugin` package or an embedded Lua VM.
 
 ## Repository layout
 

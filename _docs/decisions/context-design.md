@@ -11,14 +11,17 @@ timestamp: 2026-07-28T00:00:00Z
 **Date:** 2026-07-28
 **Status:** Accepted — Context interface is current; see note below
 
-> **Historical note:** The slim `dreego.Context` interface and the rule that
-> `<go>` blocks never depend on a hard `*http.Request` remain current. The
-> three concrete target structs (SSR/SSG/Wails) are superseded: until v1, SSR
-> is the only production target and `SSRContext` is the concrete context. See
-> [ssg-wails-v2](ssg-wails-v2.md) and [_docs/runtime.md](../../_docs/runtime.md).
+> **Current direction:** The slim `dreego.Context` interface and the rule that
+> server sections never depend on a hard `*http.Request` remain current. The
+> three concrete target structs below are historical sketches, not accepted
+> APIs. Planned v0.x work uses explicit host capabilities and must not model a
+> non-HTTP render as an SSR context with nil fields. See
+> [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output1.md)
 
-**Current state: SSR-only until v1.** `SSRContext` is the only concrete context in use; the `SSGContext` and `WailsContext` examples below are historical and superseded. See [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
+**Current state:** `SSRContext` is the only concrete context in use. SSG and
+Wails are planned after the target-neutral render foundation; the examples
+below remain historical and superseded.
 
 ## Context
 
