@@ -9,6 +9,6 @@ import (
 func TestTranspilerComment(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>T</title></head>
-<go>x := "hi"</go>
-<div><p>{{ x }}</p></div>`)
+<server>x := "hi"</server>
+<body><p>{{ x }}</p></body>`)
 }

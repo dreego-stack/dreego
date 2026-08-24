@@ -10,15 +10,15 @@ import (
 func TestBugLayoutRouteHeadMerge(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/layouts/default.dreego": `<div><html>
+		"www/layouts/default.dreego": `<body><html>
 <head>
 <meta charset="utf-8">
 {#head}
 </head>
 <body><main>{#slot}</main></body>
-</html></div>`,
+</html></body>`,
 		"www/routes/get.dreego": `<head><title>Merged Title</title><script src="route-script.js"></script></head>
-<div><p>page content</p></div>`,
+<body><p>page content</p></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, `<meta charset="utf-8">`) {

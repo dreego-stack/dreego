@@ -32,10 +32,10 @@ func TestGenSelfCloseComponentPropagatesError(t *testing.T) {
 func TestGenFormBindErrorDoesNotDiscardRenderError(t *testing.T) {
 	file := &File{
 		FormActions: []string{"Save"},
-		Go: []GoSection{
+		Server: []ServerSection{
 			{Code: "type SaveForm struct {\n\tName string\n}\nfunc Save(c dreego.Context, form SaveForm) error {\n\treturn nil\n}"},
 		},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<form g-action=\"Save\"><input name=\"name\"></form>"},
 			},
@@ -59,10 +59,10 @@ func TestGenFormBindErrorDoesNotDiscardRenderError(t *testing.T) {
 func TestGenFormValidationErrorDoesNotDiscardRenderError(t *testing.T) {
 	file := &File{
 		FormActions: []string{"Save"},
-		Go: []GoSection{
+		Server: []ServerSection{
 			{Code: "type SaveForm struct {\n\tName string `validate:\"required\"`\n}\nfunc Save(c dreego.Context, form SaveForm) error {\n\treturn nil\n}"},
 		},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<form g-action=\"Save\"><input name=\"name\"></form>"},
 			},
@@ -82,7 +82,7 @@ func TestGenFormValidationErrorDoesNotDiscardRenderError(t *testing.T) {
 
 func TestGenRouteHandlerDoesNotDiscloseInternalError(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>ok</p>"},
 			},
@@ -102,7 +102,7 @@ func TestGenRouteHandlerDoesNotDiscloseInternalError(t *testing.T) {
 
 func TestGenErrorHandlerDoesNotDiscloseInternalError(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>oops</p>"},
 			},
@@ -122,7 +122,7 @@ func TestGenErrorHandlerDoesNotDiscloseInternalError(t *testing.T) {
 
 func TestGenRouteHandlerChecksRenderError(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>ok</p>"},
 			},

@@ -10,9 +10,9 @@ import (
 func TestBugHeadExpression(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>doc := struct{ Title string }{Title: "My Docs Title"}</go>
+		"www/routes/get.dreego": `<server>doc := struct{ Title string }{Title: "My Docs Title"}</server>
 <head><title>{{ doc.Title }}</title></head>
-<div><h1>{{ doc.Title }}</h1></div>`,
+<body><h1>{{ doc.Title }}</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, "<title>My Docs Title</title>") {

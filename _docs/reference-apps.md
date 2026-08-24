@@ -15,7 +15,7 @@ Teaches the smallest possible Dreego app:
 
 - `www/routes/get.dreego` — one route file per URL, one method per file
 - `<head>` with `<title>` and meta tags
-- `<go>` block with a local variable rendered via `{{ message }}`
+- `<server>` block with a local variable rendered via `{{ message }}`
 - `www/routes/about/get.dreego` — nested directory route
 - `www/routes/users/[id]/get.dreego` — dynamic segment with `c.Param("id")`
 - `www/routes/404.dreego` — custom not-found page

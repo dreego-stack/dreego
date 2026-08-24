@@ -5,16 +5,16 @@ import (
 	"testing"
 )
 
-// splitGoSections with hasFormActions=true must move type/func declarations into
+// splitServerSections with hasFormActions=true must move type/func declarations into
 // pkgCode and inline the rest, skipping typed/custom sections.
-func TestSplitGoSectionsDeclarationWithFormActions(t *testing.T) {
-	sections := []GoSection{
+func TestSplitServerSectionsDeclarationWithFormActions(t *testing.T) {
+	sections := []ServerSection{
 		{Code: "type Item struct {\n\tName string\n}", ContentType: ""},
 		{Code: "x := 1\n_ = x", ContentType: ""},
 		{Code: "c.W.Write([]byte(\"{}\"))", ContentType: "json"},
 		{Code: "// custom", ContentType: "custom"},
 	}
-	pkg, inline := splitGoSections(sections, true)
+	pkg, inline := splitServerSections(sections, true)
 
 	if !strings.Contains(pkg, "type Item struct") {
 		t.Errorf("declaration must go to pkgCode, got pkg:\n%s", pkg)
@@ -34,12 +34,12 @@ func TestSplitGoSectionsDeclarationWithFormActions(t *testing.T) {
 	}
 }
 
-// splitGoSections without form actions must inline declarations too.
-func TestSplitGoSectionsNoFormActions(t *testing.T) {
-	sections := []GoSection{
+// splitServerSections without form actions must inline declarations too.
+func TestSplitServerSectionsNoFormActions(t *testing.T) {
+	sections := []ServerSection{
 		{Code: "func helper() {}", ContentType: ""},
 	}
-	pkg, inline := splitGoSections(sections, false)
+	pkg, inline := splitServerSections(sections, false)
 	if pkg != "" {
 		t.Errorf("without form actions no pkgCode expected, got: %q", pkg)
 	}

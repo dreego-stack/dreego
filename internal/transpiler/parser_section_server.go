@@ -5,18 +5,18 @@ import (
 	"strings"
 )
 
-func (p *Parser) parseGoSection() (*GoSection, error) {
+func (p *Parser) parseServerSection() (*ServerSection, error) {
 	p.advance()
 	var content strings.Builder
 
 	for {
 		tok := p.current()
 		if tok.Type == TokenEOF {
-			return nil, fmt.Errorf("unclosed <go> at position %d", tok.Pos)
+			return nil, fmt.Errorf("unclosed <server> at position %d", tok.Pos)
 		}
-		if tok.Type == TokenTagClose && tok.Tag == "go" {
+		if tok.Type == TokenTagClose && tok.Tag == "server" {
 			p.advance()
-			return &GoSection{Code: strings.TrimSpace(content.String())}, nil
+			return &ServerSection{Code: strings.TrimSpace(content.String())}, nil
 		}
 		if tok.Type == TokenTagOpen {
 			content.WriteString("<" + tok.Tag)
@@ -37,7 +37,7 @@ func (p *Parser) parseGoSection() (*GoSection, error) {
 	}
 }
 
-func (p *Parser) parseNonDivSection(tag string) (string, error) {
+func (p *Parser) parseRawSection(tag string) (string, error) {
 	p.advance()
 	var content strings.Builder
 	depth := 1
@@ -72,7 +72,7 @@ func (p *Parser) parseNonDivSection(tag string) (string, error) {
 		} else if tok.Type == TokenText {
 			content.WriteString(tok.Value)
 		} else if tok.Type == TokenExpression {
-			content.WriteString("{" + tok.Value + "}")
+			content.WriteString("{{" + tok.Value + "}}")
 		}
 		p.advance()
 	}

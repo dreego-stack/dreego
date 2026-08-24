@@ -91,57 +91,57 @@ func TestScanFormActionsNoAction(t *testing.T) {
 }
 
 func TestFindFormStruct(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "func save(w http.ResponseWriter, f MyForm) {}"},
 	}
-	result := findFormStruct(goSections, "save")
+	result := findFormStruct(serverSections, "save")
 	if result != "MyForm" {
 		t.Errorf("expected 'MyForm', got '%s'", result)
 	}
 }
 
 func TestFindFormStructMissing(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "func save(w http.ResponseWriter) {}"},
 	}
-	result := findFormStruct(goSections, "save")
+	result := findFormStruct(serverSections, "save")
 	if result != "" {
 		t.Errorf("expected '', got '%s'", result)
 	}
 }
 
 func TestFindFormHandler(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "func save(w http.ResponseWriter, f MyForm) {}"},
 	}
-	if !findFormHandler(goSections, "save") {
+	if !findFormHandler(serverSections, "save") {
 		t.Error("expected handler to be found")
 	}
 }
 
 func TestFindFormHandlerMissing(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "func other(w http.ResponseWriter) {}"},
 	}
-	if findFormHandler(goSections, "save") {
+	if findFormHandler(serverSections, "save") {
 		t.Error("expected handler to not be found")
 	}
 }
 
 func TestHasValidateTagScoped(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "type MyForm struct {\n\tName string `validate:\"required\"`\n}"},
 	}
-	if !hasValidateTag(goSections, "MyForm") {
+	if !hasValidateTag(serverSections, "MyForm") {
 		t.Error("expected validate tag to be found")
 	}
 }
 
 func TestHasFormTagScoped(t *testing.T) {
-	goSections := []GoSection{
+	serverSections := []ServerSection{
 		{Code: "type MyForm struct {\n\tName string `form:\"name\"`\n}"},
 	}
-	if !hasFormTag(goSections, "MyForm") {
+	if !hasFormTag(serverSections, "MyForm") {
 		t.Error("expected form tag to be found")
 	}
 }

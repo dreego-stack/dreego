@@ -6,7 +6,7 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-func TestTranspilerUnclosedDiv(t *testing.T) {
+func TestTranspilerUnclosedBody(t *testing.T) {
 	t.Parallel()
-	dreegotest.MustFail(t, `<div>no end`)
+	dreegotest.MustFail(t, `<body>no end`)
 }

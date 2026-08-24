@@ -2,7 +2,7 @@
     <title>Guestbook</title>
 </head>
 
-<go>
+<server>
     type EntryForm struct {
         Name    string `form:"name" validate:"required"`
         Message string `form:"message" validate:"required"`
@@ -14,9 +14,9 @@
         entries = append(entries, form.Name+": "+form.Message)
         return c.Redirect("/entries", 303)
     }
-</go>
+</server>
 
-<div>
+<body>
     <h1>
         Guestbook</h1>
     <p>
@@ -46,4 +46,4 @@
         <a href="/entries">
             View entries</a>
     </p>
-</div>
+</body>

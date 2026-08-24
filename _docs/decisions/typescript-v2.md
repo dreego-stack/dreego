@@ -18,7 +18,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 ## Context
 
-In `.dreego` files there is a `<script>` block for client-side code. The question was whether this should be TypeScript or Vanilla JavaScript.
+In `.dreego` files there is a `<client>` block for client-side code. The question was whether this should be TypeScript or Vanilla JavaScript.
 
 ## Problem
 
@@ -33,16 +33,16 @@ Building TypeScript into V1 would have caused enormous complexity:
 
 Elixir's attempt to retroactively introduce types shows how hard that is: Typeifying a dynamic language after 10 years is a massive, painful process. That is not a success story — it is a warning.
 
-**Important for Dreego:** TypeScript in the `<script>` block is uncritical to defer to V2 because:
+**Important for Dreego:** TypeScript in the `<client>` block is uncritical to defer to V2 because:
 1. Go itself is already statically typed (server side typed from day 1)
-2. The `<script>` block is isolated — it does not influence the core architecture
+2. The `<client>` block is isolated — it does not influence the core architecture
 3. Vanilla JS → TypeScript is an upgrade, not a fundamental redesign
 
 But for OTHER decisions: What we now set in the architecture should be designed so that future extensions are possible without breaking changes (plugin interface, transpiler pipeline, plugin system).
 
 ## Decision
 
-**V1: Pure Vanilla JavaScript** in the `<script>` block. No compiler, no bundler, 0 MB extra tooling.
+**V1: Pure Vanilla JavaScript** in the `<client>` block. No compiler, no bundler, 0 MB extra tooling.
 
 **V2: TypeScript** via esbuild integration (esbuild can be embedded as a Go library).
 
@@ -53,20 +53,19 @@ But for OTHER decisions: What we now set in the architecture should be designed 
 3. 0 complexity, maximum render speed
 4. Focus on the core: transpiler, routing, Go server
 
-## Provision for V2 (Architecture Design Now)
+## Provision for a future processor
 
 So TypeScript can be added later without breaking changes:
 
-- The transpiler has a clearly defined pipeline: Parse → AST → CodeGen
-  - A `ScriptProcessor` interface can later be a TS compiler instead of no-op
-- The `<script>` block already supports `lang="ts"` as a reserved attribute (ignored in V1, activated in V2)
+- The transpiler has a clearly defined pipeline: Parse → AST → CodeGen.
+- `<client lang="ts">` currently fails with a processor requirement instead of
+  silently emitting unchecked TypeScript.
 - Types sharing (Go struct → TS interface) is conceptually pre-sketched
-- `dreego.config.json` has a `typescript` block (empty in V1, populated in V2)
 
 ## Consequences
 
-- `<script>` block expects pure JavaScript (no `lang="ts"` in V1)
-- `lang="ts"` is parsed but not processed — no error, only warning in dev server
+- `<client>` block expects pure JavaScript (no `lang="ts"` in V1)
+- `lang="ts"` is rejected until an approved processor is installed
 - No esbuild dependency in V1
-- V2 planning: esbuild as Go binding for TS transpilation and JS bundling
+- A future external processor owns type checking, transpilation, and pinned tools
 - Types sharing (Go struct → TS interface) also comes only in V2

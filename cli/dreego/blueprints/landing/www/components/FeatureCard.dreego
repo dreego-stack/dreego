@@ -1,6 +1,6 @@
 Component FeatureCard (icon string, title string, text string)
 
-<div>
+<body>
     <div class="bg-white p-8 group hover:bg-slate-50 transition-colors">
         <div class="text-3xl mb-4">
             {{ icon }}</div>
@@ -9,4 +9,4 @@ Component FeatureCard (icon string, title string, text string)
         <p class="text-slate-500 text-sm leading-relaxed">
             {{ text }}</p>
     </div>
-</div>
+</body>

@@ -8,20 +8,20 @@ import (
 
 func FuzzParser(f *testing.F) {
 	seeds := []string{
-		"<go>msg := \"hi\"</go>\n<div><p>{{ msg }}</p></div>",
-		"<go method=\"post\">x := 1</go><div>{#if x}<p>yes</p>{/if}</div>",
-		"<div>{#each items as item}<li>{{ item.name }}</li>{/each}</div>",
-		"<div><@Card title=\"Hi\" count={n}/><@Card>slot</@Card></div>",
-		"<div>{#slot name}content{/slot}{#slot}default{/slot}</div>",
-		"<head><title>T</title></head><div>body</div>",
-		"<script>let a = 1 < 2;</script><style>.a > .b { color: red }</style><div>x</div>",
-		"<div>{#verbatim}{{ raw }}{/verbatim}</div>",
-		"<div><input value=\"x>y\" data-x='a{b'><a href=\"/p/{{ id }}\">link</a></div>",
-		"<div><p>{{ user.name | upper }}</p></div>",
-		"<div><div><p>nested</p></div></div>",
-		"<div><a class=\"nav {#if cond}active{/if}\">x</a></div>",
-		"<div>{#if a}{#else if b}{#else}c{/if}</div>",
-		"<div>{#each xs as x}{#if x}y{/if}{/each}</div>",
+		"<server>msg := \"hi\"</server>\n<body><p>{{ msg }}</p></body>",
+		"<server method=\"post\">x := 1</server><body>{#if x}<p>yes</p>{/if}</body>",
+		"<body>{#each items as item}<li>{{ item.name }}</li>{/each}</body>",
+		"<body><@Card title=\"Hi\" count={n}/><@Card>slot</@Card></body>",
+		"<body>{#slot name}content{/slot}{#slot}default{/slot}</body>",
+		"<head><title>T</title></head><body>body</body>",
+		"<client>let a = 1 < 2;</client><style>.a > .b { color: red }</style><body>x</body>",
+		"<body>{#verbatim}{{ raw }}{/verbatim}</body>",
+		"<body><input value=\"x>y\" data-x='a{b'><a href=\"/p/{{ id }}\">link</a></body>",
+		"<body><p>{{ user.name | upper }}</p></body>",
+		"<body><div><p>nested</p></div></body>",
+		"<body><a class=\"nav {#if cond}active{/if}\">x</a></body>",
+		"<body>{#if a}{#else if b}{#else}c{/if}</body>",
+		"<body>{#each xs as x}{#if x}y{/if}{/each}</body>",
 	}
 	for _, s := range seeds {
 		f.Add(s)
@@ -42,7 +42,7 @@ func FuzzParser(f *testing.F) {
 			return
 		}
 
-		if n := countTemplateNodes(file.Template); n > 2*len(tokens)+4 {
+		if n := countTemplateNodes(file.Body); n > 2*len(tokens)+4 {
 			t.Fatalf("node count %d exceeds bound for %d tokens", n, len(tokens))
 		}
 
@@ -56,7 +56,7 @@ func FuzzParser(f *testing.F) {
 	})
 }
 
-func countTemplateNodes(section *TemplateSection) int {
+func countTemplateNodes(section *BodySection) int {
 	if section == nil {
 		return 0
 	}
@@ -72,7 +72,7 @@ func countNodes(nodes []TemplateNode) int {
 	return n
 }
 
-func FuzzParserPreservesGoSection(f *testing.F) {
+func FuzzParserPreservesServerSection(f *testing.F) {
 	seeds := []string{
 		"msg := \"hi\"",
 		"if a < b { return a }",
@@ -88,11 +88,11 @@ func FuzzParserPreservesGoSection(f *testing.F) {
 		if len(code) > 64<<10 {
 			t.Skip("input too large")
 		}
-		if strings.Contains(code, "</go>") {
-			t.Skip("code closes the section; not a valid <go> body")
+		if strings.Contains(code, "</server>") {
+			t.Skip("code closes the section; not a valid <server> body")
 		}
 
-		input := "<go>" + code + "</go><div></div>"
+		input := "<server>" + code + "</server><body></body>"
 		tokens, err := Lex(input)
 		if err != nil {
 			t.Fatalf("valid source rejected by lexer: %v", err)
@@ -101,11 +101,11 @@ func FuzzParserPreservesGoSection(f *testing.F) {
 		if err != nil {
 			t.Fatalf("valid source rejected by parser: %v", err)
 		}
-		if len(file.Go) != 1 {
-			t.Fatalf("expected 1 go section, got %d", len(file.Go))
+		if len(file.Server) != 1 {
+			t.Fatalf("expected 1 go section, got %d", len(file.Server))
 		}
-		if want := strings.TrimSpace(code); file.Go[0].Code != want {
-			t.Fatalf("go section not preserved: got %q, want %q", file.Go[0].Code, want)
+		if want := strings.TrimSpace(code); file.Server[0].Code != want {
+			t.Fatalf("go section not preserved: got %q, want %q", file.Server[0].Code, want)
 		}
 	})
 }

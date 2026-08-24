@@ -9,8 +9,8 @@ import (
 func TestBugLayoutNotApplied(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/layouts/default.dreego": `<div><html><body><nav>Nav</nav>{#slot}<footer>Footer</footer></body></html></div>`,
-		"www/routes/get.dreego":      `<div><p>Page</p></div>`,
+		"www/layouts/default.dreego": `<body><html><body><nav>Nav</nav>{#slot}<footer>Footer</footer></body></html></body>`,
+		"www/routes/get.dreego":      `<body><p>Page</p></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/layouts/dree.go"], "<html>")
 	dreegotest.MustContain(t, gen["www/layouts/dree.go"], "Nav")

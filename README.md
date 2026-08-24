@@ -9,7 +9,7 @@ validation work without runtime template parsing.
 <!-- www/routes/login/post.dreego -->
 <head><title>Dreego</title></head>
 
-<go>
+<server>
     type LoginForm struct {
         Email string `form:"email" validate:"required,email"`
     }
@@ -18,16 +18,16 @@ validation work without runtime template parsing.
         c.SetSessionVal("user", form.Email)
         return c.Redirect("/dashboard", 303)
     }
-</go>
+</server>
 
-<div>
+<body>
     <h1>Login</h1>
     {#if c.Errors("email")}<p class="error">{{ c.Errors("email") }}</p>{/if}
     <form g-action="Login" method="post">
         <input name="email" type="email" value="{{ c.Old("email") }}">
         <button type="submit">Login</button>
     </form>
-</div>
+</body>
 ```
 
 ```bash
@@ -63,10 +63,9 @@ optional browser behavior
 └── DreeJS: local, fetch, poll, stream, live
 ```
 
-The future root sections describe purpose while an optional `lang` selects the
-source processor: `server`, `head`, `body`, `style`, and `client`. The currently
-released syntax remains `<go>`, `<head>`, `<div>`, `<style>`, and `<script>`
-until the pre-v0.1 migration is implemented.
+Root sections describe purpose while an optional `lang` selects the source
+processor: `server`, `head`, `body`, `style`, and `client`. Go, HTML, CSS, and
+JavaScript are the built-in defaults.
 
 Static components produce no DreeJS runtime. Components that request browser
 behavior receive only the modules they use. JavaScript remains the built-in,
@@ -101,7 +100,7 @@ See the public [Roadmap](_docs/roadmap.md), detailed
 - **PRG Pattern** — `c.Redirect(url, 303)` with `ErrRedirect` sentinel for after-success redirect
 
 ### API Endpoints (v0.0.15)
-- **Content-Type Routing** — `<go type="json">`, `<go type="xml">`, `<go type="custom">`
+- **Content-Type Routing** — `<server type="json">`, `<server type="xml">`, `<server type="custom">`
 - **JSON API** — `c.JSON(200, data)`, `c.Bind(&target)`, auto `Content-Type: application/json`
 - **XML API** — `c.XML(200, data)`, auto `Content-Type: application/xml`
 - **Custom** — `c.Write(status, contentType, body)` for arbitrary formats

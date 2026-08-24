@@ -12,6 +12,6 @@ func TestFrontmatterIsRejected(t *testing.T) {
 		"www/routes/get.dreego": `---
 title: About
 ---
-<div><h1>About</h1></div>`,
+<body><h1>About</h1></body>`,
 	})
 }

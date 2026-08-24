@@ -7,14 +7,14 @@ import (
 
 func generateFormPostHandler(file *File, renderFunc string, postHandler string, pattern string) (string, error) {
 	action := file.FormActions[0]
-	structName := findFormStruct(file.Go, action)
+	structName := findFormStruct(file.Server, action)
 	if structName == "" {
 		return fmt.Sprintf("// no form struct for action %s\n", action), nil
 	}
-	if !findFormHandler(file.Go, action) {
+	if !findFormHandler(file.Server, action) {
 		return fmt.Sprintf("// no handler function for action %s\n", action), nil
 	}
-	hasValidate := hasValidateTag(file.Go, structName)
+	hasValidate := hasValidateTag(file.Server, structName)
 
 	var buf strings.Builder
 	buf.WriteString(fmt.Sprintf("func %s(app *dreego.App, w http.ResponseWriter, r *http.Request) {\n", postHandler))

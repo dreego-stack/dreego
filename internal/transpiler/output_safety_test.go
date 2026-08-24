@@ -46,8 +46,8 @@ func TestAttrSafeFuncClassifies(t *testing.T) {
 		{`<img src="{{ u }}">`, "SafeURL"},
 		{`<form action="{{ u }}">`, "SafeURL"},
 		{`<button onclick="{{ s }}">`, "SafeScript"},
-		{`<div style="{{ s }}">`, "SafeStyle"},
-		{`<div title="{{ s }}">`, "SafeAttr"},
+		{`<body style="{{ s }}">`, "SafeStyle"},
+		{`<body title="{{ s }}">`, "SafeAttr"},
 		{`<p>{{ s }}</p>`, "SafeAttr"},
 	}
 	for _, c := range cases {
@@ -69,9 +69,9 @@ func TestAttrSafeFuncClassifiesDirectives(t *testing.T) {
 	}{
 		{`<button x-on:click="{{ s }}">`, "SafeScript"},
 		{`<button @click="{{ s }}">`, "SafeScript"},
-		{`<div x-on:mouseover="{{ s }}">`, "SafeScript"},
-		{`<div x-bind:style="{{ s }}">`, "SafeStyle"},
-		{`<div :style="{{ s }}">`, "SafeStyle"},
+		{`<body x-on:mouseover="{{ s }}">`, "SafeScript"},
+		{`<body x-bind:style="{{ s }}">`, "SafeStyle"},
+		{`<body :style="{{ s }}">`, "SafeStyle"},
 		{`<svg><use xlink:href="{{ u }}"></use></svg>`, "SafeURL"},
 	}
 	for _, c := range cases {
@@ -93,16 +93,16 @@ func TestAttrSafeFuncClassifiesHtmxAlpineScriptContexts(t *testing.T) {
 	}{
 		{`<button hx-on:click="{{ s }}">`, "SafeScript"},
 		{`<button hx-on::before-request="{{ s }}">`, "SafeScript"},
-		{`<div x-data="{{ s }}">`, "SafeScript"},
-		{`<div x-init="{{ s }}">`, "SafeScript"},
-		{`<div x-effect="{{ s }}">`, "SafeScript"},
-		{`<div x-html="{{ s }}">`, "SafeScript"},
-		{`<div x-show="{{ s }}">`, "SafeScript"},
-		{`<div x-model="{{ s }}">`, "SafeScript"},
-		{`<div x-text="{{ s }}">`, "SafeScript"},
-		{`<div x-transition="{{ s }}">`, "SafeScript"},
-		{`<div once="{{ s }}">`, "SafeScript"},
-		{`<div only="{{ s }}">`, "SafeScript"},
+		{`<body x-data="{{ s }}">`, "SafeScript"},
+		{`<body x-init="{{ s }}">`, "SafeScript"},
+		{`<body x-effect="{{ s }}">`, "SafeScript"},
+		{`<body x-html="{{ s }}">`, "SafeScript"},
+		{`<body x-show="{{ s }}">`, "SafeScript"},
+		{`<body x-model="{{ s }}">`, "SafeScript"},
+		{`<body x-text="{{ s }}">`, "SafeScript"},
+		{`<body x-transition="{{ s }}">`, "SafeScript"},
+		{`<body once="{{ s }}">`, "SafeScript"},
+		{`<body only="{{ s }}">`, "SafeScript"},
 	}
 	for _, c := range cases {
 		i := strings.Index(c.content, "{{")

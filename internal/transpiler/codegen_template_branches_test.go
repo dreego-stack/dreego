@@ -153,7 +153,7 @@ func TestGenTemplateNodeEachSubstitutesLoopInElseIfCond(t *testing.T) {
 // Full pipeline (lex → parse → codegen): {#if !$loop.Last} inside {#each}
 // must produce "if !loop.Last {" — the exact feedback.md scenario.
 func TestGenTemplateNodeEachLoopInIfCondFullParse(t *testing.T) {
-	input := `<div>{#each items as item}<span>{#if !$loop.Last}, {/if}{{ item }}</span>{/each}</div>`
+	input := `<body>{#each items as item}<span>{#if !$loop.Last}, {/if}{{ item }}</span>{/each}</body>`
 	tokens, err := Lex(input)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
@@ -162,7 +162,7 @@ func TestGenTemplateNodeEachLoopInIfCondFullParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNode(NewGenerator(), file.Template.Nodes[0], 0)
+	out, err := genTemplateNode(NewGenerator(), file.Body.Nodes[0], 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -2,7 +2,7 @@
     <title>Plugin demo</title>
 </head>
 
-<div>
+<body>
     <h1>
         Plugin demo</h1>
     <p>
@@ -21,4 +21,4 @@
                 Plugin health</a>
         </li>
     </ul>
-</div>
+</body>

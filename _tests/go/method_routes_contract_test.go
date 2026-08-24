@@ -10,10 +10,10 @@ import (
 func TestMethodRoutesAllVerbsRemainIsolated(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/items.dreego": `<go>value := "get"</go><div><p>{{ value }}</p></div>
-<go method="post">value := "post"</go><div method="post"><p>{{ value }}</p></div>
-<go method="put">value := "put"</go><div method="put"><p>{{ value }}</p></div>
-<go method="delete">value := "delete"</go><div method="delete"><p>{{ value }}</p></div>`,
+		"www/routes/items.dreego": `<server>value := "get"</server><body><p>{{ value }}</p></body>
+<server method="post">value := "post"</server><body method="post"><p>{{ value }}</p></body>
+<server method="put">value := "put"</server><body method="put"><p>{{ value }}</p></body>
+<server method="delete">value := "delete"</server><body method="delete"><p>{{ value }}</p></body>`,
 	})
 	for _, tc := range []struct{ method, want string }{{"GET", "get"}, {"POST", "post"}, {"PUT", "put"}, {"DELETE", "delete"}} {
 		code, body, _ := c.Request(t, tc.method, "/items", "", nil)
@@ -31,7 +31,7 @@ func TestMethodRoutesAllVerbsRemainIsolated(t *testing.T) {
 func TestMethodRouteOnlyPostDoesNotRegisterGet(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/submit.dreego": `<go method="post">message := "accepted"</go><div method="post"><p>{{ message }}</p></div>`,
+		"www/routes/submit.dreego": `<server method="post">message := "accepted"</server><body method="post"><p>{{ message }}</p></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/submit", "", nil)
 	dreegotest.MustStatus(t, code, 200)
@@ -45,10 +45,10 @@ func TestMethodRouteOnlyPostDoesNotRegisterGet(t *testing.T) {
 func TestMethodRouteCanRenderComponentAndLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/layouts/default.dreego": `<div><html><body>{#slot}</body></html></div>`,
+		"www/layouts/default.dreego": `<body><html><body>{#slot}</body></html></body>`,
 		"www/components/Badge.dreego": `Component Badge ()
-<div class="badge">badge</div>`,
-		"www/routes/profile.dreego": `<go method="post">name := "Ada"</go><div method="post"><@Badge/> <span>{{ name }}</span></div>`,
+<body class="badge">badge</body>`,
+		"www/routes/profile.dreego": `<server method="post">name := "Ada"</server><body method="post"><@Badge/> <span>{{ name }}</span></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/profile", "", nil)
 	dreegotest.MustStatus(t, code, 200)
@@ -59,35 +59,35 @@ func TestMethodRouteCanRenderComponentAndLayout(t *testing.T) {
 func TestMethodRouteDynamicParameter(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/users/[id].dreego": `<go method="post">id := c.Param("id")</go><div method="post"><p>saved {{ id }}</p></div>`,
+		"www/routes/users/[id].dreego": `<server method="post">id := c.Param("id")</server><body method="post"><p>saved {{ id }}</p></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/users/42", "", nil)
 	dreegotest.MustStatus(t, code, 200)
 	dreegotest.MustContainBody(t, body, "saved 42")
 }
 
-func TestMethodRouteDuplicateGoSectionsFail(t *testing.T) {
+func TestMethodRouteDuplicateServerSectionsFail(t *testing.T) {
 	t.Parallel()
-	dreegotest.MustFailWith(t, `<go method="post">x := 1</go><div method="post">{{ x }}</div>
-<go method="post">x := 2</go><div method="post">{{ x }}</div>`, "duplicate")
+	dreegotest.MustFailWith(t, `<server method="post">x := 1</server><body method="post">{{ x }}</body>
+<server method="post">x := 2</server><body method="post">{{ x }}</body>`, "duplicate")
 }
 
 func TestMethodRouteDuplicateDivSectionsFail(t *testing.T) {
 	t.Parallel()
-	dreegotest.MustFailWith(t, `<go method="post">x := 1</go><div method="post">{{ x }}</div>
-<div method="post">duplicate</div>`, "duplicate")
+	dreegotest.MustFailWith(t, `<server method="post">x := 1</server><body method="post">{{ x }}</body>
+<body method="post">duplicate</body>`, "duplicate")
 }
 
 func TestMethodRouteStandardExtendedMethodGenerates(t *testing.T) {
 	t.Parallel()
-	generated := dreegotest.Generate(t, `<go method="patch">x := 1</go><div method="patch">{{ x }}</div>`)
+	generated := dreegotest.Generate(t, `<server method="patch">x := 1</server><body method="patch">{{ x }}</body>`)
 	dreegotest.MustContain(t, generated, "PATCH")
 }
 
 func TestMethodRouteGenerationIsDeterministic(t *testing.T) {
 	t.Parallel()
-	src := `<go>message := "get"</go><div><p>{{ message }}</p></div>
-<go method="post">message := "post"</go><div method="post"><p>{{ message }}</p></div>`
+	src := `<server>message := "get"</server><body><p>{{ message }}</p></body>
+<server method="post">message := "post"</server><body method="post"><p>{{ message }}</p></body>`
 	one := dreegotest.Generate(t, src)
 	two := dreegotest.Generate(t, src)
 	if one != two {
@@ -97,8 +97,8 @@ func TestMethodRouteGenerationIsDeterministic(t *testing.T) {
 
 func TestMethodRouteDoesNotLeakCodeBetweenMethods(t *testing.T) {
 	t.Parallel()
-	out := dreegotest.Generate(t, `<go>getOnly := "get"</go><div><p>{{ getOnly }}</p></div>
-<go method="post">postOnly := "post"</go><div method="post"><p>{{ postOnly }}</p></div>`)
+	out := dreegotest.Generate(t, `<server>getOnly := "get"</server><body><p>{{ getOnly }}</p></body>
+<server method="post">postOnly := "post"</server><body method="post"><p>{{ postOnly }}</p></body>`)
 	if strings.Count(out, "getOnly") < 1 || strings.Count(out, "postOnly") < 1 {
 		t.Fatal("generated output omitted one method section")
 	}
@@ -106,7 +106,7 @@ func TestMethodRouteDoesNotLeakCodeBetweenMethods(t *testing.T) {
 
 func TestMethodRouteHeadRequestHasDefinedResult(t *testing.T) {
 	t.Parallel()
-	generated := dreegotest.Generate(t, `<div><p>ok</p></div>`)
+	generated := dreegotest.Generate(t, `<body><p>ok</p></body>`)
 	if !strings.Contains(generated, "HandleHealth") && !strings.Contains(generated, "HandleIndex") {
 		t.Fatal("GET route did not generate a handler that can define HEAD behavior")
 	}

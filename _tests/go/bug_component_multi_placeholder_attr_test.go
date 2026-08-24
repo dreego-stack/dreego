@@ -10,9 +10,9 @@ func TestBugComponentMultiPlaceholderAttr(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"www/components/Card.dreego": `Component Card (url string)
-<div><a href="{{ url }}">go</a></div>`,
-		"www/routes/get.dreego": `<go>left := "x"; right := "y"</go>
-<div><@Card url={left + "-" + right}/></div>`,
+<body><a href="{{ url }}">go</a></body>`,
+		"www/routes/get.dreego": `<server>left := "x"; right := "y"</server>
+<body><@Card url={left + "-" + right}/></body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "left}-{right")
 }

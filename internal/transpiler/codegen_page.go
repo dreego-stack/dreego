@@ -13,16 +13,16 @@ func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 	var src, regs strings.Builder
 	for _, method := range methods {
 		copy := *file
-		copy.Go = nil
-		for _, section := range file.Go {
+		copy.Server = nil
+		for _, section := range file.Server {
 			if section.Method == method || (method == "GET" && section.Method == "") {
-				copy.Go = append(copy.Go, section)
+				copy.Server = append(copy.Server, section)
 			}
 		}
-		if len(copy.Go) == 0 {
-			copy.Go = []GoSection{{Method: method}}
+		if len(copy.Server) == 0 {
+			copy.Server = []ServerSection{{Method: method}}
 		}
-		copy.Template = templateForMethod(file, method)
+		copy.Body = templateForMethod(file, method)
 		part, reg, err := generateMethodHandler(gen, &copy, layout, pkgName, baseName, pattern, scopeHash)
 		if err != nil {
 			return "", "", err
@@ -33,22 +33,22 @@ func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 	return src.String(), regs.String(), nil
 }
 
-func templateForMethod(file *File, method string) *TemplateSection {
-	for i := range file.Templates {
-		if file.Templates[i].Method == method {
-			section := file.Templates[i]
+func templateForMethod(file *File, method string) *BodySection {
+	for i := range file.Bodies {
+		if file.Bodies[i].Method == method {
+			section := file.Bodies[i]
 			return &section
 		}
 	}
-	if len(file.Templates) > 0 {
+	if len(file.Bodies) > 0 {
 		return nil
 	}
-	return file.Template
+	return file.Body
 }
 
 func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
-	for _, g := range file.Go {
+	for _, g := range file.Server {
 		if g.ContentType != "" && g.ContentType != "custom" {
 			hasTypedBlocks = true
 		}
@@ -68,7 +68,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 		firstMethod = ""
 	} else {
 		firstMethod = "GET"
-		for _, g := range file.Go {
+		for _, g := range file.Server {
 			if g.Method != "GET" {
 				firstMethod = g.Method
 			}
@@ -83,7 +83,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 
 	var buf strings.Builder
 
-	pkgCode, inlineCode := splitGoSections(file.Go, hasFormActions)
+	pkgCode, inlineCode := splitServerSections(file.Server, hasFormActions)
 	if pkgCode != "" {
 		buf.WriteString(pkgCode)
 	}
@@ -106,7 +106,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 		buf.WriteString(typedCode)
 	}
 
-	if file.Template != nil && len(file.Template.Nodes) > 0 {
+	if file.Body != nil && len(file.Body.Nodes) > 0 {
 		templCode, err := genTempl(gen, file, layout, scopeHash, true)
 		if err != nil {
 			return "", "", err
@@ -162,7 +162,7 @@ func registrationStatement(call string) string {
 func genTypedBlocks(file *File) (string, error) {
 	var buf strings.Builder
 	buf.WriteString("\tif true {\n")
-	for _, g := range file.Go {
+	for _, g := range file.Server {
 		if g.ContentType == "json" {
 			buf.WriteString("\t\tif c.Wants(\"application/json\") {\n")
 			buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n")

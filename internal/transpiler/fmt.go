@@ -11,14 +11,14 @@ var controlClose = regexp.MustCompile(`\{/(\w+)\}`)
 var multiBlank = regexp.MustCompile(`\n{3,}`)
 var multiSpace = regexp.MustCompile(` {2,}`)
 
-var knownSections = []string{"head", "go", "div", "script", "style"}
+var knownSections = []string{"server", "head", "body", "style", "client"}
 
 var sectionPatterns = map[string]*regexp.Regexp{
-	"head":   regexp.MustCompile(`<head>[\s\S]*?</head>`),
-	"go":     regexp.MustCompile(`<go>[\s\S]*?</go>`),
-	"div":    regexp.MustCompile(`<div>[\s\S]*?</div>`),
-	"script": regexp.MustCompile(`<script>[\s\S]*?</script>`),
-	"style":  regexp.MustCompile(`<style>[\s\S]*?</style>`),
+	"server": regexp.MustCompile(`<server(?:\s[^>]*)?>[\s\S]*?</server>`),
+	"head":   regexp.MustCompile(`<head(?:\s[^>]*)?>[\s\S]*?</head>`),
+	"body":   regexp.MustCompile(`<body(?:\s[^>]*)?>[\s\S]*?</body>`),
+	"style":  regexp.MustCompile(`<style(?:\s[^>]*)?>[\s\S]*?</style>`),
+	"client": regexp.MustCompile(`<client(?:\s[^>]*)?>[\s\S]*?</client>`),
 }
 
 func Format(input string) string {
@@ -141,10 +141,10 @@ func formatSections(input string) string {
 		return input
 	}
 
-	if body, ok := found["div"]; ok {
+	if body, ok := found["body"]; ok {
 		body = formatExpressions(body)
 		body = formatControlFlow(body)
-		found["div"] = body
+		found["body"] = body
 	}
 
 	var result strings.Builder
@@ -162,7 +162,11 @@ func formatSections(input string) string {
 }
 
 func formatSectionBody(tag, raw string) string {
-	prefix := "<" + tag + ">"
+	openEnd := strings.IndexByte(raw, '>')
+	if openEnd < 0 {
+		return raw
+	}
+	prefix := raw[:openEnd+1]
 	suffix := "</" + tag + ">"
 	raw = strings.TrimPrefix(raw, prefix)
 	raw = strings.TrimSuffix(raw, suffix)

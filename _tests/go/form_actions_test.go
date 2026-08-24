@@ -10,34 +10,34 @@ import (
 func TestFormActionsGActionBasic(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/get-login.dreego": `<go>
+		"www/routes/get-login.dreego": `<server>
     type LoginForm struct {
         Email string
     }
     func Login(c dreego.Context, form LoginForm) error {
         return nil
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="Login" method="post">
     <input name="email" type="email">
     <button type="submit">Login</button>
 </form>
-</div>`,
+</body>`,
 	})
 }
 
 func TestFormActionsGActionNoHandler(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-fail.dreego": `<go>
-</go>
-<div>
+		"www/routes/get-fail.dreego": `<server>
+</server>
+<body>
 <form g-action="Missing" method="post">
     <input name="x">
     <button>OK</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], `app.Register("POST"`)
 }
@@ -45,20 +45,20 @@ func TestFormActionsGActionNoHandler(t *testing.T) {
 func TestFormActionsGActionUnexported(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-fail.dreego": `<go>
+		"www/routes/get-fail.dreego": `<server>
     type myForm struct {
         X string
     }
     func myAction(c dreego.Context, form myForm) error {
         return nil
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="myAction" method="post">
     <input name="x">
     <button>OK</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "HandleIndexPost")
 }
@@ -66,20 +66,20 @@ func TestFormActionsGActionUnexported(t *testing.T) {
 func TestFormActionsGActionWrongArity(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-fail.dreego": `<go>
+		"www/routes/get-fail.dreego": `<server>
     type BadForm struct {
         X string
     }
     func Bad(c dreego.Context) error {
         return nil
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="Bad" method="post">
     <input name="x">
     <button>OK</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], `app.Register("POST"`)
 }
@@ -87,20 +87,20 @@ func TestFormActionsGActionWrongArity(t *testing.T) {
 func TestFormActionsHandlerSignature(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get-fail.dreego": `<go>
+		"www/routes/get-fail.dreego": `<server>
     type BadForm struct {
         X string
     }
     func bad(c dreego.Context, form BadForm) string {
         return "wrong"
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="bad" method="post">
     <input name="x">
     <button>OK</button>
 </form>
-</div>`,
+</body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -113,20 +113,20 @@ func TestFormActionsHandlerSignature(t *testing.T) {
 func TestFormActionsMethodPostFile(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/post-login.dreego": `<go>
+		"www/routes/post-login.dreego": `<server>
     type LoginForm struct {
         Email string
     }
     func Login(c dreego.Context, form LoginForm) error {
         return nil
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="Login" method="post">
     <input name="email">
     <button>Login</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "HandleIndexGet")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "HandleIndexPost")
@@ -135,15 +135,15 @@ func TestFormActionsMethodPostFile(t *testing.T) {
 func TestFormActionsNoGAction(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/post-search.dreego": `<go>
+		"www/routes/post-search.dreego": `<server>
     c.Set("title", "Search Page")
-</go>
-<div>
+</server>
+<body>
 <form method="post">
     <input name="search">
     <button type="submit">Search</button>
 </form>
-</div>
+</body>
 `,
 	})
 }
@@ -151,20 +151,20 @@ func TestFormActionsNoGAction(t *testing.T) {
 func TestFormActionsNoValidate(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-form.dreego": `<go>
+		"www/routes/get-form.dreego": `<server>
     type NoValForm struct {
         Email string
     }
     func NoVal(c dreego.Context, form NoValForm) error {
         return nil
     }
-</go>
-<div>
+</server>
+<body>
 <form g-action="NoVal" method="post">
     <input name="email">
     <button>OK</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "dreego.ValidateForm")
 }
@@ -172,16 +172,16 @@ func TestFormActionsNoValidate(t *testing.T) {
 func TestFormActionsPlainForm(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-plain.dreego": `<go>
+		"www/routes/get-plain.dreego": `<server>
     email := c.FormValue("email")
     c.Set("email", email)
-</go>
-<div>
+</server>
+<body>
 <form method="post">
     <input name="email">
     <button>Submit</button>
 </form>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], `app.Register("POST"`)
 }
@@ -189,16 +189,16 @@ func TestFormActionsPlainForm(t *testing.T) {
 func TestFormActionsPlainPostRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/post.dreego": `<go>
+		"www/routes/post.dreego": `<server>
     email := c.FormValue("email")
     c.Set("email", email)
-</go>
-<div>
+</server>
+<body>
 <form method="post">
     <input name="email">
     <button>Submit</button>
 </form>
-</div>`,
+</body>`,
 	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=hello@test.com", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	dreegotest.MustStatus(t, code, 200)
@@ -207,7 +207,7 @@ func TestFormActionsPlainPostRuntime(t *testing.T) {
 func TestFormActionsStructTags(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-form.dreego": "<go>\n    type MyForm struct {\n        Email string `form:\"email\"`\n    }\n    func DoForm(c dreego.Context, form MyForm) error {\n        return nil\n    }\n</go>\n<div>\n<form g-action=\"DoForm\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</div>",
+		"www/routes/get-form.dreego": "<server>\n    type MyForm struct {\n        Email string `form:\"email\"`\n    }\n    func DoForm(c dreego.Context, form MyForm) error {\n        return nil\n    }\n</server>\n<body>\n<form g-action=\"DoForm\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</body>",
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "dreego.BindForm")
 }
@@ -215,7 +215,7 @@ func TestFormActionsStructTags(t *testing.T) {
 func TestFormActionsValidateTags(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-form.dreego": "<go>\n    type ValForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func DoVal(c dreego.Context, form ValForm) error {\n        return nil\n    }\n</go>\n<div>\n<form g-action=\"DoVal\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</div>",
+		"www/routes/get-form.dreego": "<server>\n    type ValForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func DoVal(c dreego.Context, form ValForm) error {\n        return nil\n    }\n</server>\n<body>\n<form g-action=\"DoVal\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</body>",
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "app.ValidateForm")
 }
@@ -223,7 +223,7 @@ func TestFormActionsValidateTags(t *testing.T) {
 func TestFormActionsBoolBinding(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get-news.dreego": "<go>\n    type NewsForm struct {\n        Email    string `validate:\"required\"`\n        Subscribe bool\n    }\n    func SubmitNews(c dreego.Context, form NewsForm) error {\n        if form.Subscribe {\n            return c.Redirect(\"/subscribed\", 303)\n        }\n        return c.Redirect(\"/skipped\", 303)\n    }\n</go>\n<div>\n<form g-action=\"SubmitNews\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <input name=\"subscribe\" type=\"checkbox\">\n    <button type=\"submit\">Send</button>\n</form>\n</div>",
+		"www/routes/get-news.dreego": "<server>\n    type NewsForm struct {\n        Email    string `validate:\"required\"`\n        Subscribe bool\n    }\n    func SubmitNews(c dreego.Context, form NewsForm) error {\n        if form.Subscribe {\n            return c.Redirect(\"/subscribed\", 303)\n        }\n        return c.Redirect(\"/skipped\", 303)\n    }\n</server>\n<body>\n<form g-action=\"SubmitNews\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <input name=\"subscribe\" type=\"checkbox\">\n    <button type=\"submit\">Send</button>\n</form>\n</body>",
 	}, "app.SetCSRF(false); ")
 	code, _, headers := c.Request(t, "POST", "/", "email=a@b.c&subscribe=on", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
@@ -244,7 +244,7 @@ func TestFormActionsBoolBinding(t *testing.T) {
 func TestFormActionsIntBinding(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get-age.dreego": "<go>\n    type AgeForm struct {\n        Age int `validate:\"min=2\"`\n    }\n    func SubmitAge(c dreego.Context, form AgeForm) error {\n        if form.Age == 20 {\n            return c.Redirect(\"/adult\", 303)\n        }\n        return c.Redirect(\"/other\", 303)\n    }\n</go>\n<div>\n<form g-action=\"SubmitAge\" method=\"post\">\n    <input name=\"age\" type=\"number\">\n    <button type=\"submit\">Send</button>\n</form>\n</div>",
+		"www/routes/get-age.dreego": "<server>\n    type AgeForm struct {\n        Age int `validate:\"min=2\"`\n    }\n    func SubmitAge(c dreego.Context, form AgeForm) error {\n        if form.Age == 20 {\n            return c.Redirect(\"/adult\", 303)\n        }\n        return c.Redirect(\"/other\", 303)\n    }\n</server>\n<body>\n<form g-action=\"SubmitAge\" method=\"post\">\n    <input name=\"age\" type=\"number\">\n    <button type=\"submit\">Send</button>\n</form>\n</body>",
 	}, "app.SetCSRF(false); ")
 	code, _, headers := c.Request(t, "POST", "/", "age=20", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
@@ -262,7 +262,7 @@ func TestFormActionsIntBinding(t *testing.T) {
 func TestFormActionsSubmitValid(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/dashboard\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
+		"www/routes/post-login.dreego": "<server>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/dashboard\", 303)\n    }\n</server>\n<body>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</body>",
 	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=test@dreego.dev", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 303 {
@@ -273,7 +273,7 @@ func TestFormActionsSubmitValid(t *testing.T) {
 func TestFormActionsSubmitInvalid(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
+		"www/routes/post-login.dreego": "<server>\n    type LoginForm struct {\n        Email string `validate:\"required,email\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</server>\n<body>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</body>",
 	}, "app.SetCSRF(false); ")
 	code, _, _ := c.Request(t, "POST", "/", "email=invalid", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	dreegotest.MustStatus(t, code, 200)
@@ -282,7 +282,7 @@ func TestFormActionsSubmitInvalid(t *testing.T) {
 func TestFormActionsSubmitCSRFPass(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/post-login.dreego": "<go>\n    type LoginForm struct {\n        Email string `validate:\"required\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</go>\n<div>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</div>",
+		"www/routes/post-login.dreego": "<server>\n    type LoginForm struct {\n        Email string `validate:\"required\"`\n    }\n    func Login(c dreego.Context, form LoginForm) error {\n        return c.Redirect(\"/ok\", 303)\n    }\n</server>\n<body>\n<form g-action=\"Login\" method=\"post\">\n    <input name=\"email\" type=\"email\">\n    <button type=\"submit\">Login</button>\n</form>\n</body>",
 	}, "app.SetSessionStore(dreego.NewCookieStore([]byte(\"01234567890123456789012345678903\"))); ")
 	c.Get(t, "/health")
 	token := c.Cookie("csrf_token")

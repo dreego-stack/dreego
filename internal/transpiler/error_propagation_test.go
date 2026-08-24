@@ -38,7 +38,7 @@ func runInDir(t *testing.T, dir string) error {
 func TestRunAbortsOnSourceReadFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json":   "{}",
-		"www/routes/get.dreego":    "<div><p>ok</p></div>",
+		"www/routes/get.dreego":    "<body><p>ok</p></body>",
 		"www/routes/broken.dreego": "",
 	})
 	target := filepath.Join(dir, "www", "routes", "broken.dreego")
@@ -59,7 +59,7 @@ func TestRunAbortsOnSourceReadFailure(t *testing.T) {
 func TestRunAbortsOnReadDirFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json": "{}",
-		"www/routes/get.dreego":  "<div><p>ok</p></div>",
+		"www/routes/get.dreego":  "<body><p>ok</p></body>",
 	})
 	secretDir := filepath.Join(dir, "www", "routes", "secret")
 	if err := os.MkdirAll(secretDir, 0755); err != nil {
@@ -81,7 +81,7 @@ func TestRunAbortsOnReadDirFailure(t *testing.T) {
 func TestRunAbortsOnLayoutReadFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json": "{}",
-		"www/routes/get.dreego":  "<div><p>ok</p></div>",
+		"www/routes/get.dreego":  "<body><p>ok</p></body>",
 	})
 	layoutDir := filepath.Join(dir, "www", "layouts")
 	if err := os.MkdirAll(layoutDir, 0755); err != nil {

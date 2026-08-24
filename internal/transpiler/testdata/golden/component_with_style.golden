@@ -2,7 +2,7 @@ func Badge(title string, tone string) dreego.Component {
 	return dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
 		var b strings.Builder
 
-		b.WriteString("<div data-scope=\"89b1dd407f26\">")
+		b.WriteString("<div data-scope=\"55bb25811947\">")
 		b.WriteString(`
     `)
 		b.WriteString(`<span>`)
@@ -17,7 +17,7 @@ func Badge(title string, tone string) dreego.Component {
 `)
 		b.WriteString("</div>")
 		b.WriteString("<style>")
-		b.WriteString(`[data-scope=89b1dd407f26] .badge{ font-weight: bold; }[data-scope=89b1dd407f26] .badge em{ color: #666; }`)
+		b.WriteString(`[data-scope=55bb25811947] .badge{ font-weight: bold; }[data-scope=55bb25811947] .badge em{ color: #666; }`)
 		b.WriteString("</style>")
 
 		return b.String(), nil

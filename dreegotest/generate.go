@@ -105,12 +105,12 @@ func generate(src string) (string, error) {
 	}
 	file.Imports = imports
 	file.SourceContent = src
-	if len(file.Go) == 0 {
-		file.Go = []transpiler.GoSection{{Method: "GET"}}
+	if len(file.Server) == 0 {
+		file.Server = []transpiler.ServerSection{{Method: "GET"}}
 	}
-	for i := range file.Go {
-		if !file.Go[i].MethodExplicit {
-			file.Go[i].Method = "GET"
+	for i := range file.Server {
+		if !file.Server[i].MethodExplicit {
+			file.Server[i].Method = "GET"
 		}
 	}
 	h := sha256.Sum256([]byte(src))
@@ -136,8 +136,8 @@ func generateComponent(src string) (string, error) {
 	}
 	file.Component = comp
 	file.SourceContent = src
-	if len(file.Go) == 0 {
-		file.Go = []transpiler.GoSection{{Method: ""}}
+	if len(file.Server) == 0 {
+		file.Server = []transpiler.ServerSection{{Method: ""}}
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]

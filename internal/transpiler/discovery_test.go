@@ -87,10 +87,10 @@ func TestRouteFileRelSupportsFlatAndLegacyRoutes(t *testing.T) {
 
 func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 	root := writeTestProject(t, map[string]string{
-		"routes/about.dreego":            "<div>about</div>",
-		"routes/+page.dreego":            "<div>home</div>",
-		"routes/users/[id]/+page.dreego": "<div>user</div>",
-		"routes/(auth)/login.dreego":     "<div>login</div>",
+		"routes/about.dreego":            "<body>about</body>",
+		"routes/+page.dreego":            "<body>home</body>",
+		"routes/users/[id]/+page.dreego": "<body>user</body>",
+		"routes/(auth)/login.dreego":     "<body>login</body>",
 	})
 	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
 	if err != nil {
@@ -107,8 +107,8 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 	}
 
 	duplicateRoot := writeTestProject(t, map[string]string{
-		"routes/about.dreego":        "<div>one</div>",
-		"routes/(auth)/about.dreego": "<div>two</div>",
+		"routes/about.dreego":        "<body>one</body>",
+		"routes/(auth)/about.dreego": "<body>two</body>",
 	})
 	_, _, _, err = scanRoutes(NewGenerator(), duplicateRoot, map[string]*layoutEntry{})
 	if err == nil || !strings.Contains(err.Error(), "about.dreego") {

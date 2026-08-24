@@ -10,9 +10,9 @@ import (
 func TestOutputContextHeadExpressionEscapes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>t := "<script>alert(1)</script>"</go>
+		"www/routes/get.dreego": `<server>t := "<script>alert(1)</script>"</server>
 <head><title>{{ t }}</title></head>
-<div><h1>ok</h1></div>`,
+<body><h1>ok</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "<script>alert(1)</script>") {
@@ -26,9 +26,9 @@ func TestOutputContextHeadExpressionEscapes(t *testing.T) {
 func TestOutputContextHeadLinkHrefRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
 <head><link rel="stylesheet" href="{{ u }}"></head>
-<div><h1>ok</h1></div>`,
+<body><h1>ok</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "javascript:") {
@@ -42,9 +42,9 @@ func TestOutputContextHeadLinkHrefRejectsJavascript(t *testing.T) {
 func TestOutputContextHeadMetaRefreshRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "0;url=javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
 <head><meta http-equiv="refresh" content="{{ u }}"></head>
-<div><h1>ok</h1></div>`,
+<body><h1>ok</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "javascript:") {
@@ -63,9 +63,9 @@ func TestOutputContextHeadMetaRefreshWhitespaceEqualsRejectsJavascript(t *testin
 		"0;URL = javascript:alert(1)",
 	} {
 		c := dreegotest.Serve(t, map[string]string{
-			"www/routes/get.dreego": "<go>u := \"" + u + "\"</go>\n" +
+			"www/routes/get.dreego": "<server>u := \"" + u + "\"</server>\n" +
 				`<head><meta http-equiv = "refresh" content="{{ u }}"></head>` + "\n" +
-				"<div><h1>ok</h1></div>",
+				"<body><h1>ok</h1></body>",
 		})
 		_, body := c.Get(t, "/")
 		if strings.Contains(body, "javascript:") {
@@ -77,9 +77,9 @@ func TestOutputContextHeadMetaRefreshWhitespaceEqualsRejectsJavascript(t *testin
 func TestOutputContextHeadMetaRefreshUnquotedEquivRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "0;url=javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
 <head><meta http-equiv = refresh content="{{ u }}"></head>
-<div><h1>ok</h1></div>`,
+<body><h1>ok</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "javascript:") {
@@ -90,9 +90,9 @@ func TestOutputContextHeadMetaRefreshUnquotedEquivRejectsJavascript(t *testing.T
 func TestOutputContextHeadLinkHrefUnquotedRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
+		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
 <head><link rel="stylesheet" href={{ u }}></head>
-<div><h1>ok</h1></div>`,
+<body><h1>ok</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "javascript:") {
@@ -103,11 +103,11 @@ func TestOutputContextHeadLinkHrefUnquotedRejectsJavascript(t *testing.T) {
 func TestOutputContextHtmxOnJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
-<div><button hx-on:click="{{ s }}">go</button></div>`,
+		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+<body><button hx-on:click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "<script>alert(1)</script>") {
+	if strings.Contains(body, "<client>alert(1)</client>") {
 		t.Fatalf("hx-on:click context must not emit raw script markup, got: %s", body)
 	}
 	if !strings.Contains(body, `\u003cscript\u003e`) {
@@ -119,11 +119,11 @@ func TestOutputContextAlpineEvaluatorJSONEncodes(t *testing.T) {
 	t.Parallel()
 	for _, attr := range []string{"x-data", "x-init", "x-effect", "x-html"} {
 		c := dreegotest.Serve(t, map[string]string{
-			"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
-<div><div ` + attr + `="{{ s }}">x</div></div>`,
+			"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+<body><div ` + attr + `="{{ s }}">x</div></body>`,
 		})
 		_, body := c.Get(t, "/")
-		if strings.Contains(body, "<script>alert(1)</script>") {
+		if strings.Contains(body, "<client>alert(1)</client>") {
 			t.Fatalf("%s context must not emit raw script markup, got: %s", attr, body)
 		}
 		if !strings.Contains(body, `\u003cscript\u003e`) {
@@ -135,11 +135,11 @@ func TestOutputContextAlpineEvaluatorJSONEncodes(t *testing.T) {
 func TestOutputContextXOnClickJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
-<div><button x-on:click="{{ s }}">go</button></div>`,
+		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+<body><button x-on:click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "<script>alert(1)</script>") {
+	if strings.Contains(body, "<client>alert(1)</client>") {
 		t.Fatalf("x-on:click context must not emit raw script markup, got: %s", body)
 	}
 	if !strings.Contains(body, `\u003cscript\u003e`) {
@@ -150,11 +150,11 @@ func TestOutputContextXOnClickJSONEncodes(t *testing.T) {
 func TestOutputContextShorthandClickJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
-<div><button @click="{{ s }}">go</button></div>`,
+		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+<body><button @click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
-	if strings.Contains(body, "<script>alert(1)</script>") {
+	if strings.Contains(body, "<client>alert(1)</client>") {
 		t.Fatalf("@click context must not emit raw script markup, got: %s", body)
 	}
 	if !strings.Contains(body, `\u003cscript\u003e`) {
@@ -165,14 +165,14 @@ func TestOutputContextShorthandClickJSONEncodes(t *testing.T) {
 func TestOutputContextXBindStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := "red; } </style><script>alert(1)</script>"</go>
-<div><div x-bind:style="{{ s }}">x</div></div>`,
+		"www/routes/get.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
+<body><div x-bind:style="{{ s }}">x</div></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "</style>") {
 		t.Fatalf("x-bind:style context must neutralize </style>, got: %s", body)
 	}
-	if strings.Contains(body, "<script>alert(1)</script>") {
+	if strings.Contains(body, "<client>alert(1)</client>") {
 		t.Fatalf("x-bind:style context must escape markup, got: %s", body)
 	}
 }
@@ -180,14 +180,14 @@ func TestOutputContextXBindStyleNeutralizesBreakout(t *testing.T) {
 func TestOutputContextShorthandStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := "red; } </style><script>alert(1)</script>"</go>
-<div><div :style="{{ s }}">x</div></div>`,
+		"www/routes/get.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
+<body><div :style="{{ s }}">x</div></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if strings.Contains(body, "</style>") {
 		t.Fatalf(":style context must neutralize </style>, got: %s", body)
 	}
-	if strings.Contains(body, "<script>alert(1)</script>") {
+	if strings.Contains(body, "<client>alert(1)</client>") {
 		t.Fatalf(":style context must escape markup, got: %s", body)
 	}
 }

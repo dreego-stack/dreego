@@ -13,9 +13,9 @@ func TestDiscoveryIgnoresRoutesOutsideProjectRoot(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                    `{}`,
-		"www/routes/get.dreego":                     `<div><p>real</p></div>`,
-		"vendor/somepkg/dreego/routes/get.dreego":   `<div><p>vendor</p></div>`,
-		"node_modules/foo/dreego/routes/get.dreego": `<div><p>nm</p></div>`,
+		"www/routes/get.dreego":                     `<body><p>real</p></body>`,
+		"vendor/somepkg/dreego/routes/get.dreego":   `<body><p>vendor</p></body>`,
+		"node_modules/foo/dreego/routes/get.dreego": `<body><p>nm</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -36,8 +36,8 @@ func TestDiscoveryIgnoresNestedDreegoProjectRoots(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":          `{}`,
-		"www/routes/get.dreego":           `<div><p>outer</p></div>`,
-		"subapp/dreego/routes/get.dreego": `<div><p>inner</p></div>`,
+		"www/routes/get.dreego":           `<body><p>outer</p></body>`,
+		"subapp/dreego/routes/get.dreego": `<body><p>inner</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -58,9 +58,9 @@ func TestDiscoveryIgnoresComponentsOutsideProjectRoot(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                    `{}`,
-		"www/components/Inner.dreego":               "Component Inner ()\n<div><p>inner</p></div>",
-		"www/routes/get.dreego":                     `<div><@Inner/></div>`,
-		"vendor/lib/dreego/components/Outer.dreego": "Component Outer ()\n<div><p>outer</p></div>",
+		"www/components/Inner.dreego":               "Component Inner ()\n<body><p>inner</p></body>",
+		"www/routes/get.dreego":                     `<body><@Inner/></body>`,
+		"vendor/lib/dreego/components/Outer.dreego": "Component Outer ()\n<body><p>outer</p></body>",
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -81,10 +81,10 @@ func TestDiscoveryLayoutLocalCascades(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                 `{}`,
-		"www/layouts/default.dreego":             `<div><html><body><nav>Root</nav>{#slot}</body></html></div>`,
-		"www/routes/get.dreego":                  `<div><p>home</p></div>`,
-		"www/routes/blog/get.dreego":             `<div><p>blog</p></div>`,
-		"www/routes/blog/layouts/default.dreego": `<div><html><body><nav>Blog</nav>{#slot}</body></html></div>`,
+		"www/layouts/default.dreego":             `<body><html><body><nav>Root</nav>{#slot}</body></html></body>`,
+		"www/routes/get.dreego":                  `<body><p>home</p></body>`,
+		"www/routes/blog/get.dreego":             `<body><p>blog</p></body>`,
+		"www/routes/blog/layouts/default.dreego": `<body><html><body><nav>Blog</nav>{#slot}</body></html></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -105,9 +105,9 @@ func TestDiscoveryAmbiguousLayoutsFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":     `{}`,
-		"www/layouts/default.dreego": `<div><html><body>{#slot}</body></html></div>`,
-		"www/layouts/layout.dreego":  `<div><html><body><nav>X</nav>{#slot}</body></html></div>`,
-		"www/routes/get.dreego":      `<div><p>home</p></div>`,
+		"www/layouts/default.dreego": `<body><html><body>{#slot}</body></html></body>`,
+		"www/layouts/layout.dreego":  `<body><html><body><nav>X</nav>{#slot}</body></html></body>`,
+		"www/routes/get.dreego":      `<body><p>home</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -122,9 +122,9 @@ func TestDiscoveryAmbiguousErrorPagesFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":        `{}`,
-		"www/routes/404.dreego":         `<div><p>root 404</p></div>`,
-		"www/routes/(group)/404.dreego": `<div><p>group 404</p></div>`,
-		"www/routes/get.dreego":         `<div><p>home</p></div>`,
+		"www/routes/404.dreego":         `<body><p>root 404</p></body>`,
+		"www/routes/(group)/404.dreego": `<body><p>group 404</p></body>`,
+		"www/routes/get.dreego":         `<body><p>home</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -139,9 +139,9 @@ func TestDiscovery404And500SameDirGenerateAndCheck(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json": `{}`,
-		"www/routes/404.dreego":  `<div><p>not found</p></div>`,
-		"www/routes/500.dreego":  `<div><p>server error</p></div>`,
-		"www/routes/get.dreego":  `<div><p>home</p></div>`,
+		"www/routes/404.dreego":  `<body><p>not found</p></body>`,
+		"www/routes/500.dreego":  `<body><p>server error</p></body>`,
+		"www/routes/get.dreego":  `<body><p>home</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate with 404+500 in same dir: %v\n%s", err, out)
@@ -162,17 +162,17 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json": `{}`,
-		"www/routes/get.dreego":  `<div><p>home</p></div>`,
+		"www/routes/get.dreego":  `<body><p>home</p></body>`,
 	})
 	gen1 := dreegotest.Build(t, map[string]string{
 		"www/dreego.config.json":      `{}`,
-		"www/routes/get.dreego":       `<div><p>home</p></div>`,
-		"www/routes/about/get.dreego": `<div><p>about</p></div>`,
+		"www/routes/get.dreego":       `<body><p>home</p></body>`,
+		"www/routes/about/get.dreego": `<body><p>about</p></body>`,
 	})
 	if err := os.MkdirAll(filepath.Join(dir, "www", "routes", "about"), 0755); err != nil {
 		t.Fatalf("mkdir about: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "about", "get.dreego"), []byte(`<div><p>about</p></div>`), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "about", "get.dreego"), []byte(`<body><p>about</p></body>`), 0644); err != nil {
 		t.Fatalf("write about/get.dreego: %v", err)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
@@ -223,10 +223,10 @@ func TestDiscoveryGeneratesRoutesNamedStaticAndGen(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":            `{}`,
-		"www/routes/get.dreego":             `<div><p>home</p></div>`,
-		"www/routes/static/get.dreego":      `<div><p>static route</p></div>`,
-		"www/routes/gen/get.dreego":         `<div><p>gen route</p></div>`,
-		"www/routes/blog/static/get.dreego": `<div><p>blog static</p></div>`,
+		"www/routes/get.dreego":             `<body><p>home</p></body>`,
+		"www/routes/static/get.dreego":      `<body><p>static route</p></body>`,
+		"www/routes/gen/get.dreego":         `<body><p>gen route</p></body>`,
+		"www/routes/blog/static/get.dreego": `<body><p>blog static</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

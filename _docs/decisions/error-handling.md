@@ -124,7 +124,7 @@ CodeGen generates handlers that return `ValidationError`. Rendering:
 ### Error Boundary (per component)
 
 No error boundary at component level in V1. Rationale:
-- `<go>` block runs before template rendering — all errors are known beforehand
+- `<server>` block runs before template rendering — all errors are known beforehand
 - `{#if hasError}` covers the use case
 - Error boundaries are an SPA concept (React), not needed for SSR
 

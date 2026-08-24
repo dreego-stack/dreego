@@ -10,7 +10,7 @@ import (
 func TestBugRouteInlineScriptBodyStaysLiteral(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<div><script>const template = "{{ literal }}";</script></div>`,
+		"www/routes/get.dreego": `<body><script>const template = "{{ literal }}";</script></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, `const template = "{{ literal }}";`) {

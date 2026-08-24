@@ -6,7 +6,7 @@
     <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>
 </head>
 
-<div>
+<body>
     <h1>Import check</h1>
     <p>Verifies the Tailwind CDN script is served in the rendered HTML.</p>
-</div>
+</body>

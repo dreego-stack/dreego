@@ -10,8 +10,8 @@ import (
 func TestSelfClosingComponentAllowsFollowingSibling(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Card.dreego": "Component Card ()\n<div><article>{#slot}</article></div>",
-		"www/routes/get.dreego":      `<div><@Card/><p>sibling</p></div>`,
+		"www/components/Card.dreego": "Component Card ()\n<body><article>{#slot}</article></body>",
+		"www/routes/get.dreego":      `<body><@Card/><p>sibling</p></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

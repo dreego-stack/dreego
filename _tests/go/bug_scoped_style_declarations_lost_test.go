@@ -10,7 +10,7 @@ func TestBugScopedStyleDeclarationsLost(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"www/routes/get.dreego": `<style>p { background: radial-gradient(circle, red, blue); }</style>
-<div><p>hi</p></div>`,
+<body><p>hi</p></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "radial-gradient(circle, red, blue)")
 }

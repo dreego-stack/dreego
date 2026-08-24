@@ -8,7 +8,7 @@ import (
 func fileRegisteredMethods(file *File) []string {
 	if len(file.FormActions) > 0 {
 		action := file.FormActions[0]
-		if findFormStruct(file.Go, action) != "" && findFormHandler(file.Go, action) {
+		if findFormStruct(file.Server, action) != "" && findFormHandler(file.Server, action) {
 			return []string{"GET", "POST"}
 		}
 		return []string{"GET"}
@@ -24,10 +24,10 @@ func fileRegisteredMethods(file *File) []string {
 			methods = append(methods, method)
 		}
 	}
-	for _, section := range file.Go {
+	for _, section := range file.Server {
 		add(section.Method)
 	}
-	for _, template := range file.Templates {
+	for _, template := range file.Bodies {
 		add(template.Method)
 	}
 	if len(methods) == 0 {
@@ -51,11 +51,11 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 	file.Imports = imports
 	file.SourceContent = raw
 	bodyOffset := len(raw) - len(body)
-	if file.Template != nil {
-		setNodeSource(file.Template.Nodes, fpath, bodyOffset)
-		setSourceText(file.Template.Nodes, raw)
-		file.FormActions = scanFormActions(file.Template.Nodes)
-		for _, diagnostic := range a11yDiagnostics(file.Template.Nodes) {
+	if file.Body != nil {
+		setNodeSource(file.Body.Nodes, fpath, bodyOffset)
+		setSourceText(file.Body.Nodes, raw)
+		file.FormActions = scanFormActions(file.Body.Nodes)
+		for _, diagnostic := range a11yDiagnostics(file.Body.Nodes) {
 			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
 		}
 	}

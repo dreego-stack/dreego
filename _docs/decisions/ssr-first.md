@@ -40,7 +40,7 @@ Interactivity comes not through a client-side framework, but through:
 3. **Perfect SEO:** Everything is static HTML on first load
 4. **Fast FCP (First Contentful Paint):** Even on weak mobile devices
 5. **Simpler architecture:** No API layer, no JSON serialization, no client state stores
-6. **Direct DB access:** `<go>` block can directly access the database
+6. **Direct DB access:** `<server>` block can directly access the database
 
 ## Comparison
 

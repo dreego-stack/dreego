@@ -12,7 +12,7 @@ import (
 func TestCLIGenerateCheckTracksMethodRouteChanges(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<go>message := "get"</go><div>{{ message }}</div><go method="post">message := "post"</go><div method="post">{{ message }}</div>`,
+		"www/routes/+page.dreego": `<server>message := "get"</server><body>{{ message }}</body><server method="post">message := "post"</server><body method="post">{{ message }}</body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

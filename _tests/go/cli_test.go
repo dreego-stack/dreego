@@ -178,7 +178,7 @@ func TestCLICheckStale(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/routes/get.dreego": `<head><title>T</title></head>
-<div><p>check me</p></div>`,
+<body><p>check me</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -192,7 +192,7 @@ func TestCLICheckStale(t *testing.T) {
 	}
 	src := filepath.Join(dir, "www/routes/get.dreego")
 	if err := os.WriteFile(src, []byte(`<head><title>T2</title></head>
-<div><p>changed</p></div>`), 0644); err != nil {
+<body><p>changed</p></body>`), 0644); err != nil {
 		t.Fatalf("edit source: %v", err)
 	}
 	if _, err := dreegotest.RunCLI(t, dir, "generate", "--check"); err == nil {
@@ -204,7 +204,7 @@ func TestCLICheckNoGen(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json": `{}`,
-		"www/routes/get.dreego":  `<div><p>hi</p></div>`,
+		"www/routes/get.dreego":  `<body><p>hi</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {

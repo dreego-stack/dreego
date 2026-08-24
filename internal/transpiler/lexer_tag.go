@@ -10,7 +10,7 @@ func scanTag(input string, pos *int) Token {
 		return scanComponentTag(input, pos)
 	}
 
-	knownTags := []string{"go", "div", "head", "script", "style"}
+	knownTags := []string{"server", "head", "body", "style", "client", "go", "div", "script"}
 
 	for _, tag := range knownTags {
 		closer := "</" + tag + ">"

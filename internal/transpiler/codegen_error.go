@@ -21,17 +21,17 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 	buf.WriteString(fmt.Sprintf("func %s(c *dreego.SSRContext) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
-	if len(file.Go) > 0 && file.Go[0].Code != "" {
-		for _, line := range strings.Split(strings.Trim(file.Go[0].Code, "\n"), "\n") {
+	if len(file.Server) > 0 && file.Server[0].Code != "" {
+		for _, line := range strings.Split(strings.Trim(file.Server[0].Code, "\n"), "\n") {
 			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
 		}
 		buf.WriteString("\n")
 	}
 
-	if file.Template != nil {
+	if file.Body != nil {
 		suppressScope := false
-		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText {
-			suppressScope = strings.HasPrefix(file.Template.Nodes[0].Content, "<!")
+		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == NodeText {
+			suppressScope = strings.HasPrefix(file.Body.Nodes[0].Content, "<!")
 		}
 		var headCode string
 		if file.Head != nil {
@@ -49,7 +49,7 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 		}
 		headPending := suppressScope && headCode != ""
 		inSection := false
-		for _, n := range file.Template.Nodes {
+		for _, n := range file.Body.Nodes {
 			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", "", err
@@ -64,9 +64,9 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 			buf.WriteString("\tb.WriteString(\"</div>\")\n")
 		}
 
-		if file.Script != nil {
+		if file.Client != nil {
 			buf.WriteString("\tb.WriteString(\"<script>\")\n")
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Script.Code)))
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Client.Code)))
 			buf.WriteString("\tb.WriteString(\"</script>\")\n")
 		}
 		if file.Style != nil {

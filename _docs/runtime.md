@@ -4,7 +4,7 @@ This guide covers the primary runtime APIs available after `import dreego "githu
 
 ## SSRContext
 
-Available as **`c`** in routes (including `<go>` blocks and error pages) and as **`ctx`** in components (see [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
+Available as **`c`** in routes (including `<server>` blocks and error pages) and as **`ctx`** in components (see [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
 
 | Method | Returns | Description |
 |--------|---------|-------------|

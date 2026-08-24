@@ -154,7 +154,7 @@ func TestCLINewLayoutExists(t *testing.T) {
 func TestCLIBuildTarget(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>hello</p></div>`,
+		"www/routes/get.dreego": `<body><p>hello</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "build", "--target", "linux/amd64"); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
@@ -214,31 +214,31 @@ func TestCLIFmt(t *testing.T) {
 </head>
 
 
-<go>
+<server>
     msg   :=    "hello"
-</go>
+</server>
 
-<div>
+<body>
   <p>{{  msg  }}</p>
     {#if  show}
         <span>visible</span>
     {/if}
-</div>
+</body>
 `
-	expected := `<head>
+	expected := `<server>
+    msg   :=    "hello"
+</server>
+
+<head>
     <title>test</title>
 </head>
 
-<go>
-    msg   :=    "hello"
-</go>
-
-<div>
+<body>
   <p>{{ msg }}</p>
     {#if show}
         <span>visible</span>
     {/if}
-</div>
+</body>
 `
 	os.WriteFile(filepath.Join(dir, "messy.dreego"), []byte(messy), 0644)
 	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "messy.dreego")

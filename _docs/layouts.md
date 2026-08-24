@@ -29,7 +29,7 @@ diagnostic naming both files.
 **`www/layouts/default.dreego`:**
 
 ```html
-<div>
+<body>
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,7 +39,7 @@ diagnostic naming both files.
     {#slot}
 </body>
 </html>
-</div>
+</body>
 ```
 
 The layout defines the outer `<html>`/`<head>`/`<body>` skeleton. At codegen time the route's page content is placed into `{#slot}` and the route's `<head>` sections are merged into `{#head}`.

@@ -35,9 +35,9 @@ func extractFromNode(n TemplateNode, actions *[]string, seen map[string]bool) {
 	}
 }
 
-func findFormStruct(goSections []GoSection, action string) string {
+func findFormStruct(serverSections []ServerSection, action string) string {
 	combined := ""
-	for _, g := range goSections {
+	for _, g := range serverSections {
 		combined += g.Code + "\n"
 	}
 	re := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(\s*\w+\s+[^,]+,\s*\w+\s+([^,)]+)\s*\)`)
@@ -48,26 +48,26 @@ func findFormStruct(goSections []GoSection, action string) string {
 	return ""
 }
 
-func findFormHandler(goSections []GoSection, action string) bool {
+func findFormHandler(serverSections []ServerSection, action string) bool {
 	combined := ""
-	for _, g := range goSections {
+	for _, g := range serverSections {
 		combined += g.Code + "\n"
 	}
 	handlerRE := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(`)
 	return handlerRE.MatchString(combined)
 }
 
-func hasValidateTag(goSections []GoSection, structName string) bool {
-	return hasTagInStruct(goSections, structName, "validate")
+func hasValidateTag(serverSections []ServerSection, structName string) bool {
+	return hasTagInStruct(serverSections, structName, "validate")
 }
 
-func hasFormTag(goSections []GoSection, structName string) bool {
-	return hasTagInStruct(goSections, structName, "form")
+func hasFormTag(serverSections []ServerSection, structName string) bool {
+	return hasTagInStruct(serverSections, structName, "form")
 }
 
-func hasTagInStruct(goSections []GoSection, structName, tagName string) bool {
+func hasTagInStruct(serverSections []ServerSection, structName, tagName string) bool {
 	combined := ""
-	for _, g := range goSections {
+	for _, g := range serverSections {
 		combined += g.Code + "\n"
 	}
 	startRE := regexp.MustCompile(`type\s+` + regexp.QuoteMeta(structName) + `\s+struct\s*\{`)

@@ -122,13 +122,13 @@ func loadComponent(path string) (componentSource, error) {
 func prepareComponentFile(file *File, def *ComponentDef, path, raw string, bodyOffset int) {
 	file.Component = def
 	file.SourceContent = raw
-	if file.Template != nil {
-		setNodeSource(file.Template.Nodes, path, bodyOffset)
-		def.Slots = mergeUnique(def.Slots, collectSlotNames(file.Template.Nodes))
-		def.HasDefaultSlot = hasDefaultSlot(file.Template.Nodes)
-		def.HasNamedSlot = hasNamedSlot(file.Template.Nodes) || len(def.Slots) > 0
+	if file.Body != nil {
+		setNodeSource(file.Body.Nodes, path, bodyOffset)
+		def.Slots = mergeUnique(def.Slots, collectSlotNames(file.Body.Nodes))
+		def.HasDefaultSlot = hasDefaultSlot(file.Body.Nodes)
+		def.HasNamedSlot = hasNamedSlot(file.Body.Nodes) || len(def.Slots) > 0
 	}
-	if len(file.Go) == 0 {
-		file.Go = []GoSection{{Method: ""}}
+	if len(file.Server) == 0 {
+		file.Server = []ServerSection{{Method: ""}}
 	}
 }

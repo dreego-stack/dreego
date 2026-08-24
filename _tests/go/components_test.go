@@ -10,16 +10,16 @@ import (
 func TestComponentBasic(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Cmp.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2></article></div>",
-		"www/routes/get.dreego":     `<div><@Card title="Hello"/></div>`,
+		"www/components/Cmp.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
+		"www/routes/get.dreego":     `<body><@Card title="Hello"/></body>`,
 	})
 }
 
 func TestComponentEmptyProps(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Empty.dreego": "Component Empty ()\n<div><p>no props</p></div>",
-		"www/routes/get.dreego":       `<div><@Empty/></div>`,
+		"www/components/Empty.dreego": "Component Empty ()\n<body><p>no props</p></body>",
+		"www/routes/get.dreego":       `<body><@Empty/></body>`,
 	})
 }
 
@@ -27,70 +27,70 @@ func TestComponentMultiProps(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Profile.dreego": `Component Profile (name string, role string, email string)
-<div><h2>{{ name }}</h2><p>{{ role }}</p><a href="mailto:{{ email }}">{{ email }}</a></div>`,
-		"www/routes/get.dreego": `<div><@Profile name="Ada" role="Admin" email="ada@example.com"/></div>`,
+<body><h2>{{ name }}</h2><p>{{ role }}</p><a href="mailto:{{ email }}">{{ email }}</a></body>`,
+		"www/routes/get.dreego": `<body><@Profile name="Ada" role="Admin" email="ada@example.com"/></body>`,
 	})
 }
 
 func TestComponentNameClash(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/button.dreego":        "Component FlatButton (label string)\n\n<div><button>{{ label }}</button></div>",
-		"www/components/button/button.dreego": "Component NestedButton (label string)\n\n<div><button class=\"nested\">{{ label }}</button></div>",
-		"www/routes/get.dreego":               `<div><@FlatButton label="Click"/><@NestedButton label="Go"/></div>`,
+		"www/components/button.dreego":        "Component FlatButton (label string)\n\n<body><button>{{ label }}</button></body>",
+		"www/components/button/button.dreego": "Component NestedButton (label string)\n\n<body><button class=\"nested\">{{ label }}</button></body>",
+		"www/routes/get.dreego":               `<body><@FlatButton label="Click"/><@NestedButton label="Go"/></body>`,
 	})
 }
 
 func TestComponentNamedSlot(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<div><article>{#slot header}{/slot}<h2>{{ title }}</h2><div>{#slot}</div></article></div>",
-		"www/routes/get.dreego":      `<div><@Card title="Hi">{#slot header}<strong>HEADER</strong>{/slot}<p>body</p></@Card></div>`,
+		"www/components/Card.dreego": "Component Card (title string)\n<body><article>{#slot header}{/slot}<h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/routes/get.dreego":      `<body><@Card title="Hi">{#slot header}<strong>HEADER</strong>{/slot}<p>body</p></@Card></body>`,
 	})
 }
 
 func TestComponentNamedSlotEmpty(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card ()\n<div><article>{#slot header}{/slot}</article></div>",
-		"www/routes/get.dreego":      `<div><@Card><p>only default slot</p></@Card></div>`,
+		"www/components/Card.dreego": "Component Card ()\n<body><article>{#slot header}{/slot}</article></body>",
+		"www/routes/get.dreego":      `<body><@Card><p>only default slot</p></@Card></body>`,
 	})
 }
 
 func TestComponentNamedSlotExpr(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Greet.dreego": "Component Greet ()\n<div><p>{#slot header}{/slot} {#slot}</p></div>",
-		"www/routes/get.dreego": `<go>name := "World"</go>
-<div><@Greet>{#slot header}<strong>{{ name }}</strong>{/slot}!</@Greet></div>`,
+		"www/components/Greet.dreego": "Component Greet ()\n<body><p>{#slot header}{/slot} {#slot}</p></body>",
+		"www/routes/get.dreego": `<server>name := "World"</server>
+<body><@Greet>{#slot header}<strong>{{ name }}</strong>{/slot}!</@Greet></body>`,
 	})
 }
 
 func TestComponentNamedSlotMulti(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Page.dreego": "Component Page (title string)\n<div><header>{#slot header}{/slot}</header><main>{#slot}</main><footer>{#slot footer}{/slot}</footer></div>",
-		"www/routes/get.dreego": `<div><@Page title="Multi">
+		"www/components/Page.dreego": "Component Page (title string)\n<body><header>{#slot header}{/slot}</header><main>{#slot}</main><footer>{#slot footer}{/slot}</footer></body>",
+		"www/routes/get.dreego": `<body><@Page title="Multi">
 {#slot header}<nav>menu</nav>{/slot}
 content
 {#slot footer}<small>2026</small>{/slot}
-</@Page></div>`,
+</@Page></body>`,
 	})
 }
 
 func TestComponentNested(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Inner.dreego": "Component Inner ()\n<div><span>inner</span></div>",
-		"www/components/Outer.dreego": "Component Outer ()\n<div><article><@Inner/></article></div>",
-		"www/routes/get.dreego":       `<div><@Outer/></div>`,
+		"www/components/Inner.dreego": "Component Inner ()\n<body><span>inner</span></body>",
+		"www/components/Outer.dreego": "Component Outer ()\n<body><article><@Inner/></article></body>",
+		"www/routes/get.dreego":       `<body><@Outer/></body>`,
 	})
 }
 
 func TestComponentNotFound(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><@Missing/></div>`,
+		"www/routes/get.dreego": `<body><@Missing/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -104,28 +104,28 @@ func TestComponentNotFound(t *testing.T) {
 func TestComponentPropExpr(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Greet.dreego": "Component Greet (name string)\n<div><p>Hello {{ name }}</p></div>",
-		"www/routes/get.dreego": `<go>n:="World"</go>
-<div><@Greet name={n}/></div>`,
+		"www/components/Greet.dreego": "Component Greet (name string)\n<body><p>Hello {{ name }}</p></body>",
+		"www/routes/get.dreego": `<server>n:="World"</server>
+<body><@Greet name={n}/></body>`,
 	})
 }
 
 func TestComponentPropExpression(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2></article></div>",
-		"www/routes/get.dreego": `<go>type User struct { Name string }
-user := User{Name: "Ada"}</go>
-<div><@Card title={user.Name}/></div>`,
+		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
+		"www/routes/get.dreego": `<server>type User struct { Name string }
+user := User{Name: "Ada"}</server>
+<body><@Card title={user.Name}/></body>`,
 	})
 }
 
 func TestComponentScopedStyle(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Box.dreego": "Component Box ()\n<div><div class=\"box\"><p>scoped</p></div></div>\n<style>.box{border:1px solid red}</style>",
+		"www/components/Box.dreego": "Component Box ()\n<body><div class=\"box\"><p>scoped</p></div></body>\n<style>.box{border:1px solid red}</style>",
 		"www/routes/get.dreego": `<head><title>T</title></head>
-<div><@Box/><p class="box">unscoped</p></div>
+<body><@Box/><p class="box">unscoped</p></body>
 <style>.box{color:blue}</style>`,
 	})
 }
@@ -133,23 +133,23 @@ func TestComponentScopedStyle(t *testing.T) {
 func TestComponentSelfClosing(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Cmp.dreego": "Component Icon (name string)\n<div><i class=\"icon\">{{ name }}</i></div>",
-		"www/routes/get.dreego":     `<div><@Icon name="star"/></div>`,
+		"www/components/Cmp.dreego": "Component Icon (name string)\n<body><i class=\"icon\">{{ name }}</i></body>",
+		"www/routes/get.dreego":     `<body><@Icon name="star"/></body>`,
 	})
 }
 
 func TestComponentWithGo(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Greeting.dreego": "Component Greeting (name string)\n<go>msg := \"Hi \" + name</go>\n<div><p>{{ msg }}</p></div>",
-		"www/routes/get.dreego":          `<div><@Greeting name="World"/></div>`,
+		"www/components/Greeting.dreego": "Component Greeting (name string)\n<server>msg := \"Hi \" + name</server>\n<body><p>{{ msg }}</p></body>",
+		"www/routes/get.dreego":          `<body><@Greeting name="World"/></body>`,
 	})
 }
 
 func TestComponentWithSlot(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<div><article><h2>{{ title }}</h2><div>{#slot}</div></article></div>",
-		"www/routes/get.dreego":      `<div><@Card title="Welcome"><p>body text</p></@Card></div>`,
+		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/routes/get.dreego":      `<body><@Card title="Welcome"><p>body text</p></@Card></body>`,
 	})
 }

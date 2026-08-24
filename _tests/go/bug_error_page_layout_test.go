@@ -14,24 +14,24 @@ func TestBugErrorPageLayout(t *testing.T) {
     <title>Layout Site</title>
     {#head}
 </head>
-<div><main>{#slot}</main></div>`,
+<body><main>{#slot}</main></body>`,
 		"www/routes/404.dreego": `<head>
     <meta charset="utf-8">
     <title>Not Found</title>
     <link rel="stylesheet" href="/err.css">
 </head>
-<div><!doctype html>
+<body><!doctype html>
 <html lang="en">
 <body>
     <div><p>Not Found</p></div>
 </body>
-</html></div>
+</html></body>
 <style>
 p { color: red; }
 </style>
-<script>
+<client>
 console.log("err");
-</script>`,
+</client>`,
 	})
 	code, body := c.Get(t, "/missing")
 	if code != 404 {

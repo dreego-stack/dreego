@@ -2,7 +2,7 @@
 func renderAbout(c *dreego.SSRContext) (string, error) {
 	var b strings.Builder
 
-	b.WriteString("<div data-scope=\"4f3f671a10cb\">")
+	b.WriteString("<div data-scope=\"949c712a1bb5\">")
 	b.WriteString(`<h1>`)
 	b.WriteString(`About us`)
 	b.WriteString(`</h1>`)

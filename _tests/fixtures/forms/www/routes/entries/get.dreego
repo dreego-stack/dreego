@@ -2,11 +2,11 @@
     <title>Entries</title>
 </head>
 
-<go>
+<server>
     empty := len(entries) == 0
-</go>
+</server>
 
-<div>
+<body>
     <h1>
         Entries</h1>
     {#if empty}
@@ -24,4 +24,4 @@
         <a href="/">
             Post a message</a>
     </p>
-</div>
+</body>

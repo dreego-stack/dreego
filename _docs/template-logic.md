@@ -11,7 +11,7 @@ timestamp: 2026-07-28T21:33:00Z
 
 ## Design Philosophy
 
-- **No real Go in the template** — complex logic belongs in `<go>` block
+- **No real Go in the template** — complex logic belongs in `<server>` block
 - **All template blocks compile to native Go** — zero runtime cost
 - **Auto-escaping**: all `{var}` expressions are escaped via `html.EscapeString`
 
@@ -42,7 +42,7 @@ timestamp: 2026-07-28T21:33:00Z
 ```
 
 **Rules:**
-- Supports arbitrary Go conditions (variables from `<go>`)
+- Supports arbitrary Go conditions (variables from `<server>`)
 - `{#else}` optional
 - `{#else if}` / `{#elseif}` — implemented (v0.0.19)
 
@@ -57,7 +57,7 @@ timestamp: 2026-07-28T21:33:00Z
 ```
 
 **Rules:**
-- Iterates over slice/array (variables from `<go>`)
+- Iterates over slice/array (variables from `<server>`)
 - `{#each else}` renders on empty slice
 - `$loop.Index` (0-based), `.First`, `.Last`, `.Even`, `.Odd`
 - Codegen: `var loop := core.EachLoop{Index: i, ...}` with string replacement `$loop.` → `loop.`
@@ -79,7 +79,7 @@ timestamp: 2026-07-28T21:33:00Z
 
 ```
 <p>{html|raw}</p>
-<div>{name|upper}</div>
+<body>{name|upper}</body>
 ```
 
 **Rules:**
@@ -93,7 +93,7 @@ timestamp: 2026-07-28T21:33:00Z
 **Default Slot (no name, no `{/slot}`):**
 
 ```
-<div>{#slot}</div>
+<body>{#slot}</body>
 ```
 
 **Named Slots (with `{/slot}` closing):**
@@ -101,11 +101,11 @@ timestamp: 2026-07-28T21:33:00Z
 Component:
 ```
 Component Card (title string)
-<div>
+<body>
   {#slot header}{/slot}
   <h2>{title}</h2>
   {#slot}
-</div>
+</body>
 ```
 
 Route:
@@ -123,13 +123,13 @@ Route:
 
 ## Error Handling
 
-No special error tag. Errors via `<go>` block and `{#if}`:
+No special error tag. Errors via `<server>` block and `{#if}`:
 
 ```
-<go>
+<server>
     user, err := db.GetUser(id)
     hasError := err != nil
-</go>
+</server>
 
 {#if hasError}
     <p>Error loading.</p>

@@ -1,4 +1,4 @@
-<div>
+<body>
 <html lang="en">
 <head>
     <title>§$name$§</title>
@@ -13,7 +13,7 @@
     </main>
 </body>
 </html>
-</div>
+</body>
 
 <style>
 .skip-link { position: absolute; left: -9999px; }

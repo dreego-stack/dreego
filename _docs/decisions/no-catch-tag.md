@@ -23,21 +23,21 @@ Go developers handle errors explicitly (`if err != nil`). A separate error handl
 
 ## Decision
 
-**No `<catch>` tag.** Errors are handled in the `<go>` block and passed to the template as variables:
+**No `<catch>` tag.** Errors are handled in the `<server>` block and passed to the template as variables:
 
 ```html
-<go>
+<server>
     user, err := db.GetUser(id)
     hasError := err != nil
-</go>
+</server>
 
-<div class="profile">
+<body class="profile">
     {#if hasError}
         <p class="error">User could not be loaded.</p>
     {#else}
         <h1>Hello, {user.Name}!</h1>
     {/if}
-</div>
+</body>
 ```
 
 ## Rationale

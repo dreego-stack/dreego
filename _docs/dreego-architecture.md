@@ -9,8 +9,8 @@ timestamp: 2026-07-31T07:00:00Z
 # Dreego Architecture
 
 > **Current and planned boundaries:** This document primarily explains the
-> released SSR implementation and therefore uses the current `<go>`, `<div>`,
-> and `<script>` syntax. The accepted v0.x direction introduces a target-neutral
+> released SSR implementation and therefore uses the current `<server>`, `<body>`,
+> and `<client>` syntax. The accepted v0.x direction introduces a target-neutral
 > App and renderer, explicit SSR/SSG/Wails target packages, DreeJS, and the
 > planned `<server>`, `<body>`, and `<client>` names. See the
 > [target decision](decisions/target-neutral-application-and-first-party-targets.md),
@@ -37,7 +37,7 @@ Dreego is a compile-time web framework for Go. It consists of two main component
                                    │
           ┌────────────────────────┼────────────────────────┐
           ▼                        ▼                        ▼
-      <head> Block           Template & <style>        <script> Block
+      <head> Block           Template & <style>        <client> Block
   (Meta/Assets per Comp.)  (HTML + Scoped CSS)    (Vanilla JS for Client)
           │                        │                        │
           └────────────────────────┼────────────────────────┘
@@ -94,7 +94,7 @@ Browser Request
                               ┌────────────────┼────────────────┐
                               ▼                ▼                ▼
                        ┌──────────┐    ┌──────────┐    ┌──────────┐
-                       │ <go>     │    │ Template │    │ <head>   │
+                       │ <server>     │    │ Template │    │ <head>   │
                        │ Data     │    │ Render   │    │ Assets   │
                        │ Fetching │    │ HTML     │    │ Injection│
                        └──────────┘    └──────────┘    └──────────┘
@@ -103,7 +103,7 @@ Browser Request
                                                ▼
                                     ┌─────────────────┐
                                     │ Final HTML       │
-                                    │ (incl. <script>, │
+                                    │ (incl. <client>, │
                                     │  <style>, Assets)│
                                     └─────────────────┘
                                                │
@@ -130,7 +130,7 @@ dreego/
 ## V1 Scope (MVP)
 
 - [x] Transpiler: `.dreego` → `.go`
-- [x] 3 Sections: `<go>`, Template, `<style>`
+- [x] 3 Sections: `<server>`, Template, `<style>`
 - [x] Template Logic: `{#if}`, `{#each}`, `{#else}`, `{#else if}`, `{#each else}`, `$loop`, `{#verbatim}`, and `{{ expression }}`
 - [x] File-based Routing (net/http 1.22+ enhanced routing)
 - [x] Component System: `dreego/components/`, `<@Name>`, Named Slots, Scoped CSS
@@ -142,7 +142,7 @@ dreego/
 - [x] Security Headers: nosniff, frame-options, referrer-policy, permissions-policy (v0.0.14)
 - [x] CSP header via `core.SetCSP` (v0.0.20)
 - [x] Gzip Compression: compress/gzip middleware (v0.0.14)
-- [x] Content-Type Routing: `<go type="json|xml">` with c.JSON/XML/Bind/Write (v0.0.15)
+- [x] Content-Type Routing: `<server type="json|xml">` with c.JSON/XML/Bind/Write (v0.0.15)
 - [x] Form Actions: `g-action` + auto-validation + redirect (v0.0.16)
 - [x] Production Deployment: graceful shutdown, cross-compile, Docker (v0.0.17)
 - [x] Request-ID Middleware (v0.0.17)
@@ -159,10 +159,10 @@ Reusable `.dreego` components with scoped styles:
 ```
 dreego/components/Card.dreego:
   Component Card (title string)
-  <div><h2>{{ title }}</h2>{#slot}</div>
+  <body><h2>{{ title }}</h2>{#slot}</body>
 
 dreego/routes/get.dreego:
-  <div><@Card title="Hello">content</@Card></div>
+  <body><@Card title="Hello">content</@Card></body>
 ```
 
 - Auto-Discovery via `scanComponents()` — no import needed
@@ -190,7 +190,7 @@ dreego/static/logo.svg   → GET /logo.svg   (image/svg+xml)
 `dreego fmt` formats `.dreego` files in-place, `--check` for CI, `--stdout` for piping:
 
 - Normalizes component headers, expressions, control flow spacing
-- Section ordering: `<go>`, `<head>`, template, `<style>`, `<script>`
+- Section ordering: `<server>`, `<head>`, `<body>`, `<style>`, `<client>`
 - Idempotent: formatting twice produces same output
 
 ## Scaffolding + Split-Gen (v0.0.13)

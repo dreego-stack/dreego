@@ -10,8 +10,8 @@ import (
 func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego":   `<div><p>get</p></div>`,
-		"www/routes/index.dreego": `<div><p>index</p></div>`,
+		"www/routes/get.dreego":   `<body><p>get</p></body>`,
+		"www/routes/index.dreego": `<body><p>index</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -28,9 +28,9 @@ func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
 func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<go method="post">msg := "posted"</go>
-<div><p>{{ msg }}</p></div>`,
-		"www/routes/post.dreego": `<div><p>post</p></div>`,
+		"www/routes/get.dreego": `<server method="post">msg := "posted"</server>
+<body><p>{{ msg }}</p></body>`,
+		"www/routes/post.dreego": `<body><p>post</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -47,13 +47,13 @@ func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
 func TestBugDuplicateRouteFormWithoutHandler(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div>
+		"www/routes/get.dreego": `<body>
 <form g-action="Missing" method="post">
     <input name="x">
     <button>OK</button>
 </form>
-</div>`,
-		"www/routes/post.dreego": `<div><p>post</p></div>`,
+</body>`,
+		"www/routes/post.dreego": `<body><p>post</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err != nil {

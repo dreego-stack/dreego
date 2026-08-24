@@ -87,7 +87,7 @@ func TestScanBraceDoubleExpression(t *testing.T) {
 }
 
 func TestLexSingleBraceIsLiteralText(t *testing.T) {
-	tokens, err := Lex(`<div>{value}</div>`)
+	tokens, err := Lex(`<body>{value}</body>`)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -95,11 +95,11 @@ func TestLexSingleBraceIsLiteralText(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected parse error: %v", err)
 	}
-	if len(file.Template.Nodes) != 1 || file.Template.Nodes[0].Type != NodeText {
-		t.Fatalf("single braces must remain literal text, got %+v", file.Template.Nodes)
+	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeText {
+		t.Fatalf("single braces must remain literal text, got %+v", file.Body.Nodes)
 	}
-	if file.Template.Nodes[0].Content != "{value}" {
-		t.Fatalf("expected literal {value}, got %q", file.Template.Nodes[0].Content)
+	if file.Body.Nodes[0].Content != "{value}" {
+		t.Fatalf("expected literal {value}, got %q", file.Body.Nodes[0].Content)
 	}
 }
 

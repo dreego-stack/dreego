@@ -10,10 +10,10 @@ import (
 func TestNestedComponentSlotCodegenUsesValidBuilders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Inner.dreego": "Component Inner ()\n<div><aside>{#slot header}{/slot}</aside></div>",
-		"www/components/Outer.dreego": "Component Outer ()\n<div><header>{#slot header}{/slot}</header><main>{#slot}</main></div>",
-		"www/routes/get.dreego": `<div><@Outer>{#slot header}<strong>outer</strong>{/slot}` +
-			`<@Inner>{#slot header}<em>inner</em>{/slot}</@Inner></@Outer></div>`,
+		"www/components/Inner.dreego": "Component Inner ()\n<body><aside>{#slot header}{/slot}</aside></body>",
+		"www/components/Outer.dreego": "Component Outer ()\n<body><header>{#slot header}{/slot}</header><main>{#slot}</main></body>",
+		"www/routes/get.dreego": `<body><@Outer>{#slot header}<strong>outer</strong>{/slot}` +
+			`<@Inner>{#slot header}<em>inner</em>{/slot}</@Inner></@Outer></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

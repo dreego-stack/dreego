@@ -12,7 +12,7 @@ import (
 func TestBugRunReturnsChildExitStatus(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json": `{}`,
-		"www/routes/get.dreego":  `<div><p>hi</p></div>`,
+		"www/routes/get.dreego":  `<body><p>hi</p></body>`,
 	})
 	mainGo := "package main\n\nimport \"os\"\n\nfunc main() { os.Exit(7) }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {

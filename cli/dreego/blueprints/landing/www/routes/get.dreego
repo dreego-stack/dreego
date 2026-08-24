@@ -1,6 +1,6 @@
 <head><meta name="description" content="§$name$§ landing page"></head>
 
-<div>
+<body>
     <@Hero
         badge="New in 2026"
         title="Build modern web apps with Go"
@@ -54,4 +54,4 @@
         </div>
     </section>
 
-</div>
+</body>

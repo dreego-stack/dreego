@@ -13,7 +13,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), usin
 ## Areas Covered
 
 ### Transpiler
-Basic page with all sections, routes without `<go>`, unclosed `<div>`, mismatched closing tags, XSS escaping, output contexts (text, attribute, URL, script, style), duplicate sections, empty templates, large templates, unicode, comments, verbatim blocks.
+Basic page with all sections, routes without `<server>`, unclosed `<body>`, mismatched closing tags, XSS escaping, output contexts (text, attribute, URL, script, style), duplicate sections, empty templates, large templates, unicode, comments, verbatim blocks.
 
 ### Template Expressions
 `{#if}` true/false, `{#each}` loops, nested control flow, `{#else}` and `{#else if}`, empty lists, expressions with missing variables (build-time failure), function expressions, filters.

@@ -14,12 +14,12 @@ func TestBugErrorPageDoctype(t *testing.T) {
     <meta charset="utf-8">
     <title>Not Found</title>
 </head>
-<div><!doctype html>
+<body><!doctype html>
 <html lang="en">
 <body>
     <div><p>Not Found</p></div>
 </body>
-</html></div>`,
+</html></body>`,
 	})
 	code, body := c.Get(t, "/missing")
 	if code != 404 {

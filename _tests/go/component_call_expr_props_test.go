@@ -11,8 +11,8 @@ func TestComponentCallStringLiteralProp(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (message string)
-<div><p>{{ message }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet message="hi"/></div>`,
+<body><p>{{ message }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet message="hi"/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -27,8 +27,8 @@ func TestComponentCallIntLiteralProp(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Counter.dreego": `Component Counter (count int)
-<div><p>{{ count }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Counter count={42}/></div>`,
+<body><p>{{ count }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Counter count={42}/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -43,8 +43,8 @@ func TestComponentCallWrongTypeLiteralProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (message string)
-<div><p>{{ message }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet message={42}/></div>`,
+<body><p>{{ message }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet message={42}/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -68,9 +68,9 @@ func TestComponentCallExprPropHTTP(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Score.dreego": `Component Score (value int)
-<div><p>score: {{ value }}</p></div>`,
-		"www/routes/get.dreego": `<go>value := 99</go>
-<div><@Score value={value}/></div>`,
+<body><p>score: {{ value }}</p></body>`,
+		"www/routes/get.dreego": `<server>value := 99</server>
+<body><@Score value={value}/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

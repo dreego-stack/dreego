@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func splitGoSections(sections []GoSection, hasFormActions bool) (pkgCode string, inlineCode string) {
+func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode string, inlineCode string) {
 	var pkg []string
 	var inl []string
 	for _, g := range sections {

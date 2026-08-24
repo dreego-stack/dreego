@@ -14,15 +14,15 @@ import (
 func TestGenTemplHeadMergeDedupesTitle(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<title>Page</title><meta name="description" content="route desc">`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{{Type: NodeText, Content: "<p>page</p>"}},
 		},
 	}
 	layout := &layoutEntry{
 		file: &File{
 			Head: &HeadSection{Content: "<title>Site</title>\n    {#head}"},
-			Template: &TemplateSection{
-				Nodes: []TemplateNode{{Type: NodeText, Content: "<div><main>{#slot}</main></div>"}},
+			Body: &BodySection{
+				Nodes: []TemplateNode{{Type: NodeText, Content: "<body><main>{#slot}</main></body>"}},
 			},
 		},
 		name: "Default",
@@ -50,15 +50,15 @@ func TestGenTemplHeadMergeDedupesTitle(t *testing.T) {
 func TestGenTemplHeadMergeDedupesMetaDescription(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<meta name="description" content="route desc">`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{{Type: NodeText, Content: "<p>page</p>"}},
 		},
 	}
 	layout := &layoutEntry{
 		file: &File{
 			Head: &HeadSection{Content: "<meta name=\"description\" content=\"site desc\">\n{#head}"},
-			Template: &TemplateSection{
-				Nodes: []TemplateNode{{Type: NodeText, Content: "<div><main>{#slot}</main></div>"}},
+			Body: &BodySection{
+				Nodes: []TemplateNode{{Type: NodeText, Content: "<body><main>{#slot}</main></body>"}},
 			},
 		},
 		name: "Default",
@@ -85,15 +85,15 @@ func TestGenTemplHeadMergeDedupesMetaDescription(t *testing.T) {
 func TestGenTemplHeadMergeKeepsLayoutTitleWithoutRouteTitle(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<meta name="description" content="route desc">`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{{Type: NodeText, Content: "<p>page</p>"}},
 		},
 	}
 	layout := &layoutEntry{
 		file: &File{
 			Head: &HeadSection{Content: "<title>Site</title>\n    {#head}"},
-			Template: &TemplateSection{
-				Nodes: []TemplateNode{{Type: NodeText, Content: "<div><main>{#slot}</main></div>"}},
+			Body: &BodySection{
+				Nodes: []TemplateNode{{Type: NodeText, Content: "<body><main>{#slot}</main></body>"}},
 			},
 		},
 		name: "Default",
@@ -118,15 +118,15 @@ func TestGenTemplHeadMergeKeepsLayoutTitleWithoutRouteTitle(t *testing.T) {
 func TestGenTemplHeadMergeKeepsCharsetAndLinkWhenStrippingDescription(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<meta name="description" content="route desc">`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{{Type: NodeText, Content: "<p>page</p>"}},
 		},
 	}
 	layout := &layoutEntry{
 		file: &File{
 			Head: &HeadSection{Content: `<meta charset="utf-8"><meta name="description" content="site desc"><link rel="stylesheet" href="/x.css">\n{#head}`},
-			Template: &TemplateSection{
-				Nodes: []TemplateNode{{Type: NodeText, Content: "<div><main>{#slot}</main></div>"}},
+			Body: &BodySection{
+				Nodes: []TemplateNode{{Type: NodeText, Content: "<body><main>{#slot}</main></body>"}},
 			},
 		},
 		name: "Default",

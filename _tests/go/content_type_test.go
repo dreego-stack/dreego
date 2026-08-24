@@ -9,13 +9,13 @@ import (
 func TestContentTypeAcceptFallback(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
     msg := "hello"
-</go>
-<go type="json">
+</server>
+<server type="json">
     c.JSON(200, map[string]string{"msg": msg})
-</go>
-<div><h1>{{ msg }}</h1></div>`,
+</server>
+<body><h1>{{ msg }}</h1></body>`,
 	})
 	code, body := c.Get(t, "/")
 	dreegotest.MustStatus(t, code, 200)
@@ -25,9 +25,9 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 func TestContentTypeAcceptJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go type="json">
+		"www/routes/get.dreego": `<server type="json">
     c.JSON(200, map[string]string{"ok": "true"})
-</go>`,
+</server>`,
 	})
 	code, body, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/json"})
 	dreegotest.MustStatus(t, code, 200)
@@ -37,10 +37,10 @@ func TestContentTypeAcceptJSON(t *testing.T) {
 func TestContentTypeAcceptXML(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go type="xml">
+		"www/routes/get.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
-</go>`,
+</server>`,
 	})
 	code, body, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/xml"})
 	dreegotest.MustStatus(t, code, 200)
@@ -50,7 +50,7 @@ func TestContentTypeAcceptXML(t *testing.T) {
 func TestContentTypeBindError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/post.dreego": `<go type="json">
+		"www/routes/post.dreego": `<server type="json">
     var input map[string]any
     err := c.Bind(&input)
     if err != nil {
@@ -58,7 +58,7 @@ func TestContentTypeBindError(t *testing.T) {
     } else {
         c.JSON(200, input)
     }
-</go>`,
+</server>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/", "not json", map[string]string{
 		"Accept":       "application/json",
@@ -71,12 +71,12 @@ func TestContentTypeBindError(t *testing.T) {
 func TestContentTypeBindPost(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/post.dreego": `<go type="json">
+		"www/routes/post.dreego": `<server type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
     c.JSON(200, input)
-</go>`,
+</server>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/", `{"name":"Lukas"}`, map[string]string{
 		"Accept":       "application/json",
@@ -90,10 +90,10 @@ func TestContentTypeBindPost(t *testing.T) {
 func TestContentTypeCustomBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<go type="custom">
+		"www/routes/get.dreego": `<server type="custom">
     msg := []byte("hello world")
     c.Write(200, "text/plain", msg)
-</go>`,
+</server>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "text/plain")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.Write")
@@ -102,10 +102,10 @@ func TestContentTypeCustomBasic(t *testing.T) {
 func TestContentTypeHTMLDefault(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
     msg := "hello"
-</go>
-<div><h1>{{ msg }}</h1></div>`,
+</server>
+<body><h1>{{ msg }}</h1></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "text/html")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "b.WriteString")
@@ -114,12 +114,12 @@ func TestContentTypeHTMLDefault(t *testing.T) {
 func TestContentTypeJSONAutoImports(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/post.dreego": `<go type="json">
+		"www/routes/post.dreego": `<server type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
     c.JSON(200, input)
-</go>`,
+</server>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.Bind")
@@ -129,10 +129,10 @@ func TestContentTypeJSONAutoImports(t *testing.T) {
 func TestContentTypeJSONBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<go type="json">
+		"www/routes/get.dreego": `<server type="json">
     user := map[string]string{"name": "Lukas"}
     c.JSON(200, user)
-</go>`,
+</server>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/json")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
@@ -141,17 +141,17 @@ func TestContentTypeJSONBasic(t *testing.T) {
 func TestContentTypeJSONShared(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
     msg := "Lukas"
-</go>
+</server>
 
-<go type="json">
+<server type="json">
     c.JSON(200, map[string]string{"name": msg})
-</go>
+</server>
 
-<div>
+<body>
     <h1>{{ msg }}</h1>
-</div>`,
+</body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/json")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
@@ -161,17 +161,17 @@ func TestContentTypeJSONShared(t *testing.T) {
 func TestContentTypeMultiTyped(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
     name := "Lukas"
-</go>
-<go type="json">
+</server>
+<server type="json">
     c.JSON(200, map[string]string{"format": "json", "name": name})
-</go>
-<go type="xml">
+</server>
+<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: name}
     c.XML(200, user)
-</go>
-<div><h1>{{ name }}</h1></div>`,
+</server>
+<body><h1>{{ name }}</h1></body>`,
 	})
 	_, jbody, _ := c.Request(t, "GET", "/", "", map[string]string{"Accept": "application/json"})
 	dreegotest.MustContainBody(t, jbody, `"format":"json"`)
@@ -184,10 +184,10 @@ func TestContentTypeMultiTyped(t *testing.T) {
 func TestContentTypeXMLBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<go type="xml">
+		"www/routes/get.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
-</go>`,
+</server>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/xml")
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.XML")

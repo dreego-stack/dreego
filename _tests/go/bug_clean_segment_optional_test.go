@@ -10,7 +10,7 @@ import (
 func TestBugCleanSegmentOptional(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/[[opt]]/get.dreego": `<div>optional</div>`,
+		"www/routes/[[opt]]/get.dreego": `<body>optional</body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {

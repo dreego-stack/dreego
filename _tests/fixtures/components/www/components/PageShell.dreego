@@ -1,6 +1,6 @@
 Component PageShell (title string)
 
-<div>
+<body>
     <a href="#main" class="skip-link">skip to content</a>
     <header>
         <h1>{{ title }}</h1>
@@ -9,7 +9,7 @@ Component PageShell (title string)
         </nav>
     </header>
     <main id="main">{#slot}</main>
-</div>
+</body>
 
 <style>
 .skip-link { position: absolute; left: -9999px; }

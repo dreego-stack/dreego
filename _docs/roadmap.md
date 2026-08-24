@@ -9,8 +9,9 @@ This roadmap is directional, not a deadline or release promise. Dreego expects
 to remain in v0.x for a long time. Version labels describe dependency order;
 implementation evidence may split or reorder a phase.
 
-Current released behavior remains SSR-first. Planned syntax and APIs below are
-not available until their phase is implemented and documented.
+Current released behavior remains SSR-first. The semantic root sections are
+implemented; other planned syntax and APIs below are unavailable until their
+phase is implemented and documented.
 
 ## Product boundaries
 
@@ -28,7 +29,7 @@ not available until their phase is implemented and documented.
 
 The detailed implementation plans live in [`_plan/`](../_plan/README.md).
 
-## Pre-v0.1 — semantic section migration
+## Pre-v0.1 — semantic section migration (complete)
 
 Complete the deliberate breaking rename while the template language remains
 pre-stable:
@@ -50,8 +51,8 @@ separate concepts:
 ```
 
 The default `lang` values may be omitted. A `<script>` nested inside an HTML
-body remains a normal HTML element. The dedicated todo is
-[`semantic-sections.1`](../_todo/core/semantic-sections.1.md).
+body remains a normal HTML element. Legacy root names fail with migration
+guidance and have no compatibility aliases.
 
 ## v0.1 — SSR foundation
 
