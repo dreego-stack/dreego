@@ -13,6 +13,7 @@
     {"path": "/_docs/forms.md", "title": "Forms"},
     {"path": "/_docs/plugin-interfaces.md", "title": "Plugin Interfaces"},
     {"path": "/_docs/plugins.md", "title": "Plugins"},
+    {"path": "/_docs/build-hooks.md", "title": "Build Hooks"},
     {"path": "/_docs/runtime.md", "title": "Runtime API"},
     {"path": "/_docs/session-encryption.md", "title": "Session Encryption"},
     {"path": "/_docs/progressive-enhancement.md", "title": "Progressive Enhancement"},

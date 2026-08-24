@@ -228,6 +228,10 @@ def test_workflow_contract():
     pr_check = (WORKFLOWS / "pull-request-check.yml").read_text()
     check("pull-request-check validates change file", ".changes" in pr_check)
     check("pull-request-check isolates PR change file", "git merge-base HEAD origin/main" in pr_check)
+    check("pull-request-check preserves published tag ancestry",
+          "git merge-base --is-ancestor \"$latest\" HEAD" in pr_check)
+    check("main-push preserves published tag ancestry",
+          "git merge-base --is-ancestor \"$latest\" HEAD" in main_push)
     check("pull-request-check runs make test", "make test" in pr_check)
     check("pull-request-check runs coverage before tests",
           pr_check.index("make coverage") < pr_check.index("make test"))

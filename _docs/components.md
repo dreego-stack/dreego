@@ -135,6 +135,38 @@ for the exact context rules and the `|raw` opt-in.
 8. **Typed props** — `prop={expression}` passes a Go expression value without converting it to a string.
 9. **Named prop contract** — order-independent, extra/missing props fail at `dreego generate`.
 
+## Accessibility
+
+Component markup remains responsible for semantic intent. Use labeled
+navigation landmarks, ordered headings, associated form labels, alternative
+text for informative images, and `aria-hidden="true"` for decorative content.
+Use buttons for actions and links for navigation.
+
+A page shell should provide one `<main id="main">` landmark and a skip link as
+its first focusable element:
+
+```dreego
+Component PageShell (title string)
+
+<div>
+    <a href="#main" class="skip-link">skip to content</a>
+    <header>...</header>
+    <main id="main">{#slot}</main>
+</div>
+```
+
+Visually hide the link until it receives focus:
+
+```css
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { position: fixed; top: 0.5rem; left: 0.5rem; }
+```
+
+Dreego does not make arbitrary user applications automatically accessible.
+See
+[Accessibility](https://github.com/dreego-stack/dreego/blob/main/_docs/accessibility.md)
+for the complete requirements and testing guidance.
+
 ## Named Prop Contract
 
 Component props are **named** and **order-independent**. The set of props passed in a call is validated against the component declaration at `dreego generate`.

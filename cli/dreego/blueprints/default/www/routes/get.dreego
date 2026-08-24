@@ -1,5 +1,5 @@
 <head>
-    <title>Dreego</title>
+    <meta name="description" content="§$name$§ — Built with Dreego">
 </head>
 
 <go>
@@ -7,13 +7,11 @@
 </go>
 
 <div>
-    <h1>
-        {{ message }}</h1>
-    <p>
-        Edit <code>dreego/routes/get.dreego</code> and reload.</p>
+    <h1>{{ message }}</h1>
+    <p>Edit <code>www/routes/get.dreego</code> and reload.</p>
 </div>
 
 <style>
-    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; }
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
     h1 { color: #333; }
 </style>

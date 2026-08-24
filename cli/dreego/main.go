@@ -57,7 +57,7 @@ commands:
   init <path>            create a minimal dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
-  build [--target <os/arch>] generate + go build → build/bin/<name>
+  build [--target <os/arch>] [--yes]  generate + go build → build/bin/<name>
   run [-d] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change
   docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: core /_docs/index.md)
@@ -68,6 +68,7 @@ commands:
 flags:
   --force                force regeneration of all files
   --target <os/arch>     cross-compile target (e.g. linux/amd64, darwin/arm64)
+  --yes                  auto-approve all plugin build hooks (no prompt)
   -p <name>              docs of a dreego plugin (github.com/dreego-stack/<name>)
   --web                  open docs in browser instead of terminal
   --list                 list all core + plugin doc pages
@@ -79,6 +80,7 @@ examples:
   dreego generate --force     force full regeneration
   dreego build                generate + build binary (local platform)
   dreego build --target linux/amd64  cross-compile for Docker
+  dreego build --yes         generate + build, auto-approve plugin hooks
   dreego run                  build + start server (foreground)
   dreego run -d               build + start + log to file
   dreego dev                  watch + rebuild + restart on change
@@ -129,16 +131,23 @@ func cmdBuild(args []string) {
 // not kill the process.
 func cmdBuildE(args []string) error {
 	target := ""
+	yes := false
 	for i := 0; i < len(args); i++ {
 		if args[i] == "--target" && i+1 < len(args) {
 			target = args[i+1]
 			i++
 		} else if strings.HasPrefix(args[i], "--target=") {
 			target = strings.TrimPrefix(args[i], "--target=")
+		} else if args[i] == "--yes" {
+			yes = true
 		}
 	}
 
 	if err := transpiler.Run(false); err != nil {
+		return err
+	}
+
+	if err := runBuildHooks(wd(), yes, os.Stdin); err != nil {
 		return err
 	}
 

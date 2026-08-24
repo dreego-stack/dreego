@@ -158,4 +158,14 @@ func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
 	if strings.Contains(string(route), "<img") && !strings.Contains(string(route), "alt=") {
 		t.Error("default blueprint must give every <img> an alt attribute")
 	}
+	layout, err := os.ReadFile(filepath.Join(dir, "www/layouts/default.dreego"))
+	if err != nil {
+		t.Fatalf("read default layout: %v", err)
+	}
+	lay := string(layout)
+	for _, want := range []string{`<main id="main">`, "skip to content", `lang="en"`} {
+		if !strings.Contains(lay, want) {
+			t.Errorf("default layout missing %q (skip link + main landmark + lang required)", want)
+		}
+	}
 }
