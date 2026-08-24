@@ -21,8 +21,8 @@ enhancements.
   tabs, modals, toggles).
 - Plain JavaScript is always available for anything the other two do not cover.
 - There is no framework runtime, no hydration, and no client-side router in
-  the v0.1 core. Islands and hydration are explored only after v0.1, outside
-  the stable core.
+  the current v0.1 core. The planned DreeJS phases later add optional modular
+  local, fetch, poll, stream, and live behavior; see the roadmap.
 
 ## The Worked Example: A Comment Form
 

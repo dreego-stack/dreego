@@ -57,24 +57,41 @@ Dreego brings an intuitive, Svelte- and Astro-inspired development experience to
 
 Accessibility is a release quality gate, not a cosmetic enhancement. CLI output, diagnostics, documentation, generated blueprints, and official components must work without relying on sight, color, or pointer input alone. Do not claim that Dreego can make arbitrary user applications automatically accessible.
 
-- Until v1, SSR is the only production target and the core priority.
-- Before v0.1, stabilize and harden the SSR core. Do not add an internal client runtime, SSG target, or expanded Wails target.
-- The highest-priority pre-v0.1 architecture change is explicit `App` ownership of all runtime state, including explicit generated registration. Do not preserve the current global API through compatibility wrappers.
+- SSR is the current production target and the v0.1 foundation. Target-neutral
+  rendering, SSG, Wails, and DreeJS are planned sequentially for the long v0.x
+  line; they are not current behavior until implemented and documented.
+- Before v0.1, stabilize and harden SSR and complete the atomic semantic-section
+  migration. Do not start SSG, Wails, or DreeJS implementation before the render
+  foundation phase.
+- Preserve explicit `App` ownership of all runtime state and explicit generated
+  registration. Do not reintroduce global compatibility APIs.
 - HTMX, Alpine.js, and plain JavaScript are the supported progressive-enhancement path before v0.1.
-- Between v0.1 and v1, client islands or hydration may be explored outside the stable core. Promote them only after real applications establish the required interfaces.
-- Improved Wails support, SSG, and static deployment targets belong after v1.
-- Preserve future extension points where inexpensive, but do not add speculative abstractions or delay SSR stability for post-v1 targets.
+- After v0.1, extract a target-neutral typed App and render foundation before
+  adding the first-party SSG and Wails target packages.
+- DreeJS is an optional modular browser layer, not a target or SPA. Local
+  presentation state may run in the browser; authoritative business state stays
+  in Go or another explicit backend.
+- SPA and Wasm remain future investigations outside the planned v0.x line.
+- Preserve future extension points only where inexpensive. Do not add a
+  universal `Target` or processor interface before implementations prove it.
 
 See `_docs/roadmap.md` for the public, non-binding roadmap.
 
 ## Core and Plugin Boundary
 
-- Core contains the SSR framework capabilities needed by a normal Dreego application.
+- The current `core/` package contains the SSR capabilities needed by a normal
+  application. The planned v0.2 migration replaces it with a target-neutral root
+  package and explicit `target/ssr`; do not implement that structure piecemeal.
+- SSR, SSG, Wails, and DreeJS are first-party monorepo capabilities because they
+  share compiler, render, asset, diagnostic, and compatibility contracts.
 - Optional capabilities, provider integrations, and features with additional dependencies live in separate plugin repositories with their own `go.mod`, releases, tests, and CI.
 - Keep optional implementations out of `core/`, even when they currently need only the standard library. SSE and WebSockets are plugins, not core packages.
 - Add a provider-neutral interface to core only after at least two real implementations prove the same small contract is necessary.
 - Remove the current speculative EventBus, Queue, KVStore, and Storage APIs before v0.1. The session Store remains part of the SSR core.
 - Plugins may register route-specific behavior through the owning `App`; they must not weaken unrelated application defaults.
+- Optional language processors such as TypeScript, Markdown, and Lua live in
+  external plugin repositories and communicate through a future versioned
+  process boundary. Do not add an embedded Lua VM or native Go plugin loader.
 
 ## File Structure
 
@@ -87,6 +104,7 @@ repo-root/
 ├── go.mod                  ← Single root module (one tag per release)
 ├── .changes/               ← One unique release-note file per pull request
 ├── _docs/                  ← Public documentation
+├── _plan/                  ← Detailed phased architecture and worker guidance
 ├── _tests/                 ← Integration tests (Docker, `make test`)
 │   ├── go/                 ← Go integration tests (bug regressions, transpiler, blackbox, CLI)
 │   └── fixtures/           ← Reference apps for integration tests
@@ -219,15 +237,18 @@ before using it as domain data. Do not claim that Core contains no string keys.
 
 ## Architecture Guarantees
 
-Until v1, SSR is the only production target and the core priority. SSG,
-expanded Wails support, and static deployment targets belong after v1; the
-former V2 preparation (Target interface, reserved CLI flags) is no longer
-required — extension points are preserved only where inexpensive, without
-speculative abstractions. See [decisions/ssg-wails-v2](_docs/decisions/ssg-wails-v2.md)
-(superseded) and the Product Focus section above.
+SSR is the current production target and v0.1 foundation. Planned v0.x work
+extracts a target-neutral typed App and renderer, then adds explicit first-party
+SSR, SSG, and Wails target packages. DreeJS is the optional browser layer.
+There is no universal `Target` interface until working implementations prove a
+small shared contract. See
+[target-neutral-application-and-first-party-targets](_docs/decisions/target-neutral-application-and-first-party-targets.md)
+and `_plan/`.
 
-### 1. `<go>` Block: No hard `*http.Request`
-Solution: `dreego.Context` Interface. → [decisions/context-design](_docs/decisions/context-design.md)
+### 1. Server Section: No hard `*http.Request`
+The current `<go>` section uses `dreego.Context`. It will be renamed to
+`<server>` before v0.1; non-HTTP rendering must use explicit capabilities rather
+than nil HTTP fields. → [decisions/context-design](_docs/decisions/context-design.md)
 
 ### 2. Plugin Contracts Stay Provisional Until v1
 Real external plugins between v0.1 and v1 must validate the contract before a stability promise. → [plugin-contract.1](_todo/core/plugin-contract.1.md)
@@ -240,3 +261,7 @@ v0.1 target is one route file per URL (`+page.dreego` and method sections).
 ### 4. Asset System: Dual-Mode (Embedded + Disk)
 
 ### 5. Template Rendering without HTTP Server
+
+The v0.2 render foundation must preserve typed generated inputs and expose
+non-HTTP rendering before SSG or Wails is implemented. Do not make
+`map[string]any` the primary page-data contract.

@@ -11,14 +11,13 @@ timestamp: 2026-07-28T00:00:00Z
 **Date:** 2026-07-28
 **Status:** Accepted — pipeline core is current; see note below
 
-> **Historical note:** The compile-time transpiler pipeline is current. The
-> three-target codegen (SSR/SSG/Wails) is superseded: until v1, SSR is the only
-> production target. The `Target` interface and target-agnostic `render(ctx)`
-> output are no longer required for v0.1. See
-> [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
+> **Current direction:** The compile-time pipeline remains accepted. SSR is the
+> current implementation and v0.1 foundation. The historical universal
+> `Target` interface and context examples below are not accepted APIs. Planned
+> v0.x work extracts a typed render foundation and adds explicit first-party
+> target packages using capabilities proven by implementations. See
+> [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
-
-**Current state: SSR-only until v1.** Only the SSR codegen pass is current; the SSG and Wails codegen examples below are historical and superseded. See [ssg-wails-v2](ssg-wails-v2.md) and AGENTS.md "Product Focus".
 
 ## Context
 
@@ -189,4 +188,5 @@ func IndexWails(ctx *dreego.WailsContext) (string, error) {
 
 - Generated files: `pages/index_dreego.go` (not committed)
 - `dreego generate` must run before `go build`
-- Transpiler emits SSR handlers; multi-target codegen is deferred past v1
+- Transpiler currently emits SSR handlers; planned v0.x work first extracts the
+  typed render foundation and then adds explicit SSG and Wails target packages

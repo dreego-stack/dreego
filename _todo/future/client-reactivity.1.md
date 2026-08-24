@@ -1,13 +1,17 @@
 ---
 area: architecture
-phase: between-v0.1-and-v1
+phase: planned-v0.6-v0.7
 ---
-# Client islands and hydration research
+# DreeJS client behavior
 
 ## Goal
-Explore a small client-interactivity model without committing an internal runtime to the stable core prematurely.
+Implement optional modular client behavior after SSR, target-neutral rendering,
+SSG, and Wails establish their contracts. See `_plan/v0.6-dreejs-foundation.md`
+and `_plan/v0.7-dreejs-data-live.md`.
 
 ## Acceptance criteria
-- Experiments live outside the stable core first.
-- State serialization, lifecycle, event binding, security, and bundling are evaluated.
-- Promotion requires evidence from real applications and preserves a simple Go-first workflow.
+- Static components emit no runtime.
+- Local presentation state, serialization, lifecycle, event binding, security,
+  accessibility, and minimal module generation are proven first.
+- Fetch, poll, stream, and live behavior are implemented independently in that
+  order and preserve a Go-first workflow without project-owned npm tooling.

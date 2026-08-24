@@ -9,7 +9,13 @@ timestamp: 2026-07-28T00:00:00Z
 # 5 Sections in .dreego Files
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Superseded by
+[Semantic sections and external language processors](semantic-sections-and-language-processors.md)
+
+> This document records the currently implemented historical section model.
+> The accepted pre-v0.1 migration renames `<go>`, `<div>`, and root `<script>`
+> to `<server>`, `<body>`, and `<client>`. Released documentation must continue
+> to show the current syntax until that migration is implemented.
 
 ## Context
 

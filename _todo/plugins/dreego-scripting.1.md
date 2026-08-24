@@ -2,6 +2,8 @@
 area: plugins
 phase: future
 ---
-# Optional runtime scripting plugin
+# Optional Lua client processor
 
-Explore typed runtime scripting through `flow` while keeping `dreego generate` compile-time and Go-only.
+Explore `<client lang="lua">` after Markdown and TypeScript validate the
+language-processor protocol. The plugin compiles Lua source to browser
+JavaScript; it is not Dreego's plugin engine or a runtime business-logic store.

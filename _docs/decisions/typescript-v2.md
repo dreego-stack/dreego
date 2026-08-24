@@ -9,7 +9,12 @@ timestamp: 2026-07-28T00:00:00Z
 # TypeScript Deferred to V2
 
 **Date:** 2026-07-28
-**Status:** Accepted
+**Status:** Superseded by
+[Semantic sections and external language processors](semantic-sections-and-language-processors.md)
+
+> TypeScript is now planned as an external `<client lang="ts">` processor in
+> the v0.x line. Raw JavaScript remains built in. The processor must run real
+> type checking and manage pinned tools without adding dependencies to core.
 
 ## Context
 

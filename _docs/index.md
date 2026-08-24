@@ -23,6 +23,13 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Plugin Interfaces](https://github.com/dreego-stack/dreego/blob/main/_docs/plugin-interfaces.md) — Plugin System (planned)
 - [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md) — Plugin model, middleware + route hooks
 
+## Planned architecture
+
+- [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Public v0.x product direction
+- [Implementation plans](https://github.com/dreego-stack/dreego/tree/main/_plan) — Detailed architecture, phase dependencies, acceptance criteria, and worker guidance
+- [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR, SSG, and Wails hosts
+- [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/semantic-sections-and-language-processors.md) — Planned `server`, `head`, `body`, `style`, and `client` model
+
 ## Development
 
 - [Testing](https://github.com/dreego-stack/dreego/blob/main/_docs/testing.md) — Integration Test Strategy
@@ -39,7 +46,6 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 ## Meta
 
 - [Compatibility](https://github.com/dreego-stack/dreego/blob/main/_docs/compatibility.md) — Breaking-change policy and the v0.1 stability promise
-- [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Product direction, release phases, and plugin ideas
 - [README](https://github.com/dreego-stack/dreego/blob/main/README.md)
 - [CHANGELOG](https://github.com/dreego-stack/dreego/blob/main/CHANGELOG.md)
 - [Open work](https://github.com/dreego-stack/dreego/tree/main/_todo) — One item per file
