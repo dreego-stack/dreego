@@ -1,4 +1,10 @@
 
+## v0.0.72 - 2026-08-24
+
+- Docs: define the target-neutral App, SSR/SSG/Wails targets, DreeJS, semantic sections, and external language-processor direction for the v0.x roadmap
+- Fix: restore the v0.0.70 and v0.0.71 release history, including the accessible default layout and plugin build hooks
+- CI: reject pull requests and main releases that do not descend from the latest published tag
+
 ## v0.0.71 - 2026-08-23
 
 - Feat: add CLI build-hook mechanism — plugins with dreego-plugin.json run pre-build steps during dreego build/run/dev
