@@ -2,14 +2,14 @@
     <meta name="description" content="§$name$§ — Built with Dreego">
 </head>
 
-<go>
+<server>
     message := "Hello, Dreego!"
-</go>
+</server>
 
-<div>
+<body>
     <h1>{{ message }}</h1>
     <p>Edit <code>www/routes/get.dreego</code> and reload.</p>
-</div>
+</body>
 
 <style>
     body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }

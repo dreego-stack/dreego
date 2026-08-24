@@ -15,7 +15,7 @@ func TestHeadSafeFuncClassifies(t *testing.T) {
 		{`<link href="{{ u }}">`, "SafeURL"},
 		{`<meta http-equiv="refresh" content="{{ u }}">`, "SafeRefresh"},
 		{`<meta http-equiv=refresh content="{{ u }}">`, "SafeRefresh"},
-		{`<script src="{{ u }}"></script>`, "SafeURL"},
+		{`<client src="{{ u }}"></client>`, "SafeURL"},
 	}
 	for _, c := range cases {
 		i := strings.Index(c.content, "{{")

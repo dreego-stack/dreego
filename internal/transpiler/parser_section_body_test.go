@@ -1,92 +1,96 @@
 package transpiler
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
-// Tests for error paths in parseTemplateNode / parseDivNodes /
-// parseComponentNodes / parseSlotNodes (core/parser_section_div.go).
+// Tests for error paths in parseTemplateNode / parseBodyNodes /
+// parseComponentNodes / parseSlotNodes (parser_section_body.go).
 // Each test lexes the input and drives the full parse chain via
 // Lex + NewParser(tokens).Parse(), asserting the returned error.
 
 func TestParseTemplateUnexpectedSlotClose(t *testing.T) {
 	parseExpectError(t,
-		"<div>{/slot}</div>",
+		"<body>{/slot}</body>",
 		"unexpected {/slot}")
 }
 
 func TestParseTemplateElseOutsideIf(t *testing.T) {
 	parseExpectError(t,
-		"<div>{#else}</div>",
+		"<body>{#else}</body>",
 		"unexpected {#else} outside {#if}")
 }
 
 func TestParseTemplateUnexpectedToken(t *testing.T) {
 	parseExpectError(t,
-		"<div>{/if}</div>",
+		"<body>{/if}</body>",
 		"unexpected token IfClose in template")
 }
 
 func TestParseComponentMismatchedClose(t *testing.T) {
 	parseExpectError(t,
-		"<div><@a></@b></div>",
+		"<body><@a></@b></body>",
 		"unexpected </@b>, expected </@a>")
 }
 
-func TestParseUnclosedDiv(t *testing.T) {
-	parseExpectError(t,
-		"<div>",
-		"unclosed <div>")
+func TestParseUnclosedBody(t *testing.T) {
+	_, err := Lex("<body>")
+	if err == nil || !strings.Contains(err.Error(), "unclosed tag <body>") {
+		t.Fatalf("expected unclosed body error, got %v", err)
+	}
 }
 
 func TestParseIfInsideAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><a class="nav {#if cond}active{/if}">x</a></div>`,
+		`<body><a class="nav {#if cond}active{/if}">x</a></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseEachInsideAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><a class="nav {#each items as item}active{/each}">x</a></div>`,
+		`<body><a class="nav {#each items as item}active{/each}">x</a></body>`,
 		"{#each} inside attribute value")
 }
 
 func TestParseIfInsideComponentAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><@Card class="nav {#if cond}active{/if}"/></div>`,
+		`<body><@Card class="nav {#if cond}active{/if}"/></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseIfInsideDivOpenAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div class="nav {#if cond}active{/if}"><p>x</p></div>`,
+		`<body class="nav {#if cond}active{/if}"><p>x</p></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseIfInsideNestedDivAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><div class="nav {#if cond}active{/if}">x</div></div>`,
+		`<body><div class="nav {#if cond}active{/if}">x</div></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseIfInsideSingleQuotedAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><a class='nav {#if cond}active{/if}'>x</a></div>`,
+		`<body><a class='nav {#if cond}active{/if}'>x</a></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseIfInsideSingleQuotedDivAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div class='nav {#if cond}active{/if}'><p>x</p></div>`,
+		`<body class='nav {#if cond}active{/if}'><p>x</p></body>`,
 		"{#if} inside attribute value")
 }
 
 func TestParseEachInsideSingleQuotedAttrRejected(t *testing.T) {
 	parseExpectError(t,
-		`<div><a class='nav {#each items as item}active{/each}'>x</a></div>`,
+		`<body><a class='nav {#each items as item}active{/each}'>x</a></body>`,
 		"{#each} inside attribute value")
 }
 
 func TestParseIfOutsideDivAttrStillWorks(t *testing.T) {
-	tokens, err := Lex(`<div>{#if cond}<span class="nav active">x</span>{/if}</div>`)
+	tokens, err := Lex(`<body>{#if cond}<span class="nav active">x</span>{/if}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -94,13 +98,13 @@ func TestParseIfOutsideDivAttrStillWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if len(file.Template.Nodes) != 1 || file.Template.Nodes[0].Type != NodeIf {
-		t.Fatalf("expected NodeIf wrapping the div, got %+v", file.Template.Nodes)
+	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeIf {
+		t.Fatalf("expected NodeIf wrapping the div, got %+v", file.Body.Nodes)
 	}
 }
 
 func TestParseIfOutsideAttrStillWorks(t *testing.T) {
-	tokens, err := Lex(`<div>{#if cond}<a class="nav">x</a>{/if}</div>`)
+	tokens, err := Lex(`<body>{#if cond}<a class="nav">x</a>{/if}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -108,7 +112,7 @@ func TestParseIfOutsideAttrStillWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if len(file.Template.Nodes) != 1 || file.Template.Nodes[0].Type != NodeIf {
-		t.Fatalf("expected NodeIf wrapping the tag, got %+v", file.Template.Nodes)
+	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeIf {
+		t.Fatalf("expected NodeIf wrapping the tag, got %+v", file.Body.Nodes)
 	}
 }

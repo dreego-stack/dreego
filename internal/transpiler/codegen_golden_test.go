@@ -22,8 +22,8 @@ func parseFile(t *testing.T, src string) *File {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if file.Template != nil {
-		setSourceText(file.Template.Nodes, src)
+	if file.Body != nil {
+		setSourceText(file.Body.Nodes, src)
 	}
 	return file
 }
@@ -62,10 +62,10 @@ func assertGolden(t *testing.T, name, got string) {
 	}
 }
 
-// Golden for a simple route: <head> + <div>, no layout. Covers standalone head
+// Golden for a simple route: <head> + <body>, no layout. Covers standalone head
 // emission, the scoped wrapper div and static/expression text nodes.
 func TestGoldenSimpleRoute(t *testing.T) {
-	src := "<head>\n    <title>Home</title>\n</head>\n\n<div>\n    <h1>Welcome</h1>\n    <p>Hello, {{ name }}!</p>\n</div>\n"
+	src := "<head>\n    <title>Home</title>\n</head>\n\n<body>\n    <h1>Welcome</h1>\n    <p>Hello, {{ name }}!</p>\n</body>\n"
 	file := parseFile(t, src)
 	got, _, err := GenerateMethodHandler(NewGenerator(), file, nil, "home", "index", "/", scopeHashFor(src))
 	if err != nil {
@@ -76,7 +76,7 @@ func TestGoldenSimpleRoute(t *testing.T) {
 
 // Golden for a component with props and a scoped <style> block.
 func TestGoldenComponentWithStyle(t *testing.T) {
-	src := "Component Badge (title string, tone string)\n\n<div class=\"badge\">\n    <span>{{ title }}</span>\n    <em>{{ tone }}</em>\n</div>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
+	src := "Component Badge (title string, tone string)\n\n<body class=\"badge\">\n    <span>{{ title }}</span>\n    <em>{{ tone }}</em>\n</body>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
 	_, _, body := ParseHeader(src)
 	file := parseFile(t, body)
 	file.Component = &ComponentDef{
@@ -95,8 +95,8 @@ func TestGoldenComponentWithStyle(t *testing.T) {
 
 // Golden for a route rendered inside a layout with {#slot} and {#head}.
 func TestGoldenRouteWithLayout(t *testing.T) {
-	routeSrc := "<head><title>About</title></head>\n<div><h1>About us</h1></div>\n"
-	layoutSrc := "<head></head>\n<div><!doctype html><html><head>{#head}</head><body><main>{#slot}</main></body></html></div>\n"
+	routeSrc := "<head><title>About</title></head>\n<body><h1>About us</h1></body>\n"
+	layoutSrc := "<head></head>\n<body><!doctype html><html><head>{#head}</head><body><main>{#slot}</main></body></html></body>\n"
 
 	file := parseFile(t, routeSrc)
 	layout := &layoutEntry{file: parseFile(t, layoutSrc), name: "Default"}

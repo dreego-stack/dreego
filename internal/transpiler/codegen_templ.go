@@ -15,8 +15,8 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 			return "", err
 		}
 		headPending := false
-		if len(file.Template.Nodes) > 0 && file.Template.Nodes[0].Type == NodeText &&
-			strings.HasPrefix(file.Template.Nodes[0].Content, "<!") {
+		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == NodeText &&
+			strings.HasPrefix(file.Body.Nodes[0].Content, "<!") {
 			headPending = true
 		}
 		if !headPending {
@@ -25,7 +25,7 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		if isGET {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
-		for _, n := range file.Template.Nodes {
+		for _, n := range file.Body.Nodes {
 			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
@@ -44,7 +44,7 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		if isGET {
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
-		for _, n := range file.Template.Nodes {
+		for _, n := range file.Body.Nodes {
 			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
@@ -56,9 +56,9 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		}
 	}
 
-	if file.Script != nil {
+	if file.Client != nil {
 		buf.WriteString("\tb.WriteString(\"<script>\")\n")
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Script.Code)))
+		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Client.Code)))
 		buf.WriteString("\tb.WriteString(\"</script>\")\n")
 	}
 	if file.Style != nil {

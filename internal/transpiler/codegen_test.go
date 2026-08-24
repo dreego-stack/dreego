@@ -9,7 +9,7 @@ import (
 // 404 status.
 func TestGenerateErrorHandler404(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>not found</p>"},
 			},
@@ -29,7 +29,7 @@ func TestGenerateErrorHandler404(t *testing.T) {
 // GenerateErrorHandler for 500 must register via SetErrorHandler.
 func TestGenerateErrorHandler500(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>oops</p>"},
 			},
@@ -53,7 +53,7 @@ func TestGenerateErrorHandler500(t *testing.T) {
 // typed go blocks.
 func TestGenTypedBlocksJsonAndXml(t *testing.T) {
 	file := &File{
-		Go: []GoSection{
+		Server: []ServerSection{
 			{Code: "c.W.Write([]byte(\"{}\"))", ContentType: "json"},
 			{Code: "c.W.Write([]byte(\"<a/>\"))", ContentType: "xml"},
 		},
@@ -79,10 +79,10 @@ func TestGenTypedBlocksJsonAndXml(t *testing.T) {
 // append a method suffix to the handler names.
 func TestGenerateMethodHandlerNonGET(t *testing.T) {
 	file := &File{
-		Go: []GoSection{
+		Server: []ServerSection{
 			{Code: "x := 1\n_ = x", Method: "POST"},
 		},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>ok</p>"},
 			},

@@ -3,6 +3,7 @@
   "pages": [
     {"path": "/_docs/index.md", "title": "Documentation Index"},
     {"path": "/_docs/getting-started.md", "title": "Getting Started"},
+    {"path": "/_docs/semantic-sections-migration.md", "title": "Semantic Sections Migration"},
     {"path": "/_docs/cli.md", "title": "CLI Reference"},
     {"path": "/_docs/config.md", "title": "Configuration"},
     {"path": "/_docs/routing.md", "title": "File-based Routing"},

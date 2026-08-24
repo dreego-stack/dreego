@@ -10,10 +10,10 @@ import (
 func TestErrorPropagationGeneric500NoDisclosure(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
     panic("database: connection to db.internal:5432 failed")
-</go>
-<div><p>ok</p></div>`,
+</server>
+<body><p>ok</p></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 500 {
@@ -31,11 +31,11 @@ func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Boom.dreego": `Component Boom ()
-<go>
+<server>
     panic("component render failure")
-</go>
-<div><p>boom</p></div>`,
-		"www/routes/get.dreego": `<div><@Boom/></div>`,
+</server>
+<body><p>boom</p></body>`,
+		"www/routes/get.dreego": `<body><@Boom/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 500 {
@@ -49,21 +49,21 @@ func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 func TestErrorPropagationFormBindGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
 type Form struct {
     Age int
 }
 func Save(c dreego.Context, form Form) error {
     return nil
 }
-</go>
-<div>
+</server>
+<body>
 <form g-action="Save" method="post">
     <input name="age">
     <button>Save</button>
 </form>
 {#if c.Errors("_form") != ""}<p id="formerr">{{ c.Errors("_form") }}</p>{/if}
-</div>`,
+</body>`,
 	}, "app.SetCSRF(false); ")
 	code, body, _ := c.Request(t, "POST", "/", "age=notanumber", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 200 {
@@ -80,20 +80,20 @@ func Save(c dreego.Context, form Form) error {
 func TestErrorPropagationFormActionGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
 type Form struct {
     Name string
 }
 func Save(c dreego.Context, form Form) error {
     return fmt.Errorf("database: insert into users failed")
 }
-</go>
-<div>
+</server>
+<body>
 <form g-action="Save" method="post">
     <input name="name">
     <button>Save</button>
 </form>
-</div>`,
+</body>`,
 	}, "app.SetCSRF(false); ")
 	code, body, _ := c.Request(t, "POST", "/", "name=ada", map[string]string{"Content-Type": "application/x-www-form-urlencoded"})
 	if code != 500 {
@@ -133,7 +133,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"www/routes/get.dreego": `<go>
+		"www/routes/get.dreego": `<server>
 if c.SessionError() != nil {
     panic(c.SessionError())
 }
@@ -142,8 +142,8 @@ if c.SessionError() != nil {
     panic(c.SessionError())
 }
 v := c.SessionVal("k")
-</go>
-<div><p>{{ v }}</p></div>`,
+</server>
+<body><p>{{ v }}</p></body>`,
 	}, "app.SetSessionStore(failStore{}); app.SetCSRF(false); ")
 	code, body := c.Get(t, "/")
 	if code != 500 {
@@ -180,7 +180,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"www/routes/get.dreego": `<div><p>ok</p></div>`,
+		"www/routes/get.dreego": `<body><p>ok</p></body>`,
 	}, "app.SetSessionStore(failStore{}); app.SetLogging(false); ")
 	code, body := c.Get(t, "/")
 	if code != 500 {

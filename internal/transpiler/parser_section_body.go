@@ -5,21 +5,21 @@ import (
 	"strings"
 )
 
-func (p *Parser) parseDivSection() (*TemplateSection, error) {
+func (p *Parser) parseBodySection() (*BodySection, error) {
 	tok := p.current()
 	if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 		return nil, err
 	}
 	p.advance()
-	nodes, err := p.parseDivNodes()
+	nodes, err := p.parseBodyNodes()
 	if err != nil {
 		return nil, err
 	}
-	method, explicit := parseDivMethod(tok.Attr)
-	return &TemplateSection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil
+	method, explicit := parseBodyMethod(tok.Attr)
+	return &BodySection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil
 }
 
-func parseDivMethod(attrs string) (string, bool) {
+func parseBodyMethod(attrs string) (string, bool) {
 	for _, part := range strings.Fields(attrs) {
 		if strings.HasPrefix(part, "method=") {
 			return strings.ToUpper(strings.Trim(strings.TrimPrefix(part, "method="), "\"'")), true
@@ -28,40 +28,40 @@ func parseDivMethod(attrs string) (string, bool) {
 	return "GET", false
 }
 
-func (p *Parser) parseDivNodes() ([]TemplateNode, error) {
+func (p *Parser) parseBodyNodes() ([]TemplateNode, error) {
 	var nodes []TemplateNode
 	depth := 0
 
 	for {
 		tok := p.current()
 		if tok.Type == TokenEOF {
-			return nil, fmt.Errorf("unclosed <div>")
+			return nil, fmt.Errorf("unclosed <body>")
 		}
-		if tok.Type == TokenTagOpen && tok.Tag == "div" {
+		if tok.Type == TokenTagOpen && tok.Tag == "body" {
 			if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 				return nil, err
 			}
 			p.advance()
 			depth++
-			content := fmt.Sprintf("<%s", tok.Tag)
+			content := "<body"
 			if tok.Attr != "" {
 				content += " " + tok.Attr
 			}
 			content += ">"
-			nodes = append(nodes, TemplateNode{Type: NodeText, Content: content})
+			nodes = append(nodes, TemplateNode{Type: NodeText, Content: content, Pos: tok.Pos})
 			continue
 		}
-		if tok.Type == TokenTagClose && tok.Tag == "div" {
+		if tok.Type == TokenTagClose && tok.Tag == "body" {
 			p.advance()
 			depth--
 			if depth < 0 {
 				return nodes, nil
 			}
-			nodes = append(nodes, TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag)})
+			nodes = append(nodes, TemplateNode{Type: NodeText, Content: "</body>", Pos: tok.Pos})
 			continue
 		}
 
-		node, err := p.parseTemplateNode("div")
+		node, err := p.parseTemplateNode("body")
 		if err != nil {
 			return nil, err
 		}

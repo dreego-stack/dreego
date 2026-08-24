@@ -10,7 +10,7 @@ func TestBugComponentQuotedAttrs(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Card.dreego": `Component Card (title string)
-<div><h1>{{ title }}</h1></div>`,
-		"www/routes/get.dreego": `<div><@Card title="Hello World"/></div>`,
+<body><h1>{{ title }}</h1></body>`,
+		"www/routes/get.dreego": `<body><@Card title="Hello World"/></body>`,
 	})
 }

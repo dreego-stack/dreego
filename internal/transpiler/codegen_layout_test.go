@@ -7,7 +7,7 @@ import (
 
 func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>page</p>"},
 			},
@@ -15,7 +15,7 @@ func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 	}
 	layout := &layoutEntry{
 		file: &File{
-			Template: &TemplateSection{
+			Body: &BodySection{
 				Nodes: []TemplateNode{
 					{Type: NodeText, Content: "<html>{#slot}</html>"},
 				},
@@ -43,7 +43,7 @@ func TestGenTemplEmitsLayoutWrapping(t *testing.T) {
 
 func TestGenTemplLayoutSlotNodeUsesSlot(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>page</p>"},
 			},
@@ -51,7 +51,7 @@ func TestGenTemplLayoutSlotNodeUsesSlot(t *testing.T) {
 	}
 	layout := &layoutEntry{
 		file: &File{
-			Template: &TemplateSection{
+			Body: &BodySection{
 				Nodes: []TemplateNode{
 					{Type: NodeSlot},
 				},

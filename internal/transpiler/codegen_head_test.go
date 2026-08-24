@@ -10,7 +10,7 @@ func TestGenTemplEmitsHeadStandaloneWithoutLayout(t *testing.T) {
 		Head: &HeadSection{
 			Content: "<title>Home</title>",
 		},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>body</p>"},
 			},
@@ -32,7 +32,7 @@ func TestGenTemplEmitsHeadStandaloneWithoutLayout(t *testing.T) {
 
 func TestGenTemplNoHeadWithoutLayout(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<p>body</p>"},
 			},
@@ -96,7 +96,7 @@ func TestGenHeadUnclosedBrace(t *testing.T) {
 func TestGenTemplHeadAfterDoctypeWithoutLayout(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<meta charset="utf-8"><title>Home</title>`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<!doctype html><html><head>"},
 				{Type: NodeText, Content: "</head><body><p>body</p></body></html>"},

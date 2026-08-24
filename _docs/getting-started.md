@@ -110,10 +110,10 @@ Create `www/layouts/default.dreego` — wraps all pages:
 ```html
 <head><title>My App</title></head>
 
-<div>
+<body>
     <nav><a href="/">Home</a> | <a href="/about">About</a></nav>
     <main>{#slot}</main>
-</div>
+</body>
 
 <style>
     nav { padding: 1rem; background: #1e293b; }
@@ -128,12 +128,12 @@ Create `www/components/Card.dreego`:
 ```
 Component Card (title string)
 
-<div>
+<body>
     <article class="card">
         <h2>{{ title }}</h2>
         <div>{#slot}</div>
     </article>
-</div>
+</body>
 
 <style>
 .card { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; }
@@ -145,11 +145,11 @@ Use it in any route or layout:
 ```html
 import Card "components/Card.dreego"
 
-<div>
+<body>
 <@Card title="Welcome">
     <p>This is the card body.</p>
 </@Card>
-</div>
+</body>
 ```
 
 Imports are header directives and therefore appear before the root sections.
@@ -161,13 +161,13 @@ Create `www/routes/users/[id]/get.dreego`:
 ```html
 <head><title>User {{ c.Param("id") }}</title></head>
 
-<go>
+<server>
     userID := c.Param("id")
-</go>
+</server>
 
-<div>
+<body>
     <h1>User: {{ userID }}</h1>
-</div>
+</body>
 ```
 
 Visiting `/users/42` shows "User: 42".

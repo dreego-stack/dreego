@@ -10,7 +10,7 @@ func TestBugComponentPropDefault(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Card.dreego": `Component Card (title string = "Default Title")
-<div><h1>{{ title }}</h1></div>`,
-		"www/routes/get.dreego": `<div><@Card/></div>`,
+<body><h1>{{ title }}</h1></body>`,
+		"www/routes/get.dreego": `<body><@Card/></body>`,
 	})
 }

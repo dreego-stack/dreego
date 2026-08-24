@@ -93,6 +93,6 @@ untrusted input reintroduces the XSS risk that the context rules prevent.
   `x-bind:href="{{ v }}"` or `:href="{{ v }}"`) fall back to the attribute rule,
   which escapes the value but does not validate its scheme. The URL rule only
   applies to the static attribute names listed above; validate bound URLs in
-  the `<go>` section before rendering them.
+  the `<server>` section before rendering them.
 - Static markup in `.dreego` templates is emitted verbatim. Only dynamic
   `{{ expression }}` values are subject to the context rules.

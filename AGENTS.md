@@ -246,9 +246,9 @@ small shared contract. See
 and `_plan/`.
 
 ### 1. Server Section: No hard `*http.Request`
-The current `<go>` section uses `dreego.Context`. It will be renamed to
-`<server>` before v0.1; non-HTTP rendering must use explicit capabilities rather
-than nil HTTP fields. → [decisions/context-design](_docs/decisions/context-design.md)
+The `<server>` section uses `dreego.Context`; non-HTTP rendering must use
+explicit capabilities rather than nil HTTP fields.
+→ [decisions/context-design](_docs/decisions/context-design.md)
 
 ### 2. Plugin Contracts Stay Provisional Until v1
 Real external plugins between v0.1 and v1 must validate the contract before a stability promise. → [plugin-contract.1](_todo/core/plugin-contract.1.md)

@@ -2,7 +2,7 @@
     <title>Product</title>
 </head>
 
-<go>
+<server>
     type Product struct {
         Name    string
         Price   string
@@ -19,9 +19,9 @@
     } else {
         product = products[1]
     }
-</go>
+</server>
 
-<div>
+<body>
     <@PageShell title="Product detail">
         <@ProductCard name={product.Name} price={product.Price} inStock={product.InStock}/>
         <p>
@@ -29,4 +29,4 @@
                 Back to shop</a>
         </p>
     </@PageShell>
-</div>
+</body>

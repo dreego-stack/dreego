@@ -10,8 +10,8 @@ import (
 func TestBugSrcdocUsesNestedHTMLContext(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>payload := "<script>alert(1)</script>"</go>
-<div><iframe srcdoc="{{ payload }}"></iframe></div>`,
+		"www/routes/get.dreego": `<server>payload := "<script>alert(1)</script>"</server>
+<body><iframe srcdoc="{{ payload }}"></iframe></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, `srcdoc="&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;"`) {

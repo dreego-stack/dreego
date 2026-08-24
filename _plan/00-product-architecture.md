@@ -114,9 +114,8 @@ source language:
 <client lang="js"></client>
 ```
 
-Defaults are Go, HTML, CSS, and JavaScript. The current `<go>`, `<div>`, and
-root `<script>` names remain current behavior until their dedicated v0.0.x
-migration todo is implemented.
+Defaults are Go, HTML, CSS, and JavaScript. The semantic section names are part
+of the pre-v0.1 implementation; optional languages remain future processors.
 
 Only one body section exists per component. Dreego parses template constructs
 such as `<@Component>`, `{#if}`, `{#each}`, `{ expression }`, and escaped output

@@ -9,8 +9,8 @@ import (
 func TestOutputContextTextEscapesMarkup(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>v := "<script>alert(1)</script>"</go>
-<div><p>{{ v }}</p></div>`,
+		"www/routes/get.dreego": `<server>v := "<script>alert(1)</script>"</server>
+<body><p>{{ v }}</p></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
@@ -20,8 +20,8 @@ func TestOutputContextTextEscapesMarkup(t *testing.T) {
 func TestOutputContextAttrEscapesQuotes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>v := ` + "`\" onmouseover=\"alert(1)`" + `</go>
-<div><a title="{{ v }}">link</a></div>`,
+		"www/routes/get.dreego": `<server>v := ` + "`\" onmouseover=\"alert(1)`" + `</server>
+<body><a title="{{ v }}">link</a></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, `" onmouseover="`)
@@ -31,8 +31,8 @@ func TestOutputContextAttrEscapesQuotes(t *testing.T) {
 func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
-<div><a href="{{ u }}">link</a></div>`,
+		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
+<body><a href="{{ u }}">link</a></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, "javascript:")
@@ -42,8 +42,8 @@ func TestOutputContextURLRejectsJavascriptScheme(t *testing.T) {
 func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "https://example.com/x"</go>
-<div><a href="{{ u }}">link</a></div>`,
+		"www/routes/get.dreego": `<server>u := "https://example.com/x"</server>
+<body><a href="{{ u }}">link</a></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustContainBody(t, body, `href="https://example.com/x"`)
@@ -52,8 +52,8 @@ func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>u := "data:text/html,<script>alert(1)</script>"</go>
-<div><img src="{{ u }}"></div>`,
+		"www/routes/get.dreego": `<server>u := "data:text/html,<script>alert(1)</script>"</server>
+<body><img src="{{ u }}"></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, "data:text/html")
@@ -63,11 +63,11 @@ func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := ` + "`\"><script>alert(1)</script>`" + `</go>
-<div><button onclick="{{ s }}">go</button></div>`,
+		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+<body><button onclick="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
-	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
+	dreegotest.MustNotContainBody(t, body, "<client>alert(1)</client>")
 	dreegotest.MustContainBody(t, body, `\u003cscript\u003e`)
 	dreegotest.MustContainBody(t, body, "&#34;")
 }
@@ -75,19 +75,19 @@ func TestOutputContextScriptAttrJSONEncodes(t *testing.T) {
 func TestOutputContextStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>s := "red; } </style><script>alert(1)</script>"</go>
-<div><div style="{{ s }}">x</div></div>`,
+		"www/routes/get.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
+<body><div style="{{ s }}">x</div></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, "</style>")
-	dreegotest.MustNotContainBody(t, body, "<script>alert(1)</script>")
+	dreegotest.MustNotContainBody(t, body, "<client>alert(1)</client>")
 }
 
 func TestOutputContextRawOptInPassesThrough(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<go>h := "<b>trusted</b>"</go>
-<div><p>{{ h|raw }}</p></div>`,
+		"www/routes/get.dreego": `<server>h := "<b>trusted</b>"</server>
+<body><p>{{ h|raw }}</p></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustContainBody(t, body, "<b>trusted</b>")
@@ -97,9 +97,9 @@ func TestOutputContextComponentURLRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Link.dreego": `Component Link (url string)
-<div><a href="{{ url }}">go</a></div>`,
-		"www/routes/get.dreego": `<go>u := "javascript:alert(1)"</go>
-<div><@Link url={u}/></div>`,
+<body><a href="{{ url }}">go</a></body>`,
+		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
+<body><@Link url={u}/></body>`,
 	})
 	_, body := c.Get(t, "/")
 	dreegotest.MustNotContainBody(t, body, "javascript:")

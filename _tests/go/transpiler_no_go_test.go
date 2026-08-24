@@ -9,5 +9,5 @@ import (
 func TestTranspilerNoGo(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustCompile(t, `<head><title>No Go</title></head>
-<div><h1>Static</h1></div>`)
+<body><h1>Static</h1></body>`)
 }

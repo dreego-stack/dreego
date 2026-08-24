@@ -97,21 +97,34 @@ func TestFormatControlFlowCloseTag(t *testing.T) {
 }
 
 func TestFormatSectionBodyTrimsBlankLines(t *testing.T) {
-	in := "<div>\n\n  <p>hi</p>\n\n</div>"
-	out := formatSectionBody("div", in)
+	in := "<body>\n\n  <p>hi</p>\n\n</body>"
+	out := formatSectionBody("body", in)
 	if strings.Contains(out, "\n\n\n") {
 		t.Errorf("formatSectionBody must trim surrounding blank lines, got: %q", out)
 	}
-	if !strings.Contains(out, "<div>\n") || !strings.Contains(out, "</div>") {
+	if !strings.Contains(out, "<body>\n") || !strings.Contains(out, "</body>") {
 		t.Errorf("formatSectionBody must keep tags, got: %q", out)
 	}
 }
 
 func TestFormatSectionsOrdersKnownSections(t *testing.T) {
-	in := "<style>.a{}</style>\n<div><p>x</p></div>"
+	in := "<style>.a{}</style>\n<body><p>x</p></body>"
 	out := formatSections(in)
-	if !strings.Contains(out, "<style>") || !strings.Contains(out, "<div>") {
+	if !strings.Contains(out, "<style>") || !strings.Contains(out, "<body>") {
 		t.Errorf("formatSections must keep both sections, got:\n%s", out)
+	}
+}
+
+func TestFormatSectionsPreservesExplicitDefaultLanguages(t *testing.T) {
+	in := `<client lang="js">console.log("ready")</client>
+<body lang="html"><p>{{ value }}</p></body>
+<server lang="go">value := "ok"</server>`
+	out := formatSections(in)
+	server := strings.Index(out, `<server lang="go">`)
+	body := strings.Index(out, `<body lang="html">`)
+	client := strings.Index(out, `<client lang="js">`)
+	if server < 0 || body < server || client < body {
+		t.Fatalf("semantic sections not preserved in canonical order:\n%s", out)
 	}
 }
 
@@ -124,7 +137,7 @@ func TestFormatSectionsNoSections(t *testing.T) {
 }
 
 func TestFormatFullDocument(t *testing.T) {
-	in := "Component Button (label string = Hi)\n\nimport dreego github.com/dreego-stack/dreego\n\n<div>\n  <p>{{ label | upper }}</p>\n</div>\n"
+	in := "Component Button (label string = Hi)\n\nimport dreego github.com/dreego-stack/dreego\n\n<body>\n  <p>{{ label | upper }}</p>\n</body>\n"
 	out := Format(in)
 	for _, want := range []string{"Component Button (label string = Hi)", "import dreego github.com/dreego-stack/dreego", "{{ label|upper }}"} {
 		if !strings.Contains(out, want) {

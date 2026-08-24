@@ -11,16 +11,16 @@ func TestParityCLIAndDreegotestGenerate(t *testing.T) {
 	t.Parallel()
 	fixtures := map[string]string{
 		"basic": `<head><title>Parity</title></head>
-<go>msg := "hello"</go>
-<div><h1>{{ msg }}</h1></div>`,
-		"each": `<go>items := []string{"a", "b"}</go>
-<div><ul>{#each items as item}<li>{{ $loop.Index }}: {{ item }}</li>{/each}</ul></div>`,
-		"if-else": `<go>show := true</go>
-<div>{#if show}<p>yes</p>{#else}<p>no</p>{/if}</div>`,
+<server>msg := "hello"</server>
+<body><h1>{{ msg }}</h1></body>`,
+		"each": `<server>items := []string{"a", "b"}</server>
+<body><ul>{#each items as item}<li>{{ $loop.Index }}: {{ item }}</li>{/each}</ul></body>`,
+		"if-else": `<server>show := true</server>
+<body>{#if show}<p>yes</p>{#else}<p>no</p>{/if}</body>`,
 		"style-script": `<head><title>S</title></head>
 <style>.x { color: red; }</style>
-<script>const a = 1;</script>
-<div><p>styled</p></div>`,
+<client>const a = 1;</client>
+<body><p>styled</p></body>`,
 	}
 	for name, src := range fixtures {
 		t.Run(name, func(t *testing.T) {
@@ -44,12 +44,12 @@ func TestParityCLIAndDreegotestGenerateComponent(t *testing.T) {
 	t.Parallel()
 	fixtures := map[string]string{
 		"Badge": `Component Badge (label string)
-<div class="badge">{{ label }}</div>`,
+<body class="badge">{{ label }}</body>`,
 		"Status": `Component Status (ok bool)
-<div>{#if ok}<span>on</span>{#else}<span>off</span>{/if}</div>`,
+<body>{#if ok}<span>on</span>{#else}<span>off</span>{/if}</body>`,
 		"Card": `Component Card (title string)
 <style>.card { padding: 1rem; }</style>
-<div class="card"><h2>{{ title }}</h2></div>`,
+<body class="card"><h2>{{ title }}</h2></body>`,
 	}
 	for name, src := range fixtures {
 		t.Run(name, func(t *testing.T) {

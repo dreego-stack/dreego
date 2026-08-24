@@ -34,9 +34,9 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headSuffix)))
 	}
 
-	if file.Template != nil {
+	if file.Body != nil {
 		inSection := false
-		for _, n := range file.Template.Nodes {
+		for _, n := range file.Body.Nodes {
 			code, err := genLayoutNodeState(gen, n, 1, &inSection)
 			if err != nil {
 				return "", err

@@ -35,21 +35,21 @@ target_ssr.go — Wraps render(ctx) as http.HandlerFunc
 
 ~150 lines, 0 dependencies. Output: `func render(ctx dreego.Context) string` — target-agnostic.
 
-**Phase 1+: Formal Pipeline.** As features grow (<script> TS, SSG codegen) → formal separation Lexer→Parser→AST→CodeGen. The scanner grows with it.
+**Phase 1+: Formal Pipeline.** As features grow (<client> TypeScript, SSG codegen) → formal separation Lexer→Parser→AST→CodeGen. The scanner grows with it.
 
 ## 0.0.1 Architecture (Minimal)
 
 ```go
 // scan.go — State machine
 func scan(src []byte) (*File, error) {
-    // 1. Section split: <go>, <style>, Rest=Template
+    // 1. Section split: <server>, <style>, Rest=Template
     // 2. Template scan: {#if} → if block, {#each} → for block, {var} → Interpolation
     // 3. Stack-based: []string for nested tags
 }
 
 // codegen.go — Generate Go code
 func codegen(f *File) string {
-    // <go> block → copy-paste
+    // <server> block → copy-paste
     // {var} → fmt.Sprintf("%s", var)
     // {#if cond} → if cond {
     // {#each xs as x} → for _, x := range xs {
@@ -74,9 +74,10 @@ type Source struct {
 type File struct {
     Path     string
     Head     *HeadSection
-    Go       *GoSection
-    Template *TemplateSection
-    Script   *ScriptSection
+    Server   []ServerSection
+    Body     *BodySection
+    Bodies   []BodySection
+    Client   *ClientSection
     Style    *StyleSection
 }
 
@@ -107,17 +108,17 @@ A **Pre-Lexer (Section Splitter)** splits the file at block tags:
 
 ```
 <head>...</head>     → HeadSection
-<go>...</go>         → GoSection
-<script>...</script> → ScriptSection
+<server>...</server> → ServerSection
+<body>...</body>     → BodySection
 <style>...</style>   → StyleSection
-Everything in between → TemplateSection
+<client>...</client> → ClientSection
 ```
 
 Each section gets a specialized sub-parser:
 - **Head:** HTML parser → `HeadSection{Metas, Scripts, Links}`
-- **Go:** Passed directly to `go/parser` (compiler validates user Go)
-- **Template:** Dreego template lexer → `{#if}`, `{#each}`, `{var}`
-- **Script:** V1 = Raw string blob, V2 = TypeScript parser
+- **Server:** Go is passed to the Go compiler for validation
+- **Body:** Dreego template lexer → `{#if}`, `{#each}`, expressions
+- **Client:** Raw JavaScript string; optional languages require processors
 - **Style:** V1 = Raw string + scope hash, V2 = PostCSS pipe
 
 ## 3. V2 Extension Points (Strategy Interfaces)
@@ -140,7 +141,7 @@ type StyleProcessor interface {
 
 ## 4. AST Format
 
-**Own AST** — not Go's `ast` package. Rationale: Go's `ast` is for source code transformation, not for mixed HTML/Go sections. The `<go>` block is parsed via `go/parser` and embedded as an identity pass — so user Go remains validatable.
+**Own AST** — not Go's `ast` package. Rationale: Go's `ast` is for source code transformation, not for mixed HTML/Go sections. The `<server>` block is parsed via `go/parser` and embedded as an identity pass — so user Go remains validatable.
 
 Generator output always goes through `go/format.Source` — never hand-written indentation.
 
@@ -150,7 +151,7 @@ Fail-loud, compile-time. No best-effort, no runtime panics.
 
 - Lexer/Parser collect `Errors []Diag{Pos, Level, Msg}` up to cap (20), then abort
 - Critical errors → `dreego generate` exit ≠ 0, no output
-- `<go>` block: `go/parser` errors are mapped to `.dreego` lines via source map
+- `<server>` block: `go/parser` errors are mapped to `.dreego` lines via source map
 - Template syntax errors abort immediately
 
 ## 6. CodeGen Output per Target

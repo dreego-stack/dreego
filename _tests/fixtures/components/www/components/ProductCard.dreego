@@ -1,6 +1,6 @@
 Component ProductCard (name string, price string, inStock bool)
 
-<div>
+<body>
     <article class="product-card">
         <h2>
             {{ name }}</h2>
@@ -14,7 +14,7 @@ Component ProductCard (name string, price string, inStock bool)
                 Sold out</p>
         {/if}
     </article>
-</div>
+</body>
 
 <style>
 .product-card { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; }

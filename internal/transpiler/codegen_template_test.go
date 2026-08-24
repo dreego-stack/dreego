@@ -73,7 +73,7 @@ func TestGenTemplateNodeTextNoEscape(t *testing.T) {
 }
 
 func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
-	input := `<div>{#if a}A{#else}{#if b}B{#else}C{/if}D{/if}</div>`
+	input := `<body>{#if a}A{#else}{#if b}B{#else}C{/if}D{/if}</body>`
 	tokens, err := Lex(input)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
@@ -82,7 +82,7 @@ func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNode(NewGenerator(), file.Template.Nodes[0], 0)
+	out, err := genTemplateNode(NewGenerator(), file.Body.Nodes[0], 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -97,7 +97,7 @@ func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
 }
 
 func TestGenTemplateNodeCompNestedIfInElseNotDropped(t *testing.T) {
-	input := `<div>{#if a}A{#else}{#if b}B{#else}C{/if}D{/if}</div>`
+	input := `<body>{#if a}A{#else}{#if b}B{#else}C{/if}D{/if}</body>`
 	tokens, err := Lex(input)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
@@ -106,7 +106,7 @@ func TestGenTemplateNodeCompNestedIfInElseNotDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	out, err := genTemplateNodeComp(NewGenerator(), file.Template.Nodes[0])
+	out, err := genTemplateNodeComp(NewGenerator(), file.Body.Nodes[0])
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -131,7 +131,7 @@ func TestGenTemplateNodeCompReturnsErrorForUnsupportedNode(t *testing.T) {
 // `<a href="{{ url }}">` must generate a safe-value call for the url value so a
 // quote in the value cannot break out of the attribute.
 func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
-	body := `<div><a href="{{ url }}">{{ label }}</a></div>`
+	body := `<body><a href="{{ url }}">{{ label }}</a></body>`
 	tokens, err := Lex(body)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
@@ -141,7 +141,7 @@ func TestGenTemplateNodeCompAttrExpressionEscapesValue(t *testing.T) {
 		t.Fatalf("parse: %v", err)
 	}
 	var out strings.Builder
-	for _, n := range file.Template.Nodes {
+	for _, n := range file.Body.Nodes {
 		code, err := genTemplateNodeComp(NewGenerator(), n)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)

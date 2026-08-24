@@ -11,8 +11,8 @@ func TestComponentCallNamedPropsOrder(t *testing.T) {
 	t.Parallel()
 	files := map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
-<div><p>{{ first }} {{ second }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet second="World" first="Hello"/></div>`,
+<body><p>{{ first }} {{ second }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	}
 	gen := dreegotest.Build(t, files)
 	if !strings.Contains(gen["www/components/dree.go"], "Greet(") {
@@ -24,8 +24,8 @@ func TestComponentCallMissingProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
-<div><p>{{ first }} {{ second }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet first="Hello"/></div>`,
+<body><p>{{ first }} {{ second }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet first="Hello"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -46,8 +46,8 @@ func TestComponentCallUnknownProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string)
-<div><p>{{ first }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet first="Hello" second="World"/></div>`,
+<body><p>{{ first }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet first="Hello" second="World"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -68,8 +68,8 @@ func TestComponentCallDuplicateProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string)
-<div><p>{{ first }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet first="Hello" first="Again"/></div>`,
+<body><p>{{ first }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet first="Hello" first="Again"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -90,8 +90,8 @@ func TestComponentCallNamedPropsHTTP(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
-<div><p>{{ first }} {{ second }}</p></div>`,
-		"www/routes/get.dreego": `<div><@Greet second="World" first="Hello"/></div>`,
+<body><p>{{ first }} {{ second }}</p></body>`,
+		"www/routes/get.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

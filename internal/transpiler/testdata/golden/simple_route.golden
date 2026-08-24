@@ -3,7 +3,7 @@ func renderIndex(c *dreego.SSRContext) (string, error) {
 	var b strings.Builder
 
 b.WriteString(`<title>Home</title>`)
-	b.WriteString("<div data-scope=\"ce046becec8d\">")
+	b.WriteString("<div data-scope=\"f9c3ddf5488d\">")
 	b.WriteString(`
     `)
 	b.WriteString(`<h1>`)

@@ -39,7 +39,7 @@ func TestCLIHelpLinearScreenReader(t *testing.T) {
 func TestCLIErrorLeadsWithFilePositionCauseAction(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": "<div>{#if true}<p>x</p></div>",
+		"www/routes/get.dreego": "<body>{#if true}<p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -66,14 +66,14 @@ func TestCLICheckStaleActionable(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/routes/get.dreego": `<head><title>T</title></head>
-<div><p>check me</p></div>`,
+<body><p>check me</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
 	src := filepath.Join(dir, "www/routes/get.dreego")
 	if err := os.WriteFile(src, []byte(`<head><title>T</title></head>
-<div><p>changed content</p></div>`), 0644); err != nil {
+<body><p>changed content</p></body>`), 0644); err != nil {
 		t.Fatalf("write source: %v", err)
 	}
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
@@ -92,7 +92,7 @@ func TestCLICheckNoGenActionable(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json": `{}`,
-		"www/routes/get.dreego":  `<div><p>hi</p></div>`,
+		"www/routes/get.dreego":  `<body><p>hi</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {

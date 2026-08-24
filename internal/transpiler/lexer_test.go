@@ -6,22 +6,22 @@ import (
 )
 
 func TestLexUnclosedSectionTag(t *testing.T) {
-	_, err := Lex("<go>hello")
+	_, err := Lex("<server>hello")
 	if err == nil {
 		t.Fatal("expected error for unclosed section tag, got nil")
 	}
-	if !strings.Contains(err.Error(), "unclosed tag <go>") {
-		t.Fatalf("expected 'unclosed tag <go>', got %q", err.Error())
+	if !strings.Contains(err.Error(), "unclosed tag <server>") {
+		t.Fatalf("expected 'unclosed tag <server>', got %q", err.Error())
 	}
 }
 
 func TestLexUnexpectedClosingTag(t *testing.T) {
-	_, err := Lex("</go>")
+	_, err := Lex("</server>")
 	if err == nil {
 		t.Fatal("expected error for unexpected closing tag, got nil")
 	}
-	if !strings.Contains(err.Error(), "unexpected closing tag </go>") {
-		t.Fatalf("expected 'unexpected closing tag </go>', got %q", err.Error())
+	if !strings.Contains(err.Error(), "unexpected closing tag </server>") {
+		t.Fatalf("expected 'unexpected closing tag </server>', got %q", err.Error())
 	}
 }
 
@@ -140,10 +140,10 @@ func TestScanComponentUnclosed(t *testing.T) {
 	}
 }
 
-// A <go> section body is raw text: <...> inside it must NOT lex as tags, so
+// A <server> section body is raw text: <...> inside it must NOT lex as tags, so
 // Go comparisons and strings survive verbatim.
-func TestLexGoSectionLtIsRawText(t *testing.T) {
-	tokens, err := Lex(`<go>msg := "TO: <HASH>"</go>`)
+func TestLexServerSectionLtIsRawText(t *testing.T) {
+	tokens, err := Lex(`<server>msg := "TO: <HASH>"</server>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestLexGoSectionLtIsRawText(t *testing.T) {
 			kinds = append(kinds, tok.Type.String()+"("+tok.Tag+")")
 		}
 	}
-	want := "TagOpen(go), TagClose(go)"
+	want := "TagOpen(server), TagClose(server)"
 	if strings.Join(kinds, ", ") != want {
 		t.Fatalf("expected %q, got %q", want, strings.Join(kinds, ", "))
 	}

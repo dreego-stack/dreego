@@ -71,7 +71,7 @@ Even though SSG/Wails come only in V2, the architecture must be prepared in V1:
    - `TargetSSG` — Static HTML files (V2)
    - `TargetWails` — Wails-compatible Go functions (V2)
 2. **`dreego build --static`** — CLI flag already reserved in V1 (does nothing, shows "Coming in V2")
-3. **No SSR-specific assumptions in the template:** `<go>` block can only have server code in V1, but the template is target-agnostic
+3. **No SSR-specific assumptions in the template:** `<server>` block can only have server code in V1, but the template is target-agnostic
 
 ## Inspiration from the Rust World
 

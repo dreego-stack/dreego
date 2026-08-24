@@ -55,25 +55,25 @@ Route groups organize source without adding a URL segment.
 
 ## HTTP method sections
 
-`<go>` and `<div>` default to GET. An explicit `method` attribute binds the
+`<server>` and `<body>` default to GET. An explicit `method` attribute binds the
 section to another HTTP method:
 
 ```dreego
 import UserResult "components/UserResult.dreego"
 
-<go method="post">
+<server method="post">
 result, err := createUser(c)
 if err != nil {
     return "", err
 }
-</go>
+</server>
 
-<div method="post">
+<body method="post">
     <@UserResult result={result} />
-</div>
+</body>
 ```
 
-Successfully reaching the end of method logic renders the matching `<div>`.
+Successfully reaching the end of method logic renders the matching `<body>`.
 An action returning `nil` continues to rendering. Dreego never inserts an
 automatic redirect: `c.Redirect` is explicit and suppresses rendering. A normal
 Go error enters the App error path.
@@ -85,16 +85,16 @@ explicitly against their owning App and cannot silently override another route.
 ## Component imports and calls
 
 Component declarations and imports are the only directives allowed outside the
-five root sections: `<go>`, `<head>`, `<div>`, `<style>`, and `<script>`.
+five root sections: `<server>`, `<head>`, `<body>`, `<style>`, and `<client>`.
 
 ```dreego
 import Button "components/Button.dreego"
 
-<div>
+<body>
     <@Button class="primary" disabled={isLoading}>
         Submit
     </@Button>
-</div>
+</body>
 ```
 
 Imports are explicit. There is no implicit user-versus-plugin namespace

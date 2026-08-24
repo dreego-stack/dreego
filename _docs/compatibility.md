@@ -20,9 +20,9 @@ change is required to harden the SSR core. This is the phase in which the API
 is reviewed against real applications and plugins and prematurely frozen
 interfaces are revised.
 
-The planned semantic-section rename from `<go>`, `<div>`, and root `<script>`
-to `<server>`, `<body>`, and `<client>` must complete before v0.1. It is an
-intentional breaking change and does not receive compatibility aliases.
+The semantic-section rename from legacy root `<go>`, `<div>`, and `<script>` to
+`<server>`, `<body>`, and `<client>` completed before v0.1. It is an intentional
+breaking change and has no compatibility aliases.
 
 Two constraints apply even before v0.1:
 

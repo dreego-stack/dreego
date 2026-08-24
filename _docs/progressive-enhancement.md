@@ -12,7 +12,7 @@ enhancements.
 ## The Model
 
 - The server renders HTML. State lives on the server (sessions, databases,
-  `<go>` block variables).
+  `<server>` block variables).
 - The client enhances that HTML. Nothing the client does is required for the
   page to be usable.
 - HTMX swaps HTML fragments returned by the server (partial page updates
@@ -37,7 +37,7 @@ A comment form on a blog post. The requirements:
 
 ```dreego
 <!-- www/routes/posts/[id]/get.dreego -->
-<go>
+<server>
     post, err := loadPost(c.Param("id"))
     if err != nil {
         return "", err
@@ -46,9 +46,9 @@ A comment form on a blog post. The requirements:
     if err != nil {
         return "", err
     }
-</go>
+</server>
 
-<div>
+<body>
     <h1>{{ post.Title }}</h1>
     <ul id="comments">
         {#each comments as comment}
@@ -64,7 +64,7 @@ A comment form on a blog post. The requirements:
         <textarea id="body" name="body" required></textarea>
         <button type="submit">Post comment</button>
     </form>
-</div>
+</body>
 ```
 
 This is a plain HTML form. With JavaScript disabled it still works: the POST
@@ -83,7 +83,7 @@ The `g-action` handler definition lives in the POST route file (`post.dreego`) f
 
 ```dreego
 <!-- www/routes/posts/[id]/post.dreego -->
-<go>
+<server>
     type CommentForm struct {
         Author string `form:"author" validate:"required,max=80"`
         Body   string `form:"body" validate:"required,max=2000"`
@@ -95,7 +95,7 @@ The `g-action` handler definition lives in the POST route file (`post.dreego`) f
         }
         return c.Redirect("/posts/"+c.Param("id"), 303)
     }
-</go>
+</server>
 ```
 
 The `g-action` pipeline parses the form, maps it to the struct, and validates
@@ -147,14 +147,14 @@ Alpine.js handles things that never need the server. For example, a
 ```
 
 ```dreego
-<div x-data="{ preview: false }">
+<body x-data="{ preview: false }">
     <button type="button" @click="preview = !preview">
         <span x-show="!preview">Preview</span>
         <span x-show="preview">Edit</span>
     </button>
     <textarea id="body" name="body" required x-show="!preview"></textarea>
     <div x-show="preview" x-text="document.getElementById('body').value"></div>
-</div>
+</body>
 ```
 
 With JavaScript disabled the button does nothing and the textarea is always
@@ -167,7 +167,7 @@ Plain JavaScript is the fallback for anything HTMX and Alpine.js do not
 cover. It follows the same rule: enhance, never require.
 
 ```html
-<script>
+<client>
     document.querySelectorAll("form[data-confirm]").forEach(function (form) {
         form.addEventListener("submit", function (event) {
             if (!window.confirm(form.dataset.confirm)) {
@@ -175,7 +175,7 @@ cover. It follows the same rule: enhance, never require.
             }
         });
     });
-</script>
+</client>
 ```
 
 ## Security

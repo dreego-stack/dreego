@@ -38,4 +38,3 @@ func TestMimeByExtCaseInsensitive(t *testing.T) {
 		}
 	}
 }
-

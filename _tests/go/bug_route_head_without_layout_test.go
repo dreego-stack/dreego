@@ -11,7 +11,7 @@ func TestBugRouteHeadWithoutLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/routes/get.dreego": `<head><title>No Layout Title</title><script src="route.js"></script></head>
-<div><p>hello</p></div>`,
+<body><p>hello</p></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if !strings.Contains(body, "<title>No Layout Title</title>") {

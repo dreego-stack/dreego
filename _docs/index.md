@@ -5,6 +5,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 ## Getting Started
 
 - [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md) — Quick Start guide
+- [Semantic Sections Migration](https://github.com/dreego-stack/dreego/blob/main/_docs/semantic-sections-migration.md) — Move legacy root sections to `server`, `body`, and `client`
 - [CLI](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md) — CLI Reference
 - [Config](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md) — dreego.config.json
 - [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — File-based Routing
@@ -28,7 +29,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Public v0.x product direction
 - [Implementation plans](https://github.com/dreego-stack/dreego/tree/main/_plan) — Detailed architecture, phase dependencies, acceptance criteria, and worker guidance
 - [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR, SSG, and Wails hosts
-- [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/semantic-sections-and-language-processors.md) — Planned `server`, `head`, `body`, `style`, and `client` model
+- [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/semantic-sections-and-language-processors.md) — Implemented `server`, `head`, `body`, `style`, and `client` model
 
 ## Development
 

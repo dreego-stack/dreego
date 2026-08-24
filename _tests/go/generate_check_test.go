@@ -12,7 +12,7 @@ import (
 func TestGenerateCheckNoGenFileFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>hi</p></div>`,
+		"www/routes/get.dreego": `<body><p>hi</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {
@@ -26,7 +26,7 @@ func TestGenerateCheckNoGenFileFails(t *testing.T) {
 func TestGenerateCheckUpToDatePasses(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>hello</p></div>`,
+		"www/routes/get.dreego": `<body><p>hello</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -43,7 +43,7 @@ func TestGenerateCheckUpToDatePasses(t *testing.T) {
 func TestGenerateCheckDoesNotModifyWorkingTree(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>before</p></div>`,
+		"www/routes/get.dreego": `<body><p>before</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -79,12 +79,12 @@ func TestGenerateCheckDoesNotModifyWorkingTree(t *testing.T) {
 func TestGenerateCheckStaleContentFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>original</p></div>`,
+		"www/routes/get.dreego": `<body><p>original</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte(`<div><p>changed</p></div>`), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte(`<body><p>changed</p></body>`), 0644); err != nil {
 		t.Fatalf("edit source: %v", err)
 	}
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
@@ -99,12 +99,12 @@ func TestGenerateCheckStaleContentFails(t *testing.T) {
 func TestGenerateCheckManipulatedTimestampsNoFalsePass(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>v1</p></div>`,
+		"www/routes/get.dreego": `<body><p>v1</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte(`<div><p>v2</p></div>`), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte(`<body><p>v2</p></body>`), 0644); err != nil {
 		t.Fatalf("edit source: %v", err)
 	}
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
@@ -116,7 +116,7 @@ func TestGenerateCheckManipulatedTimestampsNoFalsePass(t *testing.T) {
 func TestGenerateCheckExtraGenFileFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<div><p>hi</p></div>`,
+		"www/routes/get.dreego": `<body><p>hi</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -142,9 +142,9 @@ func TestGenerateCheckExtraGenFileFails(t *testing.T) {
 func TestGenerateCheckMissingGenFileFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego":       `<div><p>page</p></div>`,
-		"www/components/Cmp.dreego":   "Component Card (title string)\n<div><article><h2>{{ title }}</h2></article></div>",
-		"www/routes/about/get.dreego": `<div><@Card title="A"/></div>`,
+		"www/routes/get.dreego":       `<body><p>page</p></body>`,
+		"www/components/Cmp.dreego":   "Component Card (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
+		"www/routes/about/get.dreego": `<body><@Card title="A"/></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -165,8 +165,8 @@ func TestGenerateCheckMissingGenFileFails(t *testing.T) {
 func TestGenerateCheckRemovesStaleGenFiles(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego":      `<div><p>home</p></div>`,
-		"www/components/Card.dreego": "Component Card ()\n<div><p>card</p></div>",
+		"www/routes/get.dreego":      `<body><p>home</p></body>`,
+		"www/components/Card.dreego": "Component Card ()\n<body><p>card</p></body>",
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

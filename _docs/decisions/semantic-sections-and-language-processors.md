@@ -8,14 +8,14 @@ timestamp: 2026-08-24T00:00:00Z
 # Semantic sections and external language processors
 
 **Date:** 2026-08-24
-**Status:** Accepted direction; migration not yet implemented
+**Status:** Accepted and implemented for the built-in languages
 
 ## Context
 
-The current root tags combine purpose and implementation language: `<go>` is
-server code, `<div>` is the template root, and `<script>` is client JavaScript.
-This becomes ambiguous when optional processors add TypeScript, Lua, Markdown,
-or another source language.
+The legacy root tags combined purpose and implementation language: `<go>` was
+server code, `<div>` was the template root, and root `<script>` was client
+JavaScript. This became ambiguous for optional TypeScript, Lua, Markdown, or
+other source-language processors.
 
 Arbitrary new root tags such as `<markdown>` or `<lua>` would force the core
 parser to infer whether a language produces server code, body nodes, styles, or
@@ -89,8 +89,8 @@ become ambiguous. Mixed content uses component composition.
 ## Consequences
 
 - Formatter, parser, generator, scaffolds, fixtures, syntax highlighting, docs,
-  and diagnostics must migrate atomically.
-- The current syntax remains documented until the migration todo is complete.
+  and diagnostics use the semantic section model together.
+- Legacy root names fail with an actionable migration diagnostic.
 - Processor compatibility is checked at generation or build time.
 - Markdown and TypeScript serve as the first two protocol proofs.
 - TypeScript support must perform real type checking, not only remove types.

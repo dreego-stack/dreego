@@ -29,8 +29,9 @@ type TemplateNode struct {
 	SourceText   string
 }
 
-type GoSection struct {
+type ServerSection struct {
 	Code           string
+	Language       string
 	Method         string
 	MethodExplicit bool
 	ContentType    string
@@ -39,10 +40,10 @@ type GoSection struct {
 
 type File struct {
 	Head          *HeadSection
-	Go            []GoSection
-	Template      *TemplateSection
-	Templates     []TemplateSection
-	Script        *ScriptSection
+	Server        []ServerSection
+	Body          *BodySection
+	Bodies        []BodySection
+	Client        *ClientSection
 	Style         *StyleSection
 	Component     *ComponentDef
 	Imports       []Import
@@ -70,19 +71,23 @@ type Import struct {
 }
 
 type HeadSection struct {
-	Content string
+	Content  string
+	Language string
 }
 
-type TemplateSection struct {
+type BodySection struct {
 	Nodes          []TemplateNode
+	Language       string
 	Method         string
 	MethodExplicit bool
 }
 
-type ScriptSection struct {
-	Code string
+type ClientSection struct {
+	Code     string
+	Language string
 }
 
 type StyleSection struct {
-	Code string
+	Code     string
+	Language string
 }

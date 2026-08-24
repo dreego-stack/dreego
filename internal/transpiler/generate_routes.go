@@ -77,17 +77,17 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 				return perr
 			}
 
-			if len(file.Go) == 0 {
-				file.Go = []GoSection{{Method: method}}
+			if len(file.Server) == 0 {
+				file.Server = []ServerSection{{Method: method}}
 			}
-			for i := range file.Go {
-				if !file.Go[i].MethodExplicit {
-					file.Go[i].Method = method
+			for i := range file.Server {
+				if !file.Server[i].MethodExplicit {
+					file.Server[i].Method = method
 				}
 			}
-			for i := range file.Templates {
-				if !file.Templates[i].MethodExplicit {
-					file.Templates[i].Method = method
+			for i := range file.Bodies {
+				if !file.Bodies[i].MethodExplicit {
+					file.Bodies[i].Method = method
 				}
 			}
 

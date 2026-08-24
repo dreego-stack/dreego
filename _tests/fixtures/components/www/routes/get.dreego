@@ -2,7 +2,7 @@
     <title>Shop</title>
 </head>
 
-<go>
+<server>
     type Product struct {
         Name    string
         Price   string
@@ -12,9 +12,9 @@
         {Name: "Dreego Mug", Price: "$12", InStock: true},
         {Name: "Dreego Tee", Price: "$24", InStock: false},
     }
-</go>
+</server>
 
-<div>
+<body>
     <@PageShell title="Welcome to the shop">
         <div class="grid">
         {#each products as product}
@@ -22,4 +22,4 @@
         {/each}
         </div>
     </@PageShell>
-</div>
+</body>

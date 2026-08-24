@@ -6,12 +6,12 @@ import (
 
 func TestParseEachClauseMissingAs(t *testing.T) {
 	parseExpectError(t,
-		"<div>{#each items}</div>",
+		"<body>{#each items}</body>",
 		"expected 'items as item'")
 }
 
 func TestParseEachClauseValid(t *testing.T) {
-	tokens, err := Lex(`<div>{#each items as item}<p>{{ x }}</p>{/each}</div>`)
+	tokens, err := Lex(`<body>{#each items as item}<p>{{ x }}</p>{/each}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -19,7 +19,7 @@ func TestParseEachClauseValid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	each := file.Template.Nodes[0]
+	each := file.Body.Nodes[0]
 	if each.Type != NodeEach {
 		t.Fatalf("node type = %v, want NodeEach", each.Type)
 	}
@@ -31,18 +31,18 @@ func TestParseEachClauseValid(t *testing.T) {
 
 func TestParseUnclosedIf(t *testing.T) {
 	parseExpectError(t,
-		"<div>{#if x}<p>a</p></div>",
+		"<body>{#if x}<p>a</p></body>",
 		"unclosed {#if}")
 }
 
 func TestParseElseInsideElse(t *testing.T) {
 	parseExpectError(t,
-		"<div>{#if x}<p>a</p>{#else}<p>b</p>{#else}<p>c</p>{/if}</div>",
+		"<body>{#if x}<p>a</p>{#else}<p>b</p>{#else}<p>c</p>{/if}</body>",
 		"unexpected {#else} or {#else if} inside {#else}")
 }
 
 func TestParseExpressionMultipleFilters(t *testing.T) {
-	tokens, err := Lex(`<div>{{ x|upper|raw }}</div>`)
+	tokens, err := Lex(`<body>{{ x|upper|raw }}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestParseExpressionMultipleFilters(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	expr := file.Template.Nodes[0]
+	expr := file.Body.Nodes[0]
 	if expr.Type != NodeExpression {
 		t.Fatalf("node type = %v, want NodeExpression", expr.Type)
 	}

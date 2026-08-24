@@ -7,13 +7,13 @@ const benchPage = `<head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
-<go>
+<server>
     title := "Benchmark"
     show := true
     items := []string{"a", "b", "c"}
-</go>
+</server>
 
-<div class="page">
+<body class="page">
     <h1>{{ title }}</h1>
     {#if show}
         <p>visible</p>
@@ -22,13 +22,13 @@ const benchPage = `<head>
         <p>{{ item }}</p>
     {/each}
     <@Card title="Hello" />
-</div>`
+</body>`
 
 const benchComponent = `Component Card (title string)
 
-<div>
+<body>
     <h2>{{ title }}</h2>
-</div>`
+</body>`
 
 func transpilePage(src string) (string, error) {
 	_, imports, body := ParseHeader(src)
@@ -43,12 +43,12 @@ func transpilePage(src string) (string, error) {
 	}
 	file.Imports = imports
 	file.SourceContent = src
-	if len(file.Go) == 0 {
-		file.Go = []GoSection{{Method: "GET"}}
+	if len(file.Server) == 0 {
+		file.Server = []ServerSection{{Method: "GET"}}
 	}
-	for i := range file.Go {
-		if !file.Go[i].MethodExplicit {
-			file.Go[i].Method = "GET"
+	for i := range file.Server {
+		if !file.Server[i].MethodExplicit {
+			file.Server[i].Method = "GET"
 		}
 	}
 	gen := NewGenerator()
@@ -80,8 +80,8 @@ func BenchmarkGenerateComponent(b *testing.B) {
 		}
 		file.Component = comp
 		file.SourceContent = benchComponent
-		if len(file.Go) == 0 {
-			file.Go = []GoSection{{Method: ""}}
+		if len(file.Server) == 0 {
+			file.Server = []ServerSection{{Method: ""}}
 		}
 		gen := NewGenerator()
 		if _, err := GenerateComponent(gen, file, "abc"); err != nil {

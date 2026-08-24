@@ -9,7 +9,10 @@ func Lex(input string) ([]Token, error) {
 	var tokens []Token
 	pos := 0
 	sectionStack := []string{}
-	sectionTags := map[string]bool{"go": true, "head": true, "script": true, "style": true}
+	sectionTags := map[string]bool{
+		"body": true, "client": true, "head": true, "server": true, "style": true,
+		"go": true, "script": true,
+	}
 
 	for pos < len(input) {
 		inSection := len(sectionStack) > 0
@@ -18,7 +21,7 @@ func Lex(input string) ([]Token, error) {
 			curSection = sectionStack[len(sectionStack)-1]
 		}
 
-		if inSection && (curSection == "go" || curSection == "script" || curSection == "style") {
+		if inSection && (curSection == "server" || curSection == "client" || curSection == "style" || curSection == "go" || curSection == "script") {
 			closer := "</" + curSection + ">"
 			closePos := strings.Index(input[pos:], closer)
 			if closePos < 0 {
@@ -44,7 +47,7 @@ func Lex(input string) ([]Token, error) {
 				nextCh = '<'
 				break
 			}
-			if !inSection && input[i] == '{' && isTemplateBrace(input[i:]) {
+			if (!inSection || curSection == "body" || curSection == "head") && input[i] == '{' && isTemplateBrace(input[i:]) {
 				nextPos = i
 				nextCh = '{'
 				break

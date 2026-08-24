@@ -6,7 +6,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
 
 ```html
 <!-- www/routes/login/post.dreego -->
-<go>
+<server>
     type LoginForm struct {
         Email    string `form:"email" validate:"required,email"`
         Password string `form:"password" validate:"required,min=8"`
@@ -20,9 +20,9 @@ Declarative server-side form handling. One struct, one function — Dreego gener
         c.SetSessionVal("error", "unknown user")
         return c.Redirect("/login", 303)
     }
-</go>
+</server>
 
-<div>
+<body>
     <h1>Login</h1>
     {#if c.Errors("email")}<p class="error">{{ c.Errors("email") }}</p>{/if}
     <form g-action="Login" method="post">
@@ -30,7 +30,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
         <input name="password" type="password">
         <button type="submit">Login</button>
     </form>
-</div>
+</body>
 ```
 
 The `g-action="Login"` attribute on the `<form>` tells Dreego to generate a POST handler that:
@@ -148,14 +148,14 @@ Disable CSRF for an API-only app before build with `app.SetCSRF(false)`. Route-s
 Forms without `g-action` are plain HTML forms — no handler generation. Use `c.FormValue()` manually:
 
 ```html
-<go>
+<server>
     email := c.FormValue("email")
     c.Set("email", email)
-</go>
-<div>
+</server>
+<body>
 <form method="post">
     <input name="email">
     <button>Submit</button>
 </form>
-</div>
+</body>
 ```

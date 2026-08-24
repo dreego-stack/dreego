@@ -1,7 +1,7 @@
 # File-based Routing
 
 > **Current implementation:** Routes support flat files or `+page.dreego`, with
-> method-specific `<go>` and `<div>` sections. Legacy method filenames remain
+> method-specific `<server>` and `<body>` sections. Legacy method filenames remain
 > supported for migration.
 
 Route discovery is restricted to the website root's `routes/` tree. The
@@ -59,19 +59,19 @@ One route file may define multiple methods. Sections without `method` default
 to GET. A request renders only the sections matching its method:
 
 ```dreego
-<go>
+<server>
     page := loadPage(c)
-</go>
-<div>{{ page.Title }}</div>
+</server>
+<body>{{ page.Title }}</body>
 
-<go method="post">
+<server method="post">
     result := savePage(c)
-</go>
-<div method="post">Saved: {{ result }}</div>
+</server>
+<body method="post">Saved: {{ result }}</body>
 ```
 
 Components, imports, layouts, styles, and scripts remain route-level resources.
-The method controls only the route logic and rendered `<div>` section.
+The method controls only the route logic and rendered `<body>` section.
 
 Each route has a method file in the directory:
 
@@ -100,31 +100,31 @@ users/
 
 ## Content-Type Routing (v0.0.15)
 
-A single route can serve multiple content types via `<go type="...">` blocks:
+A single route can serve multiple content types via `<server type="...">` blocks:
 
 ```dreego
-<go>
+<server>
     user := db.GetUser(c.Param("id"))
-</go>
+</server>
 
-<go type="json">
+<server type="json">
     c.JSON(200, user)
-</go>
+</server>
 
-<div>
+<body>
     <h1>{{ user.Name }}</h1>
-</div>
+</body>
 ```
 
 | type | MIME | Behavior |
 |------|------|----------|
 | `json` | `application/json` | `c.JSON()`, `c.Bind()`, auto-detect via `Accept` header |
 | `xml` | `application/xml` | `c.XML()`, auto-detect via `Accept` header |
-| *(none)* | `text/html` | Default — renders `<div>` template |
+| *(none)* | `text/html` | Default — renders `<body>` template |
 
-- `<go>` without `method` runs for GET; method-specific `<go>` blocks run only
+- `<server>` without `method` runs for GET; method-specific `<server>` blocks run only
   for their matching method
-- Typed `<go>` blocks run conditionally based on `Accept` header
-- Pure JSON/XML routes (no `<div>`) skip template rendering entirely
+- Typed `<server>` blocks run conditionally based on `Accept` header
+- Pure JSON/XML routes (no `<body>`) skip template rendering entirely
 - Raw content: `c.Write(status, contentType, body)` for FlatBuffers/Protobuf/etc.
-- Content negotiation: `c.Wants(mime)` available in any `<go>` block
+- Content negotiation: `c.Wants(mime)` available in any `<server>` block

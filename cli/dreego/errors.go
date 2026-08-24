@@ -59,8 +59,8 @@ func fixForCause(cause string) string {
 		return "close the {#slot} block with {/slot}"
 	case strings.Contains(cause, "unclosed {#verbatim"):
 		return "close the {#verbatim} block with {/verbatim}"
-	case strings.Contains(cause, "unclosed <div>"):
-		return "close the <div> with </div>"
+	case strings.Contains(cause, "unclosed <body>"):
+		return "close the <body> with </body>"
 	case strings.Contains(cause, "unclosed <"):
 		return "close the corresponding opening tag"
 	default:

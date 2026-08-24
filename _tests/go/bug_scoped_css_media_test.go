@@ -10,7 +10,7 @@ func TestBugScopedCSSMedia(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
 		"www/routes/get.dreego": `<style>@media (max-width: 600px) { p { color: red; } }</style>
-<div><p>hi</p></div>`,
+<body><p>hi</p></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/routes/dree.go"], "@media")
 }

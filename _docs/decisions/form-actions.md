@@ -29,7 +29,7 @@ timestamp: 2026-07-28T00:00:00Z
     <button>Login</button>
 </form>
 
-<go>
+<server>
     type LoginForm struct {
         Email string `form:"email" validate:"required,email"`
     }
@@ -39,7 +39,7 @@ timestamp: 2026-07-28T00:00:00Z
         c.Session.Set("user_id", user.ID)
         return c.Redirect("/dashboard")
     }
-</go>
+</server>
 ```
 
 ## GLM Corrections to the Original Concept

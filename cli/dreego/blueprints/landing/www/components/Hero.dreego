@@ -1,6 +1,6 @@
 Component Hero (badge string, title string, subtitle string, cta1 string, cta2 string)
 
-<div>
+<body>
     <section class="pt-28 pb-20 px-6 max-w-4xl mx-auto text-center relative" aria-labelledby="hero-title">
         <div class="absolute inset-0 bg-grid opacity-40 -z-10"></div>
         <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold mb-8 ring-1 ring-blue-200/60">
@@ -28,7 +28,7 @@ Component Hero (badge string, title string, subtitle string, cta1 string, cta2 s
             </div>
         </div>
     </section>
-</div>
+</body>
 
 <style>
 .bg-grid { background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px); background-size: 24px 24px; }

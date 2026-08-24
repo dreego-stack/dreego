@@ -3,11 +3,11 @@
     <meta name="description" content="Minimal Dreego app">
 </head>
 
-<go>
+<server>
     message := "Hello from Dreego"
-</go>
+</server>
 
-<div>
+<body>
     <h1>
         {{ message }}</h1>
     <p>
@@ -18,4 +18,4 @@
         <a href="/users/1">
             User 1</a>
     </nav>
-</div>
+</body>

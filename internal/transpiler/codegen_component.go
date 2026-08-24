@@ -233,7 +233,7 @@ func GenerateComponent(gen *generator, file *File, scopeHash string) (string, er
 	writePropDefaultFallbacks(&buf, comp)
 	buf.WriteString("\t\tvar b strings.Builder\n\n")
 
-	for _, g := range file.Go {
+	for _, g := range file.Server {
 		if g.Code != "" {
 			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
 				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
@@ -242,10 +242,10 @@ func GenerateComponent(gen *generator, file *File, scopeHash string) (string, er
 		}
 	}
 
-	if file.Template != nil {
+	if file.Body != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		g := &compGen{gen: gen, builder: "b"}
-		for _, n := range file.Template.Nodes {
+		for _, n := range file.Body.Nodes {
 			code, err := g.node(n)
 			if err != nil {
 				return "", err

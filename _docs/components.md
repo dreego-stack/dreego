@@ -21,12 +21,12 @@ The first line of a component file **must** be the `Component` declaration.
 ```
 Component Card (title string)
 
-<div>
+<body>
     <article class="card">
         <h2>{{ title }}</h2>
         <div>{#slot}</div>
     </article>
-</div>
+</body>
 <style>
 .card { border: 1px solid var(--border); padding: 1rem; }
 </style>
@@ -35,20 +35,20 @@ Component Card (title string)
 ## Usage
 
 Component declarations and imports are header directives. They are the only
-content allowed outside the five root sections: `<go>`, `<head>`, `<div>`,
-`<style>`, and `<script>`. Free text, HTML, and component calls at the root are
+content allowed outside the five root sections: `<server>`, `<head>`, `<body>`,
+`<style>`, and `<client>`. Free text, HTML, and component calls at the root are
 generation errors.
 
 ```dreego
 import Card "components/Card.dreego"
 
-<div><@Card title="Hello" /></div>
+<body><@Card title="Hello" /></body>
 ```
 
 **Self-closing:**
 
 ```html
-<div><@Card title="Hello"/></div>
+<body><@Card title="Hello"/></body>
 ```
 
 A self-closing call renders empty default and named slots. Content after the
@@ -57,11 +57,11 @@ tag belongs to the parent and remains a normal sibling.
 **With children (default slot):**
 
 ```html
-<div>
+<body>
     <@Card title="Welcome">
         <p>Slot content goes here</p>
     </@Card>
-</div>
+</body>
 ```
 
 ## Self-closing Calls and Slot Fallback
@@ -71,7 +71,7 @@ tag belongs to the parent and remains a normal sibling.
 The following paragraph is a sibling of the component:
 
 ```html
-<div><@Card/><p>Sibling content</p></div>
+<body><@Card/><p>Sibling content</p></body>
 ```
 
 Use `<@Card>...</@Card>` when content should populate the component's slots.
@@ -87,18 +87,18 @@ component call.
 **In the call:**
 
 ```html
-<div><@Card count={count} /></div>
+<body><@Card count={count} /></body>
 ```
 
 **In the component body:**
 
 ```html
 Component Link (url string)
-<div><a href="{{ url }}">{#slot}</a></div>
+<body><a href="{{ url }}">{#slot}</a></body>
 ```
 
 ```html
-<div><@Link url="https://dreego.dev">Home</@Link></div>
+<body><@Link url="https://dreego.dev">Home</@Link></body>
 ```
 
 Simple literal expressions (`"..."`, integer literals) are type-checked
@@ -107,7 +107,7 @@ are accepted unchecked because the transpiler does not evaluate Go scope.
 
 ```dreego
 Component Card (title string)
-<div><@Card title={42}/></div>
+<body><@Card title={42}/></body>
 ```
 
 Error:
@@ -148,11 +148,11 @@ its first focusable element:
 ```dreego
 Component PageShell (title string)
 
-<div>
+<body>
     <a href="#main" class="skip-link">skip to content</a>
     <header>...</header>
     <main id="main">{#slot}</main>
-</div>
+</body>
 ```
 
 Visually hide the link until it receives focus:
@@ -185,15 +185,15 @@ Component Card (title string)
 **Valid call:**
 
 ```dreego
-<div><@Card title="Items"/></div>
+<body><@Card title="Items"/></body>
 ```
 
 **Invalid calls:**
 
 ```dreego
-<div><@Card title="Items" count={3}/></div>
-<div><@Card title="Items" title="Again"/></div>
-<div><@Card/></div>
+<body><@Card title="Items" count={3}/></body>
+<body><@Card title="Items" title="Again"/></body>
+<body><@Card/></body>
 ```
 
 Error examples from `dreego generate`:
@@ -217,7 +217,7 @@ Every component's `<style>` block is scoped via a `data-scope` attribute (a 12-c
 
 ```html
 Component Spinner ()
-<div class="spinner"></div>
+<body class="spinner"></body>
 <style>
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 .spinner { animation: spin 1s linear infinite; }
@@ -230,25 +230,25 @@ Component Spinner ()
 ```
 Component Card (title string)
 
-<div>
+<body>
     <article>
         {#slot header}{/slot}
         <h2>{{ title }}</h2>
         {#slot}
     </article>
-</div>
+</body>
 ```
 
 **Route:**
 ```html
 import Card "components/Card.dreego"
 
-<div>
+<body>
 <@Card title="Hi">
     {#slot header}<strong>HEADER</strong>{/slot}
     <p>Default content here</p>
 </@Card>
-</div>
+</body>
 ```
 
 - `{#slot header}{/slot}` — Placeholder in component (empty body)
@@ -286,12 +286,12 @@ Inside a component, the SSRContext is available as **`ctx`** — in routes it is
 
 ```dreego
 Component Greeting (name string)
-<go>
+<server>
     greeting := "Hello, " + ctx.Query("lang")
-</go>
-<div>
+</server>
+<body>
     <h1>{{ greeting }}, {{ name }}!</h1>
-</div>
+</body>
 ```
 
 All SSRContext methods (`ctx.Param`, `ctx.Query`, `ctx.Set`, `ctx.Get`, …) are available under this name. Using `c` inside a component body produces a compile error (`undefined: c`).

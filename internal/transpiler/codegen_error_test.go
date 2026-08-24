@@ -11,7 +11,7 @@ import (
 // rendered body must start with the doctype.
 func TestGenerateErrorHandlerScopeDivNotBeforeDoctype(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<!doctype html><html><head><title>Not Found</title></head><body><p>Not Found</p></body></html>"},
 			},
@@ -32,9 +32,9 @@ func TestGenerateErrorHandlerScopeDivNotBeforeDoctype(t *testing.T) {
 func TestGenerateErrorHandlerHeadBeforeScopeDiv(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<title>Not Found</title>`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
-				{Type: NodeText, Content: "<div><p>Not Found</p></div>"},
+				{Type: NodeText, Content: "<body><p>Not Found</p></body>"},
 			},
 		},
 	}
@@ -60,9 +60,9 @@ func TestGenerateErrorHandlerHeadBeforeScopeDiv(t *testing.T) {
 // scoping from plain error pages.
 func TestGenerateErrorHandlerScopeDivKeptWithoutDoctype(t *testing.T) {
 	file := &File{
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
-				{Type: NodeText, Content: "<div><p>Not Found</p></div>"},
+				{Type: NodeText, Content: "<body><p>Not Found</p></body>"},
 			},
 		},
 	}
@@ -81,7 +81,7 @@ func TestGenerateErrorHandlerScopeDivKeptWithoutDoctype(t *testing.T) {
 func TestGenerateErrorHandlerHeadAfterDoctype(t *testing.T) {
 	file := &File{
 		Head: &HeadSection{Content: `<meta charset="utf-8"><title>Not Found</title>`},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<!doctype html><html><head>"},
 				{Type: NodeText, Content: "</head><body><p>Not Found</p></body></html>"},
@@ -114,7 +114,7 @@ func TestGenerateErrorHandlerHeadAfterDoctype(t *testing.T) {
 func TestGenerateErrorHandlerStyleUnscopedWithDoctype(t *testing.T) {
 	file := &File{
 		Style: &StyleSection{Code: "p { color: red; }"},
-		Template: &TemplateSection{
+		Body: &BodySection{
 			Nodes: []TemplateNode{
 				{Type: NodeText, Content: "<!doctype html><html><body><p>Not Found</p></body></html>"},
 			},

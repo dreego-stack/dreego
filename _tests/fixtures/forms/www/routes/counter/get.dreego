@@ -2,11 +2,11 @@
     <title>Counter</title>
 </head>
 
-<go>
+<server>
     count := c.SessionVal("count")
-</go>
+</server>
 
-<div>
+<body>
     <h1>
         Counter</h1>
     <p>
@@ -16,4 +16,4 @@
         <button type="submit">
             Increment</button>
     </form>
-</div>
+</body>

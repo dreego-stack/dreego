@@ -15,9 +15,9 @@ func TestBugHeadTitleDedupe(t *testing.T) {
     <meta name="description" content="site desc">
     {#head}
 </head>
-<div><main>{#slot}</main></div>`,
+<body><main>{#slot}</main></body>`,
 		"www/routes/get.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
-<div><h1>Page</h1></div>`,
+<body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
 	if n := strings.Count(body, "<title>"); n != 1 {

@@ -50,17 +50,17 @@ func TestCompTextWithAttrsLeavesScriptStyleBodiesUntouched(t *testing.T) {
 	}
 }
 
-// GenerateComponent drives the stateful compGen over file.Template.Nodes. Unlike
+// GenerateComponent drives the stateful compGen over file.Body.Nodes. Unlike
 // the wrapper-only unit tests, this exercises the real production path and must
 // (1) keep a <script>/<style> body literal, (2) still resolve a quoted attribute
 // placeholder like href="{{ url }}", and (3) produce syntactically valid Go.
 func TestGenerateComponentStatefulGenerator(t *testing.T) {
 	src := `Component Card (x string, url string)
 
-<div>
+<body>
     <script>const s = "literal {x}";</script>
     <a href="{{ url }}">go</a>
-</div>
+</body>
 `
 	_, _, body := ParseHeader(src)
 	file := parseFile(t, body)
@@ -129,7 +129,7 @@ func TestGenerateComponentAppliesPropDefaults(t *testing.T) {
 		t.Errorf("bool default must NOT be applied (explicit false is a valid value), got:\n%s", out)
 	}
 	if _, err := parser.ParseFile(token.NewFileSet(), "comp.go", "package comp\n"+out, 0); err != nil {
-		t.Fatalf("generated component is not valid Go: %v\n--- body ---\n%s", err, out)
+		t.Fatalf("generated component is not valid Server: %v\n--- body ---\n%s", err, out)
 	}
 }
 

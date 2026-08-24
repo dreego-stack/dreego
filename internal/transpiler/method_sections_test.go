@@ -19,45 +19,45 @@ func parseMethodFixture(t *testing.T, source string) *File {
 }
 
 func TestParseMethodSectionsRemainIsolated(t *testing.T) {
-	file := parseMethodFixture(t, `<go>getValue := "get"</go>
-<go method="post">postValue := "post"</go>
-<div><p>{{ getValue }}</p></div>
-<div method="post"><p>{{ postValue }}</p></div>`)
-	if len(file.Go) != 2 || len(file.Templates) != 2 {
-		t.Fatalf("expected two Go and two template sections, got %d and %d", len(file.Go), len(file.Templates))
+	file := parseMethodFixture(t, `<server>getValue := "get"</server>
+<server method="post">postValue := "post"</server>
+<body><p>{{ getValue }}</p></body>
+<body method="post"><p>{{ postValue }}</p></body>`)
+	if len(file.Server) != 2 || len(file.Bodies) != 2 {
+		t.Fatalf("expected two Go and two template sections, got %d and %d", len(file.Server), len(file.Bodies))
 	}
-	if file.Go[0].Method != "GET" || file.Go[1].Method != "POST" {
-		t.Fatalf("unexpected Go methods: %#v", file.Go)
+	if file.Server[0].Method != "GET" || file.Server[1].Method != "POST" {
+		t.Fatalf("unexpected Go methods: %#v", file.Server)
 	}
-	if file.Templates[0].Method != "GET" || file.Templates[1].Method != "POST" {
-		t.Fatalf("unexpected template methods: %#v", file.Templates)
+	if file.Bodies[0].Method != "GET" || file.Bodies[1].Method != "POST" {
+		t.Fatalf("unexpected template methods: %#v", file.Bodies)
 	}
-	if !file.Go[1].MethodExplicit || !file.Templates[1].MethodExplicit {
+	if !file.Server[1].MethodExplicit || !file.Bodies[1].MethodExplicit {
 		t.Fatal("explicit method attributes were not preserved")
 	}
 }
 
 func TestParseDuplicateMethodTemplateReportsMethod(t *testing.T) {
 	parseExpectError(t,
-		`<div method="post">one</div><div method="POST">two</div>`,
-		"duplicate <div> section for method POST")
+		`<body method="post">one</body><body method="POST">two</body>`,
+		"duplicate <body> section for method POST")
 }
 
 func TestParseMethodSectionsSupportAllCommonHTTPMethods(t *testing.T) {
-	file := parseMethodFixture(t, `<go>get := 1</go><div>GET</div>
-<go method="post">post := 1</go><div method="post">POST</div>
-<go method="put">put := 1</go><div method="put">PUT</div>
-<go method="delete">del := 1</go><div method="delete">DELETE</div>`)
+	file := parseMethodFixture(t, `<server>get := 1</server><body>GET</body>
+<server method="post">post := 1</server><body method="post">POST</body>
+<server method="put">put := 1</server><body method="put">PUT</body>
+<server method="delete">del := 1</server><body method="delete">DELETE</body>`)
 	for i, want := range []string{"GET", "POST", "PUT", "DELETE"} {
-		if file.Go[i].Method != want || file.Templates[i].Method != want {
-			t.Errorf("section %d methods = %q/%q, want %q", i, file.Go[i].Method, file.Templates[i].Method, want)
+		if file.Server[i].Method != want || file.Bodies[i].Method != want {
+			t.Errorf("section %d methods = %q/%q, want %q", i, file.Server[i].Method, file.Bodies[i].Method, want)
 		}
 	}
 }
 
 func TestGenerateMethodHandlerDoesNotMixMethodTemplates(t *testing.T) {
-	file := parseMethodFixture(t, `<go>value := "get"</go><go method="post">value := "post"</go>
-<div><p>{{ value }}</p></div><div method="post"><p>{{ value }}</p></div>`)
+	file := parseMethodFixture(t, `<server>value := "get"</server><server method="post">value := "post"</server>
+<body><p>{{ value }}</p></body><body method="post"><p>{{ value }}</p></body>`)
 	out, _, err := GenerateMethodHandler(NewGenerator(), file, nil, "main", "account", "/account", "abc")
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -68,7 +68,7 @@ func TestGenerateMethodHandlerDoesNotMixMethodTemplates(t *testing.T) {
 }
 
 func TestGenerateMethodHandlerRegistersEachMethod(t *testing.T) {
-	file := parseMethodFixture(t, `<div>get</div><div method="post">post</div><div method="put">put</div>`)
+	file := parseMethodFixture(t, `<body>get</body><body method="post">post</body><body method="put">put</body>`)
 	out, _, err := GenerateMethodHandler(NewGenerator(), file, nil, "main", "settings", "/settings", "abc")
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -81,10 +81,10 @@ func TestGenerateMethodHandlerRegistersEachMethod(t *testing.T) {
 }
 
 func TestParseMethodSectionsIsDeterministic(t *testing.T) {
-	source := `<go method="post">x := "<x>"</go><div method="post"><p>{{ x }}</p></div>`
+	source := `<server method="post">x := "<x>"</server><body method="post"><p>{{ x }}</p></body>`
 	first := parseMethodFixture(t, source)
 	second := parseMethodFixture(t, source)
-	if first.Go[0].Code != second.Go[0].Code || first.Templates[0].Nodes[0].Content != second.Templates[0].Nodes[0].Content {
+	if first.Server[0].Code != second.Server[0].Code || first.Bodies[0].Nodes[0].Content != second.Bodies[0].Nodes[0].Content {
 		t.Fatal("method section parsing is not deterministic")
 	}
 }
