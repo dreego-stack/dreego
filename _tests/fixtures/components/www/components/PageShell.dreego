@@ -1,13 +1,17 @@
 Component PageShell (title string)
 
 <div>
+    <a href="#main" class="skip-link">skip to content</a>
     <header>
-        <h1>
-            {{ title }}</h1>
-        <nav>
-            <a href="/">
-                Shop</a>
+        <h1>{{ title }}</h1>
+        <nav aria-label="Primary">
+            <a href="/">Shop</a>
         </nav>
     </header>
-    <main>{#slot}</main>
+    <main id="main">{#slot}</main>
 </div>
+
+<style>
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100; padding: 0.5rem 1rem; background: #000; color: #fff; }
+</style>
