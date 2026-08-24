@@ -1,4 +1,10 @@
 
+## v0.0.73 - 2026-08-24
+
+- Breaking: replace root `<go>`, `<div>`, and `<script>` sections with semantic `<server>`, `<body>`, and `<client>` sections before v0.1
+- Feat: preserve built-in section languages in the parsed model and reject unsupported section/language pairs with source-located processor guidance
+- Docs: add the semantic-sections migration guide and update scaffolds, fixtures, plans, and public documentation
+
 ## v0.0.72 - 2026-08-24
 
 - Docs: define the target-neutral App, SSR/SSG/Wails targets, DreeJS, semantic sections, and external language-processor direction for the v0.x roadmap
