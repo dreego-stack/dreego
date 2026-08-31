@@ -100,7 +100,6 @@ def test_idempotent_rerun():
 def test_failure_paths():
     cases = [
         ("missing change file", None, "## v0.0.43\n", ["v0.0.43"]),
-        ("invalid version minor", "---\nversion: minor\n---\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
         ("invalid version major", "---\nversion: major\n---\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
         ("no changelog lines", "---\nversion: patch\n---\n", "## v0.0.43\n", ["v0.0.43"]),
         ("malformed frontmatter", "version: patch\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
@@ -161,8 +160,24 @@ def test_none_is_deferred_until_patch():
               all((changes / name).exists() for name in none_files))
 
 
+def test_minor_bump_from_stage():
+    change = "---\nversion: minor\n---\n\n- Feat: stage merge\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.1.0 - 2026-08-15\n\n- old\n", ["v0.1.0"])
+        check("minor A: exit 0", r.returncode == 0, r.stderr)
+        check("minor A: prints new version", "new=v0.2.0" in r.stdout, r.stdout)
+        changelog = (Path(tmp) / "CHANGELOG.md").read_text()
+        check("minor A: version header added", "## v0.2.0 - " in changelog, changelog[:80])
+        check("minor A: patch reset to 0", "## v0.2.0 - " in changelog and "## v0.2.1" not in changelog)
+        check("minor A: change removed", not (Path(tmp) / ".changes/change.md").exists())
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.2.0 - 2026-08-15\n\n- old\n", ["v0.2.0"])
+        check("minor B: exit 0", r.returncode == 0, r.stderr)
+        check("minor B: prints new version", "new=v0.3.0" in r.stdout, r.stdout)
+
+
 def test_invalid_bumps_are_atomic():
-    for bump in ("minor", "major"):
+    for bump in ("major",):
         with tempfile.TemporaryDirectory() as tmp:
             change = f"---\nversion: {bump}\n---\n\n- x\n"
             r = run_release_prep(tmp, change, "## v0.0.43\n", ["v0.0.43"])
@@ -267,6 +282,7 @@ def main():
     test_combined_changes()
     test_none_is_deferred_until_patch()
     test_invalid_bumps_are_atomic()
+    test_minor_bump_from_stage()
     test_coverage_gate_contract()
     test_test_runner_contract()
     test_v0x_patch_allowed_and_major_rejected()

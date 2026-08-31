@@ -48,8 +48,8 @@ jobs:
               exit 0
             fi
 
-            if grep -Eq '^version: (major|minor)$' .changes/*.md; then
-              echo "error: version major/minor is forbidden before v0.1" >&2
+            if grep -Eq '^version: major$' .changes/*.md; then
+              echo "error: version major is forbidden until the v1 release" >&2
               exit 1
             fi
 

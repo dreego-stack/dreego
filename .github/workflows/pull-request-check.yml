@@ -38,8 +38,8 @@ jobs:
             exit 1
           fi
 
-          python3 - <<'EOF'
-          import pathlib, re, subprocess, sys
+          HEAD_REF="${{ github.event.pull_request.head.ref }}" python3 - <<'EOF'
+          import os, pathlib, re, subprocess, sys
           base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/main'], text=True).strip()
           names = subprocess.check_output(['git', 'diff', '--diff-filter=A', '--name-only', base, 'HEAD', '--', '.changes/*.md'], text=True).splitlines()
           files = [pathlib.Path(name) for name in names if name != '.changes/README.md']
@@ -50,8 +50,12 @@ jobs:
               print(f'error: {path} must start with YAML frontmatter')
               sys.exit(1)
           version = next((line.split(':', 1)[1].strip() for line in match.group(1).splitlines() if line.strip().startswith('version:')), None)
-          if version not in ('none', 'patch'):
-              print(f'error: version must be none or patch, got {version!r}')
+          head_ref = os.environ.get('HEAD_REF', '')
+          if version not in ('none', 'patch', 'minor'):
+              print(f'error: version must be none, patch or minor, got {version!r}')
+              sys.exit(1)
+          if version == 'minor' and not head_ref.startswith('stage/'):
+              print(f'error: version minor is only allowed for stage/* branch PRs, head ref is {head_ref!r}')
               sys.exit(1)
           lines = [line for line in match.group(2).splitlines() if line.strip()]
           if not lines:

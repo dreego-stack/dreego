@@ -13,6 +13,8 @@ Changelog format:
   file arrives; then all pending files (none + patch) are applied together
 - version=patch: prepend a version block (blank line,
   '## vX.Y.Z - YYYY-MM-DD', blank line) followed by the changelog lines.
+- version=minor: only valid for stage/* branch merges; produces the next
+  minor tag (v0.1.0 -> v0.2.0) and resets the patch to 0.
 
 Prints 'new=vX.Y.Z' or 'new=none' on stdout for the workflow to consume.
 
@@ -30,7 +32,7 @@ ROOT = Path.cwd()
 CHANGES = ROOT / ".changes"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
-VALID_VERSIONS = ("none", "patch")
+VALID_VERSIONS = ("none", "patch", "minor")
 
 
 def fail(msg):
@@ -79,6 +81,9 @@ def next_version(current, bump):
         fail(f"latest tag must be v0.x.y, got '{current}'")
     if bump == "patch":
         patch += 1
+    elif bump == "minor":
+        minor += 1
+        patch = 0
     return f"v{major}.{minor}.{patch}"
 
 
@@ -87,7 +92,12 @@ def main():
     if not files:
         fail("no pending .changes/*.md files found")
     parsed = [parse_change(p.read_text(), p.relative_to(ROOT)) for p in files]
-    version = "patch" if any(v == "patch" for v, _ in parsed) else "none"
+    if any(v == "minor" for v, _ in parsed):
+        version = "minor"
+    elif any(v == "patch" for v, _ in parsed):
+        version = "patch"
+    else:
+        version = "none"
     lines = [line for _, change_lines in parsed for line in change_lines]
 
     if version == "none":
