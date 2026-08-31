@@ -1,9 +1,11 @@
+// Package dreegotest provides helpers for testing generated Dreego apps.
+// Rendering goes through the target-neutral render contract; no HTTP types are
+// involved.
 package dreegotest
 
 import (
 	"fmt"
 	"html"
-	"net/http/httptest"
 	"testing"
 
 	dreego "github.com/dreego-stack/dreego/core"
@@ -11,9 +13,7 @@ import (
 
 func RenderComponent(t *testing.T, fn dreego.ComponentFunc, props ...any) string {
 	t.Helper()
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/", nil)
-	ctx := dreego.NewSSR(rec, req)
+	ctx := dreego.NewContext()
 	for i := 0; i+1 < len(props); i += 2 {
 		key, ok := props[i].(string)
 		if !ok {
