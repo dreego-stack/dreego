@@ -75,8 +75,8 @@ def next_version(current, bump):
     if not m:
         fail(f"latest tag has invalid format: '{current}'")
     major, minor, patch = (int(g) for g in m.groups())
-    if major != 0 or minor != 0:
-        fail(f"latest tag must be v0.0.x during the pre-v0.1 phase, got '{current}'")
+    if major != 0 or minor > 1:
+        fail(f"latest tag must be v0.0.x or v0.1.x, got '{current}'")
     if bump == "patch":
         patch += 1
     return f"v{major}.{minor}.{patch}"

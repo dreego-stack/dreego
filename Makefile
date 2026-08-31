@@ -16,6 +16,8 @@ dev:
 	go run ./cli/dreego && go run .
 
 test:
+	@CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
+	@make coverage
 	@docker build \
 		-q \
 		--build-arg DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \

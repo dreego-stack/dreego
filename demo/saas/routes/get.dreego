@@ -5,11 +5,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<go>
+<server>
     workspace := "Northstar"
-</go>
+</server>
 
-<div>
+<body>
     <div class="min-h-screen bg-slate-100 text-slate-900">
         <header class="border-b border-slate-200 bg-white">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Workspace navigation">
@@ -31,4 +31,4 @@
             </section>
         </main>
     </div>
-</div>
+</body>
