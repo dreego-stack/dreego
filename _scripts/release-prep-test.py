@@ -199,7 +199,7 @@ def test_test_runner_contract():
     check("test runner: coverage target exists", "coverage:" in makefile)
 
 
-def test_v01_patch_allowed_and_minor_major_rejected():
+def test_v0x_patch_allowed_and_major_rejected():
     change = "---\nversion: patch\n---\n\n- Bug: x\n"
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v0.1.0\n", ["v0.1.0"])
@@ -207,7 +207,8 @@ def test_v01_patch_allowed_and_minor_major_rejected():
         check("v0.1: prints new version", "new=v0.1.1" in r.stdout, r.stdout)
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v0.2.0\n", ["v0.2.0"])
-        check("v0.2: minor rejected, non-zero exit", r.returncode != 0, r.stderr)
+        check("v0.2: patch allowed, exit 0", r.returncode == 0, r.stderr)
+        check("v0.2: prints new version", "new=v0.2.1" in r.stdout, r.stdout)
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v1.0.0\n", ["v1.0.0"])
         check("v1.0: major rejected, non-zero exit", r.returncode != 0, r.stderr)
@@ -268,7 +269,7 @@ def main():
     test_invalid_bumps_are_atomic()
     test_coverage_gate_contract()
     test_test_runner_contract()
-    test_v01_patch_allowed_and_minor_major_rejected()
+    test_v0x_patch_allowed_and_major_rejected()
     test_workflow_contract()
     print(f"==> {PASS} passed, {FAIL} failed")
     sys.exit(1 if FAIL else 0)
