@@ -43,3 +43,6 @@ _smd/
 
 # Python
 __pycache__/
+
+# Agent task files
+.agents/

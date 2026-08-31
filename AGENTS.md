@@ -47,9 +47,9 @@ Two models share the work with strict role separation:
    - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
-## Current Phase: pre v0.1
+## Current Phase: v0.1
 
-The latest `v0.0.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). Releases are PR-driven: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. `version: none` files are never applied on their own — they stay pending until a `version: patch` file triggers the release. See `_todo/` for next steps.
+The latest `v0.1.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). The pre-v0.1 atomic semantic-section migration is complete, and v0.1 is the released SSR foundation. The `v0.1.0` tag is set deliberately and manually, not by a change file. Patch releases continue on the v0.1.x line via the PR-driven workflow: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. `version: none` files are never applied on their own — they stay pending until a `version: patch` file triggers the release. See `_todo/` for next steps.
 
 ## Product Focus
 
@@ -138,9 +138,8 @@ version: patch
   applied together with the next `version: patch` release (e.g. dependabot updates)
 - `version: patch` — `0.0.x` +1, applies all pending files at once
 
-NEVER use `version: minor` or `version: major` while in the v0.0.x phase —
-a minor bump would tag v0.1.0 before v0.1 stabilization. Only `none` and
-`patch` are allowed until the v0.1 release.
+NEVER use `version: minor` or `version: major`; only `none` and `patch` are
+allowed until the v1 release — a minor bump would tag v0.2.0 prematurely.
 
 ## Todo Workflow
 

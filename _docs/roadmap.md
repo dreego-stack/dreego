@@ -31,6 +31,8 @@ The detailed implementation plans live in [`_plan/`](../_plan/README.md).
 
 ## Pre-v0.1 — semantic section migration (complete)
 
+This migration shipped in v0.1.0.
+
 Complete the deliberate breaking rename while the template language remains
 pre-stable:
 
@@ -55,6 +57,8 @@ body remains a normal HTML element. Legacy root names fail with migration
 guidance and have no compatibility aliases.
 
 ## v0.1 — SSR foundation
+
+v0.1.0 is released; this section describes the shipped baseline.
 
 Ship and validate the current production foundation:
 

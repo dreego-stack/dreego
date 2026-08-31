@@ -5,7 +5,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<div class="min-h-screen bg-[#f7f7f3] text-slate-950">
+<body>
     <header class="border-b border-slate-200 bg-[#f7f7f3]">
         <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5" aria-label="Main navigation">
             <a href="/" class="font-mono text-sm font-bold tracking-tight">dreego / demo</a>
@@ -51,4 +51,4 @@
     </main>
 
     <footer class="border-t border-slate-200"><div class="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-6 py-8 text-sm text-slate-500"><span class="font-mono">dreego / demo lab</span><span>Built to be inspected.</span></div></footer>
-</div>
+</body>
