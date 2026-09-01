@@ -94,21 +94,25 @@ only from real SSR and non-HTTP implementations.
 
 ## v0.3 — language processor boundary
 
-Make root sections language-aware and validate compiler extension points with
-separate repositories:
+Make root sections language-aware with first-party language processors inside
+the Dreego monorepo:
 
 - raw JavaScript, Go, HTML, and CSS remain dependency-free defaults;
-- an official Markdown plugin processes `<body lang="md">`;
-- an official TypeScript plugin checks and compiles `<client lang="ts">`;
+- the Markdown body processor (`<body lang="md">`) is implemented in v0.3 as
+  the first first-party processor: a small hand-written Markdown parser with no
+  external dependencies, living at `internal/transpiler/html/md` in the
+  transpiler matrix;
+- TypeScript (`<client lang="ts">`) is planned as a first-party processor
+  (`js`/`ts`) behind a pinned, approved `node` toolchain for type checking and
+  transpilation;
 - later Lua support may compile `<client lang="lua">` to JavaScript;
-- processors communicate through a versioned subprocess protocol with
-  structured diagnostics, source maps, assets, and capability requirements;
-- managed tools require approval, pinned versions, lock data, and reproducible
-  CI behavior.
+- managed tools require explicit approval, pinned versions, lock data, and
+  reproducible CI behavior; npm remains opt-in.
 
 Dreego retains ownership of `<@Component>`, template control flow, expressions,
-escaping, and source positions even inside a processed body. There is no
-embedded Lua plugin VM and no native Go `plugin` loading.
+escaping, and source positions even inside a processed body. The Markdown
+processor preserves protected Dreego constructs. There is no embedded Lua
+plugin VM and no native Go `plugin` loading.
 
 ## v0.4 — SSG target
 

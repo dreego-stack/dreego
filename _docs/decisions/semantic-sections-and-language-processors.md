@@ -10,6 +10,10 @@ timestamp: 2026-09-01T00:00:00Z
 **Date:** 2026-09-01
 **Status:** Accepted and implemented for the built-in languages; language processors are first-party
 
+> **Status (v0.3):** The Markdown body processor (`html`/`md`, stdlib-first) is
+> implemented in v0.3 as the first first-party processor. It preserves protected
+> Dreego constructs. The TypeScript processor is still planned.
+
 ## Context
 
 The legacy root tags combined purpose and implementation language: `<go>` was
@@ -57,7 +61,7 @@ client Lua does not imply supporting server Lua.
 
 Language processors for a small, closed set of source languages are part of the
 Dreego monorepo as internal transpiler processors under
-`internal/transpiler/processors`:
+`internal/transpiler/html/md`:
 
 - Markdown (`md` → `html`) with stdlib-first parsing;
 - TypeScript (`ts` → `js`) via a node subprocess for type checking and
@@ -116,9 +120,6 @@ become ambiguous. Mixed content uses component composition.
   the roadmap as speculative.
 - Runtime plugins and provider integrations remain external plugin
   repositories.
-
-## Supersedes
-
 - [5 Sections in .dreego Files](sections-in-dreego.md).
 - The TypeScript timing and in-core esbuild direction in
   [TypeScript Deferred to V2](typescript-v2.md).
