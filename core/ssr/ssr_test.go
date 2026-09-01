@@ -84,6 +84,9 @@ func TestHostUsesSecureConfigDefaults(t *testing.T) {
 	if server.MaxHeaderBytes <= 0 {
 		t.Fatal("MaxHeaderBytes must have a secure default")
 	}
+	if host.config.ShutdownTimeout <= 0 {
+		t.Fatal("ShutdownTimeout must have a secure default")
+	}
 	if err := host.Shutdown(context.Background()); err != nil {
 		t.Fatal(err)
 	}

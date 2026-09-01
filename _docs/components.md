@@ -280,6 +280,10 @@ func Card(title string) dreego.Component {
 
 Call `<@Card title="x"/>` → `Card("x").Render(c)`.
 
+Hand-written `Component` and `ComponentFunc` implementations must use this
+`Render(dreego.RenderContext) (dreego.Result, error)` signature; they are not
+regenerated, so update them manually.
+
 ## Context Variable
 
 Inside a component, the SSRContext is available as **`ctx`** — in routes it is called **`c`** (see [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md)). The generated render function always receives it as `ctx`:

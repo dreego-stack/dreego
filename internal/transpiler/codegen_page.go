@@ -96,7 +96,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *ir.LayoutEntry, p
 	}
 
 	contextType := "*dreego.SSRContext"
-	if firstMethod == "GET" && inlineCode == "" && !hasTypedBlocks && !hasFormActions {
+	if firstMethod == "GET" && inlineCode == "" && !hasTypedBlocks {
 		contextType = "dreego.RenderContext"
 	}
 	buf.WriteString(fmt.Sprintf("\nfunc %s(c %s) (string, error) {\n", renderFunc, contextType))

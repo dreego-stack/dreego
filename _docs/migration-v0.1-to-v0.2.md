@@ -45,6 +45,10 @@ then serves in the background. `Wait` blocks until that lifecycle finishes and
 returns its final serve or shutdown error. `Shutdown` drains active requests,
 waits for cleanup, and returns the same lifecycle result.
 
+The package-level `ssr.Shutdown(app, ctx)` function was removed. Use the host
+API (`ssr.New`, `ssr.Start`, `ssr.Wait`, `ssr.Shutdown`) to manage lifecycle
+instead.
+
 ## Middleware, sessions, and forms moved
 
 The following moved to `core/ssr`. Only the import path changed; signatures are
@@ -75,6 +79,16 @@ v0.2 adds non-HTTP rendering:
 - Pure generated GET page renderers use `dreego.RenderContext`; routes with
   request-dependent server sections continue to use `dreego.SSRContext`.
 - Pure pages expose a typed `Page<Name>() dreego.Component` constructor.
+
+Hand-written `Component` and `ComponentFunc` implementations must change their
+signature from `Render(*SSRContext) (string, error)` to
+`Render(dreego.RenderContext) (dreego.Result, error)`. Generated code is
+regenerated automatically, but hand-written components do not regenerate —
+update them manually or regenerate the surrounding application code.
+
+The old `dreego.Render(fn, props...)` implicit HTML-escaping of prop values is
+gone. `Result{HTML}`-era rendering performs no prop escaping at the `Render`
+boundary, so escape values explicitly where needed.
 
 Typed component props are supplied through the generated constructor:
 
