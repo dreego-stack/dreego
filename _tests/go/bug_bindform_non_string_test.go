@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	dreego "github.com/dreego-stack/dreego/core"
+	ssr "github.com/dreego-stack/dreego/core/ssr"
 )
 
 func TestBugBindFormNonString(t *testing.T) {
@@ -25,7 +25,7 @@ func TestBugBindFormNonString(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	var p Profile
-	if err := dreego.BindForm(req, &p); err == nil {
+	if err := ssr.BindForm(req, &p); err == nil {
 		t.Fatal("expected error for unsupported map field, got nil")
 	}
 }

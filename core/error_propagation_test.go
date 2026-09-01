@@ -7,11 +7,14 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
+	"github.com/dreego-stack/dreego/core/internal/session"
 )
 
 func TestSSRContextSessionValErrorReachable(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	if got := c.SessionVal("key"); got != "" {
@@ -27,7 +30,7 @@ func TestSSRContextSessionValErrorReachable(t *testing.T) {
 
 func TestSSRContextSetSessionValErrorReachable(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	c.SetSessionVal("key", "value")
@@ -38,7 +41,7 @@ func TestSSRContextSetSessionValErrorReachable(t *testing.T) {
 
 func TestSSRContextDelSessionValErrorReachable(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	c.DelSessionVal("key")
@@ -49,7 +52,7 @@ func TestSSRContextDelSessionValErrorReachable(t *testing.T) {
 
 func TestSSRContextDestroySessionErrorReachable(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	c.DestroySession()
@@ -60,7 +63,7 @@ func TestSSRContextDestroySessionErrorReachable(t *testing.T) {
 
 func TestSSRContextCSRFTokenErrorReachable(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	if got := c.CSRFToken(); got != "" {
@@ -101,7 +104,7 @@ func TestRecoveryDoesNotDiscloseCause(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/boom", nil)
 
-	Recovery(nil)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	middleware.Recovery(nil)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		panic(fmt.Errorf("database: connection to db.example.com:5432 failed"))
 	})).ServeHTTP(w, r)
 
@@ -112,7 +115,7 @@ func TestRecoveryDoesNotDiscloseCause(t *testing.T) {
 }
 
 func TestCSRFStoreFailureReachesErrorPath(t *testing.T) {
-	mw := CSRF(failingStore{})
+	mw := middleware.CSRF(failingStore{})
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	hit := false

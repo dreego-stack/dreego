@@ -111,9 +111,13 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		imports := gen.imports[rd.pkg]
 		importLine := buildImportLine(imports, rd.pkg)
 		stdImports := stdImportsFor(rd.src)
-		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", rd.pkg, importLine)
+		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
+		if strings.Contains(rd.src, "ssr.") {
+			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/core/ssr\""
+		}
+		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\t%s\n)\n\n", rd.pkg, importLine, coreImport)
 		if stdImports != "" {
-			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", rd.pkg, stdImports, importLine)
+			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\t%s\n)\n\n", rd.pkg, stdImports, importLine, coreImport)
 		}
 		out += rd.src
 		out += "func Register(app *dreego.App) error {\n"

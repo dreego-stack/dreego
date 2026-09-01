@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestAppBodyLimitRunsBeforeCSRFFormParsing(t *testing.T) {
@@ -13,7 +15,7 @@ func TestAppBodyLimitRunsBeforeCSRFFormParsing(t *testing.T) {
 	if err := app.SetSessionStore(store); err != nil {
 		t.Fatal(err)
 	}
-	if err := app.Use(MaxBodyReader(32)); err != nil {
+	if err := app.Use(middleware.MaxBodyReader(32)); err != nil {
 		t.Fatal(err)
 	}
 	if err := app.Register(http.MethodPost, "/submit", func(http.ResponseWriter, *http.Request) {

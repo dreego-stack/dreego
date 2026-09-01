@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	dreego "github.com/dreego-stack/dreego/core"
+	ssr "github.com/dreego-stack/dreego/core/ssr"
 )
 
 type unavailableStore struct{}
@@ -22,7 +23,7 @@ func (unavailableStore) Destroy(http.ResponseWriter, *http.Request) error       
 
 func TestBugCSRFFailsClosedWithoutPersistedToken(t *testing.T) {
 	called := false
-	h := dreego.CSRF(unavailableStore{})(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { called = true }))
+	h := ssr.CSRF(unavailableStore{})(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { called = true }))
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/", nil))
 	if called || rec.Code != http.StatusInternalServerError {

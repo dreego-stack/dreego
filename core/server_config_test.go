@@ -4,10 +4,12 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/dreego-stack/dreego/core/internal/server"
 )
 
 func TestDefaultServerTimeoutsAreSecure(t *testing.T) {
-	c := DefaultServerConfig()
+	c := server.DefaultServerConfig()
 	cases := map[string]struct {
 		got  any
 		zero any
@@ -28,7 +30,7 @@ func TestDefaultServerTimeoutsAreSecure(t *testing.T) {
 
 func TestSetServerConfigBeforeBuild(t *testing.T) {
 	app := New()
-	custom := DefaultServerConfig()
+	custom := server.DefaultServerConfig()
 	custom.ReadHeaderTimeout = 5 * time.Second
 	custom.ShutdownTimeout = 3 * time.Second
 	if err := app.SetServerConfig(custom); err != nil {

@@ -7,6 +7,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
+	"github.com/dreego-stack/dreego/core/internal/session"
 )
 
 var testSecret = []byte("test-secret-key-32-bytes-long!!!")
@@ -31,7 +34,7 @@ func (failingStore) Destroy(http.ResponseWriter, *http.Request) error {
 func TestSetSessionValSurfacesStoreError(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, failingStore{})
+	r = session.WithStore(r, failingStore{})
 	c := NewSSR(w, r)
 
 	c.SetSessionVal("k", "v")
@@ -49,7 +52,7 @@ func TestSetSessionValSurfacesStoreError(t *testing.T) {
 }
 
 func TestSessionValReturnsEmptyOnStoreGetError(t *testing.T) {
-	r := WithStore(httptest.NewRequest("GET", "/", nil), failingStore{})
+	r := session.WithStore(httptest.NewRequest("GET", "/", nil), failingStore{})
 	c := NewSSR(httptest.NewRecorder(), r)
 
 	val := c.SessionVal("k")
@@ -60,7 +63,7 @@ func TestSessionValReturnsEmptyOnStoreGetError(t *testing.T) {
 
 func TestCSRFCookieUsesSecurePolicyWithTLS(t *testing.T) {
 	store := NewCookieStore(testSecret)
-	mw := CSRF(store)
+	mw := middleware.CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	r.TLS = &tls.ConnectionState{}
@@ -92,7 +95,7 @@ func TestCSRFCookieSecureBehindProxies(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			store := NewCookieStore(testSecret2)
 			store.SetTrustedProxies(tc.proxies)
-			mw := CSRF(store)
+			mw := middleware.CSRF(store)
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest("GET", "/", nil)
 			r.RemoteAddr = tc.remote

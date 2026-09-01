@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
+	"github.com/dreego-stack/dreego/core/internal/session"
 )
 
 func TestAppConfigurableCookiePolicy(t *testing.T) {
@@ -65,7 +68,7 @@ func TestSetSessionValPreservesCookiePolicy(t *testing.T) {
 	})
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, store)
+	r = session.WithStore(r, store)
 	c := NewSSR(w, r)
 
 	c.SetSessionVal("k", "v")
@@ -92,7 +95,7 @@ func TestCSRFSessionWritePreservesCookiePolicy(t *testing.T) {
 		HttpOnly: true,
 		Path:     "/",
 	})
-	mw := CSRF(store)
+	mw := middleware.CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})).ServeHTTP(w, r)

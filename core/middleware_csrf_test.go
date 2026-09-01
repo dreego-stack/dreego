@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestCSRFCookieSecureWithTLS(t *testing.T) {
 	store := NewCookieStore(testSecret)
-	mw := CSRF(store)
+	mw := middleware.CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	r.TLS = &tls.ConnectionState{}
@@ -32,7 +34,7 @@ func TestCSRFCookieSecureWithTLS(t *testing.T) {
 
 func TestCSRFCookieSecureWithoutTLS(t *testing.T) {
 	store := NewCookieStore(testSecret)
-	mw := CSRF(store)
+	mw := middleware.CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)
@@ -54,7 +56,7 @@ func TestCSRFCookieSecureWithoutTLS(t *testing.T) {
 
 func TestCSRFCookieSameSiteSet(t *testing.T) {
 	store := NewCookieStore(testSecret)
-	mw := CSRF(store)
+	mw := middleware.CSRF(store)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
 	mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})).ServeHTTP(w, r)

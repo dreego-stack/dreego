@@ -209,7 +209,7 @@ func TestFormActionsStructTags(t *testing.T) {
 	gen := dreegotest.Build(t, map[string]string{
 		"www/routes/get-form.dreego": "<server>\n    type MyForm struct {\n        Email string `form:\"email\"`\n    }\n    func DoForm(c dreego.Context, form MyForm) error {\n        return nil\n    }\n</server>\n<body>\n<form g-action=\"DoForm\" method=\"post\">\n    <input name=\"email\">\n    <button>OK</button>\n</form>\n</body>",
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "dreego.BindForm")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "ssr.BindForm")
 }
 
 func TestFormActionsValidateTags(t *testing.T) {

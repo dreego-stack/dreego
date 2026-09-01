@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 type failingCSRFStore struct{}
@@ -22,7 +24,7 @@ func (failingCSRFStore) Destroy(http.ResponseWriter, *http.Request) error       
 
 func TestCSRFFailsClosedWhenTokenCannotBePersisted(t *testing.T) {
 	called := false
-	h := CSRF(failingCSRFStore{})(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	h := middleware.CSRF(failingCSRFStore{})(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		called = true
 	}))
 	rec := httptest.NewRecorder()

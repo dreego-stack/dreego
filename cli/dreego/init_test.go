@@ -18,8 +18,8 @@ func TestDefaultBlueprintGenImport(t *testing.T) {
 	if !strings.Contains(content, "www.Register(app)") {
 		t.Errorf("default main.go.tmpl must call www.Register(app), got:\n%s", content)
 	}
-	if !strings.Contains(content, `ssr "github.com/dreego-stack/dreego/target/ssr"`) {
-		t.Errorf("default main.go.tmpl must import \"github.com/dreego-stack/dreego/target/ssr\", got:\n%s", content)
+	if !strings.Contains(content, `ssr "github.com/dreego-stack/dreego/core/ssr"`) {
+		t.Errorf("default main.go.tmpl must import \"github.com/dreego-stack/dreego/core/ssr\", got:\n%s", content)
 	}
 	if !strings.Contains(content, "ssr.Listen(app, addr)") {
 		t.Errorf("default main.go.tmpl must call ssr.Listen(app, addr), got:\n%s", content)

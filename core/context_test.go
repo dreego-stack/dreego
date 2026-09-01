@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/dreego-stack/dreego/core/internal/middleware"
+	"github.com/dreego-stack/dreego/core/internal/session"
 )
 
 func TestNewSSRNilRequest(t *testing.T) {
@@ -130,7 +131,7 @@ func TestSSRContextSessionVal(t *testing.T) {
 	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, store)
+	r = session.WithStore(r, store)
 	c := NewSSR(w, r)
 
 	c.SetSessionVal("user_id", "42")
@@ -139,7 +140,7 @@ func TestSSRContextSessionVal(t *testing.T) {
 	for _, ck := range w.Result().Cookies() {
 		req.AddCookie(ck)
 	}
-	req = WithStore(req, store)
+	req = session.WithStore(req, store)
 	c2 := NewSSR(httptest.NewRecorder(), req)
 	if got := c2.SessionVal("user_id"); got != "42" {
 		t.Errorf("expected session value '42', got %q", got)
@@ -150,7 +151,7 @@ func TestSSRContextCSRFToken(t *testing.T) {
 	store := NewCookieStore(testSecret)
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	r = WithStore(r, store)
+	r = session.WithStore(r, store)
 	c := NewSSR(w, r)
 	c.SetSessionVal("csrf_token", "tok123")
 
@@ -158,7 +159,7 @@ func TestSSRContextCSRFToken(t *testing.T) {
 	for _, ck := range w.Result().Cookies() {
 		req.AddCookie(ck)
 	}
-	req = WithStore(req, store)
+	req = session.WithStore(req, store)
 	c2 := NewSSR(httptest.NewRecorder(), req)
 	if got := c2.CSRFToken(); got != "tok123" {
 		t.Errorf("expected csrf token 'tok123', got %q", got)

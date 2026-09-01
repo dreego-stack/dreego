@@ -5,13 +5,15 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestRecoveryCatchesPanicNoHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/boom", nil)
 
-	Recovery(nil)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	middleware.Recovery(nil)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		panic("boom")
 	})).ServeHTTP(w, r)
 
@@ -31,7 +33,7 @@ func TestRecoveryCatchesPanicWithHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/boom", nil)
 
-	Recovery(handler)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	middleware.Recovery(handler)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		panic("boom")
 	})).ServeHTTP(w, r)
 
@@ -50,7 +52,7 @@ func TestRecoveryNoPanic(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/ok", nil)
 
-	Recovery(nil)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	middleware.Recovery(nil)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 	})).ServeHTTP(w, r)
 
@@ -67,7 +69,7 @@ func TestRecoveryWritesStatusBeforeHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/boom", nil)
 
-	Recovery(handler)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	middleware.Recovery(handler)(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		panic("boom")
 	})).ServeHTTP(w, r)
 

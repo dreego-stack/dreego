@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestAuthLoginReplacesPreAuthState(t *testing.T) {
@@ -217,7 +219,7 @@ func TestCSRFPostAfterRotationSucceeds(t *testing.T) {
 	stale := findCookie(t, w.Result().Cookies(), "dreego_session")
 
 	newStore := NewCookieStore(testSecret2)
-	mw := CSRF(newStore)
+	mw := middleware.CSRF(newStore)
 
 	getW := httptest.NewRecorder()
 	getR := httptest.NewRequest("GET", "/", nil)
