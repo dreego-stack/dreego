@@ -48,11 +48,18 @@ changelog and creates the tag. No local tags are required.
 
 ### Version bumps
 
-- `version: patch` — `0.0.x` +1.
 - `version: none` — changelog lines only, no version bump (e.g. dependency
-  updates).
-- NEVER use `version: minor` or `version: major` until the v0.1 release —
-  a minor bump would tag v0.1.0 prematurely.
+  updates); the change file stays pending until a `version: patch` or
+  `version: minor` release applies it.
+- `version: patch` — `0.x.y` +1 patch, applies all pending files at once.
+- `version: minor` — NEXT minor +1 with patch reset (`v0.1.x` → `v0.2.0`);
+  ONLY allowed for pull requests from `stage/*` branches; CI tags it
+  automatically after merge.
+
+NEVER use `version: major`; only `none`, `patch` and `minor` are allowed.
+`version: minor` is reserved for `stage/*` branches that ship a planned phase
+(e.g. v0.2 render foundation) — the stage merge into main is the deliberate
+release act.
 
 ## Commit Conventions
 

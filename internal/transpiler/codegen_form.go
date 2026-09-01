@@ -20,7 +20,7 @@ func generateFormPostHandler(file *File, renderFunc string, postHandler string, 
 	buf.WriteString(fmt.Sprintf("func %s(app *dreego.App, w http.ResponseWriter, r *http.Request) {\n", postHandler))
 	buf.WriteString("\tc := dreego.NewSSR(w, r)\n\n")
 	buf.WriteString(fmt.Sprintf("\tvar form %s\n", structName))
-	buf.WriteString("\tif err := dreego.BindForm(r, \u0026form); err != nil {\n")
+	buf.WriteString("\tif err := ssr.BindForm(r, \u0026form); err != nil {\n")
 	buf.WriteString(fmt.Sprintf("\t\tc.Set(\"error__form\", err.Error())\n"))
 	buf.WriteString(fmt.Sprintf("\t\thtml, err := %s(c)\n", renderFunc))
 	buf.WriteString("\t\tif err != nil {\n")

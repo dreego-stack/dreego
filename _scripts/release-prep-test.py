@@ -100,7 +100,6 @@ def test_idempotent_rerun():
 def test_failure_paths():
     cases = [
         ("missing change file", None, "## v0.0.43\n", ["v0.0.43"]),
-        ("invalid version minor", "---\nversion: minor\n---\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
         ("invalid version major", "---\nversion: major\n---\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
         ("no changelog lines", "---\nversion: patch\n---\n", "## v0.0.43\n", ["v0.0.43"]),
         ("malformed frontmatter", "version: patch\n\n- x\n", "## v0.0.43\n", ["v0.0.43"]),
@@ -161,8 +160,24 @@ def test_none_is_deferred_until_patch():
               all((changes / name).exists() for name in none_files))
 
 
+def test_minor_bump_from_stage():
+    change = "---\nversion: minor\n---\n\n- Feat: stage merge\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.1.0 - 2026-08-15\n\n- old\n", ["v0.1.0"])
+        check("minor A: exit 0", r.returncode == 0, r.stderr)
+        check("minor A: prints new version", "new=v0.2.0" in r.stdout, r.stdout)
+        changelog = (Path(tmp) / "CHANGELOG.md").read_text()
+        check("minor A: version header added", "## v0.2.0 - " in changelog, changelog[:80])
+        check("minor A: patch reset to 0", "## v0.2.0 - " in changelog and "## v0.2.1" not in changelog)
+        check("minor A: change removed", not (Path(tmp) / ".changes/change.md").exists())
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.2.0 - 2026-08-15\n\n- old\n", ["v0.2.0"])
+        check("minor B: exit 0", r.returncode == 0, r.stderr)
+        check("minor B: prints new version", "new=v0.3.0" in r.stdout, r.stdout)
+
+
 def test_invalid_bumps_are_atomic():
-    for bump in ("minor", "major"):
+    for bump in ("major",):
         with tempfile.TemporaryDirectory() as tmp:
             change = f"---\nversion: {bump}\n---\n\n- x\n"
             r = run_release_prep(tmp, change, "## v0.0.43\n", ["v0.0.43"])
@@ -184,6 +199,10 @@ def test_coverage_gate_contract():
         env["DREEGO_COVERAGE_MIN"] = "40"
         ok = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
         check("coverage: threshold passes", ok.returncode == 0, ok.stderr)
+        fake_go.write_text("#!/bin/sh\nprintf '%s\\n' 'ok  example 0.001s coverage: 100.0% of statements'\n")
+        full = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
+        check("coverage: 100 percent compares numerically", full.returncode == 0, full.stderr)
+        fake_go.write_text("#!/bin/sh\nprintf '%s\\n' 'ok  example 0.001s coverage: 42.0% of statements'\n")
         env["DREEGO_COVERAGE_MIN"] = "50"
         low = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
         check("coverage: below threshold exits non-zero", low.returncode != 0, low.stderr)
@@ -199,7 +218,7 @@ def test_test_runner_contract():
     check("test runner: coverage target exists", "coverage:" in makefile)
 
 
-def test_v01_patch_allowed_and_minor_major_rejected():
+def test_v0x_patch_allowed_and_major_rejected():
     change = "---\nversion: patch\n---\n\n- Bug: x\n"
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v0.1.0\n", ["v0.1.0"])
@@ -207,7 +226,8 @@ def test_v01_patch_allowed_and_minor_major_rejected():
         check("v0.1: prints new version", "new=v0.1.1" in r.stdout, r.stdout)
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v0.2.0\n", ["v0.2.0"])
-        check("v0.2: minor rejected, non-zero exit", r.returncode != 0, r.stderr)
+        check("v0.2: patch allowed, exit 0", r.returncode == 0, r.stderr)
+        check("v0.2: prints new version", "new=v0.2.1" in r.stdout, r.stdout)
     with tempfile.TemporaryDirectory() as tmp:
         r = run_release_prep(tmp, change, "## v1.0.0\n", ["v1.0.0"])
         check("v1.0: major rejected, non-zero exit", r.returncode != 0, r.stderr)
@@ -266,9 +286,10 @@ def main():
     test_combined_changes()
     test_none_is_deferred_until_patch()
     test_invalid_bumps_are_atomic()
+    test_minor_bump_from_stage()
     test_coverage_gate_contract()
     test_test_runner_contract()
-    test_v01_patch_allowed_and_minor_major_rejected()
+    test_v0x_patch_allowed_and_major_rejected()
     test_workflow_contract()
     print(f"==> {PASS} passed, {FAIL} failed")
     sys.exit(1 if FAIL else 0)

@@ -35,8 +35,11 @@ available to the application and to structured logs.
 
 | Method | Description |
 |----------|-------------|
-| `app.Listen(":8080")` | Start HTTP server with the App middleware chain |
-| `app.Shutdown(ctx)` | Gracefully shut down a running server (drains active requests) |
+| `ssr.Listen(app, ":8080")` | Start an HTTP host with secure defaults |
+| `host := ssr.New(app, config)` | Create an explicitly owned, configurable HTTP host |
+| `host.Start(":8080")` | Bind synchronously, then serve in the background |
+| `host.Wait()` | Block until the current host lifecycle finishes and return its result |
+| `host.Shutdown(ctx)` | Gracefully stop that host and drain active requests |
 | `app.Handler()` | Freeze configuration and return the App's `http.Handler` |
 | `app.ServeHTTP(w, r)` | Use the App directly as an `http.Handler` |
 
@@ -46,9 +49,12 @@ error if draining did not finish in time so the caller can decide how to
 report the unfinished work. Signal subscriptions are released when `Listen`
 returns, so repeated server lifecycles do not leak goroutines.
 
+`Start` returns after binding the listener and installing signal handling. Use
+`Wait` when the caller must observe the eventual server or shutdown result.
+
 ### Server timeouts and limits
 
-`app.SetServerConfig(ServerConfig)` tunes the HTTP server before build:
+Pass `ssr.ServerConfig` to `ssr.New(app, config)` to tune the HTTP host:
 
 | Field | Default | Effect |
 |-------|---------|--------|
@@ -59,10 +65,9 @@ returns, so repeated server lifecycles do not leak goroutines.
 | `MaxHeaderBytes` | 1 MiB | Rejects oversized request headers with a 431 response |
 | `ShutdownTimeout` | 10s | Deadline for draining active requests during shutdown |
 
-Connection and header timeouts are app-wide server policy for v0.1; they
-cannot be relaxed for a single route. Zero values fall back to the secure
-defaults in the table above, so timeouts and limits cannot be disabled for
-v0.1 — enforced defaults are the point. Without them, a missing
+Connection and header timeouts are host-wide policy. Zero values fall back to
+the secure defaults in the table above, so timeouts and limits cannot be
+disabled accidentally. Without them, a missing
 `ReadHeaderTimeout` would remove slowloris protection, a missing
 `ReadTimeout` would let clients hold a connection open while streaming the
 body indefinitely, and a missing `WriteTimeout` would let slow clients block
@@ -126,10 +131,10 @@ For AES-256-GCM session encryption see [Session Encryption](https://github.com/d
 | `app.SetCSP(value string)` | Override Content-Security-Policy before build |
 | `app.SetErrorHandler(code, handler)` | Configure an App-local error handler before build |
 | `app.SetReady(bool)` | Change readiness dynamically, including after build |
-| `app.SetServerConfig(ServerConfig)` | Tune HTTP server timeouts and limits before build |
 
-Configuration freezes on the first call to `Build`, `Handler`, `ServeHTTP`, or
-`Listen`. Later configuration calls return `dreego.ErrAppBuilt`; readiness is
+App configuration freezes on the first call to `Build`, `Handler`,
+`ServeHTTP`, or `ssr.Listen`. Later configuration calls return
+`dreego.ErrAppBuilt`; readiness is
 the only intentionally dynamic setting.
 
 ## Configuration File
@@ -168,6 +173,7 @@ import (
 
 	"myapp/www"
 	dreego "github.com/dreego-stack/dreego/core"
+	"github.com/dreego-stack/dreego/core/ssr"
 )
 
 func main() {
@@ -179,7 +185,7 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	if err := app.Listen(":8080"); err != nil {
+	if err := ssr.Listen(app, ":8080"); err != nil {
 		log.Fatal(err)
 	}
 }

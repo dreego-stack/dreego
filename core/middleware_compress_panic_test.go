@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestCompressPanicDoesNotCorruptResponse(t *testing.T) {
@@ -11,7 +13,7 @@ func TestCompressPanicDoesNotCorruptResponse(t *testing.T) {
 	r := httptest.NewRequest("GET", "/boom", nil)
 	r.Header.Set("Accept-Encoding", "gzip")
 
-	stack := Recovery(nil)(Compress()(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+	stack := middleware.Recovery(nil)(middleware.Compress()(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		panic("boom")
 	})))
 	stack.ServeHTTP(w, r)

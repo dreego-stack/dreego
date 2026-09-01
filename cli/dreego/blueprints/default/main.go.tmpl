@@ -5,6 +5,7 @@ import (
 	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
+	ssr "github.com/dreego-stack/dreego/core/ssr"
 	"§$name$§/www"
 )
 
@@ -13,11 +14,11 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	addr := ":8080"
+	addr := ssr.DefaultAddr()
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
 	}
-	if err := app.Listen(addr); err != nil {
+	if err := ssr.Listen(app, addr); err != nil {
 		log.Fatal(err)
 	}
 }

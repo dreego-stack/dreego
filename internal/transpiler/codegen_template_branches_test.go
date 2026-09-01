@@ -23,7 +23,7 @@ func TestGenTemplateNodeIfElseIfChain(t *testing.T) {
 		},
 	}
 	gen := NewGenerator()
-	gen.registerDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
+	gen.RegisterDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
 	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -48,7 +48,7 @@ func TestGenTemplateNodeEachWithElse(t *testing.T) {
 		},
 	}
 	gen := NewGenerator()
-	gen.registerDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
+	gen.RegisterDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
 	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -229,7 +229,7 @@ func TestGenTemplateNodeComponentCallSelfClose(t *testing.T) {
 		SelfClose: true,
 	}
 	gen := NewGenerator()
-	gen.registerDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
+	gen.RegisterDef("Button", &ComponentDef{Name: "Button", Props: []Prop{{Name: "label", Type: "string"}}})
 	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -258,7 +258,7 @@ func TestGenTemplateNodeComponentCallWithSlot(t *testing.T) {
 		},
 	}
 	gen := NewGenerator()
-	gen.registerDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
+	gen.RegisterDef("Card", &ComponentDef{Name: "Card", Slots: []string{"header"}, HasDefaultSlot: true})
 	result, err := genTemplateNode(gen, n, 0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

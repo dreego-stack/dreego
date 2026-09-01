@@ -19,7 +19,7 @@ func TestGenComponentCallResolvesAttrExpression(t *testing.T) {
 		SelfClose: true,
 	}
 	gen := NewGenerator()
-	gen.registerDef("Link", &ComponentDef{Name: "Link", Props: []Prop{{Name: "href", Type: "string"}, {Name: "label", Type: "string"}}})
+	gen.RegisterDef("Link", &ComponentDef{Name: "Link", Props: []Prop{{Name: "href", Type: "string"}, {Name: "label", Type: "string"}}})
 	out, err := (&compGen{gen: gen, builder: "b"}).genComponentCall(n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

@@ -3,11 +3,18 @@ package transpiler
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+	var l *ir.LayoutEntry
+	if layout != nil {
+		l = &ir.LayoutEntry{File: layout.file, Name: layout.name}
+	}
 	if len(file.FormActions) > 0 {
-		return generateMethodHandler(gen, file, layout, pkgName, baseName, pattern, scopeHash)
+		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash)
 	}
 	methods := fileRegisteredMethods(file)
 	var src, regs strings.Builder
@@ -23,7 +30,7 @@ func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 			copy.Server = []ServerSection{{Method: method}}
 		}
 		copy.Body = templateForMethod(file, method)
-		part, reg, err := generateMethodHandler(gen, &copy, layout, pkgName, baseName, pattern, scopeHash)
+		part, reg, err := generateMethodHandler(gen, &copy, l, pkgName, baseName, pattern, scopeHash)
 		if err != nil {
 			return "", "", err
 		}
@@ -46,7 +53,7 @@ func templateForMethod(file *File, method string) *BodySection {
 	return file.Body
 }
 
-func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+func generateMethodHandler(gen *Generator, file *File, layout *ir.LayoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Server {
 		if g.ContentType != "" && g.ContentType != "custom" {
@@ -55,7 +62,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 	}
 	hasFormActions := len(file.FormActions) > 0
 
-	pascalBase := toPascalCase(baseName)
+	pascalBase := ir.ToPascalCase(baseName)
 	renderFunc := "render" + pascalBase
 
 	var firstMethod string
@@ -88,7 +95,11 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 		buf.WriteString(pkgCode)
 	}
 
-	buf.WriteString(fmt.Sprintf("\nfunc %s(c *dreego.SSRContext) (string, error) {\n", renderFunc))
+	contextType := "*dreego.SSRContext"
+	if firstMethod == "GET" && inlineCode == "" && !hasTypedBlocks {
+		contextType = "dreego.RenderContext"
+	}
+	buf.WriteString(fmt.Sprintf("\nfunc %s(c %s) (string, error) {\n", renderFunc, contextType))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if inlineCode != "" {
@@ -107,7 +118,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 	}
 
 	if file.Body != nil && len(file.Body.Nodes) > 0 {
-		templCode, err := genTempl(gen, file, layout, scopeHash, true)
+		templCode, err := html.GenTempl(gen, file, layout, scopeHash, true)
 		if err != nil {
 			return "", "", err
 		}
@@ -117,6 +128,16 @@ func generateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 	}
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
+	if contextType == "dreego.RenderContext" {
+		pageFunc := "Page" + pascalBase
+		buf.WriteString(fmt.Sprintf("func %s() dreego.Component {\n", pageFunc))
+		buf.WriteString("\treturn dreego.ComponentFunc(func(c dreego.RenderContext) (dreego.Result, error) {\n")
+		buf.WriteString(fmt.Sprintf("\t\thtml, err := %s(c)\n", renderFunc))
+		buf.WriteString("\t\tif err != nil { return dreego.Result{}, err }\n")
+		buf.WriteString("\t\treturn dreego.Result{HTML: []byte(html)}, nil\n")
+		buf.WriteString("\t})\n")
+		buf.WriteString("}\n\n")
+	}
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", getHandler))
 	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")

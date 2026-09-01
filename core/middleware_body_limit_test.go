@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/dreego-stack/dreego/core/internal/middleware"
 )
 
 func TestMaxBodyReader(t *testing.T) {
@@ -17,7 +19,7 @@ func TestMaxBodyReader(t *testing.T) {
 		}
 		w.WriteHeader(http.StatusOK)
 	}
-	wrapped := MaxBodyReader(100)(http.HandlerFunc(handler))
+	wrapped := middleware.MaxBodyReader(100)(http.HandlerFunc(handler))
 
 	oversized := make([]byte, 200)
 	rec := httptest.NewRecorder()

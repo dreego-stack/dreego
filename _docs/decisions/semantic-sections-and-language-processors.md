@@ -1,14 +1,14 @@
 ---
 type: Decision
-title: Semantic sections and external language processors
+title: Semantic sections and first-party language processors
 description: Root sections describe purpose while lang selects a processor
-tags: [transpiler, sections, plugins, v0.x]
-timestamp: 2026-08-24T00:00:00Z
+tags: [transpiler, sections, processors, v0.x]
+timestamp: 2026-09-01T00:00:00Z
 ---
-# Semantic sections and external language processors
+# Semantic sections and first-party language processors
 
-**Date:** 2026-08-24
-**Status:** Accepted and implemented for the built-in languages
+**Date:** 2026-09-01
+**Status:** Accepted and implemented for the built-in languages; language processors are first-party
 
 ## Context
 
@@ -53,14 +53,27 @@ literal regions; it cannot consume or redefine Dreego constructs.
 ## Processor registration
 
 A processor registers an exact section, language, and output kind. Supporting
-client Lua does not imply supporting server Lua. Initial external processors
-run through a versioned subprocess protocol with structured diagnostics,
-assets, source maps, capability requirements, cancellation, and limits.
+client Lua does not imply supporting server Lua.
 
-Raw Go, HTML, CSS, and JavaScript remain built in. TypeScript, Markdown, Lua,
-and other dependency-bearing processors live in external plugin repositories.
-Managed tools require explicit approval, pinned versions, and reproducible lock
-information.
+Language processors for a small, closed set of source languages are part of the
+Dreego monorepo as internal transpiler processors under
+`internal/transpiler/processors`:
+
+- Markdown (`md` → `html`) with stdlib-first parsing;
+- TypeScript (`ts` → `js`) via a node subprocess for type checking and
+  transpilation only;
+- Lua (`lua` → `js`) later.
+
+Rationale: codegen processors have too much power to run as third-party code,
+so their influence must stay reviewable first-party code. The language count is
+small (three planned), the VS Code extension can ship the same grammars, and
+the processors work out of the box. Raw Go, HTML, CSS, and JavaScript remain
+built in.
+
+Runtime plugins (SSE, WebSockets, Tailwind) and provider integrations remain
+external plugin repositories using the explicit `Register(app)` model. Managed
+tools such as the TypeScript compiler require explicit approval, pinned
+versions, and reproducible lock information; npm remains opt-in.
 
 ## Alternatives considered
 
@@ -92,8 +105,17 @@ become ambiguous. Mixed content uses component composition.
   and diagnostics use the semantic section model together.
 - Legacy root names fail with an actionable migration diagnostic.
 - Processor compatibility is checked at generation or build time.
-- Markdown and TypeScript serve as the first two protocol proofs.
+- Markdown and TypeScript serve as the first two first-party processors.
 - TypeScript support must perform real type checking, not only remove types.
+
+## Supersedes / Amends
+
+- Replaces the external-processor direction in this document: language
+  processors are first-party monorepo code, not external plugin repositories.
+- The versioned subprocess protocol for third-party processors is removed from
+  the roadmap as speculative.
+- Runtime plugins and provider integrations remain external plugin
+  repositories.
 
 ## Supersedes
 

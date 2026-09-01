@@ -27,13 +27,13 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 			return nil, nil, fmt.Errorf("duplicate component %s: %s and %s", component.def.Name, previous, component.path)
 		}
 		pathsByName[component.def.Name] = component.path
-		gen.registerDef(component.def.Name, component.def)
+		gen.RegisterDef(component.def.Name, component.def)
 	}
 
 	sourcesByPkg := map[string][]string{}
-	gen.pkg = "components"
+	gen.Pkg = "components"
 	for _, component := range components {
-		gen.src = component.raw
+		gen.Src = component.raw
 		src, err := GenerateComponent(gen, component.file, component.scopeHash)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error generating component %s: %w", component.path, err)
@@ -84,7 +84,7 @@ func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 			}
 		}
 		component.pkgDir = pkgDir
-		gen.registerCompPkg(component.def.Name, pkg, relToRoot(root, pkgDir))
+		gen.RegisterCompPkg(component.def.Name, pkg, relToRoot(root, pkgDir))
 		components = append(components, component)
 		return nil
 	})
