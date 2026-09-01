@@ -1,9 +1,12 @@
-package transpiler
+package parser
 
 import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/lexer"
 )
 
 func FuzzParser(f *testing.F) {
@@ -32,7 +35,7 @@ func FuzzParser(f *testing.F) {
 			t.Skip("input too large")
 		}
 
-		tokens, err := Lex(input)
+		tokens, err := lexer.Lex(input)
 		if err != nil {
 			return
 		}
@@ -56,14 +59,14 @@ func FuzzParser(f *testing.F) {
 	})
 }
 
-func countTemplateNodes(section *BodySection) int {
+func countTemplateNodes(section *ir.BodySection) int {
 	if section == nil {
 		return 0
 	}
 	return countNodes(section.Nodes)
 }
 
-func countNodes(nodes []TemplateNode) int {
+func countNodes(nodes []ir.TemplateNode) int {
 	n := len(nodes)
 	for _, node := range nodes {
 		n += countNodes(node.Children)
@@ -93,7 +96,7 @@ func FuzzParserPreservesServerSection(f *testing.F) {
 		}
 
 		input := "<server>" + code + "</server><body></body>"
-		tokens, err := Lex(input)
+		tokens, err := lexer.Lex(input)
 		if err != nil {
 			t.Fatalf("valid source rejected by lexer: %v", err)
 		}

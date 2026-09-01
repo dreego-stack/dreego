@@ -1,11 +1,13 @@
-package transpiler
+package lexer
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
-func scanBraceAt(input string) (Token, int, error) {
+func scanBraceAt(input string) (tokens.Token, int, error) {
 	pos := 0
 	tok, err := scanBrace(input, &pos)
 	return tok, pos, err
@@ -15,21 +17,21 @@ func TestScanBraceAllControlTokens(t *testing.T) {
 	cases := []struct {
 		name  string
 		input string
-		want  TokenType
+		want  tokens.TokenType
 		value string
 		pos   int
 	}{
-		{"else", "{#else}", TokenElse, "", 7},
-		{"if close", "{/if}", TokenIfClose, "", 5},
-		{"each close", "{/each}", TokenEachClose, "", 7},
-		{"each else", "{#each else}", TokenEachElse, "", 12},
-		{"slot", "{#slot}", TokenSlot, "", 7},
-		{"slot open", "{#slot name}", TokenSlotOpen, "name", 12},
-		{"slot close", "{/slot}", TokenSlotClose, "", 7},
-		{"else if", "{#else if cond}", TokenElseIf, "cond", 15},
-		{"if open", "{#if cond}", TokenIfOpen, "cond", 10},
-		{"each open", "{#each items}", TokenEachOpen, "items", 13},
-		{"verbatim", "{#verbatim}raw{/verbatim}", TokenVerbatim, "raw", 25},
+		{"else", "{#else}", tokens.TokenElse, "", 7},
+		{"if close", "{/if}", tokens.TokenIfClose, "", 5},
+		{"each close", "{/each}", tokens.TokenEachClose, "", 7},
+		{"each else", "{#each else}", tokens.TokenEachElse, "", 12},
+		{"slot", "{#slot}", tokens.TokenSlot, "", 7},
+		{"slot open", "{#slot name}", tokens.TokenSlotOpen, "name", 12},
+		{"slot close", "{/slot}", tokens.TokenSlotClose, "", 7},
+		{"else if", "{#else if cond}", tokens.TokenElseIf, "cond", 15},
+		{"if open", "{#if cond}", tokens.TokenIfOpen, "cond", 10},
+		{"each open", "{#each items}", tokens.TokenEachOpen, "items", 13},
+		{"verbatim", "{#verbatim}raw{/verbatim}", tokens.TokenVerbatim, "raw", 25},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -75,7 +77,7 @@ func TestScanBraceDoubleExpression(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if tok.Type != TokenExpression {
+	if tok.Type != tokens.TokenExpression {
 		t.Fatalf("expected TokenExpression, got %v", tok.Type)
 	}
 	if tok.Value != "user.Name" {
@@ -83,23 +85,6 @@ func TestScanBraceDoubleExpression(t *testing.T) {
 	}
 	if pos != len("{{ user.Name }}") {
 		t.Fatalf("expected position %d, got %d", len("{{ user.Name }}"), pos)
-	}
-}
-
-func TestLexSingleBraceIsLiteralText(t *testing.T) {
-	tokens, err := Lex(`<body>{value}</body>`)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	file, err := NewParser(tokens).Parse()
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeText {
-		t.Fatalf("single braces must remain literal text, got %+v", file.Body.Nodes)
-	}
-	if file.Body.Nodes[0].Content != "{value}" {
-		t.Fatalf("expected literal {value}, got %q", file.Body.Nodes[0].Content)
 	}
 }
 
@@ -148,7 +133,7 @@ func TestScanBraceEachElse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if tok.Type != TokenEachOpen {
+	if tok.Type != tokens.TokenEachOpen {
 		t.Fatalf("expected TokenEachOpen, got %v", tok.Type)
 	}
 	if tok.Value != "items as item else" {

@@ -1,8 +1,11 @@
-package transpiler
+package parser
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/lexer"
 )
 
 // Tests for error paths in parseTemplateNode / parseBodyNodes /
@@ -35,7 +38,7 @@ func TestParseComponentMismatchedClose(t *testing.T) {
 }
 
 func TestParseUnclosedBody(t *testing.T) {
-	_, err := Lex("<body>")
+	_, err := lexer.Lex("<body>")
 	if err == nil || !strings.Contains(err.Error(), "unclosed tag <body>") {
 		t.Fatalf("expected unclosed body error, got %v", err)
 	}
@@ -90,7 +93,7 @@ func TestParseEachInsideSingleQuotedAttrRejected(t *testing.T) {
 }
 
 func TestParseIfOutsideDivAttrStillWorks(t *testing.T) {
-	tokens, err := Lex(`<body>{#if cond}<span class="nav active">x</span>{/if}</body>`)
+	tokens, err := lexer.Lex(`<body>{#if cond}<span class="nav active">x</span>{/if}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -98,13 +101,13 @@ func TestParseIfOutsideDivAttrStillWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeIf {
+	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != ir.NodeIf {
 		t.Fatalf("expected NodeIf wrapping the div, got %+v", file.Body.Nodes)
 	}
 }
 
 func TestParseIfOutsideAttrStillWorks(t *testing.T) {
-	tokens, err := Lex(`<body>{#if cond}<a class="nav">x</a>{/if}</body>`)
+	tokens, err := lexer.Lex(`<body>{#if cond}<a class="nav">x</a>{/if}</body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -112,7 +115,7 @@ func TestParseIfOutsideAttrStillWorks(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != NodeIf {
+	if len(file.Body.Nodes) != 1 || file.Body.Nodes[0].Type != ir.NodeIf {
 		t.Fatalf("expected NodeIf wrapping the tag, got %+v", file.Body.Nodes)
 	}
 }

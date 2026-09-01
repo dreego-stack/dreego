@@ -1,36 +1,39 @@
-package transpiler
+package parser
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
 type Parser struct {
-	tokens           []Token
+	tokens           []tokens.Token
 	pos              int
 	templateFromBody bool
 }
 
-func NewParser(tokens []Token) *Parser {
+func NewParser(tokens []tokens.Token) *Parser {
 	return &Parser{tokens: tokens}
 }
 
-func (p *Parser) Parse() (*File, error) {
-	file := &File{}
+func (p *Parser) Parse() (*ir.File, error) {
+	file := &ir.File{}
 
 	for p.pos < len(p.tokens) {
 		tok := p.current()
 
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			break
 		}
 
-		if tok.Type == TokenText && strings.TrimSpace(tok.Value) == "" {
+		if tok.Type == tokens.TokenText && strings.TrimSpace(tok.Value) == "" {
 			p.advance()
 			continue
 		}
 
-		if tok.Type != TokenTagOpen {
+		if tok.Type != tokens.TokenTagOpen {
 			return nil, fmt.Errorf("expected root section, got %s at position %d", tok.Type, tok.Pos)
 		}
 
@@ -84,7 +87,7 @@ func (p *Parser) Parse() (*File, error) {
 			if file.Head != nil {
 				return nil, fmt.Errorf("duplicate <head> section at position %d", tok.Pos)
 			}
-			file.Head = &HeadSection{Content: strings.TrimSpace(section), Language: language}
+			file.Head = &ir.HeadSection{Content: strings.TrimSpace(section), Language: language}
 		case "client":
 			language, err := parseSectionLanguage(tok, "js")
 			if err != nil {
@@ -97,7 +100,7 @@ func (p *Parser) Parse() (*File, error) {
 			if file.Client != nil {
 				return nil, fmt.Errorf("duplicate <client> section at position %d", tok.Pos)
 			}
-			file.Client = &ClientSection{Code: strings.TrimSpace(section), Language: language}
+			file.Client = &ir.ClientSection{Code: strings.TrimSpace(section), Language: language}
 		case "style":
 			language, err := parseSectionLanguage(tok, "css")
 			if err != nil {
@@ -110,7 +113,7 @@ func (p *Parser) Parse() (*File, error) {
 			if file.Style != nil {
 				return nil, fmt.Errorf("duplicate <style> section at position %d", tok.Pos)
 			}
-			file.Style = &StyleSection{Code: strings.TrimSpace(section), Language: language}
+			file.Style = &ir.StyleSection{Code: strings.TrimSpace(section), Language: language}
 		case "go":
 			return nil, fmt.Errorf("legacy root <go> at position %d: replace root <go> with <server>", tok.Pos)
 		case "div":
@@ -125,7 +128,7 @@ func (p *Parser) Parse() (*File, error) {
 	return file, nil
 }
 
-func parseSectionLanguage(tok Token, defaultLanguage string) (string, error) {
+func parseSectionLanguage(tok tokens.Token, defaultLanguage string) (string, error) {
 	language := sectionLanguage(tok.Attr)
 	if language == "" {
 		return defaultLanguage, nil
@@ -149,18 +152,18 @@ func (p *Parser) advance() {
 	p.pos++
 }
 
-func (p *Parser) current() Token {
+func (p *Parser) current() tokens.Token {
 	if p.pos < len(p.tokens) {
 		return p.tokens[p.pos]
 	}
-	return Token{Type: TokenEOF}
+	return tokens.Token{Type: tokens.TokenEOF}
 }
 
-func (p *Parser) peek() Token {
+func (p *Parser) peek() tokens.Token {
 	if p.pos+1 < len(p.tokens) {
 		return p.tokens[p.pos+1]
 	}
-	return Token{Type: TokenEOF}
+	return tokens.Token{Type: tokens.TokenEOF}
 }
 
 func parseServerAttrs(attrs string) string {

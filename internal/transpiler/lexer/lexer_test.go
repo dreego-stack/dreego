@@ -1,8 +1,10 @@
-package transpiler
+package lexer
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
 func TestLexUnclosedSectionTag(t *testing.T) {
@@ -36,41 +38,41 @@ func TestLexMismatchedClosingTag(t *testing.T) {
 }
 
 func TestLexEmptyInputReturnsEOF(t *testing.T) {
-	tokens, err := Lex("")
+	toks, err := Lex("")
 	if err != nil {
 		t.Fatalf("expected no error for empty input, got %v", err)
 	}
-	if len(tokens) != 1 {
-		t.Fatalf("expected 1 token, got %d", len(tokens))
+	if len(toks) != 1 {
+		t.Fatalf("expected 1 token, got %d", len(toks))
 	}
-	if tokens[0].Type != TokenEOF {
-		t.Fatalf("expected TokenEOF, got %v", tokens[0].Type)
+	if toks[0].Type != tokens.TokenEOF {
+		t.Fatalf("expected TokenEOF, got %v", toks[0].Type)
 	}
 }
 
 func TestLexPlainTextNoSections(t *testing.T) {
-	tokens, err := Lex("hello")
+	toks, err := Lex("hello")
 	if err != nil {
 		t.Fatalf("expected no error for plain text, got %v", err)
 	}
-	if len(tokens) != 2 {
-		t.Fatalf("expected 2 tokens (text + EOF), got %d", len(tokens))
+	if len(toks) != 2 {
+		t.Fatalf("expected 2 tokens (text + EOF), got %d", len(toks))
 	}
-	if tokens[0].Type != TokenText {
-		t.Fatalf("expected TokenText, got %v", tokens[0].Type)
+	if toks[0].Type != tokens.TokenText {
+		t.Fatalf("expected TokenText, got %v", toks[0].Type)
 	}
-	if tokens[0].Value != "hello" {
-		t.Fatalf("expected value 'hello', got %q", tokens[0].Value)
+	if toks[0].Value != "hello" {
+		t.Fatalf("expected value 'hello', got %q", toks[0].Value)
 	}
-	if tokens[1].Type != TokenEOF {
-		t.Fatalf("expected TokenEOF, got %v", tokens[1].Type)
+	if toks[1].Type != tokens.TokenEOF {
+		t.Fatalf("expected TokenEOF, got %v", toks[1].Type)
 	}
 }
 
 func TestScanTagUnclosed(t *testing.T) {
 	pos := 0
 	tok := scanTag("<div", &pos)
-	if tok.Type != TokenText {
+	if tok.Type != tokens.TokenText {
 		t.Fatalf("expected TokenText for unclosed tag, got %v", tok.Type)
 	}
 	if tok.Value != "<div" {
@@ -84,7 +86,7 @@ func TestScanTagUnclosed(t *testing.T) {
 func TestScanTagSelfClosing(t *testing.T) {
 	pos := 0
 	tok := scanTag("<img src=x/>", &pos)
-	if tok.Type != TokenTagOpen {
+	if tok.Type != tokens.TokenTagOpen {
 		t.Fatalf("expected TokenTagOpen, got %v", tok.Type)
 	}
 	if tok.Tag != "img" {
@@ -104,7 +106,7 @@ func TestScanTagSelfClosing(t *testing.T) {
 func TestScanTagNotSelfClosing(t *testing.T) {
 	pos := 0
 	tok := scanTag("<img src=x>", &pos)
-	if tok.Type != TokenTagOpen {
+	if tok.Type != tokens.TokenTagOpen {
 		t.Fatalf("expected TokenTagOpen, got %v", tok.Type)
 	}
 	if tok.SelfClose {
@@ -115,7 +117,7 @@ func TestScanTagNotSelfClosing(t *testing.T) {
 func TestScanComponentSelfClose(t *testing.T) {
 	pos := 0
 	tok := scanTag("<@Comp/>", &pos)
-	if tok.Type != TokenComponentSelfClose {
+	if tok.Type != tokens.TokenComponentSelfClose {
 		t.Fatalf("expected TokenComponentSelfClose, got %v", tok.Type)
 	}
 	if tok.Tag != "Comp" {
@@ -129,7 +131,7 @@ func TestScanComponentSelfClose(t *testing.T) {
 func TestScanComponentUnclosed(t *testing.T) {
 	pos := 0
 	tok := scanTag("<@Comp", &pos)
-	if tok.Type != TokenText {
+	if tok.Type != tokens.TokenText {
 		t.Fatalf("expected TokenText for unclosed component tag, got %v", tok.Type)
 	}
 	if tok.Value != "<@Comp" {
@@ -143,16 +145,16 @@ func TestScanComponentUnclosed(t *testing.T) {
 // A <server> section body is raw text: <...> inside it must NOT lex as tags, so
 // Go comparisons and strings survive verbatim.
 func TestLexServerSectionLtIsRawText(t *testing.T) {
-	tokens, err := Lex(`<server>msg := "TO: <HASH>"</server>`)
+	toks, err := Lex(`<server>msg := "TO: <HASH>"</server>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
 	var kinds []string
-	for _, tok := range tokens {
-		if tok.Type == TokenEOF {
+	for _, tok := range toks {
+		if tok.Type == tokens.TokenEOF {
 			break
 		}
-		if tok.Type == TokenTagOpen || tok.Type == TokenTagClose {
+		if tok.Type == tokens.TokenTagOpen || tok.Type == tokens.TokenTagClose {
 			kinds = append(kinds, tok.Type.String()+"("+tok.Tag+")")
 		}
 	}

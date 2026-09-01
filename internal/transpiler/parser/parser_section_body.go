@@ -1,11 +1,14 @@
-package transpiler
+package parser
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
-func (p *Parser) parseBodySection() (*BodySection, error) {
+func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 	tok := p.current()
 	if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 		return nil, err
@@ -16,7 +19,7 @@ func (p *Parser) parseBodySection() (*BodySection, error) {
 		return nil, err
 	}
 	method, explicit := parseBodyMethod(tok.Attr)
-	return &BodySection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil
+	return &ir.BodySection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil
 }
 
 func parseBodyMethod(attrs string) (string, bool) {
@@ -28,16 +31,16 @@ func parseBodyMethod(attrs string) (string, bool) {
 	return "GET", false
 }
 
-func (p *Parser) parseBodyNodes() ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseBodyNodes() ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 	depth := 0
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed <body>")
 		}
-		if tok.Type == TokenTagOpen && tok.Tag == "body" {
+		if tok.Type == tokens.TokenTagOpen && tok.Tag == "body" {
 			if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 				return nil, err
 			}
@@ -48,16 +51,16 @@ func (p *Parser) parseBodyNodes() ([]TemplateNode, error) {
 				content += " " + tok.Attr
 			}
 			content += ">"
-			nodes = append(nodes, TemplateNode{Type: NodeText, Content: content, Pos: tok.Pos})
+			nodes = append(nodes, ir.TemplateNode{Type: ir.NodeText, Content: content, Pos: tok.Pos})
 			continue
 		}
-		if tok.Type == TokenTagClose && tok.Tag == "body" {
+		if tok.Type == tokens.TokenTagClose && tok.Tag == "body" {
 			p.advance()
 			depth--
 			if depth < 0 {
 				return nodes, nil
 			}
-			nodes = append(nodes, TemplateNode{Type: NodeText, Content: "</body>", Pos: tok.Pos})
+			nodes = append(nodes, ir.TemplateNode{Type: ir.NodeText, Content: "</body>", Pos: tok.Pos})
 			continue
 		}
 
@@ -69,32 +72,32 @@ func (p *Parser) parseBodyNodes() ([]TemplateNode, error) {
 	}
 }
 
-func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
+func (p *Parser) parseTemplateNode(parent string) (ir.TemplateNode, error) {
 	tok := p.current()
 
 	switch tok.Type {
-	case TokenText:
+	case tokens.TokenText:
 		p.advance()
-		return TemplateNode{Type: NodeText, Content: tok.Value, Pos: tok.Pos}, nil
-	case TokenExpression:
+		return ir.TemplateNode{Type: ir.NodeText, Content: tok.Value, Pos: tok.Pos}, nil
+	case tokens.TokenExpression:
 		p.advance()
 		expr, filters := parseExpression(tok.Value)
-		return TemplateNode{Type: NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
-	case TokenIfOpen:
+		return ir.TemplateNode{Type: ir.NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
+	case tokens.TokenIfOpen:
 		cond := tok.Value
 		openPos := tok.Pos
 		p.advance()
 		children, err := p.parseIfNodes(openPos)
 		if err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
-		var elseChildren []TemplateNode
-		for p.current().Type == TokenElse || p.current().Type == TokenElseIf {
-			if p.current().Type == TokenElse {
+		var elseChildren []ir.TemplateNode
+		for p.current().Type == tokens.TokenElse || p.current().Type == tokens.TokenElseIf {
+			if p.current().Type == tokens.TokenElse {
 				p.advance()
 				elseChildren, err = p.parseElseNodes()
 				if err != nil {
-					return TemplateNode{}, err
+					return ir.TemplateNode{}, err
 				}
 				break
 			}
@@ -103,64 +106,64 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			p.advance()
 			elseIfChildren, err := p.parseIfNodes(elsePos)
 			if err != nil {
-				return TemplateNode{}, err
+				return ir.TemplateNode{}, err
 			}
-			nested := TemplateNode{Type: NodeIf, Cond: elseCond, Children: elseIfChildren}
-			if p.current().Type == TokenElse {
+			nested := ir.TemplateNode{Type: ir.NodeIf, Cond: elseCond, Children: elseIfChildren}
+			if p.current().Type == tokens.TokenElse {
 				p.advance()
 				nested.ElseChildren, err = p.parseElseNodes()
 				if err != nil {
-					return TemplateNode{}, err
+					return ir.TemplateNode{}, err
 				}
 			}
 			elseChildren = append(elseChildren, nested)
-			if p.current().Type == TokenIfClose {
+			if p.current().Type == tokens.TokenIfClose {
 				p.advance()
 				break
 			}
 		}
-		if p.current().Type == TokenIfClose {
+		if p.current().Type == tokens.TokenIfClose {
 			p.advance()
 		}
-		return TemplateNode{Type: NodeIf, Cond: cond, Children: children, ElseChildren: elseChildren}, nil
-	case TokenEachOpen:
+		return ir.TemplateNode{Type: ir.NodeIf, Cond: cond, Children: children, ElseChildren: elseChildren}, nil
+	case tokens.TokenEachOpen:
 		items, item, err := parseEachClause(tok.Value)
 		if err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
 		p.advance()
 		children, err := p.parseEachNodes()
 		if err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
-		var elseChildren []TemplateNode
-		if p.current().Type == TokenEachElse {
+		var elseChildren []ir.TemplateNode
+		if p.current().Type == tokens.TokenEachElse {
 			p.advance()
 			elseChildren, err = p.parseEachElseNodes()
 			if err != nil {
-				return TemplateNode{}, err
+				return ir.TemplateNode{}, err
 			}
 		}
-		if p.current().Type == TokenEachClose {
+		if p.current().Type == tokens.TokenEachClose {
 			p.advance()
 		}
-		return TemplateNode{Type: NodeEach, Items: items, Item: item, Children: children, ElseChildren: elseChildren}, nil
-	case TokenTagClose:
+		return ir.TemplateNode{Type: ir.NodeEach, Items: items, Item: item, Children: children, ElseChildren: elseChildren}, nil
+	case tokens.TokenTagClose:
 		p.advance()
-		return TemplateNode{Type: NodeText, Content: fmt.Sprintf("</%s>", tok.Tag), Pos: tok.Pos}, nil
-	case TokenSlot:
+		return ir.TemplateNode{Type: ir.NodeText, Content: fmt.Sprintf("</%s>", tok.Tag), Pos: tok.Pos}, nil
+	case tokens.TokenSlot:
 		p.advance()
-		return TemplateNode{Type: NodeSlot, Content: tok.Value}, nil
-	case TokenSlotOpen:
+		return ir.TemplateNode{Type: ir.NodeSlot, Content: tok.Value}, nil
+	case tokens.TokenSlotOpen:
 		p.advance()
 		children, err := p.parseSlotNodes()
 		if err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeSlot, Content: tok.Value, Children: children, Pos: tok.Pos}, nil
-	case TokenTagOpen:
+		return ir.TemplateNode{Type: ir.NodeSlot, Content: tok.Value, Children: children, Pos: tok.Pos}, nil
+	case tokens.TokenTagOpen:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
 		p.advance()
 		content := fmt.Sprintf("<%s", tok.Tag)
@@ -168,45 +171,45 @@ func (p *Parser) parseTemplateNode(parent string) (TemplateNode, error) {
 			content += " " + tok.Attr
 		}
 		content += ">"
-		return TemplateNode{Type: NodeText, Content: content, Pos: tok.Pos}, nil
-	case TokenComponentSelfClose:
+		return ir.TemplateNode{Type: ir.NodeText, Content: content, Pos: tok.Pos}, nil
+	case tokens.TokenComponentSelfClose:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
 		p.advance()
-		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true, Pos: tok.Pos}, nil
-	case TokenComponentTagOpen:
+		return ir.TemplateNode{Type: ir.NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, SelfClose: true, Pos: tok.Pos}, nil
+	case tokens.TokenComponentTagOpen:
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
 		p.advance()
 		children, err := p.parseComponentNodes(tok.Tag)
 		if err != nil {
-			return TemplateNode{}, err
+			return ir.TemplateNode{}, err
 		}
-		return TemplateNode{Type: NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children, Pos: tok.Pos}, nil
-	case TokenSlotClose:
-		return TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
-	case TokenElse:
-		return TemplateNode{}, fmt.Errorf("unexpected {#else} outside {#if} at position %d", tok.Pos)
-	case TokenElseIf:
-		return TemplateNode{}, fmt.Errorf("unexpected {#else if} outside {#if} at position %d", tok.Pos)
-	case TokenVerbatim:
+		return ir.TemplateNode{Type: ir.NodeComponentCall, Tag: tok.Tag, Attrs: tok.Attr, Children: children, Pos: tok.Pos}, nil
+	case tokens.TokenSlotClose:
+		return ir.TemplateNode{}, fmt.Errorf("unexpected {/slot} at position %d", tok.Pos)
+	case tokens.TokenElse:
+		return ir.TemplateNode{}, fmt.Errorf("unexpected {#else} outside {#if} at position %d", tok.Pos)
+	case tokens.TokenElseIf:
+		return ir.TemplateNode{}, fmt.Errorf("unexpected {#else if} outside {#if} at position %d", tok.Pos)
+	case tokens.TokenVerbatim:
 		p.advance()
-		return TemplateNode{Type: NodeVerbatim, Content: tok.Value}, nil
+		return ir.TemplateNode{Type: ir.NodeVerbatim, Content: tok.Value}, nil
 	default:
-		return TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)
+		return ir.TemplateNode{}, fmt.Errorf("unexpected token %s in template at position %d", tok.Type, tok.Pos)
 	}
 }
 
-func (p *Parser) parseSlotNodes() ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseSlotNodes() ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed {#slot}")
 		}
-		if tok.Type == TokenSlotClose {
+		if tok.Type == tokens.TokenSlotClose {
 			p.advance()
 			return nodes, nil
 		}
@@ -218,19 +221,19 @@ func (p *Parser) parseSlotNodes() ([]TemplateNode, error) {
 	}
 }
 
-func (p *Parser) parseComponentNodes(tag string) ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseComponentNodes(tag string) ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed <@%s>", tag)
 		}
-		if tok.Type == TokenComponentTagClose && tok.Tag == tag {
+		if tok.Type == tokens.TokenComponentTagClose && tok.Tag == tag {
 			p.advance()
 			return nodes, nil
 		}
-		if tok.Type == TokenComponentTagClose {
+		if tok.Type == tokens.TokenComponentTagClose {
 			return nil, fmt.Errorf("unexpected </@%s>, expected </@%s>", tok.Tag, tag)
 		}
 

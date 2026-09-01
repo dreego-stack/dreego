@@ -37,12 +37,6 @@ func TestParseMethodSectionsRemainIsolated(t *testing.T) {
 	}
 }
 
-func TestParseDuplicateMethodTemplateReportsMethod(t *testing.T) {
-	parseExpectError(t,
-		`<body method="post">one</body><body method="POST">two</body>`,
-		"duplicate <body> section for method POST")
-}
-
 func TestParseMethodSectionsSupportAllCommonHTTPMethods(t *testing.T) {
 	file := parseMethodFixture(t, `<server>get := 1</server><body>GET</body>
 <server method="post">post := 1</server><body method="post">POST</body>

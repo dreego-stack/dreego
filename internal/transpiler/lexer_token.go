@@ -1,70 +1,30 @@
 package transpiler
 
-type TokenType int
+import "github.com/dreego-stack/dreego/internal/transpiler/tokens"
+
+type TokenType = tokens.TokenType
+type Token = tokens.Token
 
 const (
-	TokenError TokenType = iota
-	TokenEOF
+	TokenError = tokens.TokenError
+	TokenEOF   = tokens.TokenEOF
 
-	TokenTagOpen
-	TokenTagClose
-	TokenText
-	TokenExpression
-	TokenIfOpen
-	TokenIfClose
-	TokenElse
-	TokenElseIf
-	TokenEachOpen
-	TokenEachClose
-	TokenEachElse
-	TokenSlot
-	TokenSlotOpen
-	TokenSlotClose
-	TokenComponentTagOpen
-	TokenComponentTagClose
-	TokenComponentSelfClose
-	TokenVerbatim
+	TokenTagOpen           = tokens.TokenTagOpen
+	TokenTagClose          = tokens.TokenTagClose
+	TokenText              = tokens.TokenText
+	TokenExpression        = tokens.TokenExpression
+	TokenIfOpen            = tokens.TokenIfOpen
+	TokenIfClose           = tokens.TokenIfClose
+	TokenElse              = tokens.TokenElse
+	TokenElseIf            = tokens.TokenElseIf
+	TokenEachOpen          = tokens.TokenEachOpen
+	TokenEachClose         = tokens.TokenEachClose
+	TokenEachElse          = tokens.TokenEachElse
+	TokenSlot              = tokens.TokenSlot
+	TokenSlotOpen          = tokens.TokenSlotOpen
+	TokenSlotClose         = tokens.TokenSlotClose
+	TokenComponentTagOpen  = tokens.TokenComponentTagOpen
+	TokenComponentTagClose = tokens.TokenComponentTagClose
+	TokenComponentSelfClose = tokens.TokenComponentSelfClose
+	TokenVerbatim          = tokens.TokenVerbatim
 )
-
-type Token struct {
-	Type      TokenType
-	Value     string
-	Tag       string
-	Attr      string
-	Pos       int
-	SelfClose bool
-}
-
-func (t TokenType) String() string {
-	switch t {
-	case TokenError:
-		return "ERROR"
-	case TokenEOF:
-		return "EOF"
-	case TokenTagOpen:
-		return "TagOpen"
-	case TokenTagClose:
-		return "TagClose"
-	case TokenText:
-		return "Text"
-	case TokenExpression:
-		return "Expression"
-	case TokenIfOpen:
-		return "IfOpen"
-	case TokenIfClose:
-		return "IfClose"
-	case TokenElse:
-		return "Else"
-	case TokenElseIf:
-		return "ElseIf"
-	case TokenEachOpen:
-		return "EachOpen"
-	case TokenEachClose:
-		return "EachClose"
-	case TokenEachElse:
-		return "EachElse"
-	case TokenVerbatim:
-		return "Verbatim"
-	}
-	return "UNKNOWN"
-}

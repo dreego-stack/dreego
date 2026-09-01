@@ -1,4 +1,4 @@
-package transpiler
+package lexer
 
 // tagEnd returns the index of the first '>' that is not inside a quoted
 // attribute value, or -1 if the tag is unclosed.

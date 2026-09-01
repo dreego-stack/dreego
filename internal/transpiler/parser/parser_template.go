@@ -1,22 +1,25 @@
-package transpiler
+package parser
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
-func (p *Parser) parseIfNodes(openPos int) ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseIfNodes(openPos int) ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed {#if} at position %d", openPos)
 		}
-		if tok.Type == TokenIfClose || tok.Type == TokenElse || tok.Type == TokenElseIf {
+		if tok.Type == tokens.TokenIfClose || tok.Type == tokens.TokenElse || tok.Type == tokens.TokenElseIf {
 			break
 		}
-		if tok.Type == TokenTagClose {
+		if tok.Type == tokens.TokenTagClose {
 			node, err := p.parseTemplateNode("if")
 			if err != nil {
 				return nil, err
@@ -34,21 +37,21 @@ func (p *Parser) parseIfNodes(openPos int) ([]TemplateNode, error) {
 	return nodes, nil
 }
 
-func (p *Parser) parseElseNodes() ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseElseNodes() ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed {#else}")
 		}
-		if tok.Type == TokenIfClose {
+		if tok.Type == tokens.TokenIfClose {
 			break
 		}
-		if tok.Type == TokenElse || tok.Type == TokenElseIf {
+		if tok.Type == tokens.TokenElse || tok.Type == tokens.TokenElseIf {
 			return nil, fmt.Errorf("unexpected {#else} or {#else if} inside {#else}")
 		}
-		if tok.Type == TokenTagClose {
+		if tok.Type == tokens.TokenTagClose {
 			node, err := p.parseTemplateNode("if")
 			if err != nil {
 				return nil, err
@@ -66,18 +69,18 @@ func (p *Parser) parseElseNodes() ([]TemplateNode, error) {
 	return nodes, nil
 }
 
-func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseEachNodes() ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed {#each}")
 		}
-		if tok.Type == TokenEachClose || tok.Type == TokenEachElse {
+		if tok.Type == tokens.TokenEachClose || tok.Type == tokens.TokenEachElse {
 			break
 		}
-		if tok.Type == TokenTagClose {
+		if tok.Type == tokens.TokenTagClose {
 			node, err := p.parseTemplateNode("each")
 			if err != nil {
 				return nil, err
@@ -95,15 +98,15 @@ func (p *Parser) parseEachNodes() ([]TemplateNode, error) {
 	return nodes, nil
 }
 
-func (p *Parser) parseEachElseNodes() ([]TemplateNode, error) {
-	var nodes []TemplateNode
+func (p *Parser) parseEachElseNodes() ([]ir.TemplateNode, error) {
+	var nodes []ir.TemplateNode
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed {#each else}")
 		}
-		if tok.Type == TokenEachClose {
+		if tok.Type == tokens.TokenEachClose {
 			break
 		}
 

@@ -1,15 +1,17 @@
-package transpiler
+package parser
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/lexer"
 )
 
 // parseExpectError lexes src, parses it, and asserts the returned error
 // contains the given substring.
 func parseExpectError(t *testing.T, src, want string) {
 	t.Helper()
-	tokens, err := Lex(src)
+	tokens, err := lexer.Lex(src)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -32,6 +34,12 @@ func TestParseDuplicateHead(t *testing.T) {
 	parseExpectError(t,
 		"<head><title>a</title></head><head><title>b</title></head>",
 		"duplicate <head> section")
+}
+
+func TestParseDuplicateMethodTemplateReportsMethod(t *testing.T) {
+	parseExpectError(t,
+		`<body method="post">one</body><body method="POST">two</body>`,
+		"duplicate <body> section for method POST")
 }
 
 func TestParseUnknownSection(t *testing.T) {
@@ -72,7 +80,7 @@ func TestParseRejectsDoctypeBeforeSection(t *testing.T) {
 
 // Control: a <server> section at the file start still parses as Go code.
 func TestParseServerSectionFirstStillWorks(t *testing.T) {
-	tokens, err := Lex("<server>msg := \"hi\"</server>\n<body><p>{{ msg }}</p></body>")
+	tokens, err := lexer.Lex("<server>msg := \"hi\"</server>\n<body><p>{{ msg }}</p></body>")
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -98,7 +106,7 @@ func TestParseServerSectionFirstStillWorks(t *testing.T) {
 
 // "TO: <HASH>" in a quoted Go string must survive the parse.
 func TestParseServerSectionKeepsLtInQuotedString(t *testing.T) {
-	tokens, err := Lex(`<server>msg := "TO: <HASH>"</server>`)
+	tokens, err := lexer.Lex(`<server>msg := "TO: <HASH>"</server>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -120,7 +128,7 @@ func TestParseServerSectionKeepsLtInQuotedString(t *testing.T) {
 // silently dropped, corrupting the reconstructed tag).
 func TestParseServerSectionKeepsLtInBacktickString(t *testing.T) {
 	src := "<server>svg := `<svg viewBox=\"0 0 24 24\"><path d=\"M12 2\"/></svg>`</server>"
-	tokens, err := Lex(src)
+	tokens, err := lexer.Lex(src)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -180,7 +188,7 @@ func TestParseGoMethodVariants(t *testing.T) {
 }
 
 func TestParseServerSectionMethodAttr(t *testing.T) {
-	tokens, err := Lex(`<server method="post">x := 1</server><body><p>{{ x }}</p></body>`)
+	tokens, err := lexer.Lex(`<server method="post">x := 1</server><body><p>{{ x }}</p></body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}
@@ -200,7 +208,7 @@ func TestParseServerSectionMethodAttr(t *testing.T) {
 }
 
 func TestParseServerSectionDefaultMethod(t *testing.T) {
-	tokens, err := Lex(`<server>x := 1</server><body><p>{{ x }}</p></body>`)
+	tokens, err := lexer.Lex(`<server>x := 1</server><body><p>{{ x }}</p></body>`)
 	if err != nil {
 		t.Fatalf("lex: %v", err)
 	}

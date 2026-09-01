@@ -1,8 +1,12 @@
-package transpiler
+package lexer
 
-import "strings"
+import (
+	"strings"
 
-func ParseHeader(input string) (comp *ComponentDef, imports []Import, body string) {
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+)
+
+func ParseHeader(input string) (comp *ir.ComponentDef, imports []ir.Import, body string) {
 	lines := strings.Split(input, "\n")
 	i := 0
 
@@ -36,21 +40,21 @@ func ParseHeader(input string) (comp *ComponentDef, imports []Import, body strin
 	return
 }
 
-func parseComponentHeader(line string) *ComponentDef {
+func parseComponentHeader(line string) *ir.ComponentDef {
 	line = strings.TrimPrefix(line, "Component ")
 	openParen := strings.IndexByte(line, '(')
 	if openParen < 0 {
-		return &ComponentDef{Name: strings.TrimSpace(line)}
+		return &ir.ComponentDef{Name: strings.TrimSpace(line)}
 	}
 	name := strings.TrimSpace(line[:openParen])
 	rest := line[openParen:]
 
 	closeParen := strings.IndexByte(rest, ')')
 	if closeParen < 0 {
-		return &ComponentDef{Name: name}
+		return &ir.ComponentDef{Name: name}
 	}
 
-	comp := &ComponentDef{Name: name}
+	comp := &ir.ComponentDef{Name: name}
 	params := strings.TrimSpace(rest[1:closeParen])
 	comp.Props = parseProps(params)
 
@@ -70,8 +74,8 @@ func parseComponentHeader(line string) *ComponentDef {
 	return comp
 }
 
-func parseProps(s string) []Prop {
-	var props []Prop
+func parseProps(s string) []ir.Prop {
+	var props []ir.Prop
 	for _, part := range strings.Split(s, ",") {
 		part = strings.TrimSpace(part)
 		if part == "" {
@@ -81,7 +85,7 @@ func parseProps(s string) []Prop {
 		if len(fields) == 0 {
 			continue
 		}
-		p := Prop{Name: fields[0]}
+		p := ir.Prop{Name: fields[0]}
 		if len(fields) >= 2 {
 			p.Type = fields[1]
 		}
@@ -96,7 +100,7 @@ func parseProps(s string) []Prop {
 	return props
 }
 
-func parseImportLine(line string) *Import {
+func parseImportLine(line string) *ir.Import {
 	line = strings.TrimPrefix(line, "import ")
 	fields := strings.Fields(line)
 	if len(fields) == 0 {
@@ -107,9 +111,9 @@ func parseImportLine(line string) *Import {
 		if path == fields[0] {
 			return nil
 		}
-		return &Import{Path: path}
+		return &ir.Import{Path: path}
 	}
-	imp := &Import{Path: strings.Trim(fields[len(fields)-1], "\"")}
+	imp := &ir.Import{Path: strings.Trim(fields[len(fields)-1], "\"")}
 	imp.Alias = fields[0]
 	return imp
 }

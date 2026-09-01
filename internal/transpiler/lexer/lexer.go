@@ -1,12 +1,14 @@
-package transpiler
+package lexer
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
-func Lex(input string) ([]Token, error) {
-	var tokens []Token
+func Lex(input string) ([]tokens.Token, error) {
+	var toks []tokens.Token
 	pos := 0
 	sectionStack := []string{}
 	sectionTags := map[string]bool{
@@ -25,14 +27,14 @@ func Lex(input string) ([]Token, error) {
 			closer := "</" + curSection + ">"
 			closePos := strings.Index(input[pos:], closer)
 			if closePos < 0 {
-				tokens = append(tokens, Token{Type: TokenText, Value: input[pos:], Pos: pos})
+				toks = append(toks, tokens.Token{Type: tokens.TokenText, Value: input[pos:], Pos: pos})
 				pos = len(input)
 				break
 			}
 			if closePos > 0 {
-				tokens = append(tokens, Token{Type: TokenText, Value: input[pos : pos+closePos], Pos: pos})
+				toks = append(toks, tokens.Token{Type: tokens.TokenText, Value: input[pos : pos+closePos], Pos: pos})
 			}
-			tokens = append(tokens, Token{Type: TokenTagClose, Tag: curSection, Pos: pos + closePos})
+			toks = append(toks, tokens.Token{Type: tokens.TokenTagClose, Tag: curSection, Pos: pos + closePos})
 			pos += closePos + len(closer)
 			sectionStack = sectionStack[:len(sectionStack)-1]
 			continue
@@ -59,8 +61,8 @@ func Lex(input string) ([]Token, error) {
 		}
 
 		if nextPos > pos {
-			tokens = append(tokens, Token{
-				Type:  TokenText,
+			toks = append(toks, tokens.Token{
+				Type:  tokens.TokenText,
 				Value: input[pos:nextPos],
 				Pos:   pos,
 			})
@@ -74,12 +76,12 @@ func Lex(input string) ([]Token, error) {
 
 		if nextCh == '<' {
 			tok := scanTag(input, &pos)
-			tokens = append(tokens, tok)
+			toks = append(toks, tok)
 
-			if tok.Type == TokenTagOpen && sectionTags[tok.Tag] {
+			if tok.Type == tokens.TokenTagOpen && sectionTags[tok.Tag] {
 				sectionStack = append(sectionStack, tok.Tag)
 			}
-			if tok.Type == TokenTagClose && sectionTags[tok.Tag] {
+			if tok.Type == tokens.TokenTagClose && sectionTags[tok.Tag] {
 				if len(sectionStack) == 0 {
 					return nil, fmt.Errorf("unexpected closing tag </%s> at position %d", tok.Tag, tok.Pos)
 				}
@@ -94,7 +96,7 @@ func Lex(input string) ([]Token, error) {
 			if err != nil {
 				return nil, err
 			}
-			tokens = append(tokens, tok)
+			toks = append(toks, tok)
 		}
 	}
 
@@ -102,6 +104,6 @@ func Lex(input string) ([]Token, error) {
 		return nil, fmt.Errorf("unclosed tag <%s>", sectionStack[len(sectionStack)-1])
 	}
 
-	tokens = append(tokens, Token{Type: TokenEOF, Pos: pos})
-	return tokens, nil
+	toks = append(toks, tokens.Token{Type: tokens.TokenEOF, Pos: pos})
+	return toks, nil
 }

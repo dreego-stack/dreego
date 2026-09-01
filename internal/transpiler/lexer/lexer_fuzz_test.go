@@ -1,8 +1,10 @@
-package transpiler
+package lexer
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
 func FuzzLexer(f *testing.F) {
@@ -32,37 +34,37 @@ func FuzzLexer(f *testing.F) {
 			t.Skip("input too large")
 		}
 
-		tokens, err := Lex(input)
+		toks, err := Lex(input)
 
 		if err == nil {
-			lexProperties(t, input, tokens)
+			lexProperties(t, input, toks)
 		}
 
 		again, err2 := Lex(input)
 		if err != nil || err2 != nil {
 			return
 		}
-		if !reflect.DeepEqual(tokens, again) {
+		if !reflect.DeepEqual(toks, again) {
 			t.Fatalf("non-deterministic lex output for %q", input)
 		}
 	})
 }
 
-func lexProperties(t *testing.T, input string, tokens []Token) {
+func lexProperties(t *testing.T, input string, toks []tokens.Token) {
 	t.Helper()
 
 	maxTokens := 2*len(input) + 2
-	if len(tokens) > maxTokens {
+	if len(toks) > maxTokens {
 		t.Fatalf("token count %d exceeds bound %d for input of length %d",
-			len(tokens), maxTokens, len(input))
+			len(toks), maxTokens, len(input))
 	}
 
-	if n := len(tokens); n == 0 || tokens[n-1].Type != TokenEOF {
+	if n := len(toks); n == 0 || toks[n-1].Type != tokens.TokenEOF {
 		t.Fatalf("expected EOF as last token, got %d tokens", n)
 	}
 
 	last := 0
-	for _, tok := range tokens {
+	for _, tok := range toks {
 		if tok.Pos < last {
 			t.Fatalf("token positions not monotonic: %d after %d", tok.Pos, last)
 		}
@@ -71,7 +73,7 @@ func lexProperties(t *testing.T, input string, tokens []Token) {
 			t.Fatalf("token position %d out of bounds for input of length %d",
 				tok.Pos, len(input))
 		}
-		if tok.Type == TokenText {
+		if tok.Type == tokens.TokenText {
 			if tok.Pos+len(tok.Value) > len(input) {
 				t.Fatalf("text token %q at %d overruns input of length %d",
 					tok.Value, tok.Pos, len(input))

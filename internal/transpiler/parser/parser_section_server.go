@@ -1,24 +1,27 @@
-package transpiler
+package parser
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
-func (p *Parser) parseServerSection() (*ServerSection, error) {
+func (p *Parser) parseServerSection() (*ir.ServerSection, error) {
 	p.advance()
 	var content strings.Builder
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return nil, fmt.Errorf("unclosed <server> at position %d", tok.Pos)
 		}
-		if tok.Type == TokenTagClose && tok.Tag == "server" {
+		if tok.Type == tokens.TokenTagClose && tok.Tag == "server" {
 			p.advance()
-			return &ServerSection{Code: strings.TrimSpace(content.String())}, nil
+			return &ir.ServerSection{Code: strings.TrimSpace(content.String())}, nil
 		}
-		if tok.Type == TokenTagOpen {
+		if tok.Type == tokens.TokenTagOpen {
 			content.WriteString("<" + tok.Tag)
 			if tok.Attr != "" {
 				content.WriteString(" " + tok.Attr)
@@ -28,9 +31,9 @@ func (p *Parser) parseServerSection() (*ServerSection, error) {
 			} else {
 				content.WriteString(">")
 			}
-		} else if tok.Type == TokenTagClose {
+		} else if tok.Type == tokens.TokenTagClose {
 			content.WriteString("</" + tok.Tag + ">")
-		} else if tok.Type == TokenText {
+		} else if tok.Type == tokens.TokenText {
 			content.WriteString(tok.Value)
 		}
 		p.advance()
@@ -44,10 +47,10 @@ func (p *Parser) parseRawSection(tag string) (string, error) {
 
 	for {
 		tok := p.current()
-		if tok.Type == TokenEOF {
+		if tok.Type == tokens.TokenEOF {
 			return "", fmt.Errorf("unclosed <%s> at position %d", tag, tok.Pos)
 		}
-		if tok.Type == TokenTagOpen {
+		if tok.Type == tokens.TokenTagOpen {
 			if tok.Tag == tag && !tok.SelfClose {
 				depth++
 			}
@@ -60,7 +63,7 @@ func (p *Parser) parseRawSection(tag string) (string, error) {
 			} else {
 				content.WriteString(">")
 			}
-		} else if tok.Type == TokenTagClose {
+		} else if tok.Type == tokens.TokenTagClose {
 			if tok.Tag == tag {
 				depth--
 				if depth == 0 {
@@ -69,9 +72,9 @@ func (p *Parser) parseRawSection(tag string) (string, error) {
 				}
 			}
 			content.WriteString("</" + tok.Tag + ">")
-		} else if tok.Type == TokenText {
+		} else if tok.Type == tokens.TokenText {
 			content.WriteString(tok.Value)
-		} else if tok.Type == TokenExpression {
+		} else if tok.Type == tokens.TokenExpression {
 			content.WriteString("{{" + tok.Value + "}}")
 		}
 		p.advance()

@@ -1,8 +1,12 @@
-package transpiler
+package lexer
 
-import "strings"
+import (
+	"strings"
 
-func scanComponentTag(input string, pos *int) Token {
+	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
+)
+
+func scanComponentTag(input string, pos *int) tokens.Token {
 	start := *pos
 	remaining := input[start:]
 
@@ -16,7 +20,7 @@ func scanComponentTag(input string, pos *int) Token {
 	end := tagEnd(remaining)
 	if end < 0 {
 		*pos += len(input) - start
-		return Token{Type: TokenText, Value: input[start:], Pos: start}
+		return tokens.Token{Type: tokens.TokenText, Value: input[start:], Pos: start}
 	}
 
 	body := strings.TrimSpace(remaining[:end])
@@ -37,10 +41,10 @@ func scanComponentTag(input string, pos *int) Token {
 	*pos = start + len(prefix) + end + 1
 
 	if prefix == "</@" {
-		return Token{Type: TokenComponentTagClose, Tag: tag, Pos: start}
+		return tokens.Token{Type: tokens.TokenComponentTagClose, Tag: tag, Pos: start}
 	}
 	if selfClose {
-		return Token{Type: TokenComponentSelfClose, Tag: tag, Attr: attrs, Pos: start}
+		return tokens.Token{Type: tokens.TokenComponentSelfClose, Tag: tag, Attr: attrs, Pos: start}
 	}
-	return Token{Type: TokenComponentTagOpen, Tag: tag, Attr: attrs, Pos: start}
+	return tokens.Token{Type: tokens.TokenComponentTagOpen, Tag: tag, Attr: attrs, Pos: start}
 }
