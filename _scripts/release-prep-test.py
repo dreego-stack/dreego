@@ -199,6 +199,10 @@ def test_coverage_gate_contract():
         env["DREEGO_COVERAGE_MIN"] = "40"
         ok = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
         check("coverage: threshold passes", ok.returncode == 0, ok.stderr)
+        fake_go.write_text("#!/bin/sh\nprintf '%s\\n' 'ok  example 0.001s coverage: 100.0% of statements'\n")
+        full = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
+        check("coverage: 100 percent compares numerically", full.returncode == 0, full.stderr)
+        fake_go.write_text("#!/bin/sh\nprintf '%s\\n' 'ok  example 0.001s coverage: 42.0% of statements'\n")
         env["DREEGO_COVERAGE_MIN"] = "50"
         low = subprocess.run(["sh", str(script)], cwd=root, env=env, capture_output=True, text=True)
         check("coverage: below threshold exits non-zero", low.returncode != 0, low.stderr)

@@ -1,5 +1,5 @@
 
-func renderIndex(c *dreego.SSRContext) (string, error) {
+func renderIndex(c dreego.RenderContext) (string, error) {
 	var b strings.Builder
 
 b.WriteString(`<title>Home</title>`)
@@ -21,6 +21,14 @@ b.WriteString(`<title>Home</title>`)
 	b.WriteString("</div>")
 
 	return b.String(), nil
+}
+
+func PageIndex() dreego.Component {
+	return dreego.ComponentFunc(func(c dreego.RenderContext) (dreego.Result, error) {
+		html, err := renderIndex(c)
+		if err != nil { return dreego.Result{}, err }
+		return dreego.Result{HTML: []byte(html)}, nil
+	})
 }
 
 func HandleIndex(w http.ResponseWriter, r *http.Request) {

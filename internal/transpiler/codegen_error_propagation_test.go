@@ -24,8 +24,28 @@ func TestGenSelfCloseComponentPropagatesError(t *testing.T) {
 	if strings.Contains(out, ", _ :=") || strings.Contains(out, "h, _ :=") {
 		t.Errorf("self-closing component call must not discard the Render error, got:\n%s", out)
 	}
-	if !strings.Contains(out, "panic(err)") {
+	if !strings.Contains(out, `return "", err`) {
 		t.Errorf("self-closing component call must propagate the Render error, got:\n%s", out)
+	}
+	if strings.Contains(out, "panic(err)") {
+		t.Errorf("self-closing component call must return rather than panic, got:\n%s", out)
+	}
+}
+
+func TestGenMultipleSelfCloseComponentsUseIndependentScopes(t *testing.T) {
+	gen := NewGenerator()
+	gen.RegisterDef("Card", &ComponentDef{Name: "Card"})
+	first, err := genTemplateNode(gen, TemplateNode{Type: NodeComponentCall, Tag: "Card", SelfClose: true}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := genTemplateNode(gen, TemplateNode{Type: NodeComponentCall, Tag: "Card", SelfClose: true}, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := first + second
+	if strings.Count(out, "\t{\n") != 2 {
+		t.Fatalf("each self-closing call needs an independent scope, got:\n%s", out)
 	}
 }
 

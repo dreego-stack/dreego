@@ -27,24 +27,24 @@ func benchRenderPage(c *SSRContext) (string, error) {
 		b.WriteString(html.EscapeString(fmt.Sprintf("%v", item)))
 		b.WriteString(`</p>`)
 	}
-	cardHTML, err := benchCard("Hello").Render(c)
+	cardResult, err := benchCard("Hello").Render(c)
 	if err != nil {
 		return "", err
 	}
-	b.WriteString(cardHTML)
+	b.Write(cardResult.HTML)
 	b.WriteString(`</div>`)
 	return b.String(), nil
 }
 
 func benchCard(title string) Component {
-	return ComponentFunc(func(ctx *SSRContext) (string, error) {
+	return ComponentFunc(func(ctx RenderContext) (Result, error) {
 		var b strings.Builder
 		b.WriteString(`<div data-scope="def">`)
 		b.WriteString(`<h2>`)
 		b.WriteString(html.EscapeString(fmt.Sprintf("%v", title)))
 		b.WriteString(`</h2>`)
 		b.WriteString(`</div>`)
-		return b.String(), nil
+		return Result{HTML: []byte(b.String())}, nil
 	})
 }
 

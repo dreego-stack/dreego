@@ -60,6 +60,15 @@ func Build(t *testing.T, files map[string]string) map[string]string {
 	return generated
 }
 
+func BuildDir(t *testing.T, files map[string]string) string {
+	t.Helper()
+	dir, err := build(t, files, false)
+	if err != nil {
+		t.Fatalf("BuildDir: %v", err)
+	}
+	return dir
+}
+
 func build(t *testing.T, files map[string]string, expectFail bool) (string, error) {
 	t.Helper()
 	dir := t.TempDir()

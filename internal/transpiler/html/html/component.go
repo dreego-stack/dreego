@@ -29,7 +29,7 @@ func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (stri
 	} else {
 		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
 	}
-	buf.WriteString("\treturn dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {\n")
+	buf.WriteString("\treturn dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {\n")
 	WritePropDefaultFallbacks(&buf, comp)
 	buf.WriteString("\t\tvar b strings.Builder\n\n")
 
@@ -62,9 +62,9 @@ func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (stri
 		buf.WriteString("\t\tb.WriteString(\"</style>\")\n")
 	}
 
-	buf.WriteString("\n\t\treturn b.String(), nil\n")
+	buf.WriteString("\n\t\treturn dreego.Result{HTML: []byte(b.String())}, nil\n")
 	buf.WriteString("\t})\n")
-	buf.WriteString("}\n\n")
+	buf.WriteString("}\n")
 
 	return buf.String(), nil
 }

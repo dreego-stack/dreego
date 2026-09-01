@@ -47,7 +47,7 @@ if err := app.SetCSP("default-src 'self'"); err != nil {
 }
 ```
 
-Call `app.SetCSP` before `app.Build`, `app.Handler`, `app.ServeHTTP`, or `app.Listen`. An empty string falls back to `default-src 'self'`.
+Call `app.SetCSP` before `app.Build`, `app.Handler`, `app.ServeHTTP`, or `ssr.Listen`. An empty string falls back to `default-src 'self'`.
 
 Always on. Applied after Recovery, before Compression.
 

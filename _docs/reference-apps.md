@@ -19,7 +19,7 @@ Teaches the smallest possible Dreego app:
 - `www/routes/about/get.dreego` — nested directory route
 - `www/routes/users/[id]/get.dreego` — dynamic segment with `c.Param("id")`
 - `www/routes/404.dreego` — custom not-found page
-- `main.go` — `dreego.New()` + `www.Register(app)` + `app.Listen(addr)`
+- `main.go` — `dreego.New()` + `www.Register(app)` + `ssr.Listen(app, addr)`
 
 Run it:
 

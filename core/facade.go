@@ -19,14 +19,15 @@ var ErrCookiePathOverride = session.ErrCookiePathOverride
 type Context = context.Context
 
 type SSRContext = context.SSRContext
+type RenderContext = context.RenderContext
 
 type Component interface {
-	Render(ctx *SSRContext) (string, error)
+	Render(ctx RenderContext) (Result, error)
 }
 
-type ComponentFunc func(ctx *SSRContext) (string, error)
+type ComponentFunc func(ctx RenderContext) (Result, error)
 
-func (f ComponentFunc) Render(ctx *SSRContext) (string, error) {
+func (f ComponentFunc) Render(ctx RenderContext) (Result, error) {
 	return f(ctx)
 }
 

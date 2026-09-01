@@ -161,7 +161,7 @@ func GenTemplateNodeToState(gen *ir.Generator, n ir.TemplateNode, depth int, bui
 		}
 		callName := gen.Qualify(funcName)
 		if n.SelfClose {
-			return fmt.Sprintf("%s%s.WriteString(func() string { h, err := %s(%s).Render(c); if err != nil { panic(err) }; return h }())\n", indent, builder, callName, args), nil
+			return fmt.Sprintf("%s{\n%s\tresult, err := %s(%s).Render(c)\n%s\tif err != nil { return \"\", err }\n%s\t%s.Write(result.HTML)\n%s}\n", indent, indent, callName, args, indent, indent, builder, indent), nil
 		}
 		slotBuilder := fmt.Sprintf("slotBuilder%d", depth)
 		previousSlot := fmt.Sprintf("previousSlot%d", depth)
@@ -210,13 +210,13 @@ func GenTemplateNodeToState(gen *ir.Generator, n ir.TemplateNode, depth int, bui
 			}
 		}
 		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", %s.String())\n", indent, slotBuilder))
-		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, callName, args))
+		buf.WriteString(fmt.Sprintf("%s\tresult, err := %s(%s).Render(c)\n", indent, callName, args))
 		buf.WriteString(RestoreContextValue(indent, "slot", previousSlot))
 		for i, key := range slotKeys {
 			buf.WriteString(RestoreContextValue(indent, key, previousNamedSlots[i]))
 		}
 		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
-		buf.WriteString(fmt.Sprintf("%s\t%s.WriteString(html)\n", indent, builder))
+		buf.WriteString(fmt.Sprintf("%s\t%s.Write(result.HTML)\n", indent, builder))
 		buf.WriteString(fmt.Sprintf("%s}\n", indent))
 		return buf.String(), nil
 	}

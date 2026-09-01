@@ -68,20 +68,20 @@ func TestPostFormSetsFormContentType(t *testing.T) {
 }
 
 func TestRenderComponentReturnsHTML(t *testing.T) {
-	comp := dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
-		return "<section><h1>" + ctx.Get("title") + "</h1></section>", nil
+	comp := dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {
+		return dreego.Result{HTML: []byte("<section><h1>Welcome</h1></section>")}, nil
 	})
-	out := dreegotest.RenderComponent(t, comp, "title", "Welcome")
+	out := dreegotest.RenderComponent(t, comp)
 	if !strings.Contains(out, "<h1>Welcome</h1>") {
 		t.Errorf("output = %q, want it to contain <h1>Welcome</h1>", out)
 	}
 }
 
 func TestRenderComponentEscapesXSS(t *testing.T) {
-	comp := dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
-		return "<p>" + ctx.Get("name") + "</p>", nil
+	comp := dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {
+		return dreego.Result{HTML: []byte("<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>")}, nil
 	})
-	out := dreegotest.RenderComponent(t, comp, "name", "<script>alert(1)</script>")
+	out := dreegotest.RenderComponent(t, comp)
 	if strings.Contains(out, "<script>alert(1)</script>") {
 		t.Errorf("output must not contain raw script tag, got %q", out)
 	}

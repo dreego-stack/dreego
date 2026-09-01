@@ -38,8 +38,8 @@ Two constraints apply even before v0.1:
 At v0.1, the following contracts form the supported SSR baseline. Dreego
 commits to changing them only through the documented pre-v1 process below. The
 v0.1 label does not freeze the current `/core` import path until v1: the planned
-v0.2 target-neutral root-package migration is an explicit pre-v1 breaking
-change with its own migration guide.
+v0.2 target-neutral render and explicit SSR-host migration is an explicit
+pre-v1 breaking change with its own migration guide.
 
 - `App` and its configuration, registration, and lifecycle methods
   (`New`, `Register`, `RegisterRedirect`, `RegisterRewrite`, `RegisterStatic`,

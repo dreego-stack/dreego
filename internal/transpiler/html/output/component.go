@@ -152,7 +152,7 @@ func (g *CompGen) genComponentCall(n ir.TemplateNode) (string, error) {
 	}
 	callName := g.Gen.Qualify(funcName)
 	if n.SelfClose {
-		return fmt.Sprintf("{ html, err := %s(%s).Render(ctx); if err != nil { return \"\", err }; %s.WriteString(html) }", callName, args, g.Builder), nil
+		return fmt.Sprintf("{ result, err := %s(%s).Render(ctx); if err != nil { return dreego.Result{}, err }; %s.Write(result.HTML) }", callName, args, g.Builder), nil
 	}
 
 	id := n.Pos
@@ -201,13 +201,13 @@ func (g *CompGen) genComponentCall(n ir.TemplateNode) (string, error) {
 		buf.WriteString("\t" + code + "\n")
 	}
 	buf.WriteString(fmt.Sprintf("\tctx.Set(\"slot\", %s.String())\n", slotBuilder))
-	buf.WriteString(fmt.Sprintf("\thtml, err := %s(%s).Render(ctx)\n", callName, args))
+	buf.WriteString(fmt.Sprintf("\tresult, err := %s(%s).Render(ctx)\n", callName, args))
 	buf.WriteString(RestoreComponentContextValue("slot", previousSlot))
 	for i, key := range slotKeys {
 		buf.WriteString(RestoreComponentContextValue(key, previousNamedSlots[i]))
 	}
-	buf.WriteString("\tif err != nil { return \"\", err }\n")
-	buf.WriteString(fmt.Sprintf("\t%s.WriteString(html)\n", g.Builder))
+	buf.WriteString("\tif err != nil { return dreego.Result{}, err }\n")
+	buf.WriteString(fmt.Sprintf("\t%s.Write(result.HTML)\n", g.Builder))
 	buf.WriteString("}")
 	return buf.String(), nil
 }

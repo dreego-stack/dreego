@@ -10,7 +10,7 @@ import (
 
 func GenerateLayout(gen *Generator, file *File, funcName string) (string, error) {
 	var buf strings.Builder
-	buf.WriteString(fmt.Sprintf("func %s(c *dreego.SSRContext, content, head string) (string, error) {\n", funcName))
+	buf.WriteString(fmt.Sprintf("func %s(c dreego.RenderContext, content, head string) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	layoutHead := ""

@@ -6,6 +6,7 @@ import (
 
 	"forms/www"
 	dreego "github.com/dreego-stack/dreego/core"
+	"github.com/dreego-stack/dreego/core/ssr"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 	if port := os.Getenv("PORT"); port != "" {
 		addr = ":" + port
 	}
-	if err := app.Listen(addr); err != nil {
+	if err := ssr.Listen(app, addr); err != nil {
 		log.Fatal(err)
 	}
 }

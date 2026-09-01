@@ -263,7 +263,7 @@ import Card "components/Card.dreego"
 
 ```go
 func Card(title string) dreego.Component {
-    return dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
+    return dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {
         var b strings.Builder
         b.WriteString("<div data-scope=\"abc123\">")
         b.WriteString(`<article class="card">`)
@@ -273,7 +273,7 @@ func Card(title string) dreego.Component {
         b.WriteString(ctx.Get("slot"))
         b.WriteString(`</article>`)
         b.WriteString("</div>")
-        return b.String(), nil
+        return dreego.Result{HTML: []byte(b.String())}, nil
     })
 }
 ```

@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -132,19 +131,5 @@ func TestCSRFStoreFailureReachesErrorPath(t *testing.T) {
 	}
 	if strings.Contains(w.Body.String(), "store read failure") {
 		t.Errorf("internal cause disclosed in body: %q", w.Body.String())
-	}
-}
-
-func TestListenErrorPropagates(t *testing.T) {
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer ln.Close()
-
-	app := New()
-	err = app.Listen(ln.Addr().String())
-	if err == nil {
-		t.Fatal("expected Listen to return an error when the port is occupied")
 	}
 }

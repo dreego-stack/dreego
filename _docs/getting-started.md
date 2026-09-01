@@ -84,6 +84,7 @@ import (
 	"log"
 
 	dreego "github.com/dreego-stack/dreego/core"
+	"github.com/dreego-stack/dreego/core/ssr"
 	"myapp/www"
 )
 
@@ -92,16 +93,16 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	if err := app.Listen(":8080"); err != nil {
+	if err := ssr.Listen(app, ":8080"); err != nil {
 		log.Fatal(err)
 	}
 }
 ```
 
-`dreego.New()` returns an `*App` that owns all runtime state (router,
-middleware, session store, server config). `www.Register(app)` wires the
-generated routes and components into the `App`. `app.Listen(":8080")` starts
-the HTTP server with the configured timeouts.
+`dreego.New()` returns an `*App` that owns route declarations, middleware, and
+session policy. `www.Register(app)` wires generated routes and components into
+the `App`. `ssr.Listen(app, ":8080")` creates the explicit HTTP host with secure
+timeout defaults.
 
 ## Adding a Layout
 

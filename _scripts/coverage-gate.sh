@@ -15,7 +15,7 @@ if printf '%s\n' "$output" | awk -v minimum="$threshold" '
         value = $0
         sub(/^.*coverage: /, "", value)
         sub(/%.*$/, "", value)
-        if (value < minimum) {
+        if ((value + 0) < (minimum + 0)) {
             failed = 1
             print "error: coverage " value "% is below " minimum "%" > "/dev/stderr"
         }

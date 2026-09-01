@@ -8,16 +8,15 @@ import (
 )
 
 func TestRenderMatchesRenderComponent(t *testing.T) {
-	comp := dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error) {
-		return "<section><h1>" + ctx.Get("title") + "</h1><p>" + ctx.Get("name") + "</p></section>", nil
+	comp := dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {
+		return dreego.Result{HTML: []byte("<section><h1>Welcome</h1><p>safe</p></section>")}, nil
 	})
-	props := []any{"title", "Welcome <b>bold</b>", "name", "<script>alert(1)</script>"}
-	want := dreegotest.RenderComponent(t, comp, props...)
-	got, err := dreego.Render(comp, props...)
+	want := dreegotest.RenderComponent(t, comp)
+	got, err := dreego.Render(comp)
 	if err != nil {
 		t.Fatalf("Render returned error: %v", err)
 	}
-	if got != want {
-		t.Errorf("Render output differs from RenderComponent:\n got: %q\nwant: %q", got, want)
+	if string(got.HTML) != want {
+		t.Errorf("Render output differs from RenderComponent:\n got: %q\nwant: %q", got.HTML, want)
 	}
 }

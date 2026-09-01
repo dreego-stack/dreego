@@ -28,7 +28,7 @@ Generated code registers explicitly with its owning App:
 ```go
 app := dreego.New()
 gen.Register(app)
-app.Listen(":8080")
+ssr.Listen(app, ":8080")
 ```
 
 Generated packages do not register routes through `init`, blank imports, or

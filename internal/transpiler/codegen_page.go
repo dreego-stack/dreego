@@ -95,7 +95,11 @@ func generateMethodHandler(gen *Generator, file *File, layout *ir.LayoutEntry, p
 		buf.WriteString(pkgCode)
 	}
 
-	buf.WriteString(fmt.Sprintf("\nfunc %s(c *dreego.SSRContext) (string, error) {\n", renderFunc))
+	contextType := "*dreego.SSRContext"
+	if firstMethod == "GET" && inlineCode == "" && !hasTypedBlocks && !hasFormActions {
+		contextType = "dreego.RenderContext"
+	}
+	buf.WriteString(fmt.Sprintf("\nfunc %s(c %s) (string, error) {\n", renderFunc, contextType))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if inlineCode != "" {
@@ -124,6 +128,16 @@ func generateMethodHandler(gen *Generator, file *File, layout *ir.LayoutEntry, p
 	}
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
+	if contextType == "dreego.RenderContext" {
+		pageFunc := "Page" + pascalBase
+		buf.WriteString(fmt.Sprintf("func %s() dreego.Component {\n", pageFunc))
+		buf.WriteString("\treturn dreego.ComponentFunc(func(c dreego.RenderContext) (dreego.Result, error) {\n")
+		buf.WriteString(fmt.Sprintf("\t\thtml, err := %s(c)\n", renderFunc))
+		buf.WriteString("\t\tif err != nil { return dreego.Result{}, err }\n")
+		buf.WriteString("\t\treturn dreego.Result{HTML: []byte(html)}, nil\n")
+		buf.WriteString("\t})\n")
+		buf.WriteString("}\n\n")
+	}
 
 	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", getHandler))
 	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")

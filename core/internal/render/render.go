@@ -6,22 +6,15 @@ import (
 	"github.com/dreego-stack/dreego/core/internal/context"
 )
 
-type Asset struct {
-	Name    string
-	Content []byte
-}
-
 type Result struct {
-	HTML   []byte
-	Head   []byte
-	Assets []Asset
+	HTML []byte
 }
 
-func Component(fn func(c *context.SSRContext) (string, error)) (Result, error) {
-	ctx := context.NewSSR(nil, nil)
-	out, err := fn(ctx)
+func Component(fn func(c context.RenderContext) (Result, error)) (Result, error) {
+	ctx := context.NewRender(nil)
+	result, err := fn(ctx)
 	if err != nil {
 		return Result{}, err
 	}
-	return Result{HTML: []byte(out)}, nil
+	return result, nil
 }
