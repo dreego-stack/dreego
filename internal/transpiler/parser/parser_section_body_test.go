@@ -119,3 +119,37 @@ func TestParseIfOutsideAttrStillWorks(t *testing.T) {
 		t.Fatalf("expected NodeIf wrapping the tag, got %+v", file.Body.Nodes)
 	}
 }
+
+func TestParseBodyMarkdownWithDreegoConstructs(t *testing.T) {
+	tokens, err := lexer.Lex(`<body lang="md"># Title
+
+{#if cond}<@Card/>{/if}
+
+trailing *para*</body>`)
+	if err != nil {
+		t.Fatalf("lex: %v", err)
+	}
+	file, err := NewParser(tokens).Parse()
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if file.Body.Language != "md" {
+		t.Fatalf("language = %q, want md", file.Body.Language)
+	}
+	nodes := file.Body.Nodes
+	if len(nodes) != 3 {
+		t.Fatalf("got %d nodes, want 3: %+v", len(nodes), nodes)
+	}
+	if nodes[0].Type != ir.NodeText || nodes[0].Content != "<h1>Title</h1>" {
+		t.Errorf("node 0 = %+v, want converted heading", nodes[0])
+	}
+	if nodes[1].Type != ir.NodeIf || nodes[1].Cond != "cond" {
+		t.Errorf("node 1 = %+v, want NodeIf", nodes[1])
+	}
+	if len(nodes[1].Children) != 1 || nodes[1].Children[0].Type != ir.NodeComponentCall || nodes[1].Children[0].Tag != "Card" {
+		t.Errorf("node 1 children = %+v, want component call", nodes[1].Children)
+	}
+	if nodes[2].Type != ir.NodeText || nodes[2].Content != "<p>trailing <em>para</em></p>" {
+		t.Errorf("node 2 = %+v, want converted paragraph", nodes[2])
+	}
+}

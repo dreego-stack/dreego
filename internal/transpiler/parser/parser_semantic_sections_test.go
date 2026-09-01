@@ -19,6 +19,7 @@ func TestParseSemanticSectionLanguages(t *testing.T) {
 		{name: "server explicit", src: `<server lang="go"></server>`, want: "go", read: func(f *ir.File) string { return f.Server[0].Language }},
 		{name: "head default", src: `<head></head>`, want: "html", read: func(f *ir.File) string { return f.Head.Language }},
 		{name: "body explicit", src: `<body lang="html"></body>`, want: "html", read: func(f *ir.File) string { return f.Body.Language }},
+		{name: "body markdown", src: `<body lang="md"></body>`, want: "md", read: func(f *ir.File) string { return f.Body.Language }},
 		{name: "style default", src: `<style></style>`, want: "css", read: func(f *ir.File) string { return f.Style.Language }},
 		{name: "client explicit", src: `<client lang="js"></client>`, want: "js", read: func(f *ir.File) string { return f.Client.Language }},
 	} {

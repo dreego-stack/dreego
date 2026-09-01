@@ -9,7 +9,8 @@ import (
 func TestHostRouterSelectsSaaSByHost(t *testing.T) {
 	public := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("public")) })
 	product := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("saas")) })
-	h := hostRouter(public, product)
+	blog := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("blog")) })
+	h := hostRouter(public, product, blog)
 	for _, tc := range []struct {
 		host string
 		want string
@@ -17,6 +18,8 @@ func TestHostRouterSelectsSaaSByHost(t *testing.T) {
 		{host: "localhost:8080", want: "public"},
 		{host: "saas.localhost:8080", want: "saas"},
 		{host: "saas.example.test:8080", want: "saas"},
+		{host: "blog.localhost:8080", want: "blog"},
+		{host: "blog.example.test:8080", want: "blog"},
 		{host: "not-saas.localhost:8080", want: "public"},
 	} {
 		t.Run(tc.host, func(t *testing.T) {
@@ -37,7 +40,7 @@ func TestHostRouterPreservesPathAndMethod(t *testing.T) {
 			t.Errorf("request = %s %s, want POST /billing", r.Method, r.URL.Path)
 		}
 	})
-	hostRouter(http.NotFoundHandler(), product).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
+	hostRouter(http.NotFoundHandler(), product, http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
 		r := httptest.NewRequest(http.MethodPost, "http://saas.localhost/billing", nil)
 		r.Host = "saas.localhost"
 		return r
