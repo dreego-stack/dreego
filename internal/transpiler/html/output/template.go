@@ -1,26 +1,28 @@
-package transpiler
+package output
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) {
+func GenTemplateNode(gen *ir.Generator, n ir.TemplateNode, depth int) (string, error) {
 	inSection := false
-	return genTemplateNodeToState(gen, n, depth, "b", &inSection)
+	return GenTemplateNodeToState(gen, n, depth, "b", &inSection)
 }
 
-func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder string, inSection *bool) (string, error) {
+func GenTemplateNodeToState(gen *ir.Generator, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
-	case NodeText:
+	case ir.NodeText:
 		if n.Content == "" {
 			return "", nil
 		}
-		code, next := compTextSection(n.Content, *inSection)
+		code, next := CompTextSection(n.Content, *inSection)
 		*inSection = next
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
-	case NodeExpression:
+	case ir.NodeExpression:
 		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
 		raw := false
 		for _, f := range n.Filters {
@@ -37,11 +39,11 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 			return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 		}
 		return fmt.Sprintf(`%s%s.WriteString(dreego.SafeText(%s))`+"\n", indent, builder, code), nil
-	case NodeIf:
+	case ir.NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
-			code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
+			code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
 			if err != nil {
 				return "", err
 			}
@@ -49,7 +51,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		}
 		chain := true
 		for _, ec := range n.ElseChildren {
-			if ec.Type != NodeIf {
+			if ec.Type != ir.NodeIf {
 				chain = false
 				break
 			}
@@ -58,7 +60,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
 				for _, child := range ec.Children {
-					code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
+					code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
 					if err != nil {
 						return "", err
 					}
@@ -67,7 +69,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 					for _, child := range ec.ElseChildren {
-						code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
+						code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
 						if err != nil {
 							return "", err
 						}
@@ -78,7 +80,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		} else {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, ec := range n.ElseChildren {
-				code, err := genTemplateNodeToState(gen, ec, depth+1, builder, inSection)
+				code, err := GenTemplateNodeToState(gen, ec, depth+1, builder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -87,7 +89,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		}
 		buf.WriteString(indent + "}\n")
 		return buf.String(), nil
-	case NodeEach:
+	case ir.NodeEach:
 		var buf strings.Builder
 		hasElse := len(n.ElseChildren) > 0
 		forDepth := depth + 1
@@ -101,7 +103,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		buf.WriteString(fmt.Sprintf("%s\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code, err := genTemplateNodeToState(gen, child, forDepth+1, builder, inSection)
+			code, err := GenTemplateNodeToState(gen, child, forDepth+1, builder, inSection)
 			if err != nil {
 				return "", err
 			}
@@ -112,7 +114,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		if hasElse {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, child := range n.ElseChildren {
-				code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection)
+				code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -121,14 +123,14 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 			buf.WriteString(indent + "}\n")
 		}
 		return buf.String(), nil
-	case NodeSlot:
+	case ir.NodeSlot:
 		if n.Content != "" && len(n.Children) > 0 {
 			slotBuilder := fmt.Sprintf("slotBuilder%d", depth)
 			var buf strings.Builder
 			buf.WriteString(fmt.Sprintf("%s{\n", indent))
 			buf.WriteString(fmt.Sprintf("%s\tvar %s strings.Builder\n", indent, slotBuilder))
 			for _, child := range n.Children {
-				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
+				code, err := GenTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -142,22 +144,22 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 			return fmt.Sprintf("%s%s.WriteString(c.Get(\"slot_%s\"))\n", indent, builder, n.Content), nil
 		}
 		return fmt.Sprintf("%s%s.WriteString(c.Get(\"slot\"))\n", indent, builder), nil
-	case NodeVerbatim:
-		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, goLiteral(n.Content)), nil
-	case NodeComponentCall:
+	case ir.NodeVerbatim:
+		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, ir.GoLiteral(n.Content)), nil
+	case ir.NodeComponentCall:
 		funcName := n.Tag
 		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {
 			funcName = n.Tag[idx+1:]
 		}
-		def := gen.lookupDef(funcName)
+		def := gen.LookupDef(funcName)
 		if def == nil {
-			return "", fmt.Errorf("%s: unknown component %s", sourceRef(n.Source, n.Pos), funcName)
+			return "", fmt.Errorf("%s: unknown component %s", ir.SourceRef(n.Source, n.Pos), funcName)
 		}
-		args, err := buildComponentArgs(def, n.Attrs, n.Source, n.Pos)
+		args, err := BuildComponentArgs(def, n.Attrs, n.Source, n.Pos)
 		if err != nil {
 			return "", err
 		}
-		callName := gen.qualify(funcName)
+		callName := gen.Qualify(funcName)
 		if n.SelfClose {
 			return fmt.Sprintf("%s%s.WriteString(func() string { h, err := %s(%s).Render(c); if err != nil { panic(err) }; return h }())\n", indent, builder, callName, args), nil
 		}
@@ -170,11 +172,11 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		var slotKeys []string
 		var previousNamedSlots []string
 		for _, child := range n.Children {
-			if child.Type == NodeSlot && child.Content != "" {
-				if nested := findNestedSlot(child.Children); nested != nil {
-					return "", nestedSlotError(n, def, nested, gen.src)
+			if child.Type == ir.NodeSlot && child.Content != "" {
+				if nested := FindNestedSlot(child.Children); nested != nil {
+					return "", NestedSlotError(n, def, nested, gen.Src)
 				}
-				if err := validateSlotName(def, child.Content, n.Source, gen.src, n.Pos); err != nil {
+				if err := ValidateSlotName(def, child.Content, n.Source, gen.Src, n.Pos); err != nil {
 					return "", err
 				}
 				slotKeys = append(slotKeys, "slot_"+child.Content)
@@ -188,7 +190,7 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar %s strings.Builder\n", indent, namedSlotBuilder))
 				for _, sc := range child.Children {
-					code, err := genTemplateNodeToState(gen, sc, depth+3, namedSlotBuilder, inSection)
+					code, err := GenTemplateNodeToState(gen, sc, depth+3, namedSlotBuilder, inSection)
 					if err != nil {
 						return "", err
 					}
@@ -197,10 +199,10 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 				buf.WriteString(fmt.Sprintf("%s\t\tc.Set(\"slot_%s\", %s.String())\n", indent, child.Content, namedSlotBuilder))
 				buf.WriteString(fmt.Sprintf("%s\t}\n", indent))
 			} else {
-				if nested := findNestedSlot([]TemplateNode{child}); nested != nil {
-					return "", nestedSlotError(n, def, nested, gen.src)
+				if nested := FindNestedSlot([]ir.TemplateNode{child}); nested != nil {
+					return "", NestedSlotError(n, def, nested, gen.Src)
 				}
-				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
+				code, err := GenTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
 				if err != nil {
 					return "", err
 				}
@@ -209,9 +211,9 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 		}
 		buf.WriteString(fmt.Sprintf("%s\tc.Set(\"slot\", %s.String())\n", indent, slotBuilder))
 		buf.WriteString(fmt.Sprintf("%s\thtml, err := %s(%s).Render(c)\n", indent, callName, args))
-		buf.WriteString(restoreContextValue(indent, "slot", previousSlot))
+		buf.WriteString(RestoreContextValue(indent, "slot", previousSlot))
 		for i, key := range slotKeys {
-			buf.WriteString(restoreContextValue(indent, key, previousNamedSlots[i]))
+			buf.WriteString(RestoreContextValue(indent, key, previousNamedSlots[i]))
 		}
 		buf.WriteString(fmt.Sprintf("%s\tif err != nil { return \"\", err }\n", indent))
 		buf.WriteString(fmt.Sprintf("%s\t%s.WriteString(html)\n", indent, builder))
@@ -221,6 +223,6 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 	return "", fmt.Errorf("unsupported template node type %d", n.Type)
 }
 
-func restoreContextValue(indent, key, previous string) string {
+func RestoreContextValue(indent, key, previous string) string {
 	return fmt.Sprintf("%s\tif %s == nil { c.Delete(%q) } else { c.Set(%q, %s) }\n", indent, previous, key, key, previous)
 }

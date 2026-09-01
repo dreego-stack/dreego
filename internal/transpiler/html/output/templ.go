@@ -1,21 +1,26 @@
-package transpiler
+package output
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/js"
 )
 
-func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string, isGET bool) (string, error) {
+func GenTempl(gen *ir.Generator, file *ir.File, layout *ir.LayoutEntry, scopeHash string, isGET bool) (string, error) {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
 		inSection := false
-		headCode, err := genHead(file.Head.Content, "b")
+		headCode, err := head.Gen(file.Head.Content, "b")
 		if err != nil {
 			return "", err
 		}
 		headPending := false
-		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == NodeText &&
+		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == ir.NodeText &&
 			strings.HasPrefix(file.Body.Nodes[0].Content, "<!") {
 			headPending = true
 		}
@@ -26,12 +31,12 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Body.Nodes {
-			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := GenTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
 			}
 			buf.WriteString(code)
-			if headPending && n.Type == NodeText && strings.HasPrefix(n.Content, "<!") {
+			if headPending && n.Type == ir.NodeText && strings.HasPrefix(n.Content, "<!") {
 				buf.WriteString(headCode)
 				headPending = false
 			}
@@ -45,7 +50,7 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Body.Nodes {
-			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := GenTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", err
 			}
@@ -57,14 +62,12 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 	}
 
 	if file.Client != nil {
-		buf.WriteString("\tb.WriteString(\"<script>\")\n")
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Client.Code)))
-		buf.WriteString("\tb.WriteString(\"</script>\")\n")
+		buf.WriteString(js.GenClient(file.Client.Code))
 	}
 	if file.Style != nil {
-		scoped := scopeCSS(file.Style.Code, scopeHash)
+		scoped := css.ScopeCSS(file.Style.Code, scopeHash)
 		buf.WriteString("\tb.WriteString(\"<style>\")\n")
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(scoped)))
+		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(scoped)))
 		buf.WriteString("\tb.WriteString(\"</style>\")\n")
 	}
 
@@ -73,7 +76,7 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		buf.WriteString("\tb.Reset()\n")
 
 		if file.Head != nil {
-			headCode, err := genHead(file.Head.Content, "b")
+			headCode, err := head.Gen(file.Head.Content, "b")
 			if err != nil {
 				return "", err
 			}
@@ -83,12 +86,12 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		buf.WriteString("\tb.Reset()\n")
 
 		layoutHead := ""
-		if layout.file.Head != nil {
-			layoutHead = layout.file.Head.Content
+		if layout.File.Head != nil {
+			layoutHead = layout.File.Head.Content
 		}
-		headPrefix, headSuffix := splitHeadPlaceholder(layoutHead)
+		headPrefix, headSuffix := SplitHeadPlaceholder(layoutHead)
 		if headPrefix != "" {
-			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", goLiteral(headPrefix)))
+			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
 			buf.WriteString("\tif strings.Contains(pageHead, \"<title\") {\n")
 			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
 			buf.WriteString("\t}\n")
@@ -99,7 +102,7 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		}
 		buf.WriteString("\tb.WriteString(pageHead)\n")
 		if headSuffix != "" {
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headSuffix)))
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(headSuffix)))
 		}
 
 		buf.WriteString("\thead := b.String()\n")
@@ -107,9 +110,9 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
 
 		layoutPkg := "layouts"
-		layoutPath := gen.module + "/" + gen.rootRel + "/layouts"
-		gen.addImport(gen.pkg, layoutPkg, layoutPath)
-		buf.WriteString(fmt.Sprintf("\thtml, err := %s.%s(c, pageContent, head)\n", layoutPkg, layout.name))
+		layoutPath := gen.Module + "/" + gen.RootRel + "/layouts"
+		gen.AddImport(gen.Pkg, layoutPkg, layoutPath)
+		buf.WriteString(fmt.Sprintf("\thtml, err := %s.%s(c, pageContent, head)\n", layoutPkg, layout.Name))
 		buf.WriteString("\tif err != nil { return \"\", err }\n")
 		buf.WriteString("\tb.WriteString(html)\n")
 	}
@@ -117,7 +120,15 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 	return buf.String(), nil
 }
 
-func headMergeHelpers() string {
+func SplitHeadPlaceholder(head string) (prefix, suffix string) {
+	if !strings.Contains(head, "{#head}") {
+		return head, ""
+	}
+	parts := strings.SplitN(head, "{#head}", 2)
+	return parts[0], parts[1]
+}
+
+func HeadMergeHelpers() string {
 	return `
 func stripTitleTag(s string) string {
 	for {

@@ -51,7 +51,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			return nil
 		}
 
-		gen.pkg = "routes"
+		gen.Pkg = "routes"
 
 		var src strings.Builder
 		var regs []string
@@ -92,7 +92,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			}
 
 			scopeHash := hashOf(data)
-			gen.src = raw
+			gen.Src = raw
 
 			if baseName == "404" || baseName == "500" {
 				errCode := 404

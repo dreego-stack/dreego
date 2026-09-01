@@ -1,11 +1,11 @@
-package transpiler
+package css
 
 import (
 	"fmt"
 	"strings"
 )
 
-func scopeCSS(css string, hash string) string {
+func ScopeCSS(css string, hash string) string {
 	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
 	var result strings.Builder
 	scopeRange(&result, css, 0, len(css), prefix)
@@ -17,7 +17,7 @@ func scopeRange(b *strings.Builder, css string, start, end int, prefix string) {
 	for i < end {
 		if css[i] == '{' {
 			sel := strings.TrimSpace(css[start:i])
-			close := matchBrace(css, i, end)
+			close := MatchBrace(css, i, end)
 			innerStart, innerEnd := i+1, close
 			b.WriteString(scopedHeader(sel, prefix))
 			b.WriteByte('{')
@@ -47,11 +47,11 @@ func scopedHeader(sel string, prefix string) string {
 	if strings.HasPrefix(sel, "@") {
 		return sel
 	}
-	return scopeSelector(sel, prefix)
+	return ScopeSelector(sel, prefix)
 }
 
-func scopeSelector(sel string, prefix string) string {
-	parts := splitTopLevelComma(sel)
+func ScopeSelector(sel string, prefix string) string {
+	parts := SplitTopLevelComma(sel)
 	scoped := make([]string, len(parts))
 	for i, p := range parts {
 		scoped[i] = prefix + strings.TrimSpace(p)
@@ -59,7 +59,7 @@ func scopeSelector(sel string, prefix string) string {
 	return strings.Join(scoped, ",\n")
 }
 
-func splitTopLevelComma(sel string) []string {
+func SplitTopLevelComma(sel string) []string {
 	var parts []string
 	depth := 0
 	start := 0
@@ -81,7 +81,7 @@ func splitTopLevelComma(sel string) []string {
 	return append(parts, sel[start:])
 }
 
-func matchBrace(css string, open, end int) int {
+func MatchBrace(css string, open, end int) int {
 	depth := 1
 	for i := open + 1; i < end; i++ {
 		switch css[i] {

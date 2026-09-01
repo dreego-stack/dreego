@@ -234,7 +234,7 @@ func TestGenComponentCallNonSelfClose(t *testing.T) {
 		SelfClose: false,
 	}
 	gen := NewGenerator()
-	gen.registerDef("Link", &ComponentDef{Name: "Link", Props: []Prop{{Name: "href", Type: "string"}}, HasDefaultSlot: true})
+	gen.RegisterDef("Link", &ComponentDef{Name: "Link", Props: []Prop{{Name: "href", Type: "string"}}, HasDefaultSlot: true})
 	out, err := (&compGen{gen: gen, builder: "b"}).genComponentCall(n)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

@@ -3,9 +3,13 @@ package transpiler
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/js"
 )
 
-func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
+func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
 
 	safeName := strings.Map(func(r rune) rune {
 		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
@@ -30,13 +34,13 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 
 	if file.Body != nil {
 		suppressScope := false
-		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == NodeText {
+		if len(file.Body.Nodes) > 0 && file.Body.Nodes[0].Type == ir.NodeText {
 			suppressScope = strings.HasPrefix(file.Body.Nodes[0].Content, "<!")
 		}
 		var headCode string
 		if file.Head != nil {
 			var err error
-			headCode, err = genHead(file.Head.Content, "b")
+			headCode, err = html.GenHead(file.Head.Content, "b")
 			if err != nil {
 				return "", "", err
 			}
@@ -50,12 +54,12 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 		headPending := suppressScope && headCode != ""
 		inSection := false
 		for _, n := range file.Body.Nodes {
-			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := html.GenTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", "", err
 			}
 			buf.WriteString(code)
-			if headPending && n.Type == NodeText && strings.HasPrefix(n.Content, "<!") {
+			if headPending && n.Type == ir.NodeText && strings.HasPrefix(n.Content, "<!") {
 				buf.WriteString(headCode)
 				headPending = false
 			}
@@ -65,17 +69,15 @@ func GenerateErrorHandler(gen *generator, file *File, pkgName string, code int, 
 		}
 
 		if file.Client != nil {
-			buf.WriteString("\tb.WriteString(\"<script>\")\n")
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(file.Client.Code)))
-			buf.WriteString("\tb.WriteString(\"</script>\")\n")
+			buf.WriteString(js.GenClient(file.Client.Code))
 		}
 		if file.Style != nil {
 			styleCode := file.Style.Code
 			if !suppressScope {
-				styleCode = scopeCSS(file.Style.Code, scopeHash)
+				styleCode = html.ScopeCSS(file.Style.Code, scopeHash)
 			}
 			buf.WriteString("\tb.WriteString(\"<style>\")\n")
-			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(styleCode)))
+			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(styleCode)))
 			buf.WriteString("\tb.WriteString(\"</style>\")\n")
 		}
 	}

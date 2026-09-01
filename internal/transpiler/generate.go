@@ -80,9 +80,9 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 
 func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	gen := NewGenerator()
-	gen.module = module
-	gen.rootRel = relToRoot(".", root)
-	gen.pkg = sanitizePkgName(filepath.Base(root))
+	gen.Module = module
+	gen.RootRel = relToRoot(".", root)
+	gen.Pkg = sanitizePkgName(filepath.Base(root))
 
 	layouts, err := discoverLayouts(root)
 	if err != nil {
@@ -108,7 +108,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {
-		imports := gen.imports[rd.pkg]
+		imports := gen.Imports[rd.pkg]
 		importLine := buildImportLine(imports, rd.pkg)
 		stdImports := stdImportsFor(rd.src)
 		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
@@ -130,7 +130,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		for pkgDir, srcs := range compSrcs {
 			rel := relToRoot(root, pkgDir)
 			pkg := sanitizePkgName(filepath.Base(pkgDir))
-			imports := gen.imports[pkg]
+			imports := gen.Imports[pkg]
 			importLine := buildImportLine(imports, pkg)
 			stdImports := stdImportsFor(strings.Join(srcs, ""))
 			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
@@ -146,7 +146,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 	if len(layoutSrcs) > 0 {
 		layoutDir := filepath.Join(root, "layouts")
-		imports := gen.imports["layouts"]
+		imports := gen.Imports["layouts"]
 		importLine := buildImportLine(imports, "layouts")
 		stdImports := stdImportsFor(strings.Join(layoutSrcs, ""))
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)

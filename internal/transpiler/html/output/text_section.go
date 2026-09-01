@@ -1,21 +1,18 @@
-package transpiler
+package output
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func compTextWithAttrs(s string) string {
-	code, _ := compTextSection(s, false)
+func CompTextWithAttrs(s string) string {
+	code, _ := CompTextSection(s, false)
 	return code
 }
 
-// compTextSection renders a NodeText content segment to Go code, resolving {{ … }}
-// placeholders inside quoted attribute values but leaving <script>/<style> section
-// bodies literal (the lexer treats those as raw text where {{ … }} is not an expression).
-// It returns the generated code and the section state after this segment so the
-// caller can carry section tracking across sibling text nodes.
-func compTextSection(content string, inSection bool) (string, bool) {
+func CompTextSection(content string, inSection bool) (string, bool) {
 	var parts []string
 	cur := inSection
 	var quote byte
@@ -26,7 +23,7 @@ func compTextSection(content string, inSection bool) (string, bool) {
 		if cur {
 			if closeLen := sectionCloseLen(content[i:]); closeLen > 0 {
 				end := i + closeLen
-				parts = append(parts, goLiteral(content[start:end]))
+				parts = append(parts, ir.GoLiteral(content[start:end]))
 				start = end
 				i = end
 				cur = false
@@ -37,7 +34,7 @@ func compTextSection(content string, inSection bool) (string, bool) {
 		}
 		if strings.HasPrefix(content[i:], "<script") || strings.HasPrefix(content[i:], "<style") {
 			if start < i {
-				parts = append(parts, goLiteral(content[start:i]))
+				parts = append(parts, ir.GoLiteral(content[start:i]))
 			}
 			start = i
 			cur = true
@@ -47,7 +44,7 @@ func compTextSection(content string, inSection bool) (string, bool) {
 		}
 		if content[i] == '<' {
 			if start < i {
-				parts = append(parts, goLiteral(content[start:i]))
+				parts = append(parts, ir.GoLiteral(content[start:i]))
 			}
 			start = i
 			tagStart = i
@@ -65,17 +62,17 @@ func compTextSection(content string, inSection bool) (string, bool) {
 			continue
 		}
 		if quote != 0 && strings.HasPrefix(content[i:], "{{") {
-			closeIdx := findExprEnd(content[i+2:])
+			closeIdx := ir.FindExprEnd(content[i+2:])
 			if closeIdx < 0 {
 				i++
 				continue
 			}
 			if start < i {
-				parts = append(parts, goLiteral(content[start:i]))
+				parts = append(parts, ir.GoLiteral(content[start:i]))
 			}
 			expr := strings.TrimSpace(content[i+2 : i+2+closeIdx])
 			code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
-			parts = append(parts, fmt.Sprintf("dreego.%s(%s)", attrSafeFunc(content, tagStart, i), code))
+			parts = append(parts, fmt.Sprintf("dreego.%s(%s)", AttrSafeFunc(content, tagStart, i), code))
 			i += 2 + closeIdx + 2
 			start = i
 			continue
@@ -83,28 +80,25 @@ func compTextSection(content string, inSection bool) (string, bool) {
 		i++
 	}
 	if start < len(content) {
-		parts = append(parts, goLiteral(content[start:]))
+		parts = append(parts, ir.GoLiteral(content[start:]))
 	}
 	return strings.Join(parts, " + "), cur
 }
 
-// attrSafeFunc picks the safe-value rule for an expression placeholder inside a
-// quoted attribute value. tagStart is the index of the '<' that opens the tag
-// containing the placeholder; i is the placeholder index in content.
-func attrSafeFunc(content string, tagStart, i int) string {
+func AttrSafeFunc(content string, tagStart, i int) string {
 	if tagStart < 0 || tagStart >= i {
 		return "SafeAttr"
 	}
-	tagEnd := tagEnd(content[tagStart:])
+	tagEnd := ir.TagEnd(content[tagStart:])
 	if tagEnd < 0 {
 		return "SafeAttr"
 	}
 	tagEnd += tagStart
-	name := attrNameAt(content[tagStart:tagEnd], i-tagStart)
+	name := ir.AttrNameAt(content[tagStart:tagEnd], i-tagStart)
 	if name == "" {
 		return "SafeAttr"
 	}
-	return attrContext(name)
+	return ir.AttrContext(name)
 }
 
 func sectionCloseLen(s string) int {

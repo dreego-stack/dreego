@@ -1,8 +1,10 @@
-package transpiler
+package output
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 type callAttr struct {
@@ -40,7 +42,7 @@ func parseCallAttrs(attrs string) ([]callAttr, error) {
 				braceDepth--
 			}
 		default:
-			if isAttrSpace(ch) && !inQuote && braceDepth == 0 {
+			if ir.IsAttrSpace(ch) && !inQuote && braceDepth == 0 {
 				if start < i {
 					attr, err := parseCallAttr(attrs[start:i])
 					if err != nil {
@@ -83,21 +85,21 @@ func attrExpressionValue(val string) string {
 	if len(val) >= 2 && val[0] == '"' && val[len(val)-1] == '"' {
 		inner := val[1 : len(val)-1]
 		if strings.Contains(inner, "{") {
-			return concatPlaceholders(inner)
+			return ConcatPlaceholders(inner)
 		}
 		return fmt.Sprintf("%q", inner)
 	}
 	return fmt.Sprintf("%q", val)
 }
 
-func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (string, error) {
+func BuildComponentArgs(comp *ir.ComponentDef, attrs string, src string, pos int) (string, error) {
 	if comp == nil {
-		return "", fmt.Errorf("%s: unknown component", sourceRef(src, pos))
+		return "", fmt.Errorf("%s: unknown component", ir.SourceRef(src, pos))
 	}
 
 	provided, err := parseCallAttrs(attrs)
 	if err != nil {
-		return "", fmt.Errorf("%s: %s: %w", sourceRef(src, pos), comp.Name, err)
+		return "", fmt.Errorf("%s: %s: %w", ir.SourceRef(src, pos), comp.Name, err)
 	}
 
 	seen := map[string]bool{}
@@ -131,7 +133,7 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 		}
 	}
 
-	loc := sourceRef(src, pos)
+	loc := ir.SourceRef(src, pos)
 	if len(dups) > 0 {
 		return "", fmt.Errorf("%s: %s %s: duplicate prop \"%s\"", loc, comp.Name, dups[0], dups[0])
 	}
@@ -161,13 +163,13 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 	return strings.Join(args, ", "), nil
 }
 
-func propByName(comp *ComponentDef, name string) Prop {
+func propByName(comp *ir.ComponentDef, name string) ir.Prop {
 	for _, p := range comp.Props {
 		if p.Name == name {
 			return p
 		}
 	}
-	return Prop{}
+	return ir.Prop{}
 }
 
 type propTypeError struct {
@@ -176,20 +178,20 @@ type propTypeError struct {
 	got  string
 }
 
-func checkPropLiteralType(prop Prop, expr, rawValue string) *propTypeError {
+func checkPropLiteralType(prop ir.Prop, expr, rawValue string) *propTypeError {
 	if !isExpressionValue(rawValue) {
 		return nil
 	}
 	if prop.Type == "" {
 		return nil
 	}
-	kind := classifyExpression(expr)
-	if kind == exprKindOther {
+	kind := ir.ClassifyExpression(expr)
+	if kind == ir.ExprKindOther {
 		return nil
 	}
 	want := propTypeKind(prop.Type)
 	if kind != want {
-		return &propTypeError{prop: prop.Name, want: prop.Type, got: kindName(kind)}
+		return &propTypeError{prop: prop.Name, want: prop.Type, got: ir.KindName(kind)}
 	}
 	return nil
 }
@@ -199,18 +201,18 @@ func isExpressionValue(raw string) bool {
 	return len(raw) >= 2 && raw[0] == '{' && raw[len(raw)-1] == '}' && strings.Count(raw, "{") == 1 && strings.Count(raw, "}") == 1
 }
 
-func propTypeKind(typ string) exprKind {
+func propTypeKind(typ string) ir.ExprKind {
 	switch typ {
 	case "string":
-		return exprKindStringLiteral
+		return ir.ExprKindStringLiteral
 	case "int", "int32", "int64", "uint", "uint32", "uint64":
-		return exprKindIntLiteral
+		return ir.ExprKindIntLiteral
 	default:
-		return exprKindOther
+		return ir.ExprKindOther
 	}
 }
 
-func propExists(comp *ComponentDef, name string) bool {
+func propExists(comp *ir.ComponentDef, name string) bool {
 	for _, p := range comp.Props {
 		if p.Name == name {
 			return true
@@ -230,12 +232,4 @@ func zeroValue(typ string) string {
 	default:
 		return ""
 	}
-}
-
-func sourceRef(src string, pos int) string {
-	loc := sourceLocation(src, pos)
-	if src == "" {
-		return "?:" + loc
-	}
-	return fmt.Sprintf("%s:%s", src, loc)
 }

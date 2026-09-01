@@ -3,6 +3,9 @@ package transpiler
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func GenerateLayout(gen *Generator, file *File, funcName string) (string, error) {
@@ -17,7 +20,7 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 	headPrefix, headSuffix := splitHeadPlaceholder(layoutHead)
 
 	if headPrefix != "" {
-		buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", goLiteral(headPrefix)))
+		buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
 		buf.WriteString("\tif strings.Contains(head, \"<title\") {\n")
 		buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
 		buf.WriteString("\t}\n")
@@ -31,7 +34,7 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 	}
 
 	if headSuffix != "" {
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", goLiteral(headSuffix)))
+		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(headSuffix)))
 	}
 
 	if file.Body != nil {
@@ -65,13 +68,13 @@ func genLayoutNode(gen *Generator, n TemplateNode, depth int) (string, error) {
 
 func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bool) (string, error) {
 	indent := strings.Repeat("\t", depth)
-	if n.Type == NodeSlot {
+	if n.Type == ir.NodeSlot {
 		if n.Content != "" {
 			return indent + fmt.Sprintf("b.WriteString(c.Get(\"slot_%s\"))\n", n.Content), nil
 		}
 		return indent + "b.WriteString(content)\n", nil
 	}
-	if n.Type == NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
+	if n.Type == ir.NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
 		parts := splitLayoutText(n.Content)
 		var out string
 		for _, p := range parts {
@@ -81,12 +84,12 @@ func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bo
 			case "{#slot}":
 				out += indent + "b.WriteString(content)\n"
 			default:
-				out += indent + fmt.Sprintf("b.WriteString(%s)\n", goLiteral(p))
+				out += indent + fmt.Sprintf("b.WriteString(%s)\n", ir.GoLiteral(p))
 			}
 		}
 		return out, nil
 	}
-	return genTemplateNodeToState(gen, n, depth, "b", inSection)
+	return html.GenTemplateNodeToState(gen, n, depth, "b", inSection)
 }
 
 func splitLayoutText(s string) []string {
