@@ -56,7 +56,7 @@ func TestToNodes(t *testing.T) {
 		{
 			name: "fenced code block raw",
 			src:  "```\n<b>raw</b>\n```",
-			want: []string{"<pre><code><b>raw</b></code></pre>"},
+			want: []string{"<pre><code>&lt;b&gt;raw&lt;/b&gt;</code></pre>"},
 		},
 		{
 			name: "blockquote",
@@ -168,7 +168,7 @@ func TestToNodes(t *testing.T) {
 			src:  "text[^1]\n\n[^1]: The footnote text.",
 			want: []string{
 				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
-				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
 			},
 		},
 		{
@@ -176,7 +176,7 @@ func TestToNodes(t *testing.T) {
 			src:  "a[^1] b[^1]\n\n[^1]: The footnote text.",
 			want: []string{
 				`<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup> b<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">2</a></sup></p>`,
-				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
 			},
 		},
 		{
@@ -184,7 +184,7 @@ func TestToNodes(t *testing.T) {
 			src:  "text[^1]\n\n[^1]: The footnote text.",
 			want: []string{
 				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
-				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
 			},
 		},
 		{
@@ -192,7 +192,7 @@ func TestToNodes(t *testing.T) {
 			src:  "text[^1]\n\n[^1]: The *footnote* text.",
 			want: []string{
 				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
-				`<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+				`<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
 			},
 		},
 	}

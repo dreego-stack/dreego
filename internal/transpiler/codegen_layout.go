@@ -17,9 +17,20 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 		buf.WriteString("\tb.WriteString(head)\n")
 	}
 
+	var styleCode string
+	if file.Style != nil {
+		styleCode = "\tb.WriteString(\"<style>\")\n"
+		styleCode += fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(file.Style.Code))
+		styleCode += "\tb.WriteString(\"</style>\")\n"
+	}
+
 	if file.Body != nil {
 		inSection := false
 		for _, n := range file.Body.Nodes {
+			if styleCode != "" && n.Type == ir.NodeText && strings.Contains(n.Content, "</html>") {
+				buf.WriteString(styleCode)
+				styleCode = ""
+			}
 			code, err := genLayoutNodeState(gen, n, 1, &inSection)
 			if err != nil {
 				return "", err
@@ -28,10 +39,8 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 		}
 	}
 
-	if file.Style != nil {
-		buf.WriteString("\tb.WriteString(\"<style>\")\n")
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(file.Style.Code)))
-		buf.WriteString("\tb.WriteString(\"</style>\")\n")
+	if styleCode != "" {
+		buf.WriteString(styleCode)
 	}
 
 	buf.WriteString("\n\treturn b.String(), nil\n")

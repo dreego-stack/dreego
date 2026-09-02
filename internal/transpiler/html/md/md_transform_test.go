@@ -76,7 +76,7 @@ func TestTransformNodesLineAware(t *testing.T) {
 				{Type: ir.NodeText, Content: "```\n<b>raw</b>\n```"},
 			},
 			want: []ir.TemplateNode{
-				{Type: ir.NodeText, Content: "<pre><code><b>raw</b></code></pre>"},
+				{Type: ir.NodeText, Content: "<pre><code>&lt;b&gt;raw&lt;/b&gt;</code></pre>"},
 			},
 		},
 		{
@@ -95,6 +95,19 @@ func TestTransformNodesLineAware(t *testing.T) {
 			},
 			want: []ir.TemplateNode{
 				{Type: ir.NodeText, Content: "<div class=\"note\">\nHTML content <b>bold</b>\n</div>"},
+			},
+		},
+		{
+			name: "html block preserves expression node",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<div class=\"note\">\nHello "},
+				{Type: ir.NodeExpression, Content: "name"},
+				{Type: ir.NodeText, Content: "\n</div>"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<div class=\"note\">\nHello "},
+				{Type: ir.NodeExpression, Content: "name"},
+				{Type: ir.NodeText, Content: "\n</div>"},
 			},
 		},
 		{
@@ -182,7 +195,7 @@ func TestTransformNodesLineAware(t *testing.T) {
 			},
 			want: []ir.TemplateNode{
 				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
-				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
 			},
 		},
 		{
@@ -192,7 +205,7 @@ func TestTransformNodesLineAware(t *testing.T) {
 			},
 			want: []ir.TemplateNode{
 				{Type: ir.NodeText, Content: `<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup> b<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">2</a></sup></p>`},
-				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
 			},
 		},
 		{
@@ -202,7 +215,7 @@ func TestTransformNodesLineAware(t *testing.T) {
 			},
 			want: []ir.TemplateNode{
 				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
-				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
 			},
 		},
 		{
@@ -212,7 +225,7 @@ func TestTransformNodesLineAware(t *testing.T) {
 			},
 			want: []ir.TemplateNode{
 				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
-				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text. <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
 			},
 		},
 	}

@@ -2,6 +2,7 @@ package md
 
 import (
 	"fmt"
+	"html"
 	"regexp"
 	"strings"
 
@@ -47,7 +48,7 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 			var code []string
 			i++
 			for i < len(lines) && !strings.HasPrefix(strings.TrimSpace(lines[i]), "```") {
-				code = append(code, lines[i])
+				code = append(code, html.EscapeString(lines[i]))
 				i++
 			}
 			open := "<pre><code"

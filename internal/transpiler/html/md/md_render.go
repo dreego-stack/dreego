@@ -34,7 +34,6 @@ func newRenderer() *mdRenderer {
 
 func (r *mdRenderer) addDef(num, content string) {
 	if _, ok := r.defs[num]; !ok {
-		content = strings.TrimSuffix(content, ".")
 		r.defs[num] = r.renderInline(content)
 	}
 }

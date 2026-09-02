@@ -34,9 +34,18 @@ code, and other constructs are converted to their HTML equivalents. The default
 - pipe tables (GFM-style) with per-column alignment;
 - nested lists (indented sub-items);
 - images (`![alt](url)` → `<img>`);
-- footnotes (references + definitions emitted at the end).
+- footnotes (references + definitions emitted at the end);
+- horizontal rules (`---`);
+- raw HTML blocks (see the trust model below).
 
-Raw HTML and indented code blocks are not supported.
+Indented code blocks are not supported. The `***` and `___` horizontal-rule
+forms and setext headings (underlined with `===` or `---`) are not supported
+either — use ATX headings and `---` for a horizontal rule.
+
+Raw HTML blocks pass through verbatim. This is a generation-time, trust-based
+feature: the Markdown source is developer-authored and compiled at build time,
+so raw HTML is trusted exactly like the class passthrough on the inline `<md>`
+tag. It is not a runtime sanitization boundary.
 
 The processor is a small hand-written Markdown parser with no external
 dependencies. It lives at `internal/transpiler/html/md` in the transpiler

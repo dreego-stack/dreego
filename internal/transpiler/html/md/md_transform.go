@@ -2,6 +2,7 @@ package md
 
 import (
 	"fmt"
+	"html"
 	"regexp"
 	"strings"
 
@@ -55,7 +56,12 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 			if i > 0 {
 				content = append(content, textNode("\n"))
 			}
-			content = append(content, fl...)
+			for _, n := range fl {
+				if n.Type == ir.NodeText {
+					n.Content = html.EscapeString(n.Content)
+				}
+				content = append(content, n)
+			}
 		}
 		open := "<pre><code"
 		if fenceLang != "" {
@@ -143,13 +149,16 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 			out = append(out, textNode("<hr>"))
 		case htmlBlockStart.MatchString(trimmed):
 			flushBlock()
-			var raw []string
+			var rawNodes []ir.TemplateNode
 			for idx < len(lines) && strings.TrimSpace(lineRaw(lines[idx])) != "" {
-				raw = append(raw, lineRaw(lines[idx]))
+				if len(rawNodes) > 0 {
+					rawNodes = append(rawNodes, textNode("\n"))
+				}
+				rawNodes = append(rawNodes, lineSegments(lines[idx], true)...)
 				idx++
 			}
 			idx--
-			out = append(out, textNode(strings.Join(raw, "\n")))
+			out = append(out, mergeText(rawNodes)...)
 		case strings.Contains(trimmed, "|") && idx+1 < len(lines) && isTableSeparator(lineRaw(lines[idx+1])):
 			flushBlock()
 			var consumed int
@@ -204,7 +213,11 @@ func buildLines(nodes []ir.TemplateNode) [][]mdSegment {
 					flush()
 				}
 				if part == "" {
-					lines = append(lines, []mdSegment{{isExpr: false, text: ""}})
+					if j == 0 {
+						flush()
+					} else {
+						lines = append(lines, []mdSegment{{isExpr: false, text: ""}})
+					}
 				} else {
 					cur = append(cur, mdSegment{isExpr: false, text: part})
 				}
