@@ -19,7 +19,7 @@ func TestCLINew(t *testing.T) {
 	for _, f := range []string{
 		"testapp/main.go",
 		"testapp/go.mod",
-		"testapp/www/routes/get.dreego",
+		"testapp/www/routes/page.dreego",
 		"testapp/www/layouts/default.dreego",
 		"testapp/www/components/Hero.dreego",
 		"testapp/www/components/FeatureCard.dreego",

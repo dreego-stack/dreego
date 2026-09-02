@@ -1,37 +1,38 @@
 # File-based Routing
 
-> **Current implementation:** Routes support flat files or `+page.dreego`, with
-> method-specific `<server>` and `<body>` sections. Legacy method filenames remain
-> supported for migration.
+> **Current implementation:** `page.dreego` is the official route file name.
+> `get.dreego`, `index.dreego`, and `+page.dreego` remain accepted legacy names.
+> Routes support method-specific `<server>` and `<body>` sections.
 
 Route discovery is restricted to the website root's `routes/` tree. The
 website root is any directory containing `dreego.config.json`. Directories
 named `routes` outside a website root (e.g. `vendor/…/www/routes`,
 `node_modules/…/www/routes`, `subapp/www/routes`) are ignored.
 
-Directories below `www/routes/` define the URL path. A flat `.dreego` filename
-defines the final static path segment; `+page.dreego` defines the directory
-route. Legacy method filenames still define the method for old projects.
+Directories below `www/routes/` define the URL path. `page.dreego` defines the
+directory route (the URL of the directory itself). A flat `.dreego` filename
+defines the final static path segment. Legacy names `get.dreego`, `index.dreego`,
+and `+page.dreego` are still accepted for migration.
 
 ## Directory Structure
 
 ```
 www/routes/
-├── get.dreego                  → GET /
+├── page.dreego                 → GET /
 ├── 404.dreego                  → GET /* (catch-all)
 ├── 500.dreego                  → Panic → 500
 ├── about/
-│   └── get.dreego              → GET /about
+│   └── page.dreego             → GET /about
 ├── users/
 │   ├── 404.dreego              → GET /users/* (catch-all)
 │   └── [id]/
-│       └── get.dreego          → GET /users/{id}
+│       └── page.dreego         → GET /users/{id}
 ├── blog/
 │   └── [...catchall]/
-│       └── get.dreego          → GET /blog/{catchall...}
+│       └── page.dreego         → GET /blog/{catchall...}
 └── (group)/
     └── demo/
-        └── get.dreego          → GET /demo  (group ignored)
+        └── page.dreego         → GET /demo  (group ignored)
 ```
 
 ## Dynamic Segments
@@ -73,7 +74,14 @@ to GET. A request renders only the sections matching its method:
 Components, imports, layouts, styles, and scripts remain route-level resources.
 The method controls only the route logic and rendered `<body>` section.
 
-Each route has a method file in the directory:
+Each route has a `page.dreego` file in the directory. The HTTP method is
+declared with `method` attributes on `<server>`/`<body>` sections (default GET):
+
+```
+page.dreego     → GET (default) or any method via `method="..."` sections
+```
+
+Legacy method filenames remain accepted for migration:
 
 ```
 get.dreego     → GET
@@ -82,13 +90,12 @@ put.dreego     → PUT
 delete.dreego  → DELETE
 ```
 
-Multiple methods per directory possible:
+Multiple methods per route possible in one `page.dreego`:
 
 ```
 users/
 └── [id]/
-    ├── get.dreego      → GET /users/{id}
-    └── delete.dreego   → DELETE /users/{id}
+    └── page.dreego      → GET /users/{id} and DELETE /users/{id}
 ```
 
 ## Error Pages

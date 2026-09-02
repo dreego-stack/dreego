@@ -21,7 +21,15 @@ func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 	}
 	language := sectionLanguage(tok.Attr)
 	if language == "md" {
+		if err := rejectMdTagInMdBody(nodes); err != nil {
+			return nil, err
+		}
 		nodes, err = md.TransformNodes(nodes)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		nodes, err = transformInlineMd(nodes)
 		if err != nil {
 			return nil, err
 		}

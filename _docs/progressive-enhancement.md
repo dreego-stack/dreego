@@ -36,7 +36,7 @@ A comment form on a blog post. The requirements:
 ### Step 1: The server-rendered form (no JavaScript)
 
 ```dreego
-<!-- www/routes/posts/[id]/get.dreego -->
+<!-- www/routes/posts/[id]/page.dreego -->
 <server>
     post, err := loadPost(c.Param("id"))
     if err != nil {

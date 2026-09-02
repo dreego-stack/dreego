@@ -10,34 +10,19 @@ import (
 )
 
 var (
-	atxHeading = regexp.MustCompile(`^(#{1,6})\s+(.*)$`)
-	ulItem     = regexp.MustCompile(`^[-*+]\s+(.*)$`)
-	olItem     = regexp.MustCompile(`^(\d+)\.\s+(.*)$`)
-	listMarker = regexp.MustCompile(`^([-*+]|\d+\.)\s*$`)
-	codeRe     = regexp.MustCompile("`([^`]*)`")
-	linkRe     = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`)
-	strongRe   = regexp.MustCompile(`\*\*([^*]+)\*\*`)
-	emRe       = regexp.MustCompile(`\*([^*]+)\*`)
+	atxHeading     = regexp.MustCompile(`^(#{1,6})\s+(.*)$`)
+	ulItem         = regexp.MustCompile(`^[-*+]\s+(.*)$`)
+	olItem         = regexp.MustCompile(`^(\d+)\.\s+(.*)$`)
+	listMarker     = regexp.MustCompile(`^([-*+]|\d+\.)\s*$`)
+	codeRe         = regexp.MustCompile("`([^`]*)`")
+	linkRe         = regexp.MustCompile(`\[([^\]]*)\]\(([^)]*)\)`)
+	strongRe       = regexp.MustCompile(`\*\*([^*]+)\*\*`)
+	emRe           = regexp.MustCompile(`\*([^*]+)\*`)
+	htmlBlockStart = regexp.MustCompile(`^</?([a-zA-Z][a-zA-Z0-9-]*)(\s|>|/)`)
 )
 
 func ToNodes(src string) ([]ir.TemplateNode, error) {
 	return parseBlocks(src)
-}
-
-func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
-	var out []ir.TemplateNode
-	for _, n := range nodes {
-		if n.Type != ir.NodeText {
-			out = append(out, n)
-			continue
-		}
-		converted, err := parseBlocks(n.Content)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, converted...)
-	}
-	return out, nil
 }
 
 func parseBlocks(src string) ([]ir.TemplateNode, error) {
@@ -71,6 +56,18 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 			}
 			open += ">"
 			nodes = append(nodes, textNode(open+strings.Join(code, "\n")+"</code></pre>"))
+			continue
+		}
+
+		if htmlBlockStart.MatchString(trimmed) {
+			flushPara()
+			var raw []string
+			for i < len(lines) && strings.TrimSpace(lines[i]) != "" {
+				raw = append(raw, lines[i])
+				i++
+			}
+			i--
+			nodes = append(nodes, textNode(strings.Join(raw, "\n")))
 			continue
 		}
 
@@ -166,10 +163,34 @@ func isHR(s string) bool {
 }
 
 func renderInline(s string) string {
+	var b strings.Builder
+	for len(s) > 0 {
+		i := strings.IndexByte(s, '<')
+		if i < 0 || i+1 >= len(s) || !(isHTMLNameStart(s[i+1]) || s[i+1] == '/') {
+			b.WriteString(renderInlineText(s))
+			break
+		}
+		b.WriteString(renderInlineText(s[:i]))
+		end := strings.IndexByte(s[i:], '>')
+		if end < 0 {
+			b.WriteString(s[i:])
+			break
+		}
+		b.WriteString(s[i : i+end+1])
+		s = s[i+end+1:]
+	}
+	return b.String()
+}
+
+func renderInlineText(s string) string {
 	s = html.EscapeString(s)
 	s = codeRe.ReplaceAllString(s, "<code>$1</code>")
 	s = linkRe.ReplaceAllString(s, `<a href="$2">$1</a>`)
 	s = strongRe.ReplaceAllString(s, "<strong>$1</strong>")
 	s = emRe.ReplaceAllString(s, "<em>$1</em>")
 	return s
+}
+
+func isHTMLNameStart(b byte) bool {
+	return b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z'
 }

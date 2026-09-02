@@ -57,7 +57,7 @@ go run .            # builds and starts the server on :8080
 ```
 
 Open http://localhost:8080 in your browser. The landing page rendered is the
-one defined in `www/routes/get.dreego`.
+one defined in `www/routes/page.dreego`.
 
 For day-to-day development:
 
@@ -157,7 +157,7 @@ Imports are header directives and therefore appear before the root sections.
 
 ## Dynamic Routes
 
-Create `www/routes/users/[id]/get.dreego`:
+Create `www/routes/users/[id]/page.dreego`:
 
 ```html
 <head><title>User {{ c.Param("id") }}</title></head>
@@ -182,7 +182,7 @@ Visiting `/users/42` shows "User: 42".
 | `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.22. Upgrade. |
 | `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
 | `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
-| `dreego generate: no routes found` | Create at least `www/routes/get.dreego` (the scaffold already does). |
+| `dreego generate: no routes found` | Create at least `www/routes/page.dreego` (the scaffold already does). |
 
 ## See Also
 

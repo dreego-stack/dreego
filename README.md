@@ -44,7 +44,7 @@ Four principles:
 1. **SSR-First, Not SSR-Only** — SSR is the current production foundation.
    Target-neutral rendering, SSG, Wails, and optional DreeJS browser behavior
    are planned for the long v0.x line.
-2. **File-Based** — The current pre-v0.1 router maps `www/routes/login/get.dreego` to `GET /login`. The accepted v0.1 migration will use one route file per URL with method-specific sections.
+2. **File-Based** — `www/routes/page.dreego` maps to `GET /`. One route file per URL with method-specific sections. Legacy names `get.dreego`, `index.dreego`, and `+page.dreego` remain accepted.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
 
@@ -81,7 +81,7 @@ See the public [Roadmap](_docs/roadmap.md), detailed
 
 ### Core
 - **Transpiler Pipeline** — Lexer → Parser → AST → CodeGen. `.dreego` → Go code.
-- **File-based Routing** — `www/routes/get.dreego` → `GET /`, `www/routes/login/post.dreego` → `POST /login`
+- **File-based Routing** — `www/routes/page.dreego` → `GET /`, `www/routes/login/page.dreego` → `GET /login` (method via `method="..."` sections)
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
@@ -201,11 +201,10 @@ www/                       # website root (name is free, marker: dreego.config.j
 ├── dreego.config.json     # logging, redirects, rewrites
 ├── dree.go                # GENERATED — package www, Register(app)
 ├── routes/                # .dreego files → URL routes
-│   ├── get.dreego             → GET /
+│   ├── page.dreego             → GET /
 │   ├── login/
-│   │   ├── get.dreego         → GET /login
-│   │   └── post.dreego        → POST /login
-│   ├── [id]/get.dreego        → GET /{id}
+│   │   └── page.dreego         → GET /login (POST via method="post" section)
+│   ├── [id]/page.dreego        → GET /{id}
 │   └── dree.go             # GENERATED — package routes, handlers + Register
 ├── layouts/
 │   ├── default.dreego      # {#slot} + {#head} wrapper

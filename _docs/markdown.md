@@ -75,3 +75,53 @@ Published on **{{ post.Date }}**.
 
 The Markdown processor emits the surrounding structure; Dreego keeps control of
 expressions and escaping for the dynamic values.
+
+## Inline `<md>` tag
+
+Inside a regular `<body lang="html">` you can drop a Markdown region anywhere
+with the inline `<md>` tag. Dreego processes it with the same Markdown processor
+at generation time and wraps the result in a `<div>`:
+
+```html
+<body>
+<h1>HTML title</h1>
+<md class="prose">
+# Markdown inside
+
+- a
+- b
+</md>
+<p>After</p>
+</body>
+```
+
+The `<md>` tag always becomes a `<div>` wrapper — there is no "transparent if no
+attributes" magic. The `class` attribute moves onto the `<div>`; every other
+attribute passes through verbatim:
+
+```html
+<md class="prose" data-x="1"># Hi</md>
+<!-- compiles to -->
+<div class="prose" data-x="1"><h1>Hi</h1></div>
+```
+
+Expressions inside the region are preserved and escaped by Dreego, exactly as in
+a `lang="md"` body.
+
+### Error cases
+
+- **Nested `<md>`** inside an `<md>` region is rejected.
+- **Control flow** (`{#if}` / `{#each}`) inside an `<md>` region is rejected —
+  close the `<md>` tag first.
+- **Unclosed `<md>`** (end of body or control flow before `</md>`) is rejected.
+- **`<md>` inside `<body lang="md">`** is rejected — Markdown is already the
+  body language there.
+
+## Roadmap ideas
+
+The following are planned but not supported yet:
+
+- Pipe tables (`| a | b |`, see `_todo/core/markdown-tables.1.md`)
+- Nested lists
+- Footnotes
+- Image blocks

@@ -75,13 +75,43 @@ func TestToNodes(t *testing.T) {
 		},
 		{
 			name: "escaping",
-			src:  "*a* & <b>",
-			want: []string{"<p><em>a</em> &amp; &lt;b&gt;</p>"},
+			src:  "*a* & < 5",
+			want: []string{"<p><em>a</em> &amp; &lt; 5</p>"},
 		},
 		{
 			name: "mixed blocks",
 			src:  "# Title\n\n- one\n- two\n\npara",
 			want: []string{"<h1>Title</h1>", "<ul><li>one</li><li>two</li></ul>", "<p>para</p>"},
+		},
+		{
+			name: "inline html",
+			src:  `Use <a href="/x" class="btn">the link</a> now`,
+			want: []string{`<p>Use <a href="/x" class="btn">the link</a> now</p>`},
+		},
+		{
+			name: "html block raw",
+			src:  `<div class="note">\nHTML content <b>bold</b>\n</div>`,
+			want: []string{`<div class="note">\nHTML content <b>bold</b>\n</div>`},
+		},
+		{
+			name: "void element",
+			src:  "line one<br>line two",
+			want: []string{"<p>line one<br>line two</p>"},
+		},
+		{
+			name: "mixed markdown around html",
+			src:  "# Heading\n\n<div>raw</div>\n\npara after",
+			want: []string{"<h1>Heading</h1>", "<div>raw</div>", "<p>para after</p>"},
+		},
+		{
+			name: "bare less than stays escaped",
+			src:  "5 < 6 and x > y",
+			want: []string{"<p>5 &lt; 6 and x &gt; y</p>"},
+		},
+		{
+			name: "less than followed by space stays escaped",
+			src:  "a < b",
+			want: []string{"<p>a &lt; b</p>"},
 		},
 	}
 

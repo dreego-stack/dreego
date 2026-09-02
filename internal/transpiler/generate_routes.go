@@ -158,7 +158,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 func routeFileRel(root, dir, name string) string {
 	rel := routeDirRel(root, dir)
 	base := strings.TrimSuffix(name, ".dreego")
-	if base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
+	if base == "page" || base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
 		return rel
 	}
 	if rel == "" {
