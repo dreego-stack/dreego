@@ -161,7 +161,7 @@ dreego/components/Card.dreego:
   Component Card (title string)
   <body><h2>{{ title }}</h2>{#slot}</body>
 
-dreego/routes/get.dreego:
+dreego/routes/page.dreego:
   <body><@Card title="Hello">content</@Card></body>
 ```
 

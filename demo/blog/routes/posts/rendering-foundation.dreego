@@ -1,0 +1,30 @@
+<head>
+    <title>The Render Foundation</title>
+    <meta name="description" content="How the v0.2 render foundation keeps generated inputs typed.">
+</head>
+
+<server>
+    siteName := "Dreego"
+</server>
+
+<body lang="md">
+# The Render Foundation
+
+The v0.2 render foundation is the layer that lets {{ siteName }} render a page without an HTTP server. It preserves typed generated inputs instead of falling back to a `map[string]any`.
+
+## Why it matters
+
+Before the foundation, rendering was tied to `net/http`. That made SSG and Wails awkward. The foundation extracts a target-neutral typed App and renderer, so the same page can be served, pre-rendered, or embedded.
+
+- Typed inputs stay the primary contract
+- Non-HTTP rendering is explicit, not a nil-request hack
+- Future targets build on one shared render path
+
+## What stays the same
+
+The server section still owns the data. The body still renders the same way. Only the plumbing around it changed.
+
+## Keep reading
+
+Back to the [blog index](/blog/), or see the [Hello, Dreego](/blog/posts/hello-dreego) post for the v0.3 Markdown story.
+</body>

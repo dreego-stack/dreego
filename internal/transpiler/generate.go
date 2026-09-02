@@ -151,7 +151,6 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		stdImports := stdImportsFor(strings.Join(layoutSrcs, ""))
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
-		layoutOut += headMergeHelpers()
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
 	}
 

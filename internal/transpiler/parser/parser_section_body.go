@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/html/md"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
@@ -17,6 +18,21 @@ func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 	nodes, err := p.parseBodyNodes()
 	if err != nil {
 		return nil, err
+	}
+	language := sectionLanguage(tok.Attr)
+	if language == "md" {
+		if err := rejectMdTagInMdBody(nodes); err != nil {
+			return nil, err
+		}
+		nodes, err = md.TransformNodes(nodes)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		nodes, err = transformInlineMd(nodes)
+		if err != nil {
+			return nil, err
+		}
 	}
 	method, explicit := parseBodyMethod(tok.Attr)
 	return &ir.BodySection{Nodes: nodes, Method: method, MethodExplicit: explicit}, nil

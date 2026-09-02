@@ -1,0 +1,43 @@
+<head>
+    <title>Dreego Blog</title>
+    <meta name="description" content="Notes on building Dreego, the compile-time Go web framework.">
+</head>
+
+<server>
+    type Post struct {
+        Title   string
+        Slug    string
+        Date    string
+        Excerpt string
+    }
+    posts := []Post{
+        {Title: "Hello, Dreego", Slug: "hello-dreego", Date: "2026-08-24", Excerpt: "A first look at the v0.2 and v0.3 releases: typed SSR, the render foundation, and Markdown bodies."},
+        {Title: "The Render Foundation", Slug: "rendering-foundation", Date: "2026-08-18", Excerpt: "How the v0.2 render foundation keeps generated inputs typed and opens the door to SSG and Wails."},
+        {Title: "Markdown in the Body", Slug: "markdown-in-the-body", Date: "2026-08-10", Excerpt: "Write real Markdown in a <body lang=\"md\"> section and mix in Dreego constructs."},
+        {Title: "Interactive Markdown", Slug: "interactive-markdown", Date: "2026-08-08", Excerpt: "HTMX-powered interactivity inside a Markdown body — components, styles, and scripts coexist."},
+    }
+</server>
+
+<body>
+    <nav class="mb-10 flex items-center gap-2" aria-label="Version switcher">
+        <a href="/blog/" class="rounded-full bg-slate-950 px-4 py-1.5 text-sm font-medium text-white">v1 · HTML</a>
+        <a href="/blog/v2" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">v2 · md tag</a>
+        <a href="/blog/v3" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">v3 · body md</a>
+    </nav>
+
+    <p class="mb-6 font-mono text-xs uppercase tracking-[0.24em] text-emerald-700">Field notes</p>
+    <h1>Building Dreego, in the open.</h1>
+    <p class="mb-14">Short posts about the framework, its design constraints, and the decisions behind each release.</p>
+
+    <p class="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-400">01 / posts</p>
+    <h2>Latest writing.</h2>
+    <p class="mb-8">Every post is a real Markdown body rendered by the v0.3 md processor.</p>
+
+    <div class="cards">
+        <div class="grid gap-5 md:grid-cols-2">
+            {#each posts as post}
+                <@PostCard title={post.Title} slug={post.Slug} date={post.Date} excerpt={post.Excerpt}/>
+            {/each}
+        </div>
+    </div>
+</body>

@@ -8,7 +8,7 @@
 
 <body>
     <h1>{{ message }}</h1>
-    <p>Edit <code>www/routes/get.dreego</code> and reload.</p>
+    <p>Edit <code>www/routes/page.dreego</code> and reload.</p>
 </body>
 
 <style>

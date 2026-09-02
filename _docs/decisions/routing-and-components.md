@@ -41,17 +41,19 @@ One `.dreego` route file owns all declared HTTP methods for one URL.
 
 | Source | URL |
 |---|---|
-| `routes/+page.dreego` | `/` |
+| `routes/page.dreego` | `/` |
 | `routes/about.dreego` | `/about` |
-| `routes/about/+page.dreego` | `/about` |
-| `routes/users/[id]/+page.dreego` | `/users/{id}` |
-| `routes/blog/[...path]/+page.dreego` | `/blog/{path...}` |
+| `routes/about/page.dreego` | `/about` |
+| `routes/users/[id]/page.dreego` | `/users/{id}` |
+| `routes/blog/[...path]/page.dreego` | `/blog/{path...}` |
 | `routes/(auth)/login.dreego` | `/login` |
 
-A flat file and `+page.dreego` resolving to the same URL conflict.
-`index.dreego` and optional segments are unsupported. Static segments take
-priority over dynamic segments, which take priority over catch-all segments.
-Route groups organize source without adding a URL segment.
+`page.dreego` is the official route file name. `get.dreego`, `index.dreego`,
+and `+page.dreego` remain accepted legacy names for migration. A flat file and
+`page.dreego` resolving to the same URL conflict. `index.dreego` and optional
+segments are unsupported. Static segments take priority over dynamic segments,
+which take priority over catch-all segments. Route groups organize source
+without adding a URL segment.
 
 ## HTTP method sections
 

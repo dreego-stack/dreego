@@ -26,6 +26,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 	routePatterns := map[string]bool{}
 	found := 0
 	routeSources := map[string]string{}
+	needsHeadHelpers := false
 
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -55,7 +56,6 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 
 		var src strings.Builder
 		var regs []string
-		needsHeadHelpers := false
 
 		for _, fpath := range dreegoFiles {
 			rel := routeFileRel(root, path, filepath.Base(fpath))
@@ -136,10 +136,6 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			}
 		}
 
-		if needsHeadHelpers {
-			src.WriteString(headMergeHelpers())
-		}
-
 		rd.src += src.String()
 		rd.regs = append(rd.regs, regs...)
 		found += len(regs)
@@ -147,6 +143,10 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 	})
 	if err != nil {
 		return nil, nil, 0, err
+	}
+
+	if needsHeadHelpers {
+		rd.src += headMergeHelpers()
 	}
 
 	if found == 0 {
@@ -158,7 +158,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 func routeFileRel(root, dir, name string) string {
 	rel := routeDirRel(root, dir)
 	base := strings.TrimSuffix(name, ".dreego")
-	if base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
+	if base == "page" || base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
 		return rel
 	}
 	if rel == "" {

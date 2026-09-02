@@ -1,0 +1,43 @@
+<head>
+    <title>Hello, Dreego</title>
+    <meta name="description" content="A first look at Dreego v0.2 and v0.3.">
+</head>
+
+<server>
+    siteName := "Dreego"
+    showNote := true
+</server>
+
+<body lang="md">
+# Hello, Dreego
+
+Welcome to the {{ siteName }} blog. This post is written as real Markdown inside a Markdown body section, and the v0.3 md processor turns it into HTML at generation time.
+
+## What shipped
+
+The v0.2 release delivered the render foundation, and v0.3 wired up Markdown bodies. Together they make writing content pages feel like writing a document, not a template.
+
+- Typed server sections stay the single source of truth
+- Markdown bodies keep Dreego constructs intact
+- Generated output stays close to ordinary Go and net/http
+
+{#if showNote}
+This sentence only renders when `showNote` is true — a Dreego condition living inside Markdown.
+{/if}
+
+> A note: Markdown can contain Dreego conditions. This blockquote is plain Markdown, converted to a blockquote element by the md processor.
+
+## A small example
+
+Inline code like `dreego generate` and a fenced block:
+
+```go
+func main() {
+    println("hello, dreego")
+}
+```
+
+## Next steps
+
+Read about the [render foundation](/blog/posts/rendering-foundation) or the [Markdown body feature](/blog/posts/markdown-in-the-body).
+</body>

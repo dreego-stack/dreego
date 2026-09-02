@@ -56,9 +56,12 @@ func (p *Parser) Parse() (*ir.File, error) {
 			}
 			file.Server = append(file.Server, *section)
 		case "body":
-			language, err := parseSectionLanguage(tok, "html")
-			if err != nil {
-				return nil, err
+			language := sectionLanguage(tok.Attr)
+			if language == "" {
+				language = "html"
+			}
+			if language != "html" && language != "md" {
+				return nil, fmt.Errorf("unsupported language %q for <body> at position %d; install a processor for this section and language", language, tok.Pos)
 			}
 			section, err := p.parseBodySection()
 			if err != nil {

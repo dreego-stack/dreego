@@ -118,8 +118,8 @@ func TestCLIInit(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "main.go")); err != nil {
 		t.Fatalf("missing main.go: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "www/routes/get.dreego")); err != nil {
-		t.Fatalf("missing get.dreego: %v", err)
+	if _, err := os.Stat(filepath.Join(dir, "www/routes/page.dreego")); err != nil {
+		t.Fatalf("missing page.dreego: %v", err)
 	}
 }
 

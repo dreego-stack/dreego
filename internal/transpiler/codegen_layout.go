@@ -13,33 +13,24 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 	buf.WriteString(fmt.Sprintf("func %s(c dreego.RenderContext, content, head string) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
-	layoutHead := ""
 	if file.Head != nil {
-		layoutHead = file.Head.Content
-	}
-	headPrefix, headSuffix := splitHeadPlaceholder(layoutHead)
-
-	if headPrefix != "" {
-		buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
-		buf.WriteString("\tif strings.Contains(head, \"<title\") {\n")
-		buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
-		buf.WriteString("\t}\n")
-		buf.WriteString("\tif strings.Contains(head, `name=\"description\"`) || strings.Contains(head, `name='description'`) {\n")
-		buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
-		buf.WriteString("\t}\n")
-		buf.WriteString("\tb.WriteString(layoutHead)\n")
-		buf.WriteString("\tb.WriteString(head)\n")
-	} else if headSuffix != "" {
 		buf.WriteString("\tb.WriteString(head)\n")
 	}
 
-	if headSuffix != "" {
-		buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(headSuffix)))
+	var styleCode string
+	if file.Style != nil {
+		styleCode = "\tb.WriteString(\"<style>\")\n"
+		styleCode += fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(file.Style.Code))
+		styleCode += "\tb.WriteString(\"</style>\")\n"
 	}
 
 	if file.Body != nil {
 		inSection := false
 		for _, n := range file.Body.Nodes {
+			if styleCode != "" && n.Type == ir.NodeText && strings.Contains(n.Content, "</html>") {
+				buf.WriteString(styleCode)
+				styleCode = ""
+			}
 			code, err := genLayoutNodeState(gen, n, 1, &inSection)
 			if err != nil {
 				return "", err
@@ -48,17 +39,13 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 		}
 	}
 
+	if styleCode != "" {
+		buf.WriteString(styleCode)
+	}
+
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
 	return buf.String(), nil
-}
-
-func splitHeadPlaceholder(head string) (prefix, suffix string) {
-	if !strings.Contains(head, "{#head}") {
-		return head, ""
-	}
-	parts := strings.SplitN(head, "{#head}", 2)
-	return parts[0], parts[1]
 }
 
 func genLayoutNode(gen *Generator, n TemplateNode, depth int) (string, error) {
@@ -121,44 +108,4 @@ func splitLayoutText(s string) []string {
 		s = s[next+nextLen:]
 	}
 	return result
-}
-
-func layoutHelpers() string {
-	return `func stripTitleTag(s string) string {
-	for {
-		open := strings.Index(s, "<title")
-		if open < 0 {
-			return s
-		}
-		closeIdx := strings.Index(s[open:], "</title>")
-		if closeIdx < 0 {
-			return s
-		}
-		end := open + closeIdx + len("</title>")
-		s = s[:open] + s[end:]
-	}
-}
-
-func stripMetaDescriptionTag(s string) string {
-	offset := 0
-	for {
-		open := strings.Index(s[offset:], "<meta")
-		if open < 0 {
-			return s
-		}
-		open += offset
-		end := strings.IndexByte(s[open:], '>')
-		if end < 0 {
-			return s
-		}
-		tag := s[open : open+end+1]
-		if strings.Contains(tag, ` + "`name=\"description\"`" + `) || strings.Contains(tag, ` + "`name='description'`" + `) {
-			s = s[:open] + s[open+end+1:]
-			offset = open
-			continue
-		}
-		offset = open + end + 1
-	}
-}
-`
 }

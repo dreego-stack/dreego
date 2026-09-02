@@ -122,7 +122,7 @@ func TestCLIBlueprintSemanticHTML(t *testing.T) {
 		}
 	}
 
-	route, err := os.ReadFile(filepath.Join(sub, "www/routes/get.dreego"))
+	route, err := os.ReadFile(filepath.Join(sub, "www/routes/page.dreego"))
 	if err != nil {
 		t.Fatalf("read route: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
 	}
-	route, err := os.ReadFile(filepath.Join(dir, "www/routes/get.dreego"))
+	route, err := os.ReadFile(filepath.Join(dir, "www/routes/page.dreego"))
 	if err != nil {
 		t.Fatalf("read route: %v", err)
 	}

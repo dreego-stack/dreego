@@ -1,0 +1,85 @@
+<head>
+    <title>Interactive Markdown</title>
+    <meta name="description" content="HTMX-powered interactivity inside a Markdown body — components, styles, and scripts coexist.">
+</head>
+
+<server>
+    siteName := "Dreego"
+    featureCount := 3
+</server>
+
+<style>
+.interactive-note {
+    border-left: 4px solid #0f766e;
+    background: #f0fdfa;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+    color: #134e4a;
+}
+.interactive-note strong {
+    color: #0f766e;
+}
+</style>
+
+<client>
+console.log("interactive post loaded");
+</client>
+
+<body lang="md">
+# Interactive Markdown
+
+This post shows how a Markdown body can host real interactivity. Alongside the prose, a scoped style section styles a callout box, a client section runs an inline script, and raw HTML with HTMX attributes lives right inside the Markdown.
+
+## What coexists here
+
+About {{ siteName }}, this page proves that a Markdown body is not limited to static text. It combines three verified features in one document:
+
+- A scoped style section that styles the callout below
+- A client section that logs to the browser console
+- Raw HTML with HTMX attributes embedded in the prose
+
+## The callout
+
+> **Scoped styles work.** This box is styled by the route's own style section, scoped to this page and coexisting with the Markdown body.
+
+## Try it
+
+The button below is raw HTML rendered inside the Markdown. It carries HTMX attributes, so clicking it fetches the blog index and swaps it into the main content area.
+
+<a href="/blog/" hx-get="/blog/" hx-target="#main" hx-swap="outerHTML" class="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Load more posts</a>
+
+## What this proves
+
+There are {{ featureCount }} verified capabilities demonstrated on this page. Raw HTML, styles, and scripts all survive generation inside a Markdown body.
+
+## Verified features
+
+| Feature | Status | Since |
+| --- | :---: | --- |
+| Scoped styles | Done | v0.3 |
+| Client scripts | Done | v0.3 |
+| Raw HTML + HTMX | Done | v0.3 |
+| Pipe tables | Done | v0.3 |
+
+![Dreego logo](https://dreego.dev/logo.svg)
+
+## Nested lists
+
+- Markdown blocks
+  - Paragraphs and headings
+  - Lists and blockquotes
+- Inline formatting
+  - Emphasis and strong
+  - Code and links
+
+## Footnotes
+
+Dreego[^1] renders Markdown to HTML at generation time.
+
+[^1]: Dreego is a compile-time Go web framework.
+
+## Keep reading
+
+Back to the [blog index](/blog/), or see the [Markdown in the Body](/blog/posts/markdown-in-the-body) post for the base feature.
+</body>
