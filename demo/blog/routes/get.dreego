@@ -1,8 +1,6 @@
 <head>
     <title>Dreego Blog</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Notes on building Dreego, the compile-time Go web framework.">
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <server>
@@ -22,7 +20,7 @@
 <body>
     <header class="border-b border-slate-200 bg-[#f7f7f3]">
         <nav class="mx-auto flex max-w-4xl items-center justify-between px-6 py-5" aria-label="Main navigation">
-            <a href="/" class="font-mono text-sm font-bold tracking-tight">dreego / blog</a>
+            <a href="/blog/" class="font-mono text-sm font-bold tracking-tight">dreego / blog</a>
             <div class="flex items-center gap-5 text-sm text-slate-600">
                 <a href="#posts" class="hover:text-slate-950">Posts</a>
                 <a href="https://github.com/dreego-stack/dreego" class="rounded-full bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-700">Source</a>

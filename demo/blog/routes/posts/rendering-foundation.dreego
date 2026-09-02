@@ -1,8 +1,6 @@
 <head>
     <title>The Render Foundation</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="How the v0.2 render foundation keeps generated inputs typed.">
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <server>
@@ -28,5 +26,5 @@ The server section still owns the data. The body still renders the same way. Onl
 
 ## Keep reading
 
-Back to the [blog index](/), or see the [Hello, Dreego](/posts/hello-dreego) post for the v0.3 Markdown story.
+Back to the [blog index](/blog/), or see the [Hello, Dreego](/blog/posts/hello-dreego) post for the v0.3 Markdown story.
 </body>

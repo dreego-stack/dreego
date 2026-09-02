@@ -1,8 +1,6 @@
 <head>
     <title>Hello, Dreego</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A first look at Dreego v0.2 and v0.3.">
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <server>
@@ -41,5 +39,5 @@ func main() {
 
 ## Next steps
 
-Read about the [render foundation](/posts/rendering-foundation) or the [Markdown body feature](/posts/markdown-in-the-body).
+Read about the [render foundation](/blog/posts/rendering-foundation) or the [Markdown body feature](/blog/posts/markdown-in-the-body).
 </body>

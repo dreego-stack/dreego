@@ -1,0 +1,30 @@
+<head>
+    <title>Markdown in the Body</title>
+    <meta name="description" content="How the v0.3 md processor turns a Markdown body into HTML.">
+</head>
+
+<server>
+    siteName := "Dreego"
+</server>
+
+<body lang="md">
+# Markdown in the Body
+
+The v0.3 md processor lets a {{ siteName }} page body be written as real Markdown. Set `lang="md"` on the body section and the processor converts it to HTML at generation time.
+
+## How it works
+
+A body section with `lang="md"` is parsed by a hand-written, stdlib-only Markdown parser. The result is ordinary HTML, so the rest of the pipeline stays unchanged.
+
+- No external dependencies
+- Dreego constructs stay intact
+- Output remains close to plain Go and net/http
+
+## What stays protected
+
+Expressions, conditions, and components inside a Markdown body are preserved. You can mix prose with Dreego logic without escaping.
+
+## Keep reading
+
+Back to the [blog index](/blog/), or see the [render foundation](/blog/posts/rendering-foundation) post for the v0.2 story.
+</body>

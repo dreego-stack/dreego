@@ -69,6 +69,23 @@ func hostRouter(public, product, blog http.Handler) http.Handler {
 			blog.ServeHTTP(w, r)
 			return
 		}
+		path := r.URL.Path
+		if path == "/blog" {
+			http.Redirect(w, r, "/blog/", http.StatusMovedPermanently)
+			return
+		}
+		if path == "/saas" {
+			http.Redirect(w, r, "/saas/", http.StatusMovedPermanently)
+			return
+		}
+		if strings.HasPrefix(path, "/blog/") {
+			http.StripPrefix("/blog", blog).ServeHTTP(w, r)
+			return
+		}
+		if strings.HasPrefix(path, "/saas/") {
+			http.StripPrefix("/saas", product).ServeHTTP(w, r)
+			return
+		}
 		public.ServeHTTP(w, r)
 	})
 }
