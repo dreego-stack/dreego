@@ -113,6 +113,88 @@ func TestToNodes(t *testing.T) {
 			src:  "a < b",
 			want: []string{"<p>a &lt; b</p>"},
 		},
+		{
+			name: "basic table",
+			src:  "| a | b |\n| --- | --- |\n| x | y |",
+			want: []string{"<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>x</td><td>y</td></tr></tbody></table>"},
+		},
+		{
+			name: "table alignment",
+			src:  "| a | b | c |\n| :--- | :---: | ---: |\n| x | y | z |",
+			want: []string{`<table><thead><tr><th style="text-align: left">a</th><th style="text-align: center">b</th><th style="text-align: right">c</th></tr></thead><tbody><tr><td style="text-align: left">x</td><td style="text-align: center">y</td><td style="text-align: right">z</td></tr></tbody></table>`},
+		},
+		{
+			name: "table header only",
+			src:  "| a | b |\n| --- | --- |",
+			want: []string{"<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody></tbody></table>"},
+		},
+		{
+			name: "table inline formatting",
+			src:  "| a | b |\n| --- | --- |\n| *em* | `code` |",
+			want: []string{"<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td><em>em</em></td><td><code>code</code></td></tr></tbody></table>"},
+		},
+		{
+			name: "table mismatched columns",
+			src:  "| a | b | c |\n| --- | --- | --- |\n| x |\n| p | q | r | s |",
+			want: []string{"<table><thead><tr><th>a</th><th>b</th><th>c</th></tr></thead><tbody><tr><td>x</td><td></td><td></td></tr><tr><td>p</td><td>q</td><td>r</td></tr></tbody></table>"},
+		},
+		{
+			name: "nested ul in ul",
+			src:  "- a\n  - b\n  - c\n- d",
+			want: []string{"<ul><li>a<ul><li>b</li><li>c</li></ul></li><li>d</li></ul>"},
+		},
+		{
+			name: "nested ol in ul",
+			src:  "- a\n  1. b\n  2. c\n- d",
+			want: []string{"<ul><li>a<ol><li>b</li><li>c</li></ol></li><li>d</li></ul>"},
+		},
+		{
+			name: "nested three levels",
+			src:  "- a\n  - b\n    - c\n- d",
+			want: []string{"<ul><li>a<ul><li>b<ul><li>c</li></ul></li></ul></li><li>d</li></ul>"},
+		},
+		{
+			name: "image inline in paragraph",
+			src:  "see ![alt text](https://example.com/img.png) here",
+			want: []string{`<p>see <img src="https://example.com/img.png" alt="alt text"> here</p>`},
+		},
+		{
+			name: "image standalone paragraph",
+			src:  "![alt](https://example.com/img.png)",
+			want: []string{`<p><img src="https://example.com/img.png" alt="alt"></p>`},
+		},
+		{
+			name: "footnote single ref",
+			src:  "text[^1]\n\n[^1]: The footnote text.",
+			want: []string{
+				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+			},
+		},
+		{
+			name: "footnote multiple refs",
+			src:  "a[^1] b[^1]\n\n[^1]: The footnote text.",
+			want: []string{
+				`<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup> b<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">2</a></sup></p>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+			},
+		},
+		{
+			name: "footnote definition after usage",
+			src:  "text[^1]\n\n[^1]: The footnote text.",
+			want: []string{
+				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
+				`<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+			},
+		},
+		{
+			name: "footnote formatting inside definition",
+			src:  "text[^1]\n\n[^1]: The *footnote* text.",
+			want: []string{
+				`<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`,
+				`<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`,
+			},
+		},
 	}
 
 	for _, tt := range tests {

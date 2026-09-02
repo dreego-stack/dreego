@@ -2,7 +2,6 @@ package md
 
 import (
 	"fmt"
-	"html"
 	"regexp"
 	"strings"
 
@@ -29,10 +28,11 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 	lines := strings.Split(src, "\n")
 	var nodes []ir.TemplateNode
 	var para []string
+	r := newRenderer()
 
 	flushPara := func() {
 		if len(para) > 0 {
-			nodes = append(nodes, textNode("<p>"+renderInline(strings.Join(para, " "))+"</p>"))
+			nodes = append(nodes, textNode("<p>"+r.renderInline(strings.Join(para, " "))+"</p>"))
 			para = nil
 		}
 	}
@@ -74,7 +74,7 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 		if m := atxHeading.FindStringSubmatch(trimmed); m != nil {
 			flushPara()
 			level := len(m[1])
-			nodes = append(nodes, textNode(fmt.Sprintf("<h%d>%s</h%d>", level, renderInline(m[2]), level)))
+			nodes = append(nodes, textNode(fmt.Sprintf("<h%d>%s</h%d>", level, r.renderInline(m[2]), level)))
 			continue
 		}
 
@@ -92,7 +92,7 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 				i++
 			}
 			i--
-			nodes = append(nodes, textNode("<blockquote>"+renderInline(strings.Join(q, " "))+"</blockquote>"))
+			nodes = append(nodes, textNode("<blockquote>"+r.renderInline(strings.Join(q, " "))+"</blockquote>"))
 			continue
 		}
 
@@ -102,35 +102,38 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 
 		if m := ulItem.FindStringSubmatch(trimmed); m != nil {
 			flushPara()
-			var items []string
-			for i < len(lines) {
-				lt := strings.TrimSpace(lines[i])
-				if im := ulItem.FindStringSubmatch(lt); im != nil {
-					items = append(items, "<li>"+renderInline(im[1])+"</li>")
-					i++
-				} else {
-					break
-				}
-			}
-			i--
+			items, next := parseList(lines, i, r)
+			i = next
 			nodes = append(nodes, textNode("<ul>"+strings.Join(items, "")+"</ul>"))
 			continue
 		}
 
 		if m := olItem.FindStringSubmatch(trimmed); m != nil {
 			flushPara()
-			var items []string
-			for i < len(lines) {
-				lt := strings.TrimSpace(lines[i])
-				if im := olItem.FindStringSubmatch(lt); im != nil {
-					items = append(items, "<li>"+renderInline(im[2])+"</li>")
-					i++
-				} else {
-					break
-				}
+			items, next := parseList(lines, i, r)
+			i = next
+			nodes = append(nodes, textNode("<ol>"+strings.Join(items, "")+"</ol>"))
+			continue
+		}
+
+		if strings.Contains(trimmed, "|") && i+1 < len(lines) && isTableSeparator(lines[i+1]) {
+			flushPara()
+			header := trimmed
+			sep := strings.TrimSpace(lines[i+1])
+			i += 2
+			var body []string
+			for i < len(lines) && strings.TrimSpace(lines[i]) != "" && strings.Contains(lines[i], "|") {
+				body = append(body, strings.TrimSpace(lines[i]))
+				i++
 			}
 			i--
-			nodes = append(nodes, textNode("<ol>"+strings.Join(items, "")+"</ol>"))
+			nodes = append(nodes, textNode(buildTable(header, sep, body)))
+			continue
+		}
+
+		if m := footnoteDefRe.FindStringSubmatch(trimmed); m != nil {
+			flushPara()
+			r.addDef(m[1], m[2])
 			continue
 		}
 
@@ -143,6 +146,9 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 	}
 
 	flushPara()
+	if r.hasDefs() {
+		nodes = append(nodes, textNode(r.footnotesSection()))
+	}
 	return nodes, nil
 }
 
@@ -160,35 +166,6 @@ func isHR(s string) bool {
 		}
 	}
 	return len(s) >= 3
-}
-
-func renderInline(s string) string {
-	var b strings.Builder
-	for len(s) > 0 {
-		i := strings.IndexByte(s, '<')
-		if i < 0 || i+1 >= len(s) || !(isHTMLNameStart(s[i+1]) || s[i+1] == '/') {
-			b.WriteString(renderInlineText(s))
-			break
-		}
-		b.WriteString(renderInlineText(s[:i]))
-		end := strings.IndexByte(s[i:], '>')
-		if end < 0 {
-			b.WriteString(s[i:])
-			break
-		}
-		b.WriteString(s[i : i+end+1])
-		s = s[i+end+1:]
-	}
-	return b.String()
-}
-
-func renderInlineText(s string) string {
-	s = html.EscapeString(s)
-	s = codeRe.ReplaceAllString(s, "<code>$1</code>")
-	s = linkRe.ReplaceAllString(s, `<a href="$2">$1</a>`)
-	s = strongRe.ReplaceAllString(s, "<strong>$1</strong>")
-	s = emRe.ReplaceAllString(s, "<em>$1</em>")
-	return s
 }
 
 func isHTMLNameStart(b byte) bool {

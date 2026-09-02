@@ -10,3 +10,4 @@ version: minor
 - Fix: head-merge helpers no longer duplicated with multiple route subdirectories
 - Feat: demo path routing (/blog, /saas) with trailing-slash redirects
 - Docs: Markdown guide (_docs/markdown.md), roadmap + ADR status updated
+- Feat: markdown pipe tables, nested lists, images, and footnotes (GFM-style)

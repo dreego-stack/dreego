@@ -117,6 +117,104 @@ func TestTransformNodesLineAware(t *testing.T) {
 				{Type: ir.NodeText, Content: "<p>5 &lt; 6 and x &gt; y</p>"},
 			},
 		},
+		{
+			name: "table with expression in cell",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "| a | b |\n| --- | --- |\n| x | "},
+				{Type: ir.NodeExpression, Content: "val"},
+				{Type: ir.NodeText, Content: " |"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>x</td><td>"},
+				{Type: ir.NodeExpression, Content: "val"},
+				{Type: ir.NodeText, Content: "</td></tr></tbody></table>"},
+			},
+		},
+		{
+			name: "nested ul in ul",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "- a\n  - b\n  - c\n- d"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<ul><li>a<ul><li>b</li><li>c</li></ul></li><li>d</li></ul>"},
+			},
+		},
+		{
+			name: "nested ol in ul",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "- a\n  1. b\n  2. c\n- d"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<ul><li>a<ol><li>b</li><li>c</li></ol></li><li>d</li></ul>"},
+			},
+		},
+		{
+			name: "nested three levels",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "- a\n  - b\n    - c\n- d"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "<ul><li>a<ul><li>b<ul><li>c</li></ul></li></ul></li><li>d</li></ul>"},
+			},
+		},
+		{
+			name: "image inline in paragraph",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "see ![alt text](https://example.com/img.png) here"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p>see <img src="https://example.com/img.png" alt="alt text"> here</p>`},
+			},
+		},
+		{
+			name: "image standalone paragraph",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "![alt](https://example.com/img.png)"},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p><img src="https://example.com/img.png" alt="alt"></p>`},
+			},
+		},
+		{
+			name: "footnote single ref",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "text[^1]\n\n[^1]: The footnote text."},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+			},
+		},
+		{
+			name: "footnote multiple refs",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "a[^1] b[^1]\n\n[^1]: The footnote text."},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p>a<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup> b<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">2</a></sup></p>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+			},
+		},
+		{
+			name: "footnote definition after usage",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "text[^1]\n\n[^1]: The footnote text."},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The footnote text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+			},
+		},
+		{
+			name: "footnote formatting inside definition",
+			in: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: "text[^1]\n\n[^1]: The *footnote* text."},
+			},
+			want: []ir.TemplateNode{
+				{Type: ir.NodeText, Content: `<p>text<sup class="footnote-ref"><a href="#fn-1" id="fnref-1">1</a></sup></p>`},
+				{Type: ir.NodeText, Content: `<section class="footnotes"><ol><li id="fn-1">The <em>footnote</em> text <a href="#fnref-1" class="footnote-backref">↩</a></li></ol></section>`},
+			},
+		},
 	}
 
 	for _, tt := range tests {

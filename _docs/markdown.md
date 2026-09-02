@@ -30,9 +30,13 @@ code, and other constructs are converted to their HTML equivalents. The default
 
 - ATX headings, lists, blockquotes, and paragraphs;
 - emphasis, strong, inline code, and links;
-- fenced code blocks.
+- fenced code blocks;
+- pipe tables (GFM-style) with per-column alignment;
+- nested lists (indented sub-items);
+- images (`![alt](url)` → `<img>`);
+- footnotes (references + definitions emitted at the end).
 
-Tables, raw HTML, and indented code blocks are not supported.
+Raw HTML and indented code blocks are not supported.
 
 The processor is a small hand-written Markdown parser with no external
 dependencies. It lives at `internal/transpiler/html/md` in the transpiler
@@ -121,7 +125,6 @@ a `lang="md"` body.
 
 The following are planned but not supported yet:
 
-- Pipe tables (`| a | b |`, see `_todo/core/markdown-tables.1.md`)
-- Nested lists
-- Footnotes
-- Image blocks
+- MDX-style imports (rejected for now)
+- Syntax highlighting for fenced code blocks
+- Automatic table of contents

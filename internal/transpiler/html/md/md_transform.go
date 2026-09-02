@@ -17,6 +17,7 @@ type mdSegment struct {
 
 func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 	lines := buildLines(nodes)
+	activeR = newRenderer()
 	var out []ir.TemplateNode
 	var inline []ir.TemplateNode
 	var blockOpen, blockClose string
@@ -122,37 +123,6 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 				blockOpen, blockClose = fmt.Sprintf("<h%d>", level), fmt.Sprintf("</h%d>", level)
 				flushBlock()
 			}
-		case isListItem(raw):
-			content := trimTrailingSpace(stripPrefix(line, markerLen(raw, listItemRe(raw))))
-			if before, expr, after, found := splitAtExpr(content); found {
-				if blockOpen == "<ul><li>" || blockOpen == "<ol><li>" {
-					inline = append(inline, textNode("</li><li>"))
-				} else {
-					flushBlock()
-					if isOL(raw) {
-						blockOpen, blockClose = "<ol><li>", "</li></ol>"
-					} else {
-						blockOpen, blockClose = "<ul><li>", "</li></ul>"
-					}
-				}
-				inline = append(inline, lineSegments(trimTrailingSpace(before), false)...)
-				flushBlock()
-				out = append(out, lineSegments(expr, false)...)
-				inline = append(inline, lineSegments(after, false)...)
-				blockOpen, blockClose = "<p>", "</p>"
-			} else {
-				if blockOpen == "<ul><li>" || blockOpen == "<ol><li>" {
-					inline = append(inline, textNode("</li><li>"))
-				} else {
-					flushBlock()
-					if isOL(raw) {
-						blockOpen, blockClose = "<ol><li>", "</li></ol>"
-					} else {
-						blockOpen, blockClose = "<ul><li>", "</li></ul>"
-					}
-				}
-				inline = append(inline, lineSegments(content, false)...)
-			}
 		case isBlockquote(raw):
 			flushBlock()
 			content := trimTrailingSpace(trimLeadingSpace(stripPrefix(line, 1)))
@@ -180,6 +150,20 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 			}
 			idx--
 			out = append(out, textNode(strings.Join(raw, "\n")))
+		case strings.Contains(trimmed, "|") && idx+1 < len(lines) && isTableSeparator(lineRaw(lines[idx+1])):
+			flushBlock()
+			var consumed int
+			out = append(out, emitTableLines(lines, idx, &consumed)...)
+			idx += consumed
+		case footnoteDefRe.MatchString(trimmed):
+			flushBlock()
+			m := footnoteDefRe.FindStringSubmatch(trimmed)
+			activeR.addDef(m[1], m[2])
+		case isListItem(raw):
+			flushBlock()
+			var consumed int
+			out = append(out, emitListLines(lines, idx, &consumed)...)
+			idx += consumed
 		default:
 			if blockOpen != "" {
 				inline = append(inline, textNode(" "))
@@ -194,6 +178,9 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 		emitFence()
 	}
 	flushBlock()
+	if activeR.hasDefs() {
+		out = append(out, textNode(activeR.footnotesSection()))
+	}
 	return out, nil
 }
 
