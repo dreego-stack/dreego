@@ -1,10 +1,10 @@
-package transpiler
+package ir
 
 import "strings"
 
 const mdtohtmlMarker = "dreego.mdtohtml("
 
-// translateMdtohtml rewrites the dreego.mdtohtml(...) stdlib syntax in server
+// TranslateMdtohtml rewrites the dreego.mdtohtml(...) stdlib syntax in server
 // section code into the exported core calls. The trust decision is visible at
 // the call site, per use:
 //
@@ -15,7 +15,7 @@ const mdtohtmlMarker = "dreego.mdtohtml("
 // The trusted: true/false argument is stripped and the function name is
 // rewritten. If the call cannot be parsed (unbalanced parens), the code is left
 // unchanged so the Go compiler reports the error naturally.
-func translateMdtohtml(code string) string {
+func TranslateMdtohtml(code string) string {
 	var b strings.Builder
 	rest := code
 	for {

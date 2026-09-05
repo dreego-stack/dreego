@@ -45,7 +45,11 @@ func (r *mdRenderer) renderInline(s string) string {
 		b.WriteString(r.renderInlineText(s[:i]))
 		end := strings.IndexByte(s[i:], '>')
 		if end < 0 {
-			b.WriteString(s[i:])
+			if r.mode == ModeSafe {
+				b.WriteString(r.renderInlineText(s[i:]))
+			} else {
+				b.WriteString(s[i:])
+			}
 			break
 		}
 		if r.mode == ModeSafe {

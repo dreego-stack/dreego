@@ -30,6 +30,9 @@ func TestMarkdownXSS(t *testing.T) {
 		{name: "fence lang breakout", src: "```\"><script>alert(1)</script>\n```"},
 		{name: "tag soup", src: `<scr<script>ipt>alert(1)</scr</script>ipt>`},
 		{name: "footnote injection", src: "text[^1]\n\n[^1]: <script>alert(1)</script>"},
+		{name: "unclosed iframe", src: "<ifrAme"},
+		{name: "unclosed iframe with attrs", src: "hello <iframe src=javascript:alert(1)//"},
+		{name: "unclosed img onerror", src: "hello <img src=x onerror=alert(1)"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -73,7 +76,9 @@ func assertNoExecutableHTML(t *testing.T, out string) {
 }
 
 // attrInUnescapedTag reports whether attr appears inside an unescaped <tag>,
-// i.e. the nearest preceding '<' is not part of an escaped &lt; sequence.
+// i.e. the nearest preceding '<' is not part of an escaped &lt; sequence and the
+// tag is still open (no '>' between that '<' and the attr). An attr in plain
+// text after a closed tag (e.g. "<p>onload=0</p>") is inert and not flagged.
 func attrInUnescapedTag(s, attr string) bool {
 	search := s
 	for {
@@ -85,7 +90,10 @@ func attrInUnescapedTag(s, attr string) bool {
 		lt := strings.LastIndex(before, "<")
 		esc := strings.LastIndex(before, "&lt;")
 		if lt > esc {
-			return true
+			gt := strings.LastIndex(before, ">")
+			if gt < lt {
+				return true
+			}
 		}
 		search = search[idx+len(attr):]
 	}

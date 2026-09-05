@@ -106,6 +106,35 @@ func TestSafeModeEscapesFenceLang(t *testing.T) {
 	}
 }
 
+func TestSafeModeEscapesUnclosedTag(t *testing.T) {
+	tests := []struct {
+		name string
+		src  string
+		want string
+	}{
+		{name: "unclosed iframe", src: "<ifrAme", want: "<p>&lt;ifrAme</p>"},
+		{name: "unclosed iframe with attrs", src: "hello <iframe src=javascript:alert(1)//", want: "<p>hello &lt;iframe src=javascript:alert(1)//</p>"},
+		{name: "unclosed img onerror", src: "hello <img src=x onerror=alert(1)", want: "<p>hello &lt;img src=x onerror=alert(1)</p>"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			nodes, err := ToNodes(tt.src, ModeSafe)
+			if err != nil {
+				t.Fatalf("ToNodes() error = %v", err)
+			}
+			if len(nodes) != 1 {
+				t.Fatalf("got %d nodes, want 1: %+v", len(nodes), nodes)
+			}
+			if nodes[0].Content != tt.want {
+				t.Errorf("content = %q, want %q", nodes[0].Content, tt.want)
+			}
+			if strings.Contains(nodes[0].Content, "<iframe") || strings.Contains(nodes[0].Content, "<img") {
+				t.Errorf("output contains unescaped executable tag: %q", nodes[0].Content)
+			}
+		})
+	}
+}
+
 func TestTrustedModeStillPassesRawHTML(t *testing.T) {
 	nodes, err := ToNodes("<script>alert(1)</script>", ModeTrusted)
 	if err != nil {

@@ -35,7 +35,7 @@ func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (stri
 
 	for _, g := range file.Server {
 		if g.Code != "" {
-			for _, line := range strings.Split(strings.Trim(g.Code, "\n"), "\n") {
+			for _, line := range strings.Split(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
 				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
 			}
 			buf.WriteString("\n")

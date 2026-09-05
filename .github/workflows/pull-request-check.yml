@@ -73,6 +73,10 @@ jobs:
       - name: go test -race
         run: CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
 
+      - name: fuzz MarkdownToHTML safe
+        run: |
+          timeout 120s go test ./core/ -run FuzzMarkdownToHTMLSafe -fuzz=FuzzMarkdownToHTMLSafe -fuzztime=30s
+
       - name: coverage gate
         run: make coverage
 

@@ -2,6 +2,8 @@ package transpiler
 
 import (
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode string, inlineCode string) {
@@ -26,9 +28,9 @@ func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode
 		}
 		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
 		if isDeclaration && hasFormActions {
-			pkg = append(pkg, translateMdtohtml(unindent(g.Code)))
+			pkg = append(pkg, ir.TranslateMdtohtml(unindent(g.Code)))
 		} else {
-			inl = append(inl, translateMdtohtml(trimmed))
+			inl = append(inl, ir.TranslateMdtohtml(trimmed))
 		}
 	}
 	result := strings.Join(pkg, "\n")
