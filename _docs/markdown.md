@@ -130,6 +130,14 @@ a `lang="md"` body.
 - **`<md>` inside `<body lang="md">`** is rejected — Markdown is already the
   body language there.
 
+## Runtime rendering
+
+The same Markdown processor is available at runtime for content stored as
+Markdown (for example from a database) via `dreego.MarkdownToHTML(src string)
+(string, error)`. It renders the Markdown to HTML per call. Control flow and
+other Dreego constructs are not interpreted at runtime — they are rendered as
+literal text, so use it only for plain Markdown content.
+
 ## Roadmap ideas
 
 The following are planned but not supported yet:
