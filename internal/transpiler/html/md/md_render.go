@@ -13,23 +13,15 @@ var (
 	footnoteDefRe = regexp.MustCompile(`^\[\^(\d+)\]:\s*(.*)$`)
 )
 
-var activeR *mdRenderer
-
-func renderInline(s string) string {
-	if activeR == nil {
-		activeR = newRenderer()
-	}
-	return activeR.renderInline(s)
-}
-
 type mdRenderer struct {
+	mode      Mode
 	defs      map[string]string
 	refCounts map[string]int
 	refOrder  []string
 }
 
-func newRenderer() *mdRenderer {
-	return &mdRenderer{defs: map[string]string{}, refCounts: map[string]int{}}
+func newRenderer(mode Mode) *mdRenderer {
+	return &mdRenderer{mode: mode, defs: map[string]string{}, refCounts: map[string]int{}}
 }
 
 func (r *mdRenderer) addDef(num, content string) {
@@ -56,7 +48,11 @@ func (r *mdRenderer) renderInline(s string) string {
 			b.WriteString(s[i:])
 			break
 		}
-		b.WriteString(s[i : i+end+1])
+		if r.mode == ModeSafe {
+			b.WriteString(r.renderInlineText(s[i : i+end+1]))
+		} else {
+			b.WriteString(s[i : i+end+1])
+		}
 		s = s[i+end+1:]
 	}
 	return b.String()
@@ -65,8 +61,22 @@ func (r *mdRenderer) renderInline(s string) string {
 func (r *mdRenderer) renderInlineText(s string) string {
 	s = html.EscapeString(s)
 	s = codeRe.ReplaceAllString(s, "<code>$1</code>")
-	s = imageRe.ReplaceAllString(s, `<img src="$2" alt="$1">`)
-	s = linkRe.ReplaceAllString(s, `<a href="$2">$1</a>`)
+	s = imageRe.ReplaceAllStringFunc(s, func(m string) string {
+		p := imageRe.FindStringSubmatch(m)
+		u := safeURL(p[2], true)
+		if u == "" {
+			return m
+		}
+		return `<img src="` + html.EscapeString(u) + `" alt="` + p[1] + `">`
+	})
+	s = linkRe.ReplaceAllStringFunc(s, func(m string) string {
+		p := linkRe.FindStringSubmatch(m)
+		u := safeURL(p[2], false)
+		if u == "" {
+			return m
+		}
+		return `<a href="` + html.EscapeString(u) + `">` + p[1] + `</a>`
+	})
 	s = strongRe.ReplaceAllString(s, "<strong>$1</strong>")
 	s = emRe.ReplaceAllString(s, "<em>$1</em>")
 	s = r.replaceFootnoteRefs(s)
@@ -97,4 +107,59 @@ func (r *mdRenderer) footnotesSection() string {
 	}
 	b.WriteString(`</ol></section>`)
 	return b.String()
+}
+
+func safeURL(raw string, isImage bool) string {
+	u := html.UnescapeString(raw)
+	// html.UnescapeString does a single pass: a decoded &amp; can reveal a
+	// further entity (e.g. &amp;#x09; -> &#x09;). Decode until stable so
+	// entity-encoded control characters are visible to the scheme check and
+	// cannot smuggle a javascript: scheme past hasScheme.
+	for {
+		next := html.UnescapeString(u)
+		if next == u {
+			break
+		}
+		u = next
+	}
+	u = strings.Map(func(r rune) rune {
+		switch {
+		case r < 0x20, r == 0x7f, r == ' ', r == '\t', r == '\n', r == '\r':
+			return -1
+		}
+		return r
+	}, u)
+	if u == "" {
+		return ""
+	}
+	if !hasScheme(u) {
+		return u
+	}
+	lower := strings.ToLower(u)
+	if strings.HasPrefix(lower, "http://") || strings.HasPrefix(lower, "https://") || strings.HasPrefix(lower, "mailto:") {
+		return u
+	}
+	if isImage && strings.HasPrefix(lower, "data:image/") {
+		rest := lower[len("data:image/"):]
+		baseIdx := strings.Index(rest, ";base64,")
+		if baseIdx > 0 {
+			switch rest[:baseIdx] {
+			case "png", "jpeg", "gif", "webp":
+				return u
+			}
+		}
+	}
+	return ""
+}
+
+func hasScheme(u string) bool {
+	for i := 0; i < len(u); i++ {
+		switch u[i] {
+		case ':':
+			return i > 0
+		case '/', '?', '#':
+			return false
+		}
+	}
+	return false
 }

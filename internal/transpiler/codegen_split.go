@@ -26,9 +26,9 @@ func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode
 		}
 		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
 		if isDeclaration && hasFormActions {
-			pkg = append(pkg, unindent(g.Code))
+			pkg = append(pkg, translateMdtohtml(unindent(g.Code)))
 		} else {
-			inl = append(inl, trimmed)
+			inl = append(inl, translateMdtohtml(trimmed))
 		}
 	}
 	result := strings.Join(pkg, "\n")

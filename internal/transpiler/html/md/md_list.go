@@ -6,9 +6,9 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func emitListLines(lines [][]mdSegment, start int, consumed *int) []ir.TemplateNode {
+func emitListLines(lines [][]mdSegment, start int, consumed *int, r *mdRenderer) []ir.TemplateNode {
 	indent := indentOfSegs(lines[start])
-	items, next := emitListAt(lines, start, indent)
+	items, next := emitListAt(lines, start, indent, r)
 	*consumed = next - start
 	var out []ir.TemplateNode
 	if ulItem.MatchString(strings.TrimSpace(lineRaw(lines[start]))) {
@@ -25,7 +25,7 @@ func emitListLines(lines [][]mdSegment, start int, consumed *int) []ir.TemplateN
 	return mergeText(out)
 }
 
-func emitListAt(lines [][]mdSegment, start, indent int) ([]ir.TemplateNode, int) {
+func emitListAt(lines [][]mdSegment, start, indent int, r *mdRenderer) ([]ir.TemplateNode, int) {
 	var items []ir.TemplateNode
 	i := start
 	for i < len(lines) {
@@ -46,10 +46,10 @@ func emitListAt(lines [][]mdSegment, start, indent int) ([]ir.TemplateNode, int)
 		}
 		var li []ir.TemplateNode
 		li = append(li, textNode("<li>"))
-		li = append(li, lineSegments(trimTrailingSpace(text), false)...)
+		li = append(li, lineSegments(trimTrailingSpace(text), false, r)...)
 		if i+1 < len(lines) && indentOfSegs(lines[i+1]) > ind {
 			childIndent := indentOfSegs(lines[i+1])
-			childItems, next := emitListAt(lines, i+1, childIndent)
+			childItems, next := emitListAt(lines, i+1, childIndent, r)
 			if ulItem.MatchString(strings.TrimSpace(lineRaw(lines[i+1]))) {
 				li = append(li, textNode("<ul>"))
 			} else {

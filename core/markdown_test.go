@@ -55,3 +55,36 @@ func TestMarkdownToHTMLControlFlowRenderedAsText(t *testing.T) {
 		t.Errorf("output = %q, want %q", out, want)
 	}
 }
+
+func TestMarkdownToHTMLSafeEscapesScript(t *testing.T) {
+	out, err := MarkdownToHTML("<script>alert(1)</script>")
+	if err != nil {
+		t.Fatalf("MarkdownToHTML returned error: %v", err)
+	}
+	if strings.Contains(out, "<script>") {
+		t.Errorf("safe mode leaked raw script tag: %q", out)
+	}
+	if !strings.Contains(out, "&lt;script&gt;") {
+		t.Errorf("safe mode did not escape script tag: %q", out)
+	}
+}
+
+func TestMarkdownToHTMLTrustedPassesScript(t *testing.T) {
+	out, err := MarkdownToHTMLTrusted("<script>alert(1)</script>")
+	if err != nil {
+		t.Fatalf("MarkdownToHTMLTrusted returned error: %v", err)
+	}
+	if !strings.Contains(out, "<script>alert(1)</script>") {
+		t.Errorf("trusted mode did not pass raw script through: %q", out)
+	}
+}
+
+func TestMarkdownToHTMLTrustedRendersMarkdown(t *testing.T) {
+	out, err := MarkdownToHTMLTrusted("# Title\n\n**bold**")
+	if err != nil {
+		t.Fatalf("MarkdownToHTMLTrusted returned error: %v", err)
+	}
+	if want := "<h1>Title</h1><p><strong>bold</strong></p>"; out != want {
+		t.Errorf("output = %q, want %q", out, want)
+	}
+}

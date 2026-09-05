@@ -133,10 +133,44 @@ a `lang="md"` body.
 ## Runtime rendering
 
 The same Markdown processor is available at runtime for content stored as
-Markdown (for example from a database) via `dreego.MarkdownToHTML(src string)
-(string, error)`. It renders the Markdown to HTML per call. Control flow and
-other Dreego constructs are not interpreted at runtime — they are rendered as
-literal text, so use it only for plain Markdown content.
+Markdown (for example from a database). Two functions are exported:
+
+- `dreego.MarkdownToHTML(src string) (string, error)` — **safe mode**. Raw HTML
+  in the source is escaped, so it is safe for untrusted content (for example
+  user-generated Markdown). This is the default and the recommended entry point.
+- `dreego.MarkdownToHTMLTrusted(src string) (string, error)` — **trusted mode**.
+  Raw HTML passes through verbatim. Use it only for content you fully control;
+  it is not a sanitization boundary. On first use it logs a loud warning to
+  stderr: `MarkdownToHTMLTrusted: raw HTML passthrough enabled — only use with
+  trusted content`.
+
+Both render the Markdown to HTML per call. Control flow and other Dreego
+constructs are not interpreted at runtime — they are rendered as literal text,
+so use them only for plain Markdown content.
+
+### `dreego.mdtohtml` stdlib syntax
+
+Inside a `<server>` section you can use the `dreego.mdtohtml(...)` stdlib syntax
+instead of calling the exported functions directly. The transpiler rewrites it
+to the corresponding core call at generation time, so the trust decision is
+visible at the call site, per use:
+
+```html
+<server>
+html, err := dreego.mdtohtml(post.Content)
+</server>
+```
+
+- `dreego.mdtohtml(x)` → `dreego.MarkdownToHTML(x)` — **safe mode**, the default.
+- `dreego.mdtohtml(x, trusted: true)` → `dreego.MarkdownToHTMLTrusted(x)` —
+  **trusted mode**; the `trusted: true` argument is stripped and the call is
+  rewritten.
+- `dreego.mdtohtml(x, trusted: false)` → `dreego.MarkdownToHTML(x)` — safe mode;
+  the `trusted: false` argument is stripped.
+
+The `trusted:` argument is a per-call-site decision, not a global setting. If
+the call cannot be parsed (for example unbalanced parentheses), the code is left
+unchanged and the Go compiler reports the error naturally.
 
 ## Roadmap ideas
 

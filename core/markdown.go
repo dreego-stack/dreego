@@ -2,14 +2,32 @@ package core
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
 	"strings"
+	"sync"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/html/md"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
+var markdownLogger = slog.New(slog.NewJSONHandler(os.Stderr, nil))
+
+var trustedWarnOnce sync.Once
+
 func MarkdownToHTML(src string) (string, error) {
-	nodes, err := md.ToNodes(src)
+	return markdownToHTML(src, md.ModeSafe)
+}
+
+func MarkdownToHTMLTrusted(src string) (string, error) {
+	trustedWarnOnce.Do(func() {
+		markdownLogger.Warn("MarkdownToHTMLTrusted: raw HTML passthrough enabled — only use with trusted content")
+	})
+	return markdownToHTML(src, md.ModeTrusted)
+}
+
+func markdownToHTML(src string, mode md.Mode) (string, error) {
+	nodes, err := md.ToNodes(src, mode)
 	if err != nil {
 		return "", err
 	}

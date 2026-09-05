@@ -2,7 +2,10 @@ package routes
 
 import (
 	"encoding/json"
+	"html"
+	"log"
 	"strings"
+	"sync"
 
 	dreego "github.com/dreego-stack/dreego/core"
 )
@@ -13,7 +16,10 @@ type NewsPost struct {
 	Content string
 }
 
-var newsPosts = []NewsPost{}
+var (
+	newsPosts = []NewsPost{}
+	newsMu    sync.Mutex
+)
 
 const newsSeedJSON = `[
 	{
@@ -39,18 +45,21 @@ func init() {
 
 func RenderNewsPosts() (string, error) {
 	var b strings.Builder
+	newsMu.Lock()
+	defer newsMu.Unlock()
 	for _, p := range newsPosts {
-		html, err := dreego.MarkdownToHTML(p.Content)
+		body, err := dreego.MarkdownToHTML(p.Content)
 		if err != nil {
-			return "", err
+			log.Printf("news: skipping post %q: %v", p.Title, err)
+			continue
 		}
 		b.WriteString(`<article class="mb-10 rounded-3xl border border-slate-200 bg-white p-7">`)
 		b.WriteString(`<div class="mb-3 flex items-center justify-between">`)
 		b.WriteString(`<span class="font-mono text-xs text-emerald-700">` + p.Date + `</span>`)
 		b.WriteString(`<span class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">announcement</span>`)
 		b.WriteString(`</div>`)
-		b.WriteString(`<h2 class="mb-4 text-2xl font-semibold tracking-tight text-slate-900">` + p.Title + `</h2>`)
-		b.WriteString(html)
+		b.WriteString(`<h2 class="mb-4 text-2xl font-semibold tracking-tight text-slate-900">` + html.EscapeString(p.Title) + `</h2>`)
+		b.WriteString(body)
 		b.WriteString(`</article>`)
 	}
 	return b.String(), nil
