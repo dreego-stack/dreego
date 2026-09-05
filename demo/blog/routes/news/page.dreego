@@ -3,7 +3,7 @@
     <meta name="description" content="Announcements from the Dreego team, rendered from markdown at runtime.">
 </head>
 
-<server>
+<server method="post">
     type NewsForm struct {
         Title   string `form:"title" validate:"required"`
         Content string `form:"content" validate:"required"`
@@ -16,24 +16,13 @@
 </server>
 
 <server>
-    var newsHTML strings.Builder
-    for _, p := range newsPosts {
-        html, err := dreego.MarkdownToHTML(p.Content)
-        if err != nil {
-            return "", err
-        }
-        newsHTML.WriteString(`<article class="mb-10 rounded-3xl border border-slate-200 bg-white p-7">`)
-        newsHTML.WriteString(`<div class="mb-3 flex items-center justify-between">`)
-        newsHTML.WriteString(`<span class="font-mono text-xs text-emerald-700">` + p.Date + `</span>`)
-        newsHTML.WriteString(`<span class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">announcement</span>`)
-        newsHTML.WriteString(`</div>`)
-        newsHTML.WriteString(`<h2 class="mb-4 text-2xl font-semibold tracking-tight text-slate-900">` + p.Title + `</h2>`)
-        newsHTML.WriteString(html)
-        newsHTML.WriteString(`</article>`)
+    newsHTML, err := RenderNewsPosts()
+    if err != nil {
+        return "", err
     }
 </server>
 
-<body lang="html">
+<body>
     <nav class="mb-10 flex items-center gap-2" aria-label="News navigation">
         <a href="/blog/" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">← Back to blog</a>
         <span class="rounded-full bg-slate-950 px-4 py-1.5 text-sm font-medium text-white">News</span>
@@ -44,7 +33,7 @@
     <p class="mb-14">Runtime-rendered markdown, straight from the store.</p>
 
     <div class="news-posts">
-        {{ newsHTML.String() | raw }}
+        {{ newsHTML | raw }}
     </div>
 
     <div class="mt-16 rounded-3xl border border-slate-200 bg-white p-7">

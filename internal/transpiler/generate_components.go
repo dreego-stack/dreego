@@ -105,7 +105,7 @@ func loadComponent(path string) (componentSource, error) {
 	if err != nil {
 		return componentSource{}, fmt.Errorf("error lexing component %s: %w", path, err)
 	}
-	file, err := NewParser(tokens).Parse()
+	file, err := NewParserConcatServer(tokens).Parse()
 	if err != nil {
 		return componentSource{}, fmt.Errorf("error parsing component %s: %w", path, err)
 	}
