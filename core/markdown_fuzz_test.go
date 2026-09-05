@@ -3,6 +3,7 @@ package core
 import (
 	"strings"
 	"testing"
+	"unicode"
 )
 
 // FuzzMarkdownToHTMLSafe asserts the SAFE runtime API never panics and never
@@ -29,6 +30,7 @@ func FuzzMarkdownToHTMLSafe(f *testing.F) {
 		"<ifrAme",
 		"hello <iframe src=javascript:alert(1)//",
 		"hello <img src=x onerror=alert(1)",
+		"0[](onload=)",
 	}
 	for _, s := range seeds {
 		f.Add(s)
@@ -67,12 +69,22 @@ func FuzzMarkdownToHTMLSafe(f *testing.F) {
 // i.e. the nearest preceding '<' is not part of an escaped &lt; sequence and the
 // tag is still open (no '>' between that '<' and the attr). An attr in plain
 // text after a closed tag (e.g. "<p>onload=0</p>") is inert and not flagged.
+// An attr inside a quoted attribute value (e.g. href="onload=" — an inert
+// relative URL) is also not flagged: only a preceding whitespace or tag
+// boundary marks a real attribute position.
 func attrInUnescapedTag(s, attr string) bool {
 	search := s
 	for {
 		idx := strings.Index(search, attr)
 		if idx < 0 {
 			return false
+		}
+		if idx > 0 {
+			prev := rune(search[idx-1])
+			if !unicode.IsSpace(prev) && prev != '<' && prev != '>' {
+				search = search[idx+len(attr):]
+				continue
+			}
 		}
 		before := search[:idx]
 		lt := strings.LastIndex(before, "<")

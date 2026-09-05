@@ -39,7 +39,7 @@ runtime never reads `dreego.config.json`; global policies would violate explicit
 ## Consequences
 
 - Safe mode is the default for all runtime content.
-- An XSS test matrix (15 hostile inputs) and a fuzz target for the safe runtime
+- An XSS test matrix (18 hostile inputs) and a fuzz target for the safe runtime
   path are a release gate.
 - Trusted mode is grep-auditable at call sites.
 

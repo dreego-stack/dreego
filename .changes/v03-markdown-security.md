@@ -9,4 +9,5 @@ version: patch
 - Fix: fenced-code language attribute injection closed
 - Fix: data race in the markdown renderer (per-call renderer)
 - Fix: news demo — title escaping, poisoned-post resilience, store mutex
-- Tests: XSS matrix (15 hostile inputs) + fuzz target for the safe runtime path
+- Breaking: duplicate <server> sections with the same method and content-type are now rejected at generation time (components keep concatenation)
+- Tests: XSS matrix (18 hostile inputs) + fuzz target for the safe runtime path

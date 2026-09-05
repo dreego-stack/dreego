@@ -3,6 +3,7 @@ package tests
 import (
 	"strings"
 	"testing"
+	"unicode"
 
 	dreego "github.com/dreego-stack/dreego/core"
 )
@@ -33,6 +34,7 @@ func TestMarkdownXSS(t *testing.T) {
 		{name: "unclosed iframe", src: "<ifrAme"},
 		{name: "unclosed iframe with attrs", src: "hello <iframe src=javascript:alert(1)//"},
 		{name: "unclosed img onerror", src: "hello <img src=x onerror=alert(1)"},
+		{name: "quoted attr value onload", src: "0[](onload=)"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -79,12 +81,22 @@ func assertNoExecutableHTML(t *testing.T, out string) {
 // i.e. the nearest preceding '<' is not part of an escaped &lt; sequence and the
 // tag is still open (no '>' between that '<' and the attr). An attr in plain
 // text after a closed tag (e.g. "<p>onload=0</p>") is inert and not flagged.
+// An attr inside a quoted attribute value (e.g. href="onload=" — an inert
+// relative URL) is also not flagged: only a preceding whitespace or tag
+// boundary marks a real attribute position.
 func attrInUnescapedTag(s, attr string) bool {
 	search := s
 	for {
 		idx := strings.Index(search, attr)
 		if idx < 0 {
 			return false
+		}
+		if idx > 0 {
+			prev := rune(search[idx-1])
+			if !unicode.IsSpace(prev) && prev != '<' && prev != '>' {
+				search = search[idx+len(attr):]
+				continue
+			}
 		}
 		before := search[:idx]
 		lt := strings.LastIndex(before, "<")

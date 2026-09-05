@@ -148,6 +148,10 @@ Both render the Markdown to HTML per call. Control flow and other Dreego
 constructs are not interpreted at runtime — they are rendered as literal text,
 so use them only for plain Markdown content.
 
+The result of `dreego.mdtohtml(...)` / `MarkdownToHTML` must be rendered with
+the `raw` filter (`{{ html | raw }}`); without it the HTML is escaped as
+literal text.
+
 ### `dreego.mdtohtml` stdlib syntax
 
 Inside a `<server>` section you can use the `dreego.mdtohtml(...)` stdlib syntax
