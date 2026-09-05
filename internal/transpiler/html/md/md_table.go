@@ -13,14 +13,14 @@ func isTableSeparator(s string) bool {
 	return tableSepRe.MatchString(s)
 }
 
-func buildTable(header, sep string, body []string) string {
+func buildTable(header, sep string, body []string, r *mdRenderer) string {
 	headers := splitCells(header)
 	sepCells := splitCells(sep)
 	n := len(headers)
 	var b strings.Builder
 	b.WriteString("<table><thead><tr>")
 	for i, h := range headers {
-		b.WriteString(cellTag("th", h, alignAt(sepCells, i)))
+		b.WriteString(cellTag("th", h, alignAt(sepCells, i), r))
 	}
 	b.WriteString("</tr></thead><tbody>")
 	for _, row := range body {
@@ -31,7 +31,7 @@ func buildTable(header, sep string, body []string) string {
 			if i < len(cells) {
 				c = cells[i]
 			}
-			b.WriteString(cellTag("td", c, alignAt(sepCells, i)))
+			b.WriteString(cellTag("td", c, alignAt(sepCells, i), r))
 		}
 		b.WriteString("</tr>")
 	}
@@ -39,14 +39,14 @@ func buildTable(header, sep string, body []string) string {
 	return b.String()
 }
 
-func buildTableNodes(header, sep []mdSegment, body [][]mdSegment) []ir.TemplateNode {
+func buildTableNodes(header, sep []mdSegment, body [][]mdSegment, r *mdRenderer) []ir.TemplateNode {
 	headers := splitCellSegments(header)
 	sepCells := splitCellSegments(sep)
 	n := len(headers)
 	var out []ir.TemplateNode
 	out = append(out, textNode("<table><thead><tr>"))
 	for i, h := range headers {
-		out = append(out, cellTagNodes("th", h, alignAtSegments(sepCells, i))...)
+		out = append(out, cellTagNodes("th", h, alignAtSegments(sepCells, i), r)...)
 	}
 	out = append(out, textNode("</tr></thead><tbody>"))
 	for _, row := range body {
@@ -57,7 +57,7 @@ func buildTableNodes(header, sep []mdSegment, body [][]mdSegment) []ir.TemplateN
 			if i < len(cells) {
 				c = cells[i]
 			}
-			out = append(out, cellTagNodes("td", c, alignAtSegments(sepCells, i))...)
+			out = append(out, cellTagNodes("td", c, alignAtSegments(sepCells, i), r)...)
 		}
 		out = append(out, textNode("</tr>"))
 	}
@@ -65,7 +65,7 @@ func buildTableNodes(header, sep []mdSegment, body [][]mdSegment) []ir.TemplateN
 	return mergeText(out)
 }
 
-func emitTableLines(lines [][]mdSegment, start int, consumed *int) []ir.TemplateNode {
+func emitTableLines(lines [][]mdSegment, start int, consumed *int, r *mdRenderer) []ir.TemplateNode {
 	header := lines[start]
 	sep := lines[start+1]
 	idx := start + 2
@@ -79,7 +79,7 @@ func emitTableLines(lines [][]mdSegment, start int, consumed *int) []ir.Template
 		idx++
 	}
 	*consumed = idx - start - 1
-	return buildTableNodes(header, sep, body)
+	return buildTableNodes(header, sep, body, r)
 }
 
 func splitCells(s string) []string {
@@ -191,7 +191,7 @@ func alignAtSegments(sepCells [][]mdSegment, i int) string {
 	return ""
 }
 
-func cellTag(tag, content, align string) string {
+func cellTag(tag, content, align string, r *mdRenderer) string {
 	var b strings.Builder
 	b.WriteString("<")
 	b.WriteString(tag)
@@ -201,14 +201,14 @@ func cellTag(tag, content, align string) string {
 		b.WriteString(`"`)
 	}
 	b.WriteString(">")
-	b.WriteString(renderInline(content))
+	b.WriteString(r.renderInline(content))
 	b.WriteString("</")
 	b.WriteString(tag)
 	b.WriteString(">")
 	return b.String()
 }
 
-func cellTagNodes(tag string, cell []mdSegment, align string) []ir.TemplateNode {
+func cellTagNodes(tag string, cell []mdSegment, align string, r *mdRenderer) []ir.TemplateNode {
 	var out []ir.TemplateNode
 	open := "<" + tag
 	if align != "" {
@@ -216,7 +216,7 @@ func cellTagNodes(tag string, cell []mdSegment, align string) []ir.TemplateNode 
 	}
 	open += ">"
 	out = append(out, textNode(open))
-	out = append(out, lineSegments(cell, false)...)
+	out = append(out, lineSegments(cell, false, r)...)
 	out = append(out, textNode("</"+tag+">"))
 	return out
 }

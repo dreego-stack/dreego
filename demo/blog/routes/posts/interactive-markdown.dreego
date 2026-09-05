@@ -62,7 +62,7 @@ There are {{ featureCount }} verified capabilities demonstrated on this page. Ra
 | Raw HTML + HTMX | Done | v0.3 |
 | Pipe tables | Done | v0.3 |
 
-![Dreego logo](https://dreego.dev/logo.svg)
+![Dreego logo](/blog/dreego-logo.png)
 
 ## Nested lists
 

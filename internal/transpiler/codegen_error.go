@@ -26,7 +26,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if len(file.Server) > 0 && file.Server[0].Code != "" {
-		for _, line := range strings.Split(strings.Trim(file.Server[0].Code, "\n"), "\n") {
+		for _, line := range strings.Split(strings.Trim(ir.TranslateMdtohtml(file.Server[0].Code), "\n"), "\n") {
 			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
 		}
 		buf.WriteString("\n")

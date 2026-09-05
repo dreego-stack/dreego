@@ -149,3 +149,39 @@ func TestGenerateComponentBoolDefaultNotApplied(t *testing.T) {
 		t.Errorf("bool default must not generate a zero-fallback (explicit false is valid), got:\n%s", out)
 	}
 }
+
+// GenerateComponent must translate dreego.mdtohtml(...) in a component server
+// section into the exported core call, so a component using the stdlib syntax
+// emits valid Go.
+func TestGenerateComponentTranslatesMdtohtml(t *testing.T) {
+	src := `Component Post (content string)
+
+<server>
+    html, err := dreego.mdtohtml(content)
+    if err != nil {
+        return dreego.Result{}, err
+    }
+</server>
+
+<body>
+    <div>{html}</div>
+</body>
+`
+	comp, _, body := ParseHeader(src)
+	file := parseFile(t, body)
+	file.Component = comp
+
+	out, err := GenerateComponent(NewGenerator(), file, scopeHashFor(src))
+	if err != nil {
+		t.Fatalf("GenerateComponent: %v", err)
+	}
+	if !strings.Contains(out, "dreego.MarkdownToHTML(content)") {
+		t.Errorf("component server section must translate dreego.mdtohtml to dreego.MarkdownToHTML, got:\n%s", out)
+	}
+	if strings.Contains(out, "dreego.mdtohtml(") {
+		t.Errorf("component server section must not keep the dreego.mdtohtml stdlib syntax, got:\n%s", out)
+	}
+	if _, err := parser.ParseFile(token.NewFileSet(), "comp.go", "package comp\n"+out, 0); err != nil {
+		t.Fatalf("generated component is not valid Go: %v\n--- body ---\n%s", err, out)
+	}
+}

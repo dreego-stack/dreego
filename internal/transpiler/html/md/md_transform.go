@@ -18,7 +18,7 @@ type mdSegment struct {
 
 func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 	lines := buildLines(nodes)
-	activeR = newRenderer()
+	r := newRenderer(ModeTrusted)
 	var out []ir.TemplateNode
 	var inline []ir.TemplateNode
 	var blockOpen, blockClose string
@@ -65,7 +65,7 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 		}
 		open := "<pre><code"
 		if fenceLang != "" {
-			open += ` class="language-` + fenceLang + `"`
+			open += ` class="language-` + html.EscapeString(fenceLang) + `"`
 		}
 		open += ">"
 		nodes := []ir.TemplateNode{textNode(open)}
@@ -90,7 +90,7 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 				inFence = false
 				fenceContent = nil
 			} else {
-				fenceContent = append(fenceContent, lineSegments(line, true))
+				fenceContent = append(fenceContent, lineSegments(line, true, r))
 			}
 			continue
 		}
@@ -118,14 +118,14 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 			level := headingLevel(raw)
 			content := trimTrailingSpace(stripPrefix(line, markerLen(raw, atxHeading)))
 			if before, expr, after, found := splitAtExpr(content); found {
-				inline = append(inline, lineSegments(trimTrailingSpace(before), false)...)
+				inline = append(inline, lineSegments(trimTrailingSpace(before), false, r)...)
 				blockOpen, blockClose = fmt.Sprintf("<h%d>", level), fmt.Sprintf("</h%d>", level)
 				flushBlock()
-				out = append(out, lineSegments(expr, false)...)
-				inline = append(inline, lineSegments(after, false)...)
+				out = append(out, lineSegments(expr, false, r)...)
+				inline = append(inline, lineSegments(after, false, r)...)
 				blockOpen, blockClose = "<p>", "</p>"
 			} else {
-				inline = append(inline, lineSegments(content, false)...)
+				inline = append(inline, lineSegments(content, false, r)...)
 				blockOpen, blockClose = fmt.Sprintf("<h%d>", level), fmt.Sprintf("</h%d>", level)
 				flushBlock()
 			}
@@ -133,14 +133,14 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 			flushBlock()
 			content := trimTrailingSpace(trimLeadingSpace(stripPrefix(line, 1)))
 			if before, expr, after, found := splitAtExpr(content); found {
-				inline = append(inline, lineSegments(trimTrailingSpace(before), false)...)
+				inline = append(inline, lineSegments(trimTrailingSpace(before), false, r)...)
 				blockOpen, blockClose = "<blockquote>", "</blockquote>"
 				flushBlock()
-				out = append(out, lineSegments(expr, false)...)
-				inline = append(inline, lineSegments(after, false)...)
+				out = append(out, lineSegments(expr, false, r)...)
+				inline = append(inline, lineSegments(after, false, r)...)
 				blockOpen, blockClose = "<p>", "</p>"
 			} else {
-				inline = append(inline, lineSegments(content, false)...)
+				inline = append(inline, lineSegments(content, false, r)...)
 				blockOpen, blockClose = "<blockquote>", "</blockquote>"
 				flushBlock()
 			}
@@ -154,7 +154,7 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 				if len(rawNodes) > 0 {
 					rawNodes = append(rawNodes, textNode("\n"))
 				}
-				rawNodes = append(rawNodes, lineSegments(lines[idx], true)...)
+				rawNodes = append(rawNodes, lineSegments(lines[idx], true, r)...)
 				idx++
 			}
 			idx--
@@ -162,16 +162,16 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 		case strings.Contains(trimmed, "|") && idx+1 < len(lines) && isTableSeparator(lineRaw(lines[idx+1])):
 			flushBlock()
 			var consumed int
-			out = append(out, emitTableLines(lines, idx, &consumed)...)
+			out = append(out, emitTableLines(lines, idx, &consumed, r)...)
 			idx += consumed
 		case footnoteDefRe.MatchString(trimmed):
 			flushBlock()
 			m := footnoteDefRe.FindStringSubmatch(trimmed)
-			activeR.addDef(m[1], m[2])
+			r.addDef(m[1], m[2])
 		case isListItem(raw):
 			flushBlock()
 			var consumed int
-			out = append(out, emitListLines(lines, idx, &consumed)...)
+			out = append(out, emitListLines(lines, idx, &consumed, r)...)
 			idx += consumed
 		default:
 			if blockOpen != "" {
@@ -180,15 +180,15 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 				flushBlock()
 				blockOpen, blockClose = "<p>", "</p>"
 			}
-			inline = append(inline, lineSegments(trimTrailingSpace(line), false)...)
+			inline = append(inline, lineSegments(trimTrailingSpace(line), false, r)...)
 		}
 	}
 	if inFence {
 		emitFence()
 	}
 	flushBlock()
-	if activeR.hasDefs() {
-		out = append(out, textNode(activeR.footnotesSection()))
+	if r.hasDefs() {
+		out = append(out, textNode(r.footnotesSection()))
 	}
 	return out, nil
 }
@@ -252,7 +252,7 @@ func hasText(line []mdSegment) bool {
 	return false
 }
 
-func lineSegments(line []mdSegment, raw bool) []ir.TemplateNode {
+func lineSegments(line []mdSegment, raw bool, r *mdRenderer) []ir.TemplateNode {
 	var out []ir.TemplateNode
 	for _, s := range line {
 		if s.isExpr {
@@ -260,7 +260,7 @@ func lineSegments(line []mdSegment, raw bool) []ir.TemplateNode {
 		} else if raw {
 			out = append(out, textNode(s.text))
 		} else {
-			out = append(out, textNode(renderInline(s.text)))
+			out = append(out, textNode(r.renderInline(s.text)))
 		}
 	}
 	return out

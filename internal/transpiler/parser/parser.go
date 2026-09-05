@@ -12,10 +12,18 @@ type Parser struct {
 	tokens           []tokens.Token
 	pos              int
 	templateFromBody bool
+	concatServer     bool
 }
 
 func NewParser(tokens []tokens.Token) *Parser {
 	return &Parser{tokens: tokens}
+}
+
+// NewParserConcatServer returns a parser that concatenates multiple <server>
+// sections instead of rejecting duplicates. Used for components, where server
+// blocks are merged into a single render body rather than dispatched by method.
+func NewParserConcatServer(tokens []tokens.Token) *Parser {
+	return &Parser{tokens: tokens, concatServer: true}
 }
 
 func (p *Parser) Parse() (*ir.File, error) {
@@ -53,6 +61,11 @@ func (p *Parser) Parse() (*ir.File, error) {
 			if m := parseServerMethod(tok.Attr); m != "" {
 				section.Method = m
 				section.MethodExplicit = true
+			}
+			for _, existing := range file.Server {
+				if !p.concatServer && existing.Method == section.Method && existing.ContentType == section.ContentType {
+					return nil, fmt.Errorf("duplicate <server> section for method %s at position %d", section.Method, tok.Pos)
+				}
 			}
 			file.Server = append(file.Server, *section)
 		case "body":

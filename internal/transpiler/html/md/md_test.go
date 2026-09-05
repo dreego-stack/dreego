@@ -199,7 +199,7 @@ func TestToNodes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodes, err := ToNodes(tt.src)
+			nodes, err := ToNodes(tt.src, ModeTrusted)
 			if err != nil {
 				t.Fatalf("ToNodes() error = %v", err)
 			}
@@ -219,7 +219,7 @@ func TestToNodes(t *testing.T) {
 }
 
 func TestToNodesError(t *testing.T) {
-	_, err := ToNodes("-")
+	_, err := ToNodes("-", ModeTrusted)
 	if err == nil {
 		t.Fatal("expected error for bare list marker")
 	}

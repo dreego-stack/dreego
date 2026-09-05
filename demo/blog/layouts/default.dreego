@@ -15,6 +15,7 @@
             <a href="/blog/" class="font-mono text-sm font-bold tracking-tight">dreego / blog</a>
             <div class="flex items-center gap-5 text-sm text-slate-600">
                 <a href="/blog/" class="hover:text-slate-950">Posts</a>
+                <a href="/blog/news" class="hover:text-slate-950">News</a>
                 <a href="https://github.com/dreego-stack/dreego" class="rounded-full bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-700">Source</a>
             </div>
         </nav>

@@ -9,6 +9,13 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
+type Mode int
+
+const (
+	ModeTrusted Mode = iota
+	ModeSafe
+)
+
 var (
 	atxHeading     = regexp.MustCompile(`^(#{1,6})\s+(.*)$`)
 	ulItem         = regexp.MustCompile(`^[-*+]\s+(.*)$`)
@@ -21,15 +28,14 @@ var (
 	htmlBlockStart = regexp.MustCompile(`^</?([a-zA-Z][a-zA-Z0-9-]*)(\s|>|/)`)
 )
 
-func ToNodes(src string) ([]ir.TemplateNode, error) {
-	return parseBlocks(src)
+func ToNodes(src string, mode Mode) ([]ir.TemplateNode, error) {
+	return parseBlocks(src, newRenderer(mode))
 }
 
-func parseBlocks(src string) ([]ir.TemplateNode, error) {
+func parseBlocks(src string, r *mdRenderer) ([]ir.TemplateNode, error) {
 	lines := strings.Split(src, "\n")
 	var nodes []ir.TemplateNode
 	var para []string
-	r := newRenderer()
 
 	flushPara := func() {
 		if len(para) > 0 {
@@ -53,7 +59,7 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 			}
 			open := "<pre><code"
 			if lang != "" {
-				open += ` class="language-` + lang + `"`
+				open += ` class="language-` + html.EscapeString(lang) + `"`
 			}
 			open += ">"
 			nodes = append(nodes, textNode(open+strings.Join(code, "\n")+"</code></pre>"))
@@ -64,7 +70,11 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 			flushPara()
 			var raw []string
 			for i < len(lines) && strings.TrimSpace(lines[i]) != "" {
-				raw = append(raw, lines[i])
+				if r.mode == ModeSafe {
+					raw = append(raw, html.EscapeString(lines[i]))
+				} else {
+					raw = append(raw, lines[i])
+				}
 				i++
 			}
 			i--
@@ -128,7 +138,7 @@ func parseBlocks(src string) ([]ir.TemplateNode, error) {
 				i++
 			}
 			i--
-			nodes = append(nodes, textNode(buildTable(header, sep, body)))
+			nodes = append(nodes, textNode(buildTable(header, sep, body, r)))
 			continue
 		}
 
