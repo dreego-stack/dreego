@@ -47,9 +47,15 @@ Two models share the work with strict role separation:
    - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
-## Current Phase: v0.1
+## Current Phase: multi-language Dreego
 
-The latest `v0.1.x` git tag is the single version source; the CLI derives its version at build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or from build info (`go install pkg@tag`). The pre-v0.1 atomic semantic-section migration is complete, and v0.1 is the released SSR foundation. The `v0.1.0` tag is set deliberately and manually, not by a change file. Patch releases continue on the v0.1.x line via the PR-driven workflow: every change lands via a pull request with one unique `.changes/*.md` file, and CI combines pending files into the changelog and creates the tag after merge. `version: none` files are never applied on their own — they stay pending until a `version: patch` file triggers the release. See `_todo/` for next steps.
+The latest git tag is the single version source; the CLI derives its version at
+build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or
+from build info (`go install pkg@tag`). Roadmap phases are capability names,
+not version promises. Markdown-to-HTML is released; TypeScript-to-JavaScript is
+the next processor, followed by Lua-to-JavaScript. Every change lands through a
+pull request with one unique `.changes/*.md` file. `version: none` files remain
+pending until a later `version: patch` change triggers a release.
 
 ## Product Focus
 
@@ -57,17 +63,15 @@ Dreego brings an intuitive, Svelte- and Astro-inspired development experience to
 
 Accessibility is a release quality gate, not a cosmetic enhancement. CLI output, diagnostics, documentation, generated blueprints, and official components must work without relying on sight, color, or pointer input alone. Do not claim that Dreego can make arbitrary user applications automatically accessible.
 
-- SSR is the current production target and the v0.1 foundation. Target-neutral
-  rendering, SSG, Wails, and DreeJS are planned sequentially for the long v0.x
-  line; they are not current behavior until implemented and documented.
-- Before v0.1, stabilize and harden SSR and complete the atomic semantic-section
-  migration. Do not start SSG, Wails, or DreeJS implementation before the render
-  foundation phase.
+- SSR is the production web host. The render foundation is target-neutral for
+  tests and the planned Wails host. Static site generation is not planned.
+- Complete the multi-language processor pipeline before Wails: Markdown to
+  HTML, TypeScript to JavaScript, then Lua to JavaScript. Do not add Lua-to-Go.
 - Preserve explicit `App` ownership of all runtime state and explicit generated
   registration. Do not reintroduce global compatibility APIs.
-- HTMX, Alpine.js, and plain JavaScript are the supported progressive-enhancement path before v0.1.
-- After v0.1, extract a target-neutral typed App and render foundation before
-  adding the first-party SSG and Wails target packages.
+- HTMX, Alpine.js, and plain JavaScript remain supported progressive-enhancement paths.
+- Add Wails directly on the target-neutral renderer and JavaScript output after
+  the multi-language phase. Wails must not use a hidden localhost server.
 - DreeJS is an optional modular browser layer, not a target or SPA. Local
   presentation state may run in the browser; authoritative business state stays
   in Go or another explicit backend.
@@ -79,19 +83,18 @@ See `_docs/roadmap.md` for the public, non-binding roadmap.
 
 ## Core and Plugin Boundary
 
-- The current `core/` package contains the SSR capabilities needed by a normal
-  application. The planned v0.2 migration replaces it with a target-neutral root
-  package and explicit `target/ssr`; do not implement that structure piecemeal.
-- SSR, SSG, Wails, and DreeJS are first-party monorepo capabilities because they
+- The current `core/` package contains the application and render capabilities
+  needed by a normal SSR application and the explicit `core/ssr` host.
+- SSR, Wails, and DreeJS are first-party monorepo capabilities because they
   share compiler, render, asset, diagnostic, and compatibility contracts.
 - Optional capabilities, provider integrations, and features with additional dependencies live in separate plugin repositories with their own `go.mod`, releases, tests, and CI.
 - Keep optional implementations out of `core/`, even when they currently need only the standard library. SSE and WebSockets are plugins, not core packages.
 - Add a provider-neutral interface to core only after at least two real implementations prove the same small contract is necessary.
 - Remove the current speculative EventBus, Queue, KVStore, and Storage APIs before v0.1. The session Store remains part of the SSR core.
 - Plugins may register route-specific behavior through the owning `App`; they must not weaken unrelated application defaults.
-- Optional language processors such as TypeScript, Markdown, and Lua live in
-  external plugin repositories and communicate through a future versioned
-  process boundary. Do not add an embedded Lua VM or native Go plugin loader.
+- The small first-party language set—Markdown, TypeScript, and Lua—lives in the
+  transpiler. Compiler-backed processors may use explicit, pinned subprocesses.
+  Do not add an embedded Lua VM or native Go plugin loader.
 
 ## File Structure
 
@@ -242,9 +245,9 @@ before using it as domain data. Do not claim that Core contains no string keys.
 
 ## Architecture Guarantees
 
-SSR is the current production target and v0.1 foundation. Planned v0.x work
-extracts a target-neutral typed App and renderer, then adds explicit first-party
-SSR, SSG, and Wails target packages. DreeJS is the optional browser layer.
+SSR is the production web host. The target-neutral typed App and renderer also
+support the planned first-party Wails host. DreeJS is the optional browser and
+WebView layer. Static site generation is not planned.
 There is no universal `Target` interface until working implementations prove a
 small shared contract. See
 [target-neutral-application-and-first-party-targets](_docs/decisions/target-neutral-application-and-first-party-targets.md)
@@ -268,6 +271,6 @@ v0.1 target is one route file per URL (`page.dreego` and method sections).
 
 ### 5. Template Rendering without HTTP Server
 
-The v0.2 render foundation must preserve typed generated inputs and expose
-non-HTTP rendering before SSG or Wails is implemented. Do not make
-`map[string]any` the primary page-data contract.
+The render foundation preserves typed generated inputs and exposes non-HTTP
+rendering for tests and Wails. Do not make `map[string]any` the primary
+page-data contract.

@@ -1,7 +1,7 @@
 ---
 type: Decision
 title: Target-neutral application and first-party targets
-description: One typed App with explicit SSR, SSG, and Wails hosts
+description: One typed App with explicit SSR and Wails hosts
 tags: [architecture, targets, render, v0.x]
 timestamp: 2026-08-24T00:00:00Z
 ---
@@ -13,11 +13,11 @@ timestamp: 2026-08-24T00:00:00Z
 ## Context
 
 Dreego began with SSR coupled to the public `core` package. The product goal now
-includes static sites and Wails desktop applications without forcing developers
+includes Wails desktop applications without forcing developers
 to maintain a JavaScript build system or run an HTTP server only to render a
 WebView.
 
-Treating SSR as the implicit root API while adding SSG and Wails as secondary
+Treating SSR as the implicit root API while adding Wails as a secondary
 features would make the first implementation the permanent architecture.
 Conversely, turning rendering, routing, and every host into unrelated plugins
 would weaken the coherent component and compiler model.
@@ -30,7 +30,6 @@ with explicit first-party target packages:
 ```text
 github.com/dreego-stack/dreego
 github.com/dreego-stack/dreego/target/ssr
-github.com/dreego-stack/dreego/target/ssg
 github.com/dreego-stack/dreego/target/wails
 ```
 
@@ -38,7 +37,7 @@ The root package owns application declarations and shared render contracts. The
 target packages own their host-specific lifecycle and capabilities. The same
 App may be used by more than one compatible target.
 
-SSR, SSG, and Wails remain in the monorepo because they coordinate closely with
+SSR and Wails remain in the monorepo because they coordinate closely with
 compiler output, component metadata, assets, diagnostics, and compatibility.
 Provider integrations remain separate plugins.
 
@@ -76,15 +75,14 @@ semantics to the same `.dreego` source.
 
 ### Add a universal Target interface immediately
 
-Rejected as speculative. SSR, build-time static output, and a desktop WebView
-have meaningfully different lifecycles. Shared interfaces will be extracted
-from working implementations.
+Rejected as speculative. SSR and a desktop WebView have meaningfully different
+lifecycles. Shared interfaces will be extracted from working implementations.
 
 ## Consequences
 
 - The public `/core` package is expected to be replaced before v1 through an
   explicit migration rather than retained indefinitely through wrappers.
-- Rendering must be separated from HTTP before SSG and Wails are implemented.
+- Rendering must be separated from HTTP before Wails is implemented.
 - Target-specific APIs cannot silently appear in target-neutral component code.
 - Documentation must distinguish current SSR behavior from planned target APIs.
 - Existing SSR contracts require behavioral tests before internal extraction.
@@ -98,8 +96,10 @@ from working implementations.
 - Historical target-interface examples in
   [Transpiler Pipeline](transpiler-pipeline.md) where they conflict with the
   capability-first direction.
+- The SSG parts of this decision are superseded by
+  [Prefer dynamic SSR and explicit caching over static site generation](ssr-over-ssg.md).
 
 ## Detailed plan
 
 See [`_plan/00-product-architecture.md`](../../_plan/00-product-architecture.md)
-and [`_plan/v0.2-render-foundation.md`](../../_plan/v0.2-render-foundation.md).
+and [`_plan/phase-render-foundation.md`](../../_plan/phase-render-foundation.md).

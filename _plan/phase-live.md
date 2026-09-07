@@ -1,9 +1,9 @@
-# v0.7 DreeJS data and live updates
+# Phase: live updates
 
 ## Goal
 
 Extend the proven DreeJS component lifecycle with explicit network update
-strategies: one-time fetch, polling, server-sent events, and bidirectional live
+strategies: polling, server-sent events, and bidirectional live
 connections. Developers choose the cheapest strategy that satisfies the user
 experience.
 
@@ -11,14 +11,13 @@ experience.
 
 Implement in increasing operational complexity:
 
-1. `fetch`: one request triggered by load, visibility, or an event.
-2. `poll`: repeated fetch with visibility pause, cancellation, jitter, and
+1. `poll`: repeated fetch with visibility pause, cancellation, jitter, and
    backoff.
-3. `stream`: unidirectional server updates through SSE.
-4. `live`: bidirectional events and server-rendered component updates through a
+2. `stream`: unidirectional server updates through an SSE plugin.
+3. `live`: bidirectional events and server-rendered component updates through a
    multiplexed WebSocket connection.
 
-Each strategy is independently usable. Installing or using `fetch` must not
+Each strategy is independently usable. Installing or using polling must not
 ship WebSocket code.
 
 ## Server-rendered updates
@@ -56,9 +55,9 @@ Connection ownership defines:
 - graceful server shutdown;
 - accessible disconnected and retry states.
 
-SSE and WebSocket transports may reuse the existing external transport plugins
-where their APIs prove suitable. DreeJS owns the client protocol and compiler
-integration; provider or transport integrations remain plugins when optional.
+SSE and WebSocket transports are external plugins. DreeJS owns the client
+protocol and compiler integration; core gains a provider-neutral interface only
+after at least two real transports prove the same small contract.
 
 ## Stateless and stateful server modes
 
@@ -71,12 +70,11 @@ latency and richer interactions. It requires explicit memory limits, lifecycle,
 recovery, deployment guidance, and horizontal scaling behavior. It must never
 be enabled merely because a component uses a WebSocket.
 
-## SSG behavior
+## Host behavior
 
-Static output can use all client modules, but it cannot supply server routes by
-itself. The application must configure an external endpoint for fetch, poll,
-stream, or live behavior. Generation fails when a server-dependent directive
-has no compatible endpoint or host capability.
+SSR supplies HTTP endpoints for polling and transport plugins. Wails uses an
+explicit desktop bridge where supported. Generation fails when a directive has
+no compatible endpoint or host capability.
 
 ## Distributed operation
 

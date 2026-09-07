@@ -10,9 +10,9 @@ timestamp: 2026-09-01T00:00:00Z
 **Date:** 2026-09-01
 **Status:** Accepted and implemented for the built-in languages; language processors are first-party
 
-> **Status (v0.3):** The Markdown body processor (`html`/`md`, stdlib-first) is
-> implemented in v0.3 as the first first-party processor. It preserves protected
-> Dreego constructs. The TypeScript processor is still planned.
+> **Current status:** The Markdown body processor (`html`/`md`, stdlib-first)
+> shipped in v0.3. TypeScript-to-JavaScript is next, followed by
+> Lua-to-JavaScript. Lua-to-Go is not planned.
 
 ## Context
 
@@ -126,4 +126,4 @@ become ambiguous. Mixed content uses component composition.
 
 ## Detailed plan
 
-See [`_plan/v0.3-language-processors.md`](../../_plan/v0.3-language-processors.md).
+See [the multi-language Dreego phase](../../_plan/phase-multilanguage-dreego.md).

@@ -1,4 +1,4 @@
-# v0.5 Wails target
+# Phase: Wails target
 
 ## Goal
 
@@ -18,9 +18,10 @@ The first-party target lives in the monorepo because it must coordinate render
 results, embedded assets, navigation, DreeJS, diagnostics, and generated host
 bindings. Provider-like desktop features may remain separate plugins.
 
-Wails depends on the v0.2 render foundation, not on SSG-specific APIs. It is
-sequenced after SSG so the first non-HTTP target can harden shared rendering and
-asset behavior before the desktop bridge adds another host lifecycle.
+Wails depends on the completed render foundation and follows the TypeScript and
+Lua client processors. That sequence proves a shared JavaScript output and
+asset pipeline before the desktop bridge adds another host lifecycle. Wails has
+no dependency on static generation.
 
 ## Host model
 
@@ -77,7 +78,7 @@ making unrelated web builds depend on Wails.
 2. Load scoped styles and embedded static assets.
 3. Navigate between literal Dreego routes.
 4. Generate one typed Go method binding and validate boundary errors.
-5. Integrate DreeJS local behavior.
+5. Establish the client asset and bridge boundary that DreeJS can use later.
 6. Add development reload and a reference desktop application.
 
 ## Acceptance criteria

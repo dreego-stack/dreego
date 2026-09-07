@@ -49,7 +49,8 @@ timestamp: 2026-07-28T00:00:00Z
 Wrong: `func Login(c *SSRContext, form LoginForm) error`
 Correct: `func Login(c dreego.Context, form LoginForm) error`
 
-Rationale: Target agnosticism (AGENTS.md guarantee #2). SSG target passes `SSGContext`.
+Rationale: Rendering and tests can run without exposing a raw HTTP request in
+application code.
 
 ### 2. Access `errors`, `old`, `flash` via `c`
 
@@ -64,9 +65,11 @@ Not as magic template variables, but via context:
 
 Rationale: Works in tests without an HTTP server (AGENTS.md guarantee #7).
 
-### 3. SSG: Actions are not generated
+### 3. Non-HTTP hosts do not inherit form-action semantics
 
-SSG target skips `g-action` codegen. Plain `<form action="/api/...">` remains as an escape hatch. Transpiler encapsulates action codegen behind `TargetSSR`.
+Wails does not silently receive HTTP form-action semantics. A plain
+`<form action="/api/...">` remains an explicit HTTP escape hatch when the
+application provides that endpoint.
 
 ### 4. Forms without `g-action` must work
 

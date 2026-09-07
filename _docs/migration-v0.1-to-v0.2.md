@@ -105,7 +105,7 @@ deferred until the pipeline can compose them without loss.
 redirect operations. Code requiring those capabilities remains in generated
 SSR handlers and fails to compile in a component render function.
 
-These are new in v0.2 and enable future SSG and Wails targets.
+These are new in v0.2 and enable non-HTTP rendering for tests and Wails.
 
 ## Release and versioning
 

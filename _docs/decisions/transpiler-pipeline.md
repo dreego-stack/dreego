@@ -2,7 +2,7 @@
 ---
 type: Decision
 title: Transpiler Pipeline (Lexer → Parser → AST → CodeGen)
-description: Compile-time transpiler pipeline with lexer, parser, AST, and CodeGen for three targets
+description: Compile-time transpiler pipeline with lexer, parser, IR, language processors, and code generation
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
 ---
@@ -12,10 +12,10 @@ timestamp: 2026-07-28T00:00:00Z
 **Status:** Accepted — pipeline core is current; see note below
 
 > **Current direction:** The compile-time pipeline remains accepted. SSR is the
-> current implementation and v0.1 foundation. The historical universal
+> production implementation. The historical universal
 > `Target` interface and context examples below are not accepted APIs. Planned
-> v0.x work extracts a typed render foundation and adds explicit first-party
-> target packages using capabilities proven by implementations. See
+> work uses a typed render foundation and adds Wails through capabilities
+> proven by implementations. Static site generation is not planned. See
 > [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
@@ -55,7 +55,9 @@ to `codegen`.
 
 ## Context
 
-Dreego is a compile-time transpiler. `.dreego` files must be converted to Go code — for 3 targets (SSR, SSG, Wails).
+Dreego is a compile-time transpiler. `.dreego` files are normalized through
+HTML, JavaScript, and Go output pipelines before Dreego emits ordinary Go and
+browser assets for SSR or Wails hosts.
 
 ## Decision
 
@@ -69,7 +71,8 @@ target_ssr.go — Wraps render(ctx) as http.HandlerFunc
 
 ~150 lines, 0 dependencies. Output: `func render(ctx dreego.Context) string` — target-agnostic.
 
-**Phase 1+: Formal Pipeline.** As features grow (<client> TypeScript, SSG codegen) → formal separation Lexer→Parser→AST→CodeGen. The scanner grows with it.
+**Phase 1+: Formal Pipeline.** As input languages grow, use formal separation
+from lexer to parser, IR, processor output, and code generation.
 
 ## 0.0.1 Architecture (Minimal)
 
@@ -95,7 +98,7 @@ func codegen(f *File) string {
 
 1. `{#` vs `{` — `#` is the discriminator. Read `{`, peek next character
 2. Nested tags — Stack (depth counter), no AST
-3. Output: `render(ctx dreego.Context) string` — not directly `http.HandlerFunc`. SSG/Wails don't need HTTP
+3. Output: render functions are not directly `http.HandlerFunc`; tests and Wails need non-HTTP rendering
 
 ## 1. Pipeline Interfaces
 
@@ -188,9 +191,9 @@ Fail-loud, compile-time. No best-effort, no runtime panics.
 - `<server>` block: `go/parser` errors are mapped to `.dreego` lines via source map
 - Template syntax errors abort immediately
 
-## 6. CodeGen Output per Target
+## 6. Host output
 
-All three targets share the same `EvalTemplate` core — only context factory and dispatcher differ.
+SSR and Wails share render contracts while retaining different host lifecycles.
 
 **SSR:**
 ```go
@@ -199,15 +202,6 @@ func indexSSR(w http.ResponseWriter, r *http.Request) {
     user, err := loadUser(ctx)
     _ = user
     _ = err
-}
-```
-
-**SSG:**
-```go
-func IndexStatic(ctx *dreego.SSGContext, w io.Writer) error {
-    posts, _ := loadPosts(ctx)
-    fmt.Fprint(w, EvalTemplate(ctx, posts))
-    return nil
 }
 ```
 
@@ -223,5 +217,6 @@ func IndexWails(ctx *dreego.WailsContext) (string, error) {
 
 - Generated files: `pages/index_dreego.go` (not committed)
 - `dreego generate` must run before `go build`
-- Transpiler currently emits SSR handlers; planned v0.x work first extracts the
-  typed render foundation and then adds explicit SSG and Wails target packages
+- The transpiler currently emits SSR handlers and target-neutral render functions.
+- Wails is the planned second host after TypeScript-to-JavaScript and
+  Lua-to-JavaScript complete the multi-language phase.

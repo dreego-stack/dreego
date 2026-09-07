@@ -1,4 +1,4 @@
-# v0.8 stabilization
+# Phase: stabilization
 
 ## Goal
 
@@ -11,7 +11,7 @@ and evidence from real applications over adding another target.
 Review every exported identifier and generated contract across:
 
 - root App and render APIs;
-- SSR, SSG, and Wails targets;
+- SSR and Wails hosts;
 - section and processor protocol;
 - DreeJS manifests and network protocols;
 - plugin registration and lifecycle;
@@ -27,11 +27,11 @@ At minimum maintain:
 
 - SSR SaaS slice with sessions, forms, protected routes, observability, and
   horizontal deployment guidance;
-- SSG content or commerce slice deployed to GitHub Pages and Cloudflare Pages,
-  including one optional dynamic component;
 - Wails desktop slice using typed Go bindings without a local HTTP server;
 - DreeJS live slice with reconnect, authorization, and multi-instance pub/sub;
-- external Markdown and TypeScript processor examples.
+- Markdown, TypeScript, and Lua processor examples;
+- cached SSR slice with private data islands and provider-neutral invalidation
+  evidence.
 
 ## Quality gates
 
