@@ -1,4 +1,4 @@
-package html
+package component
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func ComponentParams(comp *ir.ComponentDef) (decl, impl, call string, variadic string) {
+func Params(comp *ir.ComponentDef) (decl, impl, call string, variadic string) {
 	for i, p := range comp.Props {
 		if i > 0 {
 			decl += ", "

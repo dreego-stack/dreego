@@ -3,9 +3,9 @@ package html
 import (
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/html/component"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
-	"github.com/dreego-stack/dreego/internal/transpiler/html/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
@@ -47,11 +47,11 @@ func RestoreComponentContextValue(key, previous string) string {
 }
 
 func ComponentParams(comp *ir.ComponentDef) (decl, impl, call string, variadic string) {
-	return html.ComponentParams(comp)
+	return component.Params(comp)
 }
 
 func WritePropDefaultFallbacks(buf *strings.Builder, comp *ir.ComponentDef) {
-	html.WritePropDefaultFallbacks(buf, comp)
+	component.WritePropDefaultFallbacks(buf, comp)
 }
 
 func ValidateSlotName(def *ir.ComponentDef, name, filename, src string, pos int) error {
@@ -71,7 +71,7 @@ func BuildComponentArgs(comp *ir.ComponentDef, attrs string, src string, pos int
 }
 
 func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (string, error) {
-	return html.GenerateComponent(gen, file, scopeHash)
+	return component.Generate(gen, file, scopeHash)
 }
 
 func GenHead(html string, bufName string) (string, error) {

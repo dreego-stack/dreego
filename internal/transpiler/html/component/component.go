@@ -1,4 +1,4 @@
-package html
+package component
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (string, error) {
+func Generate(gen *ir.Generator, file *ir.File, scopeHash string) (string, error) {
 	comp := file.Component
 	if comp == nil {
 		return "", fmt.Errorf("no component definition")
@@ -17,7 +17,7 @@ func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (stri
 
 	var buf strings.Builder
 
-	declParams, implParams, callArgs, variadicName := ComponentParams(comp)
+	declParams, implParams, callArgs, variadicName := Params(comp)
 
 	if variadicName != "" {
 		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
