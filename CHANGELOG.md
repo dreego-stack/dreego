@@ -1,4 +1,10 @@
 
+## v0.4.0 - 2026-09-07
+
+- Feat: compile root and inline client TypeScript with the pinned native TypeScript 7 compiler.
+- Feat: generate TypeScript declarations for compatible Go component props and models.
+- Fix: harden Markdown inline-code and mixed-list handling with expanded regression coverage.
+
 ## v0.3.3 - 2026-09-07
 
 - Refactor: route JavaScript client input through a shared normalized output stage for future TypeScript and Lua processors.
