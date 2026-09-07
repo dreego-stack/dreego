@@ -1,4 +1,8 @@
 
+## v0.3.2 - 2026-09-07
+
+- Chore: clarify transpiler package boundaries and remove redundant facade layers.
+
 ## v0.3.1 - 2026-09-05
 
 - Security: runtime markdown rendering is safe by default — raw HTML is escaped, URLs are scheme-validated, scripts are structurally impossible (dreego.MarkdownToHTML)
