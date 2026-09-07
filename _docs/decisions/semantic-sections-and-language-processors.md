@@ -61,7 +61,7 @@ client Lua does not imply supporting server Lua.
 
 Language processors for a small, closed set of source languages are part of the
 Dreego monorepo as internal transpiler processors under
-`internal/transpiler/markdown`:
+`internal/transpiler/html/md`:
 
 - Markdown (`md` → `html`) with stdlib-first parsing;
 - TypeScript (`ts` → `js`) via a node subprocess for type checking and

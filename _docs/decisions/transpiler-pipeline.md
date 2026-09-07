@@ -19,6 +19,40 @@ timestamp: 2026-07-28T00:00:00Z
 > [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
+## Current package boundaries
+
+The implementation follows the pipeline with packages named after their
+responsibility:
+
+```text
+internal/transpiler/
+├── tokens/       token definitions
+├── lexer/        source text to tokens
+├── parser/       tokens to IR
+├── ir/           intermediate representation and source metadata
+├── codegen/      mutable generation state and layout metadata
+├── html/         processors that produce HTML IR plus shared output generation
+│   ├── html/      HTML input
+│   ├── md/        Markdown input
+│   ├── head/      head input
+│   ├── css/       CSS input
+│   └── output/    HTML IR to generated Go
+└── js/           processors that produce JavaScript output
+    └── js/        JavaScript input
+```
+
+The first directory in the processor matrix names the normalized output
+language and the second names the source language. Future `js/ts` and `js/lua`
+processors may therefore share JavaScript output generation without implying a
+Lua-to-Go processor.
+
+The root transpiler package owns project discovery, generation planning, and
+the narrow entry points used by the CLI and `dreegotest`. It may provide small
+compatibility helpers for its package-level tests, but it does not add facade
+packages that mirror every lower-level function. The IR package contains the
+data exchanged between pipeline stages; mutable code-generation state belongs
+to `codegen`.
+
 ## Context
 
 Dreego is a compile-time transpiler. `.dreego` files must be converted to Go code — for 3 targets (SSR, SSG, Wails).

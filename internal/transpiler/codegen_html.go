@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
-	"github.com/dreego-stack/dreego/internal/transpiler/html/component"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
+	htmlinput "github.com/dreego-stack/dreego/internal/transpiler/html/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
@@ -41,7 +41,7 @@ func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
 }
 
 func GenerateComponent(gen *Generator, file *File, scopeHash string) (string, error) {
-	return component.Generate(gen, file, scopeHash)
+	return htmlinput.Generate(gen, file, scopeHash)
 }
 
 func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (string, error) {
@@ -49,11 +49,11 @@ func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (
 }
 
 func componentParams(comp *ComponentDef) (decl, impl, call string, variadic string) {
-	return component.Params(comp)
+	return htmlinput.Params(comp)
 }
 
 func writePropDefaultFallbacks(buf *strings.Builder, comp *ComponentDef) {
-	component.WritePropDefaultFallbacks(buf, comp)
+	htmlinput.WritePropDefaultFallbacks(buf, comp)
 }
 
 func validateSlotName(def *ComponentDef, name, filename, src string, pos int) error {

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/html/md"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
-	"github.com/dreego-stack/dreego/internal/transpiler/markdown"
 )
 
 var mdOpenRe = regexp.MustCompile(`^<md(\s[^>]*)?>$`)
@@ -27,7 +27,7 @@ func transformInlineMd(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 		if err != nil {
 			return nil, err
 		}
-		converted, err := markdown.TransformNodes(region)
+		converted, err := md.TransformNodes(region)
 		if err != nil {
 			return nil, err
 		}
