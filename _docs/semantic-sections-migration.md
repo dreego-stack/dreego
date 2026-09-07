@@ -42,8 +42,17 @@ Built-in languages can be stated explicitly:
 <client lang="js"></client>
 ```
 
-The attributes may be omitted for these defaults. Other section/language pairs
-fail during generation until a compatible language processor is installed.
+The attributes may be omitted for these defaults. TypeScript is also supported
+for root client sections and inline body scripts:
+
+```html
+<client lang="ts">const ready: boolean = true</client>
+<body><script lang="ts">const count: number = 1</script></body>
+```
+
+Install the exact native compiler once with
+`dreego tools install typescript`. Generation never installs tools implicitly.
+Other unsupported section/language pairs fail during generation.
 
 ## HTML scripts inside the body
 

@@ -45,7 +45,7 @@ func Generate(gen *codegen.State, file *ir.File, scopeHash string) (string, erro
 
 	if file.Body != nil {
 		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
-		g := &output.CompGen{Gen: gen, Builder: "b"}
+		g := &output.CompGen{Gen: gen, Component: comp, Server: file.Server, Builder: "b"}
 		for _, n := range file.Body.Nodes {
 			code, err := g.Node(n)
 			if err != nil {

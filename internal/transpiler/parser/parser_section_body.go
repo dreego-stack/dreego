@@ -181,6 +181,9 @@ func (p *Parser) parseTemplateNode(parent string) (ir.TemplateNode, error) {
 		if err := checkAttrControlFlow(tok.Attr, tok.Pos); err != nil {
 			return ir.TemplateNode{}, err
 		}
+		if tok.Tag == "script" && sectionLanguage(tok.Attr) == "ts" {
+			return p.parseTypeScriptNode(tok)
+		}
 		p.advance()
 		content := fmt.Sprintf("<%s", tok.Tag)
 		if tok.Attr != "" {

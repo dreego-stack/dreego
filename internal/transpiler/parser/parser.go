@@ -105,10 +105,11 @@ func (p *Parser) Parse() (*ir.File, error) {
 			}
 			file.Head = &ir.HeadSection{Content: strings.TrimSpace(section), Language: language}
 		case "client":
-			language, err := parseSectionLanguage(tok, "js")
+			language, err := parseAllowedLanguage(tok, "js", "ts")
 			if err != nil {
 				return nil, err
 			}
+			contentPos := p.peek().Pos
 			section, err := p.parseRawSection("client")
 			if err != nil {
 				return nil, err
@@ -116,7 +117,9 @@ func (p *Parser) Parse() (*ir.File, error) {
 			if file.Client != nil {
 				return nil, fmt.Errorf("duplicate <client> section at position %d", tok.Pos)
 			}
-			file.Client = &ir.ClientSection{Code: strings.TrimSpace(section), Language: language}
+			trimmed := strings.TrimSpace(section)
+			contentPos += strings.Index(section, trimmed)
+			file.Client = &ir.ClientSection{Code: trimmed, Language: language, Pos: contentPos}
 		case "style":
 			language, err := parseSectionLanguage(tok, "css")
 			if err != nil {
@@ -145,12 +148,21 @@ func (p *Parser) Parse() (*ir.File, error) {
 }
 
 func parseSectionLanguage(tok tokens.Token, defaultLanguage string) (string, error) {
+	return parseAllowedLanguage(tok, defaultLanguage)
+}
+
+func parseAllowedLanguage(tok tokens.Token, defaultLanguage string, allowed ...string) (string, error) {
 	language := sectionLanguage(tok.Attr)
 	if language == "" {
 		return defaultLanguage, nil
 	}
 	if language == defaultLanguage {
 		return language, nil
+	}
+	for _, candidate := range allowed {
+		if language == candidate {
+			return language, nil
+		}
 	}
 	return "", fmt.Errorf("unsupported language %q for <%s> at position %d; install a processor for this section and language", language, tok.Tag, tok.Pos)
 }

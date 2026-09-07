@@ -114,11 +114,10 @@ was removed as speculative API: codegen processors have too much power
 to run as third-party code, and the language set is small and closed (Markdown,
 TypeScript, Lua-later). The VS Code extension can ship the same grammars.
 
-TypeScript is the one exception: it still needs `node` as an external tool
-behind an explicit, pinned, approval-based flow. npm remains opt-in. The
-processor records its compiler version, supports reproducible CI, reports
-diagnostics against the `.dreego` file, and never installs an unpinned `latest`
-version during a build.
+TypeScript uses Microsoft's native Go compiler as an external tool behind an
+explicit, pinned installation flow. The processor records its compiler version,
+supports reproducible CI, reports diagnostics against the `.dreego` file, and
+never installs tools during generation.
 
 ## Discovery and installation
 
@@ -129,10 +128,9 @@ dependencies.
 
 The closed language set is Markdown (`md` → `html`), TypeScript (`ts` → `js`),
 and Lua (`lua` → `js`) later. Markdown uses stdlib-first parsing. TypeScript
-uses a pinned, approved `node` toolchain; npm remains opt-in. First use of the
-TypeScript toolchain requires an explicit warning and approval. CI uses a
-checked-in lock and allowlist. Offline builds work after approved tools are
-cached.
+uses an exact native compiler release with per-platform checksums. Developers
+install it explicitly with `dreego tools install typescript`; CI performs the
+same verified installation. Offline builds work after the tool is cached.
 
 ## Reference processors
 
@@ -141,9 +139,9 @@ The first-party processor set is implemented in this order:
 1. Markdown body processor — **DONE** (shipped in v0.3, `html`/`md`,
    stdlib-first). It exercises structured body output and protected Dreego
    template placeholders, and preserves protected Dreego constructs.
-2. TypeScript client processor — **NEXT**; it will exercise external tooling,
-   diagnostics, source maps, JavaScript assets, and type checking. It remains
-   the second proof.
+2. TypeScript client processor — **DONE**; it exercises pinned native tooling,
+   diagnostics, the JavaScript output stage, Go model declarations, and real
+   type checking.
 
 3. Lua client processor — **AFTER TYPESCRIPT**; it produces JavaScript through
    the same normalized JavaScript output stage. Lua-to-Go is not planned.
@@ -152,13 +150,11 @@ The first-party processor set is implemented in this order:
 
 The TypeScript processor must run a real TypeScript type checker. A transformer
 that only removes type annotations is insufficient. It may manage a pinned
-native TypeScript compiler through npm or another verified distribution, but
-developers interact only with Dreego commands.
+native TypeScript compiler through its verified official distribution.
 
 The processor records its compiler version, supports reproducible CI, reports
 diagnostics against the `.dreego` file, and never installs an unpinned `latest`
-version during a build. `node` is an external tool behind an explicit, pinned,
-approval-based flow; npm remains opt-in.
+version during a build. Generation never downloads or installs the compiler.
 
 ## Acceptance criteria
 

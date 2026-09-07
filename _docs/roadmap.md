@@ -21,8 +21,8 @@ explicit caching and invalidation. See the
 - Provider integrations, caches, SSE, and WebSockets remain external plugins.
 - The built-in processor matrix normalizes multiple input languages into HTML,
   JavaScript, or Go output without adding a universal processor interface.
-- Applications do not operate npm or Node for the dependency-free workflow.
-  Managed TypeScript tooling requires pinned versions and explicit approval.
+- Applications do not operate npm or Node. Managed TypeScript tooling uses a
+  pinned native compiler and requires explicit installation.
 - Business state remains authoritative in Go or an explicit backend. DreeJS may
   own local presentation state and explicitly load private data islands.
 - Unsupported host or processor combinations fail during generation or build.
@@ -66,11 +66,10 @@ js/lua      Lua input        -> JavaScript output
 html/output HTML IR          -> generated Go renderer
 ```
 
-Markdown-to-HTML is shipped. The remaining order is:
+Markdown-to-HTML and TypeScript-to-JavaScript are shipped. The remaining order
+is:
 
-1. TypeScript-to-JavaScript with real type checking, source-mapped diagnostics,
-   pinned tooling, reproducible builds, and an explicit approval boundary.
-2. Lua-to-JavaScript with a small, browser-oriented contract proven against the
+1. Lua-to-JavaScript with a small, browser-oriented contract proven against the
    same JavaScript output stage.
 
 Lua-to-Go is not planned. Dreego does not embed a Lua plugin VM or load native

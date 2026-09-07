@@ -64,8 +64,8 @@ Dreego monorepo as internal transpiler processors under
 `internal/transpiler/html/md`:
 
 - Markdown (`md` → `html`) with stdlib-first parsing;
-- TypeScript (`ts` → `js`) via a node subprocess for type checking and
-  transpilation only;
+- TypeScript (`ts` → `js`) via Microsoft's pinned native Go compiler for type
+  checking and transpilation;
 - Lua (`lua` → `js`) later.
 
 Rationale: codegen processors have too much power to run as third-party code,
@@ -76,8 +76,8 @@ built in.
 
 Runtime plugins (SSE, WebSockets, Tailwind) and provider integrations remain
 external plugin repositories using the explicit `Register(app)` model. Managed
-tools such as the TypeScript compiler require explicit approval, pinned
-versions, and reproducible lock information; npm remains opt-in.
+tools such as the TypeScript compiler require explicit installation, pinned
+versions, and verified release checksums.
 
 ## Alternatives considered
 

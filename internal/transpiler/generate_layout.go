@@ -54,6 +54,7 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 			}
 			if f != nil {
 				f.SourceContent = string(data)
+				f.SourcePath = full
 				rel := layoutScopeRel(root, path)
 				funcName := "Layout"
 				if name == "default.dreego" {

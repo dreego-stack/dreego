@@ -11,5 +11,9 @@ type Artifact struct {
 }
 
 func GenClient(artifact Artifact) string {
-	return fmt.Sprintf("\tb.WriteString(\"<script>\")\n\tb.WriteString(%s)\n\tb.WriteString(\"</script>\")\n", ir.GoLiteral(artifact.Code))
+	return GenClientTo(artifact, "b", "\t")
+}
+
+func GenClientTo(artifact Artifact, builder, indent string) string {
+	return fmt.Sprintf("%s%s.WriteString(\"<script>\")\n%s%s.WriteString(%s)\n%s%s.WriteString(\"</script>\")\n", indent, builder, indent, builder, ir.GoLiteral(artifact.Code), indent, builder)
 }

@@ -25,6 +25,9 @@ jobs:
           go-version: '1.22'
           cache: false
 
+      - name: Install pinned native TypeScript compiler
+        run: go run ./cli/dreego tools install typescript
+
       - name: Test and release latest main
         run: |
           git config user.name "github-actions[bot]"

@@ -8,8 +8,8 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
-	jsinput "github.com/dreego-stack/dreego/internal/transpiler/js/js"
 	jsoutput "github.com/dreego-stack/dreego/internal/transpiler/js/output"
+	jsprocess "github.com/dreego-stack/dreego/internal/transpiler/js/process"
 )
 
 func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHash string, isGET bool) (string, error) {
@@ -33,7 +33,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Body.Nodes {
-			code, err := GenTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection, file.Server)
 			if err != nil {
 				return "", err
 			}
@@ -52,7 +52,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
 		}
 		for _, n := range file.Body.Nodes {
-			code, err := GenTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection, file.Server)
 			if err != nil {
 				return "", err
 			}
@@ -64,7 +64,11 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 	}
 
 	if file.Client != nil {
-		buf.WriteString(jsoutput.GenClient(jsinput.Process(file.Client.Code)))
+		client, err := jsprocess.Client(file)
+		if err != nil {
+			return "", err
+		}
+		buf.WriteString(jsoutput.GenClient(client))
 	}
 	if file.Style != nil {
 		scoped := css.ScopeCSS(file.Style.Code, scopeHash)

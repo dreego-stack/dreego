@@ -22,6 +22,7 @@ func TestParseSemanticSectionLanguages(t *testing.T) {
 		{name: "body markdown", src: `<body lang="md"></body>`, want: "md", read: func(f *ir.File) string { return f.Body.Language }},
 		{name: "style default", src: `<style></style>`, want: "css", read: func(f *ir.File) string { return f.Style.Language }},
 		{name: "client explicit", src: `<client lang="js"></client>`, want: "js", read: func(f *ir.File) string { return f.Client.Language }},
+		{name: "client typescript", src: `<client lang="ts"></client>`, want: "ts", read: func(f *ir.File) string { return f.Client.Language }},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			tokens, err := lexer.Lex(tc.src)
@@ -46,7 +47,6 @@ func TestParseRejectsUnsupportedBuiltInSectionLanguages(t *testing.T) {
 		`<head lang="markdown"></head>`,
 		`<body lang="markdown"></body>`,
 		`<style lang="scss"></style>`,
-		`<client lang="ts"></client>`,
 	} {
 		tokens, err := lexer.Lex(src)
 		if err != nil {

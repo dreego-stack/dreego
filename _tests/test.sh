@@ -22,6 +22,11 @@ export DREEGO_BIN
 export REPO_DIR
 export DREEGO_LOCAL_REPO="$REPO_DIR"
 
+"$DREEGO_BIN" tools install typescript >/dev/null || {
+    echo "FAIL: could not install pinned TypeScript compiler"
+    exit 1
+}
+
 # Install curl once, before any parallel test starts. Every server test needs
 # curl; doing apk add concurrently per-test races on apk's database lock and
 # flakes. A single pre-install here is deterministic and race-free.

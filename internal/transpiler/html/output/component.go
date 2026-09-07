@@ -6,10 +6,14 @@ import (
 
 	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	jsoutput "github.com/dreego-stack/dreego/internal/transpiler/js/output"
+	jsprocess "github.com/dreego-stack/dreego/internal/transpiler/js/process"
 )
 
 type CompGen struct {
 	Gen       *codegen.State
+	Component *ir.ComponentDef
+	Server    []ir.ServerSection
 	InSection bool
 	Builder   string
 }
@@ -136,6 +140,12 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 		return g.genComponentCall(n)
 	case ir.NodeVerbatim:
 		return fmt.Sprintf("%s.WriteString(%s)", g.Builder, ir.GoLiteral(n.Content)), nil
+	case ir.NodeClientScript:
+		client, err := jsprocess.Inline(n, g.Component, g.Server)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSuffix(jsoutput.GenClientTo(client, g.Builder, ""), "\n"), nil
 	}
 	return "", fmt.Errorf("unsupported component node type %d", n.Type)
 }
@@ -165,7 +175,7 @@ func (g *CompGen) genComponentCall(n ir.TemplateNode) (string, error) {
 	buf.WriteString(fmt.Sprintf("\tvar %s strings.Builder\n", slotBuilder))
 	var slotKeys []string
 	var previousNamedSlots []string
-	defaultGen := &CompGen{Gen: g.Gen, Builder: slotBuilder}
+	defaultGen := &CompGen{Gen: g.Gen, Component: g.Component, Server: g.Server, Builder: slotBuilder}
 	for _, child := range n.Children {
 		if child.Type == ir.NodeSlot && child.Content != "" {
 			if nested := FindNestedSlot(child.Children); nested != nil {
@@ -181,7 +191,7 @@ func (g *CompGen) genComponentCall(n ir.TemplateNode) (string, error) {
 			buf.WriteString(fmt.Sprintf("\t%s := ctx.Data(%q)\n", previous, key))
 			namedBuilder := fmt.Sprintf("namedSlotBuilder%d_%d", id, len(slotKeys))
 			buf.WriteString(fmt.Sprintf("\tvar %s strings.Builder\n", namedBuilder))
-			childGen := &CompGen{Gen: g.Gen, Builder: namedBuilder}
+			childGen := &CompGen{Gen: g.Gen, Component: g.Component, Server: g.Server, Builder: namedBuilder}
 			for _, slotChild := range child.Children {
 				code, err := childGen.Node(slotChild)
 				if err != nil {

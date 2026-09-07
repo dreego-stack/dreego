@@ -122,6 +122,10 @@ func loadComponent(path string) (componentSource, error) {
 func prepareComponentFile(file *File, def *ComponentDef, path, raw string, bodyOffset int) {
 	file.Component = def
 	file.SourceContent = raw
+	file.SourcePath = path
+	if file.Client != nil {
+		file.Client.Pos += bodyOffset
+	}
 	if file.Body != nil {
 		setNodeSource(file.Body.Nodes, path, bodyOffset)
 		def.Slots = mergeUnique(def.Slots, collectSlotNames(file.Body.Nodes))
