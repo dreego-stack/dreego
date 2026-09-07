@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dreego-stack/dreego/internal/transpiler/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 	"github.com/dreego-stack/dreego/internal/transpiler/js"
 )
@@ -40,7 +39,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 		var headCode string
 		if file.Head != nil {
 			var err error
-			headCode, err = html.GenHead(file.Head.Content, "b")
+			headCode, err = genHead(file.Head.Content, "b")
 			if err != nil {
 				return "", "", err
 			}
@@ -54,7 +53,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 		headPending := suppressScope && headCode != ""
 		inSection := false
 		for _, n := range file.Body.Nodes {
-			code, err := html.GenTemplateNodeToState(gen, n, 1, "b", &inSection)
+			code, err := genTemplateNodeToState(gen, n, 1, "b", &inSection)
 			if err != nil {
 				return "", "", err
 			}
@@ -74,7 +73,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 		if file.Style != nil {
 			styleCode := file.Style.Code
 			if !suppressScope {
-				styleCode = html.ScopeCSS(file.Style.Code, scopeHash)
+				styleCode = scopeCSS(file.Style.Code, scopeHash)
 			}
 			buf.WriteString("\tb.WriteString(\"<style>\")\n")
 			buf.WriteString(fmt.Sprintf("\tb.WriteString(%s)\n", ir.GoLiteral(styleCode)))

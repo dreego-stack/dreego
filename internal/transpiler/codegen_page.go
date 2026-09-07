@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
-	"github.com/dreego-stack/dreego/internal/transpiler/html"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
@@ -119,7 +119,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 	}
 
 	if file.Body != nil && len(file.Body.Nodes) > 0 {
-		templCode, err := html.GenTempl(gen, file, layout, scopeHash, true)
+		templCode, err := output.GenTempl(gen, file, layout, scopeHash, true)
 		if err != nil {
 			return "", "", err
 		}

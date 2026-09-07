@@ -4,16 +4,19 @@ import (
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
-	"github.com/dreego-stack/dreego/internal/transpiler/html"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/component"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
+	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func genTemplateNode(gen *generator, n TemplateNode, depth int) (string, error) {
-	return html.GenTemplateNode(gen, n, depth)
+	return output.GenTemplateNode(gen, n, depth)
 }
 
 func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder string, inSection *bool) (string, error) {
-	return html.GenTemplateNodeToState(gen, n, depth, builder, inSection)
+	return output.GenTemplateNodeToState(gen, n, depth, builder, inSection)
 }
 
 func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string, isGET bool) (string, error) {
@@ -21,11 +24,11 @@ func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string,
 	if layout != nil {
 		l = &codegen.Layout{File: layout.file, Name: layout.name}
 	}
-	return html.GenTempl(gen, file, l, scopeHash, isGET)
+	return output.GenTempl(gen, file, l, scopeHash, isGET)
 }
 
 func genTemplateNodeComp(gen *generator, n TemplateNode) (string, error) {
-	return html.GenTemplateNodeComp(gen, n)
+	return output.GenTemplateNodeComp(gen, n)
 }
 
 type compGen struct {
@@ -34,67 +37,67 @@ type compGen struct {
 }
 
 func (g *compGen) genComponentCall(n TemplateNode) (string, error) {
-	return html.GenComponentCall(g.gen, g.builder, n)
+	return output.GenComponentCall(g.gen, g.builder, n)
 }
 
 func GenerateComponent(gen *Generator, file *File, scopeHash string) (string, error) {
-	return html.GenerateComponent(gen, file, scopeHash)
+	return component.Generate(gen, file, scopeHash)
 }
 
 func buildComponentArgs(comp *ComponentDef, attrs string, src string, pos int) (string, error) {
-	return html.BuildComponentArgs(comp, attrs, src, pos)
+	return output.BuildComponentArgs(comp, attrs, src, pos)
 }
 
 func componentParams(comp *ComponentDef) (decl, impl, call string, variadic string) {
-	return html.ComponentParams(comp)
+	return component.Params(comp)
 }
 
 func writePropDefaultFallbacks(buf *strings.Builder, comp *ComponentDef) {
-	html.WritePropDefaultFallbacks(buf, comp)
+	component.WritePropDefaultFallbacks(buf, comp)
 }
 
 func validateSlotName(def *ComponentDef, name, filename, src string, pos int) error {
-	return html.ValidateSlotName(def, name, filename, src, pos)
+	return output.ValidateSlotName(def, name, filename, src, pos)
 }
 
 func nestedSlotError(call TemplateNode, def *ComponentDef, nested *TemplateNode, src string) error {
-	return html.NestedSlotError(call, def, nested, src)
+	return output.NestedSlotError(call, def, nested, src)
 }
 
 func genHead(htmlText string, bufName string) (string, error) {
-	return html.GenHead(htmlText, bufName)
+	return head.Gen(htmlText, bufName)
 }
 
 func compTextWithAttrs(s string) string {
-	return html.CompTextWithAttrs(s)
+	return output.CompTextWithAttrs(s)
 }
 
 func compTextSection(content string, inSection bool) (string, bool) {
-	return html.CompTextSection(content, inSection)
+	return output.CompTextSection(content, inSection)
 }
 
 func attrSafeFunc(content string, tagStart, i int) string {
-	return html.AttrSafeFunc(content, tagStart, i)
+	return output.AttrSafeFunc(content, tagStart, i)
 }
 
-func scopeCSS(css string, hash string) string {
-	return html.ScopeCSS(css, hash)
+func scopeCSS(cssText string, hash string) string {
+	return css.ScopeCSS(cssText, hash)
 }
 
 func scopeSelector(sel string, prefix string) string {
-	return html.ScopeSelector(sel, prefix)
+	return css.ScopeSelector(sel, prefix)
 }
 
 func splitTopLevelComma(sel string) []string {
-	return html.SplitTopLevelComma(sel)
+	return css.SplitTopLevelComma(sel)
 }
 
-func matchBrace(css string, open, end int) int {
-	return html.MatchBrace(css, open, end)
+func matchBrace(cssText string, open, end int) int {
+	return css.MatchBrace(cssText, open, end)
 }
 
 func headMergeHelpers() string {
-	return html.HeadMergeHelpers()
+	return output.HeadMergeHelpers()
 }
 
 func attrNameAt(tag string, i int) string {
@@ -110,7 +113,7 @@ func isScriptAttr(name string) bool {
 }
 
 func headSafeFunc(htmlText string, i int) string {
-	return html.HeadSafeFunc(htmlText, i)
+	return head.HeadSafeFunc(htmlText, i)
 }
 
 func attrValue(tag string, attr string) string {
@@ -126,13 +129,13 @@ func toPascalCase(s string) string {
 }
 
 func extractAttrValues(attrs string) string {
-	return html.ExtractAttrValues(attrs)
+	return output.ExtractAttrValues(attrs)
 }
 
 func attrVal(part string) string {
-	return html.AttrVal(part)
+	return output.AttrVal(part)
 }
 
 func concatPlaceholders(val string) string {
-	return html.ConcatPlaceholders(val)
+	return output.ConcatPlaceholders(val)
 }
