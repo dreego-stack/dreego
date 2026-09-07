@@ -1,4 +1,9 @@
 
+## v0.3.3 - 2026-09-07
+
+- Refactor: route JavaScript client input through a shared normalized output stage for future TypeScript and Lua processors.
+- Docs: replace version-numbered roadmap milestones with capability phases and remove static site generation from the planned targets.
+
 ## v0.3.2 - 2026-09-07
 
 - Chore: clarify transpiler package boundaries and remove redundant facade layers.
