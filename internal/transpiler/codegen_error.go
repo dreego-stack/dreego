@@ -6,6 +6,7 @@ import (
 
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 	jsinput "github.com/dreego-stack/dreego/internal/transpiler/js/js"
+	jsoutput "github.com/dreego-stack/dreego/internal/transpiler/js/output"
 )
 
 func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, catchPattern string, scopeHash string) (string, string, error) {
@@ -68,7 +69,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 		}
 
 		if file.Client != nil {
-			buf.WriteString(jsinput.GenClient(file.Client.Code))
+			buf.WriteString(jsoutput.GenClient(jsinput.Process(file.Client.Code)))
 		}
 		if file.Style != nil {
 			styleCode := file.Style.Code

@@ -9,6 +9,7 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 	jsinput "github.com/dreego-stack/dreego/internal/transpiler/js/js"
+	jsoutput "github.com/dreego-stack/dreego/internal/transpiler/js/output"
 )
 
 func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHash string, isGET bool) (string, error) {
@@ -63,7 +64,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 	}
 
 	if file.Client != nil {
-		buf.WriteString(jsinput.GenClient(file.Client.Code))
+		buf.WriteString(jsoutput.GenClient(jsinput.Process(file.Client.Code)))
 	}
 	if file.Style != nil {
 		scoped := css.ScopeCSS(file.Style.Code, scopeHash)
