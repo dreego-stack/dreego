@@ -9,7 +9,7 @@
     <div class="min-h-screen bg-slate-950 text-slate-100">
         <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6" aria-label="Lua demo navigation">
             <a href="/lua/" class="font-mono text-lg font-bold text-cyan-300">dreego.lua</a>
-            <a href="/lua/features" class="rounded-full border border-slate-700 px-4 py-2 text-sm font-medium hover:border-cyan-400 hover:text-cyan-300">Feature map</a>
+            <div class="flex gap-3"><a href="/lua/v0" class="rounded-full border border-slate-700 px-4 py-2 text-sm font-medium hover:border-amber-300 hover:text-amber-300">JavaScript comparison</a><a href="/lua/features" class="rounded-full border border-slate-700 px-4 py-2 text-sm font-medium hover:border-cyan-400 hover:text-cyan-300">Feature map</a></div>
         </nav>
 
         <main class="mx-auto max-w-6xl px-6 pb-20 pt-10">
