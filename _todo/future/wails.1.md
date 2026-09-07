@@ -1,13 +1,13 @@
 ---
 area: architecture
-phase: planned-v0.5
+phase: wails-host
 ---
 # Expanded Wails integration
 
 ## Goal
-Add the first-party Wails target after the v0.2 render foundation. It is
-sequenced after SSG in the roadmap but does not depend on an SSG-specific API.
-See `_plan/v0.5-wails-target.md`.
+Add the first-party Wails host after the render foundation and the TypeScript
+and Lua client processors prove the shared JavaScript output pipeline. See
+`_plan/phase-wails.md`.
 
 ## Acceptance criteria
 - Components render without assuming an HTTP request.

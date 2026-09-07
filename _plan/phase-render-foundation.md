@@ -1,4 +1,4 @@
-# v0.2 render foundation
+# Completed phase: target-neutral render foundation
 
 ## Goal
 
@@ -71,7 +71,7 @@ operations remain in the SSR host.
 
 The following must fail at generation or build time when unavailable:
 
-- setting response headers in SSG;
+- setting response headers in a non-HTTP host;
 - reading cookies in a pure build context;
 - registering a server action for a target without server routes;
 - requiring a persistent connection from an unsupported host.
@@ -126,7 +126,7 @@ deferred until at least two real targets prove the same small contract.
 - Render a generated page and component without `httptest.Server`.
 - Verify head and styles in the exact HTML bytes, escaping, errors, and typed
   props. Separate asset metadata remains deferred by the render-result ADR.
-- Do not call this SSG or Wails yet; it is evidence for their foundations.
+- Do not call this Wails yet; it is evidence for its rendering foundation.
 
 The release vehicle for this phase is a `stage/renderv0.2` branch that merges
 into main with a `version: minor` change file, producing the v0.2.0 tag
@@ -157,7 +157,7 @@ automatically (the stage model).
 
 ## Not in this phase
 
-- SSG file output, Wails APIs, DreeJS, or processor subprocesses.
+- Wails APIs, DreeJS, or processor subprocesses.
 - A universal `Target` interface.
 - Dynamic render data maps as a replacement for generated props.
 - Silent fallback when a target lacks a requested capability.

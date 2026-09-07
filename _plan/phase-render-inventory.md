@@ -1,4 +1,4 @@
-# v0.2 render foundation — behavioral inventory (Slice 1)
+# Completed render foundation: behavioral inventory
 
 Status: analysis only, no code changes. Captured 2026-09-01.
 

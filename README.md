@@ -41,9 +41,9 @@ dreego new myapp && cd myapp && dreego generate && go run .
 Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing. Your app is a plain Go binary using `net/http`. See [Benchmarks](_docs/benchmarks.md) for measured code-generation and request performance.
 
 Four principles:
-1. **SSR-First, Not SSR-Only** — SSR is the current production foundation.
-   Target-neutral rendering, SSG, Wails, and optional DreeJS browser behavior
-   are planned for the long v0.x line.
+1. **SSR-First** — SSR is the production web foundation. Target-neutral
+   rendering supports a planned Wails host, while DreeJS adds optional browser
+   and WebView behavior.
 2. **File-Based** — `www/routes/page.dreego` maps to `GET /`. One route file per URL with method-specific sections. Legacy names `get.dreego`, `index.dreego`, and `+page.dreego` remain accepted.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
@@ -56,7 +56,6 @@ multiple explicit first-party targets:
 ```text
 target-neutral App + renderer
 ├── target/ssr
-├── target/ssg
 └── target/wails
 
 optional browser behavior
@@ -225,10 +224,10 @@ Multiple websites can share one module — each directory with a
 Official plugins live in separate repos under `github.com/dreego-stack/`. Each plugin has its own `go.mod` and requires `github.com/dreego-stack/dreego`; Core stays dependency-free and never imports a plugin package.
 
 Provider integrations such as Stripe, MapLibre, auth, storage, Tailwind, SSE,
-and WebSockets remain external. Optional language processors such as
-TypeScript, Markdown, and Lua also remain external and may manage pinned tools
-after explicit approval. SSR, SSG, Wails, and DreeJS stay in the monorepo
-because they share the compiler and rendering contracts.
+and WebSockets remain external. The small first-party language set—Markdown,
+TypeScript, and Lua—stays in the transpiler and may manage pinned tools after
+explicit approval. SSR, Wails, and DreeJS stay in the monorepo because they
+share the compiler and rendering contracts.
 
 ```
 github.com/dreego-stack/

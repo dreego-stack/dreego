@@ -28,13 +28,13 @@ parse -> typed model -> validate -> render plan
                                   v
                             typed HTML renderer
                                   |
-                    +-------------+-------------+
-                    |             |             |
-                    v             v             v
-                  SSR            SSG          Wails
+                          +-------+-------+
+                          |               |
+                          v               v
+                        SSR             Wails
 ```
 
-SSR, SSG, and Wails are first-party target packages in the monorepo because
+SSR and Wails are first-party host packages in the monorepo because
 they depend on the same compiler, render contracts, component metadata, asset
 rules, diagnostics, and compatibility policy. Optional provider integrations
 remain external plugins.
@@ -46,7 +46,6 @@ The intended package shape is:
 ```text
 github.com/dreego-stack/dreego
 github.com/dreego-stack/dreego/target/ssr
-github.com/dreego-stack/dreego/target/ssg
 github.com/dreego-stack/dreego/target/wails
 ```
 
@@ -72,7 +71,6 @@ must not be copied into released documentation before it compiles.
 A target is a first-party host or build pipeline, not a generic feature flag.
 
 - SSR binds a prepared application to `net/http` and request capabilities.
-- SSG enumerates build-time route inputs and writes HTML and assets.
 - Wails binds rendered HTML, assets, navigation, and a typed host bridge to a
   desktop WebView without requiring a local HTTP server.
 - DreeJS is optional browser output shared by targets. It is not a target.
@@ -89,13 +87,11 @@ must fail when the selected target cannot provide them.
 Targets and processors exchange small capability declarations instead of a
 single broad `Target` interface. Candidate capabilities include:
 
-- static output;
 - request and response access;
 - server routes;
 - client JavaScript assets;
 - persistent server connections;
 - desktop host bridge;
-- build-time route enumeration.
 
 Capabilities are added only when an implementation needs them. Missing
 capabilities are build errors with the source location, requesting component or
@@ -128,35 +124,35 @@ Dreego.
 
 ## Processor and plugin boundary
 
-JavaScript, Go, HTML, and CSS defaults are owned by the monorepo. Optional
-languages and integrations live in external plugin repositories with their own
-modules, dependencies, releases, tests, and CI.
+JavaScript, Go, HTML, and CSS defaults and the small first-party language set
+are owned by the monorepo. Provider and transport integrations live in external
+plugin repositories with their own modules, dependencies, releases, tests, and
+CI.
 
 Examples:
 
-- TypeScript processor: client TypeScript to checked JavaScript;
-- Markdown processor: body Markdown to HTML-compatible body nodes;
-- Lua processor: client Lua to JavaScript;
+- TypeScript processor: first-party client TypeScript to checked JavaScript;
+- Markdown processor: first-party body Markdown to HTML-compatible body nodes;
+- Lua processor: first-party client Lua to JavaScript;
 - Tailwind plugin: managed external tool plus generated CSS;
 - Stripe or MapLibre plugin: typed Go registration, components, assets, and
   optional processor or build capabilities.
 
-Compiler plugins run through a versioned process protocol rather than Go's
-native `plugin` package or an embedded Lua extension VM. The protocol must
-carry structured inputs, outputs, diagnostics, source positions, assets, and
-required target capabilities. It is validated with at least two real language
-processors before a stability promise.
+Compiler-backed first-party processors may run pinned tools as subprocesses.
+They do not use Go's native `plugin` package or an embedded Lua extension VM.
+A third-party compiler protocol is deferred until real demand proves a small,
+stable contract.
 
 ## Managed tools
 
 Normal projects do not require developers to operate npm or Node directly.
-Official plugins may install a pinned external tool after an explicit warning
+First-party processors and official plugins may install a pinned external tool after an explicit warning
 and approval. Installation records version, checksum, permissions, and cache
 location. CI supports a non-interactive allowlist and fails instead of silently
 downloading an unapproved tool.
 
-TypeScript is expected to be an official external processor. Raw JavaScript
-remains the dependency-free core path. TypeScript checking must use a real
+TypeScript is a planned first-party processor. Raw JavaScript remains the
+dependency-free path. TypeScript checking must use a real
 TypeScript type checker; syntax stripping alone is not called type safety.
 
 ## DreeJS direction
@@ -200,5 +196,6 @@ multiple real implementations prove a common contract.
 - Provider-specific databases, queues, caches, auth, billing, or maps in core.
 - One universal target interface that hides incompatible runtime models.
 
-SPA and Wasm remain explicit future investigations after SSR, SSG, Wails, and
-DreeJS demonstrate where those capabilities provide additional user value.
+Static site generation is not planned. SPA and Wasm remain explicit future
+investigations after SSR, Wails, and DreeJS demonstrate where those
+capabilities provide additional user value.

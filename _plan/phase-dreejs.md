@@ -1,9 +1,10 @@
-# v0.6 DreeJS foundation
+# Phase: DreeJS foundation and data islands
 
 ## Goal
 
 Add optional, generated browser behavior without turning every Dreego page into
-a single-page application. Static HTML remains the default. Applications do
+a single-page application. Server-rendered HTML remains the default.
+Applications do
 not receive a runtime unless their components request client behavior.
 
 DreeJS is one product name and one compiler/runtime boundary. Terms such as
@@ -36,8 +37,8 @@ The root client section is:
 </client>
 ```
 
-JavaScript is the dependency-free default. TypeScript and Lua are provided by
-external language processors:
+JavaScript is the dependency-free default. TypeScript and Lua use the
+first-party processors proven before the Wails phase:
 
 ```html
 <client lang="ts"></client>
@@ -97,6 +98,10 @@ The foundation proves local client behavior before networked update modes:
 - deterministic asset generation;
 - content security policy compatibility;
 - accessible focus and announcement behavior.
+- one-time private data islands with loading, error, cancellation, and fallback
+  states;
+- explicit cache policy so personalized fragments default to `private,
+  no-store` while shared SSR output can use application-defined caching.
 
 A countdown is the reference slice. The server supplies an authoritative end
 timestamp and renders both meaningful initial content and the states needed by
@@ -132,15 +137,16 @@ Only explicitly generated client props cross the boundary. Serialization must:
 ## Target compatibility
 
 - SSR can emit initial HTML and DreeJS assets.
-- SSG can emit the same assets; network modes require external endpoints.
 - Wails can emit local code and use a host bridge where explicitly supported.
 - Unsupported capability combinations fail during generation or build.
 
 ## Acceptance criteria
 
-- A static component emits zero DreeJS bytes.
-- The countdown reference works under SSR, SSG, and Wails where host behavior
+- A server-only component emits zero DreeJS bytes.
+- The countdown reference works under SSR and Wails where host behavior
   permits it.
+- A cached SSR page can keep a personalized island outside its shared cache
+  entry without leaking one user's data to another.
 - No application-owned npm configuration is required.
 - Client code is scoped and cleaned up when its component is removed.
 - Serialized values are typed, escaped, and minimized.
@@ -152,7 +158,7 @@ Only explicitly generated client props cross the boundary. Serialization must:
 
 - A client router or SPA navigation system.
 - Automatic synchronization of arbitrary Go variables.
-- Fetch, polling, SSE, or WebSocket implementation beyond interfaces needed to
+- Polling, SSE, or WebSocket implementation beyond interfaces needed to
   validate the local foundation.
 - Go-to-JavaScript compilation.
 - A framework-specific virtual DOM selected before measurement.

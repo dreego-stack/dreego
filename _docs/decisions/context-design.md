@@ -19,13 +19,14 @@ timestamp: 2026-07-28T00:00:00Z
 > [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output1.md)
 
-**Current state:** `SSRContext` is the only concrete context in use. SSG and
-Wails are planned after the target-neutral render foundation; the examples
-below remain historical and superseded.
+**Current state:** `SSRContext` is the only concrete context in use. Wails is
+planned after the multi-language phase; the target sketches below remain
+historical and superseded. Static site generation is not planned.
 
 ## Context
 
-The `<server>` block in `.dreego` files needs a context for data access. Dreego supports three rendering targets:
+The `<server>` block in `.dreego` files needs a context for data access. The
+historical proposal compared three rendering targets:
 
 1. **SSR** — `*http.Request` + `http.ResponseWriter`
 2. **SSG** — Build time, no HTTP
@@ -101,14 +102,14 @@ No `c.Get("auth")` with `any` cast. No string key. Type-safe.
 
 ## Rationale
 
-1. **Compile-Time Safety:** If developer calls `c.Session()` in SSG → compile error. No runtime panic.
+1. **Compile-Time Safety:** Unsupported host capabilities fail before runtime.
 2. **The codegen pass knows the target:** Generated code calls directly on the concrete type, not through the interface.
 3. **The interface is documentation & test mock**, not a dispatch mechanism.
 4. **Go-idiomatic:** Like `database/sql` — one interface, various driver implementations.
 
 ## Consequences
 
-- Three codegen passes: SSR, SSG, Wails
+- Host-specific codegen does not leak unavailable capabilities
 - Each pass generates code against the concrete context type
 - Target-specific methods only appear in their pass
 - Interface usable for shared tests

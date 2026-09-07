@@ -2,12 +2,12 @@
 
 ## Status
 
-Exploration after the planned SSR, render, SSG, Wails, and DreeJS phases. This
+Exploration after the planned SSR, render, Wails, and DreeJS phases. This
 file is not a release commitment.
 
 ## SPA question
 
-SSR or SSG plus DreeJS may already cover most application interactions without
+SSR plus DreeJS may already cover most application interactions without
 a client router or complete browser-owned state model. Explore a SPA runtime
 only when real applications demonstrate a repeated limitation such as offline
 navigation, application-wide client transitions, or high-frequency local state

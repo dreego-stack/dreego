@@ -62,7 +62,8 @@ Middleware stack is locked at the first `ListenAndServe` — later `app.Use()` �
 type Middleware func(ctx Context, next http.Handler) http.Handler
 ```
 
-Takes `dreego.Context`, not raw `*http.Request` — target-agnostic (applies to SSR, SSG, Wails).
+Takes `dreego.Context`, not raw `*http.Request`. HTTP middleware remains owned
+by SSR; Wails uses its own host lifecycle.
 
 ## Consequences
 

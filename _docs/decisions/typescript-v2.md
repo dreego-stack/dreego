@@ -10,7 +10,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 **Date:** 2026-07-28
 **Status:** Superseded by
-[Semantic sections and external language processors](semantic-sections-and-language-processors.md)
+[Semantic sections and first-party language processors](semantic-sections-and-language-processors.md)
 
 > TypeScript is now planned as an external `<client lang="ts">` processor in
 > the v0.x line. Raw JavaScript remains built in. The processor must run real

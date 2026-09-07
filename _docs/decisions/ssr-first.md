@@ -63,6 +63,6 @@ Interactivity comes not through a client-side framework, but through:
 - No client-side router needed
 - No API layer between template and database
 - HTMX + Alpine.js are the supported progressive-enhancement path; plain JavaScript is always available
-- Planned v0.x: target-neutral rendering, SSG, and Wails build on the proven SSR
-  foundation; see
+- Target-neutral rendering and Wails build on the proven SSR foundation. Static
+  site generation is not planned; see
   [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).

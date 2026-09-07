@@ -1,4 +1,4 @@
-# v0.1 SSR foundation
+# Completed phase: SSR foundation
 
 ## Goal
 
@@ -63,7 +63,7 @@ small internal boundaries, and tests that reveal HTTP assumptions.
 
 ## Not in this phase
 
-- SSG, Wails, DreeJS, TypeScript, or language processors.
+- Wails, DreeJS, TypeScript, or additional language processors.
 - Compatibility wrappers that preserve obsolete global state.
 - A generic plugin lifecycle or capability interface without real consumers.
 - Moving packages only to match a future directory sketch.

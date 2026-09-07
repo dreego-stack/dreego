@@ -52,7 +52,7 @@ or `Listen` returns `dreego.ErrAppBuilt`.
 ## Framework boundary
 
 The current core contains the SSR capabilities required by a normal Dreego
-application. Planned first-party SSR, SSG, Wails, and DreeJS capabilities stay
+application. Planned first-party SSR, Wails, and DreeJS capabilities stay
 in the monorepo because they share compiler, renderer, asset, and diagnostic
 contracts. Optional provider integrations, SSE, and WebSockets live in separate
 plugin repositories, even when an implementation currently needs only the
@@ -63,10 +63,10 @@ implementations demonstrate the same small contract. Assets and lifecycle hooks
 remain plugin-owned until real plugins prove that an App-level contract is
 necessary. Plugin contracts remain provisional until v1.
 
-Optional language processors such as TypeScript, Markdown, and Lua also live in
-separate repositories. They will use a versioned compiler-process boundary and
-may manage pinned external tools after explicit approval. They do not execute
-inside core through Go's native `plugin` package or an embedded Lua VM.
+The small first-party language set—Markdown, TypeScript, and Lua—lives in the
+transpiler rather than plugin repositories. Compiler-backed processors may use
+pinned external tools after explicit approval. They do not execute through Go's
+native `plugin` package or an embedded Lua VM.
 
 ## Repository layout
 

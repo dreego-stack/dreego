@@ -118,5 +118,4 @@ scoped to the component instance contract.
 - `component-correctness.1` implements explicit imports, typed named props,
   nesting, and lexical slots.
 - The current fat Plugin interface is not part of this target.
-- SSG, Wails expansion, and runtime client hydration do not change this v0.1
-  SSR contract.
+- Wails and DreeJS expansion do not change this released SSR contract.

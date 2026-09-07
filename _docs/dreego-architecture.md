@@ -11,7 +11,7 @@ timestamp: 2026-07-31T07:00:00Z
 > **Current and planned boundaries:** This document primarily explains the
 > released SSR implementation and therefore uses the current `<server>`, `<body>`,
 > and `<client>` syntax. The accepted v0.x direction introduces a target-neutral
-> App and renderer, explicit SSR/SSG/Wails target packages, DreeJS, and the
+> App and renderer, explicit SSR and Wails hosts, DreeJS, and the
 > planned `<server>`, `<body>`, and `<client>` names. See the
 > [target decision](decisions/target-neutral-application-and-first-party-targets.md),
 > [section decision](decisions/semantic-sections-and-language-processors.md),

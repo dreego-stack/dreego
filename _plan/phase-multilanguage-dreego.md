@@ -1,4 +1,4 @@
-# v0.3 language processors
+# Current phase: multi-language Dreego
 
 ## Goal
 
@@ -7,11 +7,17 @@ processors for a small, closed set of source languages. Dreego continues to own
 document structure, component composition, template control flow, escaping,
 diagnostics, and generated Go integration.
 
-Language processors live in the Dreego monorepo under
-`internal/transpiler/html/md`, where the first directory names the output
-language and the second names the accepted input language. There is no external
-process boundary for first-party languages; third-party processor support is
-not planned for v0.3 (removed as speculative API).
+Language processors live in the Dreego monorepo. Their conceptual matrix uses
+the first name for the normalized output and the second for the accepted input:
+
+```text
+html/html  html/head  html/css  html/md  html/go
+js/js      js/ts      js/lua
+```
+
+The physical package layout may group closely related processors when that is
+clearer than mirroring every matrix cell. Third-party processor support is not
+part of this phase.
 
 ## Implemented section foundation
 
@@ -83,7 +89,6 @@ A processor registers an exact section and language pair with an output kind:
 section=body   language=md   output=body-nodes
 section=client language=ts   output=javascript
 section=client language=lua  output=javascript
-section=server language=lua  output=go-source
 ```
 
 Support for one pair never implies support for another. For example, a client
@@ -93,7 +98,6 @@ The initial stable categories should be no broader than:
 
 - body source to validated body nodes;
 - client source to JavaScript plus source map and assets;
-- server source to generated Go plus source map;
 - style source to CSS plus assets.
 
 Head processors and arbitrary parser passes are deferred until real use proves
@@ -105,8 +109,8 @@ First-party language processors run inside the Dreego transpiler. Do not use
 Go's native `plugin` package, reflection-based module loading, or an embedded
 Lua VM.
 
-The versioned subprocess protocol for third-party processors is not planned for
-v0.3. It was removed as speculative API: codegen processors have too much power
+The versioned subprocess protocol for third-party processors is not planned. It
+was removed as speculative API: codegen processors have too much power
 to run as third-party code, and the language set is small and closed (Markdown,
 TypeScript, Lua-later). The VS Code extension can ship the same grammars.
 
@@ -132,18 +136,17 @@ cached.
 
 ## Reference processors
 
-The first-party processor set is validated by two meaningfully different
-processors:
+The first-party processor set is implemented in this order:
 
-1. Markdown body processor — **DONE** (implemented in v0.3, `html`/`md`,
+1. Markdown body processor — **DONE** (shipped in v0.3, `html`/`md`,
    stdlib-first). It exercises structured body output and protected Dreego
    template placeholders, and preserves protected Dreego constructs.
-2. TypeScript client processor — **planned**; it will exercise external tooling,
+2. TypeScript client processor — **NEXT**; it will exercise external tooling,
    diagnostics, source maps, JavaScript assets, and type checking. It remains
    the second proof.
 
-Lua is a later third processor. It must not determine the first processor
-design.
+3. Lua client processor — **AFTER TYPESCRIPT**; it produces JavaScript through
+   the same normalized JavaScript output stage. Lua-to-Go is not planned.
 
 ## TypeScript requirements
 
@@ -165,6 +168,8 @@ approval-based flow; npm remains opt-in.
 - Unknown language pairs fail with an installation hint.
 - Markdown cannot reinterpret Dreego components or control flow.
 - TypeScript type errors fail generation with correct source positions.
+- Lua client input produces deterministic JavaScript through the shared output
+  stage without embedding a runtime in Dreego.
 - A processor crash cannot corrupt existing generated output.
 - Identical locked inputs produce identical generated files and assets.
 - No processor dependency is added to Dreego core or the transpiler module.
@@ -174,6 +179,7 @@ approval-based flow; npm remains opt-in.
 - Arbitrary AST mutation across the whole file.
 - In-process execution of untrusted plugin code.
 - A Dreego-owned Lua interpreter.
+- Lua-to-Go compilation.
 - Automatic installation without approval.
 - Third-party processor support (removed as speculative API).
 - Claiming a stable ecosystem protocol after only one processor.

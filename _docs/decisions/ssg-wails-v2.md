@@ -10,12 +10,11 @@ timestamp: 2026-07-28T00:00:00Z
 
 **Date:** 2026-07-28
 **Status:** Superseded by
-[Target-neutral application and first-party targets](target-neutral-application-and-first-party-targets.md)
+[Prefer dynamic SSR and explicit caching over static site generation](ssr-over-ssg.md)
 
-> **Superseded:** SSR remains the v0.1 foundation, but target-neutral rendering,
-> SSG, and Wails are now planned for the long v0.x line. The new direction uses
-> explicit first-party target packages and proven capabilities rather than the
-> universal `Target` interface proposed here.
+> **Historical record:** This proposal is not the current roadmap. Static site
+> generation was removed from the planned targets. Wails remains planned after
+> the client language processors and does not depend on static output.
 
 ## Context
 
