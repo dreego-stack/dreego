@@ -1,11 +1,11 @@
 package transpiler
 
-import "github.com/dreego-stack/dreego/internal/transpiler/ir"
+import "github.com/dreego-stack/dreego/internal/transpiler/codegen"
 
-type Generator = ir.Generator
+type Generator = codegen.State
 
 func NewGenerator() *Generator {
-	return ir.NewGenerator()
+	return codegen.NewState()
 }
 
-type generator = ir.Generator
+type generator = codegen.State

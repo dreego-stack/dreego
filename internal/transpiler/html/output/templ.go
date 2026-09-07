@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 	"github.com/dreego-stack/dreego/internal/transpiler/js"
 )
 
-func GenTempl(gen *ir.Generator, file *ir.File, layout *ir.LayoutEntry, scopeHash string, isGET bool) (string, error) {
+func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHash string, isGET bool) (string, error) {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {

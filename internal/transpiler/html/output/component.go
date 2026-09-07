@@ -4,21 +4,22 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 type CompGen struct {
-	Gen       *ir.Generator
+	Gen       *codegen.State
 	InSection bool
 	Builder   string
 }
 
-func GenTemplateNodeComp(gen *ir.Generator, n ir.TemplateNode) (string, error) {
+func GenTemplateNodeComp(gen *codegen.State, n ir.TemplateNode) (string, error) {
 	g := &CompGen{Gen: gen, Builder: "b"}
 	return g.Node(n)
 }
 
-func GenComponentCall(gen *ir.Generator, builder string, n ir.TemplateNode) (string, error) {
+func GenComponentCall(gen *codegen.State, builder string, n ir.TemplateNode) (string, error) {
 	g := &CompGen{Gen: gen, Builder: builder}
 	return g.genComponentCall(n)
 }

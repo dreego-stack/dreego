@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
-	var l *ir.LayoutEntry
+	var l *codegen.Layout
 	if layout != nil {
-		l = &ir.LayoutEntry{File: layout.file, Name: layout.name}
+		l = &codegen.Layout{File: layout.file, Name: layout.name}
 	}
 	if len(file.FormActions) > 0 {
 		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash)
@@ -53,7 +54,7 @@ func templateForMethod(file *File, method string) *BodySection {
 	return file.Body
 }
 
-func generateMethodHandler(gen *Generator, file *File, layout *ir.LayoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Server {
 		if g.ContentType != "" && g.ContentType != "custom" {

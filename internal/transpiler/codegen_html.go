@@ -3,6 +3,7 @@ package transpiler
 import (
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
@@ -16,9 +17,9 @@ func genTemplateNodeToState(gen *generator, n TemplateNode, depth int, builder s
 }
 
 func genTempl(gen *Generator, file *File, layout *layoutEntry, scopeHash string, isGET bool) (string, error) {
-	var l *ir.LayoutEntry
+	var l *codegen.Layout
 	if layout != nil {
-		l = &ir.LayoutEntry{File: layout.file, Name: layout.name}
+		l = &codegen.Layout{File: layout.file, Name: layout.name}
 	}
 	return html.GenTempl(gen, file, l, scopeHash, isGET)
 }

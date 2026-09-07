@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func Generate(gen *ir.Generator, file *ir.File, scopeHash string) (string, error) {
+func Generate(gen *codegen.State, file *ir.File, scopeHash string) (string, error) {
 	comp := file.Component
 	if comp == nil {
 		return "", fmt.Errorf("no component definition")

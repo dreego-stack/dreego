@@ -3,6 +3,7 @@ package html
 import (
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/component"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
@@ -10,23 +11,23 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func GenTemplateNode(gen *ir.Generator, n ir.TemplateNode, depth int) (string, error) {
+func GenTemplateNode(gen *codegen.State, n ir.TemplateNode, depth int) (string, error) {
 	return output.GenTemplateNode(gen, n, depth)
 }
 
-func GenTemplateNodeToState(gen *ir.Generator, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
+func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
 	return output.GenTemplateNodeToState(gen, n, depth, builder, inSection)
 }
 
-func GenTempl(gen *ir.Generator, file *ir.File, layout *ir.LayoutEntry, scopeHash string, isGET bool) (string, error) {
+func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHash string, isGET bool) (string, error) {
 	return output.GenTempl(gen, file, layout, scopeHash, isGET)
 }
 
-func GenTemplateNodeComp(gen *ir.Generator, n ir.TemplateNode) (string, error) {
+func GenTemplateNodeComp(gen *codegen.State, n ir.TemplateNode) (string, error) {
 	return output.GenTemplateNodeComp(gen, n)
 }
 
-func GenComponentCall(gen *ir.Generator, builder string, n ir.TemplateNode) (string, error) {
+func GenComponentCall(gen *codegen.State, builder string, n ir.TemplateNode) (string, error) {
 	return output.GenComponentCall(gen, builder, n)
 }
 
@@ -70,7 +71,7 @@ func BuildComponentArgs(comp *ir.ComponentDef, attrs string, src string, pos int
 	return output.BuildComponentArgs(comp, attrs, src, pos)
 }
 
-func GenerateComponent(gen *ir.Generator, file *ir.File, scopeHash string) (string, error) {
+func GenerateComponent(gen *codegen.State, file *ir.File, scopeHash string) (string, error) {
 	return component.Generate(gen, file, scopeHash)
 }
 
