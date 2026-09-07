@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dreego-stack/dreego/internal/transpiler/html/md"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/markdown"
 	"github.com/dreego-stack/dreego/internal/transpiler/tokens"
 )
 
@@ -24,7 +24,7 @@ func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 		if err := rejectMdTagInMdBody(nodes); err != nil {
 			return nil, err
 		}
-		nodes, err = md.TransformNodes(nodes)
+		nodes, err = markdown.TransformNodes(nodes)
 		if err != nil {
 			return nil, err
 		}
