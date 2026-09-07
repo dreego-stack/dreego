@@ -11,6 +11,7 @@ type State struct {
 	CompPkgs  map[string]string
 	CompPaths map[string]string
 	Imports   map[string]map[string]string
+	Lua       map[string]bool
 }
 
 func NewState() *State {
@@ -19,6 +20,13 @@ func NewState() *State {
 		CompPkgs:  map[string]string{},
 		CompPaths: map[string]string{},
 		Imports:   map[string]map[string]string{},
+		Lua:       map[string]bool{},
+	}
+}
+
+func (g *State) AddLuaFeatures(features []string) {
+	for _, feature := range features {
+		g.Lua[feature] = true
 	}
 }
 

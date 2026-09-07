@@ -7,7 +7,8 @@ import (
 )
 
 type Artifact struct {
-	Code string
+	Code        string
+	RuntimePath string
 }
 
 func GenClient(artifact Artifact) string {
@@ -15,5 +16,9 @@ func GenClient(artifact Artifact) string {
 }
 
 func GenClientTo(artifact Artifact, builder, indent string) string {
-	return fmt.Sprintf("%s%s.WriteString(\"<script>\")\n%s%s.WriteString(%s)\n%s%s.WriteString(\"</script>\")\n", indent, builder, indent, builder, ir.GoLiteral(artifact.Code), indent, builder)
+	var runtime string
+	if artifact.RuntimePath != "" {
+		runtime = fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, ir.GoLiteral(`<script src="`+artifact.RuntimePath+`"></script>`))
+	}
+	return runtime + fmt.Sprintf("%s%s.WriteString(\"<script>\")\n%s%s.WriteString(%s)\n%s%s.WriteString(\"</script>\")\n", indent, builder, indent, builder, ir.GoLiteral(artifact.Code), indent, builder)
 }

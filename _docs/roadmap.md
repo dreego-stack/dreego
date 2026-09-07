@@ -66,14 +66,15 @@ js/lua      Lua input        -> JavaScript output
 html/output HTML IR          -> generated Go renderer
 ```
 
-Markdown-to-HTML and TypeScript-to-JavaScript are shipped. The remaining order
-is:
+Markdown-to-HTML, TypeScript-to-JavaScript, and the first browser Lua MVP are
+shipped. The remaining work is:
 
-1. Lua-to-JavaScript with a small, browser-oriented contract proven against the
-   same JavaScript output stage.
+1. Expand Lua-to-JavaScript through patch releases while keeping its supported
+   browser contract and generated runtime explicit.
 
 Lua-to-Go is not planned. Dreego does not embed a Lua plugin VM or load native
 Go plugins. Raw JavaScript, Go, HTML, and CSS remain dependency-free defaults.
+Browser Lua also has no external compiler dependency.
 
 ## Phase: Wails host
 

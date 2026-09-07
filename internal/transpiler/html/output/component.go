@@ -141,7 +141,7 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 	case ir.NodeVerbatim:
 		return fmt.Sprintf("%s.WriteString(%s)", g.Builder, ir.GoLiteral(n.Content)), nil
 	case ir.NodeClientScript:
-		client, err := jsprocess.Inline(n, g.Component, g.Server)
+		client, err := jsprocess.Inline(g.Gen, n, g.Component, g.Server)
 		if err != nil {
 			return "", err
 		}

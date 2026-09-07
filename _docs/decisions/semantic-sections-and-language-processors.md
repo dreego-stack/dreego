@@ -66,7 +66,8 @@ Dreego monorepo as internal transpiler processors under
 - Markdown (`md` → `html`) with stdlib-first parsing;
 - TypeScript (`ts` → `js`) via Microsoft's pinned native Go compiler for type
   checking and transpilation;
-- Lua (`lua` → `js`) later.
+- Lua (`lua` → `js`) through Dreego's own compiler and feature-linked browser
+  helpers.
 
 Rationale: codegen processors have too much power to run as third-party code,
 so their influence must stay reviewable first-party code. The language count is

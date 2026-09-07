@@ -154,7 +154,7 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 	case ir.NodeVerbatim:
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, ir.GoLiteral(n.Content)), nil
 	case ir.NodeClientScript:
-		client, err := jsprocess.Inline(n, nil, server)
+		client, err := jsprocess.Inline(gen, n, nil, server)
 		if err != nil {
 			return "", err
 		}

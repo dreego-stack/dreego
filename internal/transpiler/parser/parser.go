@@ -105,7 +105,7 @@ func (p *Parser) Parse() (*ir.File, error) {
 			}
 			file.Head = &ir.HeadSection{Content: strings.TrimSpace(section), Language: language}
 		case "client":
-			language, err := parseAllowedLanguage(tok, "js", "ts")
+			language, err := parseAllowedLanguage(tok, "js", "ts", "lua")
 			if err != nil {
 				return nil, err
 			}

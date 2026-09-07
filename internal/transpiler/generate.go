@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	luainput "github.com/dreego-stack/dreego/internal/transpiler/js/lua"
 )
 
 func Run(force bool) error {
@@ -152,6 +154,15 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
+	}
+
+	if runtime := luainput.BundleFeatures(gen.Lua); runtime != "" {
+		path := "/_dreego/lua.js"
+		if routePatterns["GET "+path] {
+			return nil, genStats{}, fmt.Errorf("generated Lua runtime conflicts with route %q", path)
+		}
+		staticSrc += registrationStatement(fmt.Sprintf("app.RegisterStatic(%q, %q, []byte(%q))", path, "text/javascript; charset=utf-8", runtime))
+		staticCount++
 	}
 
 	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings)
