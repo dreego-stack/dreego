@@ -28,6 +28,7 @@ func emitListLines(lines [][]mdSegment, start int, consumed *int, r *mdRenderer)
 func emitListAt(lines [][]mdSegment, start, indent int, r *mdRenderer) ([]ir.TemplateNode, int) {
 	var items []ir.TemplateNode
 	i := start
+	ordered := isOL(strings.TrimSpace(lineRaw(lines[start])))
 	for i < len(lines) {
 		ind := indentOfSegs(lines[i])
 		if ind < indent {
@@ -36,6 +37,9 @@ func emitListAt(lines [][]mdSegment, start, indent int, r *mdRenderer) ([]ir.Tem
 		line := stripIndentSegs(lines[i], indent)
 		raw := lineRaw(line)
 		trimmed := strings.TrimSpace(raw)
+		if isOL(trimmed) != ordered {
+			break
+		}
 		var text []mdSegment
 		if m := ulItem.FindStringSubmatch(trimmed); m != nil {
 			text = stripPrefix(line, markerLen(raw, ulItem))
@@ -124,6 +128,7 @@ func parseList(lines []string, start int, r *mdRenderer) ([]string, int) {
 func parseListAt(lines []string, start, indent int, r *mdRenderer) ([]string, int) {
 	var items []string
 	i := start
+	ordered := isOL(strings.TrimSpace(lines[start]))
 	for i < len(lines) {
 		line := lines[i]
 		ind := indentOf(line)
@@ -131,6 +136,9 @@ func parseListAt(lines []string, start, indent int, r *mdRenderer) ([]string, in
 			break
 		}
 		content := strings.TrimSpace(line)
+		if isOL(content) != ordered {
+			break
+		}
 		var text string
 		if m := ulItem.FindStringSubmatch(content); m != nil {
 			text = m[1]
