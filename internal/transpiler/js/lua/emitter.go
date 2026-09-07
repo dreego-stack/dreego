@@ -47,6 +47,12 @@ func (e *emitter) statement(value statement, depth int) (string, error) {
 	case expressionStatement:
 		expression, err := e.expression(current.value)
 		return fmt.Sprintf("%s%s;\n", indent, expression), err
+	case returnStatement:
+		if current.value == nil {
+			return indent + "return;\n", nil
+		}
+		value, err := e.expression(current.value)
+		return fmt.Sprintf("%sreturn %s;\n", indent, value), err
 	case ifStatement:
 		return e.ifStatement(current, depth)
 	default:

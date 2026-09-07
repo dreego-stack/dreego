@@ -37,6 +37,7 @@ The first release supports:
 - arithmetic, concatenation, comparison, and Lua `and`, `or`, and `not`;
 - `if`, `elseif`, and `else` blocks;
 - local and anonymous functions with lexical closures;
+- bare returns and single return values;
 - function calls, dotted browser object access, and colon-spelled browser methods;
 - `print`, mapped through a linked runtime helper.
 

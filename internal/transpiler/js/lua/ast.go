@@ -24,6 +24,8 @@ type assignStatement struct {
 
 type expressionStatement struct{ value expression }
 
+type returnStatement struct{ value expression }
+
 type ifBranch struct {
 	condition expression
 	body      []statement
@@ -70,6 +72,7 @@ type functionExpression struct {
 func (localStatement) statementNode()      {}
 func (assignStatement) statementNode()     {}
 func (expressionStatement) statementNode() {}
+func (returnStatement) statementNode()     {}
 func (ifStatement) statementNode()         {}
 
 func (literalExpression) expressionNode()  {}

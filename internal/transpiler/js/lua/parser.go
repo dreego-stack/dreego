@@ -6,8 +6,9 @@ import (
 )
 
 type sourceParser struct {
-	tokens []token
-	index  int
+	tokens        []token
+	index         int
+	functionDepth int
 }
 
 func parse(tokens []token) (program, error) {
@@ -28,10 +29,20 @@ func (p *sourceParser) statements(stop map[tokenKind]bool) ([]statement, error) 
 			return nil, err
 		}
 		statements = append(statements, value)
+		if _, ok := value.(returnStatement); ok {
+			p.separators()
+			if !stop[p.current().kind] {
+				return nil, p.errorf(p.current(), "return must be the final statement in its block")
+			}
+			return statements, nil
+		}
 	}
 }
 
 func (p *sourceParser) statement() (statement, error) {
+	if p.match(tokenReturn) {
+		return p.returnStatement()
+	}
 	if p.match(tokenLocal) {
 		if p.match(tokenFunction) {
 			name, err := p.require(tokenIdentifier, "expected a name after local function")
@@ -242,15 +253,6 @@ func binaryPrecedence(kind tokenKind) int {
 		return 6
 	default:
 		return -1
-	}
-}
-
-func assignable(value expression) bool {
-	switch value.(type) {
-	case nameExpression, memberExpression:
-		return true
-	default:
-		return false
 	}
 }
 
