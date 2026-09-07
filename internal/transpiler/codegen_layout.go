@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dreego-stack/dreego/internal/transpiler/html"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
@@ -76,7 +75,7 @@ func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bo
 		}
 		return out, nil
 	}
-	return html.GenTemplateNodeToState(gen, n, depth, "b", inSection)
+	return genTemplateNodeToState(gen, n, depth, "b", inSection)
 }
 
 func splitLayoutText(s string) []string {

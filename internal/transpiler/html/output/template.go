@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func GenTemplateNode(gen *ir.Generator, n ir.TemplateNode, depth int) (string, error) {
+func GenTemplateNode(gen *codegen.State, n ir.TemplateNode, depth int) (string, error) {
 	inSection := false
 	return GenTemplateNodeToState(gen, n, depth, "b", &inSection)
 }
 
-func GenTemplateNodeToState(gen *ir.Generator, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
+func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
 	case ir.NodeText:

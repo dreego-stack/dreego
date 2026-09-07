@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/css"
 	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
-	"github.com/dreego-stack/dreego/internal/transpiler/js"
+	jsinput "github.com/dreego-stack/dreego/internal/transpiler/js/js"
 )
 
-func GenTempl(gen *ir.Generator, file *ir.File, layout *ir.LayoutEntry, scopeHash string, isGET bool) (string, error) {
+func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHash string, isGET bool) (string, error) {
 	var buf strings.Builder
 
 	if layout == nil && file.Head != nil && isGET {
@@ -62,7 +63,7 @@ func GenTempl(gen *ir.Generator, file *ir.File, layout *ir.LayoutEntry, scopeHas
 	}
 
 	if file.Client != nil {
-		buf.WriteString(js.GenClient(file.Client.Code))
+		buf.WriteString(jsinput.GenClient(file.Client.Code))
 	}
 	if file.Style != nil {
 		scoped := css.ScopeCSS(file.Style.Code, scopeHash)
