@@ -37,8 +37,8 @@ func (r *mdRenderer) hasDefs() bool {
 func (r *mdRenderer) renderInline(s string) string {
 	var b strings.Builder
 	for len(s) > 0 {
-		i := strings.IndexByte(s, '<')
-		if i < 0 || i+1 >= len(s) || !(isHTMLNameStart(s[i+1]) || s[i+1] == '/') {
+		i := inlineHTMLStart(s)
+		if i < 0 {
 			b.WriteString(r.renderInlineText(s))
 			break
 		}
@@ -60,6 +60,21 @@ func (r *mdRenderer) renderInline(s string) string {
 		s = s[i+end+1:]
 	}
 	return b.String()
+}
+
+func inlineHTMLStart(s string) int {
+	for i := 0; i < len(s); i++ {
+		if s[i] == '`' {
+			if end := strings.IndexByte(s[i+1:], '`'); end >= 0 {
+				i += end + 1
+			}
+			continue
+		}
+		if s[i] == '<' && i+1 < len(s) && (isHTMLNameStart(s[i+1]) || s[i+1] == '/') {
+			return i
+		}
+	}
+	return -1
 }
 
 func (r *mdRenderer) renderInlineText(s string) string {

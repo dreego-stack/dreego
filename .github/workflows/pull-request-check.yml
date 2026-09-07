@@ -70,6 +70,9 @@ jobs:
           go-version: '1.22'
           cache: false
 
+      - name: Install pinned native TypeScript compiler
+        run: go run ./cli/dreego tools install typescript
+
       - name: go test -race
         run: CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
 

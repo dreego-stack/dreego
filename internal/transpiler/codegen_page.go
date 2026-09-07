@@ -118,7 +118,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 		buf.WriteString(typedCode)
 	}
 
-	if file.Body != nil && len(file.Body.Nodes) > 0 {
+	if file.Body != nil {
 		templCode, err := output.GenTempl(gen, file, layout, scopeHash, true)
 		if err != nil {
 			return "", "", err

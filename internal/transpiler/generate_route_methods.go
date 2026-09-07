@@ -50,7 +50,11 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 	}
 	file.Imports = imports
 	file.SourceContent = raw
+	file.SourcePath = fpath
 	bodyOffset := len(raw) - len(body)
+	if file.Client != nil {
+		file.Client.Pos += bodyOffset
+	}
 	if file.Body != nil {
 		setNodeSource(file.Body.Nodes, fpath, bodyOffset)
 		setSourceText(file.Body.Nodes, raw)

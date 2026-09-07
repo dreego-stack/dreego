@@ -34,6 +34,11 @@ func main() {
 		cmdDocs(os.Args[2:])
 	case "fmt":
 		cmdFmt(os.Args[2:])
+	case "tools":
+		if err := cmdTools(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "tools error: %v\n", err)
+			os.Exit(1)
+		}
 	case "feedback":
 		cmdFeedback()
 	case "version", "--version", "-v":
@@ -57,6 +62,7 @@ commands:
   init <path>            create a minimal dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
+  tools install typescript  install the pinned native TypeScript compiler
   build [--target <os/arch>] [--yes]  generate + go build → build/bin/<name>
   run [-d] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change

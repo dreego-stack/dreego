@@ -6,6 +6,8 @@ import (
 
 	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	jsoutput "github.com/dreego-stack/dreego/internal/transpiler/js/output"
+	jsprocess "github.com/dreego-stack/dreego/internal/transpiler/js/process"
 )
 
 func GenTemplateNode(gen *codegen.State, n ir.TemplateNode, depth int) (string, error) {
@@ -14,6 +16,10 @@ func GenTemplateNode(gen *codegen.State, n ir.TemplateNode, depth int) (string, 
 }
 
 func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, builder string, inSection *bool) (string, error) {
+	return genTemplateNodeToState(gen, n, depth, builder, inSection, nil)
+}
+
+func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, builder string, inSection *bool, server []ir.ServerSection) (string, error) {
 	indent := strings.Repeat("\t", depth)
 	switch n.Type {
 	case ir.NodeText:
@@ -44,7 +50,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
 		for _, child := range n.Children {
-			code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
+			code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 			if err != nil {
 				return "", err
 			}
@@ -61,7 +67,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 			for _, ec := range n.ElseChildren {
 				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
 				for _, child := range ec.Children {
-					code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
+					code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 					if err != nil {
 						return "", err
 					}
@@ -70,7 +76,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 				if len(ec.ElseChildren) > 0 {
 					buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 					for _, child := range ec.ElseChildren {
-						code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
+						code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 						if err != nil {
 							return "", err
 						}
@@ -81,7 +87,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		} else {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, ec := range n.ElseChildren {
-				code, err := GenTemplateNodeToState(gen, ec, depth+1, builder, inSection)
+				code, err := genTemplateNodeToState(gen, ec, depth+1, builder, inSection, server)
 				if err != nil {
 					return "", err
 				}
@@ -104,7 +110,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		buf.WriteString(fmt.Sprintf("%s\tloop := dreego.EachLoop{Index: i, First: i == 0, Last: i == len(%s)-1, Even: i%%2 == 0, Odd: i%%2 != 0}\n", forIndent, n.Items))
 		buf.WriteString(fmt.Sprintf("%s\t_ = loop\n", forIndent))
 		for _, child := range n.Children {
-			code, err := GenTemplateNodeToState(gen, child, forDepth+1, builder, inSection)
+			code, err := genTemplateNodeToState(gen, child, forDepth+1, builder, inSection, server)
 			if err != nil {
 				return "", err
 			}
@@ -115,7 +121,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		if hasElse {
 			buf.WriteString(fmt.Sprintf("%s} else {\n", indent))
 			for _, child := range n.ElseChildren {
-				code, err := GenTemplateNodeToState(gen, child, depth+1, builder, inSection)
+				code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 				if err != nil {
 					return "", err
 				}
@@ -131,7 +137,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 			buf.WriteString(fmt.Sprintf("%s{\n", indent))
 			buf.WriteString(fmt.Sprintf("%s\tvar %s strings.Builder\n", indent, slotBuilder))
 			for _, child := range n.Children {
-				code, err := GenTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
+				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection, server)
 				if err != nil {
 					return "", err
 				}
@@ -147,6 +153,12 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		return fmt.Sprintf("%s%s.WriteString(c.Get(\"slot\"))\n", indent, builder), nil
 	case ir.NodeVerbatim:
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, ir.GoLiteral(n.Content)), nil
+	case ir.NodeClientScript:
+		client, err := jsprocess.Inline(n, nil, server)
+		if err != nil {
+			return "", err
+		}
+		return jsoutput.GenClientTo(client, builder, indent), nil
 	case ir.NodeComponentCall:
 		funcName := n.Tag
 		if idx := strings.LastIndexByte(n.Tag, '.'); idx >= 0 {
@@ -191,7 +203,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 				buf.WriteString(fmt.Sprintf("%s\t{\n", indent))
 				buf.WriteString(fmt.Sprintf("%s\t\tvar %s strings.Builder\n", indent, namedSlotBuilder))
 				for _, sc := range child.Children {
-					code, err := GenTemplateNodeToState(gen, sc, depth+3, namedSlotBuilder, inSection)
+					code, err := genTemplateNodeToState(gen, sc, depth+3, namedSlotBuilder, inSection, server)
 					if err != nil {
 						return "", err
 					}
@@ -203,7 +215,7 @@ func GenTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 				if nested := FindNestedSlot([]ir.TemplateNode{child}); nested != nil {
 					return "", NestedSlotError(n, def, nested, gen.Src)
 				}
-				code, err := GenTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection)
+				code, err := genTemplateNodeToState(gen, child, depth+2, slotBuilder, inSection, server)
 				if err != nil {
 					return "", err
 				}

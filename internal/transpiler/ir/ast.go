@@ -10,6 +10,7 @@ const (
 	NodeSlot
 	NodeComponentCall
 	NodeVerbatim
+	NodeClientScript
 )
 
 type TemplateNode struct {
@@ -27,6 +28,7 @@ type TemplateNode struct {
 	Pos          int
 	Source       string
 	SourceText   string
+	Language     string
 }
 
 type ServerSection struct {
@@ -49,6 +51,7 @@ type File struct {
 	Imports       []Import
 	FormActions   []string
 	SourceContent string
+	SourcePath    string
 }
 
 type ComponentDef struct {
@@ -85,6 +88,7 @@ type BodySection struct {
 type ClientSection struct {
 	Code     string
 	Language string
+	Pos      int
 }
 
 type StyleSection struct {

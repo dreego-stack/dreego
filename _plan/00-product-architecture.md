@@ -145,15 +145,14 @@ stable contract.
 
 ## Managed tools
 
-Normal projects do not require developers to operate npm or Node directly.
-First-party processors and official plugins may install a pinned external tool after an explicit warning
-and approval. Installation records version, checksum, permissions, and cache
-location. CI supports a non-interactive allowlist and fails instead of silently
-downloading an unapproved tool.
+Normal projects do not require npm or Node. First-party processors and official
+plugins may install a pinned external tool after an explicit command.
+Installation records version, checksum, permissions, and cache location. CI
+fails instead of silently downloading an unapproved tool during generation.
 
-TypeScript is a planned first-party processor. Raw JavaScript remains the
-dependency-free path. TypeScript checking must use a real
-TypeScript type checker; syntax stripping alone is not called type safety.
+TypeScript is a first-party processor backed by Microsoft's native Go compiler.
+Raw JavaScript remains the dependency-free path. TypeScript checking uses the
+real TypeScript type checker; syntax stripping alone is not called type safety.
 
 ## DreeJS direction
 
