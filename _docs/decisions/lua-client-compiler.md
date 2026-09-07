@@ -36,7 +36,8 @@ The first release supports:
 - strings, numbers, booleans, and `nil`;
 - arithmetic, concatenation, comparison, and Lua `and`, `or`, and `not`;
 - `if`, `elseif`, and `else` blocks;
-- function calls and dotted browser object access;
+- local and anonymous functions with lexical closures;
+- function calls, dotted browser object access, and colon-spelled browser methods;
 - `print`, mapped through a linked runtime helper.
 
 Lua truthiness and logical operators retain Lua behavior. In particular, zero
@@ -45,7 +46,7 @@ and empty strings are true, and `and` and `or` return operands.
 ## Deliberately excluded from the MVP
 
 - tables, metatables, and metamethods;
-- functions, closures, varargs, and multiple return values;
+- named global functions, varargs, and multiple return values;
 - loops, iterators, and coroutines;
 - modules, `require`, dynamic `load`, bytecode, and the debug library;
 - filesystem, process, socket, and native-library APIs;
@@ -54,6 +55,9 @@ and empty strings are true, and `and` and `or` return operands.
 These are added through tested patch releases only when their browser contract
 and runtime cost are explicit. Browser-inapplicable standard-library features
 may remain permanently unsupported.
+
+Colon-spelled calls target native browser methods. They preserve JavaScript's
+receiver binding and do not inject a second Lua-style `self` argument.
 
 ## Output contract
 

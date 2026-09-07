@@ -62,14 +62,20 @@ type callExpression struct {
 	args   []expression
 }
 
+type functionExpression struct {
+	params []string
+	body   []statement
+}
+
 func (localStatement) statementNode()      {}
 func (assignStatement) statementNode()     {}
 func (expressionStatement) statementNode() {}
 func (ifStatement) statementNode()         {}
 
-func (literalExpression) expressionNode() {}
-func (nameExpression) expressionNode()    {}
-func (unaryExpression) expressionNode()   {}
-func (binaryExpression) expressionNode()  {}
-func (memberExpression) expressionNode()  {}
-func (callExpression) expressionNode()    {}
+func (literalExpression) expressionNode()  {}
+func (nameExpression) expressionNode()     {}
+func (unaryExpression) expressionNode()    {}
+func (binaryExpression) expressionNode()   {}
+func (memberExpression) expressionNode()   {}
+func (callExpression) expressionNode()     {}
+func (functionExpression) expressionNode() {}

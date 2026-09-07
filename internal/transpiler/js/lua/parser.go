@@ -33,6 +33,14 @@ func (p *sourceParser) statements(stop map[tokenKind]bool) ([]statement, error) 
 
 func (p *sourceParser) statement() (statement, error) {
 	if p.match(tokenLocal) {
+		if p.match(tokenFunction) {
+			name, err := p.require(tokenIdentifier, "expected a name after local function")
+			if err != nil {
+				return nil, err
+			}
+			value, err := p.functionExpression()
+			return localStatement{name: name.value, value: value}, err
+		}
 		name, err := p.require(tokenIdentifier, "expected a name after local")
 		if err != nil {
 			return nil, err
@@ -156,6 +164,12 @@ func (p *sourceParser) prefix() (expression, error) {
 		}
 	case tokenLeftBrace:
 		return nil, p.errorf(current, "tables are not supported in the Lua MVP")
+	case tokenFunction:
+		var err error
+		value, err = p.functionExpression()
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, p.errorf(current, "expected an expression")
 	}
@@ -173,6 +187,19 @@ func (p *sourceParser) prefix() (expression, error) {
 				return nil, err
 			}
 			value = callExpression{callee: value, args: args}
+		case p.match(tokenColon):
+			field, err := p.require(tokenIdentifier, "expected method name after :")
+			if err != nil {
+				return nil, err
+			}
+			if _, err := p.require(tokenLeftParen, "expected ( after method name"); err != nil {
+				return nil, err
+			}
+			args, err := p.arguments()
+			if err != nil {
+				return nil, err
+			}
+			value = callExpression{callee: memberExpression{object: value, field: field.value}, args: args}
 		default:
 			return value, nil
 		}

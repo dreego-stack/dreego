@@ -110,6 +110,30 @@ func TestCompileNumbersAndRejectsBareExpressions(t *testing.T) {
 	}
 }
 
+func TestCompileLocalFunctionsAndBrowserCallbacks(t *testing.T) {
+	artifact, err := Compile(`local button = document:querySelector("#count")
+local function update(label)
+  button.textContent = label
+end
+button:addEventListener("click", function(event)
+  update(event.type)
+end)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		`document.querySelector("#count")`,
+		"let update = (label) => {",
+		"button.textContent = label;",
+		`button.addEventListener("click", (event) => {`,
+		"update(event.type);",
+	} {
+		if !strings.Contains(artifact.Code, want) {
+			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
+		}
+	}
+}
+
 func TestCompileAllowsMultilineCalls(t *testing.T) {
 	artifact, err := Compile("print(\n  \"hello\",\n  \"world\"\n)")
 	if err != nil {

@@ -58,6 +58,30 @@ if enabled then print("ready") end</script>
 	dreegotest.MustContain(t, out, "if (dreegoLua.truthy(enabled))")
 }
 
+func TestLuaFunctionsCompileBrowserCallbacks(t *testing.T) {
+	out := dreegotest.Generate(t, `<body><button id="count">Count</button></body>
+<client lang="lua">
+local button = document:querySelector("#count")
+local count = 0
+local function render()
+    button.textContent = "Count " .. count
+end
+button:addEventListener("click", function()
+    count = count + 1
+    render()
+end)
+</client>`)
+	for _, want := range []string{
+		`document.querySelector("#count")`,
+		"let render = () => {",
+		`button.addEventListener("click", () => {`,
+		"count = dreegoLua.add(count, 1);",
+		`button.textContent = dreegoLua.concat("Count ", count);`,
+	} {
+		dreegotest.MustContain(t, out, want)
+	}
+}
+
 func TestLuaApplicationBuilds(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"www/routes/get.dreego": `<body><main>Lua</main></body>

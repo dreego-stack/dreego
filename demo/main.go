@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"demo/blog"
+	luaDemo "demo/lua"
 	"demo/saas"
 	"demo/www"
 	dreego "github.com/dreego-stack/dreego/core"
@@ -44,7 +45,15 @@ func run() error {
 		return err
 	}
 
-	handler := hostRouter(public.Handler(), product.Handler(), blogApp.Handler())
+	luaApp := dreego.New()
+	if err := configure(luaApp); err != nil {
+		return err
+	}
+	if err := luaDemo.Register(luaApp); err != nil {
+		return err
+	}
+
+	handler := hostRouter(public.Handler(), product.Handler(), blogApp.Handler(), luaApp.Handler())
 	addr := ":8080"
 	if port := os.Getenv("DREEGO_PORT"); port != "" {
 		addr = ":" + port
@@ -58,7 +67,7 @@ func configure(app *dreego.App) error {
 	)
 }
 
-func hostRouter(public, product, blog http.Handler) http.Handler {
+func hostRouter(public, product, blog, lua http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host := strings.Split(r.Host, ":")[0]
 		if host == "saas.localhost" || strings.HasPrefix(host, "saas.") {
@@ -69,7 +78,15 @@ func hostRouter(public, product, blog http.Handler) http.Handler {
 			blog.ServeHTTP(w, r)
 			return
 		}
+		if host == "lua.localhost" || strings.HasPrefix(host, "lua.") {
+			lua.ServeHTTP(w, r)
+			return
+		}
 		path := r.URL.Path
+		if path == "/_dreego/lua.js" {
+			lua.ServeHTTP(w, r)
+			return
+		}
 		if path == "/blog" {
 			http.Redirect(w, r, "/blog/", http.StatusMovedPermanently)
 			return
@@ -78,12 +95,20 @@ func hostRouter(public, product, blog http.Handler) http.Handler {
 			http.Redirect(w, r, "/saas/", http.StatusMovedPermanently)
 			return
 		}
+		if path == "/lua" {
+			http.Redirect(w, r, "/lua/", http.StatusMovedPermanently)
+			return
+		}
 		if strings.HasPrefix(path, "/blog/") {
 			http.StripPrefix("/blog", blog).ServeHTTP(w, r)
 			return
 		}
 		if strings.HasPrefix(path, "/saas/") {
 			http.StripPrefix("/saas", product).ServeHTTP(w, r)
+			return
+		}
+		if strings.HasPrefix(path, "/lua/") {
+			http.StripPrefix("/lua", lua).ServeHTTP(w, r)
 			return
 		}
 		public.ServeHTTP(w, r)

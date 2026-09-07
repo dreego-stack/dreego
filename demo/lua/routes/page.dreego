@@ -1,0 +1,80 @@
+<head>
+    <title>Lua Lab · Dreego</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A dependency-free browser Lua showcase built with Dreego.">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <div class="min-h-screen bg-slate-950 text-slate-100">
+        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6" aria-label="Lua demo navigation">
+            <a href="/lua/" class="font-mono text-lg font-bold text-cyan-300">dreego.lua</a>
+            <a href="/lua/features" class="rounded-full border border-slate-700 px-4 py-2 text-sm font-medium hover:border-cyan-400 hover:text-cyan-300">Feature map</a>
+        </nav>
+
+        <main class="mx-auto max-w-6xl px-6 pb-20 pt-10">
+            <section class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <p class="font-mono text-sm uppercase tracking-[0.25em] text-cyan-400">Browser Lua · v0.5 preview</p>
+                    <h1 class="mt-5 text-5xl font-black tracking-tight sm:text-6xl">Write Lua.<br><span class="text-cyan-300">Ship JavaScript.</span></h1>
+                    <p class="mt-6 max-w-xl text-lg leading-8 text-slate-300">Dreego compiles your Lua at generation time. No VM, no WebAssembly, no Node dependency—only focused JavaScript and the semantic helpers your page actually uses.</p>
+                    <div class="mt-8 flex flex-wrap gap-3">
+                        <a href="#playground" class="rounded-xl bg-cyan-300 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-200">Try the counter</a>
+                        <a href="/lua/features" class="rounded-xl border border-slate-700 px-5 py-3 font-bold hover:border-slate-500">Explore features</a>
+                    </div>
+                </div>
+                <pre class="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-900 p-6 text-sm leading-7 shadow-2xl shadow-cyan-950/30" aria-label="Lua source example"><code><span class="text-fuchsia-300">local</span> count = <span class="text-amber-300">0</span>
+<span class="text-fuchsia-300">local function</span> render()
+  output.textContent = count
+<span class="text-fuchsia-300">end</span>
+
+button:addEventListener(<span class="text-emerald-300">"click"</span>, <span class="text-fuchsia-300">function</span>()
+  count = count + <span class="text-amber-300">1</span>
+  render()
+<span class="text-fuchsia-300">end</span>)</code></pre>
+            </section>
+
+            <section id="playground" class="mt-20 rounded-3xl border border-slate-800 bg-slate-900/70 p-8 sm:p-10" aria-labelledby="playground-title">
+                <div class="grid gap-10 md:grid-cols-[1fr_auto] md:items-center">
+                    <div><p class="font-mono text-sm text-cyan-400">LIVE CLIENT INTERACTION</p><h2 id="playground-title" class="mt-3 text-3xl font-bold">A counter controlled entirely by Lua</h2><p class="mt-3 text-slate-400">Functions and closures retain the counter state in the browser.</p></div>
+                    <output id="counter-value" class="min-w-32 text-center font-mono text-7xl font-black text-cyan-300" aria-live="polite">0</output>
+                </div>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <button id="decrement" class="rounded-xl border border-slate-700 px-5 py-3 font-bold hover:bg-slate-800">− Decrease</button>
+                    <button id="increment" class="rounded-xl bg-cyan-300 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-200">+ Increase</button>
+                    <button id="reset" class="rounded-xl px-5 py-3 font-bold text-slate-400 hover:text-white">Reset</button>
+                </div>
+                <p id="counter-status" class="mt-6 text-sm text-slate-400" aria-live="polite">Lua is ready.</p>
+            </section>
+        </main>
+    </div>
+</body>
+
+<client lang="lua">
+local count = 0
+local output = document:querySelector("#counter-value")
+local status = document:querySelector("#counter-status")
+local increment = document:querySelector("#increment")
+local decrement = document:querySelector("#decrement")
+local reset = document:querySelector("#reset")
+
+local function render()
+    output.textContent = count
+    status.textContent = "Lua rendered count " .. count
+end
+
+increment:addEventListener("click", function()
+    count = count + 1
+    render()
+end)
+
+decrement:addEventListener("click", function()
+    count = count - 1
+    render()
+end)
+
+reset:addEventListener("click", function()
+    count = 0
+    render()
+end)
+</client>

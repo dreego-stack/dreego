@@ -26,6 +26,7 @@ const (
 	tokenTrue
 	tokenFalse
 	tokenNil
+	tokenFunction
 	tokenAssign
 	tokenEqual
 	tokenNotEqual
@@ -45,6 +46,7 @@ const (
 	tokenComma
 	tokenLeftBrace
 	tokenRightBrace
+	tokenColon
 )
 
 type token struct {
@@ -59,6 +61,7 @@ var keywords = map[string]tokenKind{
 	"elseif": tokenElseIf, "else": tokenElse, "end": tokenEnd,
 	"and": tokenAnd, "or": tokenOr, "not": tokenNot,
 	"true": tokenTrue, "false": tokenFalse, "nil": tokenNil,
+	"function": tokenFunction,
 }
 
 func lex(source string) ([]token, error) {
@@ -209,7 +212,7 @@ func (l *sourceLexer) operator() (token, int, bool) {
 	if kind, ok := pairs[pair]; ok {
 		return token{kind: kind, value: pair, line: line, column: column}, 2, true
 	}
-	singles := map[rune]tokenKind{'=': tokenAssign, '<': tokenLess, '>': tokenGreater, '+': tokenPlus, '-': tokenMinus, '*': tokenStar, '/': tokenSlash, '%': tokenPercent, '.': tokenDot, '(': tokenLeftParen, ')': tokenRightParen, ',': tokenComma, '{': tokenLeftBrace, '}': tokenRightBrace}
+	singles := map[rune]tokenKind{'=': tokenAssign, '<': tokenLess, '>': tokenGreater, '+': tokenPlus, '-': tokenMinus, '*': tokenStar, '/': tokenSlash, '%': tokenPercent, '.': tokenDot, '(': tokenLeftParen, ')': tokenRightParen, ',': tokenComma, '{': tokenLeftBrace, '}': tokenRightBrace, ':': tokenColon}
 	kind, ok := singles[l.source[l.index]]
 	return token{kind: kind, value: string(l.source[l.index]), line: line, column: column}, 1, ok
 }

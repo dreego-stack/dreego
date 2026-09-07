@@ -101,6 +101,16 @@ func (e *emitter) expression(value expression) (string, error) {
 		return e.unary(current)
 	case binaryExpression:
 		return e.binary(current)
+	case functionExpression:
+		params := make([]string, 0, len(current.params))
+		for _, param := range current.params {
+			params = append(params, jsIdentifier(param))
+		}
+		body, err := e.statements(current.body, 1)
+		if err != nil {
+			return "", err
+		}
+		return "(" + strings.Join(params, ", ") + ") => {\n" + body + "}", nil
 	default:
 		return "", fmt.Errorf("unsupported Lua expression %T", value)
 	}
