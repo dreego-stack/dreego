@@ -55,6 +55,11 @@ The initial compiler supports:
 - line comments beginning with `--`;
 - `print`, linked to the generated browser runtime.
 
+Built-in names follow Lua lexical scoping. A local variable, local function, or
+function parameter named `print` is called directly and does not link the
+runtime logger. The same rule allows local application names such as `require`
+without enabling the unavailable global module loader.
+
 Zero and empty strings are true. Logical operators return operands and evaluate
 their right side lazily. Arithmetic rejects non-number operands rather than
 using JavaScript coercion. Modulo by zero raises an error instead of leaking a
