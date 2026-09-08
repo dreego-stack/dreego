@@ -1,4 +1,10 @@
 
+## v0.5.4 - 2026-09-08
+
+- Test: harden render-context, session, client-language, and Browser Lua compatibility contracts.
+- Bug: reject unavailable Lua metatable, coroutine, system, debug, package, and socket APIs while preserving lexical shadowing.
+- Bug: prevent parallel integration fixtures from racing for the same temporary server port.
+
 ## v0.5.3 - 2026-09-08
 
 - Docs: reorganize the documentation as section-oriented handbook chapters.
