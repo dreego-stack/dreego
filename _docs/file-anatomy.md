@@ -51,4 +51,3 @@ Directories define URL segments, while `page.dreego` owns the directory URL.
 Layouts and components use the same semantic sections but have different
 composition rules. Continue with [Routing](routing.md), [Layouts](layouts.md),
 and [Components](components.md).
-

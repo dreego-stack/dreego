@@ -43,4 +43,3 @@ The server and body sections for one method form one route response. See
 `type="json"`, `type="xml"`, and custom response helpers allow a route to
 respond without an HTML body. Content negotiation and response methods are
 documented in [Routing](routing.md) and [Runtime API](runtime.md).
-

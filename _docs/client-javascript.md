@@ -22,4 +22,3 @@ nested in an HTML body remains in place as HTML. For checked client code use
 
 The current JavaScript compatibility target is listed in
 [Client Languages](client-languages.md).
-

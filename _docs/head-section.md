@@ -23,4 +23,3 @@ not invent a complete HTML document around it.
 
 See [Layouts](layouts.md) for head composition and [Output Safety](security.md)
 for expression contexts.
-

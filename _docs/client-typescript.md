@@ -33,4 +33,3 @@ their normal TypeScript DOM types.
 
 The exact compiler, strictness, and JavaScript output targets are versioned in
 [Client Languages](client-languages.md).
-
