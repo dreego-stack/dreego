@@ -35,7 +35,7 @@ Go developers handle errors explicitly (`if err != nil`). A separate error handl
     {#if hasError}
         <p class="error">User could not be loaded.</p>
     {#else}
-        <h1>Hello, {user.Name}!</h1>
+        <h1>Hello, {{ user.Name }}!</h1>
     {/if}
 </body>
 ```

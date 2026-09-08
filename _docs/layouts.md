@@ -8,9 +8,9 @@ Layouts are shared shells rendered around route content. A layout lives in a
 
 ## Layout Discovery
 
-Layout discovery is restricted to the project's `dreego/` tree. Layout files
-outside the project root (e.g. `vendor/…/www/layouts`, `subapp/www/layouts`)
-are ignored.
+Layout discovery is restricted to the website root identified by
+`dreego.config.json`. Layout files outside that root, including vendored modules
+and nested applications, are ignored.
 
 A layout file is named `default.dreego` (or the legacy `layout.dreego`). Layouts
 resolve per route by a route-local cascade:
@@ -47,12 +47,15 @@ The layout defines the outer `<html>`/`<head>`/`<body>` skeleton. At codegen tim
 ## Route Head Behavior
 
 - **With layout**: the route's `<head>` content (e.g. `<title>{{ doc.Title }}</title>`) is injected into the layout's `{#head}` placeholder. Expressions in the head are resolved and escaped.
-- **Without layout**: if no layout file exists, the route's `<head>` is emitted standalone as a full `<html>` fragment, so the page still renders with its title and meta tags.
+- **Without layout**: the rendered head fragment is emitted before the body
+  wrapper. Dreego does not invent an `<html>` document or outer `<head>` element.
 - **No `<head>` in route**: when the route declares no `<head>`, nothing is injected into `{#head}`.
 
 ## Generated Go Code
 
-The layout wrapping is emitted as `c.Set("slot", pageContent)` / `c.Set("head", headContent)`, and the layout template reads them back with `c.Get("slot")` / `c.Get("head")`.
+Generated route rendering passes page content and head content directly to the
+selected layout renderer. Layout composition does not depend on mutable
+request-context keys.
 
 ## Rules
 

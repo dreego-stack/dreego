@@ -41,40 +41,29 @@ dreego new myapp && cd myapp && dreego generate && go run .
 Dreego is a **compile-time transpiler**, not a runtime framework. `.dreego` files compile to standard Go code — no reflection-based routers, no runtime template parsing. Your app is a plain Go binary using `net/http`. See [Benchmarks](_docs/benchmarks.md) for measured code-generation and request performance.
 
 Four principles:
-1. **SSR-First** — SSR is the production web foundation. Target-neutral
-   rendering supports a planned Wails host, while DreeJS adds optional browser
-   and WebView behavior.
+1. **SSR-First** — SSR is the production web foundation through v1. Future
+   targets remain separate from the stable core until real applications prove
+   their contracts.
 2. **File-Based** — `www/routes/page.dreego` maps to `GET /`. One route file per URL with method-specific sections. Legacy names `get.dreego`, `index.dreego`, and `+page.dreego` remain accepted.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
 
 ### Direction after v0.1
 
-Dreego is intended to let one typed application and component model serve
-multiple explicit first-party targets:
-
-```text
-target-neutral App + renderer
-├── target/ssr
-└── target/wails
-
-optional browser behavior
-└── DreeJS: local, fetch, poll, stream, live
-```
+Dreego first stabilizes its typed SSR application and render model. Optional
+client behavior and additional hosts are explored only after that baseline is
+proven in real applications.
 
 Root sections describe purpose while an optional `lang` selects the source
 processor: `server`, `head`, `body`, `style`, and `client`. Go, HTML, CSS, and
 JavaScript are the built-in defaults.
 
-Static components produce no DreeJS runtime. Components that request browser
-behavior receive only the modules they use. JavaScript remains the built-in,
-dependency-free client language. Markdown and TypeScript are first-party
-processors. Browser Lua compiles through Dreego's dependency-free first-party
-compiler and a generated feature-linked runtime.
+JavaScript remains the built-in, dependency-free client language. Markdown and
+TypeScript are first-party processors. Browser Lua compiles through Dreego's
+dependency-free first-party compiler and a generated feature-linked runtime.
 
-See the public [Roadmap](_docs/roadmap.md), detailed
-[implementation plans](_plan/README.md), and accepted
-[target architecture decision](_docs/decisions/target-neutral-application-and-first-party-targets.md).
+See the public [Roadmap](_docs/roadmap.md) and detailed
+[implementation plans](_plan/README.md).
 
 ## Features
 
@@ -108,7 +97,7 @@ See the public [Roadmap](_docs/roadmap.md), detailed
 - **Health Checks** — `GET /health` → 200, `GET /ready` → 200/503 via `app.SetReady(bool)`
 - **Security Headers** — X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Content-Security-Policy (configure via `app.SetCSP` before build)
 - **Gzip Compression** — `Accept-Encoding` → compressed response wrapping
-- **Recovery** — Panic → 500 with stack trace
+- **Recovery** — Panic → generic 500 response; internal details stay in server logs
 - **Request Logging** — JSONL format with duration, IP, status
 - **Session** — Cookie store via `app.SetSessionStore()`, `c.SetSessionVal()`
 - **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
@@ -116,7 +105,7 @@ See the public [Roadmap](_docs/roadmap.md), detailed
 ### Developer Experience
 - **CLI** — `dreego init`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
-- **Auto-Imports** — `fmt`, `html`, `strings`, `net/http` added to generated code as needed
+- **Auto-Imports** — Required standard-library packages are added to generated code as needed
 - **Accessibility Checks** — `dreego generate` warns about missing image alternatives and unassociated form labels; CLI output is color-free and screen-reader-linear
 
 ## Quick Start
@@ -226,8 +215,9 @@ Official plugins live in separate repos under `github.com/dreego-stack/`. Each p
 Provider integrations such as Stripe, MapLibre, auth, storage, Tailwind, SSE,
 and WebSockets remain external. The small first-party language set—Markdown,
 TypeScript, and Lua—stays in the transpiler and may manage pinned tools after
-explicit approval. SSR, Wails, and DreeJS stay in the monorepo because they
-share the compiler and rendering contracts.
+explicit approval. The SSR host stays in the monorepo as part of the current
+production baseline. Future hosts and client systems must first prove their
+boundaries in working applications.
 
 ```
 github.com/dreego-stack/
@@ -248,6 +238,7 @@ github.com/dreego-stack/
 |-----|-------|
 | `_docs/index.md` | Documentation index and navigation |
 | `_docs/getting-started.md` | Step-by-step tutorial |
+| `_docs/file-anatomy.md` | Anatomy of a `.dreego` file |
 | `_docs/cli.md` | CLI Reference |
 | `_docs/config.md` | dreego.config.json |
 
@@ -257,6 +248,14 @@ github.com/dreego-stack/
 |-----|-------|
 | `_docs/routing.md` | File-based routing, dynamic segments, content-type routing |
 | `_docs/layouts.md` | Layouts, `{#slot}` and `{#head}` |
+| `_docs/server-section.md` | Go declarations and route handlers |
+| `_docs/head-section.md` | Metadata and layout head composition |
+| `_docs/body-html.md` | HTML body templates and embedded processors |
+| `_docs/markdown.md` | Markdown bodies and the `<md>` custom tag |
+| `_docs/style-section.md` | Route CSS and component scoping |
+| `_docs/client-javascript.md` | Built-in JavaScript client sections |
+| `_docs/client-typescript.md` | TypeScript setup and generated JavaScript |
+| `_docs/lua.md` | Browser Lua syntax, semantics, and exclusions |
 | `_docs/middleware.md` | Health, security, compression, session, CSRF |
 | `_docs/components.md` | Component system, slots, scoped CSS |
 | `_docs/forms.md` | g-action forms, validation, redirects, error handling |

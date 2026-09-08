@@ -11,13 +11,32 @@ Transpiles `.dreego` files in the website root (any directory with a `dreego.con
 - `--force`: Forces complete regeneration (ignores cache)
 - `--check`: CI mode — regenerates the expected output in memory and compares it byte-for-byte against the files on disk. No working-tree modification. Exits non-zero with a path-level diff (`missing:`, `extra:`, `stale:`) when any generated file (routes, components, layouts, static assets, config) is missing, extra, or stale. Timestamp manipulation cannot produce a false pass.
 
+## dreego tools install typescript
+
+```bash
+dreego tools install typescript
+```
+
+Downloads and verifies Dreego's pinned native TypeScript compiler for the
+current platform. Installation is explicit; `generate` and `build` never
+download tools automatically. Projects without TypeScript sections do not need
+this tool. See [TypeScript Client Code](client-typescript.md).
+
 ## dreego build
 
 ```bash
-dreego build
+dreego build [--target <os/arch>] [--yes]
 ```
 
-Runs `generate`, then `go build`. The binary lands in `build/bin/<name>`.
+Runs `generate`, approved plugin build hooks, and `go build`. The binary lands
+in `build/bin/<name>`.
+
+- `--target <os/arch>` cross-compiles for a target such as `linux/amd64` or
+  `darwin/arm64` and includes the target in the output name.
+- `--yes` approves every declared plugin build hook for this run. Without prior
+  approval, interactive builds ask first and non-interactive builds fail safely.
+
+See [Build Hooks](build-hooks.md) for declarations, approvals, and CI behavior.
 
 ## dreego run
 
