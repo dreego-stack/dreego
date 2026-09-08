@@ -70,11 +70,9 @@ of the Dreego monorepo under the relevant transpiler output package:
 - Lua (`lua` → `js`) through Dreego's own compiler and feature-linked browser
   helpers under `internal/transpiler/js/lua`.
 
-Client Go and Starlark may be evaluated after the Lua patch series, but remain
-experimental and outside this stable set. Each experiment must be isolated in
-its own processor package, impose no cost when unused, and remain removable
-before v1. Its processor name is not reserved until a tested proposal defines
-the exact subset and opt-in contract.
+JavaScript, TypeScript, and Browser Lua are the complete client-language set
+for the foreseeable future. New language processors are outside the accepted
+roadmap; implementation effort goes into hardening these three contracts.
 
 Rationale: codegen processors have too much power to run as third-party code,
 so their influence must stay reviewable first-party code. The language count is
