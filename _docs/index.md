@@ -1,10 +1,13 @@
 # Dreego Documentation
 
-Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: this page.
+This reference is organized like a handbook while remaining available through
+the existing documentation command. Run `dreego docs` for this table of
+contents or `dreego docs <path>` for a chapter.
 
 ## Getting Started
 
 - [Getting Started](https://github.com/dreego-stack/dreego/blob/main/_docs/getting-started.md) — Quick Start guide
+- [File Anatomy](https://github.com/dreego-stack/dreego/blob/main/_docs/file-anatomy.md) — How one `.dreego` file is divided into semantic sections
 - [Semantic Sections Migration](https://github.com/dreego-stack/dreego/blob/main/_docs/semantic-sections-migration.md) — Move legacy root sections to `server`, `body`, and `client`
 - [CLI](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md) — CLI Reference
 - [Config](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md) — dreego.config.json
@@ -17,13 +20,22 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Output Safety](https://github.com/dreego-stack/dreego/blob/main/_docs/security.md) — Context-aware escaping and URL scheme validation
 - [Accessibility](https://github.com/dreego-stack/dreego/blob/main/_docs/accessibility.md) — Framework accessibility guarantees, diagnostics, and blueprint defaults
 
-## Framework
+## Sections and client languages
+
+- [Server Section](https://github.com/dreego-stack/dreego/blob/main/_docs/server-section.md) — Go declarations and route handlers
+- [Head Section](https://github.com/dreego-stack/dreego/blob/main/_docs/head-section.md) — Metadata and layout head composition
+- [HTML Body](https://github.com/dreego-stack/dreego/blob/main/_docs/body-html.md) — HTML templates, expressions, and embedded processors
+- [Markdown Body](https://github.com/dreego-stack/dreego/blob/main/_docs/markdown.md) — `<body lang="md">` and the `<md>` custom tag
+- [Style Section](https://github.com/dreego-stack/dreego/blob/main/_docs/style-section.md) — Route CSS and component scoping
+- [Client JavaScript](https://github.com/dreego-stack/dreego/blob/main/_docs/client-javascript.md) — Built-in dependency-free browser code
+- [Client TypeScript](https://github.com/dreego-stack/dreego/blob/main/_docs/client-typescript.md) — TypeScript compiler setup and generated JavaScript
+- [Browser Lua](https://github.com/dreego-stack/dreego/blob/main/_docs/lua.md) — Supported Lua syntax, semantics, browser boundary, and exclusions
+- [Client Languages](https://github.com/dreego-stack/dreego/blob/main/_docs/client-languages.md) — Language support and compatibility targets
+
+## Templates and composition
 
 - [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — Component System (`<@Name>`, slots, scoped CSS)
 - [Template Logic](https://github.com/dreego-stack/dreego/blob/main/_docs/template-logic.md) — `{#if}`, `{#each}`, `$loop`, `{#verbatim}`, filters
-- [Markdown Body](https://github.com/dreego-stack/dreego/blob/main/_docs/markdown.md) — Write `<body lang="md">` in Markdown, rendered to HTML at build time
-- [Client Languages](https://github.com/dreego-stack/dreego/blob/main/_docs/client-languages.md) — JavaScript, TypeScript, Lua, and experimental language compatibility targets
-- [Browser Lua](https://github.com/dreego-stack/dreego/blob/main/_docs/lua.md) — Supported Lua syntax, semantics, browser boundary, and exclusions
 - [Plugin Interfaces](https://github.com/dreego-stack/dreego/blob/main/_docs/plugin-interfaces.md) — Plugin System (planned)
 - [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md) — Plugin model, middleware + route hooks
 
@@ -51,6 +63,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 ## Meta
 
 - [Compatibility](https://github.com/dreego-stack/dreego/blob/main/_docs/compatibility.md) — Breaking-change policy and the v0.1 stability promise
+- [v0.1 to v0.2 Migration](https://github.com/dreego-stack/dreego/blob/main/_docs/migration-v0.1-to-v0.2.md) — Historical migration to explicit application and render ownership
 - [README](https://github.com/dreego-stack/dreego/blob/main/README.md)
 - [CHANGELOG](https://github.com/dreego-stack/dreego/blob/main/CHANGELOG.md)
 - [Open work](https://github.com/dreego-stack/dreego/tree/main/_todo) — One item per file

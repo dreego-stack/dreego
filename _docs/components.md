@@ -277,25 +277,24 @@ func Card(title string) dreego.Component {
     })
 }
 ```
-
 Call `<@Card title="x"/>` → `Card("x").Render(c)`.
-
 Hand-written `Component` and `ComponentFunc` implementations must use this
 `Render(dreego.RenderContext) (dreego.Result, error)` signature; they are not
 regenerated, so update them manually.
 
-## Context Variable
+## Render Context
 
-Inside a component, the SSRContext is available as **`ctx`** — in routes it is called **`c`** (see [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md)). The generated render function always receives it as `ctx`:
+Generated components receive **`ctx`** as a `dreego.RenderContext`, a smaller
+boundary than the request-bound `dreego.SSRContext` available to routes:
 
 ```dreego
 Component Greeting (name string)
 <server>
-    greeting := "Hello, " + ctx.Query("lang")
+prefix, _ := ctx.Data("greetingPrefix").(string)
+greeting := prefix + name
 </server>
-<body>
-    <h1>{{ greeting }}, {{ name }}!</h1>
-</body>
+<body><h1>{{ greeting }}</h1></body>
 ```
-
-All SSRContext methods (`ctx.Param`, `ctx.Query`, `ctx.Set`, `ctx.Get`, …) are available under this name. Using `c` inside a component body produces a compile error (`undefined: c`).
+It exposes Go context cancellation plus `Data`, `Set`, `Delete`, `Get`,
+`Errors`, and `Old`, but no parameters, query values, response writer,
+redirects, or sessions. Convert request data to typed props in the route.

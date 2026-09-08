@@ -110,8 +110,8 @@ Handler MUST do one of:
 
 ## XSS Protection
 
-All `{variable}` in the template are automatically HTML-escaped (output encoding).
-Only `{variable|raw}` bypasses escaping — explicit, rare, consciously risky.
+All `{{ variable }}` expressions use context-aware output escaping.
+Only `{{ variable|raw }}` bypasses escaping — explicit, rare, consciously risky.
 
 ## Consequences
 

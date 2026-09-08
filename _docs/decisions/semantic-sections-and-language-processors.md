@@ -10,9 +10,9 @@ timestamp: 2026-09-01T00:00:00Z
 **Date:** 2026-09-01
 **Status:** Accepted and implemented for the built-in languages; language processors are first-party
 
-> **Current status:** The Markdown body processor (`html`/`md`, stdlib-first)
-> shipped in v0.3. TypeScript-to-JavaScript is next, followed by
-> Lua-to-JavaScript. Lua-to-Go is not planned.
+> **Current status:** Markdown-to-HTML, TypeScript-to-JavaScript, and the
+> dependency-free Browser Lua compiler are implemented. Lua-to-Go is not
+> planned.
 
 ## Context
 
@@ -46,8 +46,10 @@ Default `lang` attributes may be omitted. The breaking migration is:
 <script> -> <client>
 ```
 
-An HTML `<script>` nested within `<body lang="html">` remains ordinary HTML.
-Only a root `<client>` section is client source owned by Dreego.
+An untyped HTML `<script>` nested within `<body lang="html">` remains ordinary
+HTML. Inline `<script lang="ts">` and `<script lang="lua">` blocks are explicit
+first-party processor inputs and remain at their body position. A root
+`<client>` section represents route-level client source.
 
 Each component has one body section. Dreego owns `<@Component>`, control flow,
 expressions, slots, escaping, source maps, and diagnostics independently of the
@@ -59,15 +61,14 @@ literal regions; it cannot consume or redefine Dreego constructs.
 A processor registers an exact section, language, and output kind. Supporting
 client Lua does not imply supporting server Lua.
 
-Stable language processors for a small, closed set of source languages are part of the
-Dreego monorepo as internal transpiler processors under
-`internal/transpiler/html/md`:
+Stable language processors for a small, closed set of source languages are part
+of the Dreego monorepo under the relevant transpiler output package:
 
-- Markdown (`md` → `html`) with stdlib-first parsing;
+- Markdown (`md` → HTML IR) under `internal/transpiler/html/md`;
 - TypeScript (`ts` → `js`) via Microsoft's pinned native Go compiler for type
-  checking and transpilation;
+  checking and transpilation under `internal/transpiler/js/ts`;
 - Lua (`lua` → `js`) through Dreego's own compiler and feature-linked browser
-helpers.
+  helpers under `internal/transpiler/js/lua`.
 
 Client Go and Starlark may be evaluated after the Lua patch series, but remain
 experimental and outside this stable set. Each experiment must be isolated in
@@ -116,7 +117,7 @@ become ambiguous. Mixed content uses component composition.
   and diagnostics use the semantic section model together.
 - Legacy root names fail with an actionable migration diagnostic.
 - Processor compatibility is checked at generation or build time.
-- Markdown and TypeScript serve as the first two first-party processors.
+- Markdown, TypeScript, and Lua are the first first-party language processors.
 - TypeScript support must perform real type checking, not only remove types.
 
 ## Supersedes / Amends

@@ -42,12 +42,14 @@ Built-in languages can be stated explicitly:
 <client lang="js"></client>
 ```
 
-The attributes may be omitted for these defaults. TypeScript is also supported
-for root client sections and inline body scripts:
+The attributes may be omitted for these defaults. TypeScript and Lua are also
+supported for root client sections and inline body scripts:
 
 ```html
 <client lang="ts">const ready: boolean = true</client>
 <body><script lang="ts">const count: number = 1</script></body>
+<client lang="lua">print("ready")</client>
+<body><script lang="lua">print("inline")</script></body>
 ```
 
 Install the exact native compiler once with
@@ -64,8 +66,9 @@ An HTML `<script>` inside `<body>` remains normal HTML and is not renamed:
 </body>
 ```
 
-Only a root `<client>` section represents JavaScript source collected by
-Dreego.
+Only a root `<client>` section represents route-level client source collected
+by Dreego. Explicit inline TypeScript and Lua scripts are compiled in place;
+plain nested scripts remain HTML.
 
 ## Repository migration
 

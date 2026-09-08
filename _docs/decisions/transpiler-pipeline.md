@@ -64,7 +64,7 @@ browser assets for SSR or Wails hosts.
 **Phase 0: Single-Pass Scanner.** No lexer/parser/AST — only state machine.
 
 ```
-scan.go      — Hand scanner: recognizes sections, {#tags}, {var}
+scan.go      — Hand scanner: recognizes sections, {#tags}, {{ expressions }}
 codegen.go   — Pattern → Go source string
 target_ssr.go — Wraps render(ctx) as http.HandlerFunc
 ```
@@ -80,14 +80,14 @@ from lexer to parser, IR, processor output, and code generation.
 // scan.go — State machine
 func scan(src []byte) (*File, error) {
     // 1. Section split: <server>, <style>, Rest=Template
-    // 2. Template scan: {#if} → if block, {#each} → for block, {var} → Interpolation
+    // 2. Template scan: {#if} → if block, {#each} → for block, {{ value }} → interpolation
     // 3. Stack-based: []string for nested tags
 }
 
 // codegen.go — Generate Go code
 func codegen(f *File) string {
     // <server> block → copy-paste
-    // {var} → fmt.Sprintf("%s", var)
+    // {{ value }} → context-aware escaped output
     // {#if cond} → if cond {
     // {#each xs as x} → for _, x := range xs {
     // <style> → extract + scope hash
