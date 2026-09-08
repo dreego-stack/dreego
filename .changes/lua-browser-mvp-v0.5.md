@@ -8,3 +8,4 @@ version: minor
 - Docs: add equivalent Lua and JavaScript browser demos for direct comparison.
 - Docs: publish client-language version targets and plan isolated client Go and Starlark experiments.
 - Fix: isolate Lua blocks and prevent client strings from terminating generated script elements.
+- Fix: preserve Lua truthiness and modulo behavior at JavaScript boundaries without identifier or runtime namespace collisions.

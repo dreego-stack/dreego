@@ -21,7 +21,7 @@ print(status.textContent)
 		`<script src="/_dreego/lua.js"></script>`,
 		`let status = document.querySelector("#status");`,
 		`status.textContent = "Loaded";`,
-		"dreegoLua.print(status.textContent);",
+		"globalThis.dreegoLua.print(status.textContent);",
 	} {
 		dreegotest.MustContain(t, out, want)
 	}
@@ -55,7 +55,7 @@ func TestLuaInlineBodyScriptProducesJavaScript(t *testing.T) {
 if enabled then print("ready") end</script>
 </body>`)
 	dreegotest.MustContain(t, out, "let enabled = true;")
-	dreegotest.MustContain(t, out, "if (dreegoLua.truthy(enabled))")
+	dreegotest.MustContain(t, out, "if (globalThis.dreegoLua.truthy(enabled))")
 }
 
 func TestLuaFunctionsCompileBrowserCallbacks(t *testing.T) {
@@ -75,8 +75,8 @@ end)
 		`document.querySelector("#count")`,
 		"let render = () => {",
 		`button.addEventListener("click", () => {`,
-		"count = dreegoLua.add(count, 1);",
-		`button.textContent = dreegoLua.concat("Count ", count);`,
+		"count = globalThis.dreegoLua.add(count, 1);",
+		`button.textContent = globalThis.dreegoLua.concat("Count ", count);`,
 	} {
 		dreegotest.MustContain(t, out, want)
 	}

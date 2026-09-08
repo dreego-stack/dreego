@@ -11,7 +11,7 @@ type helper struct {
 }
 
 var helpers = map[string]helper{
-	"truthy": {code: "truthy: value => value !== false && value !== null"},
+	"truthy": {code: "truthy: value => value !== false && value !== null && value !== undefined"},
 	"and": {
 		dependencies: []string{"truthy"},
 		code:         "and: (left, right) => globalThis.dreegoLua.truthy(left) ? right() : left",
@@ -37,7 +37,7 @@ var helpers = map[string]helper{
 		dependencies: []string{"concatValue"},
 		code:         "concat: (left, right) => globalThis.dreegoLua.concatValue(left) + globalThis.dreegoLua.concatValue(right)",
 	},
-	"mod": {dependencies: []string{"number"}, code: "mod: (left, right) => { left = globalThis.dreegoLua.number(left); right = globalThis.dreegoLua.number(right); return ((left % right) + right) % right }"},
+	"mod": {dependencies: []string{"number"}, code: "mod: (left, right) => { left = globalThis.dreegoLua.number(left); right = globalThis.dreegoLua.number(right); if (right === 0) throw new RangeError('Lua modulo by zero'); return ((left % right) + right) % right }"},
 }
 
 func Bundle(features string) string {
