@@ -9,9 +9,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
+
+var servePortMu sync.Mutex
 
 // Serve builds a temp module from files, starts it as a subprocess on a free
 // port, and returns a client for HTTP requests. It replaces shell tests that
@@ -38,13 +41,11 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		t.Fatalf("Serve: %v", err)
 	}
 
-	port := FreePort(t)
-
 	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
-	mainGo := fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, \":%d\"); err != nil { panic(err) } }\n", setup, port)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", setup)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}
@@ -72,6 +73,10 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 
 	proc := exec.Command(bin)
 	proc.Dir = dir
+	servePortMu.Lock()
+	defer servePortMu.Unlock()
+	port := FreePort(t)
+	proc.Env = append(os.Environ(), fmt.Sprintf("DREEGO_TEST_ADDR=:%d", port))
 	if err := proc.Start(); err != nil {
 		t.Fatalf("Serve: start server: %v", err)
 	}
