@@ -12,6 +12,8 @@
     {"path": "/_docs/components.md", "title": "Components"},
     {"path": "/_docs/template-logic.md", "title": "Template Logic"},
     {"path": "/_docs/markdown.md", "title": "Markdown Body Processor"},
+    {"path": "/_docs/client-languages.md", "title": "Client Languages"},
+    {"path": "/_docs/lua.md", "title": "Browser Lua"},
     {"path": "/_docs/forms.md", "title": "Forms"},
     {"path": "/_docs/plugin-interfaces.md", "title": "Plugin Interfaces"},
     {"path": "/_docs/plugins.md", "title": "Plugins"},

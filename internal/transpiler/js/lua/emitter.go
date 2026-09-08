@@ -70,9 +70,9 @@ func (e *emitter) ifStatement(value ifStatement, depth int) (string, error) {
 		}
 		e.use("truthy")
 		if index == 0 {
-			fmt.Fprintf(&out, "%sif (dreegoLua.truthy(%s)) {\n", indent, condition)
+			fmt.Fprintf(&out, "%sif (globalThis.dreegoLua.truthy(%s)) {\n", indent, condition)
 		} else {
-			fmt.Fprintf(&out, "%s} else if (dreegoLua.truthy(%s)) {\n", indent, condition)
+			fmt.Fprintf(&out, "%s} else if (globalThis.dreegoLua.truthy(%s)) {\n", indent, condition)
 		}
 		body, err := e.statements(branch.body, depth+1)
 		if err != nil {
@@ -144,7 +144,7 @@ func (e *emitter) call(value callExpression) (string, error) {
 	}
 	if name, ok := value.callee.(nameExpression); ok && name.name == "print" {
 		e.use("print")
-		callee = "dreegoLua.print"
+		callee = "globalThis.dreegoLua.print"
 	} else if name, ok := value.callee.(nameExpression); ok && forbiddenCalls[name.name] {
 		return "", fmt.Errorf("Lua browser MVP: %s is not available", name.name)
 	}
@@ -180,7 +180,7 @@ var reservedJavaScriptNames = map[string]bool{
 
 func jsIdentifier(name string) string {
 	if reservedJavaScriptNames[name] {
-		return "_lua_" + name
+		return "$lua_" + name
 	}
 	return name
 }
@@ -192,10 +192,10 @@ func (e *emitter) unary(value unaryExpression) (string, error) {
 	}
 	if value.op == tokenNot {
 		e.use("truthy")
-		return "!dreegoLua.truthy(" + right + ")", nil
+		return "!globalThis.dreegoLua.truthy(" + right + ")", nil
 	}
 	e.use("neg")
-	return "dreegoLua.neg(" + right + ")", nil
+	return "globalThis.dreegoLua.neg(" + right + ")", nil
 }
 
 func (e *emitter) binary(value binaryExpression) (string, error) {
@@ -210,21 +210,21 @@ func (e *emitter) binary(value binaryExpression) (string, error) {
 	switch value.op {
 	case tokenAnd:
 		e.use("and")
-		return fmt.Sprintf("dreegoLua.and(%s, () => %s)", left, right), nil
+		return fmt.Sprintf("globalThis.dreegoLua.and(%s, () => %s)", left, right), nil
 	case tokenOr:
 		e.use("or")
-		return fmt.Sprintf("dreegoLua.or(%s, () => %s)", left, right), nil
+		return fmt.Sprintf("globalThis.dreegoLua.or(%s, () => %s)", left, right), nil
 	case tokenConcat:
 		e.use("concat")
-		return fmt.Sprintf("dreegoLua.concat(%s, %s)", left, right), nil
+		return fmt.Sprintf("globalThis.dreegoLua.concat(%s, %s)", left, right), nil
 	case tokenPlus, tokenMinus, tokenStar, tokenSlash, tokenPercent:
 		feature := map[tokenKind]string{tokenPlus: "add", tokenMinus: "sub", tokenStar: "mul", tokenSlash: "div", tokenPercent: "mod"}[value.op]
 		e.use(feature)
-		return fmt.Sprintf("dreegoLua.%s(%s, %s)", feature, left, right), nil
+		return fmt.Sprintf("globalThis.dreegoLua.%s(%s, %s)", feature, left, right), nil
 	case tokenLess, tokenLessEqual, tokenGreater, tokenGreaterEqual:
 		feature := map[tokenKind]string{tokenLess: "lt", tokenLessEqual: "le", tokenGreater: "gt", tokenGreaterEqual: "ge"}[value.op]
 		e.use(feature)
-		return fmt.Sprintf("dreegoLua.%s(%s, %s)", feature, left, right), nil
+		return fmt.Sprintf("globalThis.dreegoLua.%s(%s, %s)", feature, left, right), nil
 	}
 	operator := map[tokenKind]string{
 		tokenEqual: "===", tokenNotEqual: "!==",

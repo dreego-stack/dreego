@@ -32,6 +32,11 @@ from JavaScript, the compiler records a semantic feature. Dreego combines the
 features from every route, layout, and component and generates one minimal
 `/_dreego/lua.js` asset. Direct-only programs do not generate that asset.
 
+Each generated Lua block executes in its own lexical scope. Reusing a local name
+in a route, layout, or component therefore cannot cause a JavaScript global
+redeclaration error. Script-end sequences in generated client code are escaped
+before HTML emission so a source string cannot terminate its script element.
+
 ## MVP syntax
 
 The initial compiler supports:
@@ -52,7 +57,8 @@ The initial compiler supports:
 
 Zero and empty strings are true. Logical operators return operands and evaluate
 their right side lazily. Arithmetic rejects non-number operands rather than
-using JavaScript coercion. Concatenation accepts only strings and numbers.
+using JavaScript coercion. Modulo by zero raises an error instead of leaking a
+JavaScript `NaN` value. Concatenation accepts only strings and numbers.
 
 ## Browser boundary
 
@@ -61,6 +67,11 @@ table model. Loops, iterators, varargs, multiple return values, metatables, and
 coroutines are planned only through tested patch releases. Browser method calls
 use Lua's colon spelling but preserve the native JavaScript receiver instead of
 injecting an additional Lua `self` argument.
+
+JavaScript `undefined` values received from browser APIs are treated like Lua
+`nil` for truthiness. Generated helper calls use the global runtime explicitly,
+so a Lua local named `dreegoLua` cannot shadow it. JavaScript reserved words are
+mapped to identifiers that cannot collide with valid Lua names.
 
 The following server or dynamic-loading functions are not available:
 

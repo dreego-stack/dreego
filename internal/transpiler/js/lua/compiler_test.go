@@ -16,8 +16,8 @@ document.title = "Count " .. count
 	}
 	for _, want := range []string{
 		"let count = 2;",
-		"count = dreegoLua.add(count, 1);",
-		`document.title = dreegoLua.concat("Count ", count);`,
+		"count = globalThis.dreegoLua.add(count, 1);",
+		`document.title = globalThis.dreegoLua.concat("Count ", count);`,
 	} {
 		if !strings.Contains(artifact.Code, want) {
 			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
@@ -44,10 +44,10 @@ local selected = value or "fallback"
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"dreegoLua.truthy(value)",
-		"!dreegoLua.truthy(false)",
-		"dreegoLua.or(value, () => \"fallback\")",
-		"dreegoLua.print(\"zero is true\")",
+		"globalThis.dreegoLua.truthy(value)",
+		"!globalThis.dreegoLua.truthy(false)",
+		"globalThis.dreegoLua.or(value, () => \"fallback\")",
+		"globalThis.dreegoLua.print(\"zero is true\")",
 	} {
 		if !strings.Contains(artifact.Code, want) {
 			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
@@ -88,12 +88,26 @@ func TestDirectLuaNeedsNoRuntime(t *testing.T) {
 
 func TestCompileManglesJavaScriptReservedNames(t *testing.T) {
 	artifact, err := Compile(`local class = 1
-class = class + 1`)
+local _lua_class = 2
+class = class + _lua_class`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(artifact.Code, "let _lua_class = 1;") || !strings.Contains(artifact.Code, "_lua_class = dreegoLua.add(_lua_class, 1);") {
+	if !strings.Contains(artifact.Code, "let $lua_class = 1;") ||
+		!strings.Contains(artifact.Code, "let _lua_class = 2;") ||
+		!strings.Contains(artifact.Code, "$lua_class = globalThis.dreegoLua.add($lua_class, _lua_class);") {
 		t.Fatalf("JavaScript = %s", artifact.Code)
+	}
+}
+
+func TestCompileRuntimeNamespaceCannotBeShadowed(t *testing.T) {
+	artifact, err := Compile(`local dreegoLua = "application value"
+local total = 1 + 2`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(artifact.Code, "globalThis.dreegoLua.add(1, 2)") {
+		t.Fatalf("JavaScript runtime namespace can be shadowed:\n%s", artifact.Code)
 	}
 }
 
@@ -144,7 +158,7 @@ local result = label(2)`)
 	}
 	for _, want := range []string{
 		"let label = (count) => {",
-		`return dreegoLua.concat("Count ", count);`,
+		`return globalThis.dreegoLua.concat("Count ", count);`,
 		"let result = label(2);",
 	} {
 		if !strings.Contains(artifact.Code, want) {
@@ -214,7 +228,7 @@ func TestCompileAllowsMultilineCalls(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(artifact.Code, `dreegoLua.print("hello", "world")`) {
+	if !strings.Contains(artifact.Code, `globalThis.dreegoLua.print("hello", "world")`) {
 		t.Fatalf("JavaScript = %s", artifact.Code)
 	}
 }
@@ -236,9 +250,33 @@ local remainder = -3 % 2`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`let greeting = "hello";`, "let equal = (2 === 2);", `let different = (greeting !== "world");`, "dreegoLua.mod(dreegoLua.neg(3), 2)"} {
+	for _, want := range []string{`let greeting = "hello";`, "let equal = (2 === 2);", `let different = (greeting !== "world");`, "globalThis.dreegoLua.mod(globalThis.dreegoLua.neg(3), 2)"} {
 		if !strings.Contains(artifact.Code, want) {
 			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
 		}
+	}
+}
+
+func TestCompileIsolatesEveryLuaBlock(t *testing.T) {
+	artifact, err := Compile(`local status = "ready"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(artifact.Code, "(() => {\n") || !strings.HasSuffix(artifact.Code, "\n})();") {
+		t.Fatalf("JavaScript is not isolated:\n%s", artifact.Code)
+	}
+}
+
+func TestRuntimeRejectsModuloByZero(t *testing.T) {
+	runtime := Bundle("mod")
+	if !strings.Contains(runtime, "right === 0") || !strings.Contains(runtime, "Lua modulo by zero") {
+		t.Fatalf("modulo helper does not reject zero: %s", runtime)
+	}
+}
+
+func TestRuntimeTreatsJavaScriptUndefinedAsNil(t *testing.T) {
+	runtime := Bundle("truthy")
+	if !strings.Contains(runtime, "value !== undefined") {
+		t.Fatalf("truthiness helper does not normalize undefined: %s", runtime)
 	}
 }

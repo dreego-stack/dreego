@@ -24,3 +24,13 @@ func TestGenClientWritesRuntimeBeforeCode(t *testing.T) {
 		t.Fatalf("generated client = %s", got)
 	}
 }
+
+func TestGenClientEscapesHTMLScriptEndSequences(t *testing.T) {
+	got := GenClient(Artifact{Code: `const lower = "</script>"; const upper = "</SCRIPT>";`})
+	if strings.Count(strings.ToLower(got), `</script>`) != 1 {
+		t.Fatalf("generated client contains an early script end: %s", got)
+	}
+	if !strings.Contains(got, `<\/script>`) {
+		t.Fatalf("generated client does not preserve the JavaScript value safely: %s", got)
+	}
+}

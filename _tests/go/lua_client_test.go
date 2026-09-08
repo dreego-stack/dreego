@@ -21,7 +21,7 @@ print(status.textContent)
 		`<script src="/_dreego/lua.js"></script>`,
 		`let status = document.querySelector("#status");`,
 		`status.textContent = "Loaded";`,
-		"dreegoLua.print(status.textContent);",
+		"globalThis.dreegoLua.print(status.textContent);",
 	} {
 		dreegotest.MustContain(t, out, want)
 	}
@@ -55,7 +55,7 @@ func TestLuaInlineBodyScriptProducesJavaScript(t *testing.T) {
 if enabled then print("ready") end</script>
 </body>`)
 	dreegotest.MustContain(t, out, "let enabled = true;")
-	dreegotest.MustContain(t, out, "if (dreegoLua.truthy(enabled))")
+	dreegotest.MustContain(t, out, "if (globalThis.dreegoLua.truthy(enabled))")
 }
 
 func TestLuaFunctionsCompileBrowserCallbacks(t *testing.T) {
@@ -75,8 +75,8 @@ end)
 		`document.querySelector("#count")`,
 		"let render = () => {",
 		`button.addEventListener("click", () => {`,
-		"count = dreegoLua.add(count, 1);",
-		`button.textContent = dreegoLua.concat("Count ", count);`,
+		"count = globalThis.dreegoLua.add(count, 1);",
+		`button.textContent = globalThis.dreegoLua.concat("Count ", count);`,
 	} {
 		dreegotest.MustContain(t, out, want)
 	}
@@ -97,6 +97,25 @@ result.textContent = describe(0)
 	dreegotest.MustContain(t, out, `return "truthy";`)
 	dreegotest.MustContain(t, out, `return "falsey";`)
 	dreegotest.MustContain(t, out, "result.textContent = describe(0);")
+}
+
+func TestLuaInlineBlocksHaveIndependentLocalScopes(t *testing.T) {
+	out := dreegotest.Generate(t, `<body>
+<script lang="lua">local status = "first"</script>
+<script lang="lua">local status = "second"</script>
+</body>`)
+	if strings.Count(out, "(() => {") != 2 {
+		t.Fatalf("Lua blocks are not independently scoped:\n%s", out)
+	}
+}
+
+func TestLuaStringCannotCloseGeneratedScript(t *testing.T) {
+	out := dreegotest.Generate(t, `<body></body>
+<client lang="lua">local marker = "</script><script>window.injected = true</script>"</client>`)
+	if strings.Contains(out, `marker = "</script>`) {
+		t.Fatalf("Lua string closes the generated script:\n%s", out)
+	}
+	dreegotest.MustContain(t, out, `<\/script>`)
 }
 
 func TestLuaApplicationBuilds(t *testing.T) {
