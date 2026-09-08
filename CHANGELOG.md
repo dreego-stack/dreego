@@ -1,4 +1,8 @@
 
+## v0.5.1 - 2026-09-08
+
+- Feat: compile bare and single-value returns in browser Lua functions.
+
 ## v0.5.0 - 2026-09-08
 
 - Feat: compile root and inline browser Lua into JavaScript without external dependencies or a VM.
