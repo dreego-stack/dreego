@@ -69,7 +69,7 @@ func GenerateErrorHandler(gen *Generator, file *File, pkgName string, code int, 
 		}
 
 		if file.Client != nil {
-			client, err := jsprocess.Client(file)
+			client, err := jsprocess.Client(gen, file)
 			if err != nil {
 				return "", "", err
 			}

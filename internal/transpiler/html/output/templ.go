@@ -64,7 +64,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 	}
 
 	if file.Client != nil {
-		client, err := jsprocess.Client(file)
+		client, err := jsprocess.Client(gen, file)
 		if err != nil {
 			return "", err
 		}

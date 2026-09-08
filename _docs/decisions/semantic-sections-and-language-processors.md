@@ -59,14 +59,21 @@ literal regions; it cannot consume or redefine Dreego constructs.
 A processor registers an exact section, language, and output kind. Supporting
 client Lua does not imply supporting server Lua.
 
-Language processors for a small, closed set of source languages are part of the
+Stable language processors for a small, closed set of source languages are part of the
 Dreego monorepo as internal transpiler processors under
 `internal/transpiler/html/md`:
 
 - Markdown (`md` → `html`) with stdlib-first parsing;
 - TypeScript (`ts` → `js`) via Microsoft's pinned native Go compiler for type
   checking and transpilation;
-- Lua (`lua` → `js`) later.
+- Lua (`lua` → `js`) through Dreego's own compiler and feature-linked browser
+helpers.
+
+Client Go and Starlark may be evaluated after the Lua patch series, but remain
+experimental and outside this stable set. Each experiment must be isolated in
+its own processor package, impose no cost when unused, and remain removable
+before v1. Its processor name is not reserved until a tested proposal defines
+the exact subset and opt-in contract.
 
 Rationale: codegen processors have too much power to run as third-party code,
 so their influence must stay reviewable first-party code. The language count is

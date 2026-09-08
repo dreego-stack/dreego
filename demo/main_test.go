@@ -10,7 +10,8 @@ func TestHostRouterSelectsSaaSByHost(t *testing.T) {
 	public := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("public")) })
 	product := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("saas")) })
 	blog := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("blog")) })
-	h := hostRouter(public, product, blog)
+	lua := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("lua")) })
+	h := hostRouter(public, product, blog, lua)
 	for _, tc := range []struct {
 		host string
 		want string
@@ -20,6 +21,8 @@ func TestHostRouterSelectsSaaSByHost(t *testing.T) {
 		{host: "saas.example.test:8080", want: "saas"},
 		{host: "blog.localhost:8080", want: "blog"},
 		{host: "blog.example.test:8080", want: "blog"},
+		{host: "lua.localhost:8080", want: "lua"},
+		{host: "lua.example.test:8080", want: "lua"},
 		{host: "not-saas.localhost:8080", want: "public"},
 	} {
 		t.Run(tc.host, func(t *testing.T) {
@@ -38,7 +41,8 @@ func TestHostRouterSelectsByPath(t *testing.T) {
 	public := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("public")) })
 	product := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("saas")) })
 	blog := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("blog")) })
-	h := hostRouter(public, product, blog)
+	lua := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("lua")) })
+	h := hostRouter(public, product, blog, lua)
 	for _, tc := range []struct {
 		path string
 		want string
@@ -48,6 +52,9 @@ func TestHostRouterSelectsByPath(t *testing.T) {
 		{path: "/blog/posts/hello-dreego", want: "blog"},
 		{path: "/saas/", want: "saas"},
 		{path: "/saas/dashboard", want: "saas"},
+		{path: "/lua/", want: "lua"},
+		{path: "/lua/features", want: "lua"},
+		{path: "/_dreego/lua.js", want: "lua"},
 		{path: "/bloggy", want: "public"},
 		{path: "/saasify", want: "public"},
 	} {
@@ -67,13 +74,15 @@ func TestHostRouterRedirectsWithoutTrailingSlash(t *testing.T) {
 	public := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("public")) })
 	product := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("saas")) })
 	blog := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("blog")) })
-	h := hostRouter(public, product, blog)
+	lua := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("lua")) })
+	h := hostRouter(public, product, blog, lua)
 	for _, tc := range []struct {
 		path string
 		want string
 	}{
 		{path: "/blog", want: "/blog/"},
 		{path: "/saas", want: "/saas/"},
+		{path: "/lua", want: "/lua/"},
 	} {
 		t.Run(tc.path, func(t *testing.T) {
 			r := httptest.NewRequest(http.MethodGet, "http://localhost:8080"+tc.path, nil)
@@ -96,7 +105,7 @@ func TestHostRouterStripsPathPrefix(t *testing.T) {
 			t.Errorf("path = %q, want /posts/hello-dreego", r.URL.Path)
 		}
 	})
-	hostRouter(http.NotFoundHandler(), http.NotFoundHandler(), blog).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
+	hostRouter(http.NotFoundHandler(), http.NotFoundHandler(), blog, http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
 		r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/blog/posts/hello-dreego", nil)
 		r.Host = "localhost:8080"
 		return r
@@ -109,9 +118,22 @@ func TestHostRouterPreservesPathAndMethod(t *testing.T) {
 			t.Errorf("request = %s %s, want POST /billing", r.Method, r.URL.Path)
 		}
 	})
-	hostRouter(http.NotFoundHandler(), product, http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
+	hostRouter(http.NotFoundHandler(), product, http.NotFoundHandler(), http.NotFoundHandler()).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
 		r := httptest.NewRequest(http.MethodPost, "http://saas.localhost/billing", nil)
 		r.Host = "saas.localhost"
+		return r
+	}())
+}
+
+func TestHostRouterStripsLuaPathPrefix(t *testing.T) {
+	lua := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/features" {
+			t.Errorf("path = %q, want /features", r.URL.Path)
+		}
+	})
+	hostRouter(http.NotFoundHandler(), http.NotFoundHandler(), http.NotFoundHandler(), lua).ServeHTTP(httptest.NewRecorder(), func() *http.Request {
+		r := httptest.NewRequest(http.MethodGet, "http://localhost:8080/lua/features", nil)
+		r.Host = "localhost:8080"
 		return r
 	}())
 }

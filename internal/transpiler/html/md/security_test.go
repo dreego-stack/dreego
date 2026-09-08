@@ -92,7 +92,7 @@ func TestURLValidation(t *testing.T) {
 	}
 }
 
-func TestSafeModeEscapesFenceLang(t *testing.T) {
+func TestSafeModeRejectsUnsafeFenceLang(t *testing.T) {
 	nodes, err := ToNodes("```\"><script>\n```", ModeSafe)
 	if err != nil {
 		t.Fatalf("ToNodes() error = %v", err)
@@ -100,7 +100,7 @@ func TestSafeModeEscapesFenceLang(t *testing.T) {
 	if len(nodes) != 1 {
 		t.Fatalf("got %d nodes, want 1: %+v", len(nodes), nodes)
 	}
-	want := `<pre><code class="language-&#34;&gt;&lt;script&gt;"></code></pre>`
+	want := `<pre><code></code></pre>`
 	if nodes[0].Content != want {
 		t.Errorf("content = %q, want %q", nodes[0].Content, want)
 	}

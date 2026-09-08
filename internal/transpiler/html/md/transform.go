@@ -96,7 +96,7 @@ func TransformNodes(nodes []ir.TemplateNode) ([]ir.TemplateNode, error) {
 
 		if strings.HasPrefix(trimmed, "```") {
 			flushBlock()
-			fenceLang = strings.TrimSpace(strings.TrimPrefix(trimmed, "```"))
+			fenceLang = safeFenceLanguage(strings.TrimSpace(strings.TrimPrefix(trimmed, "```")))
 			inFence = true
 			fenceContent = nil
 			continue

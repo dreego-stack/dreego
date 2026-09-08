@@ -69,7 +69,8 @@ JavaScript are the built-in defaults.
 Static components produce no DreeJS runtime. Components that request browser
 behavior receive only the modules they use. JavaScript remains the built-in,
 dependency-free client language. Markdown and TypeScript are first-party
-processors; Lua-to-JavaScript is planned after them.
+processors. Browser Lua compiles through Dreego's dependency-free first-party
+compiler and a generated feature-linked runtime.
 
 See the public [Roadmap](_docs/roadmap.md), detailed
 [implementation plans](_plan/README.md), and accepted

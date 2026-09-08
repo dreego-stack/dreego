@@ -27,7 +27,7 @@ Two trust domains, chosen per call site:
    bodies and is not altered.
 2. **Runtime** (`MarkdownToHTML`, `ModeSafe`): raw HTML is escaped, URLs are
    scheme-validated (`http`/`https`/`mailto`/relative; `data:image` raster only
-   for `img`), fenced-code language attributes are escaped, and each call uses a
+   for `img`), fenced-code language labels are strictly validated, and each call uses a
    per-call renderer (no global state, no data race).
 
 `dreego.MarkdownToHTMLTrusted` exists for fully-controlled content and emits a

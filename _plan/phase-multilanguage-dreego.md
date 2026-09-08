@@ -112,7 +112,7 @@ Lua VM.
 The versioned subprocess protocol for third-party processors is not planned. It
 was removed as speculative API: codegen processors have too much power
 to run as third-party code, and the language set is small and closed (Markdown,
-TypeScript, Lua-later). The VS Code extension can ship the same grammars.
+TypeScript, and browser Lua). The VS Code extension can ship the same grammars.
 
 TypeScript uses Microsoft's native Go compiler as an external tool behind an
 explicit, pinned installation flow. The processor records its compiler version,
@@ -127,7 +127,7 @@ discovery or installation. They are not scanned from arbitrary `go.mod`
 dependencies.
 
 The closed language set is Markdown (`md` → `html`), TypeScript (`ts` → `js`),
-and Lua (`lua` → `js`) later. Markdown uses stdlib-first parsing. TypeScript
+and browser Lua (`lua` → `js`). Markdown uses stdlib-first parsing. TypeScript
 uses an exact native compiler release with per-platform checksums. Developers
 install it explicitly with `dreego tools install typescript`; CI performs the
 same verified installation. Offline builds work after the tool is cached.
@@ -143,8 +143,9 @@ The first-party processor set is implemented in this order:
    diagnostics, the JavaScript output stage, Go model declarations, and real
    type checking.
 
-3. Lua client processor — **AFTER TYPESCRIPT**; it produces JavaScript through
-   the same normalized JavaScript output stage. Lua-to-Go is not planned.
+3. Lua client processor — **MVP DONE**; it produces JavaScript through the same
+   normalized output stage and links only required semantic helpers into one
+   generated browser asset. Lua-to-Go is not planned.
 
 ## TypeScript requirements
 
@@ -164,8 +165,8 @@ version during a build. Generation never downloads or installs the compiler.
 - Unknown language pairs fail with an installation hint.
 - Markdown cannot reinterpret Dreego components or control flow.
 - TypeScript type errors fail generation with correct source positions.
-- Lua client input produces deterministic JavaScript through the shared output
-  stage without embedding a runtime in Dreego.
+- Lua client input produces deterministic JavaScript and a feature-linked
+  browser helper asset without embedding a VM in Dreego.
 - A processor crash cannot corrupt existing generated output.
 - Identical locked inputs produce identical generated files and assets.
 - No processor dependency is added to Dreego core or the transpiler module.
