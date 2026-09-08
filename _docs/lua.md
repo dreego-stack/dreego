@@ -49,6 +49,7 @@ The initial compiler supports:
 - Lua `and`, `or`, and `not` semantics;
 - `if`, `elseif`, `else`, and `end`;
 - local and anonymous functions with lexical closures;
+- bare returns and returns with one value;
 - function calls and dotted browser object access;
 - browser method calls using `object:method(arguments)`;
 - line comments beginning with `--`;
@@ -62,7 +63,7 @@ JavaScript `NaN` value. Concatenation accepts only strings and numbers.
 ## Browser boundary
 
 The compiler rejects tables for now rather than implementing an incomplete
-table model. Loops, iterators, varargs, multiple returns, metatables, and
+table model. Loops, iterators, varargs, multiple return values, metatables, and
 coroutines are planned only through tested patch releases. Browser method calls
 use Lua's colon spelling but preserve the native JavaScript receiver instead of
 injecting an additional Lua `self` argument.

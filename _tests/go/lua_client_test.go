@@ -82,6 +82,23 @@ end)
 	}
 }
 
+func TestLuaFunctionReturnCompilesThroughGenerate(t *testing.T) {
+	out := dreegotest.Generate(t, `<body><output id="result"></output></body>
+<client lang="lua">
+local function describe(value)
+    if value then
+        return "truthy"
+    end
+    return "falsey"
+end
+local result = document:querySelector("#result")
+result.textContent = describe(0)
+</client>`)
+	dreegotest.MustContain(t, out, `return "truthy";`)
+	dreegotest.MustContain(t, out, `return "falsey";`)
+	dreegotest.MustContain(t, out, "result.textContent = describe(0);")
+}
+
 func TestLuaInlineBlocksHaveIndependentLocalScopes(t *testing.T) {
 	out := dreegotest.Generate(t, `<body>
 <script lang="lua">local status = "first"</script>

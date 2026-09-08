@@ -15,7 +15,7 @@
             <p class="font-mono text-sm uppercase tracking-[0.25em] text-emerald-700">Feature map</p>
             <h1 class="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Small language surface.<br>Explicit semantics.</h1>
             <div class="mt-12 grid gap-5 md:grid-cols-2">
-                <section class="rounded-3xl bg-white p-7 shadow-sm" aria-labelledby="available-title"><h2 id="available-title" class="text-xl font-bold text-emerald-800">Available now</h2><ul class="mt-5 space-y-3 text-stone-700"><li>✓ Variables and assignment</li><li>✓ Lua arithmetic and concatenation</li><li>✓ Truthiness, comparisons, and conditionals</li><li>✓ Local functions and closures</li><li>✓ Browser properties, calls, and events</li><li>✓ Feature-linked runtime helpers</li></ul></section>
+                <section class="rounded-3xl bg-white p-7 shadow-sm" aria-labelledby="available-title"><h2 id="available-title" class="text-xl font-bold text-emerald-800">Available now</h2><ul class="mt-5 space-y-3 text-stone-700"><li>✓ Variables and assignment</li><li>✓ Lua arithmetic and concatenation</li><li>✓ Truthiness, comparisons, and conditionals</li><li>✓ Local functions, closures, and single returns</li><li>✓ Browser properties, calls, and events</li><li>✓ Feature-linked runtime helpers</li></ul></section>
                 <section class="rounded-3xl border border-stone-300 p-7" aria-labelledby="later-title"><h2 id="later-title" class="text-xl font-bold">Future patches</h2><ul class="mt-5 space-y-3 text-stone-600"><li>○ Loops and iterators</li><li>○ Browser-focused tables</li><li>○ Multiple returns</li><li>○ Selected standard-library functions</li></ul><p class="mt-6 text-sm text-stone-500">Server APIs, bytecode, native modules, and filesystem access are intentionally outside the browser compiler.</p></section>
             </div>
             <section class="mt-8 rounded-3xl bg-stone-950 p-8 text-stone-100" aria-labelledby="truth-title">
@@ -25,13 +25,15 @@
                 <script lang="lua">
                 local trigger = document:querySelector("#truth-test")
                 local result = document:querySelector("#truth-result")
+                local function describe(value)
+                    if value then
+                        return "true — Lua semantics preserved"
+                    end
+                    return "false"
+                end
                 trigger:addEventListener("click", function()
                     local value = 0
-                    if value then
-                        result.textContent = "true — Lua semantics preserved"
-                    else
-                        result.textContent = "false"
-                    end
+                    result.textContent = describe(value)
                 end)
                 </script>
             </section>

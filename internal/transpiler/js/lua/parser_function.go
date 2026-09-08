@@ -20,7 +20,9 @@ func (p *sourceParser) functionExpression() (expression, error) {
 			}
 		}
 	}
+	p.functionDepth++
 	body, err := p.statements(map[tokenKind]bool{tokenEnd: true, tokenEOF: true})
+	p.functionDepth--
 	if err != nil {
 		return nil, err
 	}

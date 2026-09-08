@@ -148,6 +148,81 @@ end)`)
 	}
 }
 
+func TestCompileFunctionReturnValues(t *testing.T) {
+	artifact, err := Compile(`local function label(count)
+  return "Count " .. count
+end
+local result = label(2)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"let label = (count) => {",
+		`return globalThis.dreegoLua.concat("Count ", count);`,
+		"let result = label(2);",
+	} {
+		if !strings.Contains(artifact.Code, want) {
+			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
+		}
+	}
+}
+
+func TestCompileReturnsClosure(t *testing.T) {
+	artifact, err := Compile(`local function counter(start)
+  return function()
+    start = start + 1
+    return start
+  end
+end
+local next = counter(0)`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"return () => {", "return start;", "let next = counter(0);"} {
+		if !strings.Contains(artifact.Code, want) {
+			t.Fatalf("JavaScript missing %q:\n%s", want, artifact.Code)
+		}
+	}
+}
+
+func TestCompileRejectsReturnOutsideFunction(t *testing.T) {
+	_, err := Compile(`return "invalid"`)
+	if err == nil || !strings.Contains(err.Error(), "return is only valid inside a function") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestCompileRejectsMultipleReturnValues(t *testing.T) {
+	_, err := Compile(`local function pair()
+  return 1, 2
+end`)
+	if err == nil || !strings.Contains(err.Error(), "multiple return values are not supported") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestCompileBareReturn(t *testing.T) {
+	artifact, err := Compile(`local function stop()
+  return
+end`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(artifact.Code, "return;") {
+		t.Fatalf("JavaScript = %s", artifact.Code)
+	}
+}
+
+func TestCompileRejectsStatementAfterReturn(t *testing.T) {
+	_, err := Compile(`local function invalid()
+  return "done"
+  print("unreachable")
+end`)
+	if err == nil || !strings.Contains(err.Error(), "return must be the final statement") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
 func TestCompileAllowsMultilineCalls(t *testing.T) {
 	artifact, err := Compile("print(\n  \"hello\",\n  \"world\"\n)")
 	if err != nil {

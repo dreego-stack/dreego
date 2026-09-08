@@ -27,6 +27,7 @@ const (
 	tokenFalse
 	tokenNil
 	tokenFunction
+	tokenReturn
 	tokenAssign
 	tokenEqual
 	tokenNotEqual
@@ -62,6 +63,7 @@ var keywords = map[string]tokenKind{
 	"and": tokenAnd, "or": tokenOr, "not": tokenNot,
 	"true": tokenTrue, "false": tokenFalse, "nil": tokenNil,
 	"function": tokenFunction,
+	"return":   tokenReturn,
 }
 
 func lex(source string) ([]token, error) {
