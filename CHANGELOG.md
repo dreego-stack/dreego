@@ -1,4 +1,8 @@
 
+## v0.5.2 - 2026-09-08
+
+- Fix: preserve Lua lexical shadowing for browser built-ins and forbidden global names.
+
 ## v0.5.1 - 2026-09-08
 
 - Feat: compile bare and single-value returns in browser Lua functions.
