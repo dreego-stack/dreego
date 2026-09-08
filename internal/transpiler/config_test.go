@@ -22,7 +22,8 @@ func TestLoadConfig(t *testing.T) {
 	path := writeTempConfig(t, `{
 		"logging": {"enabled": true},
 		"redirects": [{"from": "/old", "to": "/new", "status": 301}],
-		"rewrites": [{"from": "/a/*", "to": "/b/*"}]
+		"rewrites": [{"from": "/a/*", "to": "/b/*"}],
+		"plugins": {"github.com/dreego-stack/plugin-auth": {"client": ["password"]}}
 	}`)
 
 	s, err := LoadConfig(path)
@@ -46,6 +47,10 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if s.Rewrites[0].From != "/a/*" || s.Rewrites[0].To != "/b/*" {
 		t.Errorf("unexpected rewrite: %+v", s.Rewrites[0])
+	}
+	client := s.Plugins["github.com/dreego-stack/plugin-auth"].Client
+	if len(client) != 1 || client[0] != "password" {
+		t.Errorf("unexpected plugin client selection: %v", client)
 	}
 }
 

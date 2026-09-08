@@ -107,6 +107,12 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 
 	settings := loadSettings(root)
+	pluginSrc, pluginCount, err := generatePluginClientAssets(".", settings, routePatterns)
+	if err != nil {
+		return nil, genStats{}, err
+	}
+	staticSrc += pluginSrc
+	staticCount += pluginCount
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {
