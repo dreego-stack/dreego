@@ -112,11 +112,14 @@ func (e *emitter) expression(value expression) (string, error) {
 			e.use("print")
 			return "globalThis.dreegoLua.print", nil
 		}
-		if forbiddenCalls[current.name] && !e.isLocal(current.name) {
+		if (forbiddenCalls[current.name] || forbiddenRoots[current.name]) && !e.isLocal(current.name) {
 			return "", fmt.Errorf("Lua browser MVP: %s is not available", current.name)
 		}
 		return jsIdentifier(current.name), nil
 	case memberExpression:
+		if root, ok := memberRoot(current); ok && forbiddenRoots[root] && !e.isLocal(root) {
+			return "", fmt.Errorf("Lua browser MVP: %s is not available", root)
+		}
 		object, err := e.expression(current.object)
 		return object + "." + current.field, err
 	case callExpression:
@@ -171,14 +174,6 @@ func (e *emitter) call(value callExpression) (string, error) {
 		args = append(args, code)
 	}
 	return callee + "(" + strings.Join(args, ", ") + ")", nil
-}
-
-var forbiddenCalls = map[string]bool{
-	"collectgarbage": true,
-	"dofile":         true,
-	"load":           true,
-	"loadfile":       true,
-	"require":        true,
 }
 
 var reservedJavaScriptNames = map[string]bool{
