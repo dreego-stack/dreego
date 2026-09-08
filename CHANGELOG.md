@@ -1,4 +1,9 @@
 
+## v0.5.3 - 2026-09-08
+
+- Docs: reorganize the documentation as section-oriented handbook chapters.
+- Docs: synchronize template, component, layout, CLI, runtime, and architecture references with the current implementation.
+
 ## v0.5.2 - 2026-09-08
 
 - Fix: preserve Lua lexical shadowing for browser built-ins and forbidden global names.
