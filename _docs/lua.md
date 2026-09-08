@@ -32,6 +32,11 @@ from JavaScript, the compiler records a semantic feature. Dreego combines the
 features from every route, layout, and component and generates one minimal
 `/_dreego/lua.js` asset. Direct-only programs do not generate that asset.
 
+Each generated Lua block executes in its own lexical scope. Reusing a local name
+in a route, layout, or component therefore cannot cause a JavaScript global
+redeclaration error. Script-end sequences in generated client code are escaped
+before HTML emission so a source string cannot terminate its script element.
+
 ## MVP syntax
 
 The initial compiler supports:

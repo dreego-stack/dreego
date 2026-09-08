@@ -82,6 +82,25 @@ end)
 	}
 }
 
+func TestLuaInlineBlocksHaveIndependentLocalScopes(t *testing.T) {
+	out := dreegotest.Generate(t, `<body>
+<script lang="lua">local status = "first"</script>
+<script lang="lua">local status = "second"</script>
+</body>`)
+	if strings.Count(out, "(() => {") != 2 {
+		t.Fatalf("Lua blocks are not independently scoped:\n%s", out)
+	}
+}
+
+func TestLuaStringCannotCloseGeneratedScript(t *testing.T) {
+	out := dreegotest.Generate(t, `<body></body>
+<client lang="lua">local marker = "</script><script>window.injected = true</script>"</client>`)
+	if strings.Contains(out, `marker = "</script>`) {
+		t.Fatalf("Lua string closes the generated script:\n%s", out)
+	}
+	dreegotest.MustContain(t, out, `<\/script>`)
+}
+
 func TestLuaApplicationBuilds(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"www/routes/get.dreego": `<body><main>Lua</main></body>

@@ -21,5 +21,13 @@ func Compile(source string) (Artifact, error) {
 	if err != nil {
 		return Artifact{}, err
 	}
-	return Artifact{Code: strings.TrimSpace(code), Runtime: strings.Join(emitter.sortedFeatures(), ",")}, nil
+	return Artifact{Code: isolate(code), Runtime: strings.Join(emitter.sortedFeatures(), ",")}, nil
+}
+
+func isolate(code string) string {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return ""
+	}
+	return "(() => {\n  " + strings.ReplaceAll(code, "\n", "\n  ") + "\n})();"
 }

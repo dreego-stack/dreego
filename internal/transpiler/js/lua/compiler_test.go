@@ -167,3 +167,13 @@ local remainder = -3 % 2`)
 		}
 	}
 }
+
+func TestCompileIsolatesEveryLuaBlock(t *testing.T) {
+	artifact, err := Compile(`local status = "ready"`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(artifact.Code, "(() => {\n") || !strings.HasSuffix(artifact.Code, "\n})();") {
+		t.Fatalf("JavaScript is not isolated:\n%s", artifact.Code)
+	}
+}
