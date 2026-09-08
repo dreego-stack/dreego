@@ -26,7 +26,15 @@ var (
 	strongRe       = regexp.MustCompile(`\*\*([^*]+)\*\*`)
 	emRe           = regexp.MustCompile(`\*([^*]+)\*`)
 	htmlBlockStart = regexp.MustCompile(`^</?([a-zA-Z][a-zA-Z0-9-]*)(\s|>|/)`)
+	fenceLanguage  = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_+.#-]*$`)
 )
+
+func safeFenceLanguage(info string) string {
+	if fenceLanguage.MatchString(info) {
+		return info
+	}
+	return ""
+}
 
 func ToNodes(src string, mode Mode) ([]ir.TemplateNode, error) {
 	return parseBlocks(src, newRenderer(mode))
@@ -50,7 +58,7 @@ func parseBlocks(src string, r *mdRenderer) ([]ir.TemplateNode, error) {
 
 		if strings.HasPrefix(trimmed, "```") {
 			flushPara()
-			lang := strings.TrimSpace(strings.TrimPrefix(trimmed, "```"))
+			lang := safeFenceLanguage(strings.TrimSpace(strings.TrimPrefix(trimmed, "```")))
 			var code []string
 			i++
 			for i < len(lines) && !strings.HasPrefix(strings.TrimSpace(lines[i]), "```") {

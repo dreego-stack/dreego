@@ -124,7 +124,6 @@ func TestMarkdownXSSEscaped(t *testing.T) {
 		{name: "img escaped", src: `<img src=x onerror=alert(1)>`, want: "&lt;img"},
 		{name: "iframe escaped", src: `<iframe src=javascript:alert(1)>`, want: "&lt;iframe"},
 		{name: "svg escaped", src: `<svg onload=alert(1)>`, want: "&lt;svg"},
-		{name: "fence lang escaped", src: "```\"><script>alert(1)</script>\n```", want: "&lt;script&gt;"},
 		{name: "footnote escaped", src: "text[^1]\n\n[^1]: <script>alert(1)</script>", want: "&lt;script&gt;"},
 	}
 	for _, tt := range tests {

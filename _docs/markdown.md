@@ -42,6 +42,10 @@ Indented code blocks are not supported. The `***` and `___` horizontal-rule
 forms and setext headings (underlined with `===` or `---`) are not supported
 either — use ATX headings and `---` for a horizontal rule.
 
+Fenced-code language labels accept letters, digits, `_`, `+`, `.`, `#`, and
+`-`. Dreego omits the language class when the label contains whitespace or
+other characters, preventing Markdown input from creating HTML attributes.
+
 Raw HTML blocks pass through verbatim. This is a generation-time, trust-based
 feature: the Markdown source is developer-authored and compiled at build time,
 so raw HTML is trusted exactly like the class passthrough on the inline `<md>`

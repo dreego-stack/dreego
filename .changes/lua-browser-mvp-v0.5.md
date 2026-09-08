@@ -9,3 +9,4 @@ version: minor
 - Docs: publish client-language version targets and plan isolated client Go and Starlark experiments.
 - Fix: isolate Lua blocks and prevent client strings from terminating generated script elements.
 - Fix: preserve Lua truthiness and modulo behavior at JavaScript boundaries without identifier or runtime namespace collisions.
+- Fix: reject unsafe Markdown code-fence language labels before generating HTML attributes.
