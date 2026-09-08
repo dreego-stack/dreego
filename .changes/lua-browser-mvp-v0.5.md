@@ -6,3 +6,4 @@ version: minor
 - Feat: generate one deterministic Lua runtime asset containing only the semantic helpers used by the application.
 - Feat: compile local functions, closures, and browser event callbacks from Lua.
 - Docs: add equivalent Lua and JavaScript browser demos for direct comparison.
+- Docs: publish client-language version targets and plan isolated client Go and Starlark experiments.

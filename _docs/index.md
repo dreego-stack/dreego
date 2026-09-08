@@ -22,6 +22,8 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — Component System (`<@Name>`, slots, scoped CSS)
 - [Template Logic](https://github.com/dreego-stack/dreego/blob/main/_docs/template-logic.md) — `{#if}`, `{#each}`, `$loop`, `{#verbatim}`, filters
 - [Markdown Body](https://github.com/dreego-stack/dreego/blob/main/_docs/markdown.md) — Write `<body lang="md">` in Markdown, rendered to HTML at build time
+- [Client Languages](https://github.com/dreego-stack/dreego/blob/main/_docs/client-languages.md) — JavaScript, TypeScript, Lua, and experimental language compatibility targets
+- [Browser Lua](https://github.com/dreego-stack/dreego/blob/main/_docs/lua.md) — Supported Lua syntax, semantics, browser boundary, and exclusions
 - [Plugin Interfaces](https://github.com/dreego-stack/dreego/blob/main/_docs/plugin-interfaces.md) — Plugin System (planned)
 - [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md) — Plugin model, middleware + route hooks
 
