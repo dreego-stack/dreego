@@ -67,6 +67,9 @@ helpers are namespaced under `dreegoLua`; application code receives no other
 compiler-owned globals. Identical source and compiler versions produce
 identical output.
 
+Built-in names follow lexical scope. Local declarations, local functions, and
+parameters may shadow a browser builtin without changing unrelated scopes.
+
 Every compiled source block is isolated in its own JavaScript function scope.
 The shared JavaScript output stage escapes HTML script-end sequences for Lua,
 TypeScript, and raw JavaScript before writing an inline script element.

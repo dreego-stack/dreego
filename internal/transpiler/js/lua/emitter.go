@@ -9,10 +9,11 @@ import (
 
 type emitter struct {
 	features map[string]bool
+	scopes   []map[string]bool
 }
 
 func newEmitter() *emitter {
-	return &emitter{features: map[string]bool{}}
+	return &emitter{features: map[string]bool{}, scopes: []map[string]bool{{}}}
 }
 
 func (e *emitter) program(value program) (string, error) {
@@ -35,7 +36,13 @@ func (e *emitter) statement(value statement, depth int) (string, error) {
 	indent := strings.Repeat("  ", depth)
 	switch current := value.(type) {
 	case localStatement:
+		if current.recursive {
+			e.declare(current.name)
+		}
 		right, err := e.expression(current.value)
+		if !current.recursive {
+			e.declare(current.name)
+		}
 		return fmt.Sprintf("%slet %s = %s;\n", indent, jsIdentifier(current.name), right), err
 	case assignStatement:
 		left, err := e.expression(current.target)
@@ -74,19 +81,23 @@ func (e *emitter) ifStatement(value ifStatement, depth int) (string, error) {
 		} else {
 			fmt.Fprintf(&out, "%s} else if (globalThis.dreegoLua.truthy(%s)) {\n", indent, condition)
 		}
+		e.pushScope()
 		body, err := e.statements(branch.body, depth+1)
 		if err != nil {
 			return "", err
 		}
 		out.WriteString(body)
+		e.popScope()
 	}
 	if len(value.otherwise) > 0 {
 		fmt.Fprintf(&out, "%s} else {\n", indent)
+		e.pushScope()
 		body, err := e.statements(value.otherwise, depth+1)
 		if err != nil {
 			return "", err
 		}
 		out.WriteString(body)
+		e.popScope()
 	}
 	fmt.Fprintf(&out, "%s}\n", indent)
 	return out.String(), nil
@@ -97,6 +108,13 @@ func (e *emitter) expression(value expression) (string, error) {
 	case literalExpression:
 		return literal(current), nil
 	case nameExpression:
+		if current.name == "print" && !e.isLocal("print") {
+			e.use("print")
+			return "globalThis.dreegoLua.print", nil
+		}
+		if forbiddenCalls[current.name] && !e.isLocal(current.name) {
+			return "", fmt.Errorf("Lua browser MVP: %s is not available", current.name)
+		}
 		return jsIdentifier(current.name), nil
 	case memberExpression:
 		object, err := e.expression(current.object)
@@ -108,11 +126,13 @@ func (e *emitter) expression(value expression) (string, error) {
 	case binaryExpression:
 		return e.binary(current)
 	case functionExpression:
+		e.pushScope(current.params...)
 		params := make([]string, 0, len(current.params))
 		for _, param := range current.params {
 			params = append(params, jsIdentifier(param))
 		}
 		body, err := e.statements(current.body, 1)
+		e.popScope()
 		if err != nil {
 			return "", err
 		}
@@ -141,12 +161,6 @@ func (e *emitter) call(value callExpression) (string, error) {
 	callee, err := e.expression(value.callee)
 	if err != nil {
 		return "", err
-	}
-	if name, ok := value.callee.(nameExpression); ok && name.name == "print" {
-		e.use("print")
-		callee = "globalThis.dreegoLua.print"
-	} else if name, ok := value.callee.(nameExpression); ok && forbiddenCalls[name.name] {
-		return "", fmt.Errorf("Lua browser MVP: %s is not available", name.name)
 	}
 	args := make([]string, 0, len(value.args))
 	for _, argument := range value.args {
@@ -233,6 +247,27 @@ func (e *emitter) binary(value binaryExpression) (string, error) {
 }
 
 func (e *emitter) use(feature string) { e.features[feature] = true }
+
+func (e *emitter) pushScope(names ...string) {
+	scope := map[string]bool{}
+	for _, name := range names {
+		scope[name] = true
+	}
+	e.scopes = append(e.scopes, scope)
+}
+
+func (e *emitter) popScope() { e.scopes = e.scopes[:len(e.scopes)-1] }
+
+func (e *emitter) declare(name string) { e.scopes[len(e.scopes)-1][name] = true }
+
+func (e *emitter) isLocal(name string) bool {
+	for index := len(e.scopes) - 1; index >= 0; index-- {
+		if e.scopes[index][name] {
+			return true
+		}
+	}
+	return false
+}
 
 func (e *emitter) sortedFeatures() []string {
 	features := make([]string, 0, len(e.features))

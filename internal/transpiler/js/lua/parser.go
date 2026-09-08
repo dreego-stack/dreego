@@ -50,7 +50,7 @@ func (p *sourceParser) statement() (statement, error) {
 				return nil, err
 			}
 			value, err := p.functionExpression()
-			return localStatement{name: name.value, value: value}, err
+			return localStatement{name: name.value, value: value, recursive: true}, err
 		}
 		name, err := p.require(tokenIdentifier, "expected a name after local")
 		if err != nil {

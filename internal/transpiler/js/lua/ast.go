@@ -13,8 +13,9 @@ type expression interface {
 }
 
 type localStatement struct {
-	name  string
-	value expression
+	name      string
+	value     expression
+	recursive bool
 }
 
 type assignStatement struct {
