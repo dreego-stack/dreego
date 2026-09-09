@@ -13,7 +13,7 @@ func TestBugComponentMultiGo(t *testing.T) {
 <server>greeting := "hello"</server>
 <server>msg := greeting + " world"</server>
 <body>{{ msg }} {{ name }}</body>`,
-		"www/routes/get.dreego": `<body><@Greet name="Ada"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet name="Ada"/></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/components/dree.go"], `greeting := "hello"`)
 	dreegotest.MustContain(t, gen["www/components/dree.go"], `msg := greeting + " world"`)

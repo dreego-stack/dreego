@@ -58,7 +58,7 @@ func TestTypeScriptRejectsInvalidCode(t *testing.T) {
 
 func TestTypeScriptDiagnosticUsesDreegoSourceLine(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<body><main>Ready</main></body>
+		"www/routes/+page.dreego": `<body><main>Ready</main></body>
 <client lang="ts">
 const count: number = "wrong"
 </client>`,
@@ -67,7 +67,7 @@ const count: number = "wrong"
 	if err == nil {
 		t.Fatalf("generate succeeded:\n%s", out)
 	}
-	if !regexp.MustCompile(`www/routes/get\.dreego\(3,\d+\).*TS2322`).MatchString(out) {
+	if !regexp.MustCompile(`www/routes/\+page\.dreego\(3,\d+\).*TS2322`).MatchString(out) {
 		t.Fatalf("diagnostic does not identify the TypeScript source line:\n%s", out)
 	}
 }

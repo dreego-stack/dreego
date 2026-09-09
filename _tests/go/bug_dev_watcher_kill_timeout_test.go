@@ -16,7 +16,7 @@ import (
 
 func TestDevWatcherKillsServerThatIgnoresSIGTERM(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<body>first</body>`,
+		"www/routes/+page.dreego": `<body>first</body>`,
 	})
 	mainGo := `package main
 import (
@@ -67,7 +67,7 @@ func main() {
 
 	waitForDevServerStart(t, lines, 5*time.Second)
 	time.Sleep(750 * time.Millisecond)
-	changed := filepath.Join(dir, "www/routes/get.dreego")
+	changed := filepath.Join(dir, "www/routes/+page.dreego")
 	if err := os.WriteFile(changed, []byte(`<body>second</body>`), 0644); err != nil {
 		t.Fatal(err)
 	}

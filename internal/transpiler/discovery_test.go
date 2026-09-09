@@ -66,17 +66,21 @@ func TestSanitizePkgName(t *testing.T) {
 	}
 }
 
-func TestRouteFileRelSupportsFlatAndLegacyRoutes(t *testing.T) {
+func TestRouteFileRelUsesOnlyIndexNamesForDirectoryRoutes(t *testing.T) {
 	root := filepath.Join("/tmp", "site")
 	cases := map[string]string{
 		"routes/about.dreego":            "about",
-		"routes/page.dreego":             "",
-		"routes/users/[id]/page.dreego":   "users/[id]",
+		"routes/page.dreego":             "page",
+		"routes/users/[id]/page.dreego":  "users/[id]/page",
 		"routes/+page.dreego":            "",
-		"routes/users/[id]/+page.dreego":  "users/[id]",
+		"routes/users/[id]/+page.dreego": "users/[id]",
+		"routes/profile.dreego":          "profile",
+		"routes/users/profile.dreego":    "users/profile",
+		"routes/index.dreego":            "",
+		"routes/users/index.dreego":      "users",
 		"routes/(auth)/login.dreego":     "(auth)/login",
-		"routes/post.dreego":             "",
-		"routes/admin/post-users.dreego": "admin",
+		"routes/settings.dreego":         "settings",
+		"routes/admin/audit-log.dreego":  "admin/audit-log",
 	}
 	for path, want := range cases {
 		dir := filepath.Dir(filepath.Join(root, path))
@@ -90,8 +94,8 @@ func TestRouteFileRelSupportsFlatAndLegacyRoutes(t *testing.T) {
 func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 	root := writeTestProject(t, map[string]string{
 		"routes/about.dreego":            "<body>about</body>",
-		"routes/page.dreego":             "<body>home</body>",
-		"routes/users/[id]/page.dreego":  "<body>user</body>",
+		"routes/+page.dreego":            "<body>home</body>",
+		"routes/users/[id]/index.dreego": "<body>user</body>",
 		"routes/(auth)/login.dreego":     "<body>login</body>",
 	})
 	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
@@ -117,12 +121,25 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 		t.Fatalf("expected duplicate source paths in error, got %v", err)
 	}
 
-	pageLegacyConflict := writeTestProject(t, map[string]string{
-		"routes/page.dreego": "<body>page</body>",
-		"routes/get.dreego":  "<body>legacy</body>",
+	indexConflict := writeTestProject(t, map[string]string{
+		"routes/+page.dreego": "<body>plus page</body>",
+		"routes/index.dreego": "<body>index</body>",
 	})
-	_, _, _, err = scanRoutes(NewGenerator(), pageLegacyConflict, map[string]*layoutEntry{})
+	_, _, _, err = scanRoutes(NewGenerator(), indexConflict, map[string]*layoutEntry{})
 	if err == nil || !strings.Contains(err.Error(), "duplicate route") {
-		t.Fatalf("expected duplicate route error for page.dreego + get.dreego, got %v", err)
+		t.Fatalf("expected duplicate route error for +page.dreego + index.dreego, got %v", err)
+	}
+}
+
+func TestNamedRouteFilesDefaultToGet(t *testing.T) {
+	root := writeTestProject(t, map[string]string{
+		"routes/profile.dreego": "<body>named route</body>",
+	})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Join(dirs[0].regs, ""); !strings.Contains(got, `app.Register("GET", "/profile"`) {
+		t.Fatalf("named route must default to GET: %s", got)
 	}
 }

@@ -10,7 +10,7 @@ import (
 func TestOutputContextHeadExpressionEscapes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>t := "<script>alert(1)</script>"</server>
+		"www/routes/+page.dreego": `<server>t := "<script>alert(1)</script>"</server>
 <head><title>{{ t }}</title></head>
 <body><h1>ok</h1></body>`,
 	})
@@ -26,7 +26,7 @@ func TestOutputContextHeadExpressionEscapes(t *testing.T) {
 func TestOutputContextHeadLinkHrefRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
+		"www/routes/+page.dreego": `<server>u := "javascript:alert(1)"</server>
 <head><link rel="stylesheet" href="{{ u }}"></head>
 <body><h1>ok</h1></body>`,
 	})
@@ -42,7 +42,7 @@ func TestOutputContextHeadLinkHrefRejectsJavascript(t *testing.T) {
 func TestOutputContextHeadMetaRefreshRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
+		"www/routes/+page.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
 <head><meta http-equiv="refresh" content="{{ u }}"></head>
 <body><h1>ok</h1></body>`,
 	})
@@ -63,7 +63,7 @@ func TestOutputContextHeadMetaRefreshWhitespaceEqualsRejectsJavascript(t *testin
 		"0;URL = javascript:alert(1)",
 	} {
 		c := dreegotest.Serve(t, map[string]string{
-			"www/routes/get.dreego": "<server>u := \"" + u + "\"</server>\n" +
+			"www/routes/+page.dreego": "<server>u := \"" + u + "\"</server>\n" +
 				`<head><meta http-equiv = "refresh" content="{{ u }}"></head>` + "\n" +
 				"<body><h1>ok</h1></body>",
 		})
@@ -77,7 +77,7 @@ func TestOutputContextHeadMetaRefreshWhitespaceEqualsRejectsJavascript(t *testin
 func TestOutputContextHeadMetaRefreshUnquotedEquivRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
+		"www/routes/+page.dreego": `<server>u := "0;url=javascript:alert(1)"</server>
 <head><meta http-equiv = refresh content="{{ u }}"></head>
 <body><h1>ok</h1></body>`,
 	})
@@ -90,7 +90,7 @@ func TestOutputContextHeadMetaRefreshUnquotedEquivRejectsJavascript(t *testing.T
 func TestOutputContextHeadLinkHrefUnquotedRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>u := "javascript:alert(1)"</server>
+		"www/routes/+page.dreego": `<server>u := "javascript:alert(1)"</server>
 <head><link rel="stylesheet" href={{ u }}></head>
 <body><h1>ok</h1></body>`,
 	})
@@ -103,7 +103,7 @@ func TestOutputContextHeadLinkHrefUnquotedRejectsJavascript(t *testing.T) {
 func TestOutputContextHtmxOnJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+		"www/routes/+page.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
 <body><button hx-on:click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -119,7 +119,7 @@ func TestOutputContextAlpineEvaluatorJSONEncodes(t *testing.T) {
 	t.Parallel()
 	for _, attr := range []string{"x-data", "x-init", "x-effect", "x-html"} {
 		c := dreegotest.Serve(t, map[string]string{
-			"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+			"www/routes/+page.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
 <body><div ` + attr + `="{{ s }}">x</div></body>`,
 		})
 		_, body := c.Get(t, "/")
@@ -135,7 +135,7 @@ func TestOutputContextAlpineEvaluatorJSONEncodes(t *testing.T) {
 func TestOutputContextXOnClickJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+		"www/routes/+page.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
 <body><button x-on:click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -150,7 +150,7 @@ func TestOutputContextXOnClickJSONEncodes(t *testing.T) {
 func TestOutputContextShorthandClickJSONEncodes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
+		"www/routes/+page.dreego": `<server>s := ` + "`\"><script>alert(1)</script>`" + `</server>
 <body><button @click="{{ s }}">go</button></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -165,7 +165,7 @@ func TestOutputContextShorthandClickJSONEncodes(t *testing.T) {
 func TestOutputContextXBindStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
+		"www/routes/+page.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
 <body><div x-bind:style="{{ s }}">x</div></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -180,7 +180,7 @@ func TestOutputContextXBindStyleNeutralizesBreakout(t *testing.T) {
 func TestOutputContextShorthandStyleNeutralizesBreakout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
+		"www/routes/+page.dreego": `<server>s := "red; } </style><script>alert(1)</script>"</server>
 <body><div :style="{{ s }}">x</div></body>`,
 	})
 	_, body := c.Get(t, "/")
