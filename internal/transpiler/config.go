@@ -2,11 +2,14 @@ package transpiler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
 	"golang.org/x/text/language"
 )
+
+var ErrInvalidI18n = errors.New("invalid i18n configuration")
 
 type Redirect struct {
 	From   string `json:"from"`
@@ -48,7 +51,7 @@ func LoadConfig(path string) (*Settings, error) {
 		return nil, err
 	}
 	if err := s.I18n.validate(); err != nil {
-		return nil, fmt.Errorf("i18n: %w", err)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidI18n, err)
 	}
 	return &s, nil
 }

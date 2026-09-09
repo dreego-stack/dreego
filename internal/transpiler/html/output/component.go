@@ -51,6 +51,8 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 			return fmt.Sprintf("%s.WriteString(%s)", g.Builder, code), nil
 		}
 		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.Builder, code), nil
+	case ir.NodeMessage:
+		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.Builder, messageCall(g.Gen, "ctx", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))

@@ -46,6 +46,8 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 			return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 		}
 		return fmt.Sprintf(`%s%s.WriteString(dreego.SafeText(%s))`+"\n", indent, builder, code), nil
+	case ir.NodeMessage:
+		return fmt.Sprintf("%s%s.WriteString(dreego.SafeText(%s))\n", indent, builder, messageCall(gen, "c", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder
 		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
@@ -234,6 +236,20 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		return buf.String(), nil
 	}
 	return "", fmt.Errorf("unsupported template node type %d", n.Type)
+}
+
+func messageCall(gen *codegen.State, contextName string, node ir.TemplateNode) string {
+	names := make([]string, 0, len(node.MessageArgs))
+	arguments := make([]string, 0, len(node.MessageArgs))
+	for _, argument := range node.MessageArgs {
+		names = append(names, argument.Name)
+		arguments = append(arguments, fmt.Sprintf("dreego.MessageArg{Name: %q, Value: %s}", argument.Name, argument.Expression))
+	}
+	gen.RegisterMessageUse(node.MessageKey, names)
+	if len(arguments) == 0 {
+		return fmt.Sprintf("dreego.Message(%s, %q)", contextName, node.MessageKey)
+	}
+	return fmt.Sprintf("dreego.Message(%s, %q, %s)", contextName, node.MessageKey, strings.Join(arguments, ", "))
 }
 
 func RestoreContextValue(indent, key, previous string) string {

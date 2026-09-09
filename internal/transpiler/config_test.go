@@ -131,11 +131,26 @@ func TestLoadSettingsWarnsOnInvalidConfig(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(&buf, nil)))
 	defer slog.SetDefault(old)
 
-	s := loadSettings(root)
+	s, err := loadSettings(root)
 	if s != nil {
 		t.Fatalf("expected nil Settings for invalid config, got %+v", s)
 	}
+	if err != nil {
+		t.Fatalf("expected invalid JSON to use defaults, got %v", err)
+	}
 	if !strings.Contains(buf.String(), configFileName+" is invalid") {
 		t.Errorf("expected warning about invalid config, got %q", buf.String())
+	}
+}
+
+func TestLoadSettingsRejectsInvalidI18n(t *testing.T) {
+	root := t.TempDir()
+	content := `{"i18n":{"enabled":true,"defaultLocale":"de","locales":["en"]}}`
+	if err := os.WriteFile(filepath.Join(root, configFileName), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err := loadSettings(root)
+	if err == nil || !strings.Contains(err.Error(), "invalid i18n configuration") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }

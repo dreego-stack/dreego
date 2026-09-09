@@ -40,10 +40,11 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 
 	port := FreePort(t)
 
-	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
+	copyModuleSum(t, dir, repoRoot)
 	mainGo := fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, \":%d\"); err != nil { panic(err) } }\n", setup, port)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)

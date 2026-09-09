@@ -3,6 +3,7 @@ package transpiler
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	transpileri18n "github.com/dreego-stack/dreego/internal/transpiler/i18n"
 	luainput "github.com/dreego-stack/dreego/internal/transpiler/js/lua"
 )
 
@@ -81,6 +83,10 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 }
 
 func buildRootPlan(root, module string) (map[string]string, genStats, error) {
+	settings, err := loadSettings(root)
+	if err != nil {
+		return nil, genStats{}, err
+	}
 	gen := NewGenerator()
 	gen.Module = module
 	gen.RootRel = relToRoot(".", root)
@@ -106,7 +112,6 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		return nil, genStats{}, fmt.Errorf("static assets: %w", err)
 	}
 
-	settings := loadSettings(root)
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {
@@ -156,6 +161,22 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
 	}
 
+	var generatedI18n string
+	if settings != nil && settings.I18n.Enabled {
+		catalogs, err := transpileri18n.Load(filepath.Join(root, "locales"), settings.I18n.Locales, settings.I18n.DefaultLocale)
+		if err != nil {
+			return nil, genStats{}, fmt.Errorf("i18n catalogs: %w", err)
+		}
+		uses := make(map[string][]string, len(gen.MessageUses))
+		for key, use := range gen.MessageUses {
+			uses[key] = use.Arguments
+		}
+		if err := transpileri18n.ValidateUses(catalogs, uses); err != nil {
+			return nil, genStats{}, fmt.Errorf("i18n templates: %w", err)
+		}
+		generatedI18n = transpileri18n.GoConfig(catalogs, settings.I18n.Detection)
+	}
+
 	if runtime := luainput.BundleFeatures(gen.Lua); runtime != "" {
 		path := "/_dreego/lua.js"
 		if routePatterns["GET "+path] {
@@ -165,7 +186,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		staticCount++
 	}
 
-	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings)
+	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings, generatedI18n)
 	files[filepath.Join(root, "dree.go")] = rootOut
 
 	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
@@ -201,7 +222,7 @@ func stdImportsFor(src string) string {
 	return strings.Join(imports, "\n\t")
 }
 
-func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings) string {
+func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings, i18nConfig ...string) string {
 	pkg := sanitizePkgName(filepath.Base(root))
 	var imports []string
 	var regCalls []string
@@ -227,6 +248,9 @@ func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, 
 		for _, rw := range settings.Rewrites {
 			b.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRewrite(%q, %q)", rw.From, rw.To)))
 		}
+		if len(i18nConfig) > 0 && i18nConfig[0] != "" {
+			b.WriteString(registrationStatement("app.SetI18n(" + i18nConfig[0] + ")"))
+		}
 	}
 	b.WriteString(staticSrc)
 	for _, call := range regCalls {
@@ -250,17 +274,20 @@ func modulePath() string {
 	return ""
 }
 
-func loadSettings(root string) *Settings {
+func loadSettings(root string) (*Settings, error) {
 	settingsPath := filepath.Join(root, configFileName)
 	s, err := LoadConfig(settingsPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			slog.Warn("dreego: "+configFileName+" is invalid; using defaults",
-				"path", settingsPath, "error", err)
+		if os.IsNotExist(err) {
+			return nil, nil
 		}
-		return nil
+		if errors.Is(err, ErrInvalidI18n) {
+			return nil, fmt.Errorf("%s is invalid: %w", settingsPath, err)
+		}
+		slog.Warn("dreego: "+configFileName+" is invalid; using defaults", "path", settingsPath, "error", err)
+		return nil, nil
 	}
-	return s
+	return s, nil
 }
 
 func isUpToDate(path, content string) bool {
