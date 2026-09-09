@@ -1,18 +1,24 @@
 <head>
-    <title>Dreego Demo Lab</title>
+    <title>[[ meta.title ]]</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A small collection of Dreego applications and patterns.">
+    <meta name="description" content="[[ meta.description ]]">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
     <header class="border-b border-slate-200 bg-[#f7f7f3]">
-        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5" aria-label="Main navigation">
+        <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5" aria-label="[[ nav.label ]]">
             <a href="/" class="font-mono text-sm font-bold tracking-tight">dreego / demo</a>
-            <div class="flex items-center gap-5 text-sm text-slate-600">
-                <a href="#projects" class="hover:text-slate-950">Projects</a>
-                <a href="#notes" class="hover:text-slate-950">Notes</a>
-                <a href="https://github.com/dreego-stack/dreego" class="rounded-full bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-700">Source</a>
+            <div class="flex flex-wrap items-center justify-end gap-4 text-sm text-slate-600">
+                <a href="#projects" class="hover:text-slate-950">[[ nav.projects ]]</a>
+                <a href="#notes" class="hover:text-slate-950">[[ nav.notes ]]</a>
+                <form action="/locale" method="post" class="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-1" aria-label="[[ language.label ]]">
+                    <input type="hidden" name="return" value="/">
+                    <span aria-hidden="true" class="pl-2">🌐</span>
+                    <button type="submit" name="locale" value="de" lang="de" class="rounded-full px-2 py-1 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">DE</button>
+                    <button type="submit" name="locale" value="en" lang="en" class="rounded-full px-2 py-1 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">EN</button>
+                </form>
+                <a href="https://github.com/dreego-stack/dreego" class="rounded-full bg-slate-950 px-4 py-2 font-medium text-white hover:bg-slate-700">[[ nav.source ]]</a>
             </div>
         </nav>
     </header>
@@ -20,16 +26,17 @@
     <main>
         <section class="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-[1.2fr_.8fr] md:items-end md:py-28">
             <div>
-                <p class="mb-6 font-mono text-xs uppercase tracking-[0.24em] text-emerald-700">A living demo</p>
-                <h1 class="max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl">Small apps. Real routes. Plain Go.</h1>
-                <p class="mt-8 max-w-xl text-lg leading-8 text-slate-600">This site is the Dreego demo lab: a few focused applications that show how the framework behaves when it is used instead of advertised.</p>
+                <p class="mb-6 font-mono text-xs uppercase tracking-[0.24em] text-emerald-700">[[ hero.eyebrow ]]</p>
+                <h1 class="max-w-3xl text-5xl font-semibold leading-[0.98] tracking-[-0.06em] md:text-7xl">[[ hero.title ]]</h1>
+                <p class="mt-8 max-w-xl text-lg leading-8 text-slate-600">[[ hero.description ]]</p>
             </div>
             <aside class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">Current build</p>
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">[[ build.label ]]</p>
                 <dl class="mt-6 space-y-4 text-sm">
-                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">Rendering</dt><dd class="font-medium">SSR / net/http</dd></div>
-                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">Routes</dt><dd class="font-medium">file-based</dd></div>
-                    <div class="flex justify-between gap-4"><dt class="text-slate-500">Output</dt><dd class="font-medium">generated Go</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">[[ build.rendering ]]</dt><dd class="font-medium">SSR / net/http</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">[[ build.routes ]]</dt><dd class="font-medium">[[ build.routesValue ]]</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-100 pb-4"><dt class="text-slate-500">[[ build.output ]]</dt><dd class="font-medium">[[ build.outputValue ]]</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-500">[[ build.examples ]]</dt><dd class="font-medium">[[ demo.apps count=4 ]]</dd></div>
                 </dl>
             </aside>
         </section>
@@ -37,19 +44,19 @@
         <section id="projects" class="border-y border-slate-200 bg-white">
             <div class="mx-auto max-w-6xl px-6 py-20">
                 <div class="mb-10 flex flex-wrap items-end justify-between gap-5">
-                    <div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">01 / projects</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">Three applications, one module.</h2></div>
-                    <p class="max-w-sm text-sm leading-6 text-slate-500">The demo repo can contain multiple website roots. Each one owns its routes and generated package.</p>
+                    <div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">[[ projects.eyebrow ]]</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">[[ projects.title ]]</h2></div>
+                    <p class="max-w-sm text-sm leading-6 text-slate-500">[[ projects.description ]]</p>
                 </div>
                 <div class="grid gap-5 md:grid-cols-3">
-                    <a href="/" class="group rounded-3xl border border-slate-200 bg-[#f7f7f3] p-7 transition hover:-translate-y-1 hover:border-slate-400"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-700">www</span><span class="text-slate-400 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Demo Lab</h3><p class="mt-3 max-w-sm leading-7 text-slate-600">The public-facing index for experiments, route examples, and framework notes.</p></a>
-                    <a href="/saas" class="group rounded-3xl border border-slate-200 bg-slate-950 p-7 text-white transition hover:-translate-y-1 hover:bg-slate-800"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-300">saas.localhost</span><span class="text-slate-500 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Ledgerboard</h3><p class="mt-3 max-w-sm leading-7 text-slate-300">A small subscription dashboard showing a real app-shaped Dreego project.</p></a>
-                    <a href="/blog" class="group rounded-3xl border border-slate-200 bg-white p-7 transition hover:-translate-y-1 hover:border-slate-400"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-700">blog.localhost</span><span class="text-slate-400 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Dreego Blog</h3><p class="mt-3 max-w-sm leading-7 text-slate-600">A blog whose posts are real Markdown bodies rendered by the v0.3 md processor.</p></a>
+                    <a href="/" class="group rounded-3xl border border-slate-200 bg-[#f7f7f3] p-7 transition hover:-translate-y-1 hover:border-slate-400"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-700">www</span><span aria-hidden="true" class="text-slate-400 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Demo Lab</h3><p class="mt-3 max-w-sm leading-7 text-slate-600">[[ projects.lab ]]</p></a>
+                    <a href="/saas" class="group rounded-3xl border border-slate-200 bg-slate-950 p-7 text-white transition hover:-translate-y-1 hover:bg-slate-800"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-300">saas.localhost</span><span aria-hidden="true" class="text-slate-500 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Ledgerboard</h3><p class="mt-3 max-w-sm leading-7 text-slate-300">[[ projects.saas ]]</p></a>
+                    <a href="/blog" class="group rounded-3xl border border-slate-200 bg-white p-7 transition hover:-translate-y-1 hover:border-slate-400"><div class="flex items-center justify-between"><span class="font-mono text-xs text-emerald-700">blog.localhost</span><span aria-hidden="true" class="text-slate-400 transition group-hover:translate-x-1">↗</span></div><h3 class="mt-12 text-2xl font-semibold tracking-tight">Dreego Blog</h3><p class="mt-3 max-w-sm leading-7 text-slate-600">[[ projects.blog ]]</p></a>
                 </div>
             </div>
         </section>
 
-        <section id="notes" class="mx-auto max-w-6xl px-6 py-20"><div class="grid gap-8 md:grid-cols-[.7fr_1.3fr]"><div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">02 / notes</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">What to look for.</h2></div><div class="grid gap-5 sm:grid-cols-3"><article><p class="font-mono text-sm text-emerald-700">routes/</p><h3 class="mt-3 font-semibold">One URL, one file</h3><p class="mt-2 text-sm leading-6 text-slate-500">Flat files and <code>+page.dreego</code> keep route ownership visible.</p></article><article><p class="font-mono text-sm text-emerald-700">methods</p><h3 class="mt-3 font-semibold">GET and POST together</h3><p class="mt-2 text-sm leading-6 text-slate-500">Method sections keep logic and rendered output scoped to the request.</p></article><article><p class="font-mono text-sm text-emerald-700">output</p><h3 class="mt-3 font-semibold">Go after generation</h3><p class="mt-2 text-sm leading-6 text-slate-500">The generated result stays close to ordinary Go and net/http.</p></article></div></div></section>
+        <section id="notes" class="mx-auto max-w-6xl px-6 py-20"><div class="grid gap-8 md:grid-cols-[.7fr_1.3fr]"><div><p class="font-mono text-xs uppercase tracking-[0.2em] text-slate-400">[[ notes.eyebrow ]]</p><h2 class="mt-3 text-3xl font-semibold tracking-tight">[[ notes.title ]]</h2></div><div class="grid gap-5 sm:grid-cols-3"><article><p class="font-mono text-sm text-emerald-700">routes/</p><h3 class="mt-3 font-semibold">[[ notes.routesTitle ]]</h3><p class="mt-2 text-sm leading-6 text-slate-500">[[ notes.routesText ]]</p></article><article><p class="font-mono text-sm text-emerald-700">methods</p><h3 class="mt-3 font-semibold">[[ notes.methodsTitle ]]</h3><p class="mt-2 text-sm leading-6 text-slate-500">[[ notes.methodsText ]]</p></article><article><p class="font-mono text-sm text-emerald-700">output</p><h3 class="mt-3 font-semibold">[[ notes.outputTitle ]]</h3><p class="mt-2 text-sm leading-6 text-slate-500">[[ notes.outputText ]]</p></article></div></div></section>
     </main>
 
-    <footer class="border-t border-slate-200"><div class="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-6 py-8 text-sm text-slate-500"><span class="font-mono">dreego / demo lab</span><span>Built to be inspected.</span></div></footer>
+    <footer class="border-t border-slate-200"><div class="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 px-6 py-8 text-sm text-slate-500"><span class="font-mono">dreego / demo lab</span><span>[[ footer.tagline ]]</span></div></footer>
 </body>
