@@ -1,4 +1,8 @@
 
+## v0.6.4 - 2026-09-09
+
+- Demo: add English and German localization with browser detection, persistent language selection, pluralization, and localized document metadata.
+
 ## v0.6.3 - 2026-09-09
 
 - Refactor: parse Go module metadata with `golang.org/x/mod/modfile` instead of duplicated line scanners.
