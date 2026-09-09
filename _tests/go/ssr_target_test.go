@@ -34,7 +34,7 @@ func TestBlueprintUsesSSRHost(t *testing.T) {
 func TestSSRTargetServes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<body><h1>ssr target</h1></body>`,
+		"www/routes/+page.dreego": `<body><h1>ssr target</h1></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

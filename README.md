@@ -6,7 +6,7 @@ single binary. File-based routing, built-in form handling, and compile-time
 validation work without runtime template parsing.
 
 ```html
-<!-- www/routes/login/post.dreego -->
+<!-- www/routes/login/+page.dreego -->
 <head><title>Dreego</title></head>
 
 <server>
@@ -44,7 +44,7 @@ Four principles:
 1. **SSR-First** — SSR is the production web foundation through v1. Future
    targets remain separate from the stable core until real applications prove
    their contracts.
-2. **File-Based** — `www/routes/page.dreego` maps to `GET /`. One route file per URL with method-specific sections. Legacy names `get.dreego`, `index.dreego`, and `+page.dreego` remain accepted.
+2. **File-Based** — `www/routes/+page.dreego` and `www/routes/index.dreego` map to `/`. Other filenames become URL segments, and method-specific sections select HTTP methods.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
 
@@ -69,7 +69,7 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 
 ### Core
 - **Transpiler Pipeline** — Lexer → Parser → AST → CodeGen. `.dreego` → Go code.
-- **File-based Routing** — `www/routes/page.dreego` → `GET /`, `www/routes/login/page.dreego` → `GET /login` (method via `method="..."` sections)
+- **File-based Routing** — `www/routes/+page.dreego` → `GET /`, `www/routes/login/+page.dreego` → `GET /login` (method via `method="..."` sections)
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
@@ -189,10 +189,10 @@ www/                       # website root (name is free, marker: dreego.config.j
 ├── dreego.config.json     # logging, redirects, rewrites
 ├── dree.go                # GENERATED — package www, Register(app)
 ├── routes/                # .dreego files → URL routes
-│   ├── page.dreego             → GET /
+│   ├── +page.dreego             → GET /
 │   ├── login/
-│   │   └── page.dreego         → GET /login (POST via method="post" section)
-│   ├── [id]/page.dreego        → GET /{id}
+│   │   └── +page.dreego         → GET /login (POST via method="post" section)
+│   ├── [id]/+page.dreego        → GET /{id}
 │   └── dree.go             # GENERATED — package routes, handlers + Register
 ├── layouts/
 │   ├── default.dreego      # {#slot} + {#head} wrapper

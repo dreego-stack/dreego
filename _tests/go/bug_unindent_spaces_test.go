@@ -9,7 +9,7 @@ import (
 func TestBugUnindentSpaces(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     type UserForm struct {
     }
     func Save(c *dreego.SSRContext, form UserForm) error {

@@ -9,7 +9,7 @@ import (
 func TestBugSplitGoCommentPrefix(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 // UserForm holds the login data
 type UserForm struct {
 }

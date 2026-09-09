@@ -12,7 +12,7 @@ func TestNestedComponentSlotCodegenUsesValidBuilders(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Inner.dreego": "Component Inner ()\n<body><aside>{#slot header}{/slot}</aside></body>",
 		"www/components/Outer.dreego": "Component Outer ()\n<body><header>{#slot header}{/slot}</header><main>{#slot}</main></body>",
-		"www/routes/get.dreego": `<body><@Outer>{#slot header}<strong>outer</strong>{/slot}` +
+		"www/routes/+page.dreego": `<body><@Outer>{#slot header}<strong>outer</strong>{/slot}` +
 			`<@Inner>{#slot header}<em>inner</em>{/slot}</@Inner></@Outer></body>`,
 	})
 	code, body := c.Get(t, "/")

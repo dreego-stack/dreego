@@ -5,7 +5,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
 ## Quick Example
 
 ```html
-<!-- www/routes/login/post.dreego -->
+<!-- www/routes/login/+page.dreego -->
 <server>
     type LoginForm struct {
         Email    string `form:"email" validate:"required,email"`
@@ -46,7 +46,8 @@ re-rendered with that field set, while an empty form binds to zero values
 without an error. Bind errors surface a user-facing message; Go type errors
 (such as `strconv` messages) are not disclosed to the client.
 
-The `g-action` handler definition lives in the POST route file (`post.dreego`) for the same URL — Dreego's method-filename routing maps `post.dreego` to the POST method on that route.
+The `g-action` handler lives in the same route file. Dreego generates the POST
+handler from the form and its action while the file continues to own one URL.
 
 ## Generated Pipeline
 

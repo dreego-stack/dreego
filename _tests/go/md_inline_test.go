@@ -13,7 +13,7 @@ import (
 func TestMdInlineServes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<body><h1>HTML title</h1><md class="prose">
+		"www/routes/+page.dreego": `<body><h1>HTML title</h1><md class="prose">
 # Markdown inside
 
 - a

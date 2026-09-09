@@ -10,8 +10,8 @@ import (
 func TestConfigInvalidJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/dreego.config.json": `{ broken json !!!`,
-		"www/routes/get.dreego":  `<body><p>hello</p></body>`,
+		"www/dreego.config.json":  `{ broken json !!!`,
+		"www/routes/+page.dreego": `<body><p>hello</p></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -30,7 +30,7 @@ func TestConfigRedirect(t *testing.T) {
         { "from": "/old", "to": "/new", "status": 301 }
     ]
 }`,
-		"www/routes/get.dreego": `<body><p>new page</p></body>`,
+		"www/routes/+page.dreego": `<body><p>new page</p></body>`,
 	})
 	code, _, headers := c.Request(t, "GET", "/old", "", nil)
 	if code != 301 {

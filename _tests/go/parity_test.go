@@ -26,7 +26,7 @@ func TestParityCLIAndDreegotestGenerate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			gen := dreegotest.Build(t, map[string]string{
-				"www/routes/get.dreego": src,
+				"www/routes/+page.dreego": src,
 			})
 			cliOut := gen["www/routes/dree.go"]
 			dgtOut := dreegotest.Generate(t, src)

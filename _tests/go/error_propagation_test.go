@@ -10,7 +10,7 @@ import (
 func TestErrorPropagationGeneric500NoDisclosure(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     panic("database: connection to db.internal:5432 failed")
 </server>
 <body><p>ok</p></body>`,
@@ -35,7 +35,7 @@ func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
     panic("component render failure")
 </server>
 <body><p>boom</p></body>`,
-		"www/routes/get.dreego": `<body><@Boom/></body>`,
+		"www/routes/+page.dreego": `<body><@Boom/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 500 {
@@ -49,7 +49,7 @@ func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 func TestErrorPropagationFormBindGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 type Form struct {
     Age int
 }
@@ -80,7 +80,7 @@ func Save(c dreego.Context, form Form) error {
 func TestErrorPropagationFormActionGenericError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.ServeSetup(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 type Form struct {
     Name string
 }
@@ -133,7 +133,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 if c.SessionError() != nil {
     panic(c.SessionError())
 }
@@ -180,7 +180,7 @@ func (failStore) Delete(http.ResponseWriter, *http.Request, string) error {
 func (failStore) Destroy(http.ResponseWriter, *http.Request) error {
 	return errors.New("store destroy failure")
 }`,
-		"www/routes/get.dreego": `<body><p>ok</p></body>`,
+		"www/routes/+page.dreego": `<body><p>ok</p></body>`,
 	}, "app.SetSessionStore(failStore{}); app.SetLogging(false); ")
 	code, body := c.Get(t, "/")
 	if code != 500 {
