@@ -102,6 +102,8 @@ func TestLoadConfigRejectsInvalidI18n(t *testing.T) {
 		{"missing default", `{"enabled":true,"locales":["de"]}`, "defaultLocale is required"},
 		{"default unsupported", `{"enabled":true,"defaultLocale":"fr","locales":["de","en"]}`, `defaultLocale "fr" is not listed`},
 		{"duplicate locale", `{"enabled":true,"defaultLocale":"de","locales":["de","de"]}`, `duplicate locale "de"`},
+		{"canonical duplicate locale", `{"enabled":true,"defaultLocale":"de-DE","locales":["de-DE","de-de"]}`, `duplicate locale "de-DE"`},
+		{"invalid locale", `{"enabled":true,"defaultLocale":"de--DE","locales":["de--DE"]}`, `invalid locale "de--DE"`},
 		{"invalid strategy", `{"enabled":true,"defaultLocale":"de","locales":["de"],"urlStrategy":"path"}`, `unsupported urlStrategy "path"`},
 		{"duplicate detector", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["browser","browser"]}`, `duplicate locale detector "browser"`},
 		{"default not last", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["default","browser"]}`, `locale detector "default" must be last`},

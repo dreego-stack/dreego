@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"golang.org/x/text/language"
 )
 
 type Redirect struct {
@@ -65,12 +67,23 @@ func (i *I18n) validate() error {
 		return fmt.Errorf("unsupported urlStrategy %q", i.URLStrategy)
 	}
 	locales := make(map[string]struct{}, len(i.Locales))
-	for _, locale := range i.Locales {
-		if _, exists := locales[locale]; exists {
-			return fmt.Errorf("duplicate locale %q", locale)
+	for index, locale := range i.Locales {
+		tag, err := language.Parse(locale)
+		if err != nil {
+			return fmt.Errorf("invalid locale %q: %w", locale, err)
 		}
-		locales[locale] = struct{}{}
+		canonical := tag.String()
+		if _, exists := locales[canonical]; exists {
+			return fmt.Errorf("duplicate locale %q", canonical)
+		}
+		i.Locales[index] = canonical
+		locales[canonical] = struct{}{}
 	}
+	defaultTag, err := language.Parse(i.DefaultLocale)
+	if err != nil {
+		return fmt.Errorf("invalid defaultLocale %q: %w", i.DefaultLocale, err)
+	}
+	i.DefaultLocale = defaultTag.String()
 	if _, exists := locales[i.DefaultLocale]; !exists {
 		return fmt.Errorf("defaultLocale %q is not listed in locales", i.DefaultLocale)
 	}
