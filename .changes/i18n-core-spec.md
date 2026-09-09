@@ -1,5 +1,5 @@
 ---
-version: patch
+version: minor
 ---
 
 - Feat: add compile-time-validated first-party internationalization with JSON catalogs, `[[ message.key ]]` templates, locale negotiation, plural and select variants, formatting, pseudolocales, and translation extraction.
