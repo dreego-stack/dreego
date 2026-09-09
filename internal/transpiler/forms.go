@@ -93,4 +93,3 @@ func hasTagInStruct(serverSections []ServerSection, structName, tagName string) 
 	tagRE := regexp.MustCompile(tagName + `:"[^"]*"`)
 	return tagRE.MatchString(combined)
 }
-

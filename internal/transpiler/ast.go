@@ -7,6 +7,7 @@ type TemplateNodeType = ir.TemplateNodeType
 const (
 	NodeText          = ir.NodeText
 	NodeExpression    = ir.NodeExpression
+	NodeMessage       = ir.NodeMessage
 	NodeIf            = ir.NodeIf
 	NodeEach          = ir.NodeEach
 	NodeSlot          = ir.NodeSlot
@@ -15,6 +16,7 @@ const (
 )
 
 type TemplateNode = ir.TemplateNode
+type MessageArgument = ir.MessageArgument
 type ServerSection = ir.ServerSection
 type File = ir.File
 type ComponentDef = ir.ComponentDef

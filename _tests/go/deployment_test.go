@@ -47,8 +47,15 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	port := ln.Addr().(*net.TCPAddr).Port
 	ln.Close()
 
-	goMod := "module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
+	goMod := "module t\ngo 1.22\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644)
+	moduleSum, err := os.ReadFile(filepath.Join(repoRoot, "go.sum"))
+	if err != nil {
+		t.Fatalf("read repository go.sum: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "go.sum"), moduleSum, 0o644); err != nil {
+		t.Fatalf("write go.sum: %v", err)
+	}
 	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); if err := app.SetLogging(false); err != nil { panic(err) }; if err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, \":%d\"); err != nil { panic(err) } }\n", port)), 0644)
 	os.MkdirAll(filepath.Join(dir, "www", "routes"), 0755)
 	os.WriteFile(filepath.Join(dir, "www", "routes", "get.dreego"), []byte("<body><h1>hello</h1></body>"), 0644)

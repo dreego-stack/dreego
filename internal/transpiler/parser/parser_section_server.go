@@ -76,6 +76,8 @@ func (p *Parser) parseRawSection(tag string) (string, error) {
 			content.WriteString(tok.Value)
 		} else if tok.Type == tokens.TokenExpression {
 			content.WriteString("{{" + tok.Value + "}}")
+		} else if tok.Type == tokens.TokenMessage {
+			content.WriteString("[[" + tok.Value + "]]")
 		}
 		p.advance()
 	}

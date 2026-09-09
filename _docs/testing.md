@@ -18,6 +18,10 @@ Basic page with all sections, routes without `<server>`, unclosed `<body>`, mism
 ### Template Expressions
 `{#if}` true/false, `{#each}` loops, nested control flow, `{#else}` and `{#else if}`, empty lists, expressions with missing variables (build-time failure), function expressions, filters.
 
+Dedicated i18n tests cover `[[ message.key ]]` expressions, compile-time key
+and argument validation, catalog parity, locale negotiation, plural and select
+variants, currency display without conversion, and HTML language metadata.
+
 ### Layout
 `{#slot}` and `{#head}` merging, routes without a layout, layout application bugs (regression), route head merging.
 
