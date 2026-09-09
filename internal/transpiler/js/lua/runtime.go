@@ -11,6 +11,27 @@ type helper struct {
 }
 
 var helpers = map[string]helper{
+	"tableCore": {code: "tableCore: Symbol('dreegoLuaTable')"},
+	"tableKey":  {code: "tableKey: key => { if (key === null || key === undefined) throw new TypeError('Lua table index is nil'); if (typeof key === 'number' && Number.isNaN(key)) throw new TypeError('Lua table index is NaN'); return key }"},
+	"table": {
+		dependencies: []string{"tableCore", "tableKey"},
+		code:         "table: fields => { const entries = new Map(); for (const [key, value] of fields) { const checked = globalThis.dreegoLua.tableKey(key); if (value !== null && value !== undefined) entries.set(checked, value) } const target = {[globalThis.dreegoLua.tableCore]: entries}; return new Proxy(target, {get: (object, key) => key === globalThis.dreegoLua.tableCore ? entries : entries.get(globalThis.dreegoLua.tableKey(key)) ?? null, set: (object, key, value) => { const checked = globalThis.dreegoLua.tableKey(key); if (value === null || value === undefined) entries.delete(checked); else entries.set(checked, value); return true }}) }",
+	},
+	"get": {
+		dependencies: []string{"tableCore", "tableKey"},
+		code:         "get: (table, key) => { const entries = table?.[globalThis.dreegoLua.tableCore]; if (!(entries instanceof Map)) throw new TypeError('Lua table operation requires a table'); return entries.get(globalThis.dreegoLua.tableKey(key)) ?? null }",
+	},
+	"set": {
+		dependencies: []string{"tableCore", "tableKey"},
+		code:         "set: (table, key, value) => { const entries = table?.[globalThis.dreegoLua.tableCore]; if (!(entries instanceof Map)) throw new TypeError('Lua table operation requires a table'); const checked = globalThis.dreegoLua.tableKey(key); if (value === null || value === undefined) entries.delete(checked); else entries.set(checked, value); return value }",
+	},
+	"length": {
+		dependencies: []string{"tableCore"},
+		code:         "length: table => { const entries = table?.[globalThis.dreegoLua.tableCore]; if (!(entries instanceof Map)) throw new TypeError('Lua length requires a table'); let length = 0; while (entries.has(length + 1)) length++; return length }",
+	},
+	"numericFor": {
+		code: "numericFor: function* (initial, limit, step) { if (![initial, limit, step].every(Number.isFinite)) throw new TypeError('Lua numeric for requires finite numbers'); if (step === 0) throw new RangeError('Lua numeric for step cannot be zero'); if (step > 0) { for (let value = initial; value <= limit; value += step) yield value } else { for (let value = initial; value >= limit; value += step) yield value } }",
+	},
 	"truthy": {code: "truthy: value => value !== false && value !== null && value !== undefined"},
 	"and": {
 		dependencies: []string{"truthy"},

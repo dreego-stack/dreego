@@ -126,10 +126,10 @@ if ready then print("ready") end</client>`,
 	})
 }
 
-func TestLuaUnsupportedFeatureFailsGeneration(t *testing.T) {
+func TestLuaUnsupportedGenericForFailsGeneration(t *testing.T) {
 	_, err := dreegotest.MustGenerate(t, `<body></body>
-<client lang="lua">local values = {1, 2}</client>`)
-	if err == nil || !strings.Contains(err.Error(), "tables are not supported") {
+<client lang="lua">for key, value in pairs(values) do print(key) end</client>`)
+	if err == nil || !strings.Contains(err.Error(), "expected = after numeric for variable") {
 		t.Fatalf("error = %v", err)
 	}
 }
@@ -138,14 +138,58 @@ func TestLuaDiagnosticUsesDreegoSourceLine(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/routes/get.dreego": `<body><main>Ready</main></body>
 <client lang="lua">
-local values = {1, 2}
+for key, value in pairs(values) do print(key) end
 </client>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("generate succeeded:\n%s", out)
 	}
-	if !regexp.MustCompile(`www/routes/get\.dreego\(3,\d+\): Lua: tables are not supported`).MatchString(out) {
+	if !regexp.MustCompile(`www/routes/get\.dreego\(3,\d+\): Lua: expected = after numeric for variable`).MatchString(out) {
 		t.Fatalf("diagnostic does not identify the Lua source line:\n%s", out)
+	}
+}
+
+func TestLuaLoopsTablesAndEscapesCompileThroughGenerate(t *testing.T) {
+	out := dreegotest.Generate(t, `<body><output id="result"></output></body>
+<client lang="lua">
+local values = {"first", label = "line\nvalue"}
+local count = 0
+while count < #values do
+    count = count + 1
+end
+for index = 1, #values do
+    values[index] = nil
+end
+document.querySelector("#result").textContent = values["label"]
+</client>`)
+	for _, want := range []string{
+		"globalThis.dreegoLua.table",
+		"while (globalThis.dreegoLua.truthy(",
+		"globalThis.dreegoLua.numericFor",
+		"globalThis.dreegoLua.set(values, index, null)",
+		`sourceURL=dreego:///input.dreego`,
+	} {
+		dreegotest.MustContain(t, out, want)
+	}
+}
+
+func TestLuaRuntimeSourceReferenceUsesDreegoPath(t *testing.T) {
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/routes/account.dreego": `<body></body>
+<client lang="lua">
+local value = 1 + "invalid"
+</client>`,
+	})
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err != nil {
+		t.Fatalf("generate: %v\n%s", err, out)
+	}
+	generated, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(generated), "sourceURL=dreego:///www/routes/account.dreego") {
+		t.Fatalf("generated client has no original source reference:\n%s", generated)
 	}
 }
