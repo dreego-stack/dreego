@@ -29,7 +29,7 @@ generation with a `.dreego` source location.
 
 ## MVP language
 
-The first release supports:
+The supported language includes:
 
 - comments and semicolon or newline separated statements;
 - local declarations, assignments, and expression statements;
@@ -38,17 +38,19 @@ The first release supports:
 - `if`, `elseif`, and `else` blocks;
 - local and anonymous functions with lexical closures;
 - bare returns and single return values;
+- while loops, numeric for loops, and break;
+- mutable tables with deterministic one-based sequence length;
 - function calls, dotted browser object access, and colon-spelled browser methods;
 - `print`, mapped through a linked runtime helper.
 
 Lua truthiness and logical operators retain Lua behavior. In particular, zero
 and empty strings are true, and `and` and `or` return operands.
 
-## Deliberately excluded from the MVP
+## Deliberately excluded
 
-- tables, metatables, and metamethods;
+- metatables and metamethods;
 - named global functions, varargs, and multiple return values;
-- loops, iterators, and coroutines;
+- generic iterators and coroutines;
 - modules, `require`, dynamic `load`, bytecode, and the debug library;
 - filesystem, process, socket, and native-library APIs;
 - a claim of complete Lua 5.x compatibility.
@@ -73,6 +75,13 @@ parameters may shadow a browser builtin without changing unrelated scopes.
 Every compiled source block is isolated in its own JavaScript function scope.
 The shared JavaScript output stage escapes HTML script-end sequences for Lua,
 TypeScript, and raw JavaScript before writing an inline script element.
+Lua output carries a sanitized `dreego:///` source URL and starting line so
+browser runtime stacks retain the original `.dreego` source identity.
+
+Browser Lua tables use private `Map` storage. Sequence fields begin at one,
+assigning nil removes a key, and length is the contiguous prefix ending before
+the first missing positive integer. This deterministic rule selects the
+sequence border rather than exposing JavaScript array or object semantics.
 
 ## Consequences
 

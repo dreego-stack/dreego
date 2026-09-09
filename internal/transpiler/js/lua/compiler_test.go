@@ -58,10 +58,10 @@ local selected = value or "fallback"
 	}
 }
 
-func TestCompileRejectsUnsupportedTable(t *testing.T) {
-	_, err := Compile(`local values = {1, 2, 3}`)
-	if err == nil || !strings.Contains(err.Error(), "tables are not supported") {
-		t.Fatalf("error = %v", err)
+func TestCompileSupportsTable(t *testing.T) {
+	artifact, err := Compile(`local values = {1, 2, 3}`)
+	if err != nil || !strings.Contains(artifact.Code, "globalThis.dreegoLua.table") {
+		t.Fatalf("artifact = %#v, error = %v", artifact, err)
 	}
 }
 

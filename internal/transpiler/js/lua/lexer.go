@@ -2,7 +2,6 @@ package lua
 
 import (
 	"fmt"
-	"strconv"
 	"unicode"
 )
 
@@ -28,6 +27,10 @@ const (
 	tokenNil
 	tokenFunction
 	tokenReturn
+	tokenWhile
+	tokenDo
+	tokenFor
+	tokenBreak
 	tokenAssign
 	tokenEqual
 	tokenNotEqual
@@ -47,7 +50,10 @@ const (
 	tokenComma
 	tokenLeftBrace
 	tokenRightBrace
+	tokenLeftBracket
+	tokenRightBracket
 	tokenColon
+	tokenHash
 )
 
 type token struct {
@@ -64,6 +70,10 @@ var keywords = map[string]tokenKind{
 	"true": tokenTrue, "false": tokenFalse, "nil": tokenNil,
 	"function": tokenFunction,
 	"return":   tokenReturn,
+	"while":    tokenWhile,
+	"do":       tokenDo,
+	"for":      tokenFor,
+	"break":    tokenBreak,
 }
 
 func lex(source string) ([]token, error) {
@@ -166,47 +176,6 @@ func (l *sourceLexer) number() token {
 	return token{kind: tokenNumber, value: string(l.source[start:l.index]), line: line, column: column}
 }
 
-func (l *sourceLexer) stringToken() (token, error) {
-	line, column, quote := l.line, l.column, l.source[l.index]
-	l.advance()
-	var value []rune
-	for l.index < len(l.source) && l.source[l.index] != quote {
-		if l.source[l.index] == '\n' {
-			return token{}, fmt.Errorf("Lua %d:%d: unclosed string", line, column)
-		}
-		if l.source[l.index] == '\\' && l.index+1 < len(l.source) {
-			value = append(value, l.source[l.index], l.source[l.index+1])
-			l.advance()
-			l.advance()
-			continue
-		}
-		value = append(value, l.source[l.index])
-		l.advance()
-	}
-	if l.index == len(l.source) {
-		return token{}, fmt.Errorf("Lua %d:%d: unclosed string", line, column)
-	}
-	l.advance()
-	decoded, err := decodeString(string(value), byte(quote))
-	if err != nil {
-		return token{}, fmt.Errorf("Lua %d:%d: invalid string: %w", line, column, err)
-	}
-	return token{kind: tokenString, value: decoded, line: line, column: column}, nil
-}
-
-func decodeString(value string, quote byte) (string, error) {
-	var decoded []rune
-	for value != "" {
-		current, _, tail, err := strconv.UnquoteChar(value, quote)
-		if err != nil {
-			return "", err
-		}
-		decoded = append(decoded, current)
-		value = tail
-	}
-	return string(decoded), nil
-}
-
 func (l *sourceLexer) operator() (token, int, bool) {
 	line, column := l.line, l.column
 	pair := string([]rune{l.source[l.index], l.peek(1)})
@@ -214,7 +183,7 @@ func (l *sourceLexer) operator() (token, int, bool) {
 	if kind, ok := pairs[pair]; ok {
 		return token{kind: kind, value: pair, line: line, column: column}, 2, true
 	}
-	singles := map[rune]tokenKind{'=': tokenAssign, '<': tokenLess, '>': tokenGreater, '+': tokenPlus, '-': tokenMinus, '*': tokenStar, '/': tokenSlash, '%': tokenPercent, '.': tokenDot, '(': tokenLeftParen, ')': tokenRightParen, ',': tokenComma, '{': tokenLeftBrace, '}': tokenRightBrace, ':': tokenColon}
+	singles := map[rune]tokenKind{'=': tokenAssign, '<': tokenLess, '>': tokenGreater, '+': tokenPlus, '-': tokenMinus, '*': tokenStar, '/': tokenSlash, '%': tokenPercent, '.': tokenDot, '(': tokenLeftParen, ')': tokenRightParen, ',': tokenComma, '{': tokenLeftBrace, '}': tokenRightBrace, '[': tokenLeftBracket, ']': tokenRightBracket, ':': tokenColon, '#': tokenHash}
 	kind, ok := singles[l.source[l.index]]
 	return token{kind: kind, value: string(l.source[l.index]), line: line, column: column}, 1, ok
 }

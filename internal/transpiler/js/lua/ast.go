@@ -27,6 +27,19 @@ type expressionStatement struct{ value expression }
 
 type returnStatement struct{ value expression }
 
+type breakStatement struct{}
+
+type whileStatement struct {
+	condition expression
+	body      []statement
+}
+
+type numericForStatement struct {
+	name                 string
+	initial, limit, step expression
+	body                 []statement
+}
+
 type ifBranch struct {
 	condition expression
 	body      []statement
@@ -65,6 +78,18 @@ type callExpression struct {
 	args   []expression
 }
 
+type indexExpression struct {
+	object expression
+	index  expression
+}
+
+type tableField struct {
+	key   expression
+	value expression
+}
+
+type tableExpression struct{ fields []tableField }
+
 type functionExpression struct {
 	params []string
 	body   []statement
@@ -74,6 +99,9 @@ func (localStatement) statementNode()      {}
 func (assignStatement) statementNode()     {}
 func (expressionStatement) statementNode() {}
 func (returnStatement) statementNode()     {}
+func (breakStatement) statementNode()      {}
+func (whileStatement) statementNode()      {}
+func (numericForStatement) statementNode() {}
 func (ifStatement) statementNode()         {}
 
 func (literalExpression) expressionNode()  {}
@@ -82,4 +110,6 @@ func (unaryExpression) expressionNode()    {}
 func (binaryExpression) expressionNode()   {}
 func (memberExpression) expressionNode()   {}
 func (callExpression) expressionNode()     {}
+func (indexExpression) expressionNode()    {}
+func (tableExpression) expressionNode()    {}
 func (functionExpression) expressionNode() {}

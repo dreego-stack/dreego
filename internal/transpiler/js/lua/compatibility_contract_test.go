@@ -18,6 +18,9 @@ func TestCompileAcceptsDocumentedLiteralAndOperatorMatrix(t *testing.T) {
 		"logical not":    `local value = not false`,
 		"line comment":   "-- ignored\nlocal value = true",
 		"method call":    `document:querySelector("main")`,
+		"table":          `local value = { key = "value" }`,
+		"while loop":     `while false do print("loop") end`,
+		"numeric for":    `for i = 1, 3 do print(i) end`,
 		"local restricted call": `local setmetatable = function(value) return value end
 local value = setmetatable("safe")`,
 		"local restricted root": `local coroutine = document
@@ -41,9 +44,6 @@ coroutine.createElement("div")`,
 func TestCompileRejectsDocumentedUnsupportedSyntax(t *testing.T) {
 	t.Parallel()
 	programs := map[string]string{
-		"table":           `local value = { key = "value" }`,
-		"while loop":      `while true do print("loop") end`,
-		"numeric for":     `for i = 1, 3 do print(i) end`,
 		"generic for":     `for key, value in pairs(items) do print(key) end`,
 		"varargs":         `local function values(...) return ... end`,
 		"multiple return": `local function pair() return 1, 2 end`,
