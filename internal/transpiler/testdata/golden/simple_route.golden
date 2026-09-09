@@ -20,7 +20,7 @@ b.WriteString(`<title>Home</title>`)
 `)
 	b.WriteString("</div>")
 
-	return b.String(), nil
+	return dreego.LocalizedHTML(c, b.String()), nil
 }
 
 func PageIndex() dreego.Component {

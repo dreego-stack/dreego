@@ -19,7 +19,7 @@ func TestCLINew(t *testing.T) {
 	for _, f := range []string{
 		"testapp/main.go",
 		"testapp/go.mod",
-		"testapp/www/routes/page.dreego",
+		"testapp/www/routes/+page.dreego",
 		"testapp/www/layouts/default.dreego",
 		"testapp/www/components/Hero.dreego",
 		"testapp/www/components/FeatureCard.dreego",
@@ -154,7 +154,7 @@ func TestCLINewLayoutExists(t *testing.T) {
 func TestCLIBuildTarget(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<body><p>hello</p></body>`,
+		"www/routes/+page.dreego": `<body><p>hello</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "build", "--target", "linux/amd64"); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)

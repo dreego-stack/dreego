@@ -16,7 +16,7 @@ func TestGeneratedComponentRendersWithoutHTTP(t *testing.T) {
 		"www/components/Badge.dreego": `Component Badge (label string)
 <body><span class="badge">{{ label }}</span></body>
 <style>.badge { font-weight: bold; }</style>`,
-		"www/routes/get.dreego": `<head><title>Shop</title></head>
+		"www/routes/+page.dreego": `<head><title>Shop</title></head>
 
 <body><@Badge label={"<b>hot</b>"}/></body>`,
 	}

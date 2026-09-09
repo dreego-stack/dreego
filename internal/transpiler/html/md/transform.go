@@ -203,7 +203,7 @@ func buildLines(nodes []ir.TemplateNode) [][]mdSegment {
 	}
 	for _, n := range nodes {
 		switch n.Type {
-		case ir.NodeExpression:
+		case ir.NodeExpression, ir.NodeMessage:
 			cur = append(cur, mdSegment{isExpr: true, node: n})
 		case ir.NodeText:
 			parts := strings.Split(n.Content, "\n")

@@ -4,15 +4,27 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/parser"
 )
 
 func Gen(html string, bufName string) (string, error) {
+	return generate(nil, html, bufName, "c")
+}
+
+func GenWithMessages(gen *codegen.State, html, bufName, contextName string) (string, error) {
+	return generate(gen, html, bufName, contextName)
+}
+
+func generate(gen *codegen.State, html, bufName, contextName string) (string, error) {
 	var out strings.Builder
 	rest := html
 	pos := 0
 	for rest != "" {
-		open := strings.Index(rest, "{{")
+		expressionOpen := strings.Index(rest, "{{")
+		messageOpen := strings.Index(rest, "[[")
+		open := firstOpen(expressionOpen, messageOpen)
 		if open < 0 {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, ir.GoLiteral(rest)))
 			break
@@ -21,6 +33,49 @@ func Gen(html string, bufName string) (string, error) {
 			out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, ir.GoLiteral(rest[:open])))
 			pos += open
 			rest = rest[open:]
+		}
+		if strings.HasPrefix(rest, "[[") {
+			if insideRawElement(html, pos) {
+				out.WriteString(fmt.Sprintf("%s.WriteString(%s)\n", bufName, ir.GoLiteral("[[")))
+				pos += 2
+				rest = rest[2:]
+				continue
+			}
+			closeIndex := ir.FindMessageEnd(rest[2:])
+			if closeIndex < 0 {
+				return "", fmt.Errorf("unclosed message expression at position %d", pos)
+			}
+			closeIndex += 2
+			key, arguments, err := parser.ParseMessageExpression(rest[2:closeIndex], pos)
+			if err != nil {
+				return "", err
+			}
+			if gen == nil {
+				return "", fmt.Errorf("message expression in head requires generator state")
+			}
+			names := make([]string, 0, len(arguments))
+			parts := make([]string, 0, len(arguments))
+			for _, argument := range arguments {
+				names = append(names, argument.Name)
+				constructor := "StringMessageArg"
+				switch gen.MessageArgumentKind(key, argument.Name) {
+				case "number":
+					constructor = "NumberMessageArg"
+				case "time":
+					constructor = "TimeMessageArg"
+				}
+				parts = append(parts, fmt.Sprintf("dreego.%s(%q, %s)", constructor, argument.Name, argument.Expression))
+			}
+			gen.RegisterMessageUse(key, names)
+			call := fmt.Sprintf("dreego.Message(%s, %q", contextName, key)
+			if len(parts) > 0 {
+				call += ", " + strings.Join(parts, ", ")
+			}
+			call += ")"
+			out.WriteString(fmt.Sprintf("%s.WriteString(dreego.%s(%s))\n", bufName, HeadSafeFunc(html, pos), call))
+			pos += closeIndex + 2
+			rest = rest[closeIndex+2:]
+			continue
 		}
 		closeIdx := ir.FindExprEnd(rest[2:])
 		if closeIdx < 0 {
@@ -50,6 +105,29 @@ func Gen(html string, bufName string) (string, error) {
 		rest = rest[closeIdx+2:]
 	}
 	return out.String(), nil
+}
+
+func insideRawElement(source string, position int) bool {
+	prefix := strings.ToLower(source[:position])
+	for _, tag := range []string{"script", "style"} {
+		open := strings.LastIndex(prefix, "<"+tag)
+		close := strings.LastIndex(prefix, "</"+tag+">")
+		tagEnd := strings.LastIndex(prefix, ">")
+		if open > close && tagEnd > open {
+			return true
+		}
+	}
+	return false
+}
+
+func firstOpen(left, right int) int {
+	if left < 0 {
+		return right
+	}
+	if right < 0 || left < right {
+		return left
+	}
+	return right
 }
 
 func HeadSafeFunc(html string, i int) string {

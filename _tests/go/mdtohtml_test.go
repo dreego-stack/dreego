@@ -11,7 +11,7 @@ import (
 func TestMdtohtmlTrustedGenerated(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>post := "# Hi"
+		"www/routes/+page.dreego": `<server>post := "# Hi"
 html, err := dreego.mdtohtml(post, trusted: true)
 if err != nil { return "", err }</server>
 <body><p>{{ html|raw }}</p></body>`,
@@ -25,7 +25,7 @@ if err != nil { return "", err }</server>
 func TestMdtohtmlSafeGenerated(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>post := "# Hi"
+		"www/routes/+page.dreego": `<server>post := "# Hi"
 html, err := dreego.mdtohtml(post)
 if err != nil { return "", err }</server>
 <body><p>{{ html|raw }}</p></body>`,
@@ -39,7 +39,7 @@ if err != nil { return "", err }</server>
 func TestMdtohtmlServes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>html, err := dreego.mdtohtml("# Hello")
+		"www/routes/+page.dreego": `<server>html, err := dreego.mdtohtml("# Hello")
 if err != nil { return "", err }</server>
 <body><div>{{ html|raw }}</div></body>`,
 	})

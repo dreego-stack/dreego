@@ -25,8 +25,8 @@ component boundary.
 
 ## Methods
 
-Sections without `method` belong to GET. A `page.dreego` route can define other
-methods explicitly:
+Sections without `method` belong to GET. A route file can define other methods
+explicitly:
 
 ```html
 <server method="post">

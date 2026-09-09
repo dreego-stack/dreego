@@ -13,11 +13,11 @@ build the binary, start it, and assert on HTTP responses.
 
 Teaches the smallest possible Dreego app:
 
-- `www/routes/get.dreego` — one route file per URL, one method per file
+- `www/routes/+page.dreego` — one route file per URL with method-specific sections
 - `<head>` with `<title>` and meta tags
 - `<server>` block with a local variable rendered via `{{ message }}`
-- `www/routes/about/get.dreego` — nested directory route
-- `www/routes/users/[id]/get.dreego` — dynamic segment with `c.Param("id")`
+- `www/routes/about/+page.dreego` — nested directory route
+- `www/routes/users/[id]/+page.dreego` — dynamic segment with `c.Param("id")`
 - `www/routes/404.dreego` — custom not-found page
 - `main.go` — `dreego.New()` + `www.Register(app)` + `ssr.Listen(app, addr)`
 
@@ -79,7 +79,7 @@ Teaches the component system:
   content
 - `<@ProductCard name={product.Name} .../>` — expression props from a Go struct
 - `{#each products as product}` — loop over a slice
-- `www/routes/products/[id]/get.dreego` — dynamic route reusing the same
+- `www/routes/products/[id]/+page.dreego` — dynamic route reusing the same
   components
 
 Run it:
@@ -104,7 +104,7 @@ the owning App before the generated routes.
   `app.Register(http.MethodGet, ...)` with static and `{id}` patterns
 - `main.go` — `plugin.Register(app, plugin.Options{Prefix: "/plugin"})` before
   `www.Register(app)`
-- `www/routes/get.dreego` — the app's own home page
+- `www/routes/+page.dreego` — the app's own home page
 
 Run it:
 

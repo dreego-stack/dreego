@@ -113,7 +113,7 @@ repo-root/
 │   └── fixtures/           ← Reference apps for integration tests
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
-├── core/                   ← Runtime framework facade (public API re-exports, no external deps)
+├── core/                   ← Runtime framework facade (public API re-exports, approved dependencies only)
 ├── core/internal/          ← Runtime implementation split into session/, server/, middleware/, context/, validate/
 ├── internal/transpiler/    ← Transpiler (.dreego → Go), used by CLI and dreegotest
 ├── cli/dreego/             ← CLI binary
@@ -194,10 +194,10 @@ host paths that do not exist in the container.
 
 - Max 300 lines per handwritten file, one logical thing per file. Generated fixture output is exempt and must not be manually split.
 - No code comments (except where needed for clarity)
-- Go 1.22+, prefer standard library
+- Go 1.22+, prefer the standard library
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
-- Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate — no external deps, enforced by `_scripts/check-core-deps.sh` in CI)
-- Transpiler in `internal/transpiler/` (no external deps, same CI check; importable only from within this repo: CLI, dreegotest)
+- Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate). Core may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside Core. CI enforces this boundary through `_scripts/check-core-deps.sh`.
+- Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.
 - CLI in `cli/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
 - Build via `dreego` CLI, not directly `go build`
@@ -263,8 +263,9 @@ Real external plugins between v0.1 and v1 must validate the contract before a st
 
 ### 3. File-based Routing
 Filename-based routing is the released pre-v0.1 implementation; the accepted
-v0.1 target is one route file per URL (`page.dreego` and method sections).
-`get.dreego`, `index.dreego`, and `+page.dreego` remain accepted legacy names.
+v0.1 target is one route file per URL (`+page.dreego` and method sections).
+Only `+page.dreego` and `index.dreego` map to their directory URL; other route
+filenames become literal URL segments.
 → [decisions/routing-and-components](_docs/decisions/routing-and-components.md)
 
 ### 4. Asset System: Dual-Mode (Embedded + Disk)

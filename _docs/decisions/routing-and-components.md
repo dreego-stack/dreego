@@ -11,15 +11,13 @@ timestamp: 2026-08-14T00:00:00Z
 
 ## Context
 
-The released pre-v0.1 implementation uses method filenames, generated package
+The earlier pre-v0.1 implementation used method filenames, generated package
 initializers, global runtime registration, implicit component discovery, and
 several historical plugin-discovery experiments. Those mechanisms conflict with
 explicit App ownership and make route and component behavior harder to reason
 about.
 
-This decision defines the migration target. Public documentation may continue
-to describe released behavior only when it clearly labels that behavior as
-current and provisional.
+This decision defines the implemented migration target.
 
 ## Generated registration
 
@@ -41,16 +39,18 @@ One `.dreego` route file owns all declared HTTP methods for one URL.
 
 | Source | URL |
 |---|---|
-| `routes/page.dreego` | `/` |
+| `routes/+page.dreego` | `/` |
+| `routes/index.dreego` | `/` |
 | `routes/about.dreego` | `/about` |
-| `routes/about/page.dreego` | `/about` |
-| `routes/users/[id]/page.dreego` | `/users/{id}` |
-| `routes/blog/[...path]/page.dreego` | `/blog/{path...}` |
+| `routes/about/+page.dreego` | `/about` |
+| `routes/page.dreego` | `/page` |
+| `routes/users/[id]/+page.dreego` | `/users/{id}` |
+| `routes/blog/[...path]/+page.dreego` | `/blog/{path...}` |
 | `routes/(auth)/login.dreego` | `/login` |
 
-`page.dreego` is the official route file name. `get.dreego`, `index.dreego`,
-and `+page.dreego` remain accepted legacy names for migration. A flat file and
-`page.dreego` resolving to the same URL conflict. `index.dreego` and optional
+Only `+page.dreego` and `index.dreego` resolve to their directory URL, and they
+conflict when present together. Every other filename becomes a literal URL
+segment and defaults to GET; HTTP methods are declared on sections. Optional
 segments are unsupported. Static segments take priority over dynamic segments,
 which take priority over catch-all segments. Route groups organize source
 without adding a URL segment.

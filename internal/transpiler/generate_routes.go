@@ -7,13 +7,6 @@ import (
 	"strings"
 )
 
-var methodExt = map[string]string{
-	"get":    "GET",
-	"post":   "POST",
-	"put":    "PUT",
-	"delete": "DELETE",
-}
-
 type routeDir struct {
 	dir  string
 	pkg  string
@@ -70,7 +63,7 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 				return fmt.Errorf("error reading %s: %w", fpath, err)
 			}
 			baseName := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
-			method := methodForFile(baseName)
+			method := "GET"
 
 			file, raw, perr := parseRouteFile(gen, fpath, data)
 			if perr != nil {
@@ -158,22 +151,13 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 func routeFileRel(root, dir, name string) string {
 	rel := routeDirRel(root, dir)
 	base := strings.TrimSuffix(name, ".dreego")
-	if base == "page" || base == "+page" || base == "index" || base == "404" || base == "500" || isLegacyMethodFile(base) {
+	if base == "+page" || base == "index" || base == "404" || base == "500" {
 		return rel
 	}
 	if rel == "" {
 		return base
 	}
 	return filepath.ToSlash(filepath.Join(rel, base))
-}
-
-func isLegacyMethodFile(base string) bool {
-	for prefix := range methodExt {
-		if base == prefix || strings.HasPrefix(base, prefix+"-") {
-			return true
-		}
-	}
-	return false
 }
 
 func buildPageName(rel string) string {
@@ -278,15 +262,4 @@ func doubleBracketSegment(rel string) string {
 		}
 	}
 	return ""
-}
-
-func methodForFile(base string) string {
-	method := "GET"
-	for prefix, m := range methodExt {
-		if base == prefix || strings.HasPrefix(base, prefix+"-") {
-			method = m
-			break
-		}
-	}
-	return method
 }

@@ -17,7 +17,7 @@ func TestBugLayoutRouteHeadMerge(t *testing.T) {
 </head>
 <body><main>{#slot}</main></body>
 </html></body>`,
-		"www/routes/get.dreego": `<head><title>Merged Title</title><script src="route-script.js"></script></head>
+		"www/routes/+page.dreego": `<head><title>Merged Title</title><script src="route-script.js"></script></head>
 <body><p>page content</p></body>`,
 	})
 	_, body := c.Get(t, "/")

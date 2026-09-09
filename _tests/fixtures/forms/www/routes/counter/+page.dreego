@@ -17,3 +17,12 @@
             Increment</button>
     </form>
 </body>
+
+<server method="post">
+    n := c.SessionVal("count")
+    c.SetSessionVal("count", n+"x")
+</server>
+<body method="post">
+    <p>
+        incremented</p>
+</body>

@@ -52,9 +52,11 @@ func Fixture(t *testing.T, name string) string {
 	}
 	re := regexp.MustCompile(`(?m)^replace github\.com/dreego-stack/dreego => .*$`)
 	rewritten := re.ReplaceAllString(string(data), "replace github.com/dreego-stack/dreego => "+repoRoot)
+	rewritten = regexp.MustCompile(`(?m)^require github\.com/dreego-stack/dreego v0\.0\.0$`).ReplaceAllString(rewritten, "require (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)")
 	if err := os.WriteFile(gomod, []byte(rewritten), 0644); err != nil {
 		t.Fatalf("Fixture: write go.mod: %v", err)
 	}
+	copyModuleSum(t, dir, repoRoot)
 	return dir
 }
 

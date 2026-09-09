@@ -39,22 +39,22 @@ func mtimeOf(t *testing.T, dir, name string) time.Time {
 
 func TestDetectChangesNewFile(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
 
 	changed, updated := detectChanges(dir, map[string]time.Time{})
 
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Errorf("expected new file detected, got %v", changed)
 	}
-	if _, ok := updated["page.dreego"]; !ok {
-		t.Errorf("expected updated map to contain page.dreego, got %v", updated)
+	if _, ok := updated["+page.dreego"]; !ok {
+		t.Errorf("expected updated map to contain +page.dreego, got %v", updated)
 	}
 }
 
 func TestDetectChangesNoChange(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
-	prev := map[string]time.Time{"page.dreego": mtimeOf(t, dir, "page.dreego")}
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
+	prev := map[string]time.Time{"+page.dreego": mtimeOf(t, dir, "+page.dreego")}
 
 	changed, updated := detectChanges(dir, prev)
 
@@ -68,58 +68,58 @@ func TestDetectChangesNoChange(t *testing.T) {
 
 func TestDetectChangesModified(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
-	prev := map[string]time.Time{"page.dreego": mtimeOf(t, dir, "page.dreego")}
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
+	prev := map[string]time.Time{"+page.dreego": mtimeOf(t, dir, "+page.dreego")}
 
-	future := prev["page.dreego"].Add(2 * time.Second)
-	if err := os.Chtimes(filepath.Join(dir, "page.dreego"), future, future); err != nil {
+	future := prev["+page.dreego"].Add(2 * time.Second)
+	if err := os.Chtimes(filepath.Join(dir, "+page.dreego"), future, future); err != nil {
 		t.Fatal(err)
 	}
 
 	changed, updated := detectChanges(dir, prev)
 
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Errorf("expected modified file detected, got %v", changed)
 	}
-	if !updated["page.dreego"].Equal(future) {
-		t.Errorf("expected updated modtime, got %v", updated["page.dreego"])
+	if !updated["+page.dreego"].Equal(future) {
+		t.Errorf("expected updated modtime, got %v", updated["+page.dreego"])
 	}
 }
 
 func TestDetectChangesRemoved(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
-	prev := map[string]time.Time{"page.dreego": mtimeOf(t, dir, "page.dreego")}
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
+	prev := map[string]time.Time{"+page.dreego": mtimeOf(t, dir, "+page.dreego")}
 
-	if err := os.Remove(filepath.Join(dir, "page.dreego")); err != nil {
+	if err := os.Remove(filepath.Join(dir, "+page.dreego")); err != nil {
 		t.Fatal(err)
 	}
 
 	changed, updated := detectChanges(dir, prev)
 
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Errorf("expected removed file detected, got %v", changed)
 	}
-	if _, ok := updated["page.dreego"]; ok {
+	if _, ok := updated["+page.dreego"]; ok {
 		t.Errorf("expected removed file absent from updated map, got %v", updated)
 	}
 }
 
 func TestDetectChangesIgnoresNonDreego(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
 	writeFile(t, dir, "README.md", "# readme\n")
 
 	changed, _ := detectChanges(dir, map[string]time.Time{})
 
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Errorf("expected only .dreego file, got %v", changed)
 	}
 }
 
 func TestDetectChangesSkipsDirs(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
 	for _, sub := range []string{".git", "node_modules", "build", ".worktrees"} {
 		if err := os.MkdirAll(filepath.Join(dir, sub), 0755); err != nil {
 			t.Fatal(err)
@@ -129,13 +129,13 @@ func TestDetectChangesSkipsDirs(t *testing.T) {
 
 	changed, _ := detectChanges(dir, map[string]time.Time{})
 
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Errorf("expected skipped dirs not to be scanned, got %v", changed)
 	}
 }
 
 func TestShouldRestartTrueOnChange(t *testing.T) {
-	if !shouldRestart([]string{"page.dreego"}) {
+	if !shouldRestart([]string{"+page.dreego"}) {
 		t.Error("expected restart on .dreego change")
 	}
 }
@@ -169,12 +169,12 @@ func TestShouldRestartFalseOnNoChange(t *testing.T) {
 // changes instead of treating every .dreego file as newly added.
 func TestDetectChangesInitialPriming(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, dir, "page.dreego", "page / {}\n")
+	writeFile(t, dir, "+page.dreego", "page / {}\n")
 
 	// First scan with an empty map establishes the diff baseline. It must
 	// report every file as new once, but the returned map is the baseline.
 	changed, baseline := detectChanges(dir, map[string]time.Time{})
-	if !reflect.DeepEqual(changed, []string{"page.dreego"}) {
+	if !reflect.DeepEqual(changed, []string{"+page.dreego"}) {
 		t.Fatalf("expected first scan to report new file, got %v", changed)
 	}
 

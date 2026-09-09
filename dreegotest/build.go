@@ -13,7 +13,7 @@ import (
 // compiles it with `go build`. It replaces shell tests that do
 // `dreego generate` + `go build -o /dev/null .`.
 //
-// files maps relative paths (e.g. "dreego/routes/get.dreego") to their content.
+// files maps relative paths (e.g. "dreego/routes/+page.dreego") to their content.
 // The temp module gets a go.mod with a replace to the real repo root.
 func MustBuild(t *testing.T, files map[string]string) {
 	t.Helper()
@@ -78,8 +78,15 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", err
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
+		return "", err
+	}
+	data, err := os.ReadFile(filepath.Join(repoRoot, "go.sum"))
+	if err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(filepath.Join(dir, "go.sum"), data, 0o644); err != nil {
 		return "", err
 	}
 	mainGo := "package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := www.Register(app); err != nil { panic(err) } }\n"
@@ -106,14 +113,10 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", fmt.Errorf("generate failed: %w", err)
 	}
 
-	if expectFail {
-		return dir, nil
-	}
-
 	cmd := exec.Command("go", "build", "-o", "/dev/null", ".")
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("go build failed: %v\n%s", err, out)
+		return dir, fmt.Errorf("go build failed: %v\n%s", err, out)
 	}
 	return dir, nil
 }

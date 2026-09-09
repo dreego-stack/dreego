@@ -15,6 +15,7 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 cp -R "$FIXTURE_DIR/." "$WORK/"
+cp "$REPO_DIR/go.sum" "$WORK/go.sum"
 sed -i.bak 's|^replace github.com/dreego-stack/dreego => .*$|replace github.com/dreego-stack/dreego => '"$REPO_DIR"'|' "$WORK/go.mod"
 rm -f "$WORK/go.mod.bak"
 

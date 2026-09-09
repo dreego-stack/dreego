@@ -20,7 +20,7 @@ b.WriteString(`<title>About</title>`)
 	if err != nil { return "", err }
 	b.WriteString(html)
 
-	return b.String(), nil
+	return dreego.LocalizedHTML(c, b.String()), nil
 }
 
 func PageAbout() dreego.Component {

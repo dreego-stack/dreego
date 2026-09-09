@@ -2,7 +2,7 @@
 ---
 type: Decision
 title: File-based Routing
-description: Directory-based URL paths with one HTTP method per generated route file
+description: Directory and filename-based URL paths with method-specific sections
 tags: [v0.0.10]
 timestamp: 2026-07-28T00:00:00Z
 ---
@@ -23,17 +23,18 @@ Dreego should also support this — but Go-idiomatically.
 
 ```
 routes/
-├── get.dreego              →  GET /
+├── +page.dreego              →  GET /
 ├── about/
-│   └── get.dreego          →  GET /about
+│   └── +page.dreego          →  GET /about
 └── users/
     └── [id]/
-        └── get.dreego      →  GET /users/{id}
+        └── +page.dreego      →  GET /users/{id}
 ```
 
-Directories define the URL path and the filename defines the HTTP method. A
-directory may therefore contain `get.dreego`, `post.dreego`, and other method
-files without combining every operation into one large source file.
+Directories define most of the URL path. Only `+page.dreego` and
+`index.dreego` resolve to the directory URL; every other filename adds a
+literal URL segment. HTTP methods are selected by `method` attributes on
+sections, not by filenames.
 
 `dreego generate` scans the `routes/` directory and generates a `dreego_router.go`:
 
@@ -58,7 +59,7 @@ func RegisterDreegoRoutes(mux *http.ServeMux) {
 ```
 routes/
 ├── layout.dreego          → Main wrapper (Navbar, Footer)
-├── get.dreego           → Uses layout.dreego
+├── +page.dreego           → Uses layout.dreego
 └── admin/
     ├── layout.dreego      → Extends main layout with admin sidebar
     └── settings.dreego    → Uses admin/layout.dreego

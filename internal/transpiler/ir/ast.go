@@ -5,6 +5,7 @@ type TemplateNodeType int
 const (
 	NodeText TemplateNodeType = iota
 	NodeExpression
+	NodeMessage
 	NodeIf
 	NodeEach
 	NodeSlot
@@ -29,6 +30,13 @@ type TemplateNode struct {
 	Source       string
 	SourceText   string
 	Language     string
+	MessageKey   string
+	MessageArgs  []MessageArgument
+}
+
+type MessageArgument struct {
+	Name       string
+	Expression string
 }
 
 type ServerSection struct {

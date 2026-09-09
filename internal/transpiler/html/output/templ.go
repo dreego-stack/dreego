@@ -17,7 +17,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 
 	if layout == nil && file.Head != nil && isGET {
 		inSection := false
-		headCode, err := head.Gen(file.Head.Content, "b")
+		headCode, err := head.GenWithMessages(gen, file.Head.Content, "b", "c")
 		if err != nil {
 			return "", err
 		}
@@ -82,7 +82,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 		buf.WriteString("\tb.Reset()\n")
 
 		if file.Head != nil {
-			headCode, err := head.Gen(file.Head.Content, "b")
+			headCode, err := head.GenWithMessages(gen, file.Head.Content, "b", "c")
 			if err != nil {
 				return "", err
 			}

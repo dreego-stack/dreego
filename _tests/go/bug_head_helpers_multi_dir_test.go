@@ -21,8 +21,8 @@ func TestBugHeadHelpersEmittedOnceAndLayoutStyleKept(t *testing.T) {
 <style>
 .layout-style-marker { color: #123456; }
 </style>`,
-		"www/routes/get.dreego": "<head><title>Home</title></head>\n<body><h1>Home</h1></body>",
-		"www/routes/posts/get.dreego": "<head><title>Post</title><meta name=\"description\" content=\"post\"></head>\n<body><h1>Post</h1></body>",
+		"www/routes/+page.dreego":       "<head><title>Home</title></head>\n<body><h1>Home</h1></body>",
+		"www/routes/posts/+page.dreego": "<head><title>Post</title><meta name=\"description\" content=\"post\"></head>\n<body><h1>Post</h1></body>",
 	}
 
 	generated := dreegotest.Build(t, files)
