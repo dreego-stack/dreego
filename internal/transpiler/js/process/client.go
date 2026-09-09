@@ -35,7 +35,7 @@ func compile(gen *codegen.State, language, code string, component *ir.ComponentD
 		}
 		return typescript.Process(code, declarations, sourcePath, line)
 	case "lua":
-		artifact, err := luainput.Compile(code)
+		artifact, err := luainput.CompileWithSource(code, sourceName(sourcePath), line)
 		if err != nil {
 			return jsoutput.Artifact{}, luaDiagnostic(err, sourceName(sourcePath), line)
 		}

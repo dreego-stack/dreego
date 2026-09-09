@@ -1,139 +1,86 @@
+# Template Logic
 
----
-type: Concept
-title: "Template Logic in Dreego"
-description: "Template syntax and its codegen to native Go code (as of v0.0.13)"
-tags: [v0.0.13]
-timestamp: 2026-07-28T21:33:00Z
----
+Dreego templates contain a deliberately small control-flow language. Complex
+work remains ordinary Go in the matching `<server>` section; template constructs
+compile to generated Go and add no browser runtime.
 
-# Template Logic in Dreego
+## Expressions
 
-## Design Philosophy
+Use double braces in text and attributes:
 
-- **No real Go in the template** — complex logic belongs in `<server>` block
-- **All template blocks compile to native Go** — zero runtime cost
-- **Auto-escaping**: all `{var}` expressions are escaped via `html.EscapeString`
-
-## Template Blocks (as of v0.0.13)
-
-| Block | Status | Go Equivalent |
-|---|---|---|
-| `{#if cond}` / `{#else}` / `{/if}` | ✅ | `if cond { } else { }` |
-| `{#each items as item}` / `{#each else}` / `{/each}` | ✅ | `for i, item := range items { }` + `len == 0` check |
-| `{#slot}` | ✅ | `c.Get("slot")` |
-| `{#slot name}...{/slot}` | ✅ | `c.Get("slot_name")` |
-| `{#verbatim}...{/verbatim}` | ✅ | Raw `b.WriteString()` |
-| `$loop.Index / .First / .Last / .Even / .Odd` | ✅ | Codegen-generated `core.EachLoop` struct |
-| `{var\|raw}` / `{var\|upper}` | ✅ | Filter chain in codegen |
-| `{#switch}` / `{#case}` | ❌ V2 | — |
-| `{#await}` | ❌ V2 | — |
-| `{#let}` | ❌ V2 | — |
-| `{#else if}` / `{#elseif}` | ✅ | Implemented v0.0.19 |
-
-## {#if} / {#else}
-
+```html
+<h1>{{ user.Name }}</h1>
+<a href="{{ profileURL }}">Profile</a>
 ```
-{#if show}
-    <p>visible</p>
+
+Dreego escapes expressions for their output context. Text, quoted attributes,
+URLs, event attributes, and inline style values do not share one generic
+escaping rule. See [Output Safety](security.md).
+
+Filters form a pipe-separated chain:
+
+```html
+<p>{{ name|upper }}</p>
+<div>{{ trustedHTML|raw }}</div>
+```
+
+`raw` bypasses normal escaping and must receive application-trusted HTML.
+
+## Conditions
+
+```html
+{#if user.IsAdmin}
+    <a href="/admin">Admin</a>
+{#else if user.IsMember}
+    <a href="/account">Account</a>
 {#else}
-    <p>hidden</p>
+    <a href="/login">Sign in</a>
 {/if}
 ```
 
-**Rules:**
-- Supports arbitrary Go conditions (variables from `<server>`)
-- `{#else}` optional
-- `{#else if}` / `{#elseif}` — implemented (v0.0.19)
+`{#elseif condition}` is accepted as an alternative spelling. Conditions are
+Go expressions using values available to the template.
 
-## {#each} / {#each else} / $loop
+## Iteration
 
-```
+```html
 {#each users as user}
-    <li>{$loop.Index}: {user.Name}</li>
+    <p>{{ $loop.Index }}: {{ user.Name }}</p>
 {#each else}
-    <li>No data</li>
+    <p>No users</p>
 {/each}
 ```
 
-**Rules:**
-- Iterates over slice/array (variables from `<server>`)
-- `{#each else}` renders on empty slice
-- `$loop.Index` (0-based), `.First`, `.Last`, `.Even`, `.Odd`
-- Codegen: `var loop := core.EachLoop{Index: i, ...}` with string replacement `$loop.` → `loop.`
+`$loop.Index` is zero-based. `$loop.First`, `$loop.Last`, `$loop.Even`, and
+`$loop.Odd` describe the current iteration. The optional `{#each else}` branch
+renders when the collection is empty.
 
-## {#verbatim}
+## Components and slots
 
-```
-{#verbatim}
-    <script>var x = {a: 1};</script>
-{/verbatim}
-```
-
-**Rules:**
-- Everything between `{#verbatim}` and `{/verbatim}` is output 1:1
-- No parsing, no escaping — perfect for JS templates
-- Lexer scans as a single `TokenVerbatim` with raw content
-
-## Filters
-
-```
-<p>{html|raw}</p>
-<body>{name|upper}</body>
-```
-
-**Rules:**
-- `|raw` — no HTML escaping (for trusted HTML)
-- `|upper` — `strings.ToUpper()` for text
-- `parseExpression()` splits at `|` in the parser
-- Codegen builds filter chain: `strings.ToUpper(fmt.Sprintf("%v", name))`
-
-## {#slot} / Named Slots
-
-**Default Slot (no name, no `{/slot}`):**
-
-```
-<body>{#slot}</body>
-```
-
-**Named Slots (with `{/slot}` closing):**
-
-Component:
-```
-Component Card (title string)
-<body>
-  {#slot header}{/slot}
-  <h2>{title}</h2>
-  {#slot}
-</body>
-```
-
-Route:
-```
-<@Card title="Hi">
-  {#slot header}<nav>menu</nav>{/slot}
-  <p>body content</p>
+```html
+<@Card title="Welcome">
+    {#slot header}<strong>News</strong>{/slot}
+    <p>Default slot content</p>
 </@Card>
 ```
 
-**Codegen:**
-- Route: `c.Set("slot_header", sb.String())`, `c.Set("slot", cb.String())`
-- Component: `b.WriteString(ctx.Get("slot_header"))`, `b.WriteString(ctx.Get("slot"))`
-- Components with children: `cb.WriteString` / `sb.WriteString` buffer redirection
+Inside the component, `{#slot}` renders default content and
+`{#slot header}{/slot}` marks a named slot. Slots are passed as render inputs;
+they are not stored in request-global string keys. See [Components](components.md).
 
-## Error Handling
+## Verbatim regions
 
-No special error tag. Errors via `<server>` block and `{#if}`:
-
+```html
+{#verbatim}
+<template>{{ handled_by_another_tool }}</template>
+{/verbatim}
 ```
-<server>
-    user, err := db.GetUser(id)
-    hasError := err != nil
-</server>
 
-{#if hasError}
-    <p>Error loading.</p>
-{#else}
-    <h1>{user.Name}</h1>
-{/if}
-```
+Verbatim content is emitted literally and receives no Dreego interpolation or
+escaping. Use it only for developer-authored content.
+
+## Boundaries
+
+Control-flow blocks cannot begin inside an HTML attribute. Wrap the complete
+element in the condition or loop instead. Dreego has no catch, await, switch,
+or template-local variable blocks; implement that logic in Go.

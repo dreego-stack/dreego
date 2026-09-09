@@ -41,14 +41,14 @@ v0.1 label does not freeze the current `/core` import path until v1: the planned
 v0.2 target-neutral render and explicit SSR-host migration is an explicit
 pre-v1 breaking change with its own migration guide.
 
-- `App` and its configuration, registration, and lifecycle methods
+- `App` and its configuration and registration methods
   (`New`, `Register`, `RegisterRedirect`, `RegisterRewrite`, `RegisterStatic`,
   `Use`, `SetLogging`, `SetCSRF`, `SetErrorHandler`, `SetSessionStore`,
-  `SetCSP`, `SetServerConfig`, `SetReady`, `Build`, `Handler`, `ServeHTTP`,
-  `Listen`, `Shutdown`).
+  `SetCSP`, `SetReady`, `Build`, `Handler`, `ServeHTTP`). HTTP lifecycle belongs
+  to `core/ssr.Host` (`New`, `Listen`, `Serve`, `Start`, `Wait`, `Shutdown`).
 - `SSRContext` and the `Context` interface used by generated form handlers.
 - The session `Store` interface and `CookieStore`/`CookiePolicy`/`Options`.
-- `ServerConfig` and `DefaultServerConfig` (the type set by `SetServerConfig`).
+- `core/ssr.ServerConfig` and `core/ssr.DefaultServerConfig`.
 - The exported error sentinels used by applications: `ErrAppBuilt`,
   `ErrRouteConflict`, `ErrSessionTooLarge`, `ErrRedirect`.
 - The output-safety helpers (`SafeText`, `SafeAttr`, `SafeURL`, `SafeScript`,

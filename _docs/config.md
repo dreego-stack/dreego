@@ -21,6 +21,11 @@ The configuration file is located at `dreego.config.json` in the project root.
     "locales": ["de", "en"],
     "urlStrategy": "none",
     "detection": ["cookie", "browser", "custom", "default"]
+  },
+  "plugins": {
+    "github.com/dreego-stack/plugin-auth": {
+      "client": ["password", "passkeys"]
+    }
   }
 }
 ```
@@ -93,3 +98,29 @@ Rewrites are applied just before routing, after user middleware registered via
 rewritten one — match middleware patterns against the source path (for example
 match `/api/*` even when `/api/*` rewrites to `/v2/*`). Access logs record the
 pre-rewrite path.
+
+## plugins
+
+The `plugins` object selects optional browser modules declared by installed
+Dreego plugins. Its keys are complete `github.com/dreego-stack/plugin-*`
+module paths. Each plugin must also be present in the application's `go.mod`.
+
+```json
+{
+  "plugins": {
+    "github.com/dreego-stack/plugin-auth": {
+      "client": ["password", "passkeys"]
+    }
+  }
+}
+```
+
+Dreego reads each plugin's `dreego-plugin.json`, includes required modules and
+the transitive dependencies of the selected module IDs, and registers one
+deterministic JavaScript bundle at the manifest's declared URL. Unselected
+modules are not included. This processing is declarative and never executes a
+plugin command.
+
+Only `.js` files inside the plugin module are accepted. Unknown IDs, duplicate
+IDs, dependency cycles, unsafe paths, route conflicts, files larger than 256
+KiB, and bundles larger than 1 MiB stop generation with an error.

@@ -9,14 +9,14 @@
     <div class="min-h-screen bg-stone-100 text-stone-950">
         <nav class="mx-auto flex max-w-5xl items-center justify-between px-6 py-6" aria-label="Lua demo navigation">
             <a href="/lua/" class="font-mono text-lg font-bold">← dreego.lua</a>
-            <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">MVP grows by tested patches</span>
+            <span class="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">Browser Lua 0.5</span>
         </nav>
         <main class="mx-auto max-w-5xl px-6 pb-20 pt-10">
             <p class="font-mono text-sm uppercase tracking-[0.25em] text-emerald-700">Feature map</p>
             <h1 class="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Small language surface.<br>Explicit semantics.</h1>
             <div class="mt-12 grid gap-5 md:grid-cols-2">
-                <section class="rounded-3xl bg-white p-7 shadow-sm" aria-labelledby="available-title"><h2 id="available-title" class="text-xl font-bold text-emerald-800">Available now</h2><ul class="mt-5 space-y-3 text-stone-700"><li>✓ Variables and assignment</li><li>✓ Lua arithmetic and concatenation</li><li>✓ Truthiness, comparisons, and conditionals</li><li>✓ Local functions and closures</li><li>✓ Browser properties, calls, and events</li><li>✓ Feature-linked runtime helpers</li></ul></section>
-                <section class="rounded-3xl border border-stone-300 p-7" aria-labelledby="later-title"><h2 id="later-title" class="text-xl font-bold">Future patches</h2><ul class="mt-5 space-y-3 text-stone-600"><li>○ Loops and iterators</li><li>○ Browser-focused tables</li><li>○ Multiple returns</li><li>○ Selected standard-library functions</li></ul><p class="mt-6 text-sm text-stone-500">Server APIs, bytecode, native modules, and filesystem access are intentionally outside the browser compiler.</p></section>
+                <section class="rounded-3xl bg-white p-7 shadow-sm" aria-labelledby="available-title"><h2 id="available-title" class="text-xl font-bold text-emerald-800">Available now</h2><ul class="mt-5 space-y-3 text-stone-700"><li>✓ Variables and assignment</li><li>✓ Lua arithmetic and concatenation</li><li>✓ Truthiness, comparisons, and conditionals</li><li>✓ Local functions, closures, and single returns</li><li>✓ While and numeric for loops</li><li>✓ One-based mutable tables</li><li>✓ Browser properties, calls, and events</li><li>✓ Source-aware runtime stacks</li></ul></section>
+                <section class="rounded-3xl border border-stone-300 p-7" aria-labelledby="later-title"><h2 id="later-title" class="text-xl font-bold">Intentionally excluded</h2><ul class="mt-5 space-y-3 text-stone-600"><li>○ Generic iterators</li><li>○ Metatables and coroutines</li><li>○ Multiple returns</li><li>○ Dynamic modules</li></ul><p class="mt-6 text-sm text-stone-500">Server APIs, bytecode, native modules, and filesystem access remain outside the browser compiler.</p></section>
             </div>
             <section class="mt-8 rounded-3xl bg-stone-950 p-8 text-stone-100" aria-labelledby="truth-title">
                 <p class="font-mono text-xs text-emerald-300">SEMANTIC CHECK</p><h2 id="truth-title" class="mt-3 text-2xl font-bold">In Lua, zero is truthy.</h2><p class="mt-2 text-stone-400">Run the compiled condition and inspect its result.</p>
@@ -25,14 +25,33 @@
                 <script lang="lua">
                 local trigger = document:querySelector("#truth-test")
                 local result = document:querySelector("#truth-result")
+                local function describe(value)
+                    if value then
+                        return "true — Lua semantics preserved"
+                    end
+                    return "false"
+                end
                 trigger:addEventListener("click", function()
                     local value = 0
-                    if value then
-                        result.textContent = "true — Lua semantics preserved"
-                    else
-                        result.textContent = "false"
-                    end
+                    result.textContent = describe(value)
                 end)
+                </script>
+            </section>
+            <section class="mt-8 rounded-3xl bg-white p-8 shadow-sm" aria-labelledby="table-title">
+                <h2 id="table-title" class="text-2xl font-bold">One-based table sequence</h2>
+                <p id="table-result" class="mt-3 font-mono text-stone-600" aria-live="polite">Compiling…</p>
+                <script lang="lua">
+                local labels = {"tables", "loops", "escapes"}
+                local message = ""
+                for index = 1, #labels do
+                    message = message .. labels[index]
+                    if index < #labels then
+                        message = message .. " · "
+                    end
+                end
+                labels[2] = nil
+                local result = document:querySelector("#table-result")
+                result.textContent = message .. " · contiguous length after deletion: " .. #labels
                 </script>
             </section>
         </main>

@@ -24,10 +24,15 @@ type Rewrite struct {
 }
 
 type Settings struct {
-	Logging   Logging    `json:"logging"`
-	Redirects []Redirect `json:"redirects"`
-	Rewrites  []Rewrite  `json:"rewrites"`
-	I18n      I18n       `json:"i18n"`
+	Logging   Logging                   `json:"logging"`
+	Redirects []Redirect                `json:"redirects"`
+	Rewrites  []Rewrite                 `json:"rewrites"`
+	Plugins   map[string]PluginSettings `json:"plugins"`
+	I18n      I18n                      `json:"i18n"`
+}
+
+type PluginSettings struct {
+	Client []string `json:"client"`
 }
 
 type Logging struct {

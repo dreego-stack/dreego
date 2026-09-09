@@ -117,6 +117,12 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		return nil, genStats{}, fmt.Errorf("static assets: %w", err)
 	}
 
+	pluginSrc, pluginCount, err := generatePluginClientAssets(".", settings, routePatterns)
+	if err != nil {
+		return nil, genStats{}, err
+	}
+	staticSrc += pluginSrc
+	staticCount += pluginCount
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {

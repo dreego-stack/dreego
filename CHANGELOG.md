@@ -1,4 +1,44 @@
 
+## v0.5.6 - 2026-09-09
+
+- Feat: add Browser Lua while and numeric for loops with validated bounds and break support.
+- Feat: add mutable Browser Lua tables with one-based indexing, nil deletion, and deterministic sequence length.
+- Feat: support Lua short-string escapes and preserve original `.dreego` paths in browser runtime stacks.
+
+## v0.5.5 - 2026-09-09
+
+- Feat: bundle selected declarative JavaScript modules from installed plugins during generation
+
+## v0.5.4 - 2026-09-08
+
+- Test: harden render-context, session, client-language, and Browser Lua compatibility contracts.
+- Bug: reject unavailable Lua metatable, coroutine, system, debug, package, and socket APIs while preserving lexical shadowing.
+- Bug: prevent parallel integration fixtures from racing for the same temporary server port.
+
+## v0.5.3 - 2026-09-08
+
+- Docs: reorganize the documentation as section-oriented handbook chapters.
+- Docs: synchronize template, component, layout, CLI, runtime, and architecture references with the current implementation.
+
+## v0.5.2 - 2026-09-08
+
+- Fix: preserve Lua lexical shadowing for browser built-ins and forbidden global names.
+
+## v0.5.1 - 2026-09-08
+
+- Feat: compile bare and single-value returns in browser Lua functions.
+
+## v0.5.0 - 2026-09-08
+
+- Feat: compile root and inline browser Lua into JavaScript without external dependencies or a VM.
+- Feat: generate one deterministic Lua runtime asset containing only the semantic helpers used by the application.
+- Feat: compile local functions, closures, and browser event callbacks from Lua.
+- Docs: add equivalent Lua and JavaScript browser demos for direct comparison.
+- Docs: publish client-language version targets and plan isolated client Go and Starlark experiments.
+- Fix: isolate Lua blocks and prevent client strings from terminating generated script elements.
+- Fix: preserve Lua truthiness and modulo behavior at JavaScript boundaries without identifier or runtime namespace collisions.
+- Fix: reject unsafe Markdown code-fence language labels before generating HTML attributes.
+
 ## v0.4.0 - 2026-09-07
 
 - Feat: compile root and inline client TypeScript with the pinned native TypeScript 7 compiler.
