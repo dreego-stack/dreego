@@ -11,6 +11,16 @@ Transpiles `.dreego` files in the website root (any directory with a `dreego.con
 - `--force`: Forces complete regeneration (ignores cache)
 - `--check`: CI mode — regenerates the expected output in memory and compares it byte-for-byte against the files on disk. No working-tree modification. Exits non-zero with a path-level diff (`missing:`, `extra:`, `stale:`) when any generated file (routes, components, layouts, static assets, config) is missing, extra, or stale. Timestamp manipulation cannot produce a false pass.
 
+## dreego i18n extract
+
+```bash
+dreego i18n extract
+```
+
+Emits deterministic, versioned JSON for translation-management adapters. The
+stream contains the default-locale messages, argument and formatting contracts,
+structured variants, and configured target locales.
+
 ## dreego build
 
 ```bash

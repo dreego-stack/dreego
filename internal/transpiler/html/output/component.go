@@ -31,7 +31,10 @@ func GenComponentCall(gen *codegen.State, builder string, n ir.TemplateNode) (st
 func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 	switch n.Type {
 	case ir.NodeText:
-		code, next := CompTextSection(n.Content, g.InSection)
+		code, next, err := compTextSection(g.Gen, n.Content, g.InSection, "ctx")
+		if err != nil {
+			return "", err
+		}
 		g.InSection = next
 		return fmt.Sprintf("%s.WriteString(%s)", g.Builder, code), nil
 	case ir.NodeExpression:
@@ -52,6 +55,9 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 		}
 		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.Builder, code), nil
 	case ir.NodeMessage:
+		if g.InSection {
+			return "", fmt.Errorf("message expressions are not allowed inside script or style elements at position %d", n.Pos)
+		}
 		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.Builder, messageCall(g.Gen, "ctx", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder

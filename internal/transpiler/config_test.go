@@ -105,9 +105,13 @@ func TestLoadConfigRejectsInvalidI18n(t *testing.T) {
 		{"canonical duplicate locale", `{"enabled":true,"defaultLocale":"de-DE","locales":["de-DE","de-de"]}`, `duplicate locale "de-DE"`},
 		{"invalid locale", `{"enabled":true,"defaultLocale":"de--DE","locales":["de--DE"]}`, `invalid locale "de--DE"`},
 		{"invalid strategy", `{"enabled":true,"defaultLocale":"de","locales":["de"],"urlStrategy":"path"}`, `unsupported urlStrategy "path"`},
+		{"missing domain", `{"enabled":true,"defaultLocale":"de","locales":["de"],"urlStrategy":"domain"}`, `domain is required for locale "de"`},
+		{"duplicate domain", `{"enabled":true,"defaultLocale":"de","locales":["de","en"],"urlStrategy":"domain","domains":{"de":"example.com","en":"example.com"}}`, `domain "example.com" is used by locales`},
 		{"duplicate detector", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["browser","browser"]}`, `duplicate locale detector "browser"`},
 		{"default not last", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["default","browser"]}`, `locale detector "default" must be last`},
 		{"unknown detector", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["ip","default"]}`, `unsupported locale detector "ip"`},
+		{"unsupported fallback", `{"enabled":true,"defaultLocale":"de","locales":["de"],"fallbacks":{"de":["en"]}}`, `fallback locale "en" is not listed`},
+		{"fallback cycle", `{"enabled":true,"defaultLocale":"de","locales":["de","en"],"fallbacks":{"de":["en"],"en":["de"]}}`, `fallback cycle includes locale`},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

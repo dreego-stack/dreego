@@ -41,12 +41,18 @@ Messages live outside `.dreego` files:
 ```text
 locales/
 ├── de/
-│   ├── common.ftl
-│   └── cart.ftl
+│   ├── common.json
+│   └── cart.json
 └── en/
-    ├── common.ftl
-    └── cart.ftl
+    ├── common.json
+    └── cart.json
 ```
+
+Catalog files contain flat, namespaced keys. A string is shorthand for a plain
+message. Structured values express typed formatting and recursively nested
+plural or select variants without embedding another template language. The
+format is owned by Dreego and can be exported to translation-management formats
+independently from runtime rendering.
 
 `dreego generate` validates message syntax, keys, arguments, locale coverage,
 and fallback cycles. Catalogs are compiled into deterministic generated Go;

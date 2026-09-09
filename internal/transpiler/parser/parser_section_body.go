@@ -101,7 +101,7 @@ func (p *Parser) parseTemplateNode(parent string) (ir.TemplateNode, error) {
 		return ir.TemplateNode{Type: ir.NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
 	case tokens.TokenMessage:
 		p.advance()
-		key, args, err := parseMessageExpression(tok.Value, tok.Pos)
+		key, args, err := ParseMessageExpression(tok.Value, tok.Pos)
 		if err != nil {
 			return ir.TemplateNode{}, err
 		}

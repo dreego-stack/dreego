@@ -2,4 +2,4 @@ module github.com/dreego-stack/dreego
 
 go 1.22
 
-require golang.org/x/text v0.22.0 // indirect
+require golang.org/x/text v0.22.0

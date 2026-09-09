@@ -26,7 +26,10 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		if n.Content == "" {
 			return "", nil
 		}
-		code, next := CompTextSection(n.Content, *inSection)
+		code, next, err := compTextSection(gen, n.Content, *inSection, "c")
+		if err != nil {
+			return "", err
+		}
 		*inSection = next
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 	case ir.NodeExpression:
@@ -47,6 +50,9 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		}
 		return fmt.Sprintf(`%s%s.WriteString(dreego.SafeText(%s))`+"\n", indent, builder, code), nil
 	case ir.NodeMessage:
+		if *inSection {
+			return "", fmt.Errorf("message expressions are not allowed inside script or style elements at position %d", n.Pos)
+		}
 		return fmt.Sprintf("%s%s.WriteString(dreego.SafeText(%s))\n", indent, builder, messageCall(gen, "c", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder
@@ -243,7 +249,14 @@ func messageCall(gen *codegen.State, contextName string, node ir.TemplateNode) s
 	arguments := make([]string, 0, len(node.MessageArgs))
 	for _, argument := range node.MessageArgs {
 		names = append(names, argument.Name)
-		arguments = append(arguments, fmt.Sprintf("dreego.MessageArg{Name: %q, Value: %s}", argument.Name, argument.Expression))
+		constructor := "StringMessageArg"
+		switch gen.MessageArgumentKind(node.MessageKey, argument.Name) {
+		case "number":
+			constructor = "NumberMessageArg"
+		case "time":
+			constructor = "TimeMessageArg"
+		}
+		arguments = append(arguments, fmt.Sprintf("dreego.%s(%q, %s)", constructor, argument.Name, argument.Expression))
 	}
 	gen.RegisterMessageUse(node.MessageKey, names)
 	if len(arguments) == 0 {

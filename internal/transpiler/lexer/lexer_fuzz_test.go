@@ -22,6 +22,7 @@ func FuzzLexer(f *testing.F) {
 		`<body><input value="x>y" data-x='a{b'><a href="/p/{{ id }}">link</a></body>`,
 		`<body><p>{{ user.name | upper }}</p></body>`,
 		`<body><div><p>nested</p></div></body>`,
+		`<head><title>[[ page.title ]]</title></head><body>[[ cart.items count=rows[index] ]]</body>`,
 		`<server>if a < b { return a }</server>`,
 		`<@Comp/>`,
 	}

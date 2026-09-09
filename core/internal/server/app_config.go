@@ -184,7 +184,7 @@ func (a *App) SetLocalizer(config corei18n.Config, localizer corei18n.Localizer)
 	if localizer == nil {
 		return errors.New("dreego: localizer is nil")
 	}
-	copy := config
+	copy := corei18n.CloneConfig(config)
 	a.i18nConfig = &copy
 	a.localizer = localizer
 	return nil
@@ -198,6 +198,34 @@ func (a *App) DisableI18n() error {
 	}
 	a.i18nConfig = nil
 	a.localizer = nil
+	return nil
+}
+
+func (a *App) SetAccountLocaleResolver(resolver corei18n.Resolver) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if err := a.mutable(); err != nil {
+		return err
+	}
+	if a.i18nConfig == nil {
+		return errors.New("dreego: i18n is not configured")
+	}
+	a.i18nConfig.Account = resolver
+	return nil
+}
+
+func (a *App) RegisterLocaleResolver(resolver corei18n.Resolver) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if err := a.mutable(); err != nil {
+		return err
+	}
+	if a.i18nConfig == nil {
+		return errors.New("dreego: i18n is not configured")
+	}
+	if resolver != nil {
+		a.i18nConfig.Resolvers = append(a.i18nConfig.Resolvers, resolver)
+	}
 	return nil
 }
 

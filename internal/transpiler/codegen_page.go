@@ -127,7 +127,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 	} else if !hasFormActions && firstMethod != "GET" {
 		buf.WriteString("\tb.WriteString(\"OK\")\n")
 	}
-	buf.WriteString("\n\treturn b.String(), nil\n")
+	buf.WriteString("\n\treturn dreego.LocalizedHTML(c, b.String()), nil\n")
 	buf.WriteString("}\n\n")
 	if contextType == "dreego.RenderContext" {
 		pageFunc := "Page" + pascalBase

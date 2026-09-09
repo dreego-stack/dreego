@@ -113,14 +113,10 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", fmt.Errorf("generate failed: %w", err)
 	}
 
-	if expectFail {
-		return dir, nil
-	}
-
 	cmd := exec.Command("go", "build", "-o", "/dev/null", ".")
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return "", fmt.Errorf("go build failed: %v\n%s", err, out)
+		return dir, fmt.Errorf("go build failed: %v\n%s", err, out)
 	}
 	return dir, nil
 }

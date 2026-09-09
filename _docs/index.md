@@ -8,6 +8,7 @@ Agent-friendly CLI docs. Use `dreego docs [path]` to read any file. Default: thi
 - [Semantic Sections Migration](https://github.com/dreego-stack/dreego/blob/main/_docs/semantic-sections-migration.md) — Move legacy root sections to `server`, `body`, and `client`
 - [CLI](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md) — CLI Reference
 - [Config](https://github.com/dreego-stack/dreego/blob/main/_docs/config.md) — dreego.config.json
+- [Internationalization](https://github.com/dreego-stack/dreego/blob/main/_docs/i18n.md) — Compile-time catalogs, locale resolution, and formatting
 - [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — File-based Routing
 - [Layouts](https://github.com/dreego-stack/dreego/blob/main/_docs/layouts.md) — `{#slot}` / `{#head}` and route head behavior
 - [Middleware](https://github.com/dreego-stack/dreego/blob/main/_docs/middleware.md) — Middleware System

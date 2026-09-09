@@ -3,6 +3,7 @@ package core
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -30,6 +31,9 @@ func TestAppLocalizesRequestFromBrowserPreference(t *testing.T) {
 	if response.Body.String() != "Hello" {
 		t.Fatalf("body = %q", response.Body.String())
 	}
+	if response.Header().Get("Content-Language") != "en" || !strings.Contains(response.Header().Get("Vary"), "Accept-Language") {
+		t.Fatalf("localization headers = %+v", response.Header())
+	}
 }
 
 func TestAppCanReplaceAndDisableLocalizer(t *testing.T) {
@@ -44,5 +48,29 @@ func TestAppCanReplaceAndDisableLocalizer(t *testing.T) {
 	}
 	if err := app.DisableI18n(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestAppCustomLocaleResolver(t *testing.T) {
+	app := New()
+	config := I18nConfig{DefaultLocale: "de", Detection: []string{"custom", "default"}, Locales: []LocaleCatalog{
+		{Locale: "de", Messages: map[string]LocalizedMessage{}},
+		{Locale: "ar", Messages: map[string]LocalizedMessage{}},
+	}}
+	if err := app.SetI18n(config); err != nil {
+		t.Fatal(err)
+	}
+	if err := app.RegisterLocaleResolver(func(*http.Request) string { return "ar" }); err != nil {
+		t.Fatal(err)
+	}
+	if err := app.Register(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(Locale(r.Context())))
+	}); err != nil {
+		t.Fatal(err)
+	}
+	response := httptest.NewRecorder()
+	app.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/", nil))
+	if response.Body.String() != "ar" || response.Header().Get("Vary") != "*" {
+		t.Fatalf("body = %q, headers = %+v", response.Body.String(), response.Header())
 	}
 }

@@ -3,25 +3,23 @@ package i18n
 import (
 	"context"
 	"fmt"
-	"strings"
-
-	"golang.org/x/text/currency"
-	"golang.org/x/text/feature/plural"
 	"golang.org/x/text/language"
-	"golang.org/x/text/message"
 )
 
 type CatalogLocalizer struct {
 	defaultLocale string
 	catalogs      map[string]LocaleCatalog
 	tags          map[string]language.Tag
+	fallbacks     map[string][]string
 }
 
 func NewCatalogLocalizer(config Config) (*CatalogLocalizer, error) {
+	config = CloneConfig(config)
 	localizer := &CatalogLocalizer{
 		defaultLocale: config.DefaultLocale,
 		catalogs:      make(map[string]LocaleCatalog, len(config.Locales)),
 		tags:          make(map[string]language.Tag, len(config.Locales)),
+		fallbacks:     make(map[string][]string, len(config.Fallbacks)),
 	}
 	for _, catalog := range config.Locales {
 		tag, err := language.Parse(catalog.Locale)
@@ -29,6 +27,9 @@ func NewCatalogLocalizer(config Config) (*CatalogLocalizer, error) {
 			return nil, fmt.Errorf("locale %q: %w", catalog.Locale, err)
 		}
 		locale := tag.String()
+		if _, exists := localizer.catalogs[locale]; exists {
+			return nil, fmt.Errorf("duplicate locale %q", locale)
+		}
 		localizer.catalogs[locale] = catalog
 		localizer.tags[locale] = tag
 	}
@@ -40,21 +41,38 @@ func NewCatalogLocalizer(config Config) (*CatalogLocalizer, error) {
 	if _, exists := localizer.catalogs[localizer.defaultLocale]; !exists {
 		return nil, fmt.Errorf("default locale %q has no catalog", localizer.defaultLocale)
 	}
+	for source, targets := range config.Fallbacks {
+		sourceTag, err := language.Parse(source)
+		if err != nil {
+			return nil, fmt.Errorf("fallback source %q: %w", source, err)
+		}
+		canonicalSource := sourceTag.String()
+		if _, exists := localizer.catalogs[canonicalSource]; !exists {
+			return nil, fmt.Errorf("fallback source %q has no catalog", canonicalSource)
+		}
+		for _, target := range targets {
+			targetTag, err := language.Parse(target)
+			if err != nil {
+				return nil, fmt.Errorf("fallback target %q: %w", target, err)
+			}
+			canonicalTarget := targetTag.String()
+			if _, exists := localizer.catalogs[canonicalTarget]; !exists {
+				return nil, fmt.Errorf("fallback target %q has no catalog", canonicalTarget)
+			}
+			localizer.fallbacks[canonicalSource] = append(localizer.fallbacks[canonicalSource], canonicalTarget)
+		}
+	}
+	if err := localizer.validateFallbacks(); err != nil {
+		return nil, err
+	}
 	return localizer, nil
 }
 
 func (l *CatalogLocalizer) Localize(_ context.Context, locale, key string, arguments []Argument) (string, error) {
-	catalog, exists := l.catalogs[locale]
-	if !exists {
-		catalog = l.catalogs[l.defaultLocale]
-		locale = l.defaultLocale
+	if tag, err := language.Parse(locale); err == nil {
+		locale = tag.String()
 	}
-	entry, exists := catalog.Messages[key]
-	if !exists && locale != l.defaultLocale {
-		catalog = l.catalogs[l.defaultLocale]
-		entry, exists = catalog.Messages[key]
-		locale = l.defaultLocale
-	}
+	entry, locale, exists := l.findMessage(locale, key)
 	if !exists {
 		return "", fmt.Errorf("message %q is not defined", key)
 	}
@@ -66,141 +84,57 @@ func (l *CatalogLocalizer) Localize(_ context.Context, locale, key string, argum
 	return renderValue(entry.Value, entry.Arguments, values, tag)
 }
 
-func renderValue(value Value, formats map[string]ArgumentFormat, arguments map[string]any, tag language.Tag) (string, error) {
-	if value.Text != nil {
-		return interpolate(*value.Text, formats, arguments, tag)
+func (l *CatalogLocalizer) findMessage(locale, key string) (Message, string, bool) {
+	visited := map[string]bool{}
+	var find func(string) (Message, string, bool)
+	find = func(candidate string) (Message, string, bool) {
+		if visited[candidate] {
+			return Message{}, "", false
+		}
+		visited[candidate] = true
+		if catalog, exists := l.catalogs[candidate]; exists {
+			if message, exists := catalog.Messages[key]; exists {
+				return message, candidate, true
+			}
+		}
+		for _, fallback := range l.fallbacks[candidate] {
+			if message, matched, exists := find(fallback); exists {
+				return message, matched, true
+			}
+		}
+		return Message{}, "", false
 	}
-	if value.Selector == nil {
-		return "", fmt.Errorf("message value is empty")
+	if message, matched, exists := find(locale); exists {
+		return message, matched, true
 	}
-	raw, exists := arguments[value.Selector.Argument]
-	if !exists {
-		return "", fmt.Errorf("missing argument %q", value.Selector.Argument)
-	}
-	caseName, err := selectCase(value.Selector, raw, tag)
-	if err != nil {
-		return "", err
-	}
-	selected, exists := value.Selector.Cases[caseName]
-	if !exists {
-		selected = value.Selector.Cases["other"]
-	}
-	return renderValue(selected, formats, arguments, tag)
+	return find(l.defaultLocale)
 }
 
-func selectCase(selector *Selector, value any, tag language.Tag) (string, error) {
-	if selector.Kind == "select" {
-		return fmt.Sprint(value), nil
-	}
-	number, ok := integer(value)
-	if !ok {
-		return "", fmt.Errorf("plural argument %q must be an integer", selector.Argument)
-	}
-	rules := plural.Cardinal
-	if selector.Kind == "ordinal" {
-		rules = plural.Ordinal
-	}
-	form := rules.MatchPlural(tag, number, 0, 0, 0, 0)
-	switch form {
-	case plural.Zero:
-		return "zero", nil
-	case plural.One:
-		return "one", nil
-	case plural.Two:
-		return "two", nil
-	case plural.Few:
-		return "few", nil
-	case plural.Many:
-		return "many", nil
-	default:
-		return "other", nil
-	}
-}
-
-func interpolate(text string, formats map[string]ArgumentFormat, arguments map[string]any, tag language.Tag) (string, error) {
-	var output strings.Builder
-	for {
-		start := strings.IndexByte(text, '{')
-		if start < 0 {
-			output.WriteString(text)
-			return output.String(), nil
+func (l *CatalogLocalizer) validateFallbacks() error {
+	visiting := map[string]bool{}
+	visited := map[string]bool{}
+	var visit func(string) error
+	visit = func(locale string) error {
+		if visiting[locale] {
+			return fmt.Errorf("fallback cycle includes locale %q", locale)
 		}
-		output.WriteString(text[:start])
-		end := strings.IndexByte(text[start+1:], '}')
-		if end < 0 {
-			return "", fmt.Errorf("unclosed placeholder")
+		if visited[locale] {
+			return nil
 		}
-		name := text[start+1 : start+1+end]
-		value, exists := arguments[name]
-		if !exists {
-			return "", fmt.Errorf("missing argument %q", name)
+		visiting[locale] = true
+		for _, target := range l.fallbacks[locale] {
+			if err := visit(target); err != nil {
+				return err
+			}
 		}
-		formatted, err := formatValue(value, formats[name], arguments, tag)
-		if err != nil {
-			return "", fmt.Errorf("argument %q: %w", name, err)
-		}
-		output.WriteString(formatted)
-		text = text[start+end+2:]
+		visiting[locale] = false
+		visited[locale] = true
+		return nil
 	}
-}
-
-func formatValue(value any, format ArgumentFormat, arguments map[string]any, tag language.Tag) (string, error) {
-	printer := message.NewPrinter(tag)
-	switch format.Format {
-	case "number", "integer", "":
-		return printer.Sprint(value), nil
-	case "percent":
-		number, ok := decimal(value)
-		if !ok {
-			return "", fmt.Errorf("percent must be numeric")
+	for locale := range l.fallbacks {
+		if err := visit(locale); err != nil {
+			return err
 		}
-		return printer.Sprintf("%.2f%%", number*100), nil
-	case "currency":
-		code, ok := arguments[format.CurrencyArgument].(string)
-		if !ok {
-			return "", fmt.Errorf("currency argument %q must be an ISO 4217 string", format.CurrencyArgument)
-		}
-		unit, err := currency.ParseISO(code)
-		if err != nil {
-			return "", err
-		}
-		return printer.Sprint(currency.Symbol(unit.Amount(value))), nil
-	default:
-		return fmt.Sprint(value), nil
 	}
-}
-
-func integer(value any) (int, bool) {
-	switch number := value.(type) {
-	case int:
-		return number, true
-	case int64:
-		return int(number), true
-	case int32:
-		return int(number), true
-	case uint:
-		return int(number), true
-	case uint64:
-		return int(number), true
-	default:
-		return 0, false
-	}
-}
-
-func decimal(value any) (float64, bool) {
-	switch number := value.(type) {
-	case float64:
-		return number, true
-	case float32:
-		return float64(number), true
-	default:
-		integer, ok := integer(value)
-		return float64(integer), ok
-	}
-}
-
-func MatchSupported(matcher language.Matcher, preferred []string) string {
-	tag, _ := language.MatchStrings(matcher, preferred...)
-	base, _ := tag.Base()
-	return base.String()
+	return nil
 }

@@ -1,12 +1,7 @@
 package transpiler
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"errors"
 	"fmt"
-	"log/slog"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -91,6 +86,16 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	gen.Module = module
 	gen.RootRel = relToRoot(".", root)
 	gen.Pkg = sanitizePkgName(filepath.Base(root))
+	var catalogs transpileri18n.Set
+	var generatedI18n string
+	if settings != nil && settings.I18n.Enabled {
+		catalogs, err = transpileri18n.Load(filepath.Join(root, "locales"), settings.I18n.Locales, settings.I18n.DefaultLocale)
+		if err != nil {
+			return nil, genStats{}, fmt.Errorf("i18n catalogs: %w", err)
+		}
+		gen.MessageArguments = transpileri18n.ArgumentKinds(catalogs)
+		generatedI18n = transpileri18n.GoConfig(catalogs, settings.I18n.Detection, settings.I18n.URLStrategy, settings.I18n.Domains, settings.I18n.Fallbacks)
+	}
 
 	layouts, err := discoverLayouts(root)
 	if err != nil {
@@ -161,20 +166,16 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
 	}
 
-	var generatedI18n string
 	if settings != nil && settings.I18n.Enabled {
-		catalogs, err := transpileri18n.Load(filepath.Join(root, "locales"), settings.I18n.Locales, settings.I18n.DefaultLocale)
-		if err != nil {
-			return nil, genStats{}, fmt.Errorf("i18n catalogs: %w", err)
-		}
-		uses := make(map[string][]string, len(gen.MessageUses))
-		for key, use := range gen.MessageUses {
-			uses[key] = use.Arguments
+		uses := make([]transpileri18n.Use, 0, len(gen.MessageUses))
+		for _, use := range gen.MessageUses {
+			uses = append(uses, transpileri18n.Use{Key: use.Key, Arguments: use.Arguments})
 		}
 		if err := transpileri18n.ValidateUses(catalogs, uses); err != nil {
 			return nil, genStats{}, fmt.Errorf("i18n templates: %w", err)
 		}
-		generatedI18n = transpileri18n.GoConfig(catalogs, settings.I18n.Detection)
+	} else if len(gen.MessageUses) > 0 {
+		return nil, genStats{}, fmt.Errorf("i18n templates: enable i18n in %s before using message expressions", configFileName)
 	}
 
 	if runtime := luainput.BundleFeatures(gen.Lua); runtime != "" {
@@ -258,47 +259,4 @@ func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, 
 	}
 	b.WriteString("\treturn nil\n}\n")
 	return b.String()
-}
-
-func modulePath() string {
-	data, err := os.ReadFile("go.mod")
-	if err != nil {
-		return ""
-	}
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if rest, ok := strings.CutPrefix(line, "module "); ok {
-			return strings.TrimSpace(rest)
-		}
-	}
-	return ""
-}
-
-func loadSettings(root string) (*Settings, error) {
-	settingsPath := filepath.Join(root, configFileName)
-	s, err := LoadConfig(settingsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		if errors.Is(err, ErrInvalidI18n) {
-			return nil, fmt.Errorf("%s is invalid: %w", settingsPath, err)
-		}
-		slog.Warn("dreego: "+configFileName+" is invalid; using defaults", "path", settingsPath, "error", err)
-		return nil, nil
-	}
-	return s, nil
-}
-
-func isUpToDate(path, content string) bool {
-	existing, err := os.ReadFile(path)
-	if err != nil {
-		return false
-	}
-	return string(existing) == content
-}
-
-func hashOf(data []byte) string {
-	h := sha256.Sum256(data)
-	return hex.EncodeToString(h[:])[:12]
 }

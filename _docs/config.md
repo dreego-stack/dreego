@@ -14,9 +14,27 @@ The configuration file is located at `dreego.config.json` in the project root.
   ],
   "rewrites": [
     { "from": "/api/v1/*", "to": "/api/v2/*" }
-  ]
+  ],
+  "i18n": {
+    "enabled": true,
+    "defaultLocale": "de",
+    "locales": ["de", "en"],
+    "urlStrategy": "none",
+    "detection": ["cookie", "browser", "custom", "default"]
+  }
 }
 ```
+
+## i18n
+
+The first-party i18n configuration selects canonical BCP 47 locales, resolver
+order, fallback chains, and optional localized URL handling. `none` preserves
+ordinary routes; `prefix` recognizes a leading locale segment; `domain` maps
+each locale to a hostname through `domains`.
+
+GeoIP is intentionally not a built-in detector. Register it as a custom locale
+resolver when needed. See [Internationalization](i18n.md) for catalogs,
+template expressions, selection handlers, cache behavior, and formatting.
 
 ## logging
 

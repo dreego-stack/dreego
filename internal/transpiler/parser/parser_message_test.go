@@ -66,3 +66,16 @@ func TestParseMessageExpressionRejectsInvalidSyntax(t *testing.T) {
 		})
 	}
 }
+
+func TestParseMessageExpressionAllowsGoExpressionsWithSpaces(t *testing.T) {
+	key, arguments, err := ParseMessageExpression(`home.greeting name=fmt.Sprintf("%s %s", user.First, user.Last) count=len(items)`, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != "home.greeting" || len(arguments) != 2 {
+		t.Fatalf("key = %q, arguments = %+v", key, arguments)
+	}
+	if arguments[0].Expression != `fmt.Sprintf("%s %s", user.First, user.Last)` {
+		t.Fatalf("expression = %q", arguments[0].Expression)
+	}
+}

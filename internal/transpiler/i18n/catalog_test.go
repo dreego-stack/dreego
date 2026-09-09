@@ -53,13 +53,16 @@ func TestLoadCatalogsRejectsInvalidData(t *testing.T) {
 		want    string
 	}{
 		{"unknown field", `{"home.title":{"text":"Hi","html":true}}`, "unknown field"},
+		{"duplicate JSON key", `{"home.title":"Hi","home.title":"Hello"}`, `duplicate JSON key "home.title"`},
 		{"invalid key", `{"home title":"Hi"}`, "invalid message key"},
 		{"missing other", `{"items":{"plural":{"argument":"count","cases":{"one":"One"}}}}`, `requires an "other" case`},
+		{"invalid plural case", `{"items":{"plural":{"argument":"count","cases":{"others":"Items","other":"Items"}}}}`, `unsupported plural case "others"`},
 		{"mixed variants", `{"items":{"text":"Items","plural":{"argument":"count","cases":{"other":"Items"}}}}`, "exactly one of text, plural, or select"},
 		{"unknown format", `{"price":{"text":"{amount}","arguments":{"amount":{"format":"money"}}}}`, `unsupported format "money"`},
 		{"missing currency argument", `{"price":{"text":"{amount}","arguments":{"amount":{"format":"currency"}}}}`, "currencyArgument is required"},
 		{"undeclared currency argument", `{"price":{"text":"{amount}","arguments":{"amount":{"format":"currency","currencyArgument":"currency"}}}}`, `currency argument "currency" is not defined`},
 		{"undeclared placeholder", `{"hello":{"text":"Hello, {name}","arguments":{}}}`, `placeholder "name" has no argument definition`},
+		{"unclosed placeholder", `{"hello":"Hello, {name"}`, "unclosed placeholder"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -80,6 +83,33 @@ func TestLoadCatalogsRequiresMatchingArgumentContracts(t *testing.T) {
 	_, err := Load(filepath.Join(root, "locales"), []string{"de", "en"}, "de")
 	if err == nil || !strings.Contains(err.Error(), `message "hello" in locale "en" has arguments [person], want [name]`) {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadCatalogsRequiresMatchingFormatContracts(t *testing.T) {
+	root := t.TempDir()
+	writeCatalog(t, root, "de", "messages.json", `{"value":{"text":"{value}","arguments":{"value":{"format":"number"}}}}`)
+	writeCatalog(t, root, "en", "messages.json", `{"value":{"text":"{value}","arguments":{"value":{"format":"date"}}}}`)
+	_, err := Load(filepath.Join(root, "locales"), []string{"de", "en"}, "de")
+	if err == nil || !strings.Contains(err.Error(), "incompatible format contract") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadCatalogsGeneratesPseudoLocales(t *testing.T) {
+	root := t.TempDir()
+	writeCatalog(t, root, "de", "messages.json", `{"hello":"Hallo, {name}!"}`)
+	set, err := Load(filepath.Join(root, "locales"), []string{"de", "en-XA", "ar-XB"}, "de")
+	if err != nil {
+		t.Fatal(err)
+	}
+	accented := *set.Locales["en-XA"].Messages["hello"].Value.Text
+	if !strings.Contains(accented, "á") || !strings.Contains(accented, "{name}") {
+		t.Fatalf("accented pseudo message = %q", accented)
+	}
+	bidi := *set.Locales["ar-XB"].Messages["hello"].Value.Text
+	if !strings.HasPrefix(bidi, "\u202e") || !strings.HasSuffix(bidi, "\u202c") {
+		t.Fatalf("bidi pseudo message = %q", bidi)
 	}
 }
 

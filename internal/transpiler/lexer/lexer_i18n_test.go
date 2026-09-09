@@ -55,3 +55,16 @@ func TestLexUnclosedMessageExpression(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestLexMessageExpressionWithAdjacentIndexBracket(t *testing.T) {
+	toks, err := Lex(`<body>[[ table.cell value=rows[index]]] </body>`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, token := range toks {
+		if token.Type == tokens.TokenMessage && token.Value == "table.cell value=rows[index]" {
+			return
+		}
+	}
+	t.Fatalf("message token not found: %+v", toks)
+}

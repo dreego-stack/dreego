@@ -3,8 +3,6 @@ package core
 import (
 	"context"
 	"testing"
-
-	corei18n "github.com/dreego-stack/dreego/core/internal/i18n"
 )
 
 func TestMessageUsesRequestLocalizer(t *testing.T) {
@@ -14,7 +12,7 @@ func TestMessageUsesRequestLocalizer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx := corei18n.WithContext(context.Background(), localizer, "en")
+	ctx := WithLocale(context.Background(), localizer, "en")
 	if got := Message(ctx, "hello", MessageArg{Name: "name", Value: "Ada"}); got != "Hello, Ada!" {
 		t.Fatalf("Message = %q", got)
 	}

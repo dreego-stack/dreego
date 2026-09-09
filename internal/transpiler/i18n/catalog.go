@@ -41,6 +41,7 @@ type Argument struct {
 	Format           string `json:"format,omitempty"`
 	CurrencyArgument string `json:"currencyArgument,omitempty"`
 	TimeZoneArgument string `json:"timeZoneArgument,omitempty"`
+	Layout           string `json:"layout,omitempty"`
 }
 
 type messageJSON struct {
@@ -70,11 +71,23 @@ func (v *Value) UnmarshalJSON(data []byte) error {
 func Load(root string, locales []string, defaultLocale string) (Set, error) {
 	set := Set{DefaultLocale: defaultLocale, Locales: make(map[string]Catalog, len(locales))}
 	for _, locale := range locales {
+		if isPseudoLocale(locale) {
+			continue
+		}
 		catalog, err := loadCatalog(filepath.Join(root, locale), locale)
 		if err != nil {
 			return Set{}, err
 		}
 		set.Locales[locale] = catalog
+	}
+	defaultCatalog, exists := set.Locales[defaultLocale]
+	if !exists {
+		return Set{}, fmt.Errorf("default locale %q must have source catalogs", defaultLocale)
+	}
+	for _, locale := range locales {
+		if isPseudoLocale(locale) {
+			set.Locales[locale] = pseudoCatalog(defaultCatalog, locale)
+		}
 	}
 	if err := validateCoverage(set); err != nil {
 		return Set{}, err
@@ -112,6 +125,9 @@ func loadFile(path string) (map[string]Message, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := validateJSON(data); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
 	var raw map[string]json.RawMessage
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	if err := decoder.Decode(&raw); err != nil {
@@ -141,7 +157,9 @@ func decodeMessage(raw json.RawMessage) (Message, error) {
 	if err := json.Unmarshal(raw, &shorthand); err == nil {
 		value := Value{Text: &shorthand}
 		message := Message{Value: value, Arguments: map[string]Argument{}}
-		inferArguments(value, message.Arguments)
+		if err := inferArguments(value, message.Arguments); err != nil {
+			return Message{}, err
+		}
 		return message, nil
 	}
 	var source messageJSON
@@ -156,7 +174,16 @@ func decodeMessage(raw json.RawMessage) (Message, error) {
 	}
 	if message.Arguments == nil {
 		message.Arguments = map[string]Argument{}
-		inferArguments(message.Value, message.Arguments)
+		if err := inferArguments(message.Value, message.Arguments); err != nil {
+			return Message{}, err
+		}
+	}
+	inferArgumentFormats(message.Value, message.Arguments)
+	for name, argument := range message.Arguments {
+		if argument.Format == "" {
+			argument.Format = "string"
+			message.Arguments[name] = argument
+		}
 	}
 	if err := validateMessage(message); err != nil {
 		return Message{}, err

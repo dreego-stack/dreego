@@ -3,38 +3,42 @@ package codegen
 import "github.com/dreego-stack/dreego/internal/transpiler/ir"
 
 type State struct {
-	Defs        map[string]*ir.ComponentDef
-	Src         string
-	Pkg         string
-	Module      string
-	RootRel     string
-	CompPkgs    map[string]string
-	CompPaths   map[string]string
-	Imports     map[string]map[string]string
-	Lua         map[string]bool
-	MessageUses map[string]MessageUse
+	Defs             map[string]*ir.ComponentDef
+	Src              string
+	Pkg              string
+	Module           string
+	RootRel          string
+	CompPkgs         map[string]string
+	CompPaths        map[string]string
+	Imports          map[string]map[string]string
+	Lua              map[string]bool
+	MessageUses      []MessageUse
+	MessageArguments map[string]map[string]string
 }
 
 type MessageUse struct {
+	Key       string
 	Arguments []string
 }
 
 func NewState() *State {
 	return &State{
-		Defs:        map[string]*ir.ComponentDef{},
-		CompPkgs:    map[string]string{},
-		CompPaths:   map[string]string{},
-		Imports:     map[string]map[string]string{},
-		Lua:         map[string]bool{},
-		MessageUses: map[string]MessageUse{},
+		Defs:             map[string]*ir.ComponentDef{},
+		CompPkgs:         map[string]string{},
+		CompPaths:        map[string]string{},
+		Imports:          map[string]map[string]string{},
+		Lua:              map[string]bool{},
+		MessageUses:      nil,
+		MessageArguments: map[string]map[string]string{},
 	}
 }
 
+func (g *State) MessageArgumentKind(key, name string) string {
+	return g.MessageArguments[key][name]
+}
+
 func (g *State) RegisterMessageUse(key string, arguments []string) {
-	if _, exists := g.MessageUses[key]; exists {
-		return
-	}
-	g.MessageUses[key] = MessageUse{Arguments: append([]string(nil), arguments...)}
+	g.MessageUses = append(g.MessageUses, MessageUse{Key: key, Arguments: append([]string(nil), arguments...)})
 }
 
 func (g *State) AddLuaFeatures(features []string) {

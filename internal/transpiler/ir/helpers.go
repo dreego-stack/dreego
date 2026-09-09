@@ -76,6 +76,46 @@ func FindExprEnd(s string) int {
 	return -1
 }
 
+func FindMessageEnd(source string) int {
+	depth := 0
+	var quote byte
+	escaped := false
+	for index := 0; index < len(source); index++ {
+		char := source[index]
+		if quote != 0 {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if char == '\\' && quote != '`' {
+				escaped = true
+				continue
+			}
+			if char == quote {
+				quote = 0
+			}
+			continue
+		}
+		switch char {
+		case '\'', '"', '`':
+			quote = char
+		case '(', '[', '{':
+			depth++
+		case ')', '}':
+			if depth > 0 {
+				depth--
+			}
+		case ']':
+			if depth > 0 {
+				depth--
+			} else if index+1 < len(source) && source[index+1] == ']' {
+				return index
+			}
+		}
+	}
+	return -1
+}
+
 func ParseExpression(raw string) (expr string, filters []string) {
 	if !strings.Contains(raw, "|") {
 		return raw, nil

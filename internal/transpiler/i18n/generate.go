@@ -6,32 +6,51 @@ import (
 	"strings"
 )
 
-func ValidateUses(set Set, uses map[string][]string) error {
-	defaultCatalog := set.Locales[set.DefaultLocale]
-	keys := make([]string, 0, len(uses))
-	for key := range uses {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
-		message, exists := defaultCatalog.Messages[key]
-		if !exists {
-			return fmt.Errorf("message %q is not defined in default locale %q", key, set.DefaultLocale)
+type Use struct {
+	Key       string
+	Arguments []string
+}
+
+func ArgumentKinds(set Set) map[string]map[string]string {
+	result := make(map[string]map[string]string)
+	for key, message := range set.Locales[set.DefaultLocale].Messages {
+		arguments := make(map[string]string, len(message.Arguments))
+		for name, argument := range message.Arguments {
+			switch argument.Format {
+			case "number", "integer", "percent", "currency":
+				arguments[name] = "number"
+			case "date", "time", "datetime":
+				arguments[name] = "time"
+			default:
+				arguments[name] = "string"
+			}
 		}
-		got := append([]string(nil), uses[key]...)
+		result[key] = arguments
+	}
+	return result
+}
+
+func ValidateUses(set Set, uses []Use) error {
+	defaultCatalog := set.Locales[set.DefaultLocale]
+	for _, use := range uses {
+		message, exists := defaultCatalog.Messages[use.Key]
+		if !exists {
+			return fmt.Errorf("message %q is not defined in default locale %q", use.Key, set.DefaultLocale)
+		}
+		got := append([]string(nil), use.Arguments...)
 		sort.Strings(got)
 		want := argumentNames(message.Arguments)
 		if strings.Join(got, "\x00") != strings.Join(want, "\x00") {
-			return fmt.Errorf("message %q uses arguments %v, want %v", key, got, want)
+			return fmt.Errorf("message %q uses arguments %v, want %v", use.Key, got, want)
 		}
 	}
 	return nil
 }
 
-func GoConfig(set Set, detection []string) string {
+func GoConfig(set Set, detection []string, urlStrategy string, domains map[string]string, fallbacks map[string][]string) string {
 	var output strings.Builder
 	output.WriteString("dreego.I18nConfig{DefaultLocale: ")
-	output.WriteString(fmt.Sprintf("%q, Detection: %#v, Locales: []dreego.LocaleCatalog{", set.DefaultLocale, detection))
+	output.WriteString(fmt.Sprintf("%q, Detection: %#v, URLStrategy: %q, Domains: %#v, Fallbacks: %#v, Locales: []dreego.LocaleCatalog{", set.DefaultLocale, detection, urlStrategy, domains, fallbacks))
 	locales := make([]string, 0, len(set.Locales))
 	for locale := range set.Locales {
 		locales = append(locales, locale)
@@ -62,7 +81,7 @@ func goMessage(message Message) string {
 		output.WriteString(", Arguments: map[string]dreego.MessageArgumentFormat{")
 		for _, name := range argumentNames(message.Arguments) {
 			argument := message.Arguments[name]
-			output.WriteString(fmt.Sprintf("%q: {Format: %q, CurrencyArgument: %q, TimeZoneArgument: %q},", name, argument.Format, argument.CurrencyArgument, argument.TimeZoneArgument))
+			output.WriteString(fmt.Sprintf("%q: {Format: %q, CurrencyArgument: %q, TimeZoneArgument: %q, Layout: %q},", name, argument.Format, argument.CurrencyArgument, argument.TimeZoneArgument, argument.Layout))
 		}
 		output.WriteString("}")
 	}
