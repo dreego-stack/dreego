@@ -1,4 +1,8 @@
 
+## v0.5.5 - 2026-09-09
+
+- Feat: bundle selected declarative JavaScript modules from installed plugins during generation
+
 ## v0.5.4 - 2026-09-08
 
 - Test: harden render-context, session, client-language, and Browser Lua compatibility contracts.
