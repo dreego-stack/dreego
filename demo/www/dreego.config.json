@@ -1,5 +1,12 @@
 {
     "logging": {"enabled": true},
     "redirects": [],
-    "rewrites": []
+    "rewrites": [],
+    "i18n": {
+        "enabled": true,
+        "defaultLocale": "en",
+        "locales": ["en", "de"],
+        "urlStrategy": "none",
+        "detection": ["cookie", "browser", "default"]
+    }
 }

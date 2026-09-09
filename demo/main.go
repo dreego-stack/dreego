@@ -28,6 +28,9 @@ func run() error {
 	if err := www.Register(public); err != nil {
 		return err
 	}
+	if err := registerLocaleSelection(public); err != nil {
+		return err
+	}
 
 	product := dreego.New()
 	if err := configure(product); err != nil {
@@ -59,6 +62,12 @@ func run() error {
 		addr = ":" + port
 	}
 	return http.ListenAndServe(addr, handler)
+}
+
+func registerLocaleSelection(app *dreego.App) error {
+	return app.Register(http.MethodPost, "/locale", dreego.LocaleSelectionHandler(dreego.LocaleSelectionOptions{
+		FallbackPath: "/",
+	}))
 }
 
 func configure(app *dreego.App) error {

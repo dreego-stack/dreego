@@ -1,0 +1,7 @@
+<body>
+    <!doctype html>
+    <html>
+        <head>{#head}</head>
+        <body class="m-0 bg-[#f7f7f3] text-slate-950 antialiased">{#slot}</body>
+    </html>
+</body>
