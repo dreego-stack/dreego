@@ -1,4 +1,8 @@
 
+## v0.6.2 - 2026-09-09
+
+- Fix: use the canonical directory route filename for the Lua demo home page.
+
 ## v0.6.1 - 2026-09-09
 
 - Breaking: map only `+page.dreego` and `index.dreego` to their directory URL; all other route filenames now become literal URL segments and default to GET.
