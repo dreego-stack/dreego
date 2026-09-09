@@ -31,10 +31,11 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 		t.Fatalf("ProjectDir: %v", err)
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire github.com/dreego-stack/dreego v0.0.0\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("ProjectDir: write go.mod: %v", err)
 	}
+	copyModuleSum(t, dir, repoRoot)
 	mainGo := "package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := www.Register(app); err != nil { panic(err) } }\n"
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("ProjectDir: write main.go: %v", err)
@@ -42,6 +43,17 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 	writeFiles(t, dir, files)
 	ensureConfig(t, dir, files)
 	return dir
+}
+
+func copyModuleSum(t *testing.T, dir, repoRoot string) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(repoRoot, "go.sum"))
+	if err != nil {
+		t.Fatalf("read repository go.sum: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "go.sum"), data, 0o644); err != nil {
+		t.Fatalf("write test go.sum: %v", err)
+	}
 }
 
 // CLIBin builds the dreego CLI once per test binary and returns its path. It

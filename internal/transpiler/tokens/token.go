@@ -10,6 +10,7 @@ const (
 	TokenTagClose
 	TokenText
 	TokenExpression
+	TokenMessage
 	TokenIfOpen
 	TokenIfClose
 	TokenElse
@@ -49,6 +50,8 @@ func (t TokenType) String() string {
 		return "Text"
 	case TokenExpression:
 		return "Expression"
+	case TokenMessage:
+		return "Message"
 	case TokenIfOpen:
 		return "IfOpen"
 	case TokenIfClose:

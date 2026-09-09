@@ -14,9 +14,32 @@ The configuration file is located at `dreego.config.json` in the project root.
   ],
   "rewrites": [
     { "from": "/api/v1/*", "to": "/api/v2/*" }
-  ]
+  ],
+  "i18n": {
+    "enabled": true,
+    "defaultLocale": "de",
+    "locales": ["de", "en"],
+    "urlStrategy": "none",
+    "detection": ["cookie", "browser", "custom", "default"]
+  },
+  "plugins": {
+    "github.com/dreego-stack/plugin-auth": {
+      "client": ["password", "passkeys"]
+    }
+  }
 }
 ```
+
+## i18n
+
+The first-party i18n configuration selects canonical BCP 47 locales, resolver
+order, fallback chains, and optional localized URL handling. `none` preserves
+ordinary routes; `prefix` recognizes a leading locale segment; `domain` maps
+each locale to a hostname through `domains`.
+
+GeoIP is intentionally not a built-in detector. Register it as a custom locale
+resolver when needed. See [Internationalization](i18n.md) for catalogs,
+template expressions, selection handlers, cache behavior, and formatting.
 
 ## logging
 
@@ -75,3 +98,29 @@ Rewrites are applied just before routing, after user middleware registered via
 rewritten one — match middleware patterns against the source path (for example
 match `/api/*` even when `/api/*` rewrites to `/v2/*`). Access logs record the
 pre-rewrite path.
+
+## plugins
+
+The `plugins` object selects optional browser modules declared by installed
+Dreego plugins. Its keys are complete `github.com/dreego-stack/plugin-*`
+module paths. Each plugin must also be present in the application's `go.mod`.
+
+```json
+{
+  "plugins": {
+    "github.com/dreego-stack/plugin-auth": {
+      "client": ["password", "passkeys"]
+    }
+  }
+}
+```
+
+Dreego reads each plugin's `dreego-plugin.json`, includes required modules and
+the transitive dependencies of the selected module IDs, and registers one
+deterministic JavaScript bundle at the manifest's declared URL. Unselected
+modules are not included. This processing is declarative and never executes a
+plugin command.
+
+Only `.js` files inside the plugin module are accepted. Unknown IDs, duplicate
+IDs, dependency cycles, unsafe paths, route conflicts, files larger than 256
+KiB, and bundles larger than 1 MiB stop generation with an error.

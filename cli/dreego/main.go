@@ -34,6 +34,11 @@ func main() {
 		cmdDocs(os.Args[2:])
 	case "fmt":
 		cmdFmt(os.Args[2:])
+	case "i18n":
+		if err := cmdI18n(os.Args[2:], os.Stdout); err != nil {
+			fmt.Fprintf(os.Stderr, "i18n error: %v\n", err)
+			os.Exit(1)
+		}
 	case "tools":
 		if err := cmdTools(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "tools error: %v\n", err)
@@ -62,6 +67,7 @@ commands:
   init <path>            create a minimal dreego project from blueprint
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
+  i18n extract           emit deterministic translation-management JSON
   tools install typescript  install the pinned native TypeScript compiler
   build [--target <os/arch>] [--yes]  generate + go build → build/bin/<name>
   run [-d] build + start server (dev only)
@@ -84,6 +90,7 @@ examples:
   dreego new myapp            create project with landing page
   dreego generate             transpile changed .dreego files
   dreego generate --force     force full regeneration
+  dreego i18n extract         export source messages for translation tooling
   dreego build                generate + build binary (local platform)
   dreego build --target linux/amd64  cross-compile for Docker
   dreego build --yes         generate + build, auto-approve plugin hooks

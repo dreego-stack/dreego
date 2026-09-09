@@ -2,17 +2,16 @@ package lua
 
 import (
 	"fmt"
-	"sort"
-	"strconv"
 	"strings"
 )
 
 type emitter struct {
 	features map[string]bool
+	scopes   []map[string]bool
 }
 
 func newEmitter() *emitter {
-	return &emitter{features: map[string]bool{}}
+	return &emitter{features: map[string]bool{}, scopes: []map[string]bool{{}}}
 }
 
 func (e *emitter) program(value program) (string, error) {
@@ -35,9 +34,28 @@ func (e *emitter) statement(value statement, depth int) (string, error) {
 	indent := strings.Repeat("  ", depth)
 	switch current := value.(type) {
 	case localStatement:
+		if current.recursive {
+			e.declare(current.name)
+		}
 		right, err := e.expression(current.value)
+		if !current.recursive {
+			e.declare(current.name)
+		}
 		return fmt.Sprintf("%slet %s = %s;\n", indent, jsIdentifier(current.name), right), err
 	case assignStatement:
+		if target, ok := current.target.(indexExpression); ok {
+			object, err := e.expression(target.object)
+			if err != nil {
+				return "", err
+			}
+			index, err := e.expression(target.index)
+			if err != nil {
+				return "", err
+			}
+			right, err := e.expression(current.value)
+			e.use("set")
+			return fmt.Sprintf("%sglobalThis.dreegoLua.set(%s, %s, %s);\n", indent, object, index, right), err
+		}
 		left, err := e.expression(current.target)
 		if err != nil {
 			return "", err
@@ -47,11 +65,63 @@ func (e *emitter) statement(value statement, depth int) (string, error) {
 	case expressionStatement:
 		expression, err := e.expression(current.value)
 		return fmt.Sprintf("%s%s;\n", indent, expression), err
+	case returnStatement:
+		if current.value == nil {
+			return indent + "return;\n", nil
+		}
+		value, err := e.expression(current.value)
+		return fmt.Sprintf("%sreturn %s;\n", indent, value), err
+	case breakStatement:
+		return indent + "break;\n", nil
+	case whileStatement:
+		return e.whileStatement(current, depth)
+	case numericForStatement:
+		return e.numericForStatement(current, depth)
 	case ifStatement:
 		return e.ifStatement(current, depth)
 	default:
 		return "", fmt.Errorf("unsupported Lua statement %T", value)
 	}
+}
+
+func (e *emitter) whileStatement(value whileStatement, depth int) (string, error) {
+	condition, err := e.expression(value.condition)
+	if err != nil {
+		return "", err
+	}
+	e.use("truthy")
+	indent := strings.Repeat("  ", depth)
+	e.pushScope()
+	body, err := e.statements(value.body, depth+1)
+	e.popScope()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%swhile (globalThis.dreegoLua.truthy(%s)) {\n%s%s}\n", indent, condition, body, indent), nil
+}
+
+func (e *emitter) numericForStatement(value numericForStatement, depth int) (string, error) {
+	initial, err := e.expression(value.initial)
+	if err != nil {
+		return "", err
+	}
+	limit, err := e.expression(value.limit)
+	if err != nil {
+		return "", err
+	}
+	step, err := e.expression(value.step)
+	if err != nil {
+		return "", err
+	}
+	e.use("numericFor")
+	e.pushScope(value.name)
+	body, err := e.statements(value.body, depth+1)
+	e.popScope()
+	if err != nil {
+		return "", err
+	}
+	indent := strings.Repeat("  ", depth)
+	return fmt.Sprintf("%sfor (let %s of globalThis.dreegoLua.numericFor(%s, %s, %s)) {\n%s%s}\n", indent, jsIdentifier(value.name), initial, limit, step, body, indent), nil
 }
 
 func (e *emitter) ifStatement(value ifStatement, depth int) (string, error) {
@@ -68,171 +138,47 @@ func (e *emitter) ifStatement(value ifStatement, depth int) (string, error) {
 		} else {
 			fmt.Fprintf(&out, "%s} else if (globalThis.dreegoLua.truthy(%s)) {\n", indent, condition)
 		}
+		e.pushScope()
 		body, err := e.statements(branch.body, depth+1)
 		if err != nil {
 			return "", err
 		}
 		out.WriteString(body)
+		e.popScope()
 	}
 	if len(value.otherwise) > 0 {
 		fmt.Fprintf(&out, "%s} else {\n", indent)
+		e.pushScope()
 		body, err := e.statements(value.otherwise, depth+1)
 		if err != nil {
 			return "", err
 		}
 		out.WriteString(body)
+		e.popScope()
 	}
 	fmt.Fprintf(&out, "%s}\n", indent)
 	return out.String(), nil
 }
 
-func (e *emitter) expression(value expression) (string, error) {
-	switch current := value.(type) {
-	case literalExpression:
-		return literal(current), nil
-	case nameExpression:
-		return jsIdentifier(current.name), nil
-	case memberExpression:
-		object, err := e.expression(current.object)
-		return object + "." + current.field, err
-	case callExpression:
-		return e.call(current)
-	case unaryExpression:
-		return e.unary(current)
-	case binaryExpression:
-		return e.binary(current)
-	case functionExpression:
-		params := make([]string, 0, len(current.params))
-		for _, param := range current.params {
-			params = append(params, jsIdentifier(param))
-		}
-		body, err := e.statements(current.body, 1)
-		if err != nil {
-			return "", err
-		}
-		return "(" + strings.Join(params, ", ") + ") => {\n" + body + "}", nil
-	default:
-		return "", fmt.Errorf("unsupported Lua expression %T", value)
-	}
-}
-
-func literal(value literalExpression) string {
-	switch value.kind {
-	case tokenString:
-		return strconv.Quote(value.value)
-	case tokenTrue:
-		return "true"
-	case tokenFalse:
-		return "false"
-	case tokenNil:
-		return "null"
-	default:
-		return value.value
-	}
-}
-
-func (e *emitter) call(value callExpression) (string, error) {
-	callee, err := e.expression(value.callee)
-	if err != nil {
-		return "", err
-	}
-	if name, ok := value.callee.(nameExpression); ok && name.name == "print" {
-		e.use("print")
-		callee = "globalThis.dreegoLua.print"
-	} else if name, ok := value.callee.(nameExpression); ok && forbiddenCalls[name.name] {
-		return "", fmt.Errorf("Lua browser MVP: %s is not available", name.name)
-	}
-	args := make([]string, 0, len(value.args))
-	for _, argument := range value.args {
-		code, err := e.expression(argument)
-		if err != nil {
-			return "", err
-		}
-		args = append(args, code)
-	}
-	return callee + "(" + strings.Join(args, ", ") + ")", nil
-}
-
-var forbiddenCalls = map[string]bool{
-	"collectgarbage": true,
-	"dofile":         true,
-	"load":           true,
-	"loadfile":       true,
-	"require":        true,
-}
-
-var reservedJavaScriptNames = map[string]bool{
-	"await": true, "break": true, "case": true, "catch": true, "class": true,
-	"const": true, "continue": true, "debugger": true, "default": true,
-	"delete": true, "do": true, "else": true, "export": true, "extends": true,
-	"finally": true, "for": true, "function": true, "if": true, "import": true,
-	"in": true, "instanceof": true, "let": true, "new": true, "return": true,
-	"static": true, "super": true, "switch": true, "this": true, "throw": true,
-	"try": true, "typeof": true, "var": true, "void": true, "while": true,
-	"with": true, "yield": true,
-}
-
-func jsIdentifier(name string) string {
-	if reservedJavaScriptNames[name] {
-		return "$lua_" + name
-	}
-	return name
-}
-
-func (e *emitter) unary(value unaryExpression) (string, error) {
-	right, err := e.expression(value.right)
-	if err != nil {
-		return "", err
-	}
-	if value.op == tokenNot {
-		e.use("truthy")
-		return "!globalThis.dreegoLua.truthy(" + right + ")", nil
-	}
-	e.use("neg")
-	return "globalThis.dreegoLua.neg(" + right + ")", nil
-}
-
-func (e *emitter) binary(value binaryExpression) (string, error) {
-	left, err := e.expression(value.left)
-	if err != nil {
-		return "", err
-	}
-	right, err := e.expression(value.right)
-	if err != nil {
-		return "", err
-	}
-	switch value.op {
-	case tokenAnd:
-		e.use("and")
-		return fmt.Sprintf("globalThis.dreegoLua.and(%s, () => %s)", left, right), nil
-	case tokenOr:
-		e.use("or")
-		return fmt.Sprintf("globalThis.dreegoLua.or(%s, () => %s)", left, right), nil
-	case tokenConcat:
-		e.use("concat")
-		return fmt.Sprintf("globalThis.dreegoLua.concat(%s, %s)", left, right), nil
-	case tokenPlus, tokenMinus, tokenStar, tokenSlash, tokenPercent:
-		feature := map[tokenKind]string{tokenPlus: "add", tokenMinus: "sub", tokenStar: "mul", tokenSlash: "div", tokenPercent: "mod"}[value.op]
-		e.use(feature)
-		return fmt.Sprintf("globalThis.dreegoLua.%s(%s, %s)", feature, left, right), nil
-	case tokenLess, tokenLessEqual, tokenGreater, tokenGreaterEqual:
-		feature := map[tokenKind]string{tokenLess: "lt", tokenLessEqual: "le", tokenGreater: "gt", tokenGreaterEqual: "ge"}[value.op]
-		e.use(feature)
-		return fmt.Sprintf("globalThis.dreegoLua.%s(%s, %s)", feature, left, right), nil
-	}
-	operator := map[tokenKind]string{
-		tokenEqual: "===", tokenNotEqual: "!==",
-	}[value.op]
-	return fmt.Sprintf("(%s %s %s)", left, operator, right), nil
-}
-
 func (e *emitter) use(feature string) { e.features[feature] = true }
 
-func (e *emitter) sortedFeatures() []string {
-	features := make([]string, 0, len(e.features))
-	for feature := range e.features {
-		features = append(features, feature)
+func (e *emitter) pushScope(names ...string) {
+	scope := map[string]bool{}
+	for _, name := range names {
+		scope[name] = true
 	}
-	sort.Strings(features)
-	return features
+	e.scopes = append(e.scopes, scope)
+}
+
+func (e *emitter) popScope() { e.scopes = e.scopes[:len(e.scopes)-1] }
+
+func (e *emitter) declare(name string) { e.scopes[len(e.scopes)-1][name] = true }
+
+func (e *emitter) isLocal(name string) bool {
+	for index := len(e.scopes) - 1; index >= 0; index-- {
+		if e.scopes[index][name] {
+			return true
+		}
+	}
+	return false
 }

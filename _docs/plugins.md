@@ -63,6 +63,30 @@ implementations demonstrate the same small contract. Assets and lifecycle hooks
 remain plugin-owned until real plugins prove that an App-level contract is
 necessary. Plugin contracts remain provisional until v1.
 
+## Client modules
+
+Plugins can declare modular browser JavaScript without using executable build
+hooks:
+
+```json
+{
+  "client": {
+    "format": "modules-v1",
+    "path": "/_dreego/plugin-auth.js",
+    "modules": [
+      {"id": "core", "path": "client/core.js", "required": true},
+      {"id": "password", "path": "client/password.js", "dependsOn": ["core"]},
+      {"id": "passkeys", "path": "client/passkeys.js", "dependsOn": ["core"]}
+    ]
+  }
+}
+```
+
+Applications select optional modules in `dreego.config.json`. Dreego resolves
+dependencies, reads only files inside the installed plugin module, and embeds
+the resulting bundle through `RegisterStatic`. JavaScript is accepted in v0.5;
+plugins that author TypeScript compile it before publishing.
+
 The small first-party language set—Markdown, TypeScript, and Lua—lives in the
 transpiler rather than plugin repositories. Compiler-backed processors may use
 pinned external tools after explicit approval. They do not execute through Go's

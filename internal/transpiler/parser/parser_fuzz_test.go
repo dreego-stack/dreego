@@ -25,6 +25,7 @@ func FuzzParser(f *testing.F) {
 		"<body><a class=\"nav {#if cond}active{/if}\">x</a></body>",
 		"<body>{#if a}{#else if b}{#else}c{/if}</body>",
 		"<body>{#each xs as x}{#if x}y{/if}{/each}</body>",
+		`<head><title>[[ page.title ]]</title></head><body>[[ cart.items count=len(items) ]]</body>`,
 	}
 	for _, s := range seeds {
 		f.Add(s)

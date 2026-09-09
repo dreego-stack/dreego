@@ -28,31 +28,9 @@ semantics, browser boundary, and exclusions are listed in [Browser Lua](lua.md).
 This avoids silently accepting code with different number, string, table,
 metatable, coroutine, module, or standard-library behavior.
 
-## Experimental languages
+## Language scope
 
-Client Go and Starlark are planned as isolated experiments after the stable Lua
-patch series:
-
-- client Go explores a browser-safe, statically typed Go subset that can share
-  Dreego-generated models and Wails bindings;
-- Starlark explores concise Python-like client authoring with a deliberately
-  small and deterministic language surface.
-
-Experimental means no compatibility promise. Syntax, processor identifiers,
-generated output, diagnostics, and the experiment itself may change or be
-removed before v1. An experiment must live in its own processor package, add no
-runtime behavior to applications that do not use it, and must not weaken the
-stable JavaScript, TypeScript, or Lua paths.
-
-Neither experiment may claim compatibility with full Go or Python. Before a
-processor is accepted, its proposal must define:
-
-1. the precise source-language subset and JavaScript target;
-2. type and runtime semantics at the DOM and Wails boundaries;
-3. generated asset and bundle budgets;
-4. diagnostics, source mapping, accessibility, and security behavior;
-5. removal criteria and evidence required for promotion.
-
-The final `lang` spelling and opt-in mechanism remain intentionally unreserved
-until each experiment has a tested vertical slice. This keeps removal cheap and
-prevents an exploratory name from becoming an accidental public API.
+JavaScript, TypeScript, and Browser Lua are the complete supported client
+language set for the foreseeable future. Dreego prioritizes compatibility,
+diagnostics, and predictable generated output for these three processors over
+adding more source languages.

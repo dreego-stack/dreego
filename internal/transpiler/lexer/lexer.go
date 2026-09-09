@@ -54,6 +54,11 @@ func Lex(input string) ([]tokens.Token, error) {
 				nextCh = '{'
 				break
 			}
+			if (!inSection || curSection == "body" || curSection == "head") && strings.HasPrefix(input[i:], "[[") {
+				nextPos = i
+				nextCh = '['
+				break
+			}
 		}
 
 		if nextPos < 0 {
@@ -93,6 +98,12 @@ func Lex(input string) ([]tokens.Token, error) {
 			}
 		} else if nextCh == '{' {
 			tok, err := scanBrace(input, &pos)
+			if err != nil {
+				return nil, err
+			}
+			toks = append(toks, tok)
+		} else if nextCh == '[' {
+			tok, err := scanMessage(input, &pos)
 			if err != nil {
 				return nil, err
 			}

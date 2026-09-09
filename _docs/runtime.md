@@ -2,9 +2,13 @@
 
 This guide covers the primary runtime APIs available after `import dreego "github.com/dreego-stack/dreego/core"`. The exported Go package remains the complete API reference.
 
-## SSRContext
+## Route and render contexts
 
-Available as **`c`** in routes (including `<server>` blocks and error pages) and as **`ctx`** in components (see [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md)). The name is fixed by the generated code: routes are generated as `func renderX(c *dreego.SSRContext)`, components as `func(ctx *dreego.SSRContext)`.
+Route `<server>` sections and error pages receive **`c`**, a
+`*dreego.SSRContext`. Generated and hand-written components instead receive
+**`ctx`**, a `dreego.RenderContext`. The component interface deliberately omits
+request and response operations; pass request-derived values as typed props.
+See [Components](components.md).
 
 | Method | Returns | Description |
 |--------|---------|-------------|

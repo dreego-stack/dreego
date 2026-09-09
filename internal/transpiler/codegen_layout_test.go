@@ -111,4 +111,3 @@ func TestGenLayoutNodeNamedSlot(t *testing.T) {
 		t.Errorf("genLayoutNode named slot must read slot_footer, got:\n%s", out)
 	}
 }
-

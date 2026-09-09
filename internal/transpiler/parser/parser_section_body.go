@@ -99,6 +99,13 @@ func (p *Parser) parseTemplateNode(parent string) (ir.TemplateNode, error) {
 		p.advance()
 		expr, filters := parseExpression(tok.Value)
 		return ir.TemplateNode{Type: ir.NodeExpression, Content: expr, Filters: filters, Pos: tok.Pos}, nil
+	case tokens.TokenMessage:
+		p.advance()
+		key, args, err := ParseMessageExpression(tok.Value, tok.Pos)
+		if err != nil {
+			return ir.TemplateNode{}, err
+		}
+		return ir.TemplateNode{Type: ir.NodeMessage, MessageKey: key, MessageArgs: args, Pos: tok.Pos}, nil
 	case tokens.TokenIfOpen:
 		cond := tok.Value
 		openPos := tok.Pos

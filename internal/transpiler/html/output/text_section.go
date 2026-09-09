@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dreego-stack/dreego/internal/transpiler/codegen"
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+	"github.com/dreego-stack/dreego/internal/transpiler/parser"
 )
 
 func CompTextWithAttrs(s string) string {
@@ -13,6 +15,11 @@ func CompTextWithAttrs(s string) string {
 }
 
 func CompTextSection(content string, inSection bool) (string, bool) {
+	code, next, _ := compTextSection(nil, content, inSection, "c")
+	return code, next
+}
+
+func compTextSection(gen *codegen.State, content string, inSection bool, contextName string) (string, bool, error) {
 	var parts []string
 	cur := inSection
 	var quote byte
@@ -77,12 +84,35 @@ func CompTextSection(content string, inSection bool) (string, bool) {
 			start = i
 			continue
 		}
+		if quote != 0 && strings.HasPrefix(content[i:], "[[") {
+			closeIndex := ir.FindMessageEnd(content[i+2:])
+			if closeIndex < 0 {
+				i++
+				continue
+			}
+			if start < i {
+				parts = append(parts, ir.GoLiteral(content[start:i]))
+			}
+			key, arguments, err := parser.ParseMessageExpression(content[i+2:i+2+closeIndex], i)
+			if err != nil && gen != nil {
+				return "", cur, err
+			}
+			if gen == nil {
+				parts = append(parts, ir.GoLiteral(content[i:i+closeIndex+4]))
+			} else {
+				node := ir.TemplateNode{Type: ir.NodeMessage, MessageKey: key, MessageArgs: arguments}
+				parts = append(parts, fmt.Sprintf("dreego.%s(%s)", AttrSafeFunc(content, tagStart, i), messageCall(gen, contextName, node)))
+			}
+			i += closeIndex + 4
+			start = i
+			continue
+		}
 		i++
 	}
 	if start < len(content) {
 		parts = append(parts, ir.GoLiteral(content[start:]))
 	}
-	return strings.Join(parts, " + "), cur
+	return strings.Join(parts, " + "), cur, nil
 }
 
 func AttrSafeFunc(content string, tagStart, i int) string {

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	corei18n "github.com/dreego-stack/dreego/core/internal/i18n"
 	mw "github.com/dreego-stack/dreego/core/internal/middleware"
 	sess "github.com/dreego-stack/dreego/core/internal/session"
 )
@@ -32,6 +33,8 @@ type App struct {
 	cspHeader      string
 	built          bool
 	buildDone      chan struct{}
+	i18nConfig     *corei18n.Config
+	localizer      corei18n.Localizer
 }
 
 func New() *App {
@@ -88,6 +91,14 @@ func (a *App) Build() error {
 			return fmt.Errorf("dreego: session store validation failed: %w", err)
 		}
 	}
+	var localeMiddleware func(http.Handler) http.Handler
+	if a.i18nConfig != nil && a.localizer != nil {
+		negotiator, err := corei18n.NewNegotiator(*a.i18nConfig, a.localizer)
+		if err != nil {
+			return fmt.Errorf("dreego: i18n configuration failed: %w", err)
+		}
+		localeMiddleware = negotiator.Middleware
+	}
 
 	mux := http.NewServeMux()
 
@@ -107,6 +118,9 @@ func (a *App) Build() error {
 
 	var h http.Handler = mux
 	h = a.redirectRewriteMiddleware(h)
+	if localeMiddleware != nil {
+		h = localeMiddleware(h)
+	}
 	if a.sessionStore != nil && a.csrfEnabled {
 		h = mw.CSRF(a.sessionStore)(h)
 	}
