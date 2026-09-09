@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dreego-stack/dreego/internal/gomod"
 	luainput "github.com/dreego-stack/dreego/internal/transpiler/js/lua"
 )
 
@@ -243,15 +244,9 @@ func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, 
 }
 
 func modulePath() string {
-	data, err := os.ReadFile("go.mod")
-	if err != nil {
-		return ""
-	}
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if rest, ok := strings.CutPrefix(line, "module "); ok {
-			return strings.TrimSpace(rest)
-		}
+	file, err := gomod.Read("go.mod")
+	if err == nil {
+		return file.Module
 	}
 	return ""
 }

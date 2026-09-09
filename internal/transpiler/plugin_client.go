@@ -1,7 +1,6 @@
 package transpiler
 
 import (
-	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -12,6 +11,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/gomod"
 )
 
 const maxPluginClientModuleSize = 256 << 10
@@ -233,39 +234,8 @@ func readPluginClientFile(dir, relative string) ([]byte, error) {
 }
 
 func requiredModules(project string) (map[string]string, error) {
-	file, err := os.Open(filepath.Join(project, "go.mod"))
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	modules := map[string]string{}
-	scanner := bufio.NewScanner(file)
-	inRequire := false
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == ")" && inRequire {
-			inRequire = false
-			continue
-		}
-		if line == "require (" {
-			inRequire = true
-			continue
-		}
-		if inRequire {
-			fields := strings.Fields(line)
-			if len(fields) >= 2 {
-				modules[fields[0]] = fields[1]
-			}
-			continue
-		}
-		if strings.HasPrefix(line, "require ") {
-			fields := strings.Fields(strings.TrimPrefix(line, "require "))
-			if len(fields) >= 2 {
-				modules[fields[0]] = fields[1]
-			}
-		}
-	}
-	return modules, scanner.Err()
+	file, err := gomod.Read(filepath.Join(project, "go.mod"))
+	return file.Requires, err
 }
 
 func pluginModuleDir(project, modulePath, version string) (string, error) {

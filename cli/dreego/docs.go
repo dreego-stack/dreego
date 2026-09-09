@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/gomod"
 )
 
 const coreModule = "github.com/dreego-stack/dreego"
@@ -21,10 +22,7 @@ var wdFunc = func() string {
 	return d
 }
 
-type goMod struct {
-	Module   string
-	Requires map[string]string
-}
+type goMod = gomod.File
 
 type sitemapDoc struct {
 	Module string        `json:"module"`
@@ -37,41 +35,11 @@ type sitemapPage struct {
 }
 
 func parseGoMod(path string) (*goMod, error) {
-	f, err := os.Open(path)
+	file, err := gomod.Read(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	gm := &goMod{Requires: map[string]string{}}
-	scanner := bufio.NewScanner(f)
-	inRequire := false
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" {
-			continue
-		}
-		if inRequire {
-			if line == ")" {
-				inRequire = false
-				continue
-			}
-			if f := strings.Fields(line); len(f) >= 2 {
-				gm.Requires[f[0]] = f[1]
-			}
-			continue
-		}
-		switch {
-		case strings.HasPrefix(line, "module "):
-			gm.Module = strings.TrimSpace(strings.TrimPrefix(line, "module "))
-		case strings.HasPrefix(line, "require ("):
-			inRequire = true
-		case strings.HasPrefix(line, "require "):
-			if f := strings.Fields(strings.TrimPrefix(line, "require ")); len(f) >= 2 {
-				gm.Requires[f[0]] = f[1]
-			}
-		}
-	}
-	return gm, scanner.Err()
+	return &file, nil
 }
 
 // findModDir locates the on-disk directory for a module path, reading go.mod
