@@ -10,7 +10,7 @@ import (
 func TestRoutingBlackboxCatchall(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/blog/[...catchall]/get.dreego": `<server>p := c.Param("catchall")</server>
+		"www/routes/blog/[...catchall]/+page.dreego": `<server>p := c.Param("catchall")</server>
 <body><p>blog:{{ p }}</p></body>`,
 	})
 	code, body := c.Get(t, "/blog/hello/world")
@@ -21,7 +21,7 @@ func TestRoutingBlackboxCatchall(t *testing.T) {
 func TestRoutingBlackboxCatchallRoot(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/[...path]/get.dreego": `<server>p := c.Param("path")</server>
+		"www/routes/[...path]/+page.dreego": `<server>p := c.Param("path")</server>
 <body><p>root:{{ p }}</p></body>`,
 	})
 	code, body := c.Get(t, "/a/b/c")
@@ -32,7 +32,7 @@ func TestRoutingBlackboxCatchallRoot(t *testing.T) {
 func TestRoutingBlackboxGroup(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/(admin)/dashboard/get.dreego": `<body><p>admin dashboard</p></body>`,
+		"www/routes/(admin)/dashboard/+page.dreego": `<body><p>admin dashboard</p></body>`,
 	})
 	code, body := c.Get(t, "/dashboard")
 	dreegotest.MustStatus(t, code, 200)
@@ -46,7 +46,7 @@ func TestRoutingBlackboxGroup(t *testing.T) {
 func TestRoutingBlackboxDynamic(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/users/[id]/get.dreego": `<server>id := c.Param("id")</server>
+		"www/routes/users/[id]/+page.dreego": `<server>id := c.Param("id")</server>
 <body><p>user:{{ id }}</p></body>`,
 	})
 	code, body := c.Get(t, "/users/42")
@@ -54,37 +54,30 @@ func TestRoutingBlackboxDynamic(t *testing.T) {
 	dreegotest.MustContainBody(t, body, "user:42")
 }
 
-func TestRoutingBlackboxMethods(t *testing.T) {
+func TestRoutingBlackboxNamedFilesAreURLSegments(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego":    `<body><p>get route</p></body>`,
-		"www/routes/post.dreego":   `<body><p>post route</p></body>`,
-		"www/routes/put.dreego":    `<body><p>put route</p></body>`,
-		"www/routes/delete.dreego": `<body><p>delete route</p></body>`,
+		"www/routes/+page.dreego":   `<body><p>home route</p></body>`,
+		"www/routes/page.dreego":    `<body><p>page route</p></body>`,
+		"www/routes/profile.dreego": `<body><p>profile route</p></body>`,
 	})
 	code, body := c.Get(t, "/")
-	if code != 200 || !strings.Contains(body, "get route") {
-		t.Fatalf("GET / = %d %q, want 200 with get route", code, body)
+	if code != 200 || !strings.Contains(body, "home route") {
+		t.Fatalf("GET / = %d %q, want 200 with home route", code, body)
 	}
-	code, body, _ = c.Request(t, "POST", "/", "", nil)
-	if code != 200 || !strings.Contains(body, "post route") {
-		t.Fatalf("POST / = %d %q, want 200 with post route", code, body)
-	}
-	code, body, _ = c.Request(t, "PUT", "/", "", nil)
-	if code != 200 || !strings.Contains(body, "put route") {
-		t.Fatalf("PUT / = %d %q, want 200 with put route", code, body)
-	}
-	code, body, _ = c.Request(t, "DELETE", "/", "", nil)
-	if code != 200 || !strings.Contains(body, "delete route") {
-		t.Fatalf("DELETE / = %d %q, want 200 with delete route", code, body)
+	for path, want := range map[string]string{"/page": "page route", "/profile": "profile route"} {
+		code, body = c.Get(t, path)
+		if code != 200 || !strings.Contains(body, want) {
+			t.Fatalf("GET %s = %d %q, want 200 with %s", path, code, body, want)
+		}
 	}
 }
 
 func TestRoutingBlackboxNested(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/about/get.dreego":       `<body><p>about</p></body>`,
-		"www/routes/users/about/get.dreego": `<body><p>users about</p></body>`,
+		"www/routes/about/+page.dreego":       `<body><p>about</p></body>`,
+		"www/routes/users/about/+page.dreego": `<body><p>users about</p></body>`,
 	})
 	code, body := c.Get(t, "/about")
 	if code != 200 || !strings.Contains(body, "about") {
@@ -114,7 +107,7 @@ func TestRoutingBlackboxFlatRoutes(t *testing.T) {
 func TestRoutingBlackboxMethodAttr(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server method="post">msg := "posted"</server>
+		"www/routes/+page.dreego": `<server method="post">msg := "posted"</server>
 <body method="post"><p>{{ msg }}</p></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/", "", nil)

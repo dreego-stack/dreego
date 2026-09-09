@@ -1,4 +1,14 @@
 
+## v0.6.2 - 2026-09-09
+
+- Fix: use the canonical directory route filename for the Lua demo home page.
+
+## v0.6.1 - 2026-09-09
+
+- Breaking: map only `+page.dreego` and `index.dreego` to their directory URL; all other route filenames now become literal URL segments and default to GET.
+- Breaking: remove the former `get.dreego`, `post.dreego`, `put.dreego`, and `delete.dreego` method-file convention; HTTP methods must now be declared with method-specific sections.
+- Fix: reject directories containing both `+page.dreego` and `index.dreego` with a duplicate-route error.
+
 ## v0.6.0 - 2026-09-09
 
 - Feat: add compile-time-validated first-party internationalization with JSON catalogs, `[[ message.key ]]` templates, locale negotiation, plural and select variants, formatting, pseudolocales, and translation extraction.

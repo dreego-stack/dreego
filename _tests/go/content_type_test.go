@@ -9,7 +9,7 @@ import (
 func TestContentTypeAcceptFallback(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     msg := "hello"
 </server>
 <server type="json">
@@ -25,7 +25,7 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 func TestContentTypeAcceptJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server type="json">
+		"www/routes/+page.dreego": `<server type="json">
     c.JSON(200, map[string]string{"ok": "true"})
 </server>`,
 	})
@@ -37,7 +37,7 @@ func TestContentTypeAcceptJSON(t *testing.T) {
 func TestContentTypeAcceptXML(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server type="xml">
+		"www/routes/+page.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
 </server>`,
@@ -50,7 +50,7 @@ func TestContentTypeAcceptXML(t *testing.T) {
 func TestContentTypeBindError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/post.dreego": `<server type="json">
+		"www/routes/+page.dreego": `<server method="post" type="json">
     var input map[string]any
     err := c.Bind(&input)
     if err != nil {
@@ -71,7 +71,7 @@ func TestContentTypeBindError(t *testing.T) {
 func TestContentTypeBindPost(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/post.dreego": `<server type="json">
+		"www/routes/+page.dreego": `<server method="post" type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
@@ -90,7 +90,7 @@ func TestContentTypeBindPost(t *testing.T) {
 func TestContentTypeCustomBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server type="custom">
+		"www/routes/+page.dreego": `<server type="custom">
     msg := []byte("hello world")
     c.Write(200, "text/plain", msg)
 </server>`,
@@ -102,7 +102,7 @@ func TestContentTypeCustomBasic(t *testing.T) {
 func TestContentTypeHTMLDefault(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     msg := "hello"
 </server>
 <body><h1>{{ msg }}</h1></body>`,
@@ -114,7 +114,7 @@ func TestContentTypeHTMLDefault(t *testing.T) {
 func TestContentTypeJSONAutoImports(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/post.dreego": `<server type="json">
+		"www/routes/+page.dreego": `<server type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
@@ -129,7 +129,7 @@ func TestContentTypeJSONAutoImports(t *testing.T) {
 func TestContentTypeJSONBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server type="json">
+		"www/routes/+page.dreego": `<server type="json">
     user := map[string]string{"name": "Lukas"}
     c.JSON(200, user)
 </server>`,
@@ -141,7 +141,7 @@ func TestContentTypeJSONBasic(t *testing.T) {
 func TestContentTypeJSONShared(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     msg := "Lukas"
 </server>
 
@@ -161,7 +161,7 @@ func TestContentTypeJSONShared(t *testing.T) {
 func TestContentTypeMultiTyped(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
     name := "Lukas"
 </server>
 <server type="json">
@@ -184,7 +184,7 @@ func TestContentTypeMultiTyped(t *testing.T) {
 func TestContentTypeXMLBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server type="xml">
+		"www/routes/+page.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
 </server>`,

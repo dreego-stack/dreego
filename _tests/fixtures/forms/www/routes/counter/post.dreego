@@ -1,8 +1,0 @@
-<server>
-    n := c.SessionVal("count")
-    c.SetSessionVal("count", n+"x")
-</server>
-<body>
-    <p>
-        incremented</p>
-</body>

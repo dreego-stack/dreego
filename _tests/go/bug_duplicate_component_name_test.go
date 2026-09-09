@@ -12,7 +12,7 @@ func TestBugDuplicateComponentNameFailsGenerate(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/a/Card.dreego": "Component Card ()\n<body><p>A</p></body>",
 		"www/components/b/Card.dreego": "Component Card ()\n<body><p>B</p></body>",
-		"www/routes/get.dreego":        "<body><@Card/></body>",
+		"www/routes/+page.dreego":      "<body><@Card/></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {

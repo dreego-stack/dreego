@@ -263,8 +263,9 @@ Real external plugins between v0.1 and v1 must validate the contract before a st
 
 ### 3. File-based Routing
 Filename-based routing is the released pre-v0.1 implementation; the accepted
-v0.1 target is one route file per URL (`page.dreego` and method sections).
-`get.dreego`, `index.dreego`, and `+page.dreego` remain accepted legacy names.
+v0.1 target is one route file per URL (`+page.dreego` and method sections).
+Only `+page.dreego` and `index.dreego` map to their directory URL; other route
+filenames become literal URL segments.
 → [decisions/routing-and-components](_docs/decisions/routing-and-components.md)
 
 ### 4. Asset System: Dual-Mode (Embedded + Disk)

@@ -7,17 +7,17 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
+func TestBugDuplicateRoutePageVsIndex(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego":   `<body><p>get</p></body>`,
+		"www/routes/+page.dreego": `<body><p>get</p></body>`,
 		"www/routes/index.dreego": `<body><p>index</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("expected generate failure for duplicate route, got success: %s", out)
 	}
-	if !strings.Contains(out, "www/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/+page.dreego") {
 		t.Fatalf("error must name the first source path, got: %s", out)
 	}
 	if !strings.Contains(out, "www/routes/index.dreego") {
@@ -25,35 +25,33 @@ func TestBugDuplicateRouteFlatVsIndex(t *testing.T) {
 	}
 }
 
-func TestBugDuplicateRouteMethodAttrVsFile(t *testing.T) {
+func TestNamedFileDoesNotClaimDirectoryRoute(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<server method="post">msg := "posted"</server>
-<body><p>{{ msg }}</p></body>`,
-		"www/routes/post.dreego": `<body><p>post</p></body>`,
+	c := dreegotest.Serve(t, map[string]string{
+		"www/routes/+page.dreego": `<server method="post">msg := "posted"</server>
+<body method="post"><p>{{ msg }}</p></body>`,
+		"www/routes/profile.dreego": `<body><p>profile</p></body>`,
 	})
-	out, err := dreegotest.RunCLI(t, dir, "generate")
-	if err == nil {
-		t.Fatalf("expected generate failure for duplicate POST route, got success: %s", out)
+	code, body, _ := c.Request(t, "POST", "/", "", nil)
+	if code != 200 || !strings.Contains(body, "posted") {
+		t.Fatalf("POST / = %d %q, want directory route", code, body)
 	}
-	if !strings.Contains(out, "POST") {
-		t.Fatalf("error must name the conflicting method, got: %s", out)
-	}
-	if !strings.Contains(out, "www/routes/get.dreego") || !strings.Contains(out, "www/routes/post.dreego") {
-		t.Fatalf("error must name both source paths, got: %s", out)
+	code, body = c.Get(t, "/profile")
+	if code != 200 || !strings.Contains(body, "profile") {
+		t.Fatalf("GET /profile = %d %q, want named route", code, body)
 	}
 }
 
 func TestBugDuplicateRouteFormWithoutHandler(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<body>
+		"www/routes/+page.dreego": `<body>
 <form g-action="Missing" method="post">
     <input name="x">
     <button>OK</button>
 </form>
 </body>`,
-		"www/routes/post.dreego": `<body><p>post</p></body>`,
+		"www/routes/profile.dreego": `<body><p>profile</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err != nil {

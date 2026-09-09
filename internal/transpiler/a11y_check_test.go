@@ -8,12 +8,12 @@ import (
 func TestA11yCheckImageWithoutAlt(t *testing.T) {
 	src := "<body>\n    <img src=\"/logo.png\">\n</body>\n"
 	f := parseFile(t, src)
-	setNodeSource(f.Body.Nodes, "dreego/routes/get.dreego", 0)
+	setNodeSource(f.Body.Nodes, "dreego/routes/+page.dreego", 0)
 	d := a11yCheck(f.Body.Nodes)
 	if len(d) == 0 {
 		t.Fatal("expected an accessibility diagnostic for <img> without alt")
 	}
-	if !strings.Contains(d[0].String(), "dreego/routes/get.dreego:2:5") {
+	if !strings.Contains(d[0].String(), "dreego/routes/+page.dreego:2:5") {
 		t.Fatalf("diagnostic must carry file:line:col, got %q", d[0].String())
 	}
 	if !strings.Contains(d[0].String(), "img") || !strings.Contains(d[0].String(), "alt") {
@@ -27,7 +27,7 @@ func TestA11yCheckImageWithoutAlt(t *testing.T) {
 func TestA11yCheckInputWithoutLabel(t *testing.T) {
 	src := "<body>\n<form>\n    <input name=\"email\" type=\"email\">\n</form>\n</body>\n"
 	f := parseFile(t, src)
-	setNodeSource(f.Body.Nodes, "dreego/routes/get.dreego", 0)
+	setNodeSource(f.Body.Nodes, "dreego/routes/+page.dreego", 0)
 	d := a11yCheck(f.Body.Nodes)
 	if len(d) == 0 {
 		t.Fatal("expected an accessibility diagnostic for <input> without label")
@@ -40,7 +40,7 @@ func TestA11yCheckInputWithoutLabel(t *testing.T) {
 func TestA11yCheckExplicitAltAndLabel(t *testing.T) {
 	src := "<body>\n    <img src=\"/logo.png\" alt=\"Dreego logo\">\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\" type=\"email\">\n</body>\n"
 	f := parseFile(t, src)
-	setNodeSource(f.Body.Nodes, "dreego/routes/get.dreego", 0)
+	setNodeSource(f.Body.Nodes, "dreego/routes/+page.dreego", 0)
 	d := a11yCheck(f.Body.Nodes)
 	if len(d) != 0 {
 		t.Fatalf("expected no diagnostics for accessible markup, got %q", d)
@@ -50,7 +50,7 @@ func TestA11yCheckExplicitAltAndLabel(t *testing.T) {
 func TestA11yCheckLabelForMatchesID(t *testing.T) {
 	src := "<body>\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\">\n</body>\n"
 	f := parseFile(t, src)
-	setNodeSource(f.Body.Nodes, "dreego/routes/get.dreego", 0)
+	setNodeSource(f.Body.Nodes, "dreego/routes/+page.dreego", 0)
 	if d := a11yCheck(f.Body.Nodes); len(d) != 0 {
 		t.Fatalf("label[for] must count as an association, got %q", d)
 	}
@@ -59,7 +59,7 @@ func TestA11yCheckLabelForMatchesID(t *testing.T) {
 func TestA11yCheckFormGetsDiagnostics(t *testing.T) {
 	src := "<body>\n<form>\n    <input name=\"email\" type=\"email\">\n</form>\n</body>\n"
 	f := parseFile(t, src)
-	setNodeSource(f.Body.Nodes, "dreego/routes/get.dreego", 0)
+	setNodeSource(f.Body.Nodes, "dreego/routes/+page.dreego", 0)
 	d := a11yDiagnostics(f.Body.Nodes)
 	if len(d) != 1 {
 		t.Fatalf("expected exactly one diagnostic, got %q", d)

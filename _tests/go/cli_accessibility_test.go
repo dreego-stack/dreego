@@ -39,7 +39,7 @@ func TestCLIHelpLinearScreenReader(t *testing.T) {
 func TestCLIErrorLeadsWithFilePositionCauseAction(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": "<body>{#if true}<p>x</p></body>",
+		"www/routes/+page.dreego": "<body>{#if true}<p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -48,10 +48,10 @@ func TestCLIErrorLeadsWithFilePositionCauseAction(t *testing.T) {
 	if strings.Contains(out, "\x1b[") {
 		t.Fatalf("error output contains ANSI color codes: %q", out)
 	}
-	if !strings.Contains(out, "www/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/+page.dreego") {
 		t.Fatalf("error must lead with the source file, got: %q", out)
 	}
-	if !regexp.MustCompile(`www/routes/get\.dreego:\d+:\d+`).MatchString(out) {
+	if !regexp.MustCompile(`www/routes/\+page\.dreego:\d+:\d+`).MatchString(out) {
 		t.Fatalf("error must contain file:line:col, got: %q", out)
 	}
 	if !strings.Contains(out, "unclosed {#if") {
@@ -65,13 +65,13 @@ func TestCLIErrorLeadsWithFilePositionCauseAction(t *testing.T) {
 func TestCLICheckStaleActionable(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/get.dreego": `<head><title>T</title></head>
+		"www/routes/+page.dreego": `<head><title>T</title></head>
 <body><p>check me</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	src := filepath.Join(dir, "www/routes/get.dreego")
+	src := filepath.Join(dir, "www/routes/+page.dreego")
 	if err := os.WriteFile(src, []byte(`<head><title>T</title></head>
 <body><p>changed content</p></body>`), 0644); err != nil {
 		t.Fatalf("write source: %v", err)
@@ -91,8 +91,8 @@ func TestCLICheckStaleActionable(t *testing.T) {
 func TestCLICheckNoGenActionable(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/dreego.config.json": `{}`,
-		"www/routes/get.dreego":  `<body><p>hi</p></body>`,
+		"www/dreego.config.json":  `{}`,
+		"www/routes/+page.dreego": `<body><p>hi</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {
@@ -122,7 +122,7 @@ func TestCLIBlueprintSemanticHTML(t *testing.T) {
 		}
 	}
 
-	route, err := os.ReadFile(filepath.Join(sub, "www/routes/page.dreego"))
+	route, err := os.ReadFile(filepath.Join(sub, "www/routes/+page.dreego"))
 	if err != nil {
 		t.Fatalf("read route: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
 		t.Fatalf("init: %v\n%s", err, out)
 	}
-	route, err := os.ReadFile(filepath.Join(dir, "www/routes/page.dreego"))
+	route, err := os.ReadFile(filepath.Join(dir, "www/routes/+page.dreego"))
 	if err != nil {
 		t.Fatalf("read route: %v", err)
 	}

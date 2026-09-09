@@ -10,7 +10,7 @@ import (
 func TestBugRouteHeadWithoutLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/get.dreego": `<head><title>No Layout Title</title><script src="route.js"></script></head>
+		"www/routes/+page.dreego": `<head><title>No Layout Title</title><script src="route.js"></script></head>
 <body><p>hello</p></body>`,
 	})
 	_, body := c.Get(t, "/")

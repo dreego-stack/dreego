@@ -13,7 +13,7 @@ import (
 // compiles it with `go build`. It replaces shell tests that do
 // `dreego generate` + `go build -o /dev/null .`.
 //
-// files maps relative paths (e.g. "dreego/routes/get.dreego") to their content.
+// files maps relative paths (e.g. "dreego/routes/+page.dreego") to their content.
 // The temp module gets a go.mod with a replace to the real repo root.
 func MustBuild(t *testing.T, files map[string]string) {
 	t.Helper()

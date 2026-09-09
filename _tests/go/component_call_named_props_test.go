@@ -12,7 +12,7 @@ func TestComponentCallNamedPropsOrder(t *testing.T) {
 	files := map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
-		"www/routes/get.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	}
 	gen := dreegotest.Build(t, files)
 	if !strings.Contains(gen["www/components/dree.go"], "Greet(") {
@@ -25,7 +25,7 @@ func TestComponentCallMissingProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
-		"www/routes/get.dreego": `<body><@Greet first="Hello"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet first="Hello"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -37,7 +37,7 @@ func TestComponentCallMissingProp(t *testing.T) {
 	if !strings.Contains(out, "second") {
 		t.Fatalf("error must name missing prop second, got: %s", out)
 	}
-	if !strings.Contains(out, "www/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/+page.dreego") {
 		t.Fatalf("error must reference the calling source path, got: %s", out)
 	}
 }
@@ -47,7 +47,7 @@ func TestComponentCallUnknownProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string)
 <body><p>{{ first }}</p></body>`,
-		"www/routes/get.dreego": `<body><@Greet first="Hello" second="World"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet first="Hello" second="World"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -59,7 +59,7 @@ func TestComponentCallUnknownProp(t *testing.T) {
 	if !strings.Contains(out, "second") {
 		t.Fatalf("error must name unknown prop second, got: %s", out)
 	}
-	if !strings.Contains(out, "www/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/+page.dreego") {
 		t.Fatalf("error must reference the calling source path, got: %s", out)
 	}
 }
@@ -69,7 +69,7 @@ func TestComponentCallDuplicateProp(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string)
 <body><p>{{ first }}</p></body>`,
-		"www/routes/get.dreego": `<body><@Greet first="Hello" first="Again"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet first="Hello" first="Again"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -81,7 +81,7 @@ func TestComponentCallDuplicateProp(t *testing.T) {
 	if !strings.Contains(out, "first") {
 		t.Fatalf("error must name duplicated prop first, got: %s", out)
 	}
-	if !strings.Contains(out, "www/routes/get.dreego") {
+	if !strings.Contains(out, "www/routes/+page.dreego") {
 		t.Fatalf("error must reference the calling source path, got: %s", out)
 	}
 }
@@ -91,7 +91,7 @@ func TestComponentCallNamedPropsHTTP(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Greet.dreego": `Component Greet (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
-		"www/routes/get.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
+		"www/routes/+page.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

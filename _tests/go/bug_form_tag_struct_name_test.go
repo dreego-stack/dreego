@@ -9,7 +9,7 @@ import (
 func TestBugFormTagStructName(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get-search.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 type LoginForm struct {
 }
 type SearchQuery struct {

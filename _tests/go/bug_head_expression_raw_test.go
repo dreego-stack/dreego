@@ -9,7 +9,7 @@ import (
 func TestBugHeadExpressionRaw(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/get.dreego": `<server>
+		"www/routes/+page.dreego": `<server>
 type Doc struct{ Title string }
 doc := Doc{Title: "PeerNet Docs"}
 </server>
