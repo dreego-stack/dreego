@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/gomod"
 )
 
 //go:embed all:blueprints
@@ -67,14 +69,9 @@ func cmdInit(args []string) {
 // "module " line), or the directory base name as fallback when no go.mod
 // exists. Used to qualify the generated package import in blueprints.
 func moduleName(dir string) string {
-	data, err := os.ReadFile(filepath.Join(dir, "go.mod"))
-	if err == nil {
-		for _, line := range strings.Split(string(data), "\n") {
-			line = strings.TrimSpace(line)
-			if rest, ok := strings.CutPrefix(line, "module "); ok {
-				return strings.TrimSpace(rest)
-			}
-		}
+	file, err := gomod.Read(filepath.Join(dir, "go.mod"))
+	if err == nil && file.Module != "" {
+		return file.Module
 	}
 	return filepath.Base(dir)
 }
