@@ -71,6 +71,53 @@ func TestLoadConfigInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestLoadConfigI18n(t *testing.T) {
+	path := writeTempConfig(t, `{
+		"i18n": {
+			"enabled": true,
+			"defaultLocale": "de",
+			"locales": ["de", "en"],
+			"urlStrategy": "none",
+			"detection": ["cookie", "browser", "custom", "default"]
+		}
+	}`)
+	s, err := LoadConfig(path)
+	if err != nil {
+		t.Fatalf("LoadConfig failed: %v", err)
+	}
+	if !s.I18n.Enabled || s.I18n.DefaultLocale != "de" {
+		t.Fatalf("unexpected i18n settings: %+v", s.I18n)
+	}
+	if strings.Join(s.I18n.Locales, ",") != "de,en" {
+		t.Errorf("locales = %v", s.I18n.Locales)
+	}
+}
+
+func TestLoadConfigRejectsInvalidI18n(t *testing.T) {
+	cases := []struct {
+		name string
+		i18n string
+		want string
+	}{
+		{"missing default", `{"enabled":true,"locales":["de"]}`, "defaultLocale is required"},
+		{"default unsupported", `{"enabled":true,"defaultLocale":"fr","locales":["de","en"]}`, `defaultLocale "fr" is not listed`},
+		{"duplicate locale", `{"enabled":true,"defaultLocale":"de","locales":["de","de"]}`, `duplicate locale "de"`},
+		{"invalid strategy", `{"enabled":true,"defaultLocale":"de","locales":["de"],"urlStrategy":"path"}`, `unsupported urlStrategy "path"`},
+		{"duplicate detector", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["browser","browser"]}`, `duplicate locale detector "browser"`},
+		{"default not last", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["default","browser"]}`, `locale detector "default" must be last`},
+		{"unknown detector", `{"enabled":true,"defaultLocale":"de","locales":["de"],"detection":["ip","default"]}`, `unsupported locale detector "ip"`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			path := writeTempConfig(t, `{"i18n":`+tc.i18n+`}`)
+			_, err := LoadConfig(path)
+			if err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("error = %v, want %q", err, tc.want)
+			}
+		})
+	}
+}
+
 func TestLoadSettingsWarnsOnInvalidConfig(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, configFileName), []byte(`{not valid`), 0o600); err != nil {
