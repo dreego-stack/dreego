@@ -1,4 +1,9 @@
 
+## v0.6.0 - 2026-09-09
+
+- Feat: add compile-time-validated first-party internationalization with JSON catalogs, `[[ message.key ]]` templates, locale negotiation, plural and select variants, formatting, pseudolocales, and translation extraction.
+- Docs: document the Core and plugin boundary, routing choices, accessibility metadata, resolver hooks, and the no-conversion currency boundary.
+
 ## v0.5.6 - 2026-09-09
 
 - Feat: add Browser Lua while and numeric for loops with validated bounds and break support.
