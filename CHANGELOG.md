@@ -1,4 +1,10 @@
 
+## v0.5.6 - 2026-09-09
+
+- Feat: add Browser Lua while and numeric for loops with validated bounds and break support.
+- Feat: add mutable Browser Lua tables with one-based indexing, nil deletion, and deterministic sequence length.
+- Feat: support Lua short-string escapes and preserve original `.dreego` paths in browser runtime stacks.
+
 ## v0.5.5 - 2026-09-09
 
 - Feat: bundle selected declarative JavaScript modules from installed plugins during generation
