@@ -47,7 +47,8 @@ TypeScript and Lua become JavaScript.
 ## Routes, layouts, and components
 
 Route files live below the configured website root's `routes/` directory.
-Directories define URL segments, while `page.dreego` owns the directory URL.
+Directories define URL segments, while `+page.dreego` or `index.dreego` owns
+the directory URL. Any other route filename adds a literal URL segment.
 Layouts and components use the same semantic sections but have different
 composition rules. Continue with [Routing](routing.md), [Layouts](layouts.md),
 and [Components](components.md).
