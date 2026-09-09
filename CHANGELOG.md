@@ -1,4 +1,9 @@
 
+## v0.6.3 - 2026-09-09
+
+- Refactor: parse Go module metadata with `golang.org/x/mod/modfile` instead of duplicated line scanners.
+- Docs: align the file anatomy and server-section references with the current route filename convention.
+
 ## v0.6.2 - 2026-09-09
 
 - Fix: use the canonical directory route filename for the Lua demo home page.
