@@ -158,7 +158,7 @@ func importedComponentPaths(root string) ([]string, error) {
 		}
 		_, imports, _ := ParseHeader(string(data))
 		for _, imp := range imports {
-			if strings.Contains(imp.Path, ".") && !seen[imp.Path] {
+			if !strings.HasSuffix(imp.Path, ".dreego") && strings.Contains(imp.Path, ".") && !seen[imp.Path] {
 				seen[imp.Path] = true
 				paths = append(paths, imp.Path)
 			}
