@@ -116,6 +116,9 @@ func applyPlan(plan genPlan, force bool) error {
 	}
 	sort.Strings(paths)
 	for _, p := range paths {
+		if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+			return fmt.Errorf("error creating directory for %s: %w", p, err)
+		}
 		content := plan.files[p]
 		if !force && isUpToDate(p, content) {
 			continue

@@ -101,3 +101,30 @@ func TestParseImportLineTooShort(t *testing.T) {
 		t.Errorf("expected nil Import for too-short line, got %+v", imp)
 	}
 }
+
+func TestParseHeaderGroupedImports(t *testing.T) {
+	_, imports, body := ParseHeader(`from "www/components" import {
+    Button,
+    Card,
+}
+
+from "github.com/dreego-stack/dreego-ui/components/dreegoui" import {
+    Navbar,
+    PriceCard,
+}
+
+<body><@Button/></body>`)
+
+	if len(imports) != 2 {
+		t.Fatalf("expected 2 grouped imports, got %d: %+v", len(imports), imports)
+	}
+	if imports[0].Path != "www/components" || len(imports[0].Names) != 2 {
+		t.Fatalf("unexpected local import: %+v", imports[0])
+	}
+	if imports[1].Path != "github.com/dreego-stack/dreego-ui/components/dreegoui" || len(imports[1].Names) != 2 {
+		t.Fatalf("unexpected module import: %+v", imports[1])
+	}
+	if body == "" {
+		t.Fatal("expected body after grouped imports")
+	}
+}

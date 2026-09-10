@@ -79,6 +79,7 @@ type Prop struct {
 type Import struct {
 	Alias string
 	Path  string
+	Names []string
 }
 
 type HeadSection struct {
