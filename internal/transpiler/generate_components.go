@@ -141,7 +141,11 @@ func loadModuleComponents(gen *Generator, root string) ([]componentSource, error
 func importedComponentPaths(root string) ([]string, error) {
 	seen := map[string]bool{}
 	var paths []string
-	err := filepath.WalkDir(filepath.Join(root, "routes"), func(path string, d os.DirEntry, walkErr error) error {
+	routesDir := filepath.Join(root, "routes")
+	if _, err := os.Stat(routesDir); os.IsNotExist(err) {
+		return paths, nil
+	}
+	err := filepath.WalkDir(routesDir, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
