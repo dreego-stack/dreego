@@ -1,4 +1,8 @@
 
+## v0.6.6 - 2026-09-10
+
+- Bug: keep legacy local `.dreego` component imports out of Go module resolution
+
 ## v0.6.5 - 2026-09-10
 
 - Feat: generate components imported from required Go modules
