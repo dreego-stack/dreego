@@ -1,4 +1,9 @@
 
+## v0.6.5 - 2026-09-10
+
+- Feat: generate components imported from required Go modules
+- Feat: support grouped `from ... import { ... }` component imports
+
 ## v0.6.4 - 2026-09-09
 
 - Demo: add English and German localization with browser detection, persistent language selection, pluralization, and localized document metadata.
