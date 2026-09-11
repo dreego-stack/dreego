@@ -1,0 +1,9 @@
+module demo
+
+go 1.27
+
+require github.com/dreego-stack/dreego v0.0.0
+
+require golang.org/x/text v0.39.0 // indirect
+
+replace github.com/dreego-stack/dreego => ../..

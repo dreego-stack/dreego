@@ -14,7 +14,7 @@ import * as $models from "./models.js";
  * @returns {$CancellablePromise<$models.TimerSnapshot>}
  */
 export function Reset() {
-    return $Call.ByID(894164148).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(588067845).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }
@@ -23,7 +23,7 @@ export function Reset() {
  * @returns {$CancellablePromise<$models.TimerSnapshot>}
  */
 export function Snapshot() {
-    return $Call.ByID(499355849).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(3673680190).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }
@@ -32,7 +32,7 @@ export function Snapshot() {
  * @returns {$CancellablePromise<$models.TimerSnapshot>}
  */
 export function Toggle() {
-    return $Call.ByID(2035003321).then(/** @type {($result: any) => any} */(($result) => {
+    return $Call.ByID(3107160234).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }

@@ -1,4 +1,4 @@
-package wails_v3
+package app
 
 import (
 	dreego "github.com/dreego-stack/dreego/core"

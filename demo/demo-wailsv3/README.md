@@ -10,15 +10,15 @@ From the repository root, generate the demo and build it through `smd`:
 
 ```sh
 smd go build -o /tmp/dreego ./cli/dreego
-smd sh -c 'cd demo && /tmp/dreego generate'
-smd sh -c 'cd demo && go build -o /tmp/dreego-wails-timer ./cmd/wails-v3'
+smd sh -c 'cd demo/demo-wailsv3 && /tmp/dreego generate'
+smd sh -c 'cd demo/demo-wailsv3 && go build -o /tmp/dreego-wails-timer .'
 ```
 
 Regenerate bindings after changing `TimerService`:
 
 ```sh
-smd sh -c 'cd demo && wails3 generate bindings -d wails-v3/bindings -ts -i -b ./wails-v3 ./cmd/wails-v3'
-smd sh -c 'cd demo && wails3 generate bindings -d wails-v3/static/bindings -b -noevents ./wails-v3 ./cmd/wails-v3'
+smd sh -c 'cd demo/demo-wailsv3 && wails3 generate bindings -d app/bindings -ts -i -b ./app'
+smd sh -c 'cd demo/demo-wailsv3 && wails3 generate bindings -d app/static/bindings -b -noevents ./app'
 ```
 
 No `package.json`, npm install, Wails dev server, or Dreego HTTP server is part

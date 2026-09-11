@@ -13,11 +13,11 @@ func TestWailsTimerDemoGeneratesAccessibleDocument(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RepoRoot: %v", err)
 	}
-	source, err := os.ReadFile(filepath.Join(repoRoot, "demo", "wails-v3", "routes", "+page.dreego"))
+	source, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "routes", "+page.dreego"))
 	if err != nil {
 		t.Fatalf("read timer demo: %v", err)
 	}
-	about, err := os.ReadFile(filepath.Join(repoRoot, "demo", "wails-v3", "routes", "about", "+page.dreego"))
+	about, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "routes", "about", "+page.dreego"))
 	if err != nil {
 		t.Fatalf("read timer about page: %v", err)
 	}
@@ -39,22 +39,22 @@ func TestWailsTimerDemoGeneratesAccessibleDocument(t *testing.T) {
 		`aria-label="Timer controls"`,
 		`role="status"`,
 		`button:focus-visible`,
-		`bindings/demo/wails-v3/timerservice.js`,
+		`bindings/demo-wailsv3/app/timerservice.js`,
 		`toggle.addEventListener`,
 		`reset.addEventListener`,
 	} {
 		dreegotest.MustContain(t, routes, fragment)
 	}
 	for _, path := range []string{
-		"demo/wails-v3/bindings/demo/wails-v3/models.ts",
-		"demo/wails-v3/bindings/demo/wails-v3/timerservice.ts",
-		"demo/wails-v3/static/bindings/demo/wails-v3/timerservice.js",
+		"demo/demo-wailsv3/app/bindings/demo-wailsv3/app/models.ts",
+		"demo/demo-wailsv3/app/bindings/demo-wailsv3/app/timerservice.ts",
+		"demo/demo-wailsv3/app/static/bindings/demo-wailsv3/app/timerservice.js",
 	} {
 		if _, err := os.Stat(filepath.Join(repoRoot, path)); err != nil {
 			t.Fatalf("required generated binding %s: %v", path, err)
 		}
 	}
-	if _, err := os.Stat(filepath.Join(repoRoot, "demo", "wails-v3", "package.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(repoRoot, "demo", "demo-wailsv3", "package.json")); !os.IsNotExist(err) {
 		t.Fatalf("Wails timer must not own package.json: %v", err)
 	}
 }

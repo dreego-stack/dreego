@@ -88,9 +88,9 @@ Generate readable TypeScript declarations and browser-ready JavaScript from the
 same explicit contract:
 
 ```sh
-cd demo
-wails3 generate bindings -d wails-v3/bindings -ts -i -b ./wails-v3 ./cmd/wails-v3
-wails3 generate bindings -d wails-v3/static/bindings -b -noevents ./wails-v3 ./cmd/wails-v3
+cd demo/demo-wailsv3
+wails3 generate bindings -d app/bindings -ts -i -b ./app
+wails3 generate bindings -d app/static/bindings -b -noevents ./app
 ```
 
 The generated browser modules import `/wails/runtime.js`, which the native

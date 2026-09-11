@@ -1,4 +1,4 @@
-module demo
+module demo-wailsv3
 
 go 1.27
 

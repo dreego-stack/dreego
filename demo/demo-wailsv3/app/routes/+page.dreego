@@ -41,7 +41,7 @@ function render(snapshot, announce = false) {
     if (announce || snapshot.remainingSeconds === 0) status.textContent = snapshot.status
 }
 
-import("/bindings/demo/wails-v3/timerservice.js").then(({ Reset, Snapshot, Toggle }) => {
+import("/bindings/demo-wailsv3/app/timerservice.js").then(({ Reset, Snapshot, Toggle }) => {
     toggle.disabled = false
     reset.disabled = false
     toggle.addEventListener("click", async () => render(await Toggle(), true))

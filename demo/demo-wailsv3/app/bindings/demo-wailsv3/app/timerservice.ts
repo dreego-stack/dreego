@@ -10,13 +10,13 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "/wails
 import * as $models from "./models.js";
 
 export function Reset(): $CancellablePromise<$models.TimerSnapshot> {
-    return $Call.ByID(894164148);
+    return $Call.ByID(588067845);
 }
 
 export function Snapshot(): $CancellablePromise<$models.TimerSnapshot> {
-    return $Call.ByID(499355849);
+    return $Call.ByID(3673680190);
 }
 
 export function Toggle(): $CancellablePromise<$models.TimerSnapshot> {
-    return $Call.ByID(2035003321);
+    return $Call.ByID(3107160234);
 }

@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	wailsdemo "demo/wails-v3"
+	"demo-wailsv3/app"
 )
 
 func main() {
-	if err := wailsdemo.Run(); err != nil {
+	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

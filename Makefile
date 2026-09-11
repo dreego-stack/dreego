@@ -3,10 +3,10 @@
 ROOT_VERSION = $$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 2>/dev/null || echo dev)
 
 up:
-	cd demo && docker compose up -d
+	cd demo/demo-ssr && docker compose up -d
 
 down:
-	cd demo && docker compose down
+	cd demo/demo-ssr && docker compose down
 
 build:
 	go build -ldflags "-X main.version=$(ROOT_VERSION)" -o tmp/dreego ./cmd/dreego
