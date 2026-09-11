@@ -36,6 +36,7 @@ type App struct {
 	buildDone      chan struct{}
 	i18nConfig     *corei18n.Config
 	localizer      corei18n.Localizer
+	renderPages    map[string]render.Renderable
 }
 
 func New() *App {
@@ -46,6 +47,7 @@ func New() *App {
 		customRules:    map[string]func(string) string{},
 		cspHeader:      mw.DefaultCSP,
 		buildDone:      make(chan struct{}),
+		renderPages:    map[string]render.Renderable{},
 	}
 	a.ready.Store(true)
 	return a

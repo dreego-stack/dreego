@@ -1,0 +1,77 @@
+<head>
+    <title>Dreego Timer</title>
+</head>
+
+<body>
+    <main class="timer-shell">
+        <p class="eyebrow">Dreego + Wails v3</p>
+        <h1>Focus timer</h1>
+        <p id="timer" class="timer" role="timer" aria-live="off" aria-label="Time remaining">05:00</p>
+        <div class="controls" aria-label="Timer controls">
+            <button id="toggle" type="button">Start</button>
+            <button id="reset" type="button">Reset</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite">Ready for a five-minute focus session.</p>
+    </main>
+</body>
+
+<style>
+    .timer-shell { box-sizing: border-box; min-height: 100vh; min-width: 20rem; margin: 0; padding: 3rem 1.5rem; background: Canvas; color: CanvasText; font-family: system-ui, sans-serif; text-align: center; }
+    .eyebrow { margin: 0 0 0.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2rem, 8vw, 3.5rem); }
+    .timer { margin: 2rem 0; font: 700 clamp(4rem, 20vw, 8rem) ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    .controls { display: flex; justify-content: center; gap: 0.75rem; }
+    button { min-width: 7rem; min-height: 2.75rem; padding: 0.75rem 1rem; border: 0.125rem solid currentColor; border-radius: 0.5rem; background: ButtonFace; color: ButtonText; font: inherit; font-weight: 700; }
+    button:focus-visible { outline: 0.2rem solid Highlight; outline-offset: 0.2rem; }
+    .status { min-height: 1.5rem; margin-top: 1.5rem; }
+</style>
+
+<client lang="js">
+const duration = 5 * 60
+let remaining = duration
+let interval = null
+
+const timer = document.querySelector("#timer")
+const toggle = document.querySelector("#toggle")
+const reset = document.querySelector("#reset")
+const status = document.querySelector("#status")
+
+function renderTime() {
+    const minutes = Math.floor(remaining / 60).toString().padStart(2, "0")
+    const seconds = (remaining % 60).toString().padStart(2, "0")
+    timer.textContent = `${minutes}:${seconds}`
+}
+
+function pause(message) {
+    clearInterval(interval)
+    interval = null
+    toggle.textContent = "Start"
+    status.textContent = message
+}
+
+toggle.addEventListener("click", () => {
+    if (interval !== null) {
+        pause("Timer paused.")
+        return
+    }
+    if (remaining === 0) {
+        remaining = duration
+        renderTime()
+    }
+    toggle.textContent = "Pause"
+    status.textContent = "Timer running."
+    interval = setInterval(() => {
+        remaining -= 1
+        renderTime()
+        if (remaining === 0) {
+            pause("Focus session complete.")
+        }
+    }, 1000)
+})
+
+reset.addEventListener("click", () => {
+    remaining = duration
+    renderTime()
+    pause("Timer reset to five minutes.")
+})
+</client>

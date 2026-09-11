@@ -172,9 +172,28 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 		}
 	} else {
 		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", firstMethod, pattern, getHandler)))
+		if contextType == "dreego.RenderContext" {
+			if routePath, ok := desktopRoutePath(pattern); ok {
+				pageFunc := "Page" + pascalBase
+				reg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRender(%q, %s())", routePath, pageFunc)))
+			}
+		}
 	}
 
 	return buf.String(), reg.String(), nil
+}
+
+func desktopRoutePath(pattern string) (string, bool) {
+	if strings.Contains(pattern, "{") && !strings.HasSuffix(pattern, "/{$}") {
+		return "", false
+	}
+	if pattern == "/{$}" {
+		return "/", true
+	}
+	if routePath, ok := strings.CutSuffix(pattern, "/{$}"); ok {
+		return routePath + "/", true
+	}
+	return pattern, true
 }
 
 func registrationStatement(call string) string {
