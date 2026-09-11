@@ -51,6 +51,9 @@ contents or `dreego docs <path>` for a chapter.
 ## Development
 
 - [Testing](https://github.com/dreego-stack/dreego/blob/main/_docs/testing.md) — Integration Test Strategy
+- [Go 1.23 knowledge patch](https://github.com/dreego-stack/dreego/blob/main/_docs/handbook/go-1.23.md) — Changes an agent with Go 1.22 knowledge must know
+- [Go 1.24 knowledge patch](https://github.com/dreego-stack/dreego/blob/main/_docs/handbook/go-1.24.md) — Changes an agent with Go 1.23 knowledge must know
+- [Go 1.25 knowledge patch](https://github.com/dreego-stack/dreego/blob/main/_docs/handbook/go-1.25.md) — Changes an agent with Go 1.24 knowledge must know
 - [Reference Applications](https://github.com/dreego-stack/dreego/blob/main/_docs/reference-apps.md) — End-to-end example apps under `_tests/fixtures/`
 - [Benchmarks](https://github.com/dreego-stack/dreego/blob/main/_docs/benchmarks.md) — Code generation and request benchmarks
 - [Deployment](https://github.com/dreego-stack/dreego/blob/main/_docs/deployment.md) — Build, Cross-Compile, Containers
