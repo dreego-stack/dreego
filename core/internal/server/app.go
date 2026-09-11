@@ -37,6 +37,7 @@ type App struct {
 	i18nConfig     *corei18n.Config
 	localizer      corei18n.Localizer
 	renderPages    map[string]render.Renderable
+	staticAssets   map[string]StaticAsset
 }
 
 func New() *App {
@@ -48,6 +49,7 @@ func New() *App {
 		cspHeader:      mw.DefaultCSP,
 		buildDone:      make(chan struct{}),
 		renderPages:    map[string]render.Renderable{},
+		staticAssets:   map[string]StaticAsset{},
 	}
 	a.ready.Store(true)
 	return a

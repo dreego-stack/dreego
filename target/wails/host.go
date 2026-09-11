@@ -2,6 +2,8 @@ package wails
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -33,18 +35,29 @@ func (h *Host) Render(path string) (dreego.Result, error) {
 }
 
 func (h *Host) Run(options Options) error {
-	result, err := h.Render(options.Path)
-	if err != nil {
+	if os.Getenv("FRONTEND_DEVSERVER_URL") != "" {
+		return errors.New("dreego wails: FRONTEND_DEVSERVER_URL is not supported")
+	}
+	if _, err := h.Render(options.Path); err != nil {
 		return err
 	}
-	app := application.New(application.Options{Name: options.Name})
+	app := application.New(application.Options{
+		Name: options.Name,
+		Assets: application.AssetOptions{
+			Handler:        h,
+			DisableLogging: true,
+		},
+	})
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:     options.Title,
 		Width:     options.Width,
 		Height:    options.Height,
 		MinWidth:  options.MinWidth,
 		MinHeight: options.MinHeight,
-		HTML:      string(result.HTML),
+		URL:       options.Path,
 	})
-	return app.Run()
+	if err := app.Run(); err != nil {
+		return fmt.Errorf("dreego wails: run: %w", err)
+	}
+	return nil
 }

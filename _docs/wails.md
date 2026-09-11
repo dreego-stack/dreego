@@ -18,6 +18,21 @@ window. It checks the complete Wails process tree for TCP listener descriptors
 and traces system calls so that even a short-lived `listen` call fails the
 suite. The virtual display is configured with its own TCP transport disabled.
 
+## Assets and literal routes
+
+The desktop host gives Wails an in-process asset handler and loads the initial
+literal route through the native Wails URL scheme. The handler serves only
+pages registered for target-neutral rendering and files registered with
+`App.RegisterStatic`. It never falls back to the SSR handler, so middleware,
+cookies, form actions, redirects, and other HTTP behavior do not cross into the
+desktop host.
+
+Literal links perform full-document WebView navigation and use the native
+back-forward history. Query strings, encoded paths, traversal segments,
+backslashes, unknown routes, and non-GET requests are rejected. Dreego also
+rejects `FRONTEND_DEVSERVER_URL` because an external development server would
+violate the listener-free desktop contract.
+
 ```go
 app := dreego.New()
 if err := www.Register(app); err != nil {

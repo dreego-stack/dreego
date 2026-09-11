@@ -15,6 +15,7 @@ var ErrRedirect = context.ErrRedirect
 var ErrAppBuilt = server.ErrAppBuilt
 var ErrRouteConflict = server.ErrRouteConflict
 var ErrRenderRouteNotFound = server.ErrRenderRouteNotFound
+var ErrStaticAssetNotFound = server.ErrStaticAssetNotFound
 var ErrSessionTooLarge = session.ErrSessionTooLarge
 var ErrCookiePathOverride = session.ErrCookiePathOverride
 
@@ -32,6 +33,7 @@ func (f ComponentFunc) Render(ctx RenderContext) (Result, error) {
 }
 
 type App = server.App
+type StaticAsset = server.StaticAsset
 
 func New() *App {
 	return server.New()
