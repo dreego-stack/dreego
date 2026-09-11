@@ -2,6 +2,8 @@ package i18n
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -51,19 +53,11 @@ func GoConfig(set Set, detection []string, urlStrategy string, domains map[strin
 	var output strings.Builder
 	output.WriteString("dreego.I18nConfig{DefaultLocale: ")
 	output.WriteString(fmt.Sprintf("%q, Detection: %#v, URLStrategy: %q, Domains: %#v, Fallbacks: %#v, Locales: []dreego.LocaleCatalog{", set.DefaultLocale, detection, urlStrategy, domains, fallbacks))
-	locales := make([]string, 0, len(set.Locales))
-	for locale := range set.Locales {
-		locales = append(locales, locale)
-	}
-	sort.Strings(locales)
+	locales := slices.Sorted(maps.Keys(set.Locales))
 	for _, locale := range locales {
 		catalog := set.Locales[locale]
 		output.WriteString(fmt.Sprintf("{Locale: %q, Messages: map[string]dreego.LocalizedMessage{", locale))
-		keys := make([]string, 0, len(catalog.Messages))
-		for key := range catalog.Messages {
-			keys = append(keys, key)
-		}
-		sort.Strings(keys)
+		keys := slices.Sorted(maps.Keys(catalog.Messages))
 		for _, key := range keys {
 			output.WriteString(fmt.Sprintf("%q: %s,", key, goMessage(catalog.Messages[key])))
 		}
@@ -111,11 +105,7 @@ func goValue(value Value) string {
 		output.WriteString(fmt.Sprintf(", %q", kind))
 	}
 	output.WriteString(", map[string]dreego.MessageValue{")
-	cases := make([]string, 0, len(selector.Cases))
-	for name := range selector.Cases {
-		cases = append(cases, name)
-	}
-	sort.Strings(cases)
+	cases := slices.Sorted(maps.Keys(selector.Cases))
 	for _, name := range cases {
 		output.WriteString(fmt.Sprintf("%q: %s,", name, goValue(selector.Cases[name])))
 	}

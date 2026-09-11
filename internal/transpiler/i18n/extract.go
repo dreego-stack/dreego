@@ -3,7 +3,8 @@ package i18n
 import (
 	"encoding/json"
 	"io"
-	"sort"
+	"maps"
+	"slices"
 )
 
 type Extraction struct {
@@ -20,17 +21,9 @@ type ExtractedMessage struct {
 }
 
 func Extract(writer io.Writer, set Set) error {
-	locales := make([]string, 0, len(set.Locales))
-	for locale := range set.Locales {
-		locales = append(locales, locale)
-	}
-	sort.Strings(locales)
+	locales := slices.Sorted(maps.Keys(set.Locales))
 	source := set.Locales[set.DefaultLocale]
-	keys := make([]string, 0, len(source.Messages))
-	for key := range source.Messages {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
+	keys := slices.Sorted(maps.Keys(source.Messages))
 	document := Extraction{FormatVersion: 1, SourceLocale: set.DefaultLocale, Locales: locales}
 	for _, key := range keys {
 		message := source.Messages[key]

@@ -21,22 +21,24 @@ import (
 var ErrServerRunning = errors.New("dreego: server already running")
 
 type ServerConfig struct {
-	ReadHeaderTimeout time.Duration
-	ReadTimeout       time.Duration
-	WriteTimeout      time.Duration
-	IdleTimeout       time.Duration
-	MaxHeaderBytes    int
-	ShutdownTimeout   time.Duration
+	ReadHeaderTimeout   time.Duration
+	ReadTimeout         time.Duration
+	WriteTimeout        time.Duration
+	IdleTimeout         time.Duration
+	MaxHeaderBytes      int
+	MaxHeaderValueCount int
+	ShutdownTimeout     time.Duration
 }
 
 func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
-		ReadHeaderTimeout: 10 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      30 * time.Second,
-		IdleTimeout:       120 * time.Second,
-		MaxHeaderBytes:    1 << 20,
-		ShutdownTimeout:   10 * time.Second,
+		ReadHeaderTimeout:   10 * time.Second,
+		ReadTimeout:         30 * time.Second,
+		WriteTimeout:        30 * time.Second,
+		IdleTimeout:         120 * time.Second,
+		MaxHeaderBytes:      1 << 20,
+		MaxHeaderValueCount: http.DefaultMaxHeaderValueCount,
+		ShutdownTimeout:     10 * time.Second,
 	}
 }
 
@@ -56,6 +58,9 @@ func (c ServerConfig) withDefaults() ServerConfig {
 	}
 	if c.MaxHeaderBytes <= 0 {
 		c.MaxHeaderBytes = defaults.MaxHeaderBytes
+	}
+	if c.MaxHeaderValueCount <= 0 {
+		c.MaxHeaderValueCount = defaults.MaxHeaderValueCount
 	}
 	if c.ShutdownTimeout <= 0 {
 		c.ShutdownTimeout = defaults.ShutdownTimeout
@@ -121,12 +126,13 @@ func (h *Host) start(listener net.Listener) (*hostLifecycle, error) {
 	}
 	cfg := h.config.withDefaults()
 	server := &http.Server{
-		Handler:           h.app.Handler(),
-		ReadHeaderTimeout: cfg.ReadHeaderTimeout,
-		ReadTimeout:       cfg.ReadTimeout,
-		WriteTimeout:      cfg.WriteTimeout,
-		IdleTimeout:       cfg.IdleTimeout,
-		MaxHeaderBytes:    cfg.MaxHeaderBytes,
+		Handler:             h.app.Handler(),
+		ReadHeaderTimeout:   cfg.ReadHeaderTimeout,
+		ReadTimeout:         cfg.ReadTimeout,
+		WriteTimeout:        cfg.WriteTimeout,
+		IdleTimeout:         cfg.IdleTimeout,
+		MaxHeaderBytes:      cfg.MaxHeaderBytes,
+		MaxHeaderValueCount: cfg.MaxHeaderValueCount,
 	}
 
 	h.mu.Lock()

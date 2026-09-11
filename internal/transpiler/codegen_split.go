@@ -18,7 +18,7 @@ func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode
 			continue
 		}
 		firstLine := ""
-		for _, line := range strings.Split(trimmed, "\n") {
+		for line := range strings.SplitSeq(trimmed, "\n") {
 			line = strings.TrimSpace(line)
 			if line == "" || strings.HasPrefix(line, "//") {
 				continue

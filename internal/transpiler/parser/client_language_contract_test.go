@@ -11,7 +11,6 @@ import (
 func TestClientLanguageContractRejectsUnsupportedLanguages(t *testing.T) {
 	t.Parallel()
 	for _, language := range []string{"python", "typescript", "coffee"} {
-		language := language
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			source := `<body></body><client lang="` + language + `"></client>`
@@ -30,7 +29,6 @@ func TestClientLanguageContractRejectsUnsupportedLanguages(t *testing.T) {
 func TestClientLanguageContractNormalizesSupportedNames(t *testing.T) {
 	t.Parallel()
 	for _, language := range []string{"JS", "TS", "Lua"} {
-		language := language
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			source := `<body></body><client lang="` + language + `"></client>`

@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine
+FROM golang:1.27-alpine
 ARG DREEGO_VERSION=dev
 WORKDIR /app
 RUN apk add --no-cache curl git py3-yaml >/dev/null 2>&1

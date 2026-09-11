@@ -103,7 +103,7 @@ func parseComponentHeader(line string) *ir.ComponentDef {
 	if strings.HasPrefix(slots, "(") && strings.HasSuffix(slots, ")") {
 		inner := strings.Trim(slots[1:len(slots)-1], " ")
 		if inner != "" {
-			for _, s := range strings.Split(inner, ",") {
+			for s := range strings.SplitSeq(inner, ",") {
 				s = strings.TrimSpace(s)
 				if s != "" {
 					comp.Slots = append(comp.Slots, s)
@@ -117,7 +117,7 @@ func parseComponentHeader(line string) *ir.ComponentDef {
 
 func parseProps(s string) []ir.Prop {
 	var props []ir.Prop
-	for _, part := range strings.Split(s, ",") {
+	for part := range strings.SplitSeq(s, ",") {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue
@@ -130,8 +130,8 @@ func parseProps(s string) []ir.Prop {
 		if len(fields) >= 2 {
 			p.Type = fields[1]
 		}
-		if eq := strings.IndexByte(part, '='); eq >= 0 {
-			p.Default = strings.TrimSpace(part[eq+1:])
+		if _, after, ok := strings.Cut(part, "="); ok {
+			p.Default = strings.TrimSpace(after)
 		}
 		if p.Type == "" {
 			p.Type = "string"

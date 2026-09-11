@@ -55,6 +55,8 @@ func TestPluginClientBundleRejectsUnsafeAndInvalidManifests(t *testing.T) {
 		{"dependency cycle", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"a","path":"a.js","dependsOn":["b"]},{"id":"b","path":"b.js","dependsOn":["a"]}]}}`, map[string]string{"a.js": "a();", "b.js": "b();"}, "dependency cycle"},
 		{"traversal", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad","path":"../secret.js","required":true}]}}`, nil, "unsafe client module path"},
 		{"backslash traversal", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad","path":"..\\secret.js","required":true}]}}`, nil, "unsafe client module path"},
+		{"redundant separator", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad","path":"client//bad.js","required":true}]}}`, nil, "unsafe client module path"},
+		{"dot segment", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad","path":"client/./bad.js","required":true}]}}`, nil, "unsafe client module path"},
 		{"non javascript", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad","path":"client/bad.ts","required":true}]}}`, map[string]string{"client/bad.ts": "bad();"}, "must be a .js file"},
 		{"unsafe id", `{"client":{"format":"modules-v1","path":"/x.js","modules":[{"id":"bad\\nid","path":"client/bad.js","required":true}]}}`, map[string]string{"client/bad.js": "bad();"}, "invalid client module id"},
 	}
@@ -88,12 +90,32 @@ func TestPluginClientBundleRejectsRouteConflict(t *testing.T) {
 	}
 }
 
+func TestPluginClientBundleRejectsSymlinkEscape(t *testing.T) {
+	project := t.TempDir()
+	plugin := filepath.Join(project, "vendor", "github.com", "dreego-stack", "plugin-auth")
+	writePluginClientFixture(t, project, plugin, `{"client":{"format":"modules-v1","path":"/auth.js","modules":[{"id":"core","path":"client/core.js","required":true}]}}`, nil)
+	outside := filepath.Join(project, "outside.js")
+	if err := os.WriteFile(outside, []byte("outside();"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(plugin, "client"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(plugin, "client", "core.js")); err != nil {
+		t.Fatal(err)
+	}
+	settings := &Settings{Plugins: map[string]PluginSettings{"github.com/dreego-stack/plugin-auth": {}}}
+	if _, _, err := generatePluginClientAssets(project, settings, map[string]bool{}); err == nil {
+		t.Fatal("expected symlink escape to fail")
+	}
+}
+
 func writePluginClientFixture(t *testing.T, project, plugin, manifest string, files map[string]string) {
 	t.Helper()
 	if err := os.MkdirAll(plugin, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	goMod := "module example.com/app\n\ngo 1.22\n\nrequire github.com/dreego-stack/plugin-auth v0.0.1\n"
+	goMod := "module example.com/app\n\ngo 1.27\n\nrequire github.com/dreego-stack/plugin-auth v0.0.1\n"
 	if err := os.WriteFile(filepath.Join(project, "go.mod"), []byte(goMod), 0o600); err != nil {
 		t.Fatal(err)
 	}

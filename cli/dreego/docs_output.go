@@ -19,7 +19,7 @@ var linkPattern = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
 func printJSON(webBase, path string, body []byte) {
 	text := string(body)
 	var headings []string
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		if match := headingPattern.FindStringSubmatch(line); match != nil {
 			headings = append(headings, strings.TrimSpace(match[1]))
 		}

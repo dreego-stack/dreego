@@ -79,7 +79,7 @@ func formatCompHeader(line string) string {
 	}
 
 	var formatted []string
-	for _, p := range strings.Split(params, ",") {
+	for p := range strings.SplitSeq(params, ",") {
 		p = strings.TrimSpace(p)
 		if p == "" {
 			continue

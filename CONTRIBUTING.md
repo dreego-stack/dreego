@@ -6,7 +6,7 @@ root — it is the authoritative source for conventions.
 
 ## Development Setup
 
-- Go 1.22 or newer.
+- Go 1.27 or newer.
 - No external runtime dependencies in `core/` — the standard library only
   (enforced by `_scripts/check-core-deps.sh` in CI).
 - Run the full suite with `make test` (Docker-based; builds the `_tests/`
@@ -98,7 +98,7 @@ Every feature follows this cycle:
 - Max 300 lines per handwritten file, one logical thing per file. Generated
   fixture output is exempt and must not be manually split.
 - No comments unless needed for clarity.
-- Go 1.22+, standard library preferred. Core code in `core/` has no external
+- Go 1.27+, standard library preferred. Core code in `core/` has no external
   dependencies.
 - CLI lives in `cli/dreego/` and imports core; plugins live in separate
   repositories under `github.com/dreego-stack/`.

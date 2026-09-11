@@ -41,7 +41,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		t.Fatalf("Serve: %v", err)
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.22\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := fmt.Sprintf("module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}

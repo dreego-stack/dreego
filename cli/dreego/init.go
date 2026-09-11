@@ -28,7 +28,7 @@ func cmdInit(args []string) {
 
 	if !goAvailable() {
 		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
-		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.22 or newer. Install it from https://go.dev/doc/install and retry.\n")
+		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.27 or newer. Install it from https://go.dev/doc/install and retry.\n")
 		os.Exit(1)
 	}
 

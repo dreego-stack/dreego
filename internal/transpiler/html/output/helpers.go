@@ -39,11 +39,11 @@ func ExtractAttrValues(attrs string) string {
 }
 
 func AttrVal(part string) string {
-	eq := strings.IndexByte(part, '=')
-	if eq < 0 {
+	_, after, ok := strings.Cut(part, "=")
+	if !ok {
 		return fmt.Sprintf("%q", part)
 	}
-	val := strings.TrimSpace(part[eq+1:])
+	val := strings.TrimSpace(after)
 	if val == "" {
 		return fmt.Sprintf("%q", "")
 	}

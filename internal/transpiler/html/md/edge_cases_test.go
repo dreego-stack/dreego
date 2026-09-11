@@ -37,7 +37,6 @@ b := 2</code></pre>`},
 	}
 
 	for _, test := range tests {
-		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			nodes, err := ToNodes(test.src, ModeTrusted)
@@ -68,7 +67,6 @@ func TestSafeMarkdownNeverEmitsExecutableHTML(t *testing.T) {
 	}
 
 	for _, input := range inputs {
-		input := input
 		t.Run(input, func(t *testing.T) {
 			t.Parallel()
 			nodes, err := ToNodes(input, ModeSafe)

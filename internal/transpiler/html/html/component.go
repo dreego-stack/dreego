@@ -36,7 +36,7 @@ func Generate(gen *codegen.State, file *ir.File, scopeHash string) (string, erro
 
 	for _, g := range file.Server {
 		if g.Code != "" {
-			for _, line := range strings.Split(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
 				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
 			}
 			buf.WriteString("\n")

@@ -169,5 +169,5 @@ func (p *AuthPlugin) authMiddleware(next http.Handler) http.Handler {
 - All handlers (including generated ones) return `error` — Recovery dispatches
 - `dreego.Context` is extended with `Errors()`, `Old()`, `Flash()`
 - `dreego generate` validates template syntax → build errors before runtime
-- `slog` is a core dependency (Go 1.21+ stdlib, Go 1.22+ used)
+- `slog` is a core standard-library dependency
 - No Chi — all middleware built from scratch on `net/http`

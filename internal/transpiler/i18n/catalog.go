@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -133,11 +134,7 @@ func loadFile(path string) (map[string]Message, error) {
 	if err := decoder.Decode(&raw); err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
-	keys := make([]string, 0, len(raw))
-	for key := range raw {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
+	keys := slices.Sorted(maps.Keys(raw))
 	messages := make(map[string]Message, len(raw))
 	for _, key := range keys {
 		if !validName(key, true) {
@@ -195,7 +192,7 @@ func validName(value string, dots bool) bool {
 	if value == "" {
 		return false
 	}
-	for _, part := range strings.Split(value, ".") {
+	for part := range strings.SplitSeq(value, ".") {
 		if part == "" || !asciiLetter(part[0]) {
 			return false
 		}

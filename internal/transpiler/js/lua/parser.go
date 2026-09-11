@@ -147,7 +147,7 @@ func (p *sourceParser) separators() {
 
 func (p *sourceParser) require(kind tokenKind, message string) (token, error) {
 	if p.current().kind != kind {
-		return token{}, p.errorf(p.current(), message)
+		return token{}, p.errorf(p.current(), "%s", message)
 	}
 	return p.advance(), nil
 }

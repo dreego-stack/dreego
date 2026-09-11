@@ -2,6 +2,7 @@ package output
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
@@ -10,12 +11,7 @@ func slotExists(def *ir.ComponentDef, name string) bool {
 	if def == nil {
 		return false
 	}
-	for _, s := range def.Slots {
-		if s == name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(def.Slots, name)
 }
 
 func ValidateSlotName(def *ir.ComponentDef, name, filename, src string, pos int) error {

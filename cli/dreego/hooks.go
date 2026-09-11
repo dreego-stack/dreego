@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -38,13 +39,13 @@ func runBuildHooks(cwd string, autoApprove bool, stdin io.Reader) error {
 	if err != nil {
 		return nil
 	}
-	var plugins []string
-	for path := range gm.Requires {
+	plugins := slices.Sorted(maps.Keys(gm.Requires))
+	plugins = slices.DeleteFunc(plugins, func(path string) bool {
 		if strings.HasPrefix(path, pluginOrgPrefix) && path != coreModule {
-			plugins = append(plugins, path)
+			return false
 		}
-	}
-	sort.Strings(plugins)
+		return true
+	})
 
 	for _, modPath := range plugins {
 		dir, err := findModDir(cwd, modPath)

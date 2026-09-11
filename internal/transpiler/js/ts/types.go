@@ -78,7 +78,7 @@ func modelFieldName(fallback string, tag *ast.BasicLit) (string, bool) {
 		return fallback, true
 	}
 	value := strings.Trim(tag.Value, "`")
-	jsonName := strings.Split(reflect.StructTag(value).Get("json"), ",")[0]
+	jsonName, _, _ := strings.Cut(reflect.StructTag(value).Get("json"), ",")
 	if jsonName == "-" {
 		return "", false
 	}
@@ -119,16 +119,16 @@ func goASTType(expression ast.Expr) (string, error) {
 
 func goType(value string) (string, error) {
 	value = strings.TrimSpace(value)
-	if strings.HasPrefix(value, "*") {
-		mapped, err := goType(strings.TrimPrefix(value, "*"))
+	if after, ok := strings.CutPrefix(value, "*"); ok {
+		mapped, err := goType(after)
 		return mapped + " | null", err
 	}
-	if strings.HasPrefix(value, "[]") {
-		mapped, err := goType(strings.TrimPrefix(value, "[]"))
+	if after, ok := strings.CutPrefix(value, "[]"); ok {
+		mapped, err := goType(after)
 		return "Array<" + mapped + ">", err
 	}
-	if strings.HasPrefix(value, "map[string]") {
-		mapped, err := goType(strings.TrimPrefix(value, "map[string]"))
+	if after, ok := strings.CutPrefix(value, "map[string]"); ok {
+		mapped, err := goType(after)
 		return "Record<string, " + mapped + ">", err
 	}
 	switch value {

@@ -26,7 +26,7 @@ func cmdNew(args []string) {
 
 	if !goAvailable() {
 		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
-		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.22 or newer. Install it from https://go.dev/doc/install and retry.\n")
+		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.27 or newer. Install it from https://go.dev/doc/install and retry.\n")
 		os.Exit(1)
 	}
 
@@ -81,7 +81,7 @@ func cmdNew(args []string) {
 		fmt.Fprintf(os.Stderr, "warning: go mod init failed: %v\n", err)
 	}
 
-	c = exec.Command("go", "mod", "edit", "-go=1.22")
+	c = exec.Command("go", "mod", "edit", "-go=1.27")
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
 	if err := c.Run(); err != nil {
@@ -164,7 +164,7 @@ func findRepoFromWorkingModule() string {
 		return ""
 	}
 	prefix := "replace github.com/dreego-stack/dreego => "
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		line = strings.TrimSpace(line)
 		if !strings.HasPrefix(line, prefix) {
 			continue
@@ -191,7 +191,7 @@ func validProjectName(name string) bool {
 	if strings.ContainsAny(name, " \t\"'\\`$;|&<>(){}[]!*?") {
 		return false
 	}
-	for _, seg := range strings.Split(name, "/") {
+	for seg := range strings.SplitSeq(name, "/") {
 		if seg == "" || seg == "." || seg == ".." {
 			return false
 		}

@@ -174,7 +174,7 @@ The CI (`pull-request-check.yml`) validates the change file and runs the race an
 
 ## Note: smd
 
-All development commands run inside `smd` (Docker container). Never run `make test`, `go build`, or any dev command directly on the host. The committed root `smd.toml` uses `golang:1.22-alpine` and includes the tools required by the test and release scripts. Run the full suite inside the container with `smd sh _tests/test.sh`; `make test` remains the Docker-based host and CI entry point.
+All development commands run inside `smd` (Docker container). Never run `go build` or any dev command directly on the host. The committed root `smd.toml` uses `golang:1.27-alpine` and includes the tools required by the test and release scripts. Run the full suite with `make test`; it starts the test container and remains the CI entry point.
 
 The `smd.toml` configuration exists ONLY at the repo root. Never create `smd.toml` in subdirectories (e.g. `core/`, `demo/`, worktrees copy the root file when a container image is needed).
 
@@ -194,7 +194,13 @@ host paths that do not exist in the container.
 
 - Max 300 lines per handwritten file, one logical thing per file. Generated fixture output is exempt and must not be manually split.
 - No code comments (except where needed for clarity)
-- Go 1.22+, prefer the standard library
+- Go 1.27+, prefer the standard library
+- Before changing the Go baseline or modernizing Go code, read only the Go
+  knowledge patches newer than your reliable built-in knowledge:
+  `_docs/handbook/go-1.23.md`, `_docs/handbook/go-1.24.md`, and
+  `_docs/handbook/go-1.25.md`, `_docs/handbook/go-1.26.md`, and
+  `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
+  immediate predecessor and links to the official release notes.
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
 - Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate). Core may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside Core. CI enforces this boundary through `_scripts/check-core-deps.sh`.
 - Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.

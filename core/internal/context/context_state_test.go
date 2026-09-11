@@ -119,7 +119,6 @@ func TestSSRContextSessionWriteErrorsReturnGeneric500(t *testing.T) {
 		"destroy": func(ctx *SSRContext) { ctx.DestroySession() },
 	}
 	for name, operation := range operations {
-		name, operation := name, operation
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			want := errors.New("write failed")

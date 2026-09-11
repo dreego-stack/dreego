@@ -104,7 +104,7 @@ func parseMessageExpression(raw string, pos int) (string, []ir.MessageArgument, 
 }
 
 func validMessageKey(key string) bool {
-	for _, segment := range strings.Split(key, ".") {
+	for segment := range strings.SplitSeq(key, ".") {
 		if !validMessageName(segment) {
 			return false
 		}

@@ -1,6 +1,6 @@
 module pluginapp
 
-go 1.22
+go 1.27
 
 require github.com/dreego-stack/dreego v0.0.0
 

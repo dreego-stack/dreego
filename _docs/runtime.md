@@ -67,6 +67,7 @@ Pass `ssr.ServerConfig` to `ssr.New(app, config)` to tune the HTTP host:
 | `WriteTimeout` | 30s | Caps the time from end-of-headers to fully writing the response |
 | `IdleTimeout` | 120s | Closes keep-alive connections that are idle longer than this |
 | `MaxHeaderBytes` | 1 MiB | Rejects oversized request headers with a 431 response |
+| `MaxHeaderValueCount` | 500 | Rejects requests with excessive repeated header values |
 | `ShutdownTimeout` | 10s | Deadline for draining active requests during shutdown |
 
 Connection and header timeouts are host-wide policy. Zero values fall back to

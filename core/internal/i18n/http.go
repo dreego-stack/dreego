@@ -95,7 +95,7 @@ func addVary(header http.Header, value string) {
 		return
 	}
 	for _, existing := range values {
-		for _, part := range strings.Split(existing, ",") {
+		for part := range strings.SplitSeq(existing, ",") {
 			if strings.EqualFold(strings.TrimSpace(part), value) {
 				return
 			}

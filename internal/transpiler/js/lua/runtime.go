@@ -1,7 +1,8 @@
 package lua
 
 import (
-	"sort"
+	"maps"
+	"slices"
 	"strings"
 )
 
@@ -76,14 +77,10 @@ func Bundle(features string) string {
 			include(dependency)
 		}
 	}
-	for _, feature := range strings.Split(features, ",") {
+	for feature := range strings.SplitSeq(features, ",") {
 		include(feature)
 	}
-	names := make([]string, 0, len(selected))
-	for name := range selected {
-		names = append(names, name)
-	}
-	sort.Strings(names)
+	names := slices.Sorted(maps.Keys(selected))
 	parts := make([]string, 0, len(names))
 	for _, name := range names {
 		parts = append(parts, helpers[name].code)
@@ -99,10 +96,6 @@ func FeatureList(features string) []string {
 }
 
 func BundleFeatures(features map[string]bool) string {
-	names := make([]string, 0, len(features))
-	for name := range features {
-		names = append(names, name)
-	}
-	sort.Strings(names)
+	names := slices.Sorted(maps.Keys(features))
 	return Bundle(strings.Join(names, ","))
 }

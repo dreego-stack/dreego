@@ -36,12 +36,12 @@ func extractFromNode(n TemplateNode, actions *[]string, seen map[string]bool) {
 }
 
 func findFormStruct(serverSections []ServerSection, action string) string {
-	combined := ""
+	var combined strings.Builder
 	for _, g := range serverSections {
-		combined += g.Code + "\n"
+		combined.WriteString(g.Code + "\n")
 	}
 	re := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(\s*\w+\s+[^,]+,\s*\w+\s+([^,)]+)\s*\)`)
-	matches := re.FindStringSubmatch(combined)
+	matches := re.FindStringSubmatch(combined.String())
 	if len(matches) >= 2 {
 		return strings.TrimSpace(matches[1])
 	}
@@ -49,12 +49,12 @@ func findFormStruct(serverSections []ServerSection, action string) string {
 }
 
 func findFormHandler(serverSections []ServerSection, action string) bool {
-	combined := ""
+	var combined strings.Builder
 	for _, g := range serverSections {
-		combined += g.Code + "\n"
+		combined.WriteString(g.Code + "\n")
 	}
 	handlerRE := regexp.MustCompile(`func\s+` + regexp.QuoteMeta(action) + `\s*\(`)
-	return handlerRE.MatchString(combined)
+	return handlerRE.MatchString(combined.String())
 }
 
 func hasValidateTag(serverSections []ServerSection, structName string) bool {

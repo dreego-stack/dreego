@@ -27,7 +27,6 @@ local value = setmetatable("safe")`,
 coroutine.createElement("div")`,
 	}
 	for name, source := range programs {
-		name, source := name, source
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			artifact, err := Compile(source)
@@ -54,7 +53,6 @@ func TestCompileRejectsDocumentedUnsupportedSyntax(t *testing.T) {
 		"collectgarbage":  `collectgarbage()`,
 	}
 	for name, source := range programs {
-		name, source := name, source
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			if _, err := Compile(source); err == nil {

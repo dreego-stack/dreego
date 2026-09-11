@@ -162,7 +162,7 @@ func routeFileRel(root, dir, name string) string {
 
 func buildPageName(rel string) string {
 	parts := []string{}
-	for _, seg := range strings.Split(rel, "/") {
+	for seg := range strings.SplitSeq(rel, "/") {
 		if seg == "" {
 			continue
 		}
@@ -179,7 +179,7 @@ func buildPattern(rel string) string {
 		return "/{$}"
 	}
 	segments := []string{}
-	for _, seg := range strings.Split(rel, "/") {
+	for seg := range strings.SplitSeq(rel, "/") {
 		if seg == "" {
 			continue
 		}
@@ -195,8 +195,8 @@ func buildPattern(rel string) string {
 }
 
 func errorCatchPattern(dirPattern string) string {
-	if strings.HasSuffix(dirPattern, "/{$}") {
-		return strings.TrimSuffix(dirPattern, "/{$}") + "/{p...}"
+	if before, ok := strings.CutSuffix(dirPattern, "/{$}"); ok {
+		return before + "/{p...}"
 	}
 	return dirPattern + "/{p...}"
 }
@@ -249,14 +249,14 @@ func patternSegment(seg string) string {
 	if seg == "" {
 		return ""
 	}
-	if strings.HasPrefix(seg, "...") {
-		return "{" + strings.TrimPrefix(seg, "...") + "...}"
+	if after, ok := strings.CutPrefix(seg, "..."); ok {
+		return "{" + after + "...}"
 	}
 	return "{" + seg + "}"
 }
 
 func doubleBracketSegment(rel string) string {
-	for _, seg := range strings.Split(rel, "/") {
+	for seg := range strings.SplitSeq(rel, "/") {
 		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
 			return seg
 		}
