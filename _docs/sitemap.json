@@ -34,6 +34,8 @@
     {"path": "/_docs/handbook/go-1.23.md", "title": "Go 1.23 Knowledge Patch"},
     {"path": "/_docs/handbook/go-1.24.md", "title": "Go 1.24 Knowledge Patch"},
     {"path": "/_docs/handbook/go-1.25.md", "title": "Go 1.25 Knowledge Patch"},
+    {"path": "/_docs/handbook/go-1.26.md", "title": "Go 1.26 Knowledge Patch"},
+    {"path": "/_docs/handbook/go-1.27.md", "title": "Go 1.27 Knowledge Patch"},
     {"path": "/_docs/benchmarks.md", "title": "Benchmarks"},
     {"path": "/_docs/reference-apps.md", "title": "Reference Applications"},
     {"path": "/_docs/deployment.md", "title": "Deployment"},

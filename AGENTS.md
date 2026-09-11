@@ -198,7 +198,8 @@ host paths that do not exist in the container.
 - Before changing the Go baseline or modernizing Go code, read only the Go
   knowledge patches newer than your reliable built-in knowledge:
   `_docs/handbook/go-1.23.md`, `_docs/handbook/go-1.24.md`, and
-  `_docs/handbook/go-1.25.md`. Each page contains only the delta from its
+  `_docs/handbook/go-1.25.md`, `_docs/handbook/go-1.26.md`, and
+  `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
   immediate predecessor and links to the official release notes.
 - Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
 - Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate). Core may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside Core. CI enforces this boundary through `_scripts/check-core-deps.sh`.
