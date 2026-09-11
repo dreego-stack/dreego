@@ -47,7 +47,7 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	port := ln.Addr().(*net.TCPAddr).Port
 	ln.Close()
 
-	goMod := "module t\ngo 1.26\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
+	goMod := "module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644)
 	moduleSum, err := os.ReadFile(filepath.Join(repoRoot, "go.sum"))
 	if err != nil {

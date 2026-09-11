@@ -27,7 +27,7 @@ func writeTestTree(t *testing.T, files map[string]string) string {
 func writeGoMod(t *testing.T, root, module string, reqs map[string]string) {
 	t.Helper()
 	var b strings.Builder
-	b.WriteString("module " + module + "\n\ngo 1.26\n")
+	b.WriteString("module " + module + "\n\ngo 1.27\n")
 	if len(reqs) > 0 {
 		b.WriteString("require (\n")
 		for m, v := range reqs {

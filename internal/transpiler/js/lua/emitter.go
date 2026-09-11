@@ -2,6 +2,7 @@ package lua
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -175,8 +176,8 @@ func (e *emitter) popScope() { e.scopes = e.scopes[:len(e.scopes)-1] }
 func (e *emitter) declare(name string) { e.scopes[len(e.scopes)-1][name] = true }
 
 func (e *emitter) isLocal(name string) bool {
-	for index := len(e.scopes) - 1; index >= 0; index-- {
-		if e.scopes[index][name] {
+	for _, v := range slices.Backward(e.scopes) {
+		if v[name] {
 			return true
 		}
 	}

@@ -78,7 +78,7 @@ func modelFieldName(fallback string, tag *ast.BasicLit) (string, bool) {
 		return fallback, true
 	}
 	value := strings.Trim(tag.Value, "`")
-	jsonName := strings.Split(reflect.StructTag(value).Get("json"), ",")[0]
+	jsonName, _, _ := strings.Cut(reflect.StructTag(value).Get("json"), ",")
 	if jsonName == "-" {
 		return "", false
 	}

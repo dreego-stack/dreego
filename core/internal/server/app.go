@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"sync"
 	"sync/atomic"
 
@@ -127,11 +128,11 @@ func (a *App) Build() error {
 	if a.sessionStore != nil {
 		h = a.sessionMiddleware(h)
 	}
-	for i := len(a.middlewares) - 1; i >= 0; i-- {
-		if a.middlewares[i] == nil {
+	for _, v := range slices.Backward(a.middlewares) {
+		if v == nil {
 			continue
 		}
-		h = a.middlewares[i](h)
+		h = v(h)
 	}
 	if a.loggingEnabled {
 		h = mw.RequestLogging()(h)

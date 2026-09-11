@@ -78,7 +78,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", err
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.26\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := fmt.Sprintf("module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		return "", err
 	}
