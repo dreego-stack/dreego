@@ -13,11 +13,10 @@ Dreego HTTP listener. Routes that require `SSRContext`, form actions, request
 headers, cookies, sessions, or other HTTP capabilities are not registered for
 desktop rendering and return `dreego.ErrRenderRouteNotFound`.
 
-The Linux integration suite observes the render process through `/proc` while
-a component is rendering and fails if the Wails render path creates a TCP
-listener. The later reference-application gate also checks the running native
-window so that both the Dreego render boundary and the complete desktop process
-are covered.
+The Linux integration suite observes both the render path and a running native
+window. It checks the complete Wails process tree for TCP listener descriptors
+and traces system calls so that even a short-lived `listen` call fails the
+suite. The virtual display is configured with its own TCP transport disabled.
 
 ```go
 app := dreego.New()
