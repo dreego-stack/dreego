@@ -34,7 +34,13 @@ func TestWailsNativeProcessHasNoTCPListener(t *testing.T) {
 	var output lockedBuffer
 	command := exec.Command("strace", "-f", "-e", "trace=listen", "-o", trace,
 		executable, "-test.run=^TestWailsNativeProcessHasNoTCPListener$")
-	command.Env = append(os.Environ(), nativeWailsHelper+"=1", "DISPLAY="+display)
+	command.Env = append(os.Environ(),
+		nativeWailsHelper+"=1",
+		"DISPLAY="+display,
+		"GSK_RENDERER=cairo",
+		"LIBGL_ALWAYS_SOFTWARE=1",
+		"WEBKIT_DISABLE_DMABUF_RENDERER=1",
+	)
 	command.Stdout = &output
 	command.Stderr = &output
 	if err := command.Start(); err != nil {
