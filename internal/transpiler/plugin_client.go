@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"maps"
 	"os"
 	"os/exec"
@@ -220,18 +221,17 @@ func readPluginClientFile(dir, relative string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unsafe client module path %q", relative)
 	}
-	root, err := filepath.EvalSymlinks(dir)
+	root, err := os.OpenRoot(dir)
 	if err != nil {
 		return nil, err
 	}
-	full, err := filepath.EvalSymlinks(filepath.Join(root, local))
+	defer root.Close()
+	file, err := root.Open(local)
 	if err != nil {
 		return nil, err
 	}
-	if full != root && !strings.HasPrefix(full, root+string(os.PathSeparator)) {
-		return nil, fmt.Errorf("client module path %q escapes plugin directory", relative)
-	}
-	return os.ReadFile(full)
+	defer file.Close()
+	return io.ReadAll(file)
 }
 
 func requiredModules(project string) (map[string]string, error) {

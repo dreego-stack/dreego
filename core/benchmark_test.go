@@ -73,7 +73,7 @@ func BenchmarkRequestPage(b *testing.B) {
 	req := httptest.NewRequest("GET", "/", nil)
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 	}
@@ -84,7 +84,7 @@ func BenchmarkRequestJSON(b *testing.B) {
 	req := httptest.NewRequest("GET", "/api", nil)
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 	}
@@ -101,7 +101,7 @@ func BenchmarkRequestSimple(b *testing.B) {
 	req := httptest.NewRequest("GET", "/", nil)
 	b.ReportAllocs()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 	}

@@ -26,7 +26,7 @@ func cmdNew(args []string) {
 
 	if !goAvailable() {
 		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
-		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.23 or newer. Install it from https://go.dev/doc/install and retry.\n")
+		fmt.Fprintf(os.Stderr, "  Dreego requires Go 1.24 or newer. Install it from https://go.dev/doc/install and retry.\n")
 		os.Exit(1)
 	}
 
@@ -81,7 +81,7 @@ func cmdNew(args []string) {
 		fmt.Fprintf(os.Stderr, "warning: go mod init failed: %v\n", err)
 	}
 
-	c = exec.Command("go", "mod", "edit", "-go=1.23")
+	c = exec.Command("go", "mod", "edit", "-go=1.24")
 	c.Dir = target
 	c.Stdout, c.Stderr = nil, os.Stderr
 	if err := c.Run(); err != nil {

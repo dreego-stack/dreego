@@ -2,19 +2,19 @@
 
 This guide is the canonical path from installation to a running Dreego
 application. The same commands run in CI as a black-box test, so the steps
-below are guaranteed to work on a clean machine with Go 1.23 or newer.
+below are guaranteed to work on a clean machine with Go 1.24 or newer.
 
 ## Prerequisites
 
-Dreego requires Go 1.23 or newer. Check your installation:
+Dreego requires Go 1.24 or newer. Check your installation:
 
 ```bash
 go version
 ```
 
 If `go` is not found, install it from https://go.dev/doc/install. If the
-version is older than 1.23, upgrade before continuing — generated code uses
-Go 1.23 features and `go mod` directives.
+version is older than 1.24, upgrade before continuing — generated code uses
+Go 1.24 features and `go mod` directives.
 
 ## 1. Install the CLI
 
@@ -178,8 +178,8 @@ Visiting `/users/42` shows "User: 42".
 | Symptom | Cause / Fix |
 |---------|-------------|
 | `dreego: command not found` | `go install` put the binary in `$(go env GOPATH)/bin`; add it to `PATH`. |
-| `go: command not found` | Install Go 1.23+ from https://go.dev/doc/install. |
-| `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.23. Upgrade. |
+| `go: command not found` | Install Go 1.24+ from https://go.dev/doc/install. |
+| `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.24. Upgrade. |
 | `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
 | `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
 | `dreego generate: no routes found` | Create at least `www/routes/+page.dreego` (the scaffold already does). |

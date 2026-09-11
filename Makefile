@@ -16,6 +16,7 @@ dev:
 	go run ./cli/dreego && go run .
 
 test:
+	@go run ./cli/dreego tools install typescript
 	@CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
 	@make coverage
 	@docker build \

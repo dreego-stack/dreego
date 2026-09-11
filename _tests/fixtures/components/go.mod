@@ -1,6 +1,6 @@
 module components
 
-go 1.23
+go 1.24
 
 require github.com/dreego-stack/dreego v0.0.0
 

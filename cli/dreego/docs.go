@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -81,13 +82,17 @@ func goModCache() string {
 
 func readDocFrom(dir, path string) ([]byte, error) {
 	rel := strings.TrimPrefix(path, "/")
-	full := filepath.Join(dir, rel)
-	cleanDir := filepath.Clean(dir)
-	cleanFull := filepath.Clean(full)
-	if cleanFull != cleanDir && !strings.HasPrefix(cleanFull, cleanDir+string(os.PathSeparator)) {
-		return nil, fmt.Errorf("path escapes module dir: %s", path)
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, err
 	}
-	return os.ReadFile(full)
+	defer root.Close()
+	file, err := root.Open(rel)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	return io.ReadAll(file)
 }
 
 func readSitemap(dir string) (*sitemapDoc, error) {

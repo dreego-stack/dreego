@@ -58,7 +58,7 @@ func transpilePage(src string) (string, error) {
 
 func BenchmarkGeneratePage(b *testing.B) {
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		if _, err := transpilePage(benchPage); err != nil {
 			b.Fatal(err)
 		}
@@ -67,7 +67,7 @@ func BenchmarkGeneratePage(b *testing.B) {
 
 func BenchmarkGenerateComponent(b *testing.B) {
 	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		comp, _, body := ParseHeader(benchComponent)
 		tokens, err := Lex(body)
 		if err != nil {

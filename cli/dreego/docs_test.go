@@ -27,7 +27,7 @@ func writeTestTree(t *testing.T, files map[string]string) string {
 func writeGoMod(t *testing.T, root, module string, reqs map[string]string) {
 	t.Helper()
 	var b strings.Builder
-	b.WriteString("module " + module + "\n\ngo 1.23\n")
+	b.WriteString("module " + module + "\n\ngo 1.24\n")
 	if len(reqs) > 0 {
 		b.WriteString("require (\n")
 		for m, v := range reqs {
@@ -137,6 +137,20 @@ func TestReadDocFromDirRejectsTraversal(t *testing.T) {
 		if _, err := readDocFrom(root, p); err == nil {
 			t.Errorf("expected traversal error for path %q", p)
 		}
+	}
+}
+
+func TestReadDocFromDirRejectsSymlinkEscape(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err := os.WriteFile(outside, []byte("secret"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(root, "linked.md")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readDocFrom(root, "/linked.md"); err == nil {
+		t.Fatal("expected symlink escape to fail")
 	}
 }
 

@@ -192,7 +192,7 @@ func TestCLIDocs(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, nil)
 	vendorDocs := filepath.Join(dir, "vendor/github.com/dreego-stack/plugin-sse/_docs")
 	os.MkdirAll(vendorDocs, 0755)
-	gomod := "module example.com/myapp\n\ngo 1.23\n\nrequire (\n    github.com/dreego-stack/dreego v0.0.27\n    github.com/dreego-stack/plugin-sse v0.1.0\n)\n"
+	gomod := "module example.com/myapp\n\ngo 1.24\n\nrequire (\n    github.com/dreego-stack/dreego v0.0.27\n    github.com/dreego-stack/plugin-sse v0.1.0\n)\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(gomod), 0644)
 	os.WriteFile(filepath.Join(vendorDocs, "index.md"), []byte("# Plugin SSE\n\nVendor-local plugin docs.\n"), 0644)
 
