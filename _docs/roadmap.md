@@ -69,15 +69,12 @@ html/output HTML IR          -> generated Go renderer
 Stable client languages and their version targets are tracked in the
 [client-language compatibility matrix](client-languages.md).
 
-Markdown-to-HTML, TypeScript-to-JavaScript, and the browser Lua foundation are
-shipped. Browser Lua includes local functions, loops, deterministic tables,
-precise string escapes, feature-linked helpers, and source-aware runtime stacks.
-The remaining work is:
-
-1. Harden Lua script isolation, safe emission, and diagnostics as new browser
-   behavior is exercised.
-2. Expand Lua-to-JavaScript through tested patch releases while keeping its supported
-   browser contract and generated runtime explicit.
+Markdown-to-HTML, TypeScript-to-JavaScript, and Browser Lua are shipped. Browser
+Lua includes isolated scripts, safe emission, source-accurate diagnostics,
+local functions, loops, deterministic tables, precise string escapes,
+feature-linked helpers, and source-aware runtime stacks. Its supported subset
+is covered through black-box generation tests and may grow through compatible,
+tested patch releases.
 
 Lua-to-Go is not planned. Dreego does not embed a Lua plugin VM or load native
 Go plugins. Raw JavaScript, Go, HTML, and CSS remain dependency-free defaults.

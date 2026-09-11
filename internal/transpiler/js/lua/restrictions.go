@@ -18,16 +18,16 @@ var forbiddenRoots = map[string]bool{
 	"socket":    true,
 }
 
-func memberRoot(value memberExpression) (string, bool) {
+func memberRoot(value memberExpression) (nameExpression, bool) {
 	current := value.object
 	for {
 		switch root := current.(type) {
 		case nameExpression:
-			return root.name, true
+			return root, true
 		case memberExpression:
 			current = root.object
 		default:
-			return "", false
+			return nameExpression{}, false
 		}
 	}
 }

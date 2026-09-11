@@ -55,7 +55,10 @@ type literalExpression struct {
 	value string
 }
 
-type nameExpression struct{ name string }
+type nameExpression struct {
+	name         string
+	line, column int
+}
 
 type unaryExpression struct {
 	op    tokenKind

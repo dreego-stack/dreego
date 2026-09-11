@@ -38,7 +38,7 @@ func (p *sourceParser) prefix() (expression, error) {
 	case tokenString, tokenTrue, tokenFalse, tokenNil:
 		value = literalExpression{kind: current.kind, value: current.value}
 	case tokenIdentifier:
-		value = nameExpression{name: current.value}
+		value = nameExpression{name: current.value, line: current.line, column: current.column}
 	case tokenMinus, tokenNot, tokenHash:
 		right, err := p.expression(7)
 		if err != nil {
