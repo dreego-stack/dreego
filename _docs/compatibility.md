@@ -45,10 +45,10 @@ pre-v1 breaking change with its own migration guide.
   (`New`, `Register`, `RegisterRedirect`, `RegisterRewrite`, `RegisterStatic`,
   `Use`, `SetLogging`, `SetCSRF`, `SetErrorHandler`, `SetSessionStore`,
   `SetCSP`, `SetReady`, `Build`, `Handler`, `ServeHTTP`). HTTP lifecycle belongs
-  to `core/ssr.Host` (`New`, `Listen`, `Serve`, `Start`, `Wait`, `Shutdown`).
+  to `adapter/ssr.Host` (`New`, `Listen`, `Serve`, `Start`, `Wait`, `Shutdown`).
 - `SSRContext` and the `Context` interface used by generated form handlers.
 - The session `Store` interface and `CookieStore`/`CookiePolicy`/`Options`.
-- `core/ssr.ServerConfig` and `core/ssr.DefaultServerConfig`.
+- `adapter/ssr.ServerConfig` and `adapter/ssr.DefaultServerConfig`.
 - The exported error sentinels used by applications: `ErrAppBuilt`,
   `ErrRouteConflict`, `ErrSessionTooLarge`, `ErrRedirect`.
 - The output-safety helpers (`SafeText`, `SafeAttr`, `SafeURL`, `SafeScript`,

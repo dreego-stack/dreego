@@ -69,6 +69,96 @@ def test_patch_path():
         check("patch: change removed", not (Path(tmp) / ".changes/change.md").exists())
 
 
+def test_coordinated_v08_patch():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp)
+        (repo / ".changes").mkdir()
+        (repo / ".changes/change.md").write_text(
+            "---\nversion: patch\n---\n\n- Bug: coordinate module versions\n"
+        )
+        (repo / "CHANGELOG.md").write_text("## v0.8.0 - 2026-09-11\n")
+        modules = {
+            "go.mod": "module github.com/dreego-stack/dreego\n\ngo 1.27\n\nrequire golang.org/x/mod v0.20.0\n",
+            "core/go.mod": "module github.com/dreego-stack/dreego/core\n\ngo 1.27\n\nrequire (\n\tgithub.com/dreego-stack/dreego v0.8.0\n\tgolang.org/x/text v0.22.0\n)\n",
+            "adapter/ssr/go.mod": "module github.com/dreego-stack/dreego/adapter/ssr\n\ngo 1.27\n\nrequire (\n\tgithub.com/dreego-stack/dreego v0.8.0\n\tgithub.com/dreego-stack/dreego/core v0.8.0\n)\n",
+            "dreegotest/go.mod": "module github.com/dreego-stack/dreego/dreegotest\n\ngo 1.27\n\nrequire github.com/dreego-stack/dreego/core v0.8.0\n",
+            "cmd/dreego/go.mod": "module github.com/dreego-stack/dreego/cmd/dreego\n\ngo 1.27\n\nrequire github.com/dreego-stack/dreego v0.8.0\n",
+            "demo/go.mod": "module demo\n\ngo 1.27\n\nrequire github.com/dreego-stack/dreego/core v0.8.0\n",
+        }
+        for name, content in modules.items():
+            path = repo / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+        (repo / "go.work").write_text(
+            "go 1.27\n\n"
+            "replace github.com/dreego-stack/dreego v0.8.0 => .\n"
+            "replace github.com/dreego-stack/dreego/core v0.8.0 => ./core\n"
+        )
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
+        subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
+        for tag in ("v0.8.0", "core/v9.9.9", "cmd/dreego/v8.8.8"):
+            subprocess.run(["git", "tag", tag], cwd=repo, check=True)
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPTS / "release-prep.py")],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
+
+        check("coordinated patch: exit 0", result.returncode == 0, result.stderr)
+        check("coordinated patch: root tag determines v0.8.1", "new=v0.8.1" in result.stdout, result.stdout)
+        expected_tags = "tags=v0.8.1 core/v0.8.1 adapter/ssr/v0.8.1 dreegotest/v0.8.1 cmd/dreego/v0.8.1"
+        check("coordinated patch: prints complete ordered tag set", expected_tags in result.stdout, result.stdout)
+        for name, content in modules.items():
+            updated = (repo / name).read_text()
+            if name == "go.mod":
+                continue
+            check(
+                f"coordinated patch: updates internal requirements in {name}",
+                " v0.8.0" not in updated,
+                updated,
+            )
+        check(
+            "coordinated patch: preserves external requirement",
+            "golang.org/x/text v0.22.0" in (repo / "core/go.mod").read_text(),
+        )
+        work = (repo / "go.work").read_text()
+        check("coordinated patch: updates workspace replacements", "v0.8.0" not in work and work.count("v0.8.1") == 2, work)
+
+
+def test_coordinated_tag_verification():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp)
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
+        (repo / "file").write_text("release")
+        subprocess.run(["git", "add", "file"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "release"], cwd=repo, check=True)
+        for tag in ("v0.7.1", "v0.8.0", "core/v0.8.0"):
+            subprocess.run(["git", "tag", tag], cwd=repo, check=True)
+        incomplete = subprocess.run(
+            [sys.executable, str(SCRIPTS / "release-prep.py"), "--verify-tags"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
+        check("tag verification: rejects incomplete v0.8 group", incomplete.returncode != 0)
+        for tag in ("adapter/ssr/v0.8.0", "dreegotest/v0.8.0", "cmd/dreego/v0.8.0"):
+            subprocess.run(["git", "tag", tag], cwd=repo, check=True)
+        complete = subprocess.run(
+            [sys.executable, str(SCRIPTS / "release-prep.py"), "--verify-tags"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+        )
+        check("tag verification: accepts complete same-commit group", complete.returncode == 0, complete.stderr)
+
+
 def test_none_path():
     with tempfile.TemporaryDirectory() as tmp:
         pr = "---\nversion: none\n---\n\n- Chore: bump dep\n"
@@ -187,6 +277,21 @@ def test_invalid_bumps_are_atomic():
             check(f"{bump}: change remains pending", (repo / ".changes/change.md").exists())
 
 
+def test_v0x_patch_allowed_and_major_rejected():
+    change = "---\nversion: patch\n---\n\n- Bug: x\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.1.0\n", ["v0.1.0"])
+        check("v0.1: patch allowed, exit 0", r.returncode == 0, r.stderr)
+        check("v0.1: prints new version", "new=v0.1.1" in r.stdout, r.stdout)
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v0.2.0\n", ["v0.2.0"])
+        check("v0.2: patch allowed, exit 0", r.returncode == 0, r.stderr)
+        check("v0.2: prints new version", "new=v0.2.1" in r.stdout, r.stdout)
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run_release_prep(tmp, change, "## v1.0.0\n", ["v1.0.0"])
+        check("v1.0: major rejected, non-zero exit", r.returncode != 0, r.stderr)
+
+
 def test_coverage_gate_contract():
     script = SCRIPTS / "coverage-gate.sh"
     with tempfile.TemporaryDirectory() as tmp:
@@ -218,21 +323,6 @@ def test_test_runner_contract():
     check("test runner: coverage target exists", "coverage:" in makefile)
 
 
-def test_v0x_patch_allowed_and_major_rejected():
-    change = "---\nversion: patch\n---\n\n- Bug: x\n"
-    with tempfile.TemporaryDirectory() as tmp:
-        r = run_release_prep(tmp, change, "## v0.1.0\n", ["v0.1.0"])
-        check("v0.1: patch allowed, exit 0", r.returncode == 0, r.stderr)
-        check("v0.1: prints new version", "new=v0.1.1" in r.stdout, r.stdout)
-    with tempfile.TemporaryDirectory() as tmp:
-        r = run_release_prep(tmp, change, "## v0.2.0\n", ["v0.2.0"])
-        check("v0.2: patch allowed, exit 0", r.returncode == 0, r.stderr)
-        check("v0.2: prints new version", "new=v0.2.1" in r.stdout, r.stdout)
-    with tempfile.TemporaryDirectory() as tmp:
-        r = run_release_prep(tmp, change, "## v1.0.0\n", ["v1.0.0"])
-        check("v1.0: major rejected, non-zero exit", r.returncode != 0, r.stderr)
-
-
 def test_workflow_contract():
     expected = ["main-push.yml", "pull-request-check.yml"]
     for name in expected:
@@ -247,10 +337,14 @@ def test_workflow_contract():
 
     main_push = (WORKFLOWS / "main-push.yml").read_text()
     check("main-push runs make test before change processing",
-          main_push.index("make test") < main_push.index("release-prep.py"))
+          main_push.index("make test") < main_push.index("python3 _scripts/release-prep.py |"))
     check("main-push processes change files on main", "release-prep.py" in main_push)
     check("main-push retries stale pushes", "git fetch origin main --tags" in main_push and "seq 1 5" in main_push)
     check("main-push serialized globally", "group: main-push" in main_push)
+    check("main-push uses Go 1.27", "go-version: '1.27'" in main_push)
+    check("main-push reads coordinated tags", "grep '^tags='" in main_push)
+    check("main-push pushes main and tags atomically", "git push --atomic origin" in main_push)
+    check("main-push filters root release tags", "refs/tags/v[0-9]*.[0-9]*.[0-9]*" in main_push)
 
     pr_check = (WORKFLOWS / "pull-request-check.yml").read_text()
     check("pull-request-check validates change file", ".changes" in pr_check)
@@ -262,6 +356,8 @@ def test_workflow_contract():
     check("pull-request-check runs make test", "make test" in pr_check)
     check("pull-request-check runs coverage before tests",
           pr_check.index("make coverage") < pr_check.index("make test"))
+    check("pull-request-check uses Go 1.27", "go-version: '1.27'" in pr_check)
+    check("pull-request-check filters root release tags", "refs/tags/v[0-9]*.[0-9]*.[0-9]*" in pr_check)
 
 
 def yaml_ok(text):
@@ -280,6 +376,8 @@ def yaml_ok(text):
 
 def main():
     test_patch_path()
+    test_coordinated_v08_patch()
+    test_coordinated_tag_verification()
     test_none_path()
     test_idempotent_rerun()
     test_failure_paths()

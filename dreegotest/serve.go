@@ -41,12 +41,12 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		t.Fatalf("Serve: %v", err)
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := testModuleFile(repoRoot, true)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
 	copyModuleSum(t, dir, repoRoot)
-	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", setup)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/adapter/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", setup)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}
@@ -66,7 +66,7 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 	}
 
 	bin := filepath.Join(dir, "server")
-	cmd := exec.Command("go", "build", "-o", bin, ".")
+	cmd := exec.Command("go", "build", "-mod=mod", "-o", bin, ".")
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("Serve: go build failed: %v\n%s", err, out)

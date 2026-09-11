@@ -1,0 +1,9 @@
+{
+  "module": "github.com/dreego-stack/dreego/dreegotest",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "dreegotest Documentation Index"},
+    {"path": "/_docs/testing.md", "title": "Testing"},
+    {"path": "/_docs/reference-apps.md", "title": "Reference Applications"},
+    {"path": "/_docs/benchmarks.md", "title": "Benchmarks"}
+  ]
+}

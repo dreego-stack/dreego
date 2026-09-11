@@ -34,7 +34,7 @@ repo root
 This is a responsibility map, not a mandatory file move. Before moving code,
 inventory exported identifiers and generated imports. The shared core is
 imported as `github.com/dreego-stack/dreego/core`. The SSR host is selected
-explicitly through `github.com/dreego-stack/dreego/core/ssr`.
+explicitly through `github.com/dreego-stack/dreego/adapter/ssr`.
 
 ## Render contract
 
@@ -116,7 +116,7 @@ deferred until at least two real targets prove the same small contract.
 
 ### Slice 4: public package migration
 
-- Publish the shared core and `core/ssr` API.
+- Publish the shared core and `adapter/ssr` API.
 - Update generated imports atomically.
 - Provide a migration guide from `/core`.
 - Remove the obsolete public package instead of retaining indefinite wrappers.

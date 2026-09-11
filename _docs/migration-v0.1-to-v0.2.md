@@ -4,12 +4,13 @@ This guide covers the public API changes between v0.1 and v0.2. The v0.2
 release moves the HTTP host into an explicit target package and adds a typed,
 render-neutral component contract.
 
-## HTTP host moved to core/ssr
+## HTTP host moved to core/ssr in v0.2
 
-The HTTP host now lives in `core/ssr`. Import it as:
+The HTTP host moved to `core/ssr` in v0.2 and moved again to `adapter/ssr` in
+v0.8. Current applications import it as:
 
 ```go
-import ssr "github.com/dreego-stack/dreego/core/ssr"
+import ssr "github.com/dreego-stack/dreego/adapter/ssr"
 ```
 
 Start applications with:
@@ -51,8 +52,8 @@ instead.
 
 ## Middleware, sessions, and forms moved
 
-The following moved to `core/ssr`. Only the import path changed; signatures are
-unchanged:
+The following moved to `core/ssr` in v0.2 and to `adapter/ssr` in v0.8. Only
+the import path changed; signatures are unchanged:
 
 - `ssr.CSRF`
 - `ssr.Compress`

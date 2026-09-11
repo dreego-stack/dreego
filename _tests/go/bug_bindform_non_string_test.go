@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	ssr "github.com/dreego-stack/dreego/core/ssr"
+	ssr "github.com/dreego-stack/dreego/adapter/ssr"
 )
 
 func TestBugBindFormNonString(t *testing.T) {

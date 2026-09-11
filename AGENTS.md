@@ -47,15 +47,15 @@ Two models share the work with strict role separation:
    - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
-## Current Phase: Wails v3 Phase 1
+## Current Phase: v0.8 Module Boundaries
 
 The latest git tag is the single version source; the CLI derives its version at
 build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or
 from build info (`go install pkg@tag`). Roadmap phases are capability names,
 not version promises. Markdown-to-HTML, TypeScript-to-JavaScript, and Browser
-Lua are released. The planned release slices are v0.8 for the experimental
-Wails v3 Phase 1 foundation, v0.9 for the DreeJS foundation, and v0.10 for
-incremental DreeJS extensions. Wails v3 Phase 2 waits for an upstream stable
+Lua are released. v0.8 introduces the coordinated multi-module layout and its
+breaking import paths. The experimental Wails v3 Phase 1 foundation moves to
+v0.9; DreeJS follows after that. Wails v3 Phase 2 waits for an upstream stable
 Wails v3 release and evidence from the Phase 1 reference application. Every
 change lands through a pull request with one unique `.changes/*.md` file.
 `version: none` files remain pending until a later `version: patch` change
@@ -88,7 +88,7 @@ See `_docs/roadmap.md` for the public, non-binding roadmap.
 ## Core and Plugin Boundary
 
 - The current `core/` package contains the application and render capabilities
-  needed by a normal SSR application and the explicit `core/ssr` host.
+  needed by a normal SSR application and the explicit `adapter/ssr` host.
 - SSR, Wails, and DreeJS are first-party monorepo capabilities because they
   share compiler, render, asset, diagnostic, and compatibility contracts.
 - Optional capabilities, provider integrations, and features with additional dependencies live in separate plugin repositories with their own `go.mod`, releases, tests, and CI.
@@ -108,7 +108,8 @@ repo-root/
 ├── CHANGELOG.md            ← What came in which version
 ├── README.md               ← Project overview
 ├── LICENSE                 ← MPL-2.0
-├── go.mod                  ← Single root module (one tag per release)
+├── go.mod                  ← Shared internal implementation module
+├── go.work                 ← Local coordination of all repository modules
 ├── .changes/               ← One unique release-note file per pull request
 ├── _docs/                  ← Public documentation
 ├── _plan/                  ← Detailed phased architecture and worker guidance
@@ -117,10 +118,11 @@ repo-root/
 │   └── fixtures/           ← Reference apps for integration tests
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
-├── core/                   ← Runtime framework facade (public API re-exports, approved dependencies only)
-├── core/internal/          ← Runtime implementation split into session/, server/, middleware/, context/, validate/
+├── core/                   ← Target-neutral public runtime module
+├── adapter/ssr/            ← Explicit HTTP host module
+├── dreegotest/             ← Public testing module
 ├── internal/transpiler/    ← Transpiler (.dreego → Go), used by CLI and dreegotest
-├── cli/dreego/             ← CLI binary
+├── cmd/dreego/             ← Installable CLI module
 ├── .github/workflows/      ← CI: pull-request-check.yml, main-push.yml
 │
 └── _docs/decisions/        ← Architecture decisions (ADR)
@@ -205,10 +207,10 @@ host paths that do not exist in the container.
   `_docs/handbook/go-1.25.md`, `_docs/handbook/go-1.26.md`, and
   `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
   immediate predecessor and links to the official release notes.
-- Single root module `github.com/dreego-stack/dreego` (one `go.mod` at repo root, one tag per release)
-- Core code in `core/` (facade re-exports) and `core/internal/` (session, server, middleware, context, validate). Core may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside Core. CI enforces this boundary through `_scripts/check-core-deps.sh`.
+- Five coordinated published modules: root, `core`, `adapter/ssr`, `dreegotest`, and `cmd/dreego`. Every release uses one version across five module-specific tags on the same commit.
+- Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_scripts/check-core-deps.sh`.
 - Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.
-- CLI in `cli/dreego/` (imports core)
+- CLI in `cmd/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
 - Build via `dreego` CLI, not directly `go build`
 - Generated `dree.go` not committed

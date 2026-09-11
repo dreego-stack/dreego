@@ -31,7 +31,7 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 		t.Fatalf("ProjectDir: %v", err)
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := testModuleFile(repoRoot, true)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("ProjectDir: write go.mod: %v", err)
 	}
@@ -57,7 +57,7 @@ func copyModuleSum(t *testing.T, dir, repoRoot string) {
 }
 
 // CLIBin builds the dreego CLI once per test binary and returns its path. It
-// replaces shell tests that `go build -o … ./cli/dreego` themselves. The
+// replaces shell tests that `go build -o … ./cmd/dreego` themselves. The
 // version is injected via ldflags (latest git tag) so `dreego new` writes a
 // valid require directive.
 func CLIBin(t *testing.T) string {
@@ -81,8 +81,8 @@ func CLIBin(t *testing.T) string {
 
 		tag := latestTag(repoRoot)
 		ldflags := "-X main.version=" + tag
-		build := exec.Command("go", "build", "-ldflags", ldflags, "-o", bin, "./cli/dreego")
-		build.Dir = repoRoot
+		build := exec.Command("go", "build", "-ldflags", ldflags, "-o", bin, ".")
+		build.Dir = filepath.Join(repoRoot, "cmd", "dreego")
 		if out, err := build.CombinedOutput(); err != nil {
 			cliErr = fmt.Errorf("build CLI: %v\n%s", err, out)
 			return
@@ -187,7 +187,7 @@ func MustScaffold(t *testing.T, name string) string {
 // replaces shell tests that assert on the go build exit status.
 func BuildInDirOK(t *testing.T, dir string) bool {
 	t.Helper()
-	build := exec.Command("go", "build", "-o", "/dev/null", ".")
+	build := exec.Command("go", "build", "-mod=mod", "-o", "/dev/null", ".")
 	build.Dir = dir
 	return build.Run() == nil
 }

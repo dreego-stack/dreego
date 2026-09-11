@@ -1,9 +1,9 @@
-# Phase: Wails v3 target
+# Phase: Wails v3 adapter
 
 ## Release strategy
 
 Wails support is split because Dreego begins its integration while Wails v3 is
-still beta. Phase 1 is planned as the v0.8 release slice. It pins one upstream
+still beta. Phase 1 is planned as the v0.9 release slice. It pins one upstream
 beta version and proves a small, opt-in desktop host. The release remains
 provisional and does not imply support for the complete Wails API.
 
@@ -17,15 +17,15 @@ Render Dreego applications inside Wails without running a local HTTP server and
 without requiring application developers to operate an npm build pipeline.
 The same components and target-neutral App remain usable for web targets.
 
-## Target package
+## Adapter package
 
 The intended package is:
 
 ```text
-github.com/dreego-stack/dreego/target/wails
+github.com/dreego-stack/dreego/adapter/wails
 ```
 
-The first-party target lives in the monorepo because it must coordinate render
+The first-party adapter lives in the monorepo because it must coordinate render
 results, embedded assets, navigation, DreeJS, diagnostics, and generated host
 bindings. Provider-like desktop features may remain separate plugins.
 

@@ -1,11 +1,11 @@
 #!/bin/sh
-# Verify core/ and internal/transpiler/ use only the standard library, the
+# Verify the root implementation, core, and SSR adapter use only the standard library, the
 # dreego module, and modules maintained by the Go project under golang.org/x/.
 set -e
 
 cd "$(dirname "$0")/.."
 
-for pkg in ./core/... ./internal/transpiler/...; do
+for pkg in ./internal/... ./core/... ./adapter/ssr/...; do
 	deps=$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' "$pkg" 2>/dev/null | grep -v '^github.com/dreego-stack/dreego' | grep -v '^golang.org/x/' | grep -v '^$' || true)
 
 	if [ -n "$deps" ]; then
@@ -15,4 +15,4 @@ for pkg in ./core/... ./internal/transpiler/...; do
 	fi
 done
 
-echo "PASS: core/ and internal/transpiler/ use only approved dependencies"
+echo "PASS: root internal, core, and adapter/ssr use only approved dependencies"

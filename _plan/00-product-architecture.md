@@ -44,12 +44,12 @@ remain external plugins.
 The intended package shape is:
 
 ```text
-github.com/dreego-stack/dreego
-github.com/dreego-stack/dreego/target/ssr
-github.com/dreego-stack/dreego/target/wails
+github.com/dreego-stack/dreego/core
+github.com/dreego-stack/dreego/adapter/ssr
+github.com/dreego-stack/dreego/adapter/wails
 ```
 
-The root package owns target-neutral application declarations, typed render
+Core owns target-neutral application declarations, typed render
 contracts, routes, components, and shared context capabilities. A host is
 selected explicitly:
 

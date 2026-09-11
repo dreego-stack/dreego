@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -50,9 +50,8 @@ func Fixture(t *testing.T, name string) string {
 	if err != nil {
 		t.Fatalf("Fixture: read go.mod: %v", err)
 	}
-	re := regexp.MustCompile(`(?m)^replace github\.com/dreego-stack/dreego => .*$`)
-	rewritten := re.ReplaceAllString(string(data), "replace github.com/dreego-stack/dreego => "+repoRoot)
-	rewritten = regexp.MustCompile(`(?m)^require github\.com/dreego-stack/dreego v0\.0\.0$`).ReplaceAllString(rewritten, "require (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)")
+	module := strings.TrimSpace(strings.TrimPrefix(strings.SplitN(string(data), "\n", 2)[0], "module "))
+	rewritten := testModuleFileNamed(module, repoRoot, true)
 	if err := os.WriteFile(gomod, []byte(rewritten), 0644); err != nil {
 		t.Fatalf("Fixture: write go.mod: %v", err)
 	}
@@ -70,7 +69,7 @@ func ServeFixture(t *testing.T, name string) *Client {
 	}
 	port := FreePort(t)
 	bin := filepath.Join(dir, "server")
-	build := exec.Command("go", "build", "-o", bin, ".")
+	build := exec.Command("go", "build", "-mod=mod", "-o", bin, ".")
 	build.Dir = dir
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("ServeFixture: go build %s: %v\n%s", name, err, out)

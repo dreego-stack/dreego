@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/middleware"
-	"github.com/dreego-stack/dreego/core/internal/session"
+	"github.com/dreego-stack/dreego/internal/middleware"
+	"github.com/dreego-stack/dreego/internal/session"
 )
 
 var testSecret = []byte("test-secret-key-32-bytes-long!!!")

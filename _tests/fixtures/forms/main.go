@@ -6,7 +6,7 @@ import (
 
 	"forms/www"
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/core/ssr"
+	"github.com/dreego-stack/dreego/adapter/ssr"
 )
 
 func main() {

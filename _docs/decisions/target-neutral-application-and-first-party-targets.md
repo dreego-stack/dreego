@@ -33,13 +33,13 @@ Dreego will evolve toward one target-neutral, typed App and render foundation
 with explicit first-party target packages:
 
 ```text
-github.com/dreego-stack/dreego
-github.com/dreego-stack/dreego/target/ssr
-github.com/dreego-stack/dreego/target/wails
+github.com/dreego-stack/dreego/core
+github.com/dreego-stack/dreego/adapter/ssr
+github.com/dreego-stack/dreego/adapter/wails
 ```
 
-The root package owns application declarations and shared render contracts. The
-target packages own their host-specific lifecycle and capabilities. The same
+Core owns application declarations and shared render contracts. The adapter
+packages own their host-specific lifecycle and capabilities. The same
 App may be used by more than one compatible target.
 
 SSR and Wails remain in the monorepo because they coordinate closely with
@@ -99,7 +99,7 @@ lifecycles. Shared interfaces will be extracted from working implementations.
   [SSG & Wails Integration in V2](ssg-wails-v2.md).
 - The post-v1 target restriction in [SSR-First](ssr-first.md).
 - Historical target-interface examples in
-  [Transpiler Pipeline](transpiler-pipeline.md) where they conflict with the
+  [Transpiler Pipeline](../../cmd/dreego/_docs/decisions/transpiler-pipeline.md) where they conflict with the
   capability-first direction.
 - The SSG parts of this decision are superseded by
   [Prefer dynamic SSR and explicit caching over static site generation](ssr-over-ssg.md).

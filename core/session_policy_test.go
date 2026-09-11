@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/middleware"
-	"github.com/dreego-stack/dreego/core/internal/session"
+	"github.com/dreego-stack/dreego/internal/middleware"
+	"github.com/dreego-stack/dreego/internal/session"
 )
 
 func TestAppConfigurableCookiePolicy(t *testing.T) {

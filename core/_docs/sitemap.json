@@ -1,0 +1,19 @@
+{
+  "module": "github.com/dreego-stack/dreego/core",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "Core Documentation Index"},
+    {"path": "/_docs/config.md", "title": "Configuration"},
+    {"path": "/_docs/runtime.md", "title": "Runtime API"},
+    {"path": "/_docs/file-anatomy.md", "title": "File Anatomy"},
+    {"path": "/_docs/server-section.md", "title": "Server Section"},
+    {"path": "/_docs/head-section.md", "title": "Head Section"},
+    {"path": "/_docs/body-html.md", "title": "HTML Body"},
+    {"path": "/_docs/style-section.md", "title": "Style Section"},
+    {"path": "/_docs/components.md", "title": "Components"},
+    {"path": "/_docs/template-logic.md", "title": "Template Logic"},
+    {"path": "/_docs/forms.md", "title": "Forms"},
+    {"path": "/_docs/i18n.md", "title": "Internationalization"},
+    {"path": "/_docs/routing.md", "title": "Routing"},
+    {"path": "/_docs/layouts.md", "title": "Layouts"}
+  ]
+}

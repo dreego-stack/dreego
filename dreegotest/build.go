@@ -78,7 +78,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", err
 	}
 
-	goMod := fmt.Sprintf("module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0 // indirect\n)\nreplace github.com/dreego-stack/dreego => %s\n", repoRoot)
+	goMod := testModuleFile(repoRoot, true)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		return "", err
 	}
@@ -113,7 +113,7 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 		return "", fmt.Errorf("generate failed: %w", err)
 	}
 
-	cmd := exec.Command("go", "build", "-o", "/dev/null", ".")
+	cmd := exec.Command("go", "build", "-mod=mod", "-o", "/dev/null", ".")
 	cmd.Dir = dir
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return dir, fmt.Errorf("go build failed: %v\n%s", err, out)
@@ -148,17 +148,25 @@ func ensureConfig(t *testing.T, dir string, files map[string]string) {
 }
 
 func RepoRoot() (string, error) {
+	if root := os.Getenv("DREEGO_REPO_ROOT"); root != "" {
+		if _, err := os.Stat(filepath.Join(root, "go.work")); err == nil {
+			return root, nil
+		}
+	}
 	wd, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
 	for {
-		if _, err := os.Stat(filepath.Join(wd, "go.mod")); err == nil {
+		if _, err := os.Stat(filepath.Join(wd, "go.work")); err == nil {
+			return wd, nil
+		}
+		if _, err := os.Stat(filepath.Join(wd, ".git")); err == nil {
 			return wd, nil
 		}
 		parent := filepath.Dir(wd)
 		if parent == wd {
-			return "", fmt.Errorf("go.mod not found above %s", wd)
+			return "", fmt.Errorf("repository root not found above %s", wd)
 		}
 		wd = parent
 	}

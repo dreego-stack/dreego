@@ -9,8 +9,8 @@ Release numbers report shipped changes; they do not promise that an entire
 phase fits into one release. A phase advances only when tests and real
 applications prove its contracts.
 
-The current release plan uses v0.8 to begin Wails v3 Phase 1, v0.9 to begin the
-DreeJS foundation, and v0.10 to extend DreeJS. These are planned slices rather
+The current release plan uses v0.8 for coordinated module boundaries, v0.9 to
+begin Wails v3 Phase 1, and v0.10 to begin DreeJS. These are planned slices rather
 than compatibility promises; evidence may move unfinished work to a later
 release.
 
@@ -72,7 +72,7 @@ html/output HTML IR          -> generated Go renderer
 ```
 
 Stable client languages and their version targets are tracked in the
-[client-language compatibility matrix](client-languages.md).
+[client-language compatibility matrix](../cmd/dreego/_docs/client-languages.md).
 
 Markdown-to-HTML, TypeScript-to-JavaScript, and Browser Lua are shipped. Browser
 Lua includes isolated scripts, safe emission, source-accurate diagnostics,
@@ -89,7 +89,14 @@ JavaScript, TypeScript, and Browser Lua are the complete client-language set
 for the foreseeable future. Additional client languages are outside the
 roadmap so the existing processors can be hardened instead of widened.
 
-## Current phase: Wails v3 Phase 1 — planned for v0.8
+## Current phase: coordinated module boundaries — planned for v0.8
+
+Split Core, SSR, testing, and the CLI into independently consumable Go modules
+with one coordinated version and module-specific tags. Rename the HTTP host to
+`adapter/ssr` and the CLI source to `cmd/dreego`. Wails is intentionally not
+part of this release.
+
+## Phase: Wails v3 Phase 1 — planned for v0.9
 
 Add an experimental, opt-in first-party host against one explicitly pinned
 Wails v3 beta release:
@@ -111,7 +118,7 @@ literal navigation, one typed binding, lifecycle cleanup, development reload,
 and an accessible reference application. It proves that the integration works;
 it does not promise broad coverage of Wails APIs while Wails v3 remains beta.
 
-## Phase: DreeJS foundation — planned for v0.9
+## Phase: DreeJS foundation — planned for v0.10
 
 Establish the optional component lifecycle, deterministic module emission,
 local presentation state, accessible cleanup, and typed serialized props. A
@@ -119,7 +126,7 @@ component without client behavior continues to emit zero DreeJS bytes. DreeJS
 is the umbrella name for modular browser and WebView capabilities, not a target
 and not one release-sized feature.
 
-## Phase: DreeJS extensions — planned from v0.10
+## Phase: DreeJS extensions — planned after v0.10
 
 Add a small modular browser and WebView layer:
 

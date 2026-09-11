@@ -31,14 +31,14 @@ typed JSON, XML, or custom responses can be produced by server sections alone.
 
 ## Section reference
 
-- [`server`](server-section.md): request-time Go and typed responses.
-- [`head`](head-section.md): document metadata merged with layouts.
-- [`body`](body-html.md): HTML templates and Dreego template constructs.
-- [`style`](style-section.md): route or component CSS.
-- [`client`](client-javascript.md): browser JavaScript.
-- [TypeScript client code](client-typescript.md): checked and compiled to JavaScript.
-- [Browser Lua](lua.md): compiled to JavaScript with a feature-linked runtime.
-- [Markdown bodies and `<md>` regions](markdown.md): compiled into HTML IR.
+- [`server`](../core/_docs/server-section.md): request-time Go and typed responses.
+- [`head`](../core/_docs/head-section.md): document metadata merged with layouts.
+- [`body`](../core/_docs/body-html.md): HTML templates and Dreego template constructs.
+- [`style`](../core/_docs/style-section.md): route or component CSS.
+- [`client`](../cmd/dreego/_docs/client-javascript.md): browser JavaScript.
+- [TypeScript client code](../cmd/dreego/_docs/client-typescript.md): checked and compiled to JavaScript.
+- [Browser Lua](../cmd/dreego/_docs/lua.md): compiled to JavaScript with a feature-linked runtime.
+- [Markdown bodies and `<md>` regions](../cmd/dreego/_docs/markdown.md): compiled into HTML IR.
 
 Only documented section/language pairs are accepted. Language names describe
 inputs, not additional output targets: Markdown becomes HTML IR, while
@@ -50,5 +50,5 @@ Route files live below the configured website root's `routes/` directory.
 Directories define URL segments, while `+page.dreego` or `index.dreego` owns
 the directory URL. Any other route filename adds a literal URL segment.
 Layouts and components use the same semantic sections but have different
-composition rules. Continue with [Routing](routing.md), [Layouts](layouts.md),
-and [Components](components.md).
+composition rules. Continue with [Routing](../core/_docs/routing.md), [Layouts](../core/_docs/layouts.md),
+and [Components](../core/_docs/components.md).

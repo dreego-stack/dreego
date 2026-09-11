@@ -154,8 +154,10 @@ func TestQuickStartNoReplaceDirective(t *testing.T) {
 	}
 	gomod, _ := os.ReadFile(filepath.Join(dir, "myapp/go.mod"))
 	content := string(gomod)
-	if !strings.Contains(content, "require github.com/dreego-stack/dreego") {
-		t.Fatalf("scaffolded go.mod has no 'require github.com/dreego-stack/dreego':\n%s", content)
+	for _, module := range []string{"github.com/dreego-stack/dreego/core", "github.com/dreego-stack/dreego/adapter/ssr"} {
+		if !strings.Contains(content, module) {
+			t.Fatalf("scaffolded go.mod has no requirement for %s:\n%s", module, content)
+		}
 	}
 	if !strings.Contains(content, "module myapp") {
 		t.Fatalf("scaffolded go.mod has no 'module myapp':\n%s", content)

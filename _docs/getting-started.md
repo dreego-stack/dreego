@@ -19,7 +19,7 @@ Go 1.27 features and `go mod` directives.
 ## 1. Install the CLI
 
 ```bash
-go install github.com/dreego-stack/dreego/cli/dreego@latest
+go install github.com/dreego-stack/dreego/cmd/dreego@latest
 ```
 
 This installs the `dreego` binary into your `GOPATH/bin` directory. Make sure
@@ -84,7 +84,7 @@ import (
 	"log"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/core/ssr"
+	"github.com/dreego-stack/dreego/adapter/ssr"
 	"myapp/www"
 )
 
@@ -186,8 +186,8 @@ Visiting `/users/42` shows "User: 42".
 
 ## See Also
 
-- [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — full component docs
-- [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — dynamic segments, groups, methods
-- [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md) — SSRContext, sessions, config
-- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md)
+- [Components](https://github.com/dreego-stack/dreego/blob/main/core/_docs/components.md) — full component docs
+- [Routing](https://github.com/dreego-stack/dreego/blob/main/core/_docs/routing.md) — dynamic segments, groups, methods
+- [Runtime API](https://github.com/dreego-stack/dreego/blob/main/core/_docs/runtime.md) — SSRContext, sessions, config
+- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/cmd/dreego/_docs/cli.md)
 - [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	ssr "github.com/dreego-stack/dreego/core/ssr"
+	ssr "github.com/dreego-stack/dreego/adapter/ssr"
 )
 
 type unavailableStore struct{}

@@ -18,7 +18,7 @@ Changelog format:
 
 Prints 'new=vX.Y.Z' or 'new=none' on stdout for the workflow to consume.
 
-Usage: python3 _scripts/release-prep.py
+Usage: python3 _scripts/release-prep.py [--verify-tags]
 Exit 0 on success, non-zero on validation error.
 """
 
@@ -33,6 +33,8 @@ CHANGES = ROOT / ".changes"
 CHANGELOG = ROOT / "CHANGELOG.md"
 
 VALID_VERSIONS = ("none", "patch", "minor")
+MODULE_PATH = "github.com/dreego-stack/dreego"
+TAG_PREFIXES = ("", "core/", "adapter/ssr/", "dreegotest/", "cmd/dreego/")
 
 
 def fail(msg):
@@ -49,6 +51,80 @@ def latest_tag():
     if not tags:
         return "v0.0.0"
     return sorted(tags, key=lambda t: [int(x) for x in t[1:].split(".")])[-1]
+
+
+def release_tags(version):
+    return [f"{prefix}{version}" for prefix in TAG_PREFIXES]
+
+
+def git_tags():
+    result = subprocess.run(
+        ["git", "tag", "--list"], capture_output=True, text=True, cwd=ROOT, check=True
+    )
+    return set(result.stdout.splitlines())
+
+
+def tag_commit(tag):
+    result = subprocess.run(
+        ["git", "rev-list", "-n", "1", tag],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def verify_tag_groups():
+    tags = git_tags()
+    allowed = re.compile(
+        r"^(?:core/|adapter/ssr/|dreegotest/|cmd/dreego/)?v\d+\.\d+\.\d+$"
+    )
+    for tag in tags:
+        if "/v" in tag and not allowed.match(tag):
+            fail(f"unexpected module release tag: {tag}")
+    roots = sorted(
+        tag for tag in tags
+        if re.match(r"^v\d+\.\d+\.\d+$", tag)
+        and tuple(int(part) for part in tag[1:].split(".")) >= (0, 8, 0)
+    )
+    for root_tag in roots:
+        expected = release_tags(root_tag)
+        missing = [tag for tag in expected if tag not in tags]
+        if missing:
+            fail(f"incomplete coordinated release {root_tag}; missing: {' '.join(missing)}")
+        commits = {tag_commit(tag) for tag in expected}
+        if len(commits) != 1:
+            fail(f"coordinated release tags do not share one commit: {' '.join(expected)}")
+    print(f"verified={len(roots)}")
+
+
+def update_internal_requirements(version):
+    pattern = re.compile(
+        rf"^(\s*(?:require\s+)?)({re.escape(MODULE_PATH)}(?:/[^\s]+)?)(\s+)v\d+\.\d+\.\d+(\s*(?://.*)?)$",
+        re.MULTILINE,
+    )
+    changed = []
+    for path in sorted(ROOT.rglob("go.mod")):
+        if ".git" in path.parts or ".worktrees" in path.parts:
+            continue
+        old = path.read_text()
+        new = pattern.sub(rf"\1\2\3{version}\4", old)
+        if new != old:
+            path.write_text(new)
+            changed.append(path.relative_to(ROOT))
+    workspace = ROOT / "go.work"
+    if workspace.exists():
+        old = workspace.read_text()
+        workspace_pattern = re.compile(
+            rf"^(\s*replace\s+)({re.escape(MODULE_PATH)}(?:/[^\s]+)?)(\s+)v\d+\.\d+\.\d+(\s+=>\s+.+)$",
+            re.MULTILINE,
+        )
+        new = workspace_pattern.sub(rf"\1\2\3{version}\4", old)
+        if new != old:
+            workspace.write_text(new)
+            changed.append(workspace.relative_to(ROOT))
+    return changed
 
 
 def parse_change(text, source):
@@ -88,6 +164,11 @@ def next_version(current, bump):
 
 
 def main():
+    if sys.argv[1:] == ["--verify-tags"]:
+        verify_tag_groups()
+        return
+    if sys.argv[1:]:
+        fail("usage: release-prep.py [--verify-tags]")
     files = sorted(p for p in CHANGES.glob("*.md") if p.name != "README.md")
     if not files:
         fail("no pending .changes/*.md files found")
@@ -109,6 +190,8 @@ def main():
     current = latest_tag()
     new_version = next_version(current, version)
 
+    updated_modules = update_internal_requirements(new_version)
+
     today = date.today().isoformat()
     old = CHANGELOG.read_text() if CHANGELOG.exists() else ""
     if old and not old.startswith("\n"):
@@ -119,6 +202,7 @@ def main():
     entry = f"\n## {new_version} - {today}\n\n{lines_text}"
     if f"## {new_version} -" in old:
         print(f"new={new_version}")
+        print(f"tags={' '.join(release_tags(new_version))}")
         print(f"skipped: version {new_version} already in CHANGELOG", file=sys.stderr)
         for path in files:
             path.unlink()
@@ -129,7 +213,10 @@ def main():
     for path in files:
         path.unlink()
     print(f"new={new_version}")
+    print(f"tags={' '.join(release_tags(new_version))}")
     print(f"applied: version={version} new={new_version} lines={len(lines)}", file=sys.stderr)
+    for path in updated_modules:
+        print(f"updated: {path}", file=sys.stderr)
 
 
 if __name__ == "__main__":
