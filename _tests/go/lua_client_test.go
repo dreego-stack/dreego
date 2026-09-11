@@ -150,6 +150,25 @@ for key, value in pairs(values) do print(key) end
 	}
 }
 
+func TestLuaRestrictedAPIDiagnosticUsesExactDreegoSourceLine(t *testing.T) {
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/routes/account.dreego": `<body><main>Ready</main></body>
+<client lang="lua">
+local ready = true
+if ready then
+    require("unsafe")
+end
+</client>`,
+	})
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err == nil {
+		t.Fatalf("generate succeeded:\n%s", out)
+	}
+	if !strings.Contains(out, `www/routes/account.dreego(5,5): Lua: require is not available`) {
+		t.Fatalf("diagnostic does not identify the restricted API source range:\n%s", out)
+	}
+}
+
 func TestLuaLoopsTablesAndEscapesCompileThroughGenerate(t *testing.T) {
 	out := dreegotest.Generate(t, `<body><output id="result"></output></body>
 <client lang="lua">
@@ -169,6 +188,46 @@ document.querySelector("#result").textContent = values["label"]
 		"globalThis.dreegoLua.numericFor",
 		"globalThis.dreegoLua.set(values, index, null)",
 		`sourceURL=dreego:///input.dreego`,
+	} {
+		dreegotest.MustContain(t, out, want)
+	}
+}
+
+func TestLuaSupportedBrowserContractCompilesThroughGenerate(t *testing.T) {
+	out := dreegotest.Generate(t, `<body><button id="run">Run</button></body>
+<client lang="lua">
+-- literals, operators, control flow, functions, loops, and tables
+local values = {'first', count = 2, enabled = true, missing = nil}
+local function label(value)
+    if not value then
+        return "empty"
+    elseif value == "first" or value ~= 'second' then
+        return "value: " .. value
+    else
+        return "other"
+    end
+end
+local total = (values.count + 4 - 1) * 2 / 5 % 3
+while total >= 0 and total <= 3 do
+    total = total - 1
+    break
+end
+for index = 3, 1, -1 do
+    values[index] = label(values[index])
+end
+local run = function()
+    document.querySelector("#run").textContent = label(values[1])
+end
+document:querySelector("#run"):addEventListener("click", run)
+print(#values, total)
+</client>`)
+	for _, want := range []string{
+		"globalThis.dreegoLua.table",
+		"globalThis.dreegoLua.concat",
+		"globalThis.dreegoLua.numericFor",
+		"globalThis.dreegoLua.length",
+		`document.querySelector("#run").addEventListener("click", run)`,
+		"globalThis.dreegoLua.print",
 	} {
 		dreegotest.MustContain(t, out, want)
 	}

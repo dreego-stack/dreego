@@ -18,12 +18,12 @@ func (e *emitter) expression(value expression) (string, error) {
 			return "globalThis.dreegoLua.print", nil
 		}
 		if (forbiddenCalls[current.name] || forbiddenRoots[current.name]) && !e.isLocal(current.name) {
-			return "", fmt.Errorf("Lua browser MVP: %s is not available", current.name)
+			return "", unavailableError(current)
 		}
 		return jsIdentifier(current.name), nil
 	case memberExpression:
-		if root, ok := memberRoot(current); ok && forbiddenRoots[root] && !e.isLocal(root) {
-			return "", fmt.Errorf("Lua browser MVP: %s is not available", root)
+		if root, ok := memberRoot(current); ok && forbiddenRoots[root.name] && !e.isLocal(root.name) {
+			return "", unavailableError(root)
 		}
 		object, err := e.expression(current.object)
 		return object + "." + current.field, err
@@ -58,6 +58,10 @@ func (e *emitter) expression(value expression) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported Lua expression %T", value)
 	}
+}
+
+func unavailableError(value nameExpression) error {
+	return fmt.Errorf("Lua %d:%d: %s is not available", value.line, value.column, value.name)
 }
 
 func literal(value literalExpression) string {
