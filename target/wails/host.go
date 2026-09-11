@@ -25,6 +25,7 @@ type Options struct {
 	Height    int
 	MinWidth  int
 	MinHeight int
+	Services  []application.Service
 }
 
 func New(app *dreego.App) (*Host, error) {
@@ -39,6 +40,9 @@ func (h *Host) Render(path string) (dreego.Result, error) {
 }
 
 func (h *Host) Run(options Options) error {
+	if err := validateServices(options.Services); err != nil {
+		return err
+	}
 	if os.Getenv("FRONTEND_DEVSERVER_URL") != "" {
 		return errors.New("dreego wails: FRONTEND_DEVSERVER_URL is not supported")
 	}
@@ -50,13 +54,9 @@ func (h *Host) Run(options Options) error {
 	h.initialPath = options.Path
 	h.initial = &result
 	h.mu.Unlock()
-	app := application.New(application.Options{
-		Name: options.Name,
-		Assets: application.AssetOptions{
-			Handler:        h,
-			DisableLogging: true,
-		},
-	})
+	appOptions := applicationOptions(options)
+	appOptions.Assets = application.AssetOptions{Handler: h, DisableLogging: true}
+	app := application.New(appOptions)
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:     options.Title,
 		Width:     options.Width,
@@ -69,4 +69,11 @@ func (h *Host) Run(options Options) error {
 		return fmt.Errorf("dreego wails: run: %w", err)
 	}
 	return nil
+}
+
+func applicationOptions(options Options) application.Options {
+	return application.Options{
+		Name:     options.Name,
+		Services: append([]application.Service(nil), options.Services...),
+	}
 }

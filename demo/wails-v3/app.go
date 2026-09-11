@@ -3,6 +3,7 @@ package wails_v3
 import (
 	dreego "github.com/dreego-stack/dreego/core"
 	wailstarget "github.com/dreego-stack/dreego/target/wails"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func Run() error {
@@ -22,5 +23,8 @@ func Run() error {
 		Height:    560,
 		MinWidth:  320,
 		MinHeight: 480,
+		Services: []application.Service{
+			application.NewService(NewTimerService(5 * 60)),
+		},
 	})
 }

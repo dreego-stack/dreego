@@ -90,7 +90,8 @@ making unrelated web builds depend on Wails.
 3. Navigate between literal Dreego routes.
 4. Generate one typed Go method binding and validate boundary errors.
 5. Establish the client asset and bridge boundary that DreeJS can use later.
-6. Add development reload and a reference desktop application.
+6. Add deterministic restart-based development reload and a reference desktop
+   application. Wails-specific live reload remains deferred to Phase 2.
 
 ## Phase 1 acceptance criteria
 
@@ -98,11 +99,14 @@ making unrelated web builds depend on Wails.
 - The same component is exercised under SSR and Wails.
 - Styles, head entries, and assets behave deterministically.
 - Typed bindings surface incompatible values at generation or build time.
-- Shutdown releases renderer, plugin, and bridge resources.
+- Service contracts forward Wails startup and shutdown ownership without global
+  registration. Headless native shutdown is rechecked at the Phase 2 gate due
+  to the pinned beta's Alpine GTK4 `App.Quit` behavior.
 - A developer can build the reference application without creating a
   `package.json` or invoking npm manually.
 - Keyboard navigation, focus management, and screen-reader semantics are part
-  of the reference application's quality gate.
+  of the reference application's automated markup gate and documented manual
+  native-platform check.
 
 ## Deferred Phase 2
 

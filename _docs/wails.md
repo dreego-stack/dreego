@@ -16,7 +16,8 @@ desktop rendering and return `dreego.ErrRenderRouteNotFound`.
 The Linux integration suite observes both the render path and a running native
 window. It checks the complete Wails process tree for TCP listener descriptors
 and traces system calls so that even a short-lived `listen` call fails the
-suite. The virtual display is configured with its own TCP transport disabled.
+suite. It also exercises literal WebView navigation and native history. The
+virtual display is configured with its own TCP transport disabled.
 
 ## Assets and literal routes
 
@@ -56,6 +57,63 @@ return host.Run(wails.Options{
 })
 ```
 
+## Typed services and lifecycle
+
+Desktop methods are available only when the application explicitly registers a
+Wails service in `Options.Services`. Dreego validates every exported binding
+method signature before creating the native application. Parameters and results
+must use JSON-safe concrete types; channels, functions, interfaces, recursive
+models, non-string map keys, and multiple non-error results fail with an
+actionable startup diagnostic. Unexported struct fields are outside the client
+contract and are ignored by JSON encoding.
+
+```go
+timer := NewTimerService(5 * 60)
+return host.Run(wails.Options{
+    Name: "Focus Timer",
+    Services: []application.Service{
+        application.NewService(timer),
+    },
+})
+```
+
+Dreego does not register filesystem, shell, network, clipboard, or window
+services by default. Such capabilities exist only when the application adds a
+service that exposes them. Services may implement Wails `ServiceStartup` and
+`ServiceShutdown`; Wails cancels the application context before invoking
+shutdown in reverse registration order. Dreego forwards the exact service list
+without global registration.
+
+Generate readable TypeScript declarations and browser-ready JavaScript from the
+same explicit contract:
+
+```sh
+cd demo
+wails3 generate bindings -d wails-v3/bindings -ts -i -b ./wails-v3 ./cmd/wails-v3
+wails3 generate bindings -d wails-v3/static/bindings -b -noevents ./wails-v3 ./cmd/wails-v3
+```
+
+The generated browser modules import `/wails/runtime.js`, which the native
+Wails asset server supplies in process. Dreego embeds the remaining modules
+from `static/`; no localhost listener or npm package is involved.
+
+## Deterministic development cycle
+
+Phase 1 intentionally uses restart-based reload instead of `wails3 dev` or
+`FRONTEND_DEVSERVER_URL`. Stop the running application, run `dreego generate`,
+regenerate bindings only when the Go service contract changed, and start the
+application again. Every restart renders from registered source and embedded
+assets, so it cannot depend on a stale external development server. Live bridge
+updates remain deferred until Phase 2.
+
+Wails v3 beta.20 can block both bridge calls and programmatic `Quit` during
+headless Alpine GTK4 tests even after the application-started event. Phase 1
+therefore verifies the native window, navigation, history, and no-listener
+contract end to end, and verifies generated bindings plus Dreego's exact
+service/lifecycle forwarding deterministically. Binding interaction remains a
+manual supported-desktop check for the reference application; native headless
+bridge and shutdown behavior are upstream-stable Phase 2 compatibility gates.
+
 ## Development toolchain
 
 All repository commands run through `smd`. The image contains `pkgconf`, GTK 4,
@@ -75,4 +133,6 @@ does not prevent compilation of the Wails host or timer demo.
 
 See the [official Wails installation guide](https://v3.wails.io/getting-started/installation/),
 [application API](https://v3.wails.io/reference/application/), and
-[lifecycle documentation](https://v3.wails.io/concepts/lifecycle/).
+[lifecycle documentation](https://v3.wails.io/concepts/lifecycle/). The
+[binding method guide](https://v3.wails.io/features/bindings/methods/) describes
+the generated client modules.

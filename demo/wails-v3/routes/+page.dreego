@@ -8,10 +8,11 @@
         <h1>Focus timer</h1>
         <p id="timer" class="timer" role="timer" aria-live="off" aria-label="Time remaining">05:00</p>
         <div class="controls" aria-label="Timer controls">
-            <button id="toggle" type="button">Start</button>
-            <button id="reset" type="button">Reset</button>
+            <button id="toggle" type="button" disabled>Start</button>
+            <button id="reset" type="button" disabled>Reset</button>
         </div>
         <p id="status" class="status" role="status" aria-live="polite">Ready for a five-minute focus session.</p>
+        <a href="/about">About this demo</a>
     </main>
 </body>
 
@@ -27,51 +28,26 @@
 </style>
 
 <client lang="js">
-const duration = 5 * 60
-let remaining = duration
-let interval = null
-
 const timer = document.querySelector("#timer")
 const toggle = document.querySelector("#toggle")
 const reset = document.querySelector("#reset")
 const status = document.querySelector("#status")
 
-function renderTime() {
-    const minutes = Math.floor(remaining / 60).toString().padStart(2, "0")
-    const seconds = (remaining % 60).toString().padStart(2, "0")
+function render(snapshot, announce = false) {
+    const minutes = Math.floor(snapshot.remainingSeconds / 60).toString().padStart(2, "0")
+    const seconds = (snapshot.remainingSeconds % 60).toString().padStart(2, "0")
     timer.textContent = `${minutes}:${seconds}`
+    toggle.textContent = snapshot.running ? "Pause" : "Start"
+    if (announce || snapshot.remainingSeconds === 0) status.textContent = snapshot.status
 }
 
-function pause(message) {
-    clearInterval(interval)
-    interval = null
-    toggle.textContent = "Start"
-    status.textContent = message
-}
-
-toggle.addEventListener("click", () => {
-    if (interval !== null) {
-        pause("Timer paused.")
-        return
-    }
-    if (remaining === 0) {
-        remaining = duration
-        renderTime()
-    }
-    toggle.textContent = "Pause"
-    status.textContent = "Timer running."
-    interval = setInterval(() => {
-        remaining -= 1
-        renderTime()
-        if (remaining === 0) {
-            pause("Focus session complete.")
-        }
-    }, 1000)
-})
-
-reset.addEventListener("click", () => {
-    remaining = duration
-    renderTime()
-    pause("Timer reset to five minutes.")
+import("/bindings/demo/wails-v3/timerservice.js").then(({ Reset, Snapshot, Toggle }) => {
+    toggle.disabled = false
+    reset.disabled = false
+    toggle.addEventListener("click", async () => render(await Toggle(), true))
+    reset.addEventListener("click", async () => render(await Reset(), true))
+    setInterval(async () => render(await Snapshot()), 250)
+}).catch(() => {
+    status.textContent = "Timer service could not start."
 })
 </client>

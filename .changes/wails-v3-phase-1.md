@@ -2,4 +2,4 @@
 version: minor
 ---
 
-- Feat: add the experimental Wails v3 render host and accessible timer reference application
+- Feat: add the listener-free Wails v3 render host, validated typed services, and accessible Go-backed timer reference application
