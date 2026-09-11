@@ -10,7 +10,7 @@ func TestReadParsesModuleAndRequirements(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "go.mod")
 	source := `module "example.com/app"
 
-go 1.25
+go 1.26
 
 require (
 	"example.com/direct" v1.2.3

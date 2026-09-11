@@ -39,9 +39,9 @@ func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 }
 
 func parseBodyMethod(attrs string) (string, bool) {
-	for _, part := range strings.Fields(attrs) {
-		if strings.HasPrefix(part, "method=") {
-			return strings.ToUpper(strings.Trim(strings.TrimPrefix(part, "method="), "\"'")), true
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "method="); ok {
+			return strings.ToUpper(strings.Trim(after, "\"'")), true
 		}
 	}
 	return "GET", false

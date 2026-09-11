@@ -192,7 +192,7 @@ func validName(value string, dots bool) bool {
 	if value == "" {
 		return false
 	}
-	for _, part := range strings.Split(value, ".") {
+	for part := range strings.SplitSeq(value, ".") {
 		if part == "" || !asciiLetter(part[0]) {
 			return false
 		}

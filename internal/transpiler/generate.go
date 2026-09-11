@@ -2,6 +2,7 @@ package transpiler
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -67,9 +68,7 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 		if err != nil {
 			return genPlan{}, genStats{}, err
 		}
-		for p, c := range rootFiles {
-			files[p] = c
-		}
+		maps.Copy(files, rootFiles)
 		stats.routes += rootStats.routes
 		stats.components += rootStats.components
 		stats.static += rootStats.static

@@ -149,8 +149,8 @@ func cmdBuildE(args []string) error {
 		if args[i] == "--target" && i+1 < len(args) {
 			target = args[i+1]
 			i++
-		} else if strings.HasPrefix(args[i], "--target=") {
-			target = strings.TrimPrefix(args[i], "--target=")
+		} else if after, ok := strings.CutPrefix(args[i], "--target="); ok {
+			target = after
 		} else if args[i] == "--yes" {
 			yes = true
 		}

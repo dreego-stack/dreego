@@ -77,7 +77,7 @@ func Bundle(features string) string {
 			include(dependency)
 		}
 	}
-	for _, feature := range strings.Split(features, ",") {
+	for feature := range strings.SplitSeq(features, ",") {
 		include(feature)
 	}
 	names := slices.Sorted(maps.Keys(selected))

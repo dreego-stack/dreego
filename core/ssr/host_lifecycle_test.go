@@ -53,7 +53,7 @@ func TestHostHandlesTerminationSignal(t *testing.T) {
 func TestRepeatedHostLifecycleDoesNotLeakGoroutines(t *testing.T) {
 	baseline := runtime.NumGoroutine()
 	host := New(dreego.New())
-	for cycle := 0; cycle < 10; cycle++ {
+	for cycle := range 10 {
 		if err := host.Start("127.0.0.1:0"); err != nil {
 			t.Fatalf("cycle %d Start: %v", cycle, err)
 		}
@@ -174,7 +174,7 @@ func TestShutdownDeadlineIsObservable(t *testing.T) {
 
 func TestHostSupportsRepeatedLifecycles(t *testing.T) {
 	host := New(dreego.New())
-	for cycle := 0; cycle < 2; cycle++ {
+	for cycle := range 2 {
 		listener := listenLocal(t)
 		serveDone := make(chan error, 1)
 		go func() { serveDone <- host.Serve(listener) }()

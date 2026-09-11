@@ -104,7 +104,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 	buf.WriteString("\tvar b strings.Builder\n\n")
 
 	if inlineCode != "" {
-		for _, line := range strings.Split(strings.Trim(inlineCode, "\n"), "\n") {
+		for line := range strings.SplitSeq(strings.Trim(inlineCode, "\n"), "\n") {
 			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
 		}
 		buf.WriteString("\n")
@@ -188,7 +188,7 @@ func genTypedBlocks(file *File) (string, error) {
 		if g.ContentType == "json" {
 			buf.WriteString("\t\tif c.Wants(\"application/json\") {\n")
 			buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n")
-			for _, line := range strings.Split(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
 				buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
 			}
 			buf.WriteString("\t\t\treturn \"\", nil\n")
@@ -197,7 +197,7 @@ func genTypedBlocks(file *File) (string, error) {
 		if g.ContentType == "xml" {
 			buf.WriteString("\t\tif c.Wants(\"application/xml\") {\n")
 			buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/xml; charset=utf-8\")\n")
-			for _, line := range strings.Split(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
 				buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
 			}
 			buf.WriteString("\t\t\treturn \"\", nil\n")

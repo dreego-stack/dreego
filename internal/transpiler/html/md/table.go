@@ -26,7 +26,7 @@ func buildTable(header, sep string, body []string, r *mdRenderer) string {
 	for _, row := range body {
 		cells := splitCells(row)
 		b.WriteString("<tr>")
-		for i := 0; i < n; i++ {
+		for i := range n {
 			c := ""
 			if i < len(cells) {
 				c = cells[i]
@@ -52,7 +52,7 @@ func buildTableNodes(header, sep []mdSegment, body [][]mdSegment, r *mdRenderer)
 	for _, row := range body {
 		cells := splitCellSegments(row)
 		out = append(out, textNode("<tr>"))
-		for i := 0; i < n; i++ {
+		for i := range n {
 			var c []mdSegment
 			if i < len(cells) {
 				c = cells[i]

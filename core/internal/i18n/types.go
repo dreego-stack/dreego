@@ -2,6 +2,7 @@ package i18n
 
 import (
 	"context"
+	"maps"
 	"net/http"
 )
 
@@ -73,9 +74,7 @@ func CloneConfig(source Config) Config {
 	clone.Detection = append([]string(nil), source.Detection...)
 	clone.Resolvers = append([]Resolver(nil), source.Resolvers...)
 	clone.Domains = make(map[string]string, len(source.Domains))
-	for locale, domain := range source.Domains {
-		clone.Domains[locale] = domain
-	}
+	maps.Copy(clone.Domains, source.Domains)
 	clone.Fallbacks = make(map[string][]string, len(source.Fallbacks))
 	for locale, fallbacks := range source.Fallbacks {
 		clone.Fallbacks[locale] = append([]string(nil), fallbacks...)
@@ -85,9 +84,7 @@ func CloneConfig(source Config) Config {
 		messages := make(map[string]Message, len(catalog.Messages))
 		for key, message := range catalog.Messages {
 			formats := make(map[string]ArgumentFormat, len(message.Arguments))
-			for name, format := range message.Arguments {
-				formats[name] = format
-			}
+			maps.Copy(formats, message.Arguments)
 			messages[key] = Message{Value: cloneValue(message.Value), Arguments: formats}
 		}
 		clone.Locales[index] = LocaleCatalog{Locale: catalog.Locale, Messages: messages}

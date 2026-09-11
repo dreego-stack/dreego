@@ -178,7 +178,7 @@ func validLocaleDomain(domain string) bool {
 	if domain == "" || strings.HasPrefix(domain, ".") || strings.HasSuffix(domain, ".") {
 		return false
 	}
-	for _, label := range strings.Split(domain, ".") {
+	for label := range strings.SplitSeq(domain, ".") {
 		if label == "" || label[0] == '-' || label[len(label)-1] == '-' {
 			return false
 		}

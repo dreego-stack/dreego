@@ -38,10 +38,9 @@ func formatGenerateError(err error) string {
 
 func splitErrorFile(msg string) (file, rest string) {
 	for _, prefix := range []string{"error parsing ", "error lexing ", "error generating ", "error generating error page "} {
-		if strings.HasPrefix(msg, prefix) {
-			after := strings.TrimPrefix(msg, prefix)
-			if idx := strings.Index(after, ": "); idx >= 0 {
-				return after[:idx], after[idx+2:]
+		if after, ok := strings.CutPrefix(msg, prefix); ok {
+			if before, after0, ok := strings.Cut(after, ": "); ok {
+				return before, after0
 			}
 			return after, ""
 		}

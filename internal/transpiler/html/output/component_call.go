@@ -66,12 +66,12 @@ func parseCallAttrs(attrs string) ([]callAttr, error) {
 
 func parseCallAttr(part string) (callAttr, error) {
 	part = strings.TrimSpace(part)
-	eq := strings.IndexByte(part, '=')
-	if eq < 0 {
+	before, after, ok := strings.Cut(part, "=")
+	if !ok {
 		return callAttr{}, fmt.Errorf("attribute %q must use name=value syntax", part)
 	}
-	name := strings.TrimSpace(part[:eq])
-	value := strings.TrimSpace(part[eq+1:])
+	name := strings.TrimSpace(before)
+	value := strings.TrimSpace(after)
 	return callAttr{Name: name, Value: value}, nil
 }
 

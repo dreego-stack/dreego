@@ -66,8 +66,8 @@ func scanTag(input string, pos *int) tokens.Token {
 		}
 		body := remaining[1:end]
 		tag := body
-		if idx := strings.IndexByte(body, ' '); idx >= 0 {
-			tag = body[:idx]
+		if before, _, ok := strings.Cut(body, " "); ok {
+			tag = before
 		}
 		attrs := strings.TrimSpace(strings.TrimPrefix(body, tag))
 		selfClose := strings.HasSuffix(attrs, "/")

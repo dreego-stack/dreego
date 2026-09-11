@@ -150,7 +150,7 @@ func TestTrustedModeStillPassesRawHTML(t *testing.T) {
 
 func TestConcurrentToNodesNoRace(t *testing.T) {
 	var wg sync.WaitGroup
-	for i := 0; i < 8; i++ {
+	for i := range 8 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -172,11 +172,9 @@ func TestConcurrentToNodesNoRace(t *testing.T) {
 
 func TestConcurrentMarkdownToHTML(t *testing.T) {
 	var wg sync.WaitGroup
-	for i := 0; i < 8; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < 50; j++ {
+	for range 8 {
+		wg.Go(func() {
+			for range 50 {
 				nodes, err := ToNodes("<div>raw</div>\n\n[a](https://x.com)", ModeSafe)
 				if err != nil {
 					t.Errorf("ToNodes() error = %v", err)
@@ -185,7 +183,7 @@ func TestConcurrentMarkdownToHTML(t *testing.T) {
 					t.Error("expected nodes")
 				}
 			}
-		}()
+		})
 	}
 	wg.Wait()
 }

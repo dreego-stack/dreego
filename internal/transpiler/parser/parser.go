@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
@@ -159,18 +160,16 @@ func parseAllowedLanguage(tok tokens.Token, defaultLanguage string, allowed ...s
 	if language == defaultLanguage {
 		return language, nil
 	}
-	for _, candidate := range allowed {
-		if language == candidate {
-			return language, nil
-		}
+	if slices.Contains(allowed, language) {
+		return language, nil
 	}
 	return "", fmt.Errorf("unsupported language %q for <%s> at position %d; install a processor for this section and language", language, tok.Tag, tok.Pos)
 }
 
 func sectionLanguage(attrs string) string {
-	for _, part := range strings.Fields(attrs) {
-		if strings.HasPrefix(part, "lang=") {
-			return strings.ToLower(strings.Trim(strings.TrimPrefix(part, "lang="), "\"'"))
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "lang="); ok {
+			return strings.ToLower(strings.Trim(after, "\"'"))
 		}
 	}
 	return ""
@@ -198,9 +197,9 @@ func parseServerAttrs(attrs string) string {
 	if attrs == "" {
 		return ""
 	}
-	for _, part := range strings.Fields(attrs) {
-		if strings.HasPrefix(part, "type=") {
-			v := strings.TrimPrefix(part, "type=")
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "type="); ok {
+			v := after
 			return strings.Trim(v, "\"'")
 		}
 	}
@@ -213,9 +212,9 @@ func parseServerMethod(attrs string) string {
 	if attrs == "" {
 		return ""
 	}
-	for _, part := range strings.Fields(attrs) {
-		if strings.HasPrefix(part, "method=") {
-			v := strings.Trim(strings.TrimPrefix(part, "method="), "\"'")
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "method="); ok {
+			v := strings.Trim(after, "\"'")
 			return strings.ToUpper(v)
 		}
 	}

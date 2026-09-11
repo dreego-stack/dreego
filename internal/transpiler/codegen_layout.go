@@ -62,18 +62,18 @@ func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bo
 	}
 	if n.Type == ir.NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
 		parts := splitLayoutText(n.Content)
-		var out string
+		var out strings.Builder
 		for _, p := range parts {
 			switch p {
 			case "{#head}":
-				out += indent + "b.WriteString(head)\n"
+				out.WriteString(indent + "b.WriteString(head)\n")
 			case "{#slot}":
-				out += indent + "b.WriteString(content)\n"
+				out.WriteString(indent + "b.WriteString(content)\n")
 			default:
-				out += indent + fmt.Sprintf("b.WriteString(%s)\n", ir.GoLiteral(p))
+				out.WriteString(indent + fmt.Sprintf("b.WriteString(%s)\n", ir.GoLiteral(p)))
 			}
 		}
-		return out, nil
+		return out.String(), nil
 	}
 	return genTemplateNodeToState(gen, n, depth, "b", inSection)
 }

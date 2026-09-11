@@ -115,7 +115,7 @@ func writePluginClientFixture(t *testing.T, project, plugin, manifest string, fi
 	if err := os.MkdirAll(plugin, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	goMod := "module example.com/app\n\ngo 1.25\n\nrequire github.com/dreego-stack/plugin-auth v0.0.1\n"
+	goMod := "module example.com/app\n\ngo 1.26\n\nrequire github.com/dreego-stack/plugin-auth v0.0.1\n"
 	if err := os.WriteFile(filepath.Join(project, "go.mod"), []byte(goMod), 0o600); err != nil {
 		t.Fatal(err)
 	}

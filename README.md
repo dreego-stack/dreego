@@ -110,7 +110,7 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 
 ## Quick Start
 
-Requires Go 1.25 or newer (`go version`). The `dreego new` command scaffolds a
+Requires Go 1.26 or newer (`go version`). The `dreego new` command scaffolds a
 project, writes a `go.mod` that requires the published `dreego` module, and
 runs `go mod tidy` so the build resolves from the public Go proxy. No
 repository-local `replace` directive is needed for a release-installed CLI.

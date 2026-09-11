@@ -15,7 +15,7 @@ var sessionTestSecret = []byte("test-secret-key-32-bytes-long!!!")
 func TestConcurrentRouteRegistrationNoRace(t *testing.T) {
 	app := New()
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		wg.Add(1)
 		go func(n int) {
 			defer wg.Done()
@@ -44,7 +44,7 @@ func itoa(n int) string {
 func TestConcurrentAppConfigNoRace(t *testing.T) {
 	app := New()
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		wg.Add(4)
 		go func(i int) {
 			defer wg.Done()
@@ -73,7 +73,7 @@ func TestConcurrentAppConfigNoRace(t *testing.T) {
 func TestConcurrentSessionStoreNoRace(t *testing.T) {
 	store := session.NewCookieStore(sessionTestSecret)
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		wg.Add(2)
 		go func(i int) {
 			defer wg.Done()
@@ -93,7 +93,7 @@ func TestConcurrentSessionStoreNoRace(t *testing.T) {
 func TestConcurrentCookiePolicyNoRace(t *testing.T) {
 	store := session.NewCookieStore(sessionTestSecret)
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		wg.Add(3)
 		go func(i int) {
 			defer wg.Done()
@@ -124,14 +124,12 @@ func TestConcurrentCSRFMiddlewareNoRace(t *testing.T) {
 	mw := middleware.CSRF(store)
 	handler := mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 50 {
+		wg.Go(func() {
 			w := httptest.NewRecorder()
 			r := httptest.NewRequest("GET", "/", nil)
 			handler.ServeHTTP(w, r)
-		}()
+		})
 	}
 	wg.Wait()
 }
@@ -139,7 +137,7 @@ func TestConcurrentCSRFMiddlewareNoRace(t *testing.T) {
 func TestConcurrentReadyHandlerNoRace(t *testing.T) {
 	app := New()
 	var wg sync.WaitGroup
-	for i := 0; i < 50; i++ {
+	for range 50 {
 		wg.Add(2)
 		go func() {
 			defer wg.Done()
