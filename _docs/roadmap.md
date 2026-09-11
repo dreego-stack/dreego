@@ -9,6 +9,11 @@ Release numbers report shipped changes; they do not promise that an entire
 phase fits into one release. A phase advances only when tests and real
 applications prove its contracts.
 
+The current release plan uses v0.8 to begin Wails v3 Phase 1, v0.9 to begin the
+DreeJS foundation, and v0.10 to extend DreeJS. These are planned slices rather
+than compatibility promises; evidence may move unfinished work to a later
+release.
+
 Static site generation is not planned. Dreego prioritizes dynamic SSR with
 explicit caching and invalidation. See the
 [SSR over static site generation decision](decisions/ssr-over-ssg.md).
@@ -43,7 +48,7 @@ The released foundation provides:
 
 SSR is the production baseline and remains the primary deployment model.
 
-## Current phase: multi-language Dreego
+## Completed phase: multi-language Dreego
 
 Root sections express purpose while `lang` selects the input language:
 
@@ -84,9 +89,10 @@ JavaScript, TypeScript, and Browser Lua are the complete client-language set
 for the foreseeable future. Additional client languages are outside the
 roadmap so the existing processors can be hardened instead of widened.
 
-## Phase: Wails host
+## Current phase: Wails v3 Phase 1 — planned for v0.8
 
-After the client-language pipeline is proven, add a first-party Wails host:
+Add an experimental, opt-in first-party host against one explicitly pinned
+Wails v3 beta release:
 
 - render initial documents without a listening TCP socket;
 - embed HTML, styles, scripts, and static assets in the application;
@@ -100,7 +106,20 @@ Wails depends on target-neutral rendering and the JavaScript processor output.
 It does not depend on static site generation. The first Wails slice may use raw
 JavaScript or TypeScript without waiting for DreeJS.
 
-## Phase: DreeJS and cache-aware data islands
+Phase 1 is the smallest credible desktop path: rendering, embedded assets,
+literal navigation, one typed binding, lifecycle cleanup, development reload,
+and an accessible reference application. It proves that the integration works;
+it does not promise broad coverage of Wails APIs while Wails v3 remains beta.
+
+## Phase: DreeJS foundation — planned for v0.9
+
+Establish the optional component lifecycle, deterministic module emission,
+local presentation state, accessible cleanup, and typed serialized props. A
+component without client behavior continues to emit zero DreeJS bytes. DreeJS
+is the umbrella name for modular browser and WebView capabilities, not a target
+and not one release-sized feature.
+
+## Phase: DreeJS extensions — planned from v0.10
 
 Add a small modular browser and WebView layer:
 
@@ -117,6 +136,14 @@ A public SSR page may contain a neutral account placeholder while a DreeJS
 island loads the authenticated user. Private responses remain `private` and
 `no-store`; personal data never enters the shared page cache.
 
+## Deferred phase: Wails v3 Phase 2
+
+Broader desktop integration begins only after Wails v3 has a stable upstream
+release and the Phase 1 reference application has produced practical
+compatibility evidence. Phase 2 may expand bridge integration, packaging,
+performance, platform behavior, and explicitly granted host capabilities. It
+has no assigned Dreego release number.
+
 Caching is developed alongside those boundaries but remains provider-owned
 until multiple implementations prove a shared contract. Initial proofs should
 cover an in-memory or Redis-backed cache and a CDN integration such as
@@ -130,7 +157,7 @@ Extend the proven DreeJS lifecycle in increasing order of complexity:
 1. bounded, visibility-aware polling;
 2. server-sent events through an external SSE plugin;
 3. bidirectional updates through an external WebSocket plugin;
-4. Wails bridge updates through the desktop host.
+4. Wails bridge updates after the Wails v3 Phase 2 gate is met.
 
 DreeJS owns the transport-neutral client update model: ordering, sequence
 numbers, resynchronization, focus preservation, accessible announcements, and

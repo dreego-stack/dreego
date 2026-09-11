@@ -1,6 +1,17 @@
-# Phase: Wails target
+# Phase: Wails v3 target
 
-## Goal
+## Release strategy
+
+Wails support is split because Dreego begins its integration while Wails v3 is
+still beta. Phase 1 is planned as the v0.8 release slice. It pins one upstream
+beta version and proves a small, opt-in desktop host. The release remains
+provisional and does not imply support for the complete Wails API.
+
+Phase 2 has no Dreego version assignment. It starts only after Wails v3 reaches
+an upstream stable release and Phase 1 has produced compatibility evidence from
+tests and a maintained reference application.
+
+## Phase 1 goal
 
 Render Dreego applications inside Wails without running a local HTTP server and
 without requiring application developers to operate an npm build pipeline.
@@ -72,7 +83,7 @@ Components that require unavailable capabilities fail generation with a
 specific diagnostic. A plugin can provide Wails-only functionality without
 making unrelated web builds depend on Wails.
 
-## Implementation slices
+## Phase 1 implementation slices
 
 1. Render one component as an initial Wails document without HTTP.
 2. Load scoped styles and embedded static assets.
@@ -81,7 +92,7 @@ making unrelated web builds depend on Wails.
 5. Establish the client asset and bridge boundary that DreeJS can use later.
 6. Add development reload and a reference desktop application.
 
-## Acceptance criteria
+## Phase 1 acceptance criteria
 
 - The reference application opens and renders without a listening TCP socket.
 - The same component is exercised under SSR and Wails.
@@ -93,6 +104,20 @@ making unrelated web builds depend on Wails.
 - Keyboard navigation, focus management, and screen-reader semantics are part
   of the reference application's quality gate.
 
+## Deferred Phase 2
+
+Phase 2 may harden and expand:
+
+- coverage of stable Wails v3 application and window APIs;
+- broader typed bridge integration without granting ambient privileges;
+- packaging, distribution, platform compatibility, and performance;
+- development tooling informed by Phase 1 usage;
+- Wails-specific live bridge updates where DreeJS proves a shared need.
+
+Before Phase 2 starts, the pinned dependency must move to a stable Wails v3
+release, the complete Phase 1 suite must pass against it, and an architecture
+review must record any required migration.
+
 ## Risks
 
 - Wails version changes can create a moving host boundary. Keep version-specific
@@ -101,6 +126,8 @@ making unrelated web builds depend on Wails.
   behavior. Specify the navigation contract before exposing it.
 - A broad bridge can expose dangerous desktop capabilities. Generate only
   explicitly registered methods and preserve least privilege.
+- A beta dependency can change before general availability. Keep Phase 1
+  opt-in, pin its exact version, and contain version-specific code in the host.
 
 ## Not in this phase
 

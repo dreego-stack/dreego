@@ -1,5 +1,14 @@
 # Phase: DreeJS foundation and data islands
 
+## Release strategy
+
+DreeJS is an umbrella capability delivered in independent slices. The v0.9
+plan begins with component lifecycle and typed client props after Wails v3
+Phase 1 proves the browser/WebView boundary. The v0.10 plan begins the extension
+work with private data islands and additional modules. Polling, streams, and
+bidirectional live updates remain later slices and are not implied by either
+release number.
+
 ## Goal
 
 Add optional, generated browser behavior without turning every Dreego page into
@@ -85,7 +94,7 @@ Generation builds a client manifest from used components and directives. It
 includes only required modules and component code. A page with no client
 features produces no DreeJS asset.
 
-## Initial scope
+## Foundation scope — planned for v0.9
 
 The foundation proves local client behavior before networked update modes:
 
@@ -98,10 +107,14 @@ The foundation proves local client behavior before networked update modes:
 - deterministic asset generation;
 - content security policy compatibility;
 - accessible focus and announcement behavior.
+
+## Extension scope — planned from v0.10
+
 - one-time private data islands with loading, error, cancellation, and fallback
   states;
 - explicit cache policy so personalized fragments default to `private,
-  no-store` while shared SSR output can use application-defined caching.
+  no-store` while shared SSR output can use application-defined caching;
+- further optional modules added one independently tested capability at a time.
 
 A countdown is the reference slice. The server supplies an authoritative end
 timestamp and renders both meaningful initial content and the states needed by

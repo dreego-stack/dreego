@@ -1,4 +1,4 @@
-# Current phase: multi-language Dreego
+# Completed phase: multi-language Dreego
 
 ## Goal
 

@@ -10,6 +10,11 @@ timestamp: 2026-08-24T00:00:00Z
 **Date:** 2026-08-24
 **Status:** Accepted direction; public APIs remain provisional until implemented
 
+**Implementation sequence:** Wails v3 Phase 1 begins as an experimental,
+version-pinned beta integration. DreeJS follows that host proof in incremental
+release slices. Broader Wails v3 Phase 2 work is gated on an upstream stable
+release and practical Phase 1 evidence.
+
 ## Context
 
 Dreego began with SSR coupled to the public `core` package. The product goal now

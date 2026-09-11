@@ -85,7 +85,9 @@ possible, with `.dreego` source locations.
 
 ## Product boundary
 
-SSR is the production target through v1. Static generation and expanded Wails
-support are not current core requirements. Future extension points are kept only
-when they are inexpensive and proven by real applications. See the
+SSR remains the production baseline. The experimental Wails v3 Phase 1 host is
+the next target slice, followed by incremental DreeJS capabilities. Broader
+Wails v3 Phase 2 support waits for a stable upstream release and evidence from
+the Phase 1 reference application. Future extension points are kept only when
+they are inexpensive and proven by real applications. See the
 [Roadmap](roadmap.md) and architecture decisions for current direction.

@@ -10,9 +10,9 @@ releases.
 1. [Product architecture](00-product-architecture.md)
 2. [Completed SSR foundation](phase-ssr-foundation.md)
 3. [Completed render foundation](phase-render-foundation.md)
-4. [Multi-language Dreego](phase-multilanguage-dreego.md)
-5. [Wails host](phase-wails.md)
-6. [DreeJS and data islands](phase-dreejs.md)
+4. [Completed multi-language Dreego](phase-multilanguage-dreego.md)
+5. [Wails v3 Phase 1 and deferred Phase 2](phase-wails.md)
+6. [DreeJS foundation and extensions](phase-dreejs.md)
 7. [Live updates](phase-live.md)
 8. [Stabilization](phase-stabilization.md)
 9. [Future SPA and Wasm exploration](future-spa-wasm.md)
@@ -29,10 +29,13 @@ SSR and render foundation (complete)
 multi-language Dreego: md -> html, ts -> js, lua -> js
               |
               v
-Wails host
+Wails v3 Phase 1 (planned v0.8)
               |
               v
-DreeJS, private data islands, and cache-aware SSR
+DreeJS foundation (planned v0.9)
+              |
+              v
+DreeJS data islands and extensions (planned from v0.10)
               |
               v
 polling and live transports
@@ -40,6 +43,10 @@ polling and live transports
               v
 stabilization and the v1 contract review
 ```
+
+Wails v3 Phase 2 is a separate deferred phase. It begins only after an upstream
+stable Wails v3 release and practical evidence from Dreego's Phase 1 reference
+application. It is not assigned to v0.9 or v0.10.
 
 Static site generation is not a planned phase. Dynamic SSR with explicit cache
 policy and invalidation is the supported web deployment direction.

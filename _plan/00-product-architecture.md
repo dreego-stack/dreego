@@ -73,6 +73,9 @@ A target is a first-party host or build pipeline, not a generic feature flag.
 - SSR binds a prepared application to `net/http` and request capabilities.
 - Wails binds rendered HTML, assets, navigation, and a typed host bridge to a
   desktop WebView without requiring a local HTTP server.
+- Wails v3 Phase 1 proves that boundary with an experimental host pinned to one
+  beta release. Broader Phase 2 integration waits for stable upstream Wails v3
+  and evidence from the Phase 1 reference application.
 - DreeJS is optional browser output shared by targets. It is not a target.
 - Islands are not a separate product concept. DreeJS supplies narrowly scoped
   dynamic components through local code, fetch, polling, streams, or live
@@ -157,7 +160,8 @@ real TypeScript type checker; syntax stripping alone is not called type safety.
 ## DreeJS direction
 
 DreeJS is the umbrella name for generated browser support. Its implementation
-is modular:
+is modular and spans multiple release slices rather than one all-or-nothing
+feature:
 
 ```text
 dreejs/

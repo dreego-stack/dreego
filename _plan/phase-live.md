@@ -72,9 +72,10 @@ be enabled merely because a component uses a WebSocket.
 
 ## Host behavior
 
-SSR supplies HTTP endpoints for polling and transport plugins. Wails uses an
-explicit desktop bridge where supported. Generation fails when a directive has
-no compatible endpoint or host capability.
+SSR supplies HTTP endpoints for polling and transport plugins. Wails bridge
+updates wait for the Wails v3 Phase 2 gate and use an explicit desktop bridge.
+Generation fails when a directive has no compatible endpoint or host
+capability.
 
 ## Distributed operation
 

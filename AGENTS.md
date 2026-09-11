@@ -47,15 +47,19 @@ Two models share the work with strict role separation:
    - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
-## Current Phase: multi-language Dreego
+## Current Phase: Wails v3 Phase 1
 
 The latest git tag is the single version source; the CLI derives its version at
 build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or
 from build info (`go install pkg@tag`). Roadmap phases are capability names,
-not version promises. Markdown-to-HTML is released; TypeScript-to-JavaScript is
-the next processor, followed by Lua-to-JavaScript. Every change lands through a
-pull request with one unique `.changes/*.md` file. `version: none` files remain
-pending until a later `version: patch` change triggers a release.
+not version promises. Markdown-to-HTML, TypeScript-to-JavaScript, and Browser
+Lua are released. The planned release slices are v0.8 for the experimental
+Wails v3 Phase 1 foundation, v0.9 for the DreeJS foundation, and v0.10 for
+incremental DreeJS extensions. Wails v3 Phase 2 waits for an upstream stable
+Wails v3 release and evidence from the Phase 1 reference application. Every
+change lands through a pull request with one unique `.changes/*.md` file.
+`version: none` files remain pending until a later `version: patch` change
+triggers a release.
 
 ## Product Focus
 
