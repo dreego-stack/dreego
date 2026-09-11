@@ -15,7 +15,7 @@ func TestScopeCSSKeepsDeclarationsWithBraces(t *testing.T) {
 	if !strings.Contains(out, "radial-gradient(circle, #ccfbf1 1px, transparent 1px)") {
 		t.Errorf("declaration value with commas/parens lost: got %q", out)
 	}
-	if !strings.Contains(out, "[data-scope=abc]") {
+	if !strings.Contains(out, `[data-scope="abc"]`) {
 		t.Errorf("selector not scoped: got %q", out)
 	}
 }
@@ -30,7 +30,7 @@ func TestScopeCSSMediaPreservesDeclarationsAndScopesInnerSelectors(t *testing.T)
 	if !strings.Contains(out, "color: blue") {
 		t.Errorf("@media declaration dropped: got %q", out)
 	}
-	if !strings.Contains(out, "[data-scope=abc] .box") {
+	if !strings.Contains(out, `[data-scope="abc"] .box`) {
 		t.Errorf("inner selector not scoped: got %q", out)
 	}
 }
@@ -75,7 +75,7 @@ func TestScopeCSSPseudoSelectorKeepsDeclaration(t *testing.T) {
 	if !strings.Contains(out, "color: green") {
 		t.Errorf("declaration lost: got %q", out)
 	}
-	if !strings.Contains(out, "[data-scope=abc] .box:hover") {
+	if !strings.Contains(out, `[data-scope="abc"] .box:hover`) {
 		t.Errorf("pseudo selector not scoped: got %q", out)
 	}
 }
@@ -113,11 +113,11 @@ func TestToPascalCaseVariants(t *testing.T) {
 }
 
 func TestScopeSelectorCommaList(t *testing.T) {
-	out := scopeSelector(".a, .b:hover", "[data-scope=x] ")
-	if !strings.Contains(out, "[data-scope=x] .a") {
+	out := scopeSelector(".a, .b:hover", `[data-scope="x"] `)
+	if !strings.Contains(out, `[data-scope="x"] .a`) {
 		t.Errorf("scopeSelector must scope first selector, got: %q", out)
 	}
-	if !strings.Contains(out, "[data-scope=x] .b:hover") {
+	if !strings.Contains(out, `[data-scope="x"] .b:hover`) {
 		t.Errorf("scopeSelector must scope second selector, got: %q", out)
 	}
 }

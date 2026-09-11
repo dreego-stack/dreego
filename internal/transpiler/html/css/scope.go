@@ -6,7 +6,7 @@ import (
 )
 
 func ScopeCSS(css string, hash string) string {
-	prefix := fmt.Sprintf("[data-scope=%s] ", hash)
+	prefix := fmt.Sprintf(`[data-scope="%s"] `, hash)
 	var result strings.Builder
 	scopeRange(&result, css, 0, len(css), prefix)
 	return strings.TrimSpace(result.String())
