@@ -15,6 +15,7 @@ var ErrRedirect = context.ErrRedirect
 var ErrAppBuilt = server.ErrAppBuilt
 var ErrRouteConflict = server.ErrRouteConflict
 var ErrRenderRouteNotFound = server.ErrRenderRouteNotFound
+var ErrDynamicRenderRoute = server.ErrDynamicRenderRoute
 var ErrStaticAssetNotFound = server.ErrStaticAssetNotFound
 var ErrSessionTooLarge = session.ErrSessionTooLarge
 var ErrCookiePathOverride = session.ErrCookiePathOverride

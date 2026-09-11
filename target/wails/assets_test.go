@@ -1,6 +1,7 @@
 package wails
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -57,6 +58,20 @@ func TestRunRejectsExternalFrontendDevserver(t *testing.T) {
 	}
 	if err := host.Run(Options{Path: "/"}); err == nil || !strings.Contains(err.Error(), "FRONTEND_DEVSERVER_URL") {
 		t.Fatalf("Run error = %v", err)
+	}
+}
+
+func TestHostDiagnosesDynamicRoute(t *testing.T) {
+	app := dreego.New()
+	if err := app.Register(http.MethodGet, "/users/{id}", func(http.ResponseWriter, *http.Request) {}); err != nil {
+		t.Fatalf("Register: %v", err)
+	}
+	host, err := New(app)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := host.Render("/users/42"); !errors.Is(err, dreego.ErrDynamicRenderRoute) {
+		t.Fatalf("Render error = %v, want ErrDynamicRenderRoute", err)
 	}
 }
 

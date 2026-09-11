@@ -33,6 +33,11 @@ backslashes, unknown routes, and non-GET requests are rejected. Dreego also
 rejects `FRONTEND_DEVSERVER_URL` because an external development server would
 violate the listener-free desktop contract.
 
+Dynamic routes remain valid for SSR but are not supported by the Phase 1
+desktop renderer. A matching desktop render attempt fails before window startup
+with `dreego.ErrDynamicRenderRoute`, identifies the dynamic pattern, and directs
+the developer to SSR or a literal desktop route.
+
 ```go
 app := dreego.New()
 if err := www.Register(app); err != nil {

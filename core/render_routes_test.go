@@ -2,6 +2,8 @@ package core
 
 import (
 	"errors"
+	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -19,6 +21,20 @@ func TestAppRendersRegisteredPage(t *testing.T) {
 	}
 	if got := string(result.HTML); got != "<main>Timer</main>" {
 		t.Fatalf("HTML = %q", got)
+	}
+}
+
+func TestAppDiagnosesDynamicRenderRoute(t *testing.T) {
+	app := New()
+	if err := app.Register(http.MethodGet, "/users/{id}", func(http.ResponseWriter, *http.Request) {}); err != nil {
+		t.Fatalf("Register: %v", err)
+	}
+	_, err := app.RenderPage("/users/42")
+	if !errors.Is(err, ErrDynamicRenderRoute) {
+		t.Fatalf("RenderPage error = %v, want ErrDynamicRenderRoute", err)
+	}
+	if !strings.Contains(err.Error(), "/users/{id}") || !strings.Contains(err.Error(), "literal desktop route") {
+		t.Fatalf("RenderPage error is not actionable: %v", err)
 	}
 }
 
