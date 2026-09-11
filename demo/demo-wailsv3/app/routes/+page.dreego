@@ -1,35 +1,70 @@
 <head>
-    <title>Dreego Timer</title>
+    <title>Focus — Dreego Timer</title>
 </head>
 
 <body>
-    <main class="timer-shell">
-        <p class="eyebrow">Dreego + Wails v3</p>
-        <h1>Focus timer</h1>
-        <p id="timer" class="timer" role="timer" aria-live="off" aria-label="Time remaining">05:00</p>
-        <div class="controls" aria-label="Timer controls">
-            <button id="toggle" type="button" disabled>Start</button>
-            <button id="reset" type="button" disabled>Reset</button>
-        </div>
-        <p id="status" class="status" role="status" aria-live="polite">Ready for a five-minute focus session.</p>
-        <a href="/about">About this demo</a>
+    <main class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="Dreego Focus home"><span aria-hidden="true">D</span> Dreego Focus</a>
+            <span class="native-badge">Native · Wails v3</span>
+        </header>
+        <section class="timer-card" aria-labelledby="page-title">
+            <p class="eyebrow">Deep work session</p>
+            <h1 id="page-title">Make this moment count.</h1>
+            <p class="intro">Five quiet minutes. One meaningful step forward.</p>
+            <div class="timer-orbit" style="--progress: 0turn">
+                <div class="timer-face">
+                    <p id="timer" class="timer" role="timer" aria-live="off" aria-label="Time remaining" aria-describedby="timer-caption">05:00</p>
+                    <p id="timer-caption" class="timer-caption">minutes remaining</p>
+                </div>
+            </div>
+            <div class="controls" aria-label="Timer controls">
+                <button id="toggle" class="button-primary" type="button" disabled><span class="button-icon" aria-hidden="true">▶</span><span id="toggle-label">Start focus</span></button>
+                <button id="reset" class="button-secondary" type="button" disabled><span aria-hidden="true">↺</span> Reset</button>
+            </div>
+            <p class="shortcut-hint"><kbd>Space</kbd> to start or pause</p>
+            <p id="status" class="status" role="status" aria-live="polite">Ready for a five-minute focus session.</p>
+        </section>
+        <footer><span>Private by design · no local server</span><a href="/about">How it works <span aria-hidden="true">→</span></a></footer>
     </main>
 </body>
 
 <style>
-    .timer-shell { box-sizing: border-box; min-height: 100vh; min-width: 20rem; margin: 0; padding: 3rem 1.5rem; background: Canvas; color: CanvasText; font-family: system-ui, sans-serif; text-align: center; }
-    .eyebrow { margin: 0 0 0.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-    h1 { margin: 0; font-size: clamp(2rem, 8vw, 3.5rem); }
-    .timer { margin: 2rem 0; font: 700 clamp(4rem, 20vw, 8rem) ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-    .controls { display: flex; justify-content: center; gap: 0.75rem; }
-    button { min-width: 7rem; min-height: 2.75rem; padding: 0.75rem 1rem; border: 0.125rem solid currentColor; border-radius: 0.5rem; background: ButtonFace; color: ButtonText; font: inherit; font-weight: 700; }
-    button:focus-visible { outline: 0.2rem solid Highlight; outline-offset: 0.2rem; }
-    .status { min-height: 1.5rem; margin-top: 1.5rem; }
+    .app-shell { --ink: #f5f7ff; --muted: #9ca4bc; --mint: #9fffd7; --violet: #aa9cff; position: fixed; inset: 0; box-sizing: border-box; min-width: 20rem; overflow: auto; padding: 1.25rem clamp(1rem, 4vw, 2rem); background: radial-gradient(circle at 15% 10%, rgba(82, 70, 160, 0.28), transparent 34%), radial-gradient(circle at 85% 75%, rgba(35, 141, 115, 0.2), transparent 38%), #090b14; color: var(--ink); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; max-width: 42rem; margin: 0 auto 1.25rem; }
+    .brand { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--ink); font-size: 0.82rem; font-weight: 750; letter-spacing: 0.04em; text-decoration: none; }
+    .brand span { display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border: 1px solid rgba(159, 255, 215, 0.42); border-radius: 0.55rem; background: rgba(159, 255, 215, 0.1); color: var(--mint); }
+    .native-badge { color: var(--muted); font-size: 0.68rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; }
+    .timer-card { box-sizing: border-box; max-width: 32rem; margin: 0 auto; padding: clamp(1.35rem, 4vw, 2rem); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.75rem; background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)); box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.08); text-align: center; }
+    .eyebrow { margin: 0 0 0.55rem; color: var(--mint); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { max-width: 22rem; margin: 0 auto; font-size: clamp(1.75rem, 6vw, 2.6rem); font-weight: 720; letter-spacing: -0.045em; line-height: 1.04; }
+    .intro { max-width: 24rem; margin: 0.75rem auto 1.25rem; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    .timer-orbit { display: grid; width: clamp(11.5rem, 38vw, 14rem); aspect-ratio: 1; margin: 0.5rem auto 1.35rem; padding: 0.3rem; place-items: center; border-radius: 50%; background: conic-gradient(var(--mint) var(--progress), rgba(255, 255, 255, 0.08) 0); box-shadow: 0 0 2.5rem rgba(159, 255, 215, 0.12); transition: --progress 0.4s linear; }
+    .timer-face { display: grid; width: 100%; height: 100%; place-content: center; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #1c2134, #10131f 68%); box-shadow: inset 0 0 2rem rgba(0, 0, 0, 0.45); }
+    .timer { margin: 0; font: 650 clamp(3.2rem, 13vw, 5rem)/1 ui-monospace, "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.08em; text-indent: -0.08em; }
+    .timer-caption { margin: 0.45rem 0 0; color: var(--muted); font-size: 0.68rem; letter-spacing: 0.11em; text-transform: uppercase; }
+    .controls { display: flex; justify-content: center; gap: 0.65rem; }
+    button { display: inline-flex; min-height: 2.85rem; align-items: center; justify-content: center; gap: 0.55rem; padding: 0.72rem 1.1rem; border: 1px solid transparent; border-radius: 0.9rem; font: inherit; font-size: 0.88rem; font-weight: 750; cursor: pointer; transition: transform 150ms ease, background 150ms ease, border-color 150ms ease; }
+    button:not(:disabled):hover { transform: translateY(-1px); }
+    button:disabled { cursor: wait; opacity: 0.5; }
+    .button-primary { min-width: 9.75rem; background: var(--mint); color: #07130f; box-shadow: 0 0.65rem 1.5rem rgba(70, 220, 164, 0.18); }
+    .button-secondary { border-color: rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.055); color: var(--ink); }
+    button:focus-visible, a:focus-visible { outline: 0.2rem solid var(--violet); outline-offset: 0.2rem; }
+    .shortcut-hint { margin: 0.8rem 0 0; color: #747d97; font-size: 0.68rem; }
+    kbd { padding: 0.08rem 0.34rem; border: 1px solid rgba(255, 255, 255, 0.18); border-bottom-width: 2px; border-radius: 0.28rem; background: rgba(255, 255, 255, 0.06); color: var(--muted); font: inherit; }
+    .status { min-height: 1.25rem; margin: 0.7rem 0 0; color: var(--muted); font-size: 0.76rem; }
+    footer { display: flex; max-width: 32rem; align-items: center; justify-content: space-between; gap: 1rem; margin: 1rem auto 0; color: #747d97; font-size: 0.68rem; }
+    footer a { color: var(--mint); font-weight: 700; text-decoration: none; }
+    @media (max-width: 27rem) { .native-badge, footer > span, .shortcut-hint { display: none; } .timer-card { border-radius: 1.3rem; } footer { justify-content: center; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
 </style>
 
 <client lang="js">
 const timer = document.querySelector("#timer")
+const timerOrbit = document.querySelector(".timer-orbit")
 const toggle = document.querySelector("#toggle")
+const toggleLabel = document.querySelector("#toggle-label")
+const toggleIcon = document.querySelector(".button-icon")
 const reset = document.querySelector("#reset")
 const status = document.querySelector("#status")
 
@@ -37,7 +72,9 @@ function render(snapshot, announce = false) {
     const minutes = Math.floor(snapshot.remainingSeconds / 60).toString().padStart(2, "0")
     const seconds = (snapshot.remainingSeconds % 60).toString().padStart(2, "0")
     timer.textContent = `${minutes}:${seconds}`
-    toggle.textContent = snapshot.running ? "Pause" : "Start"
+    timerOrbit.style.setProperty("--progress", `${1 - snapshot.remainingSeconds / 300}turn`)
+    toggleLabel.textContent = snapshot.running ? "Pause focus" : "Start focus"
+    toggleIcon.textContent = snapshot.running ? "Ⅱ" : "▶"
     if (announce || snapshot.remainingSeconds === 0) status.textContent = snapshot.status
 }
 
@@ -46,6 +83,12 @@ import("/bindings/demo-wailsv3/app/timerservice.js").then(({ Reset, Snapshot, To
     reset.disabled = false
     toggle.addEventListener("click", async () => render(await Toggle(), true))
     reset.addEventListener("click", async () => render(await Reset(), true))
+    document.addEventListener("keydown", async (event) => {
+        if (event.code === "Space" && event.target === document.body) {
+            event.preventDefault()
+            render(await Toggle(), true)
+        }
+    })
     setInterval(async () => render(await Snapshot()), 250)
 }).catch(() => {
     status.textContent = "Timer service could not start."
