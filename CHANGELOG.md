@@ -1,4 +1,12 @@
 
+## v0.7.1 - 2026-09-11
+
+- Fix: report restricted Browser Lua APIs at their exact `.dreego` source location
+- Test: cover the complete supported Browser Lua contract through generation
+- Test: harden Browser Lua compiler coverage for malformed input and nested control flow
+- Chore: remove the obsolete i18n plugin todo after first-party i18n shipped
+- Docs: split the remaining Wails, DreeJS, live-update, Lua, and v1 stabilization work into executable todo items.
+
 ## v0.7.0 - 2026-09-11
 
 - Breaking: require Go 1.27 or newer for Dreego development, generated applications, and builds.
