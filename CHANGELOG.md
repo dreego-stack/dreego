@@ -1,4 +1,10 @@
 
+## v0.8.0 - 2026-09-11
+
+- Breaking: split Dreego into independently tagged Core, SSR adapter, testing, CLI, and shared implementation modules
+- Breaking: move the CLI to `cmd/dreego` and the SSR host to `adapter/ssr`
+- Docs: define the Wails v3 Phase 1, DreeJS, and deferred Wails v3 Phase 2 release sequence
+
 ## v0.7.1 - 2026-09-11
 
 - Fix: report restricted Browser Lua APIs at their exact `.dreego` source location
