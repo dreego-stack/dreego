@@ -4,13 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 type Host struct {
-	app *dreego.App
+	app         *dreego.App
+	mu          sync.Mutex
+	initialPath string
+	initial     *dreego.Result
 }
 
 type Options struct {
@@ -38,9 +42,14 @@ func (h *Host) Run(options Options) error {
 	if os.Getenv("FRONTEND_DEVSERVER_URL") != "" {
 		return errors.New("dreego wails: FRONTEND_DEVSERVER_URL is not supported")
 	}
-	if _, err := h.Render(options.Path); err != nil {
+	result, err := h.Render(options.Path)
+	if err != nil {
 		return err
 	}
+	h.mu.Lock()
+	h.initialPath = options.Path
+	h.initial = &result
+	h.mu.Unlock()
 	app := application.New(application.Options{
 		Name: options.Name,
 		Assets: application.AssetOptions{

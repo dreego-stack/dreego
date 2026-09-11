@@ -19,7 +19,7 @@ func (h *Host) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 		http.NotFound(response, request)
 		return
 	}
-	result, err := h.Render(request.URL.Path)
+	result, err := h.renderPage(request.URL.Path)
 	if err == nil {
 		writeAssetResponse(response, request, "text/html; charset=utf-8", result.HTML)
 		return
@@ -34,6 +34,18 @@ func (h *Host) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 	writeAssetResponse(response, request, asset.MIME, asset.Content)
+}
+
+func (h *Host) renderPage(routePath string) (dreego.Result, error) {
+	h.mu.Lock()
+	if h.initial != nil && h.initialPath == routePath {
+		result := *h.initial
+		h.initial = nil
+		h.mu.Unlock()
+		return result, nil
+	}
+	h.mu.Unlock()
+	return h.Render(routePath)
 }
 
 func validAssetRequest(request *http.Request) bool {
