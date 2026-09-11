@@ -5,7 +5,7 @@ import (
 	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/core/ssr"
+	"github.com/dreego-stack/dreego/adapter/ssr"
 	"pluginapp/plugin"
 	"pluginapp/www"
 )

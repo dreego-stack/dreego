@@ -117,7 +117,7 @@ repository-local `replace` directive is needed for a release-installed CLI.
 
 ```bash
 # 1. Install the Dreego CLI
-go install github.com/dreego-stack/dreego/cli/dreego@latest
+go install github.com/dreego-stack/dreego/cmd/dreego@latest
 
 # 2. Scaffold a new project (writes go.mod, main.go, www/ tree, runs go mod tidy)
 dreego new myapp
@@ -142,7 +142,7 @@ import (
 	"log"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/core/ssr"
+	"github.com/dreego-stack/dreego/adapter/ssr"
 	"myapp/www"
 )
 

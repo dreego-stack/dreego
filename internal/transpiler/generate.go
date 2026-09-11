@@ -130,7 +130,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		stdImports := stdImportsFor(rd.src)
 		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
 		if strings.Contains(rd.src, "ssr.") {
-			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/core/ssr\""
+			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
 		}
 		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\t%s\n)\n\n", rd.pkg, importLine, coreImport)
 		if stdImports != "" {

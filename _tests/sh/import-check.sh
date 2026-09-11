@@ -16,17 +16,19 @@ trap 'rm -rf "$WORK"' EXIT
 
 cp -R "$FIXTURE_DIR/." "$WORK/"
 cp "$REPO_DIR/go.sum" "$WORK/go.sum"
-sed -i.bak 's|^replace github.com/dreego-stack/dreego => .*$|replace github.com/dreego-stack/dreego => '"$REPO_DIR"'|' "$WORK/go.mod"
-rm -f "$WORK/go.mod.bak"
+(cd "$WORK" && GOWORK=off go mod edit \
+    -replace=github.com/dreego-stack/dreego="$REPO_DIR" \
+    -replace=github.com/dreego-stack/dreego/core="$REPO_DIR/core" \
+    -replace=github.com/dreego-stack/dreego/adapter/ssr="$REPO_DIR/adapter/ssr")
 
 DREEGO_BIN="${DREEGO_BIN:-}"
 if [ -z "$DREEGO_BIN" ]; then
     DREEGO_BIN="$(mktemp -d)/dreego"
-    (cd "$REPO_DIR" && go build -o "$DREEGO_BIN" ./cli/dreego)
+    (cd "$REPO_DIR" && go build -o "$DREEGO_BIN" ./cmd/dreego)
 fi
 
 (cd "$WORK" && "$DREEGO_BIN" generate)
-(cd "$WORK" && go build -o server .)
+(cd "$WORK" && go build -mod=mod -o server .)
 
 PORT="${PORT:-$(shuf -i 20000-29999 -n 1 2>/dev/null || echo 20000)}"
 (cd "$WORK" && PORT="$PORT" ./server) &

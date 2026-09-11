@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 
 	corei18n "github.com/dreego-stack/dreego/core/internal/i18n"
-	mw "github.com/dreego-stack/dreego/core/internal/middleware"
-	sess "github.com/dreego-stack/dreego/core/internal/session"
+	mw "github.com/dreego-stack/dreego/internal/middleware"
+	sess "github.com/dreego-stack/dreego/internal/session"
 )
 
 type Store = sess.Store

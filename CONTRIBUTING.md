@@ -11,7 +11,7 @@ root — it is the authoritative source for conventions.
   (enforced by `_scripts/check-core-deps.sh` in CI).
 - Run the full suite with `make test` (Docker-based; builds the `_tests/`
   image and runs the race and integration suites). For a fast subset:
-  `go test ./core/... ./cli/dreego/...`.
+  `go test ./core/... ./cmd/dreego/...`.
 - All commands may also be run inside the `smd` container. Use
   `smd sh _tests/test.sh` for the full suite; this is optional and never
   required for contributions.
@@ -100,7 +100,7 @@ Every feature follows this cycle:
 - No comments unless needed for clarity.
 - Go 1.27+, standard library preferred. Core code in `core/` has no external
   dependencies.
-- CLI lives in `cli/dreego/` and imports core; plugins live in separate
+- CLI lives in `cmd/dreego/` and imports core; plugins live in separate
   repositories under `github.com/dreego-stack/`.
 - Build via the `dreego` CLI, not directly `go build`.
 

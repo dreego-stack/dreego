@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/middleware"
+	"github.com/dreego-stack/dreego/internal/middleware"
 )
 
 func TestRecoveryCatchesPanicNoHandler(t *testing.T) {

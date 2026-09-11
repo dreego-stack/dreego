@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	corei18n "github.com/dreego-stack/dreego/core/internal/i18n"
-	"github.com/dreego-stack/dreego/core/internal/validate"
+	"github.com/dreego-stack/dreego/internal/validate"
 )
 
 var ErrAppBuilt = errors.New("dreego: app configuration is frozen")

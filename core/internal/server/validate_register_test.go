@@ -3,7 +3,7 @@ package server
 import (
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/validate"
+	"github.com/dreego-stack/dreego/internal/validate"
 )
 
 // typed-forms.1: custom validator registration + application. Currently RED —

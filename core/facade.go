@@ -6,8 +6,8 @@ import (
 
 	"github.com/dreego-stack/dreego/core/internal/context"
 	"github.com/dreego-stack/dreego/core/internal/server"
-	"github.com/dreego-stack/dreego/core/internal/session"
-	"github.com/dreego-stack/dreego/core/internal/validate"
+	"github.com/dreego-stack/dreego/internal/session"
+	"github.com/dreego-stack/dreego/internal/validate"
 )
 
 var ErrRedirect = context.ErrRedirect

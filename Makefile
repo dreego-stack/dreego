@@ -1,5 +1,7 @@
 .PHONY: up down build generate dev clean dx dx-clean test coverage install-hooks
 
+ROOT_VERSION = $$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 2>/dev/null || echo dev)
+
 up:
 	cd demo && docker compose up -d
 
@@ -7,21 +9,21 @@ down:
 	cd demo && docker compose down
 
 build:
-	go build -ldflags "-X main.version=$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" -o bin/dreego ./cli/dreego
+	go build -ldflags "-X main.version=$(ROOT_VERSION)" -o tmp/dreego ./cmd/dreego
 
 generate:
-	go run ./cli/dreego
+	go run ./cmd/dreego
 
 dev:
-	go run ./cli/dreego && go run .
+	go run ./cmd/dreego && go run .
 
 test:
-	@go run ./cli/dreego tools install typescript
-	@CGO_ENABLED=1 go test -race ./core/... ./internal/transpiler/... ./_tests/go/...
+	@go run ./cmd/dreego tools install typescript
+	@CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
 	@make coverage
 	@docker build \
 		-q \
-		--build-arg DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \
+		--build-arg DREEGO_VERSION="$(ROOT_VERSION)" \
 		-f _tests/Dockerfile \
 		-t dreego-test \
 		. > /dev/null 2>&1
@@ -29,7 +31,7 @@ test:
 		--rm \
 		-e DREEGO_FILTER="$${DREEGO_FILTER:-}" \
 		-e DREEGO_RUNS="$${DREEGO_RUNS:-1}" \
-		-e DREEGO_VERSION="$$(git describe --tags --abbrev=0 2>/dev/null || echo dev)" \
+		-e DREEGO_VERSION="$(ROOT_VERSION)" \
 		dreego-test
 
 coverage:
@@ -47,7 +49,7 @@ dx-clean:
 
 clean:
 	rm -f *_dreego.go
-	rm -rf bin/
+	rm -rf tmp/
 
 install-hooks:
 	@cp _scripts/pre-commit .git/hooks/pre-commit

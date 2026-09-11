@@ -10,7 +10,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 **Date:** 2026-07-28
 **Status:** Superseded by
-[Semantic sections and first-party language processors](semantic-sections-and-language-processors.md)
+[Semantic sections and first-party language processors](../../cmd/dreego/_docs/decisions/semantic-sections-and-language-processors.md)
 
 > This document records the historical section model. Its original root names
 > were `<go>`, `<div>`, and `<script>`; the implemented semantic model uses

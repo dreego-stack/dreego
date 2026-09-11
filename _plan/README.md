@@ -29,13 +29,16 @@ SSR and render foundation (complete)
 multi-language Dreego: md -> html, ts -> js, lua -> js
               |
               v
-Wails v3 Phase 1 (planned v0.8)
+coordinated module boundaries (planned v0.8)
               |
               v
-DreeJS foundation (planned v0.9)
+Wails v3 Phase 1 (planned v0.9)
               |
               v
-DreeJS data islands and extensions (planned from v0.10)
+DreeJS foundation (planned v0.10)
+              |
+              v
+DreeJS data islands and extensions (planned after v0.10)
               |
               v
 polling and live transports

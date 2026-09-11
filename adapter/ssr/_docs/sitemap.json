@@ -1,0 +1,9 @@
+{
+  "module": "github.com/dreego-stack/dreego/adapter/ssr",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "SSR Documentation Index"},
+    {"path": "/_docs/middleware.md", "title": "Middleware"},
+    {"path": "/_docs/session-encryption.md", "title": "Session Encryption"},
+    {"path": "/_docs/deployment.md", "title": "Deployment"}
+  ]
+}

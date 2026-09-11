@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/middleware"
-	"github.com/dreego-stack/dreego/core/internal/session"
+	"github.com/dreego-stack/dreego/internal/middleware"
+	"github.com/dreego-stack/dreego/internal/session"
 )
 
 func TestNewSSRNilRequest(t *testing.T) {

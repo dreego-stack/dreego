@@ -55,7 +55,7 @@ func testModuleComponentImport(t *testing.T, root string) {
 	if _, err := os.Stat(filepath.Join(dir, root, "components", "dree.go")); err != nil {
 		t.Fatalf("generated component package for %s: %v", root, err)
 	}
-	build := exec.Command("go", "test", "./...")
+	build := exec.Command("go", "test", "-mod=mod", "./...")
 	build.Dir = dir
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("generated project failed to compile: %v\n%s", err, output)

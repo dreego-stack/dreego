@@ -25,7 +25,7 @@ JavaScript, pinned TypeScript, and Dreego Browser Lua. See
 
 ```text
 HTTP request
-    -> core/ssr host
+    -> adapter/ssr host
     -> application middleware
     -> generated route handler
     -> route server code
@@ -37,16 +37,16 @@ HTTP request
 `core` owns the public application, context, component, validation, and session
 contracts. Implementation packages below `core/internal` separate server,
 middleware, rendering, session, context, and validation responsibilities.
-`core/ssr` is the first-party HTTP host.
+`adapter/ssr` is the first-party HTTP host.
 
 ## Repository boundaries
 
 ```text
 core/                  public runtime facade
 core/internal/         runtime implementation
-core/ssr/              first-party HTTP host
+adapter/ssr/           first-party HTTP host
 internal/transpiler/   .dreego compiler and code generation
-cli/dreego/            command-line application
+cmd/dreego/            command-line application
 dreegotest/            public test helpers
 _tests/go/             integration and regression tests
 _docs/                 versioned public documentation

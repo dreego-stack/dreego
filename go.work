@@ -1,0 +1,21 @@
+go 1.27
+
+use (
+	.
+	./_tests/go
+	./adapter/ssr
+	./cmd/dreego
+	./core
+	./dreegotest
+	./demo
+)
+
+replace github.com/dreego-stack/dreego v0.8.0 => .
+
+replace github.com/dreego-stack/dreego/core v0.8.0 => ./core
+
+replace github.com/dreego-stack/dreego/adapter/ssr v0.8.0 => ./adapter/ssr
+
+replace github.com/dreego-stack/dreego/dreegotest v0.8.0 => ./dreegotest
+
+replace github.com/dreego-stack/dreego/cmd/dreego v0.8.0 => ./cmd/dreego

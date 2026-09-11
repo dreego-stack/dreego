@@ -47,7 +47,7 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	port := ln.Addr().(*net.TCPAddr).Port
 	ln.Close()
 
-	goMod := "module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego v0.0.0\n\tgolang.org/x/text v0.22.0\n)\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\n"
+	goMod := "module t\ngo 1.27\nrequire (\n\tgithub.com/dreego-stack/dreego/core v0.8.0\n\tgithub.com/dreego-stack/dreego/adapter/ssr v0.8.0\n)\nreplace github.com/dreego-stack/dreego => " + repoRoot + "\nreplace github.com/dreego-stack/dreego/core => " + filepath.Join(repoRoot, "core") + "\nreplace github.com/dreego-stack/dreego/adapter/ssr => " + filepath.Join(repoRoot, "adapter", "ssr") + "\n"
 	os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644)
 	moduleSum, err := os.ReadFile(filepath.Join(repoRoot, "go.sum"))
 	if err != nil {
@@ -56,7 +56,7 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "go.sum"), moduleSum, 0o644); err != nil {
 		t.Fatalf("write go.sum: %v", err)
 	}
-	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/core/ssr\"\n)\nfunc main() { app := dreego.New(); if err := app.SetLogging(false); err != nil { panic(err) }; if err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, \":%d\"); err != nil { panic(err) } }\n", port)), 0644)
+	os.WriteFile(filepath.Join(dir, "main.go"), []byte(fmt.Sprintf("package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/adapter/ssr\"\n)\nfunc main() { app := dreego.New(); if err := app.SetLogging(false); err != nil { panic(err) }; if err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, \":%d\"); err != nil { panic(err) } }\n", port)), 0644)
 	os.MkdirAll(filepath.Join(dir, "www", "routes"), 0755)
 	os.WriteFile(filepath.Join(dir, "www", "routes", "+page.dreego"), []byte("<body><h1>hello</h1></body>"), 0644)
 	os.WriteFile(filepath.Join(dir, "www", "dreego.config.json"), []byte("{}"), 0644)
@@ -66,7 +66,7 @@ func TestDeploymentGracefulShutdown(t *testing.T) {
 	}
 
 	srv := filepath.Join(dir, "srv")
-	build := exec.Command("go", "build", "-o", srv, ".")
+	build := exec.Command("go", "build", "-mod=mod", "-o", srv, ".")
 	build.Dir = dir
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)

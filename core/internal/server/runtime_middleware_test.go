@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dreego-stack/dreego/core/internal/session"
+	"github.com/dreego-stack/dreego/internal/session"
 )
 
 type mockStore struct{}

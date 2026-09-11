@@ -16,7 +16,7 @@ func TestBlueprintUsesSSRHost(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RepoRoot: %v", err)
 	}
-	data, err := os.ReadFile(filepath.Join(repoRoot, "cli", "dreego", "blueprints", "default", "main.go.tmpl"))
+	data, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "blueprints", "default", "main.go.tmpl"))
 	if err != nil {
 		t.Fatalf("read default main.go.tmpl: %v", err)
 	}

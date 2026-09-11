@@ -1,0 +1,16 @@
+{
+  "module": "github.com/dreego-stack/dreego/cmd/dreego",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "CLI Documentation Index"},
+    {"path": "/_docs/cli.md", "title": "CLI Reference"},
+    {"path": "/_docs/build-hooks.md", "title": "Build Hooks"},
+    {"path": "/_docs/dev-server.md", "title": "Development Server"},
+    {"path": "/_docs/hot-reload.md", "title": "Hot Reload"},
+    {"path": "/_docs/client-javascript.md", "title": "Client JavaScript"},
+    {"path": "/_docs/client-typescript.md", "title": "Client TypeScript"},
+    {"path": "/_docs/lua.md", "title": "Browser Lua"},
+    {"path": "/_docs/markdown.md", "title": "Markdown"},
+    {"path": "/_docs/client-languages.md", "title": "Client Languages"},
+    {"path": "/_docs/semantic-sections-migration.md", "title": "Semantic Sections Migration"}
+  ]
+}
