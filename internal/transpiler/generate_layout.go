@@ -2,8 +2,10 @@ package transpiler
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -150,11 +152,7 @@ func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntr
 	for _, e := range layouts {
 		scopes[e.rel] = true
 	}
-	var scopeList []string
-	for s := range scopes {
-		scopeList = append(scopeList, s)
-	}
-	sort.Strings(scopeList)
+	scopeList := slices.Sorted(maps.Keys(scopes))
 
 	for _, scope := range scopeList {
 		for _, name := range []string{"default.dreego", "layout.dreego"} {

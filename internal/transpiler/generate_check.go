@@ -2,8 +2,10 @@ package transpiler
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -110,11 +112,7 @@ func applyPlan(plan genPlan, force bool) error {
 			}
 		}
 	}
-	var paths []string
-	for p := range plan.files {
-		paths = append(paths, p)
-	}
-	sort.Strings(paths)
+	paths := slices.Sorted(maps.Keys(plan.files))
 	for _, p := range paths {
 		if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
 			return fmt.Errorf("error creating directory for %s: %w", p, err)

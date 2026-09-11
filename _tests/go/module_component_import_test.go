@@ -33,7 +33,7 @@ func testModuleComponentImport(t *testing.T, root string) {
 	if err := os.MkdirAll(filepath.Join(moduleDir, "components"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(moduleDir, "go.mod"), []byte("module example.com/ui\n\ngo 1.22\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(moduleDir, "go.mod"), []byte("module example.com/ui\n\ngo 1.23\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(moduleDir, "components", "Button.dreego"), []byte(`Component Button (label string)

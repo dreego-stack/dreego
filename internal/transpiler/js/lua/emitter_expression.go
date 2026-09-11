@@ -2,7 +2,8 @@ package lua
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -175,10 +176,5 @@ func jsIdentifier(name string) string {
 }
 
 func (e *emitter) sortedFeatures() []string {
-	features := make([]string, 0, len(e.features))
-	for feature := range e.features {
-		features = append(features, feature)
-	}
-	sort.Strings(features)
-	return features
+	return slices.Sorted(maps.Keys(e.features))
 }

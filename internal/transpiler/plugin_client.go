@@ -5,10 +5,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -43,11 +45,7 @@ func generatePluginClientAssets(project string, settings *Settings, routePattern
 	if err != nil {
 		return "", 0, err
 	}
-	paths := make([]string, 0, len(settings.Plugins))
-	for modulePath := range settings.Plugins {
-		paths = append(paths, modulePath)
-	}
-	sort.Strings(paths)
+	paths := slices.Sorted(maps.Keys(settings.Plugins))
 
 	var src strings.Builder
 	for _, modulePath := range paths {
@@ -108,11 +106,7 @@ func loadPluginClientBundle(dir string, selected []string) (generatedPluginBundl
 		}
 		byID[module.ID] = module
 	}
-	allIDs := make([]string, 0, len(byID))
-	for id := range byID {
-		allIDs = append(allIDs, id)
-	}
-	sort.Strings(allIDs)
+	allIDs := slices.Sorted(maps.Keys(byID))
 	if _, err := orderPluginClientModules(byID, allIDs); err != nil {
 		return generatedPluginBundle{}, err
 	}
@@ -192,11 +186,14 @@ func validatePluginClientURL(value string) error {
 }
 
 func validatePluginClientFile(value string) error {
-	clean := filepath.Clean(filepath.FromSlash(value))
-	if value == "" || strings.Contains(value, "\\") || filepath.IsAbs(value) || clean == ".." || strings.HasPrefix(clean, ".."+string(os.PathSeparator)) {
+	if strings.Contains(value, "\\") {
 		return fmt.Errorf("unsafe client module path %q", value)
 	}
-	if filepath.Ext(clean) != ".js" {
+	local, err := filepath.Localize(value)
+	if err != nil {
+		return fmt.Errorf("unsafe client module path %q", value)
+	}
+	if filepath.Ext(local) != ".js" {
 		return fmt.Errorf("client module path %q must be a .js file", value)
 	}
 	return nil
@@ -219,11 +216,15 @@ func validPluginClientID(value string) bool {
 }
 
 func readPluginClientFile(dir, relative string) ([]byte, error) {
+	local, err := filepath.Localize(relative)
+	if err != nil {
+		return nil, fmt.Errorf("unsafe client module path %q", relative)
+	}
 	root, err := filepath.EvalSymlinks(dir)
 	if err != nil {
 		return nil, err
 	}
-	full, err := filepath.EvalSymlinks(filepath.Join(root, filepath.FromSlash(relative)))
+	full, err := filepath.EvalSymlinks(filepath.Join(root, local))
 	if err != nil {
 		return nil, err
 	}

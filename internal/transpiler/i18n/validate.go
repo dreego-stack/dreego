@@ -2,7 +2,8 @@ package i18n
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -204,12 +205,7 @@ func placeholders(text string) ([]string, error) {
 		seen[name] = struct{}{}
 		index += end + 1
 	}
-	names := make([]string, 0, len(seen))
-	for name := range seen {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names, nil
+	return slices.Sorted(maps.Keys(seen)), nil
 }
 
 func validateCoverage(set Set) error {
@@ -217,18 +213,10 @@ func validateCoverage(set Set) error {
 	if !exists {
 		return fmt.Errorf("default locale %q has no catalog", set.DefaultLocale)
 	}
-	locales := make([]string, 0, len(set.Locales))
-	for locale := range set.Locales {
-		locales = append(locales, locale)
-	}
-	sort.Strings(locales)
+	locales := slices.Sorted(maps.Keys(set.Locales))
 	for _, locale := range locales {
 		catalog := set.Locales[locale]
-		keys := make([]string, 0, len(catalog.Messages))
-		for key := range catalog.Messages {
-			keys = append(keys, key)
-		}
-		sort.Strings(keys)
+		keys := slices.Sorted(maps.Keys(catalog.Messages))
 		for _, key := range keys {
 			message := catalog.Messages[key]
 			defaultMessage, exists := defaultCatalog.Messages[key]
@@ -253,10 +241,5 @@ func validateCoverage(set Set) error {
 }
 
 func argumentNames(arguments map[string]Argument) []string {
-	names := make([]string, 0, len(arguments))
-	for name := range arguments {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
+	return slices.Sorted(maps.Keys(arguments))
 }

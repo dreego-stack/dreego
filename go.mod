@@ -1,6 +1,6 @@
 module github.com/dreego-stack/dreego
 
-go 1.22
+go 1.23
 
 require (
 	golang.org/x/mod v0.20.0
