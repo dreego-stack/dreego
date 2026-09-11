@@ -3,7 +3,6 @@
 package tests
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -32,7 +31,7 @@ func TestWailsNativeProcessHasNoTCPListener(t *testing.T) {
 		t.Fatalf("resolve test executable: %v", err)
 	}
 	trace := filepath.Join(t.TempDir(), "listen.trace")
-	var output bytes.Buffer
+	var output lockedBuffer
 	command := exec.Command("strace", "-f", "-e", "trace=listen", "-o", trace,
 		executable, "-test.run=^TestWailsNativeProcessHasNoTCPListener$")
 	command.Env = append(os.Environ(), nativeWailsHelper+"=1", "DISPLAY="+display)
@@ -84,7 +83,7 @@ func startVirtualDisplay(t *testing.T) string {
 	t.Helper()
 	display := ":97"
 	command := exec.Command("Xvfb", display, "-screen", "0", "1024x768x24", "-nolisten", "tcp")
-	var output bytes.Buffer
+	var output lockedBuffer
 	command.Stdout = &output
 	command.Stderr = &output
 	if err := command.Start(); err != nil {
@@ -105,7 +104,7 @@ func startVirtualDisplay(t *testing.T) string {
 	return ""
 }
 
-func waitForWindow(t *testing.T, display, title string, process *exec.Cmd, output *bytes.Buffer) {
+func waitForWindow(t *testing.T, display, title string, process *exec.Cmd, output *lockedBuffer) {
 	t.Helper()
 	deadline := time.Now().Add(15 * time.Second)
 	for time.Now().Before(deadline) {
@@ -149,7 +148,7 @@ func directChildPID(t *testing.T, parent int) int {
 	return 0
 }
 
-func waitForProcess(t *testing.T, command *exec.Cmd, output *bytes.Buffer) {
+func waitForProcess(t *testing.T, command *exec.Cmd, output *lockedBuffer) {
 	t.Helper()
 	done := make(chan error, 1)
 	go func() { done <- command.Wait() }()

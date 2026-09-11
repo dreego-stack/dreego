@@ -3,7 +3,6 @@
 package tests
 
 import (
-	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,7 +30,7 @@ func TestWailsNativeNavigationUsesLiteralHistory(t *testing.T) {
 		t.Fatalf("resolve test executable: %v", err)
 	}
 	trace := filepath.Join(t.TempDir(), "navigation.trace")
-	var output bytes.Buffer
+	var output lockedBuffer
 	command := exec.Command(executable, "-test.run=^TestWailsNativeNavigationUsesLiteralHistory$")
 	command.Env = append(os.Environ(),
 		nativeNavigationHelper+"=1",
@@ -101,7 +100,7 @@ func registerNavigationPage(t *testing.T, app *dreego.App, routePath, trace, mar
 	}
 }
 
-func waitForNavigationTrace(t *testing.T, trace string, want []string, process *exec.Cmd, output *bytes.Buffer) {
+func waitForNavigationTrace(t *testing.T, trace string, want []string, process *exec.Cmd, output *lockedBuffer) {
 	t.Helper()
 	deadline := time.Now().Add(15 * time.Second)
 	for time.Now().Before(deadline) {
