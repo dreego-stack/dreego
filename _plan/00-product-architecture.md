@@ -34,7 +34,7 @@ parse -> typed model -> validate -> render plan
                         SSR             Wails
 ```
 
-SSR and Wails are first-party host packages in the monorepo because
+SSR and Wails are first-party adapter packages in the monorepo because
 they depend on the same compiler, render contracts, component metadata, asset
 rules, diagnostics, and compatibility policy. Optional provider integrations
 remain external plugins.
@@ -50,7 +50,7 @@ github.com/dreego-stack/dreego/adapter/wails
 ```
 
 Core owns target-neutral application declarations, typed render
-contracts, routes, components, and shared context capabilities. A host is
+contracts, routes, components, and shared context capabilities. An adapter is
 selected explicitly:
 
 ```go
@@ -66,24 +66,27 @@ if err := ssr.Run(app, ssr.Options{Address: ":8080"}); err != nil {
 The exact API is decided by the render-foundation implementation. This example
 must not be copied into released documentation before it compiles.
 
-## Target model
+## Adapter model
 
-A target is a first-party host or build pipeline, not a generic feature flag.
+An adapter connects the target-neutral App to a concrete runtime without
+turning Dreego into a wrapper around that runtime.
 
 - SSR binds a prepared application to `net/http` and request capabilities.
-- Wails binds rendered HTML, assets, navigation, and a typed host bridge to a
-  desktop WebView without requiring a local HTTP server.
-- Wails v3 Phase 1 proves that boundary with an experimental host pinned to one
-  beta release. Broader Phase 2 integration waits for stable upstream Wails v3
-  and evidence from the Phase 1 reference application.
+- Wails exposes rendered HTML and assets as an in-process handler without a
+  local HTTP server. The application directly owns Wails, its window, services,
+  bindings, and lifecycle.
+- Wails v3 Phase 1 proves that boundary with an experimental reference app
+  pinned to one beta release. The adapter itself has no Wails dependency.
+  Broader Phase 2 integration waits for stable upstream Wails v3 and evidence
+  from the Phase 1 reference application.
 - DreeJS is optional browser output shared by targets. It is not a target.
 - Islands are not a separate product concept. DreeJS supplies narrowly scoped
   dynamic components through local code, fetch, polling, streams, or live
   connections.
 
-One application may be used by more than one target. Components should not
-branch on target names. They may require explicit capabilities, and a build
-must fail when the selected target cannot provide them.
+One application may be used by more than one adapter. Components should not
+branch on adapter names. They may require explicit capabilities, and a build
+must fail when the selected runtime cannot provide them.
 
 ## Capability checks
 

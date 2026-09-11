@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/dreego-stack/dreego/adapter/wails"
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/dreegotest"
-	"github.com/dreego-stack/dreego/target/wails"
 )
 
 func TestWailsRenderMatchesSSRForRegisteredPage(t *testing.T) {
@@ -39,12 +39,10 @@ func TestWailsRenderMatchesSSRForRegisteredPage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("wails.New: %v", err)
 	}
-	wailsResult, err := host.Render("/timer")
-	if err != nil {
-		t.Fatalf("Wails render: %v", err)
-	}
+	wailsResponse := httptest.NewRecorder()
+	host.ServeHTTP(wailsResponse, httptest.NewRequest(http.MethodGet, "/timer", nil))
 	dreegotest.MustEqual(t, string(response.Body.Bytes()), string(ssrResult.HTML))
-	dreegotest.MustEqual(t, string(wailsResult.HTML), string(ssrResult.HTML))
+	dreegotest.MustEqual(t, wailsResponse.Body.String(), string(ssrResult.HTML))
 }
 
 func TestWailsRejectsNilApp(t *testing.T) {
@@ -62,7 +60,9 @@ func TestWailsRejectsHTTPOnlyRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("wails.New: %v", err)
 	}
-	if _, err := host.Render("/http-only"); err == nil {
+	response := httptest.NewRecorder()
+	host.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/http-only", nil))
+	if response.Code != http.StatusNotFound {
 		t.Fatal("Wails must reject an HTTP-only route without a render registration")
 	}
 }

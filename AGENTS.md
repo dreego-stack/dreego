@@ -47,15 +47,15 @@ Two models share the work with strict role separation:
    - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
-## Current Phase: v0.8 Module Boundaries
+## Current Phase: Wails v3 Phase 1
 
 The latest git tag is the single version source; the CLI derives its version at
 build time (`-ldflags -X main.version=$(git describe --tags --abbrev=0)`) or
 from build info (`go install pkg@tag`). Roadmap phases are capability names,
 not version promises. Markdown-to-HTML, TypeScript-to-JavaScript, and Browser
-Lua are released. v0.8 introduces the coordinated multi-module layout and its
-breaking import paths. The experimental Wails v3 Phase 1 foundation moves to
-v0.9; DreeJS follows after that. Wails v3 Phase 2 waits for an upstream stable
+Lua and the v0.8 coordinated module boundaries are released. The experimental
+Wails v3 Phase 1 adapter is planned for v0.9; DreeJS follows after that. Wails
+v3 Phase 2 waits for an upstream stable
 Wails v3 release and evidence from the Phase 1 reference application. Every
 change lands through a pull request with one unique `.changes/*.md` file.
 `version: none` files remain pending until a later `version: patch` change
@@ -68,7 +68,7 @@ Dreego brings an intuitive, Svelte- and Astro-inspired development experience to
 Accessibility is a release quality gate, not a cosmetic enhancement. CLI output, diagnostics, documentation, generated blueprints, and official components must work without relying on sight, color, or pointer input alone. Do not claim that Dreego can make arbitrary user applications automatically accessible.
 
 - SSR is the production web host. The render foundation is target-neutral for
-  tests and the planned Wails host. Static site generation is not planned.
+  tests and the planned Wails adapter. Static site generation is not planned.
 - Complete the multi-language processor pipeline before Wails: Markdown to
   HTML, TypeScript to JavaScript, then Lua to JavaScript. Do not add Lua-to-Go.
 - Preserve explicit `App` ownership of all runtime state and explicit generated
@@ -120,6 +120,7 @@ repo-root/
 │
 ├── core/                   ← Target-neutral public runtime module
 ├── adapter/ssr/            ← Explicit HTTP host module
+├── adapter/wails/          ← Listener-free desktop render adapter module
 ├── dreegotest/             ← Public testing module
 ├── internal/transpiler/    ← Transpiler (.dreego → Go), used by CLI and dreegotest
 ├── cmd/dreego/             ← Installable CLI module
@@ -207,7 +208,7 @@ host paths that do not exist in the container.
   `_docs/handbook/go-1.25.md`, `_docs/handbook/go-1.26.md`, and
   `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
   immediate predecessor and links to the official release notes.
-- Five coordinated published modules: root, `core`, `adapter/ssr`, `dreegotest`, and `cmd/dreego`. Every release uses one version across five module-specific tags on the same commit.
+- Coordinated published modules: root, `core`, `adapter/ssr`, `adapter/wails`, `dreegotest`, and `cmd/dreego`. Wails joins at v0.9; every release uses one version across all participating module-specific tags on the same commit.
 - Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_scripts/check-core-deps.sh`.
 - Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.
 - CLI in `cmd/dreego/` (imports core)
@@ -258,7 +259,7 @@ before using it as domain data. Do not claim that Core contains no string keys.
 ## Architecture Guarantees
 
 SSR is the production web host. The target-neutral typed App and renderer also
-support the planned first-party Wails host. DreeJS is the optional browser and
+support the planned first-party Wails adapter. DreeJS is the optional browser and
 WebView layer. Static site generation is not planned.
 There is no universal `Target` interface until working implementations prove a
 small shared contract. See

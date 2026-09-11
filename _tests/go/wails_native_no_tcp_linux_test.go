@@ -14,8 +14,9 @@ import (
 	"testing"
 	"time"
 
+	wailsadapter "github.com/dreego-stack/dreego/adapter/wails"
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/target/wails"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const nativeWailsHelper = "DREEGO_WAILS_NATIVE_NO_TCP_HELPER"
@@ -68,12 +69,13 @@ func runNativeWailsHelper(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RegisterRender: %v", err)
 	}
-	host, err := wails.New(app)
+	handler, err := wailsadapter.New(app)
 	if err != nil {
-		t.Fatalf("wails.New: %v", err)
+		t.Fatalf("wails adapter: %v", err)
 	}
-	err = host.Run(wails.Options{Name: "Dreego No TCP Test", Title: "Dreego No TCP Test", Path: "/", Width: 640, Height: 480})
-	if err != nil {
+	wailsApp := application.New(application.Options{Name: "Dreego No TCP Test", Assets: application.AssetOptions{Handler: handler}})
+	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{Title: "Dreego No TCP Test", URL: "/", Width: 640, Height: 480})
+	if err := wailsApp.Run(); err != nil {
 		t.Fatalf("Run: %v", err)
 	}
 }

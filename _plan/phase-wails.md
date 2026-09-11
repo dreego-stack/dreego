@@ -3,8 +3,8 @@
 ## Release strategy
 
 Wails support is split because Dreego begins its integration while Wails v3 is
-still beta. Phase 1 is planned as the v0.9 release slice. It pins one upstream
-beta version and proves a small, opt-in desktop host. The release remains
+still beta. Phase 1 is planned as the v0.9 release slice. The reference app
+pins one upstream beta version and proves a small, opt-in desktop adapter. The release remains
 provisional and does not imply support for the complete Wails API.
 
 Phase 2 has no Dreego version assignment. It starts only after Wails v3 reaches
@@ -26,34 +26,37 @@ github.com/dreego-stack/dreego/adapter/wails
 ```
 
 The first-party adapter lives in the monorepo because it must coordinate render
-results, embedded assets, navigation, DreeJS, diagnostics, and generated host
-bindings. Provider-like desktop features may remain separate plugins.
+results, embedded assets, navigation, DreeJS, and diagnostics. Provider-like
+desktop features may remain separate plugins.
 
 Wails depends on the completed render foundation and follows the TypeScript and
 Lua client processors. That sequence proves a shared JavaScript output and
-asset pipeline before the desktop bridge adds another host lifecycle. Wails has
+asset pipeline before the desktop bridge is exercised. Wails has
 no dependency on static generation.
 
-## Host model
+## Ownership model
 
-The target owns:
+The application owns:
 
 - initial document rendering;
 - asset delivery through Wails-supported mechanisms;
 - navigation between Dreego routes;
 - lifecycle integration with window startup and shutdown;
-- generated, typed Go-to-client bindings;
-- target capability declarations;
+- Wails-generated, typed Go-to-client bindings;
+- desktop capability declarations;
 - development reload behavior.
 
-It does not emulate HTTP with a hidden localhost server. HTTP request methods,
+The Dreego adapter only supplies an in-process asset handler. It does not create
+or run a Wails application, window, service, binding, or lifecycle hook, and it
+does not depend on Wails. It does not emulate HTTP with a hidden localhost server. HTTP request methods,
 cookies, response headers, and redirects cannot silently retain SSR semantics.
 Navigation, persistence, and identity receive explicit desktop equivalents.
 
 ## Client bridge
 
 Wails expects browser-side bridge code even when business logic is written in
-Go. Dreego should generate and manage that bridge. Developers may use
+Go. Wails generates that bridge from services explicitly owned by the
+application. Developers may use
 `<client lang="js">` or a processor such as TypeScript for presentation logic,
 but no project-owned npm configuration is required for the standard path.
 
@@ -88,7 +91,7 @@ making unrelated web builds depend on Wails.
 1. Render one component as an initial Wails document without HTTP.
 2. Load scoped styles and embedded static assets.
 3. Navigate between literal Dreego routes.
-4. Generate one typed Go method binding and validate boundary errors.
+4. Exercise one Wails-generated typed Go method binding and validate boundary errors.
 5. Establish the client asset and bridge boundary that DreeJS can use later.
 6. Add deterministic restart-based development reload and a reference desktop
    application. Wails-specific live reload remains deferred to Phase 2.
@@ -98,7 +101,7 @@ making unrelated web builds depend on Wails.
 - The reference application opens and renders without a listening TCP socket.
 - The same component is exercised under SSR and Wails.
 - Styles, head entries, and assets behave deterministically.
-- Typed bindings surface incompatible values at generation or build time.
+- Application-owned Wails bindings surface incompatible values at generation or build time.
 - Service contracts forward Wails startup and shutdown ownership without global
   registration. Headless native shutdown is rechecked at the Phase 2 gate due
   to the pinned beta's Alpine GTK4 `App.Quit` behavior.
@@ -124,14 +127,14 @@ review must record any required migration.
 
 ## Risks
 
-- Wails version changes can create a moving host boundary. Keep version-specific
-  code inside the target package and document the supported range.
+- Wails version changes can create a moving application boundary. Keep its
+  dependency in the reference application and native integration tests.
 - Browser navigation assumptions may not match desktop history and window
   behavior. Specify the navigation contract before exposing it.
 - A broad bridge can expose dangerous desktop capabilities. Generate only
   explicitly registered methods and preserve least privilege.
 - A beta dependency can change before general availability. Keep Phase 1
-  opt-in, pin its exact version, and contain version-specific code in the host.
+  opt-in, pin its exact version, and contain version-specific code outside the adapter.
 
 ## Not in this phase
 

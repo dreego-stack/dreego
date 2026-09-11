@@ -12,8 +12,9 @@ import (
 	"testing"
 	"time"
 
+	wailsadapter "github.com/dreego-stack/dreego/adapter/wails"
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/target/wails"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const nativeNavigationHelper = "DREEGO_WAILS_NATIVE_NAVIGATION_HELPER"
@@ -68,11 +69,13 @@ if (sessionStorage.getItem("visited-settings") === null) {
 </script>`)
 	registerNavigationPage(t, app, "/settings", trace, "settings", `<script>setTimeout(() => history.back(), 500)</script>`)
 	registerNavigationPage(t, app, "/root-back", trace, "root-back", "")
-	host, err := wails.New(app)
+	handler, err := wailsadapter.New(app)
 	if err != nil {
-		t.Fatalf("wails.New: %v", err)
+		t.Fatalf("wails adapter: %v", err)
 	}
-	if err := host.Run(wails.Options{Name: "Dreego Navigation Test", Title: "Dreego Navigation Test", Path: "/", Width: 640, Height: 480}); err != nil {
+	wailsApp := application.New(application.Options{Name: "Dreego Navigation Test", Assets: application.AssetOptions{Handler: handler}})
+	wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{Title: "Dreego Navigation Test", URL: "/", Width: 640, Height: 480})
+	if err := wailsApp.Run(); err != nil {
 		t.Fatalf("Run: %v", err)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	corei18n "github.com/dreego-stack/dreego/core/internal/i18n"
+	"github.com/dreego-stack/dreego/core/internal/render"
 	mw "github.com/dreego-stack/dreego/internal/middleware"
 	sess "github.com/dreego-stack/dreego/internal/session"
 )

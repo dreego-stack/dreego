@@ -1,7 +1,6 @@
 package wails
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -50,17 +49,6 @@ func TestAssetHandlerRejectsUnknownAndTraversalPaths(t *testing.T) {
 	}
 }
 
-func TestRunRejectsExternalFrontendDevserver(t *testing.T) {
-	t.Setenv("FRONTEND_DEVSERVER_URL", "http://127.0.0.1:5173")
-	host, err := New(dreego.New())
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	if err := host.Run(Options{Path: "/"}); err == nil || !strings.Contains(err.Error(), "FRONTEND_DEVSERVER_URL") {
-		t.Fatalf("Run error = %v", err)
-	}
-}
-
 func TestHostDiagnosesDynamicRoute(t *testing.T) {
 	app := dreego.New()
 	if err := app.Register(http.MethodGet, "/users/{id}", func(http.ResponseWriter, *http.Request) {}); err != nil {
@@ -70,8 +58,39 @@ func TestHostDiagnosesDynamicRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	if _, err := host.Render("/users/42"); !errors.Is(err, dreego.ErrDynamicRenderRoute) {
-		t.Fatalf("Render error = %v, want ErrDynamicRenderRoute", err)
+	request := httptest.NewRequest(http.MethodGet, "/users/42", nil)
+	response := httptest.NewRecorder()
+	host.ServeHTTP(response, request)
+	if response.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d, want %d for %v", response.Code, http.StatusInternalServerError, dreego.ErrDynamicRenderRoute)
+	}
+}
+
+func TestAssetHandlerEnforcesReadOnlyLiteralRequests(t *testing.T) {
+	app := dreego.New()
+	if err := app.RegisterRender("/", dreego.ComponentFunc(func(dreego.RenderContext) (dreego.Result, error) {
+		return dreego.Result{HTML: []byte("<main>Ready</main>")}, nil
+	})); err != nil {
+		t.Fatalf("RegisterRender: %v", err)
+	}
+	host, err := New(app)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	head := httptest.NewRecorder()
+	host.ServeHTTP(head, httptest.NewRequest(http.MethodHead, "/", nil))
+	if head.Code != http.StatusOK || head.Body.Len() != 0 {
+		t.Fatalf("HEAD response = status %d body %q", head.Code, head.Body.String())
+	}
+	query := httptest.NewRecorder()
+	host.ServeHTTP(query, httptest.NewRequest(http.MethodGet, "/?private=value", nil))
+	if query.Code != http.StatusNotFound {
+		t.Fatalf("query status = %d, want %d", query.Code, http.StatusNotFound)
+	}
+	post := httptest.NewRecorder()
+	host.ServeHTTP(post, httptest.NewRequest(http.MethodPost, "/", nil))
+	if post.Code != http.StatusMethodNotAllowed || post.Header().Get("Allow") != "GET, HEAD" {
+		t.Fatalf("POST response = status %d Allow %q", post.Code, post.Header().Get("Allow"))
 	}
 }
 

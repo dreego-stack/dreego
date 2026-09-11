@@ -10,6 +10,7 @@ Usage: python3 _scripts/release-prep-test.py
 Exit 0 on success, non-zero on any failed check.
 """
 
+import importlib.util
 import os
 import re
 import shutil
@@ -17,6 +18,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "_scripts"
@@ -157,6 +160,19 @@ def test_coordinated_tag_verification():
             text=True,
         )
         check("tag verification: accepts complete same-commit group", complete.returncode == 0, complete.stderr)
+
+
+def test_wails_tag_joins_at_v09():
+    check("v0.8 has five coordinated tags", len(release_tags_for_test("v0.8.1")) == 5)
+    tags = release_tags_for_test("v0.9.0")
+    check("v0.9 adds Wails adapter tag", "adapter/wails/v0.9.0" in tags and len(tags) == 6)
+
+
+def release_tags_for_test(version):
+    script = importlib.util.spec_from_file_location("release_prep", SCRIPTS / "release-prep.py")
+    module = importlib.util.module_from_spec(script)
+    script.loader.exec_module(module)
+    return module.release_tags(version)
 
 
 def test_none_path():
@@ -378,6 +394,7 @@ def main():
     test_patch_path()
     test_coordinated_v08_patch()
     test_coordinated_tag_verification()
+    test_wails_tag_joins_at_v09()
     test_none_path()
     test_idempotent_rerun()
     test_failure_paths()

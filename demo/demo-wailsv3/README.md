@@ -9,7 +9,7 @@ Navigation and binding modules are served as in-process assets.
 From the repository root, generate the demo and build it through `smd`:
 
 ```sh
-smd go build -o /tmp/dreego ./cli/dreego
+smd sh -c 'cd cmd/dreego && go build -o /tmp/dreego .'
 smd sh -c 'cd demo/demo-wailsv3 && /tmp/dreego generate'
 smd sh -c 'cd demo/demo-wailsv3 && go build -o /tmp/dreego-wails-timer .'
 ```
@@ -43,10 +43,9 @@ make arbitrary application content accessible automatically.
 Phase 1 proves a native binary; signed installers and distribution packaging
 are deferred until Wails v3 is stable. Build on the target operating system
 with its documented Wails dependencies. If the window is blank, rerun
-`dreego generate` and confirm the generated binding modules exist. If a service
-fails before the window opens, follow the `Fix:` text in the binding diagnostic.
-Unset `FRONTEND_DEVSERVER_URL`; Dreego rejects it to preserve the no-listener
-contract.
+`dreego generate` and confirm the generated binding modules exist. The
+application owns any Wails development-server choice; this reference app uses
+only the in-process handler.
 
 The Wails v3 native runtime still requires a graphical desktop. The container
 proves generation and compilation; run the packaged application on a supported

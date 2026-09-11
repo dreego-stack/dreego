@@ -19,7 +19,8 @@ dev:
 
 test:
 	@go run ./cmd/dreego tools install typescript
-	@CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
+	@sh _scripts/check-wails-demo.sh
+	@CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
 	@make coverage
 	@docker build \
 		-q \

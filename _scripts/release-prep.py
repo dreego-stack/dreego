@@ -35,6 +35,7 @@ CHANGELOG = ROOT / "CHANGELOG.md"
 VALID_VERSIONS = ("none", "patch", "minor")
 MODULE_PATH = "github.com/dreego-stack/dreego"
 TAG_PREFIXES = ("", "core/", "adapter/ssr/", "dreegotest/", "cmd/dreego/")
+WAILS_TAG_PREFIX = "adapter/wails/"
 
 
 def fail(msg):
@@ -54,7 +55,11 @@ def latest_tag():
 
 
 def release_tags(version):
-    return [f"{prefix}{version}" for prefix in TAG_PREFIXES]
+    prefixes = TAG_PREFIXES
+    parts = tuple(int(part) for part in version.removeprefix("v").split("."))
+    if parts >= (0, 9, 0):
+        prefixes += (WAILS_TAG_PREFIX,)
+    return [f"{prefix}{version}" for prefix in prefixes]
 
 
 def git_tags():
@@ -78,7 +83,7 @@ def tag_commit(tag):
 def verify_tag_groups():
     tags = git_tags()
     allowed = re.compile(
-        r"^(?:core/|adapter/ssr/|dreegotest/|cmd/dreego/)?v\d+\.\d+\.\d+$"
+        r"^(?:core/|adapter/ssr/|adapter/wails/|dreegotest/|cmd/dreego/)?v\d+\.\d+\.\d+$"
     )
     for tag in tags:
         if "/v" in tag and not allowed.match(tag):

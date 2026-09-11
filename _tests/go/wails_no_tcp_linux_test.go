@@ -3,12 +3,13 @@
 package tests
 
 import (
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/dreego-stack/dreego/adapter/wails"
 	dreego "github.com/dreego-stack/dreego/core"
-	"github.com/dreego-stack/dreego/target/wails"
 )
 
 func TestWailsRenderDoesNotOpenTCPListener(t *testing.T) {
@@ -30,8 +31,9 @@ func TestWailsRenderDoesNotOpenTCPListener(t *testing.T) {
 	before := processTCPListeners(t)
 	done := make(chan error, 1)
 	go func() {
-		_, renderErr := host.Render("/")
-		done <- renderErr
+		response := httptest.NewRecorder()
+		host.ServeHTTP(response, httptest.NewRequest("GET", "/", nil))
+		done <- nil
 	}()
 	<-entered
 	during := func() map[string]bool {
@@ -39,7 +41,7 @@ func TestWailsRenderDoesNotOpenTCPListener(t *testing.T) {
 		return processTCPListeners(t)
 	}()
 	if err := <-done; err != nil {
-		t.Fatalf("Render: %v", err)
+		t.Fatalf("ServeHTTP: %v", err)
 	}
 	for inode := range during {
 		if !before[inode] {
