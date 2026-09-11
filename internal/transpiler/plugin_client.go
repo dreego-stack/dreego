@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"maps"
 	"os"
 	"os/exec"
@@ -226,12 +225,7 @@ func readPluginClientFile(dir, relative string) ([]byte, error) {
 		return nil, err
 	}
 	defer root.Close()
-	file, err := root.Open(local)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return io.ReadAll(file)
+	return root.ReadFile(local)
 }
 
 func requiredModules(project string) (map[string]string, error) {

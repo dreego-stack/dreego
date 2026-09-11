@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -87,12 +86,7 @@ func readDocFrom(dir, path string) ([]byte, error) {
 		return nil, err
 	}
 	defer root.Close()
-	file, err := root.Open(rel)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return io.ReadAll(file)
+	return root.ReadFile(rel)
 }
 
 func readSitemap(dir string) (*sitemapDoc, error) {

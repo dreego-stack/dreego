@@ -26,4 +26,4 @@
   read_only = false
 
 [dockerfile]
-  lines = ["FROM docker.io/golang:1.24-alpine", "RUN apk add --no-cache curl gcc git make musl-dev python3"]
+  lines = ["FROM docker.io/golang:1.25-alpine", "RUN apk add --no-cache curl gcc git make musl-dev python3"]
