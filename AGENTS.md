@@ -44,7 +44,7 @@ Two models share the work with strict role separation:
    - Pro makes a decision → Flash executes → Pro verifies → User sees final result
 
 4. **Quality Gate:**
-   - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`make test`), line count (max 300), coding rules, no comments unless needed
+   - After Flash writes code, Pro must verify: compilation (`go build`), test pass (`task test`), line count (max 300), coding rules, no comments unless needed
    - If Flash output violates any rule, Pro fixes or re-tasks Flash with corrective instructions
 
 ## Current Phase: Wails v3 Phase 1
@@ -113,7 +113,7 @@ repo-root/
 ├── .changes/               ← One unique release-note file per pull request
 ├── _docs/                  ← Public documentation
 ├── _plan/                  ← Detailed phased architecture and worker guidance
-├── _tests/                 ← Integration tests (Docker, `make test`)
+├── _tests/                 ← Integration tests (Docker, `task test`)
 │   ├── go/                 ← Go integration tests (bug regressions, transpiler, blackbox, CLI)
 │   └── fixtures/           ← Reference apps for integration tests
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
@@ -181,7 +181,7 @@ The CI (`pull-request-check.yml`) validates the change file and runs the race an
 
 ## Note: smd
 
-All development commands run inside `smd` (Docker container). Never run `go build` or any dev command directly on the host. The committed root `smd.toml` uses `golang:1.27-alpine` and includes the tools required by the test and release scripts. Run the full suite with `make test`; it starts the test container and remains the CI entry point.
+All development commands run inside `smd` (Docker container). Never run `go build` or any dev command directly on the host. The committed root `smd.toml` uses `golang:1.27-alpine` and includes the tools required by the test and release scripts. Run the full suite with `task test`; it starts the test container when needed and remains the CI entry point.
 
 The `smd.toml` configuration exists ONLY at the repo root. Never create `smd.toml` in subdirectories (e.g. `core/`, `demo/`, worktrees copy the root file when a container image is needed).
 
@@ -220,7 +220,7 @@ host paths that do not exist in the container.
 
 Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
 1. Bug found → create `_tests/go/bug_<name>_test.go` that reproduces the bug (must FAIL)
-2. Fix code until `make test` shows the new test GREEN
+2. Fix code until `task test` shows the new test GREEN
 3. Bug is permanently covered — no regression risk
 
 `.tmp/<name>/` is ONLY for temporary debugging/exploration — never for permanent tests.
@@ -232,7 +232,7 @@ Every feature follows this cycle:
 1. **`_tests/`** — Create integration test in `_tests/go/<name>_test.go` using `dreegotest` (see `_docs/testing.md` and existing `_tests/go/*_test.go` for the pattern)
 2. **Code** — Implement in `core/internal/` or `internal/transpiler/`; public API lives in `core/` (facade, one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
-4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `make test`) — must be GREEN
+4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `task test`) — must be GREEN
 5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it
 6. **Docs** — Update `_docs/` + relevant decision docs in `_docs/decisions/`
 

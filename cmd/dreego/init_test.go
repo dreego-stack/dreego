@@ -29,6 +29,16 @@ func TestDefaultBlueprintGenImport(t *testing.T) {
 	}
 }
 
+func TestDefaultBlueprintIncludesTaskfile(t *testing.T) {
+	data, err := blueprintsSrc.ReadFile("blueprints/default/Taskfile.yml")
+	if err != nil {
+		t.Fatalf("read default Taskfile.yml: %v", err)
+	}
+	if !strings.Contains(string(data), "  generate:") {
+		t.Fatalf("default Taskfile.yml must define generate task, got:\n%s", data)
+	}
+}
+
 func TestLandingBlueprintGenImport(t *testing.T) {
 	data, err := blueprintsSrc.ReadFile("blueprints/landing/main.go.tmpl")
 	if err != nil {
@@ -41,5 +51,15 @@ func TestLandingBlueprintGenImport(t *testing.T) {
 	}
 	if !strings.Contains(content, "www.Register(app)") {
 		t.Errorf("landing main.go.tmpl must call www.Register(app), got:\n%s", content)
+	}
+}
+
+func TestLandingBlueprintIncludesTaskfile(t *testing.T) {
+	data, err := blueprintsSrc.ReadFile("blueprints/landing/Taskfile.yml")
+	if err != nil {
+		t.Fatalf("read landing Taskfile.yml: %v", err)
+	}
+	if !strings.Contains(string(data), "  build:") {
+		t.Fatalf("landing Taskfile.yml must define build task, got:\n%s", data)
 	}
 }

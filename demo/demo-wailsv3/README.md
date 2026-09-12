@@ -6,24 +6,31 @@ an explicitly registered Go service. Wails-generated JavaScript calls that
 service while committed TypeScript declarations describe the same contract.
 Navigation and binding modules are served as in-process assets.
 
-From the repository root, generate the demo and build it through `smd`:
+From the repository root, generate and build the demo through Task:
 
 ```sh
 smd sh -c 'cd cmd/dreego && go build -o /tmp/dreego .'
-smd sh -c 'cd demo/demo-wailsv3 && /tmp/dreego generate'
-smd sh -c 'cd demo/demo-wailsv3 && go build -o /tmp/dreego-wails-timer .'
+smd sh -c 'cd demo/demo-wailsv3 && task generate'
+smd sh -c 'cd demo/demo-wailsv3 && task build'
 ```
 
 Regenerate bindings after changing `TimerService`:
 
 ```sh
-smd sh -c 'cd demo/demo-wailsv3 && wails3 generate bindings -d app/bindings -ts -i -b ./app'
-smd sh -c 'cd demo/demo-wailsv3 && wails3 generate bindings -d app/static/bindings -b -noevents ./app'
+smd sh -c 'cd demo/demo-wailsv3 && task bindings'
 ```
 
 No `package.json`, npm install, Wails dev server, or Dreego HTTP server is part
 of this workflow. Development reload is deliberately deterministic: stop the
-binary, regenerate Dreego output and changed bindings, then rebuild and restart.
+binary, run `task generate`, then run `task build` and restart.
+
+Platform tasks run on their native hosts:
+
+```sh
+task darwin:build
+task windows:build
+task ios:run
+```
 
 ## Accessibility checks
 

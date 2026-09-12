@@ -9,7 +9,7 @@ root — it is the authoritative source for conventions.
 - Go 1.27 or newer.
 - No external runtime dependencies in `core/` — the standard library only
   (enforced by `_scripts/check-core-deps.sh` in CI).
-- Run the full suite with `make test` (Docker-based; builds the `_tests/`
+- Run the full suite with `task test` (Docker-based; builds the `_tests/`
   image and runs the race and integration suites). For a fast subset:
   `go test ./core/... ./cmd/dreego/...`.
 - All commands may also be run inside the `smd` container. Use
@@ -89,7 +89,7 @@ Every feature follows this cycle:
    `dreegotest` (see `_docs/testing.md` and existing tests for the pattern).
 2. `core/` — implementation, one logical thing per file.
 3. `_docs/` — update relevant documentation.
-4. Test — `go test ./_tests/go/ -run <TestName>` (or `make test`) — GREEN.
+4. Test — `go test ./_tests/go/ -run <TestName>` (or `task test`) — GREEN.
 5. PR — one `.changes/*.md` file (version bump + changelog lines).
 6. `_docs/` — update decision docs in `_docs/decisions/`.
 

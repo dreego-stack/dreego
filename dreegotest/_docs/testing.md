@@ -1,13 +1,13 @@
 # Testing Strategy
 
-Tests run as Go integration tests in `_tests/go/` via Docker (`make test`), using the `dreegotest` helpers. Every area covers positive (confirm behavior) and negative (detect errors early) cases.
+Tests run as Go integration tests in `_tests/go/` via Docker (`task test`), using the `dreegotest` helpers. Every area covers positive (confirm behavior) and negative (detect errors early) cases.
 
 ## Test Layout
 
 - `internal/transpiler/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./internal/transpiler/...`).
 - `core/*_test.go` and `core/internal/*/*_test.go` — unit tests for the runtime framework facade and its internal packages (run with `go test ./core/...`).
 - `_tests/go/*_test.go` — integration tests that build a real project, run the CLI, and assert on generated code and HTTP behavior.
-- `_tests/sh/*.sh` — shell-level black-box checks run as part of `make test` (see below).
+- `_tests/sh/*.sh` — shell-level black-box checks run as part of `task test` (see below).
 - `dreegotest/` — shared helpers: `ProjectDir`, `RunCLI`, `Build`, `MustBuild`, `NewApp`, `RenderComponent`.
 
 ## Areas Covered
@@ -71,8 +71,8 @@ counterpart to the Go integration tests.
 ## Running Tests
 
 ```bash
-make test                              # Docker-based full suite
-make coverage                          # core coverage gate (35% minimum per package)
+task test                              # Docker-based full suite
+task coverage                          # core coverage gate (35% minimum per package)
 go test ./core/...                     # runtime unit tests only
 go test ./internal/transpiler/...     # transpiler unit tests only
 go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for CLI builds)
