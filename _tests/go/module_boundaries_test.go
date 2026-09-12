@@ -65,7 +65,7 @@ func TestModuleBoundaries(t *testing.T) {
 		}
 	}
 	for _, path := range []string{"core/ssr", "cli/dreego", "target"} {
-		if _, err := os.Stat(filepath.Join(repoRoot, path)); !os.IsNotExist(err) {
+		if legacyPathExists(filepath.Join(repoRoot, path)) {
 			t.Errorf("removed v0.7 path %s still exists", path)
 		}
 	}
@@ -75,6 +75,9 @@ func TestModuleBoundaries(t *testing.T) {
 	}
 	if err := filepath.WalkDir(repoRoot, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil || entry.IsDir() || filepath.Ext(path) != ".go" {
+			if walkErr == nil && entry.IsDir() && (entry.Name() == ".worktrees" || entry.Name() == ".git") {
+				return filepath.SkipDir
+			}
 			return walkErr
 		}
 		if filepath.Base(path) == "module_boundaries_test.go" {
@@ -93,6 +96,22 @@ func TestModuleBoundaries(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func legacyPathExists(path string) bool {
+	entries, err := os.ReadDir(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if err != nil {
+		return true
+	}
+	for _, entry := range entries {
+		if entry.Name() != ".DS_Store" {
+			return true
+		}
+	}
+	return false
 }
 
 func TestWailsAdapterKeepsApplicationOwnershipExplicit(t *testing.T) {

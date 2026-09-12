@@ -7,3 +7,4 @@ version: minor
 - Bug: keep generated scoped styles valid when their deterministic hash starts with a digit
 - Docs: organize the SSR and Wails reference applications as independent demo modules
 - Chore: standardize repository, demo, and scaffold commands on Taskfile
+- Bug: make module-boundary and integration tests stable in worktree and container environments
