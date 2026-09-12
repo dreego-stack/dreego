@@ -1,0 +1,7 @@
+{
+  "module": "github.com/dreego-stack/dreego/adapter/wails",
+  "pages": [
+    {"path": "/_docs/index.md", "title": "Wails Adapter"},
+    {"path": "/_docs/phase-1.md", "title": "Wails v3 Phase 1"}
+  ]
+}

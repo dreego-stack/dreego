@@ -44,7 +44,8 @@ contents or `dreego docs <path>` for a chapter.
 
 - [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Public v0.x product direction
 - [Implementation plans](https://github.com/dreego-stack/dreego/tree/main/_plan) — Detailed architecture, phase dependencies, acceptance criteria, and worker guidance
-- [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR and Wails hosts
+- [Wails v3](https://github.com/dreego-stack/dreego/blob/main/adapter/wails/_docs/phase-1.md) — Experimental desktop adapter, capability boundary, and toolchain
+- [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR and Wails adapters
 - [SSR over SSG decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/ssr-over-ssg.md) — Dynamic SSR, cache-aware islands, and no planned SSG target
 - [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/cmd/dreego/_docs/decisions/semantic-sections-and-language-processors.md) — Implemented `server`, `head`, `body`, `style`, and `client` model
 

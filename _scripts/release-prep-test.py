@@ -4,12 +4,13 @@
 Covers:
 - release-prep.py behavior: combined patch, none, and failure paths
 - workflow contract: expected workflow files exist, are named per AGENTS.md,
-  serialize via concurrency groups, and tag only after make test
+  serialize via concurrency groups, and tag only after task test
 
 Usage: python3 _scripts/release-prep-test.py
 Exit 0 on success, non-zero on any failed check.
 """
 
+import importlib.util
 import os
 import re
 import shutil
@@ -17,6 +18,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "_scripts"
@@ -157,6 +160,19 @@ def test_coordinated_tag_verification():
             text=True,
         )
         check("tag verification: accepts complete same-commit group", complete.returncode == 0, complete.stderr)
+
+
+def test_wails_tag_joins_at_v09():
+    check("v0.8 has five coordinated tags", len(release_tags_for_test("v0.8.1")) == 5)
+    tags = release_tags_for_test("v0.9.0")
+    check("v0.9 adds Wails adapter tag", "adapter/wails/v0.9.0" in tags and len(tags) == 6)
+
+
+def release_tags_for_test(version):
+    script = importlib.util.spec_from_file_location("release_prep", SCRIPTS / "release-prep.py")
+    module = importlib.util.module_from_spec(script)
+    script.loader.exec_module(module)
+    return module.release_tags(version)
 
 
 def test_none_path():
@@ -317,10 +333,11 @@ def test_coverage_gate_contract():
 
 
 def test_test_runner_contract():
-    makefile = (ROOT / "Makefile").read_text()
-    check("test runner: forwards DREEGO_FILTER", 'DREEGO_FILTER="$${DREEGO_FILTER:-}"' in makefile)
-    check("test runner: forwards DREEGO_RUNS", 'DREEGO_RUNS="$${DREEGO_RUNS:-1}"' in makefile)
-    check("test runner: coverage target exists", "coverage:" in makefile)
+    taskfile = (ROOT / "Taskfile.yml").read_text()
+    check("test runner: forwards DREEGO_FILTER", 'DREEGO_FILTER="${DREEGO_FILTER:-}"' in taskfile)
+    check("test runner: forwards DREEGO_RUNS", 'DREEGO_RUNS="${DREEGO_RUNS:-1}"' in taskfile)
+    check("test runner: coverage task exists", "  coverage:" in taskfile)
+    check("test runner: detects smd", "DREEGO_IN_SMD" in taskfile)
 
 
 def test_workflow_contract():
@@ -336,8 +353,8 @@ def test_workflow_contract():
         check(f"workflow {name} valid yaml", yaml_ok(text), name)
 
     main_push = (WORKFLOWS / "main-push.yml").read_text()
-    check("main-push runs make test before change processing",
-          main_push.index("make test") < main_push.index("python3 _scripts/release-prep.py |"))
+    check("main-push runs task test before change processing",
+          main_push.index("task test") < main_push.index("python3 _scripts/release-prep.py |"))
     check("main-push processes change files on main", "release-prep.py" in main_push)
     check("main-push retries stale pushes", "git fetch origin main --tags" in main_push and "seq 1 5" in main_push)
     check("main-push serialized globally", "group: main-push" in main_push)
@@ -353,9 +370,9 @@ def test_workflow_contract():
           "git merge-base --is-ancestor \"$latest\" HEAD" in pr_check)
     check("main-push preserves published tag ancestry",
           "git merge-base --is-ancestor \"$latest\" HEAD" in main_push)
-    check("pull-request-check runs make test", "make test" in pr_check)
+    check("pull-request-check runs task test", "task test" in pr_check)
     check("pull-request-check runs coverage before tests",
-          pr_check.index("make coverage") < pr_check.index("make test"))
+          pr_check.index("task coverage") < pr_check.index("task test"))
     check("pull-request-check uses Go 1.27", "go-version: '1.27'" in pr_check)
     check("pull-request-check filters root release tags", "refs/tags/v[0-9]*.[0-9]*.[0-9]*" in pr_check)
 
@@ -378,6 +395,7 @@ def main():
     test_patch_path()
     test_coordinated_v08_patch()
     test_coordinated_tag_verification()
+    test_wails_tag_joins_at_v09()
     test_none_path()
     test_idempotent_rerun()
     test_failure_paths()

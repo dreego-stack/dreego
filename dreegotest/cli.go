@@ -101,7 +101,7 @@ func latestTag(repoRoot string) string {
 	if v := os.Getenv("DREEGO_VERSION"); v != "" {
 		return v
 	}
-	cmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
+	cmd := exec.Command("git", "describe", "--tags", "--match", "v[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
 	cmd.Dir = repoRoot
 	if out, err := cmd.Output(); err == nil {
 		if tag := strings.TrimSpace(string(out)); tag != "" {

@@ -9,17 +9,18 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-func TestV08ModuleBoundaries(t *testing.T) {
+func TestModuleBoundaries(t *testing.T) {
 	repoRoot, err := dreegotest.RepoRoot()
 	if err != nil {
 		t.Fatal(err)
 	}
 	modules := map[string]string{
-		"go.mod":             "module github.com/dreego-stack/dreego\n",
-		"core/go.mod":        "module github.com/dreego-stack/dreego/core\n",
-		"adapter/ssr/go.mod": "module github.com/dreego-stack/dreego/adapter/ssr\n",
-		"dreegotest/go.mod":  "module github.com/dreego-stack/dreego/dreegotest\n",
-		"cmd/dreego/go.mod":  "module github.com/dreego-stack/dreego/cmd/dreego\n",
+		"go.mod":               "module github.com/dreego-stack/dreego\n",
+		"core/go.mod":          "module github.com/dreego-stack/dreego/core\n",
+		"adapter/ssr/go.mod":   "module github.com/dreego-stack/dreego/adapter/ssr\n",
+		"adapter/wails/go.mod": "module github.com/dreego-stack/dreego/adapter/wails\n",
+		"dreegotest/go.mod":    "module github.com/dreego-stack/dreego/dreegotest\n",
+		"cmd/dreego/go.mod":    "module github.com/dreego-stack/dreego/cmd/dreego\n",
 	}
 	for path, declaration := range modules {
 		contents, err := os.ReadFile(filepath.Join(repoRoot, path))
@@ -35,10 +36,11 @@ func TestV08ModuleBoundaries(t *testing.T) {
 		}
 	}
 	requirements := map[string][]string{
-		"core/go.mod":        {"github.com/dreego-stack/dreego v0.8.0"},
-		"adapter/ssr/go.mod": {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
-		"dreegotest/go.mod":  {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
-		"cmd/dreego/go.mod":  {"github.com/dreego-stack/dreego v0.8.0"},
+		"core/go.mod":          {"github.com/dreego-stack/dreego v0.8.0"},
+		"adapter/ssr/go.mod":   {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
+		"adapter/wails/go.mod": {"github.com/dreego-stack/dreego/core v0.8.0"},
+		"dreegotest/go.mod":    {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
+		"cmd/dreego/go.mod":    {"github.com/dreego-stack/dreego v0.8.0"},
 	}
 	for path, expected := range requirements {
 		contents, err := os.ReadFile(filepath.Join(repoRoot, path))
@@ -54,6 +56,7 @@ func TestV08ModuleBoundaries(t *testing.T) {
 	for _, path := range []string{
 		"core/_docs",
 		"adapter/ssr/_docs",
+		"adapter/wails/_docs",
 		"dreegotest/_docs",
 		"cmd/dreego/_docs",
 	} {
@@ -62,7 +65,7 @@ func TestV08ModuleBoundaries(t *testing.T) {
 		}
 	}
 	for _, path := range []string{"core/ssr", "cli/dreego", "target"} {
-		if _, err := os.Stat(filepath.Join(repoRoot, path)); !os.IsNotExist(err) {
+		if legacyPathExists(filepath.Join(repoRoot, path)) {
 			t.Errorf("removed v0.7 path %s still exists", path)
 		}
 	}
@@ -72,6 +75,9 @@ func TestV08ModuleBoundaries(t *testing.T) {
 	}
 	if err := filepath.WalkDir(repoRoot, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil || entry.IsDir() || filepath.Ext(path) != ".go" {
+			if walkErr == nil && entry.IsDir() && (entry.Name() == ".worktrees" || entry.Name() == ".git") {
+				return filepath.SkipDir
+			}
 			return walkErr
 		}
 		if filepath.Base(path) == "module_boundaries_test.go" {
@@ -89,5 +95,44 @@ func TestV08ModuleBoundaries(t *testing.T) {
 		return nil
 	}); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func legacyPathExists(path string) bool {
+	entries, err := os.ReadDir(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if err != nil {
+		return true
+	}
+	for _, entry := range entries {
+		if entry.Name() != ".DS_Store" {
+			return true
+		}
+	}
+	return false
+}
+
+func TestWailsAdapterKeepsApplicationOwnershipExplicit(t *testing.T) {
+	repoRoot, err := dreegotest.RepoRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapterModule, err := os.ReadFile(filepath.Join(repoRoot, "adapter/wails/go.mod"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(adapterModule), "github.com/wailsapp/wails") {
+		t.Fatal("adapter/wails must not depend on Wails")
+	}
+	mainSource, err := os.ReadFile(filepath.Join(repoRoot, "demo/demo-wailsv3/main.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, ownership := range []string{"application.New", "application.NewService", "Window.NewWithOptions", "wailsApp.Run"} {
+		if !strings.Contains(string(mainSource), ownership) {
+			t.Errorf("demo main.go does not visibly own %s", ownership)
+		}
 	}
 }

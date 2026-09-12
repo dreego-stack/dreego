@@ -1,7 +1,7 @@
 # Roadmap
 
 Dreego is an SSR-first Go application framework growing toward multi-language
-`.dreego` components, a first-party Wails host, and optional browser behavior
+`.dreego` components, a first-party Wails adapter, and optional browser behavior
 through DreeJS. Production SSR remains the primary target.
 
 This roadmap uses named capability phases rather than semantic versions.
@@ -21,7 +21,7 @@ explicit caching and invalidation. See the
 ## Product boundaries
 
 - The root package owns target-neutral application and rendering contracts.
-- SSR and Wails are first-party hosts because they share compiler, render,
+- SSR and Wails are first-party adapters because they share compiler, render,
   asset, diagnostic, and compatibility contracts.
 - Provider integrations, caches, SSE, and WebSockets remain external plugins.
 - The built-in processor matrix normalizes multiple input languages into HTML,
@@ -89,7 +89,7 @@ JavaScript, TypeScript, and Browser Lua are the complete client-language set
 for the foreseeable future. Additional client languages are outside the
 roadmap so the existing processors can be hardened instead of widened.
 
-## Current phase: coordinated module boundaries — planned for v0.8
+## Completed phase: coordinated module boundaries — released in v0.8
 
 Split Core, SSR, testing, and the CLI into independently consumable Go modules
 with one coordinated version and module-specific tags. Rename the HTTP host to
@@ -98,8 +98,8 @@ part of this release.
 
 ## Phase: Wails v3 Phase 1 — planned for v0.9
 
-Add an experimental, opt-in first-party host against one explicitly pinned
-Wails v3 beta release:
+Add an experimental, opt-in first-party adapter, exercised by a reference app
+against one explicitly pinned Wails v3 beta release:
 
 - render initial documents without a listening TCP socket;
 - embed HTML, styles, scripts, and static assets in the application;
@@ -113,9 +113,11 @@ Wails depends on target-neutral rendering and the JavaScript processor output.
 It does not depend on static site generation. The first Wails slice may use raw
 JavaScript or TypeScript without waiting for DreeJS.
 
-Phase 1 is the smallest credible desktop path: rendering, embedded assets,
-literal navigation, one typed binding, lifecycle cleanup, development reload,
-and an accessible reference application. It proves that the integration works;
+Phase 1 is the smallest credible desktop path: a listener-free asset handler,
+literal navigation, one application-owned typed binding, lifecycle cleanup,
+development reload, and an accessible reference application. Application code
+owns Wails creation, options, windows, services, bindings, lifecycle, and Run.
+It proves that the integration works;
 it does not promise broad coverage of Wails APIs while Wails v3 remains beta.
 
 ## Phase: DreeJS foundation — planned for v0.10
@@ -203,5 +205,5 @@ Official and community plugins may provide auth, billing, maps, SSE,
 WebSockets, Tailwind, observability, i18n, search, mail, PDF, storage, cache,
 jobs, analytics, and other optional capabilities. Each plugin owns its
 dependencies and release lifecycle. The Dreego monorepo contains the tightly
-coupled application, compiler, renderer, SSR host, Wails host, and DreeJS
+coupled application, compiler, renderer, SSR adapter, Wails adapter, and DreeJS
 foundations.

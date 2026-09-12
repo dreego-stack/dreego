@@ -9,5 +9,7 @@
   evidence, and an architecture review records required migrations.
 - Candidate scope: broader typed bridge coverage, packaging and distribution,
   platform compatibility, performance, development tooling, and Wails-specific
-  live updates.
+  live updates. Recheck native bridge calls and programmatic shutdown under
+  headless Linux: Wails v3 beta.20 can block both under Alpine GTK4/Xvfb even
+  after the application-started event.
 - Depends on: wails-reference-application.1 and an upstream stable Wails v3 release

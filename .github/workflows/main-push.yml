@@ -25,6 +25,12 @@ jobs:
           go-version: '1.27'
           cache: false
 
+      - name: Set up Task
+        uses: arduino/setup-task@v2
+
+      - name: Install Wails Linux test dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev strace xvfb x11-utils
+
       - name: Install pinned native TypeScript compiler
         run: go run ./cmd/dreego tools install typescript
 
@@ -46,7 +52,7 @@ jobs:
               exit 1
             fi
 
-            make test
+            task test
 
             if ! find .changes -maxdepth 1 -type f -name '*.md' ! -name README.md | grep -q .; then
               echo "no pending change files"
@@ -85,7 +91,7 @@ jobs:
               fi
             done
 
-            make test
+            task test
 
             git add -A
             git commit -m "docs: apply pending release notes"

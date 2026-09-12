@@ -4,7 +4,7 @@ set -eu
 threshold="${DREEGO_COVERAGE_MIN:-35}"
 profile="$(mktemp)"
 trap 'rm -f "$profile"' EXIT
-output="$(go test -coverprofile="$profile" ./internal/... ./core/... ./adapter/ssr/... ./dreegotest/... ./cmd/dreego/... 2>&1)"
+output="$(go test -coverprofile="$profile" ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/... 2>&1)"
 printf '%s\n' "$output"
 
 if ! printf '%s\n' "$threshold" | awk '/^[0-9]+(\.[0-9]+)?$/ { ok=1 } END { exit ok ? 0 : 1 }'; then
