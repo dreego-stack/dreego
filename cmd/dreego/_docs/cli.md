@@ -1,5 +1,43 @@
 # CLI Reference
 
+## dreego new
+
+```bash
+dreego new <name> [-t <template>] [-l|--list]
+```
+
+Scaffolds a new project from the `web-minimal` template in a new directory. It
+writes `main.go`, `Taskfile.yml`, `.gitignore`, and the `www/` tree, then runs
+`go mod init` and `go mod tidy`.
+
+- `-t <template>`, `--template <template>`: select a template; `web-minimal` is
+  the only template and the default
+- `-l`, `--list`: list the available templates and exit without scaffolding
+
+An unknown template name fails with an error that lists the valid names. A
+missing `-t` value also fails. Both exit non-zero.
+
+## dreego init
+
+```bash
+dreego init <path> [-t <template>] [-l|--list]
+```
+
+Scaffolds the `web-minimal` template into an existing or new path. It accepts
+the same `-t`/`--template` and `-l`/`--list` flags as `dreego new`, with
+`web-minimal` as the default.
+
+## dreego task
+
+```bash
+dreego task [args...]
+```
+
+Forwards its arguments to the external `task` binary and forwards its exit
+code. With no arguments it runs `task --list`. Dreego does not embed a task
+runner; when `task` is not on `PATH`, the command fails with an error pointing
+to the Task installation page.
+
 ## dreego generate
 
 ```bash

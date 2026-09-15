@@ -1,0 +1,19 @@
+<head>
+    <meta name="description" content="§$name$§ — Built with Dreego">
+</head>
+
+<server>
+    message := "Hello, Dreego!"
+</server>
+
+<body>
+    <h1>{{ message }}</h1>
+    <p class="hint">Edit <code>www/routes/+page.dreego</code> and reload to see your changes.</p>
+</body>
+
+<style>
+    h1 { color: #0f172a; }
+    .hint { color: #475569; }
+    code { font-family: ui-monospace, monospace; background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 0.25rem; }
+    :focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+</style>

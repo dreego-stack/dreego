@@ -103,49 +103,53 @@ func TestCLICheckNoGenActionable(t *testing.T) {
 	}
 }
 
-func TestCLIBlueprintSemanticHTML(t *testing.T) {
+func TestCLITemplateSemanticHTML(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "new", "testapp"); err != nil {
-		t.Fatalf("new: %v\n%s", err, out)
-	}
-	sub := filepath.Join(dir, "testapp")
-
-	layout, err := os.ReadFile(filepath.Join(sub, "www/layouts/default.dreego"))
+	repoRoot, err := dreegotest.RepoRoot()
 	if err != nil {
-		t.Fatalf("read layout: %v", err)
+		t.Fatalf("RepoRoot: %v", err)
+	}
+
+	layout, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "internal", "templates", "web-minimal", "www", "layouts", "default.dreego"))
+	if err != nil {
+		t.Fatalf("read template layout: %v", err)
 	}
 	lay := string(layout)
-	for _, want := range []string{"<main", "{#slot}", "<nav", "skip"} {
+	for _, want := range []string{"<main", "{#slot}", "skip to content", `href="#main"`, `lang="en"`} {
 		if !strings.Contains(lay, want) {
-			t.Errorf("landing layout missing %q (semantic landmarks + skip link required)", want)
+			t.Errorf("template layout missing %q (semantic landmarks + skip link required)", want)
 		}
 	}
 
-	route, err := os.ReadFile(filepath.Join(sub, "www/routes/+page.dreego"))
+	route, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "internal", "templates", "web-minimal", "www", "routes", "+page.dreego"))
 	if err != nil {
-		t.Fatalf("read route: %v", err)
+		t.Fatalf("read template route: %v", err)
 	}
 	if strings.Contains(string(route), "<img") && !strings.Contains(string(route), "alt=") {
-		t.Error("landing route must give every <img> an alt attribute")
-	}
-	mainGo, err := os.ReadFile(filepath.Join(sub, "main.go"))
-	if err != nil {
-		t.Fatalf("read main.go: %v", err)
-	}
-	if !strings.Contains(string(mainGo), "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com") {
-		t.Error("landing CSP must allow its Tailwind development script")
+		t.Error("template route must give every <img> an alt attribute")
 	}
 
-	if out, err := dreegotest.RunCLI(t, sub, "generate"); err != nil {
+	mainTmpl, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "internal", "templates", "_common", "main.go.tmpl"))
+	if err != nil {
+		t.Fatalf("read _common/main.go.tmpl: %v", err)
+	}
+	if strings.Contains(string(mainTmpl), "cdn.tailwindcss.com") {
+		t.Error("web-minimal must not depend on a Tailwind CDN script")
+	}
+
+	dir := dreegotest.ProjectDir(t, nil)
+	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
+		t.Fatalf("init: %v\n%s", err, out)
+	}
+	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate in scaffold: %v\n%s", err, out)
 	}
-	if !dreegotest.BuildInDirOK(t, sub) {
+	if !dreegotest.BuildInDirOK(t, dir) {
 		t.Fatal("accessible scaffold must still build")
 	}
 }
 
-func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
+func TestCLITemplateRouteAccessible(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
 	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
@@ -156,16 +160,16 @@ func TestCLIBlueprintDefaultRouteAccessible(t *testing.T) {
 		t.Fatalf("read route: %v", err)
 	}
 	if strings.Contains(string(route), "<img") && !strings.Contains(string(route), "alt=") {
-		t.Error("default blueprint must give every <img> an alt attribute")
+		t.Error("scaffolded route must give every <img> an alt attribute")
 	}
 	layout, err := os.ReadFile(filepath.Join(dir, "www/layouts/default.dreego"))
 	if err != nil {
-		t.Fatalf("read default layout: %v", err)
+		t.Fatalf("read scaffolded layout: %v", err)
 	}
 	lay := string(layout)
 	for _, want := range []string{`<main id="main">`, "skip to content", `lang="en"`} {
 		if !strings.Contains(lay, want) {
-			t.Errorf("default layout missing %q (skip link + main landmark + lang required)", want)
+			t.Errorf("scaffolded layout missing %q (skip link + main landmark + lang required)", want)
 		}
 	}
 }

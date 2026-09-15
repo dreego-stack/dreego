@@ -65,7 +65,7 @@ counterpart to the Go integration tests.
 
 - CLI output is color-free and screen-reader-linear (`_tests/go/cli_accessibility_test.go`).
 - Generator diagnostics lead with `file:line:col`, the cause, and a practical `Fix:` action.
-- The landing blueprint uses semantic HTML (`<main>`, `<nav>`, skip link, `{#slot}`) and gives every `<img>` an `alt`. The minimal `init` blueprint is tested as a minimal route, not as a complete accessible application shell.
+- The `web-minimal` template layout ships `<html lang="en">`, a skip link, and a `<main id="main">` landmark. The route is tested as a minimal page, not as a complete accessible application shell.
 - The transpiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`internal/transpiler/a11y_check_test.go`).
 
 ## Running Tests

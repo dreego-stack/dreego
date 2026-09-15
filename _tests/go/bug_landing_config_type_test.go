@@ -20,6 +20,6 @@ func TestBugLandingConfigType(t *testing.T) {
 		t.Fatalf("read config.json: %v", err)
 	}
 	if !strings.Contains(string(config), `"logging": {`) {
-		t.Fatalf("landing config.json logging field has wrong type (B8): %s", config)
+		t.Fatalf("scaffolded config.json logging field has wrong type (B8): %s", config)
 	}
 }
