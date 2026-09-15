@@ -24,8 +24,10 @@ Limits: the checker scans static markup in `.dreego` templates. Dynamically comp
 
 ## Templates
 
-`web-minimal` is currently the only scaffold. It ships a minimal accessible
-layout in `www/layouts/default.dreego`:
+Two scaffolds ship today: `web-minimal` (the default) and `web-app`.
+
+`web-minimal` ships a minimal accessible layout in
+`www/layouts/default.dreego`:
 
 - `<html lang="en">`, a UTF-8 charset, and a viewport meta tag.
 - A skip link (`<a href="#main">skip to content</a>`) that is visually hidden
@@ -37,6 +39,16 @@ one paragraph, and a `:focus-visible` outline. It has no navigation, form
 controls, or images, so it is a starting point rather than a complete
 accessible application shell. Add the landmarks, labels, and alternatives your
 application needs as you build it.
+
+`web-app` ships a fuller SSR application shell in the same layout shape: a skip
+link, a `<header>` with primary navigation, a labelled `<nav>` whose active link
+uses a non-colour state (`aria-current="page"` plus weight/underline), a
+`<main id="main">` landmark, a footer, and a visible `:focus-visible` outline.
+Its `/` route has one `<h1>`, a labelled text input, and a typed server-rendered
+form; `/dashboard` has one `<h1>` and a table with a caption and column headers.
+Each route supplies its own `<title>` and meta description, so the layout
+declares no static title. These are semantic defaults, not a conformance claim:
+applications still verify their own content.
 
 ## Documentation
 

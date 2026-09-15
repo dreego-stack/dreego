@@ -40,20 +40,24 @@ cd myapp
 - runs `go mod init` and `go mod tidy` against the published `dreego` module
   (resolved from the public Go proxy — no `replace` directive)
 
-The `web-minimal` starter styles itself with local `<style>` blocks and does not
-load Tailwind or any other stylesheet from a CDN. No CDN origin is added to the
-Content Security Policy.
+Both starters style themselves with local `<style>` blocks and load no Tailwind
+or any other stylesheet from a CDN. No CDN origin is added to the Content
+Security Policy.
 
-`web-minimal` is currently the only template. `-t` (or `--template`) selects it
-explicitly, and `-l` (or `--list`) lists the available templates:
+Two templates ship today. `web-minimal` is the default for both `dreego new` and
+`dreego init` and stays the smallest starting point. `web-app` is a full SSR
+application starter: an app shell with a `Nav` component in the layout header, a
+`Card` component, `/` with a server-rendered typed form, and a nested
+`/dashboard` route. `-t` (or `--template`) selects a template explicitly, and
+`-l` (or `--list`) lists the available templates:
 
 ```bash
-dreego new myapp -t web-minimal
+dreego new myapp -t web-app
 dreego new myapp -l
 ```
 
-`dreego init <path>` scaffolds the same `web-minimal` template into an existing
-or new path. It accepts the same `-t` and `-l` flags.
+`dreego init <path>` scaffolds the same templates into an existing or new path
+and defaults to `web-minimal`. It accepts the same `-t` and `-l` flags.
 
 The project name must be a valid Go module path segment (letters, digits,
 hyphens, underscores; must start with a letter). `dreego new myapp` creates a

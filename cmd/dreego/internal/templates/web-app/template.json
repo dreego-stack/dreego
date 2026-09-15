@@ -1,0 +1,8 @@
+{
+    "name": "web-app",
+    "title": "Full web application",
+    "description": "A full Dreego application starter with an app shell, components, nested routes, and a server-rendered form.",
+    "type": "web",
+    "adapter": "ssr",
+    "extraRequires": []
+}

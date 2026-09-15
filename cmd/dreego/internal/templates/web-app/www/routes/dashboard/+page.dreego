@@ -1,0 +1,48 @@
+<head>
+    <title>Dashboard — §$name$§</title>
+    <meta name="description" content="§$name$§ — dashboard">
+</head>
+
+<server>
+    c.Set("current", "/dashboard")
+
+    type Task struct {
+        Title string
+        Done  bool
+    }
+
+    tasks := []Task{
+        {Title: "Read the Dreego docs", Done: true},
+        {Title: "Build your first route", Done: false},
+    }
+</server>
+
+<body>
+    <h1>Dashboard</h1>
+    <p>This nested route renders a typed list from its own <code>&lt;server&gt;</code> section.</p>
+
+    <table>
+        <caption>Tasks</caption>
+        <thead>
+            <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {#each tasks as task}
+            <tr>
+                <td>{{ task.Title }}</td>
+                <td>{#if task.Done}Done{#else}Open{/if}</td>
+            </tr>
+        {/each}
+        </tbody>
+    </table>
+</body>
+
+<style>
+table { border-collapse: collapse; width: 100%; margin-top: 1.5rem; }
+caption { text-align: left; font-weight: 600; padding-bottom: 0.5rem; }
+th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #cbd5e1; }
+thead th { border-bottom: 2px solid #94a3b8; }
+</style>

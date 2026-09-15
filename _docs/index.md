@@ -46,7 +46,7 @@ contents or `dreego docs <path>` for a chapter.
 - [Implementation plans](https://github.com/dreego-stack/dreego/tree/main/_plan) — Detailed architecture, phase dependencies, acceptance criteria, and worker guidance
 - [Wails v3](https://github.com/dreego-stack/dreego/blob/main/adapter/wails/_docs/phase-1.md) — Experimental desktop adapter, capability boundary, and toolchain
 - [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR and Wails adapters
-- [Project templates decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/template-scaffolds.md) — `_common` overlay, `template.json`, and the shipped `web-minimal` template
+- [Project templates decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/template-scaffolds.md) — `_common` overlay, `template.json`, and the shipped `web-minimal` and `web-app` templates
 - [SSR over SSG decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/ssr-over-ssg.md) — Dynamic SSR, cache-aware islands, and no planned SSG target
 - [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/cmd/dreego/_docs/decisions/semantic-sections-and-language-processors.md) — Implemented `server`, `head`, `body`, `style`, and `client` model
 

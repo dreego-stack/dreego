@@ -1,0 +1,37 @@
+<body>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {#head}
+</head>
+<body>
+    <a href="#main" class="skip-link">skip to content</a>
+    <header class="site-header">
+        <span class="brand">§$name$§</span>
+        <@Nav current={c.Get("current")}/>
+    </header>
+    <main id="main">
+    {#slot}
+    </main>
+    <footer class="site-footer">
+        <p>§$name$§ — built with Dreego.</p>
+    </footer>
+</body>
+</html>
+</body>
+
+<style>
+:root { color-scheme: light; }
+html { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100; padding: 0.5rem 1rem; background: #0f172a; color: #ffffff; border-radius: 0.25rem; }
+.site-header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: #ffffff; border-bottom: 1px solid #cbd5e1; }
+.brand { font-weight: 700; }
+main { max-width: 48rem; margin: 0 auto; padding: 2rem 1.5rem; }
+.site-footer { max-width: 48rem; margin: 0 auto; padding: 1.5rem; border-top: 1px solid #cbd5e1; color: #475569; }
+.site-footer p { margin: 0; }
+a { color: #1d4ed8; }
+:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+</style>

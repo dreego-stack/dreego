@@ -1,0 +1,14 @@
+Component Card (title string, text string)
+
+<body>
+    <article class="card">
+        <h2>{{ title }}</h2>
+        <p>{{ text }}</p>
+    </article>
+</body>
+
+<style>
+.card { border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 1rem 1.25rem; background: #ffffff; }
+.card h2 { margin: 0 0 0.5rem; font-size: 1.125rem; }
+.card p { margin: 0; color: #334155; }
+</style>

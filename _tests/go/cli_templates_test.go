@@ -39,6 +39,67 @@ func TestCLIInitSelectedTemplate(t *testing.T) {
 	}
 }
 
+func TestCLIInitWebAppTemplate(t *testing.T) {
+	t.Parallel()
+	dir := dreegotest.ProjectDir(t, nil)
+	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "web-app")
+	if err != nil {
+		t.Fatalf("init -t web-app: %v\n%s", err, out)
+	}
+	for _, f := range []string{
+		"main.go",
+		"www/layouts/default.dreego",
+		"www/components/Nav.dreego",
+		"www/components/Card.dreego",
+		"www/routes/+page.dreego",
+		"www/routes/notes_store.go",
+		"www/routes/dashboard/+page.dreego",
+	} {
+		if _, statErr := os.Stat(filepath.Join(dir, f)); statErr != nil {
+			t.Fatalf("missing %s after init -t web-app: %v", f, statErr)
+		}
+	}
+	if _, statErr := os.Stat(filepath.Join(dir, "template.json")); statErr == nil {
+		t.Error("scaffolded web-app tree must not contain template.json")
+	}
+	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
+			return walkErr
+		}
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		if strings.Contains(string(data), "§$name$§") {
+			t.Errorf("scaffolded web-app tree contains an unresolved §$name$§ placeholder: %s", path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk web-app scaffold: %v", err)
+	}
+	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
+		t.Fatalf("generate in web-app scaffold: %v\n%s", err, out)
+	}
+	if !dreegotest.BuildInDirOK(t, dir) {
+		t.Fatal("web-app scaffold must build")
+	}
+}
+
+func TestCLIInitWebAppListsBothTemplates(t *testing.T) {
+	t.Parallel()
+	dir := dreegotest.ProjectDir(t, nil)
+	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-l")
+	if err != nil {
+		t.Fatalf("init -l: %v\n%s", err, out)
+	}
+	for _, name := range []string{"web-app", "web-minimal"} {
+		if !strings.Contains(out, name) {
+			t.Fatalf("init -l must list %s, got: %s", name, out)
+		}
+	}
+}
+
 func TestCLIInitUnknownTemplateFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)

@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-//go:embed all:_common all:web-minimal
+//go:embed all:_common all:web-minimal all:web-app
 var fsys embed.FS
 
 const DefaultName = "web-minimal"

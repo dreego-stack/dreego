@@ -11,7 +11,7 @@ writes `main.go`, `Taskfile.yml`, `.gitignore`, and the `www/` tree, then runs
 `go mod init` and `go mod tidy`.
 
 - `-t <template>`, `--template <template>`: select a template; `web-minimal` is
-  the only template and the default
+  the default, and `web-app` is the other shipped template
 - `-l`, `--list`: list the available templates and exit without scaffolding
 
 An unknown template name fails with an error that lists the valid names. A

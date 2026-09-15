@@ -35,11 +35,17 @@ cmd/dreego/internal/templates/
 │   ├── Taskfile.yml
 │   ├── .gitignore.tmpl
 │   └── www/dreego.config.json
-└── web-minimal/
+├── web-minimal/
+│   ├── template.json
+│   └── www/
+│       ├── layouts/default.dreego
+│       └── routes/+page.dreego
+└── web-app/
     ├── template.json
     └── www/
+        ├── components/{Nav,Card}.dreego
         ├── layouts/default.dreego
-        └── routes/+page.dreego
+        └── routes/{+page.dreego,dashboard/+page.dreego}
 ```
 
 `cmd/dreego/blueprints/` is deleted.
@@ -62,8 +68,8 @@ Go-project modules under `golang.org/x/` only. `gopkg.in/yaml.v3` would violate
 that boundary, while `encoding/json` is already available. JSON is used only
 for build-time metadata; it is not part of the generated application.
 
-For `web-minimal` the fields are `name` `web-minimal`, `type` `web`,
-`adapter` `ssr`, and an empty `extraRequires` list. `adapter` and
+For `web-minimal` and `web-app` the fields are `type` `web`, `adapter` `ssr`,
+and an empty `extraRequires` list. `adapter` and
 `extraRequires` are the declared extension point for templates that need an
 additional Dreego module.
 
@@ -82,7 +88,13 @@ those expressions and corrupt the generated application.
 
 | Template | Purpose |
 |----------|---------|
-| `web-minimal` | Smallest SSR application: SSR entrypoint, config, one layout, one route, and one style block. |
+| `web-minimal` | Smallest SSR application: SSR entrypoint, config, one layout, one route, and one style block. Default for `dreego new` and `dreego init`. |
+| `web-app` | Full SSR application starter: app shell with a `Nav` component in the layout header, a `Card` component, `/` with a server-rendered typed form, and a nested `/dashboard` route. Local `<style>` only, no CDN. |
+
+Both templates declare `type` `web` and `adapter` `ssr` with an empty
+`extraRequires` list. The `web-app` layout deliberately declares no static
+`<title>`: each route supplies its own `<title>` and meta description, while
+`web-minimal` keeps the layout title.
 
 Installation skips `template.json`, `.DS_Store`, and generated files
 (`dree.go`, `*_dreego.go`, `handle_*.go`).
@@ -99,13 +111,14 @@ Installation skips `template.json`, `.DS_Store`, and generated files
 ## Consequences
 
 - The template filesystem is embedded with an explicit list:
-  `//go:embed all:_common all:web-minimal`. Adding a template therefore
+  `//go:embed all:_common all:web-minimal all:web-app`. Adding a template therefore
   requires adding its directory to that list in `templates.go`; a new directory
-  on disk is not shipped automatically.
+  on disk is not shipped automatically. `DefaultName` remains `web-minimal`.
 - A registry test guards the list: `TestListSorted` pins the returned names and
   `TestEveryDiskTemplateRegistered` fails when a directory with a
   `template.json` is not registered by `List()`. `TestMetaOfValid` checks the
-  `web-minimal` metadata.
+  `web-minimal` metadata, and `web-app` is covered by the registry, install, and
+  end-to-end CLI tests.
 - A new template is one directory plus its `template.json`; common files are
   never duplicated.
 - Removing `cmd/dreego/blueprints/` is a breaking change for anything that
@@ -144,6 +157,6 @@ The following are explicitly open and not part of this change:
 - No template versioning or migration of already-scaffolded projects.
 - No post-generation hooks.
 - No embedded task runner; `dreego task` only forwards.
-- Additional templates, such as a Wails desktop template, are deliberately
+- Further templates, such as a Wails desktop template, are deliberately
   deferred. The `adapter` and `extraRequires` fields of `template.json` are the
   extension point for a template that depends on another Dreego module.

@@ -15,7 +15,7 @@ func TestListSorted(t *testing.T) {
 	for _, meta := range metas {
 		got = append(got, meta.Name)
 	}
-	want := []string{"web-minimal"}
+	want := []string{"web-app", "web-minimal"}
 	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Fatalf("List() = %v, want %v", got, want)
 	}
@@ -155,6 +155,60 @@ func TestMetaOfValid(t *testing.T) {
 	}
 	if meta.Name != "web-minimal" || meta.Title != "Minimal web app" || meta.Type != "web" || meta.Adapter != "ssr" {
 		t.Errorf("unexpected meta: %+v", meta)
+	}
+}
+
+func TestMetaOfWebApp(t *testing.T) {
+	meta, err := MetaOf("web-app")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Name != "web-app" || meta.Title != "Full web application" || meta.Type != "web" || meta.Adapter != "ssr" {
+		t.Errorf("unexpected meta: %+v", meta)
+	}
+	if len(meta.ExtraRequires) != 0 {
+		t.Errorf("web-app extraRequires = %v, want empty", meta.ExtraRequires)
+	}
+}
+
+func TestInstallWebApp(t *testing.T) {
+	target := t.TempDir()
+	if err := Install(target, "example.com/acme/app", "web-app"); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{
+		"main.go",
+		"Taskfile.yml",
+		filepath.Join("www", "dreego.config.json"),
+		filepath.Join("www", "layouts", "default.dreego"),
+		filepath.Join("www", "components", "Nav.dreego"),
+		filepath.Join("www", "components", "Card.dreego"),
+		filepath.Join("www", "routes", "+page.dreego"),
+		filepath.Join("www", "routes", "notes_store.go"),
+		filepath.Join("www", "routes", "dashboard", "+page.dreego"),
+	} {
+		if _, err := os.Stat(filepath.Join(target, name)); err != nil {
+			t.Errorf("expected %s in target: %v", name, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(target, metaFile)); !os.IsNotExist(err) {
+		t.Errorf("%s must not be copied into the target", metaFile)
+	}
+	err := filepath.WalkDir(target, func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		data, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(data), nameToken) {
+			t.Errorf("%s still contains %s", p, nameToken)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
