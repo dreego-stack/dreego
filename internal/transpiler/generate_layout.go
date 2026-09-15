@@ -46,7 +46,9 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 			if readErr != nil {
 				return fmt.Errorf("error reading layout %s: %w", full, readErr)
 			}
-			tokens, lexErr := Lex(string(data))
+			raw := string(data)
+			_, imports, body := ParseHeader(raw)
+			tokens, lexErr := Lex(body)
 			if lexErr != nil {
 				return fmt.Errorf("error lexing layout %s: %w", full, lexErr)
 			}
@@ -55,8 +57,17 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 				return fmt.Errorf("error parsing layout %s: %w", full, parseErr)
 			}
 			if f != nil {
-				f.SourceContent = string(data)
+				f.Imports = imports
+				f.SourceContent = raw
 				f.SourcePath = full
+				bodyOffset := len(raw) - len(body)
+				if f.Client != nil {
+					f.Client.Pos += bodyOffset
+				}
+				if f.Body != nil {
+					setNodeSource(f.Body.Nodes, full, bodyOffset)
+					setSourceText(f.Body.Nodes, raw)
+				}
 				rel := layoutScopeRel(root, path)
 				funcName := "Layout"
 				if name == "default.dreego" {
@@ -164,6 +175,7 @@ func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntr
 			if name == "default.dreego" {
 				funcName = "Default"
 			}
+			gen.Src = e.file.SourceContent
 			src, err := GenerateLayout(gen, e.file, funcName)
 			if err != nil {
 				return nil, err

@@ -157,6 +157,8 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		}
 	}
 
+	layoutPkg := gen.Pkg
+	gen.Pkg = "layouts"
 	layoutSrcs, err := generateLayouts(gen, root, layouts)
 	if err != nil {
 		return nil, genStats{}, err
@@ -170,6 +172,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		layoutOut += strings.Join(layoutSrcs, "")
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
 	}
+	gen.Pkg = layoutPkg
 
 	if settings != nil && settings.I18n.Enabled {
 		uses := make([]transpileri18n.Use, 0, len(gen.MessageUses))
