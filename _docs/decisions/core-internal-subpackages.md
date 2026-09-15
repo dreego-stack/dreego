@@ -67,6 +67,6 @@ No cycles.
 - Mixed test files were split at the package boundary; tests using unexported
   internals moved into the internal packages, facade tests stayed at `core/`.
 - CI (`_tests/test.sh`, `pull-request-check.yml`) already runs `./core/...`,
-  which covers the internal packages; `_scripts/check-core-deps.sh` now checks
+  which covers the internal packages; `_tests/sh/check-core-deps.sh` now checks
   `./core/...` too.
 - The 300-line rule is now enforced per file inside the split.

@@ -3,7 +3,7 @@
 # dreego module, and modules maintained by the Go project under golang.org/x/.
 set -e
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 for pkg in ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/...; do
 	deps=$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' "$pkg" 2>/dev/null | grep -v '^github.com/dreego-stack/dreego' | grep -v '^golang.org/x/' | grep -v '^$' || true)

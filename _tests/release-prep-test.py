@@ -6,7 +6,7 @@ Covers:
 - workflow contract: expected workflow files exist, are named per AGENTS.md,
   serialize via concurrency groups, and tag only after task test
 
-Usage: python3 _scripts/release-prep-test.py
+Usage: python3 _tests/release-prep-test.py
 Exit 0 on success, non-zero on any failed check.
 """
 
@@ -22,8 +22,15 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS = ROOT / "_scripts"
 WORKFLOWS = ROOT / ".github" / "workflows"
+
+
+def find_script(name):
+    for base in (ROOT / ".github" / "scripts", ROOT / "_scripts"):
+        candidate = base / name
+        if candidate.exists():
+            return candidate
+    return ROOT / ".github" / "scripts" / name
 
 PASS = 0
 FAIL = 0
@@ -54,7 +61,7 @@ def run_release_prep(workdir, change, changelog, tags):
     for tag in tags:
         subprocess.run(["git", "tag", tag], cwd=repo, check=True)
     return subprocess.run(
-        [sys.executable, str(SCRIPTS / "release-prep.py")],
+        [sys.executable, str(find_script("release-prep.py"))],
         cwd=repo, capture_output=True, text=True,
     )
 
@@ -106,7 +113,7 @@ def test_coordinated_v08_patch():
             subprocess.run(["git", "tag", tag], cwd=repo, check=True)
 
         result = subprocess.run(
-            [sys.executable, str(SCRIPTS / "release-prep.py")],
+            [sys.executable, str(find_script("release-prep.py"))],
             cwd=repo,
             capture_output=True,
             text=True,
@@ -145,7 +152,7 @@ def test_coordinated_tag_verification():
         for tag in ("v0.7.1", "v0.8.0", "core/v0.8.0"):
             subprocess.run(["git", "tag", tag], cwd=repo, check=True)
         incomplete = subprocess.run(
-            [sys.executable, str(SCRIPTS / "release-prep.py"), "--verify-tags"],
+            [sys.executable, str(find_script("release-prep.py")), "--verify-tags"],
             cwd=repo,
             capture_output=True,
             text=True,
@@ -154,7 +161,7 @@ def test_coordinated_tag_verification():
         for tag in ("adapter/ssr/v0.8.0", "dreegotest/v0.8.0", "cmd/dreego/v0.8.0"):
             subprocess.run(["git", "tag", tag], cwd=repo, check=True)
         complete = subprocess.run(
-            [sys.executable, str(SCRIPTS / "release-prep.py"), "--verify-tags"],
+            [sys.executable, str(find_script("release-prep.py")), "--verify-tags"],
             cwd=repo,
             capture_output=True,
             text=True,
@@ -169,7 +176,7 @@ def test_wails_tag_joins_at_v09():
 
 
 def release_tags_for_test(version):
-    script = importlib.util.spec_from_file_location("release_prep", SCRIPTS / "release-prep.py")
+    script = importlib.util.spec_from_file_location("release_prep", find_script("release-prep.py"))
     module = importlib.util.module_from_spec(script)
     script.loader.exec_module(module)
     return module.release_tags(version)
@@ -195,7 +202,7 @@ def test_idempotent_rerun():
         repo = Path(tmp)
         (repo / ".changes/change.md").write_text(pr)
         r2 = subprocess.run(
-            [sys.executable, str(SCRIPTS / "release-prep.py")],
+            [sys.executable, str(find_script("release-prep.py"))],
             cwd=tmp, capture_output=True, text=True,
         )
         check("rerun: exit 0", r2.returncode == 0, r2.stderr)
@@ -229,7 +236,7 @@ def test_combined_changes():
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
         subprocess.run(["git", "tag", "v0.0.43"], cwd=repo, check=True)
-        r = subprocess.run([sys.executable, str(SCRIPTS / "release-prep.py")], cwd=repo, capture_output=True, text=True)
+        r = subprocess.run([sys.executable, str(find_script("release-prep.py"))], cwd=repo, capture_output=True, text=True)
         text = (repo / "CHANGELOG.md").read_text()
         check("combined: exits 0", r.returncode == 0, r.stderr)
         check("combined: one patch bump", "new=v0.0.44" in r.stdout)
@@ -257,7 +264,7 @@ def test_none_is_deferred_until_patch():
         subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=repo, check=True)
         subprocess.run(["git", "tag", "v0.0.43"], cwd=repo, check=True)
-        r = subprocess.run([sys.executable, str(SCRIPTS / "release-prep.py")], cwd=repo,
+        r = subprocess.run([sys.executable, str(find_script("release-prep.py"))], cwd=repo,
                            capture_output=True, text=True)
         check("none-only: exits 0", r.returncode == 0, r.stderr)
         check("none-only: changelog remains byte-identical",
@@ -309,7 +316,7 @@ def test_v0x_patch_allowed_and_major_rejected():
 
 
 def test_coverage_gate_contract():
-    script = SCRIPTS / "coverage-gate.sh"
+    script = find_script("coverage-gate.sh")
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         fake_go = root / "go"
@@ -354,7 +361,7 @@ def test_workflow_contract():
 
     main_push = (WORKFLOWS / "main-push.yml").read_text()
     check("main-push runs task test before change processing",
-          main_push.index("task test") < main_push.index("python3 _scripts/release-prep.py |"))
+          main_push.index("task test") < main_push.index("release-prep.py |"))
     check("main-push processes change files on main", "release-prep.py" in main_push)
     check("main-push retries stale pushes", "git fetch origin main --tags" in main_push and "seq 1 5" in main_push)
     check("main-push serialized globally", "group: main-push" in main_push)

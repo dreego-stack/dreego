@@ -209,7 +209,7 @@ host paths that do not exist in the container.
   `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
   immediate predecessor and links to the official release notes.
 - Coordinated published modules: root, `core`, `adapter/ssr`, `adapter/wails`, `dreegotest`, and `cmd/dreego`. Wails joins at v0.9; every release uses one version across all participating module-specific tags on the same commit.
-- Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_scripts/check-core-deps.sh`.
+- Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_tests/sh/check-core-deps.sh`.
 - Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.
 - CLI in `cmd/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)

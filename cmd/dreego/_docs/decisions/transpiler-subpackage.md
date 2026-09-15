@@ -43,5 +43,5 @@ public contract, not an implementation detail.
   (`benchmark_test.go`, `error_propagation_test.go`, output-safety tests) were
   split along the runtime/transpiler boundary.
 - CI (`_tests/test.sh`, `pull-request-check.yml`) now runs
-  `./internal/transpiler/...`; `_scripts/check-core-deps.sh` verifies both
+  `./internal/transpiler/...`; `_tests/sh/check-core-deps.sh` verifies both
   packages have no external dependencies.

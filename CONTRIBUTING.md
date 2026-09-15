@@ -8,7 +8,7 @@ root — it is the authoritative source for conventions.
 
 - Go 1.27 or newer.
 - No external runtime dependencies in `core/` — the standard library only
-  (enforced by `_scripts/check-core-deps.sh` in CI).
+  (enforced by `_tests/sh/check-core-deps.sh` in CI).
 - Run the full suite with `task test` (Docker-based; builds the `_tests/`
   image and runs the race and integration suites). For a fast subset:
   `go test ./core/... ./cmd/dreego/...`.
