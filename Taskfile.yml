@@ -31,7 +31,7 @@ tasks:
 
   coverage:
     cmds:
-      - sh _scripts/coverage-gate.sh
+      - sh .github/scripts/coverage-gate.sh
 
   test:
     cmds:

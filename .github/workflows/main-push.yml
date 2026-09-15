@@ -43,7 +43,7 @@ jobs:
             git fetch origin main --tags
             git checkout -B release-work origin/main
 
-            python3 _scripts/release-prep.py --verify-tags
+            python3 .github/scripts/release-prep.py --verify-tags
 
             latest=$(git for-each-ref --format='%(refname:short)' --sort=-version:refname 'refs/tags/v[0-9]*.[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
             if [ -n "$latest" ] && ! git merge-base --is-ancestor "$latest" HEAD; then
@@ -64,7 +64,7 @@ jobs:
               exit 1
             fi
 
-            python3 _scripts/release-prep.py | tee /tmp/release-prep.out
+            python3 .github/scripts/release-prep.py | tee /tmp/release-prep.out
             new=$(grep '^new=' /tmp/release-prep.out | cut -d= -f2)
 
             if [ "$new" = none ]; then

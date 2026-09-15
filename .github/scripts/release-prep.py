@@ -18,7 +18,7 @@ Changelog format:
 
 Prints 'new=vX.Y.Z' or 'new=none' on stdout for the workflow to consume.
 
-Usage: python3 _scripts/release-prep.py [--verify-tags]
+Usage: python3 .github/scripts/release-prep.py [--verify-tags]
 Exit 0 on success, non-zero on validation error.
 """
 

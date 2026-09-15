@@ -20,7 +20,7 @@ jobs:
 
       - name: Verify published release ancestry
         run: |
-          python3 _scripts/release-prep.py --verify-tags
+          python3 .github/scripts/release-prep.py --verify-tags
           latest=$(git for-each-ref --format='%(refname:short)' --sort=-version:refname 'refs/tags/v[0-9]*.[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
           if [ -n "$latest" ] && ! git merge-base --is-ancestor "$latest" HEAD; then
             echo "error: latest published tag $latest is not an ancestor of this change" >&2
