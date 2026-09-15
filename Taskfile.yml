@@ -54,14 +54,6 @@ tasks:
           DREEGO_IN_SMD=1 smd task test
         fi
 
-  install-hooks:
-    cmds:
-      - cp _scripts/pre-commit .git/hooks/pre-commit
-      - chmod +x .git/hooks/pre-commit
-      - cp _scripts/pre-push .git/hooks/pre-push
-      - chmod +x .git/hooks/pre-push
-      - echo "Git hooks installed"
-
   clean:
     cmds:
       - rm -f *_dreego.go
