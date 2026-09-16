@@ -24,7 +24,7 @@ import (
 //	./server  →  GET / 200
 //
 // It scaffolds a real project with the CLI, generates, builds, starts the
-// binary on a free port, and asserts the landing page responds. The test runs
+// binary on a free port, and asserts the default page responds. The test runs
 // the documented commands end-to-end (black box), only substituting the
 // listening port via DREEGO_PORT so the binary does not bind :8080.
 func TestQuickStartScaffold(t *testing.T) {

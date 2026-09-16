@@ -1,0 +1,41 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  bindings:
+    cmds:
+      - wails3 generate bindings -d app/bindings -ts -i -b ./app
+      - wails3 generate bindings -d app/static/bindings -b -noevents ./app
+
+  generate:
+    deps: [bindings]
+    cmds:
+      - dreego generate
+
+  build:
+    deps: [generate]
+    cmds:
+      - go build .
+
+  test:
+    deps: [generate]
+    cmds:
+      - go test ./...
+
+  darwin:build:
+    deps: [generate]
+    cmds:
+      - wails3 build
+
+  windows:build:
+    deps: [generate]
+    cmds:
+      - wails3 build
+
+  ios:run:
+    deps: [generate]
+    cmds:
+      - wails3 task ios:run

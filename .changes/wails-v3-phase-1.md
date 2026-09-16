@@ -1,0 +1,26 @@
+---
+version: minor
+---
+
+- Feat: add a listener-free Wails adapter while keeping application, window, services, bindings, and lifecycle ownership in user code
+- Feat: add a polished, responsive, and accessible Go-backed Wails timer reference application
+- Feat: ship project templates from `cmd/dreego/internal/templates/` with a shared `_common` layer, per-template `template.json` metadata, and the `web-minimal` template
+- Feat: add `-t`/`--template <name>` selection and `-l`/`--list` to `dreego new` and `dreego init`, both defaulting to `web-minimal`
+- Feat: add `dreego task [args...]` to forward to the external `task` binary (runs `task --list` with no arguments and forwards the exit code)
+- Feat: add the `web-app` project template — a full SSR application starter with an accessible app shell, `Nav` and `Card` components, a nested `dashboard` route, and a server-rendered note form
+- Feat: register `web-app` in the template embed list and cover it with registry, install, and end-to-end CLI tests; `web-minimal` remains the default template
+- Bug: keep generated scoped styles valid when their deterministic hash starts with a digit
+- Bug: emit the components import in generated layouts so component calls in a layout compile
+- Bug: parse header import directives in layout files instead of rejecting them as body text
+- Bug: track layout source positions so component errors point at the layout file
+- Bug: make module-boundary and integration tests stable in worktree and container environments
+- Bug: point the `demo-ssr` Dockerfile at `demo/demo-ssr/` after the demo reorganization so `task up` and docker-compose build again
+- Fix: give each `web-app` route its own `<title>` (WCAG 2.4.2) and drop the layout's duplicate title so every page renders exactly one
+- Fix: synchronise the `web-app` notes list with a `sync.Mutex` so `go test -race` stays clean under concurrent submissions
+- Fix: remove the inert `csrf_token` hidden field from the `web-app` form instead of implying CSRF protection that the minimal starter does not configure
+- Breaking: remove `cmd/dreego/blueprints/` and the `default`/`landing` blueprint names; scaffold paths move to `cmd/dreego/internal/templates/` with `web-minimal` as the replacement
+- Docs: organize the SSR and Wails reference applications as independent demo modules
+- Docs: document the template overlay, metadata format, substitution rules, and CLI surface in `_docs/decisions/template-scaffolds.md`
+- Chore: standardize repository, demo, and scaffold commands on Taskfile
+- Test: add serve-based `web-app` coverage for titles, `aria-current` navigation, the dashboard table, the form round-trip, and race-safe concurrent note posts
+- Test: prove `adapter/wails` links no external or Wails runtime dependency with an executable least-privilege test

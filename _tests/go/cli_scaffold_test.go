@@ -19,10 +19,9 @@ func TestCLINew(t *testing.T) {
 	for _, f := range []string{
 		"testapp/main.go",
 		"testapp/go.mod",
+		"testapp/Taskfile.yml",
 		"testapp/www/routes/+page.dreego",
 		"testapp/www/layouts/default.dreego",
-		"testapp/www/components/Hero.dreego",
-		"testapp/www/components/FeatureCard.dreego",
 	} {
 		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
 			t.Fatalf("missing %s: %v", f, err)
@@ -146,7 +145,7 @@ func TestCLINewLayoutExists(t *testing.T) {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
 	routes, _ := os.ReadFile(filepath.Join(sub, "www/layouts/dree.go"))
-	if !strings.Contains(string(routes), "<html>") {
+	if !strings.Contains(string(routes), "<html") {
 		t.Fatal("layout exists but generated layout does not produce a complete HTML document (no <html> found)")
 	}
 }

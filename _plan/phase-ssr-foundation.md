@@ -45,7 +45,7 @@ semantic names. Legacy root names are rejected with migration diagnostics.
 
 ## Verification gate
 
-- Full `make test` passes inside `smd`.
+- Full `task test` passes inside `smd`.
 - Race tests pass for runtime and integration packages.
 - Reference applications cover routes, forms, components, and one plugin.
 - CLI generation and formatting are deterministic.

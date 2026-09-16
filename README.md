@@ -46,7 +46,7 @@ Four principles:
    their contracts.
 2. **File-Based** — `www/routes/+page.dreego` and `www/routes/index.dreego` map to `/`. Other filenames become URL segments, and method-specific sections select HTTP methods.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
-4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the landing blueprint demonstrates semantic navigation. Applications still verify their own content and conformance.
+4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the scaffolded `web-minimal` template ships a skip link and a `<main>` landmark. Applications still verify their own content and conformance.
 
 ### Direction after v0.1
 
@@ -103,7 +103,7 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 - **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
 
 ### Developer Experience
-- **CLI** — `dreego init`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
+- **CLI** — `dreego new [-t <template>] [-l]`, `dreego init [-t <template>] [-l]`, `dreego task [args...]`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
 - **Auto-Imports** — Required standard-library packages are added to generated code as needed
 - **Accessibility Checks** — `dreego generate` warns about missing image alternatives and unassociated form labels; CLI output is color-free and screen-reader-linear
@@ -130,7 +130,6 @@ go run .
 
 # or build for production
 dreego build --target linux/amd64
-docker build -t myapp .
 ```
 
 `main.go` uses the explicit App API — no globals, no hidden state:
@@ -140,6 +139,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
@@ -151,7 +151,11 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	if err := ssr.Listen(app, ":8080"); err != nil {
+	addr := ssr.DefaultAddr()
+	if p := os.Getenv("DREEGO_PORT"); p != "" {
+		addr = ":" + p
+	}
+	if err := ssr.Listen(app, addr); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -262,7 +266,7 @@ github.com/dreego-stack/
 | `_docs/session-encryption.md` | AES-256-GCM encrypted session cookies |
 | `_docs/progressive-enhancement.md` | HTMX, Alpine.js, plain JavaScript |
 | `_docs/security.md` | Context-aware escaping, output safety |
-| `_docs/accessibility.md` | Accessibility guarantees and blueprint defaults |
+| `_docs/accessibility.md` | Accessibility guarantees and template defaults |
 
 ### Reference
 

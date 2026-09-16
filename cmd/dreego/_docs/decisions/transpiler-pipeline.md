@@ -57,7 +57,7 @@ to `codegen`.
 
 Dreego is a compile-time transpiler. `.dreego` files are normalized through
 HTML, JavaScript, and Go output pipelines before Dreego emits ordinary Go and
-browser assets for SSR or Wails hosts.
+browser assets for SSR or Wails runtimes.
 
 ## Decision
 

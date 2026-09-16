@@ -41,7 +41,7 @@ run_suite() {
     run_dir="$RESULTDIR/run-$run"
     mkdir -p "$run_dir"
 
-    if ! (cd "$REPO_DIR" && sh _scripts/check-core-deps.sh > /dev/null 2>&1); then
+    if ! (cd "$REPO_DIR" && sh _tests/sh/check-core-deps.sh > /dev/null 2>&1); then
         echo "FAIL core-deps"
         FAIL=$((FAIL + 1))
     else
@@ -65,7 +65,7 @@ run_suite() {
         echo "==> PASS <=> import-check <========="
     fi
 
-    if ! (cd "$REPO_DIR" && python3 _scripts/release-prep-test.py > "$run_dir/release-prep-test.out" 2>&1); then
+    if ! (cd "$REPO_DIR" && python3 _tests/release-prep-test.py > "$run_dir/release-prep-test.out" 2>&1); then
         echo "-> FAIL -> release-prep contract tests"
         cat "$run_dir/release-prep-test.out"
         FAIL=$((FAIL + 1))
@@ -73,10 +73,18 @@ run_suite() {
         echo "==> PASS <=> release-prep contract tests <========="
     fi
 
+    if ! (cd "$REPO_DIR" && sh _tests/sh/check-wails-demo.sh > "$run_dir/wails-demo.out" 2>&1); then
+        echo "-> FAIL -> Wails demo generation and build"
+        cat "$run_dir/wails-demo.out"
+        FAIL=$((FAIL + 1))
+    else
+        echo "==> PASS <=> Wails demo generation and build <========="
+    fi
+
     go_failed=0
     go_count=0
     go_run=0
-    for pkg in ./internal/... ./core/... ./adapter/ssr/... ./dreegotest/... ./cmd/dreego/...; do
+    for pkg in ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/...; do
         go_run=$((go_run + 1))
         go_out="$run_dir/gotest-$go_run.out"
         if ! (cd "$REPO_DIR" && go list "$pkg" > /dev/null 2>&1); then

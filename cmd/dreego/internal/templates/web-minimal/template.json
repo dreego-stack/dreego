@@ -1,0 +1,8 @@
+{
+    "name": "web-minimal",
+    "title": "Minimal web app",
+    "description": "A minimal Dreego web app with the SSR adapter.",
+    "type": "web",
+    "adapter": "ssr",
+    "extraRequires": []
+}

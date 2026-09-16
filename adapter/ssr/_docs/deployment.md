@@ -22,7 +22,7 @@ dreego build --target linux/amd64
 # Binary is written to build/bin/*-linux-amd64
 ```
 
-For statically linked, scratch-container-friendly binaries the generated blueprints / Dockerfiles build with `CGO_ENABLED=0`. You can set `GOOS`/`GOARCH` yourself before building:
+For statically linked, scratch-container-friendly binaries build with `CGO_ENABLED=0`. You can set `GOOS`/`GOARCH` yourself before building:
 
 ```sh
 GOOS=linux GOARCH=arm64 dreego build
@@ -30,7 +30,9 @@ GOOS=linux GOARCH=arm64 dreego build
 
 ## Container
 
-The landing blueprint uses a two-stage build and a non-root distroless runtime:
+A two-stage build with a non-root distroless runtime looks like this. The
+scaffolded `web-minimal` template does not ship a Dockerfile; add one alongside
+your project.
 
 ```dockerfile
 FROM golang:1.27-alpine AS builder

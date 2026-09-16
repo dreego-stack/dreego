@@ -105,14 +105,6 @@ func (a *App) RegisterRewrite(from, to string) error {
 	return nil
 }
 
-func (a *App) RegisterStatic(path, mime string, content []byte) error {
-	data := append([]byte(nil), content...)
-	return a.Register(http.MethodGet, path, func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", mime)
-		_, _ = w.Write(data)
-	})
-}
-
 func (a *App) Use(middlewares ...func(http.Handler) http.Handler) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()

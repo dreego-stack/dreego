@@ -160,7 +160,19 @@ func (c *Client) Request(t *testing.T, method, path, body string, headers map[st
 		req.Header.Set(k, v)
 	}
 	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
-	resp, err := client.Do(req)
+	var resp *http.Response
+	for attempt := 0; attempt < 5; attempt++ {
+		if attempt > 0 {
+			retry := req.Clone(req.Context())
+			retry.Body = io.NopCloser(strings.NewReader(body))
+			req = retry
+		}
+		resp, err = client.Do(req)
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Duration(attempt+1) * 25 * time.Millisecond)
+	}
 	if err != nil {
 		t.Fatalf("Request: do %s %s: %v", method, path, err)
 	}

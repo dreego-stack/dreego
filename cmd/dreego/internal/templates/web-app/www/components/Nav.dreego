@@ -1,0 +1,23 @@
+Component Nav (current string)
+
+<body>
+    <nav aria-label="Primary">
+        {#if current == "/"}
+            <a href="/" aria-current="page" class="active">Home</a>
+        {#else}
+            <a href="/">Home</a>
+        {/if}
+        {#if current == "/dashboard"}
+            <a href="/dashboard" aria-current="page" class="active">Dashboard</a>
+        {#else}
+            <a href="/dashboard">Dashboard</a>
+        {/if}
+    </nav>
+</body>
+
+<style>
+nav { display: flex; gap: 1.25rem; align-items: center; }
+nav a { color: #0f172a; text-decoration: none; padding: 0.25rem 0; }
+nav a.active { font-weight: 700; text-decoration: underline; text-underline-offset: 0.25rem; }
+nav a:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+</style>

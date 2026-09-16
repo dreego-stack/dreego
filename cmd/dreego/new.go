@@ -2,27 +2,44 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/dreego-stack/dreego/cmd/dreego/internal/templates"
 )
 
 func cmdNew(args []string) {
-	if len(args) < 1 {
-		fmt.Fprintf(os.Stderr, "usage: dreego new <name>\n")
+	flags, err := parseScaffoldFlags(args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	name := args[0]
+
+	if flags.list {
+		printTemplates()
+		return
+	}
+
+	if len(flags.args) < 1 {
+		fmt.Fprintf(os.Stderr, "usage: dreego new <name> [-t <template>]\n")
+		os.Exit(1)
+	}
+	name := flags.args[0]
 	if !validProjectName(name) {
 		fmt.Fprintf(os.Stderr, "error: invalid project name %q\n", name)
 		fmt.Fprintf(os.Stderr, "  the name must be a Go module path segment: start with a letter, use only letters, digits, '-', '_', '.', and '/'.\n")
 		fmt.Fprintf(os.Stderr, "  examples: myapp, github.com/me/myapp\n")
 		os.Exit(1)
 	}
-	projName := filepath.Base(name)
+
+	meta, err := resolveTemplate(flags.template)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 
 	if !goAvailable() {
 		fmt.Fprintf(os.Stderr, "error: 'go' executable not found on PATH.\n")
@@ -38,36 +55,7 @@ func cmdNew(args []string) {
 
 	fmt.Printf("Creating %s/\n", name)
 
-	templateRoot := "blueprints/landing"
-
-	err := fs.WalkDir(blueprintsSrc, templateRoot, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		rel, _ := filepath.Rel(templateRoot, path)
-		if rel == "." {
-			return nil
-		}
-
-		dest := filepath.Join(target, rel)
-
-		if d.IsDir() {
-			return os.MkdirAll(dest, 0755)
-		}
-
-		data, err := blueprintsSrc.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		content := strings.ReplaceAll(string(data), "§$name$§", projName)
-
-		os.MkdirAll(filepath.Dir(dest), 0755)
-		dest = strings.TrimSuffix(dest, ".tmpl")
-		return os.WriteFile(dest, []byte(content), 0644)
-	})
-	if err != nil {
+	if err := templates.Install(target, moduleName(target), meta.Name); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
@@ -88,10 +76,7 @@ func cmdNew(args []string) {
 		fmt.Fprintf(os.Stderr, "warning: go mod edit -go failed: %v\n", err)
 	}
 
-	for _, module := range []string{
-		"github.com/dreego-stack/dreego/core",
-		"github.com/dreego-stack/dreego/adapter/ssr",
-	} {
+	for _, module := range requiredModules(meta) {
 		c = exec.Command("go", "mod", "edit", "-require", module+"@"+dreegoVersion)
 		c.Dir = target
 		c.Stdout, c.Stderr = nil, os.Stderr
@@ -106,15 +91,7 @@ func cmdNew(args []string) {
 	// fully offline. For a release-installed binary there is no local repo
 	// directory, so tidy resolves the published tag instead.
 	if repoDir := findLocalRepo(); repoDir != "" {
-		replacements := []struct {
-			module string
-			dir    string
-		}{
-			{"github.com/dreego-stack/dreego", repoDir},
-			{"github.com/dreego-stack/dreego/core", filepath.Join(repoDir, "core")},
-			{"github.com/dreego-stack/dreego/adapter/ssr", filepath.Join(repoDir, "adapter", "ssr")},
-		}
-		for _, replacement := range replacements {
+		for _, replacement := range localReplacements(repoDir, meta) {
 			c = exec.Command("go", "mod", "edit", "-replace="+replacement.module+"="+replacement.dir)
 			c.Dir = target
 			c.Stdout, c.Stderr = nil, os.Stderr
@@ -138,6 +115,45 @@ func cmdNew(args []string) {
 
 	fmt.Printf("Done!\n")
 	fmt.Printf("  cd %s && dreego generate && go run .\n", name)
+}
+
+// requiredModules returns the dreego modules a scaffolded project must require:
+// core always, the module for the template's adapter when it names one, and any
+// extra module@version entries declared by the template.
+func requiredModules(meta templates.Meta) []string {
+	modules := []string{"github.com/dreego-stack/dreego/core"}
+	if module, _ := adapterModule(meta.Adapter); module != "" {
+		modules = append(modules, module)
+	}
+	return append(modules, meta.ExtraRequires...)
+}
+
+// adapterModule maps a template adapter name to its dreego module path and its
+// path relative to the repo root. An empty adapter means the template needs no
+// adapter module.
+func adapterModule(adapter string) (module, dir string) {
+	if adapter == "" {
+		return "", ""
+	}
+	return "github.com/dreego-stack/dreego/adapter/" + adapter, filepath.Join("adapter", adapter)
+}
+
+type moduleReplacement struct {
+	module string
+	dir    string
+}
+
+// localReplacements returns the replace directives that point a scaffolded
+// project at the local dreego checkout, derived from the selected template.
+func localReplacements(repoDir string, meta templates.Meta) []moduleReplacement {
+	replacements := []moduleReplacement{
+		{"github.com/dreego-stack/dreego", repoDir},
+		{"github.com/dreego-stack/dreego/core", filepath.Join(repoDir, "core")},
+	}
+	if module, dir := adapterModule(meta.Adapter); module != "" {
+		replacements = append(replacements, moduleReplacement{module, filepath.Join(repoDir, dir)})
+	}
+	return replacements
 }
 
 func scaffoldVersion(version string) string {

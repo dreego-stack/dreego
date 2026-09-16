@@ -9,23 +9,23 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-// TestBlueprintUsesSSRHost asserts the generated default blueprint main starts
+// TestBlueprintUsesSSRHost asserts the shared template entrypoint starts
 // the app through the explicit SSR host instead of calling app.Listen directly.
 func TestBlueprintUsesSSRHost(t *testing.T) {
 	repoRoot, err := dreegotest.RepoRoot()
 	if err != nil {
 		t.Fatalf("RepoRoot: %v", err)
 	}
-	data, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "blueprints", "default", "main.go.tmpl"))
+	data, err := os.ReadFile(filepath.Join(repoRoot, "cmd", "dreego", "internal", "templates", "_common", "main.go.tmpl"))
 	if err != nil {
-		t.Fatalf("read default main.go.tmpl: %v", err)
+		t.Fatalf("read _common/main.go.tmpl: %v", err)
 	}
 	content := string(data)
 	if !strings.Contains(content, "ssr.Listen(app, addr)") {
-		t.Fatalf("default blueprint does not use ssr.Listen(app, addr):\n%s", content)
+		t.Fatalf("template entrypoint does not use ssr.Listen(app, addr):\n%s", content)
 	}
 	if strings.Contains(content, "app.Listen(") {
-		t.Fatalf("default blueprint still calls app.Listen directly:\n%s", content)
+		t.Fatalf("template entrypoint still calls app.Listen directly:\n%s", content)
 	}
 }
 

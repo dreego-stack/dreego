@@ -17,7 +17,7 @@ func Badge(title string, tone string) dreego.Component {
 `)
 		b.WriteString("</div>")
 		b.WriteString("<style>")
-		b.WriteString(`[data-scope=55bb25811947] .badge{ font-weight: bold; }[data-scope=55bb25811947] .badge em{ color: #666; }`)
+		b.WriteString(`[data-scope="55bb25811947"] .badge{ font-weight: bold; }[data-scope="55bb25811947"] .badge em{ color: #666; }`)
 		b.WriteString("</style>")
 
 		return dreego.Result{HTML: []byte(b.String())}, nil

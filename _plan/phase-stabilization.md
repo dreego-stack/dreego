@@ -11,7 +11,7 @@ and evidence from real applications over adding another target.
 Review every exported identifier and generated contract across:
 
 - root App and render APIs;
-- SSR and Wails hosts;
+- SSR and Wails adapters;
 - section and processor protocol;
 - DreeJS manifests and network protocols;
 - plugin registration and lifecycle;

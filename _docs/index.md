@@ -19,7 +19,7 @@ contents or `dreego docs <path>` for a chapter.
 - [Session Encryption](https://github.com/dreego-stack/dreego/blob/main/adapter/ssr/_docs/session-encryption.md) — AES-256-GCM encrypted session cookies
 - [Progressive Enhancement](https://github.com/dreego-stack/dreego/blob/main/_docs/progressive-enhancement.md) — HTMX, Alpine.js, and plain JavaScript without an internal client runtime
 - [Output Safety](https://github.com/dreego-stack/dreego/blob/main/_docs/security.md) — Context-aware escaping and URL scheme validation
-- [Accessibility](https://github.com/dreego-stack/dreego/blob/main/_docs/accessibility.md) — Framework accessibility guarantees, diagnostics, and blueprint defaults
+- [Accessibility](https://github.com/dreego-stack/dreego/blob/main/_docs/accessibility.md) — Framework accessibility guarantees, diagnostics, and template defaults
 
 ## Sections and client languages
 
@@ -44,7 +44,9 @@ contents or `dreego docs <path>` for a chapter.
 
 - [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Public v0.x product direction
 - [Implementation plans](https://github.com/dreego-stack/dreego/tree/main/_plan) — Detailed architecture, phase dependencies, acceptance criteria, and worker guidance
-- [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR and Wails hosts
+- [Wails v3](https://github.com/dreego-stack/dreego/blob/main/adapter/wails/_docs/phase-1.md) — Experimental desktop adapter, capability boundary, and toolchain
+- [Target-neutral application decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/target-neutral-application-and-first-party-targets.md) — Root App plus explicit SSR and Wails adapters
+- [Project templates decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/template-scaffolds.md) — `_common` overlay, `template.json`, and the shipped `web-minimal` and `web-app` templates
 - [SSR over SSG decision](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/ssr-over-ssg.md) — Dynamic SSR, cache-aware islands, and no planned SSG target
 - [Semantic sections decision](https://github.com/dreego-stack/dreego/blob/main/cmd/dreego/_docs/decisions/semantic-sections-and-language-processors.md) — Implemented `server`, `head`, `body`, `style`, and `client` model
 

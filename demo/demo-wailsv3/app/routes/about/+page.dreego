@@ -1,0 +1,39 @@
+<head>
+    <title>About — Dreego Focus</title>
+</head>
+
+<body>
+    <main class="about-shell">
+        <a class="back-link" href="/"><span aria-hidden="true">←</span> Back to timer</a>
+        <article>
+            <p class="eyebrow">Under the hood</p>
+            <h1>Small surface.<br>Clear ownership.</h1>
+            <p class="lede">A native desktop window powered by Wails, with Dreego handling only what it should: rendering pages and assets.</p>
+            <dl>
+                <div><dt>Transport</dt><dd>In-process handler</dd></div>
+                <div><dt>Local ports</dt><dd>None</dd></div>
+                <div><dt>UI source</dt><dd>.dreego</dd></div>
+                <div><dt>State owner</dt><dd>Explicit Go service</dd></div>
+            </dl>
+            <p class="note"><span aria-hidden="true">✦</span> The application owns its Wails window, services, bindings, and lifecycle. Dreego is the adapter—not the wrapper.</p>
+        </article>
+    </main>
+</body>
+
+<style>
+    .about-shell { --ink: #f5f7ff; --muted: #a4abc0; --mint: #9fffd7; --violet: #aa9cff; position: fixed; inset: 0; box-sizing: border-box; overflow: auto; padding: clamp(1.25rem, 5vw, 2.5rem); background: radial-gradient(circle at 80% 15%, rgba(117, 95, 210, 0.3), transparent 38%), radial-gradient(circle at 10% 90%, rgba(35, 141, 115, 0.2), transparent 42%), #090b14; color: var(--ink); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--mint); font-size: 0.78rem; font-weight: 750; text-decoration: none; }
+    article { max-width: 33rem; margin: clamp(2rem, 8vh, 4.5rem) auto 0; }
+    .eyebrow { margin: 0 0 0.65rem; color: var(--mint); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2.2rem, 9vw, 4rem); font-weight: 720; letter-spacing: -0.055em; line-height: 0.98; }
+    .lede { max-width: 29rem; margin: 1.25rem 0 1.6rem; color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+    dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin: 0; }
+    dl div { padding: 0.9rem 1rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.9rem; background: rgba(255, 255, 255, 0.05); }
+    dt { margin-bottom: 0.3rem; color: #747d97; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    dd { margin: 0; font-size: 0.85rem; font-weight: 700; }
+    .note { display: flex; gap: 0.7rem; margin: 1.2rem 0 0; padding: 1rem; border-left: 2px solid var(--violet); background: rgba(170, 156, 255, 0.07); color: var(--muted); font-size: 0.78rem; line-height: 1.55; }
+    .note span { color: var(--violet); }
+    a:focus-visible { outline: 0.2rem solid var(--violet); outline-offset: 0.2rem; }
+    @media (max-width: 27rem) { dl { grid-template-columns: 1fr; } article { margin-top: 2rem; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+</style>

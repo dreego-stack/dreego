@@ -32,22 +32,36 @@ dreego new myapp
 cd myapp
 ```
 
-`dreego new` scaffolds a project from the `landing` blueprint:
+`dreego new` scaffolds a project from the `web-minimal` template:
 
-- writes `main.go`, `go.mod`, `Dockerfile`, `.gitignore`
-- writes the `www/` tree: `routes/`, `layouts/`, `components/`, `dreego.config.json`
+- writes `main.go`, `Taskfile.yml`, `.gitignore`
+- writes the `www/` tree: `routes/+page.dreego`, `layouts/default.dreego`,
+  and `dreego.config.json`
 - runs `go mod init` and `go mod tidy` against the published `dreego` module
   (resolved from the public Go proxy — no `replace` directive)
+
+Both starters style themselves with local `<style>` blocks and load no Tailwind
+or any other stylesheet from a CDN. No CDN origin is added to the Content
+Security Policy.
+
+Two templates ship today. `web-minimal` is the default for both `dreego new` and
+`dreego init` and stays the smallest starting point. `web-app` is a full SSR
+application starter: an app shell with a `Nav` component in the layout header, a
+`Card` component, `/` with a server-rendered typed form, and a nested
+`/dashboard` route. `-t` (or `--template`) selects a template explicitly, and
+`-l` (or `--list`) lists the available templates:
+
+```bash
+dreego new myapp -t web-app
+dreego new myapp -l
+```
+
+`dreego init <path>` scaffolds the same templates into an existing or new path
+and defaults to `web-minimal`. It accepts the same `-t` and `-l` flags.
 
 The project name must be a valid Go module path segment (letters, digits,
 hyphens, underscores; must start with a letter). `dreego new myapp` creates a
 module named `myapp`; `dreego new github.com/me/myapp` is also accepted.
-
-The landing starter loads Tailwind's browser script from its CDN and its
-generated `main.go` explicitly allows that origin in the Content Security
-Policy. This is convenient for evaluating the blueprint. For production,
-replace the browser script with locally built CSS and remove the CDN origin
-from the policy.
 
 ## 3. Generate and run
 
@@ -56,8 +70,8 @@ dreego generate    # transpiles .dreego files → dree.go per directory
 go run .            # builds and starts the server on :8080
 ```
 
-Open http://localhost:8080 in your browser. The landing page rendered is the
-one defined in `www/routes/+page.dreego`.
+Open http://localhost:8080 in your browser. The page rendered is the one
+defined in `www/routes/+page.dreego`.
 
 For day-to-day development:
 
@@ -70,7 +84,7 @@ dreego dev         # watch .dreego files, rebuild + restart on change
 
 > **Note:** `dreego build` and `dreego run` are dev tools, not for production.
 > Production builds use `go build` (or `dreego build --target <os/arch>` for
-> cross-compilation) plus the Dockerfile that `dreego new` wrote.
+> cross-compilation).
 
 ## main.go
 
@@ -82,6 +96,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
@@ -93,7 +108,11 @@ func main() {
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	if err := ssr.Listen(app, ":8080"); err != nil {
+	addr := ssr.DefaultAddr()
+	if p := os.Getenv("DREEGO_PORT"); p != "" {
+		addr = ":" + p
+	}
+	if err := ssr.Listen(app, addr); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -101,8 +120,9 @@ func main() {
 
 `dreego.New()` returns an `*App` that owns route declarations, middleware, and
 session policy. `www.Register(app)` wires generated routes and components into
-the `App`. `ssr.Listen(app, ":8080")` creates the explicit HTTP host with secure
-timeout defaults.
+the `App`. `ssr.Listen(app, addr)` creates the explicit HTTP host with secure
+timeout defaults. The scaffold listens on `DREEGO_PORT` when that variable is
+set, otherwise on the SSR adapter's default address.
 
 ## Adding a Layout
 

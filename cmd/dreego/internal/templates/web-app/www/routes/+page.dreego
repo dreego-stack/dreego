@@ -1,0 +1,54 @@
+<head>
+    <title>Notes — §$name$§</title>
+    <meta name="description" content="§$name$§ — notes demo home page">
+</head>
+
+<server>
+    notes := notesSnapshot()
+    c.Set("current", "/")
+</server>
+<server method="post">
+    type NoteForm struct {
+        Title string `form:"title" validate:"required"`
+    }
+
+    func AddNote(c dreego.Context, form NoteForm) error {
+        addNote(form.Title)
+        return c.Redirect("/", 303)
+    }
+</server>
+
+<body>
+    <h1>Notes</h1>
+    <@Card title="Add a note" text="This form is handled on the server with a typed struct, validation, and old-value repopulation."/>
+
+    <form g-action="AddNote" method="post">
+        <label for="title">Note</label>
+        <input id="title" name="title" type="text" value="{{ c.Old("title") }}">
+        {#if c.Errors("title") != ""}
+            <p class="error">{{ c.Errors("title") }}</p>
+        {/if}
+        <button type="submit">Add note</button>
+    </form>
+
+    {#if len(notes) > 0}
+        <h2>Saved notes</h2>
+        <ul>
+        {#each notes as note}
+            <li>{{ note }}</li>
+        {/each}
+        </ul>
+    {#else}
+        <p class="empty">No notes yet. Add the first one above.</p>
+    {/if}
+</body>
+
+<style>
+label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+input[type="text"] { display: block; width: 100%; max-width: 24rem; padding: 0.5rem; border: 1px solid #94a3b8; border-radius: 0.25rem; font: inherit; }
+button { margin-top: 0.75rem; padding: 0.5rem 1rem; border: 1px solid #1d4ed8; border-radius: 0.25rem; background: #1d4ed8; color: #ffffff; font: inherit; cursor: pointer; }
+form { margin: 1.5rem 0; }
+.error { color: #b91c1c; font-weight: 600; }
+.empty { color: #475569; }
+ul { padding-left: 1.25rem; }
+</style>

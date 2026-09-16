@@ -4,10 +4,12 @@ use (
 	.
 	./_tests/go
 	./adapter/ssr
+	./adapter/wails
 	./cmd/dreego
 	./core
 	./dreegotest
-	./demo
+	./demo/demo-ssr
+	./demo/demo-wailsv3
 )
 
 replace github.com/dreego-stack/dreego v0.8.0 => .
@@ -15,6 +17,8 @@ replace github.com/dreego-stack/dreego v0.8.0 => .
 replace github.com/dreego-stack/dreego/core v0.8.0 => ./core
 
 replace github.com/dreego-stack/dreego/adapter/ssr v0.8.0 => ./adapter/ssr
+
+replace github.com/dreego-stack/dreego/adapter/wails v0.8.0 => ./adapter/wails
 
 replace github.com/dreego-stack/dreego/dreegotest v0.8.0 => ./dreegotest
 
