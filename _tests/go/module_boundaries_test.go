@@ -1,13 +1,49 @@
 package tests
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/dreego-stack/dreego/dreegotest"
 )
+
+var internalModulePattern = regexp.MustCompile(`(?m)^[ \t]*(?:require[ \t]+|replace[ \t]+)?(github\.com/dreego-stack/dreego(?:/[^\s]+)?)[ \t]+([^\s]+)`)
+
+var semanticVersionPattern = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
+
+func internalModuleVersions(body string) map[string]string {
+	versions := make(map[string]string)
+	for _, match := range internalModulePattern.FindAllStringSubmatch(body, -1) {
+		versions[match[1]] = match[2]
+	}
+	return versions
+}
+
+func coordinatedVersion(bodies map[string]string) (string, error) {
+	version := ""
+	for path, body := range bodies {
+		for module, found := range internalModuleVersions(body) {
+			if !semanticVersionPattern.MatchString(found) {
+				return "", fmt.Errorf("%s: %s uses invalid version %q", path, module, found)
+			}
+			if version == "" {
+				version = found
+				continue
+			}
+			if found != version {
+				return "", fmt.Errorf("%s: %s uses %s, coordinated version is %s", path, module, found, version)
+			}
+		}
+	}
+	if version == "" {
+		return "", fmt.Errorf("no internal module requirement found")
+	}
+	return version, nil
+}
 
 func TestModuleBoundaries(t *testing.T) {
 	repoRoot, err := dreegotest.RepoRoot()
@@ -36,22 +72,35 @@ func TestModuleBoundaries(t *testing.T) {
 		}
 	}
 	requirements := map[string][]string{
-		"core/go.mod":          {"github.com/dreego-stack/dreego v0.8.0"},
-		"adapter/ssr/go.mod":   {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
-		"adapter/wails/go.mod": {"github.com/dreego-stack/dreego/core v0.8.0"},
-		"dreegotest/go.mod":    {"github.com/dreego-stack/dreego v0.8.0", "github.com/dreego-stack/dreego/core v0.8.0"},
-		"cmd/dreego/go.mod":    {"github.com/dreego-stack/dreego v0.8.0"},
+		"core/go.mod":          {"github.com/dreego-stack/dreego"},
+		"adapter/ssr/go.mod":   {"github.com/dreego-stack/dreego", "github.com/dreego-stack/dreego/core"},
+		"adapter/wails/go.mod": {"github.com/dreego-stack/dreego/core"},
+		"dreegotest/go.mod":    {"github.com/dreego-stack/dreego", "github.com/dreego-stack/dreego/core"},
+		"cmd/dreego/go.mod":    {"github.com/dreego-stack/dreego"},
 	}
+	bodies := make(map[string]string, len(requirements)+1)
 	for path, expected := range requirements {
 		contents, err := os.ReadFile(filepath.Join(repoRoot, path))
 		if err != nil {
 			t.Fatal(err)
 		}
+		bodies[path] = string(contents)
+		versions := internalModuleVersions(bodies[path])
 		for _, requirement := range expected {
-			if !strings.Contains(string(contents), requirement) {
+			if _, ok := versions[requirement]; !ok {
 				t.Errorf("%s is missing coordinated requirement %q", path, requirement)
 			}
 		}
+	}
+	workspace, err := os.ReadFile(filepath.Join(repoRoot, "go.work"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bodies["go.work"] = string(workspace)
+	if version, err := coordinatedVersion(bodies); err != nil {
+		t.Errorf("coordinated module version mismatch: %v", err)
+	} else if !semanticVersionPattern.MatchString(version) {
+		t.Errorf("coordinated module version %q is not a semantic version", version)
 	}
 	for _, path := range []string{
 		"core/_docs",
@@ -95,6 +144,37 @@ func TestModuleBoundaries(t *testing.T) {
 		return nil
 	}); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestCoordinatedVersionRejectsMismatch(t *testing.T) {
+	if _, err := coordinatedVersion(map[string]string{
+		"core/go.mod":        "module github.com/dreego-stack/dreego/core\n\nrequire github.com/dreego-stack/dreego v0.9.0\n",
+		"adapter/ssr/go.mod": "module github.com/dreego-stack/dreego/adapter/ssr\n\nrequire github.com/dreego-stack/dreego/core v0.8.0\n",
+	}); err == nil {
+		t.Fatal("coordinatedVersion must reject mixed v0.9.0 and v0.8.0 requirements")
+	}
+}
+
+func TestCoordinatedVersionRejectsInvalidSemanticVersion(t *testing.T) {
+	if _, err := coordinatedVersion(map[string]string{
+		"core/go.mod": "module github.com/dreego-stack/dreego/core\n\nrequire github.com/dreego-stack/dreego v0.9\n",
+	}); err == nil {
+		t.Fatal("coordinatedVersion must reject non-semantic module versions")
+	}
+}
+
+func TestCoordinatedVersionAcceptsSingleVersion(t *testing.T) {
+	version, err := coordinatedVersion(map[string]string{
+		"core/go.mod":        "module github.com/dreego-stack/dreego/core\n\nrequire github.com/dreego-stack/dreego v0.9.0\n",
+		"adapter/ssr/go.mod": "module github.com/dreego-stack/dreego/adapter/ssr\n\nrequire github.com/dreego-stack/dreego/core v0.9.0\n",
+		"go.work":            "replace github.com/dreego-stack/dreego v0.9.0 => .\n\nreplace github.com/dreego-stack/dreego/core v0.9.0 => ./core\n",
+	})
+	if err != nil {
+		t.Fatalf("coordinatedVersion rejected a consistent version set: %v", err)
+	}
+	if version != "v0.9.0" {
+		t.Fatalf("coordinatedVersion = %q, want v0.9.0", version)
 	}
 }
 
