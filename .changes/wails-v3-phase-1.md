@@ -14,12 +14,12 @@ version: minor
 - Bug: parse header import directives in layout files instead of rejecting them as body text
 - Bug: track layout source positions so component errors point at the layout file
 - Bug: make module-boundary and integration tests stable in worktree and container environments
+- Bug: point the `demo-ssr` Dockerfile at `demo/demo-ssr/` after the demo reorganization so `task up` and docker-compose build again
 - Fix: give each `web-app` route its own `<title>` (WCAG 2.4.2) and drop the layout's duplicate title so every page renders exactly one
 - Fix: synchronise the `web-app` notes list with a `sync.Mutex` so `go test -race` stays clean under concurrent submissions
 - Fix: remove the inert `csrf_token` hidden field from the `web-app` form instead of implying CSRF protection that the minimal starter does not configure
 - Breaking: remove `cmd/dreego/blueprints/` and the `default`/`landing` blueprint names; scaffold paths move to `cmd/dreego/internal/templates/` with `web-minimal` as the replacement
 - Docs: organize the SSR and Wails reference applications as independent demo modules
-- Bug: point the `demo-ssr` Dockerfile at `demo/demo-ssr/` after the demo reorganization so `task up` and docker-compose build again
 - Docs: document the template overlay, metadata format, substitution rules, and CLI surface in `_docs/decisions/template-scaffolds.md`
 - Chore: standardize repository, demo, and scaffold commands on Taskfile
 - Test: add serve-based `web-app` coverage for titles, `aria-current` navigation, the dashboard table, the form round-trip, and race-safe concurrent note posts

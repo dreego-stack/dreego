@@ -19,12 +19,13 @@ v3 toolchain (`wails3`) on a supported native host, because it is not installed
 in the development container:
 
 ```sh
-task bindings
+cd demo/demo-wailsv3 && task bindings
 ```
 
 No `package.json`, npm install, Wails dev server, or Dreego HTTP server is part
-of this workflow. Development reload is deliberately deterministic: stop the
-binary, run `task generate`, then run `task build` and restart.
+of this workflow. Development reload is deliberately deterministic: from
+`demo/demo-wailsv3`, stop the binary, run `task generate`, then run
+`task build` and restart.
 
 Platform tasks run on their native hosts:
 
