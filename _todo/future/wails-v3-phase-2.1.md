@@ -12,4 +12,4 @@
   live updates. Recheck native bridge calls and programmatic shutdown under
   headless Linux: Wails v3 beta.20 can block both under Alpine GTK4/Xvfb even
   after the application-started event.
-- Depends on: wails-reference-application.1 and an upstream stable Wails v3 release
+- Depends on: the Wails v3 Phase 1 reference application being released (`adapter/wails/_docs/phase-1.md`) and an upstream stable Wails v3 release
