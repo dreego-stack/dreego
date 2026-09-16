@@ -1,6 +1,7 @@
 package wails
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -61,8 +62,45 @@ func TestHostDiagnosesDynamicRoute(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/users/42", nil)
 	response := httptest.NewRecorder()
 	host.ServeHTTP(response, request)
-	if response.Code != http.StatusInternalServerError {
-		t.Fatalf("status = %d, want %d for %v", response.Code, http.StatusInternalServerError, dreego.ErrDynamicRenderRoute)
+	if response.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want %d for %v", response.Code, http.StatusNotFound, dreego.ErrDynamicRenderRoute)
+	}
+}
+
+func TestAssetHandlerReturnsInternalErrorForOtherRenderFailures(t *testing.T) {
+	app := dreego.New()
+	if err := app.RegisterRender("/broken", dreego.ComponentFunc(func(dreego.RenderContext) (dreego.Result, error) {
+		return dreego.Result{}, errors.New("render exploded")
+	})); err != nil {
+		t.Fatalf("RegisterRender: %v", err)
+	}
+	host, err := New(app)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	recorder := httptest.NewRecorder()
+	host.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/broken", nil))
+	if recorder.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusInternalServerError)
+	}
+}
+
+func TestAssetHandlerStillServesStaticAssetsAfterRenderMiss(t *testing.T) {
+	app := dreego.New()
+	if err := app.RegisterStatic("/assets/app.js", "application/javascript", []byte("ready()")); err != nil {
+		t.Fatalf("RegisterStatic: %v", err)
+	}
+	host, err := New(app)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	recorder := httptest.NewRecorder()
+	host.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/assets/app.js", nil))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if got := recorder.Body.String(); got != "ready()" {
+		t.Fatalf("body = %q, want %q", got, "ready()")
 	}
 }
 

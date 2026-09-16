@@ -2,7 +2,7 @@ FROM golang:1.27-alpine AS build
 WORKDIR /src
 COPY . .
 RUN go build -o /dreego ./cmd/dreego
-RUN cd demo && /dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
+RUN cd demo/demo-ssr && /dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
 
 FROM scratch
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

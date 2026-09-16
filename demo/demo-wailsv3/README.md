@@ -6,18 +6,20 @@ an explicitly registered Go service. Wails-generated JavaScript calls that
 service while committed TypeScript declarations describe the same contract.
 Navigation and binding modules are served as in-process assets.
 
-From the repository root, generate and build the demo through Task:
+From the repository root, build the CLI and verify the demo in one container
+command. This is the same path used by `_tests/sh/check-wails-demo.sh`:
 
 ```sh
-smd sh -c 'cd cmd/dreego && go build -o /tmp/dreego .'
-smd sh -c 'cd demo/demo-wailsv3 && task generate'
-smd sh -c 'cd demo/demo-wailsv3 && task build'
+smd sh -c 'go build -o /tmp/dreego ./cmd/dreego && cd demo/demo-wailsv3 && /tmp/dreego generate && go test ./...'
 ```
 
-Regenerate bindings after changing `TimerService`:
+The committed Wails bindings under `app/bindings` and `app/static/bindings` are
+used as-is. Regenerating them after changing `TimerService` requires the Wails
+v3 toolchain (`wails3`) on a supported native host, because it is not installed
+in the development container:
 
 ```sh
-smd sh -c 'cd demo/demo-wailsv3 && task bindings'
+task bindings
 ```
 
 No `package.json`, npm install, Wails dev server, or Dreego HTTP server is part

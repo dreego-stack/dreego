@@ -2,6 +2,7 @@ package wails
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"path"
 	"strings"
@@ -33,6 +34,11 @@ func (h *handler) ServeHTTP(response http.ResponseWriter, request *http.Request)
 	result, err := h.app.RenderPage(request.URL.Path)
 	if err == nil {
 		writeAssetResponse(response, request, "text/html; charset=utf-8", result.HTML)
+		return
+	}
+	if errors.Is(err, dreego.ErrDynamicRenderRoute) {
+		slog.Warn("dreego wails: dynamic route is unsupported", "error", err)
+		http.Error(response, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 	if !errors.Is(err, dreego.ErrRenderRouteNotFound) {

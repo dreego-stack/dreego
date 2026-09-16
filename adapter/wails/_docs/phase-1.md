@@ -38,10 +38,11 @@ log.Fatal(wailsApp.Run())
 ## Route and asset boundary
 
 Only pure pages registered through `App.RegisterRender` are available.
-Generated pages without a `<server>` section receive that registration
-automatically. Dynamic routes and SSR-only handlers are rejected because they
-need request-specific state. Form actions, sessions, cookies, redirects, and
-SSR middleware do not cross into the desktop adapter.
+Generated pages that are `GET`, contain no inline `<server>` code, and use no
+typed blocks receive that registration automatically. Dynamic routes and
+SSR-only handlers are rejected because they need request-specific state. Form
+actions, sessions, cookies, redirects, and SSR middleware do not cross into the
+desktop adapter.
 
 The handler accepts `GET` and `HEAD` for literal clean paths. Query strings,
 encoded paths, traversal segments, backslashes, unknown routes, and other

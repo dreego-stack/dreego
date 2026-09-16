@@ -7,6 +7,23 @@ import (
 	"testing"
 )
 
+func TestAppDiagnosesConflictingDynamicRoutesWithoutBuild(t *testing.T) {
+	app := New()
+	if err := app.Register(http.MethodGet, "/users/{id}", func(http.ResponseWriter, *http.Request) {}); err != nil {
+		t.Fatalf("Register /users/{id}: %v", err)
+	}
+	if err := app.Register(http.MethodGet, "/users/{name}", func(http.ResponseWriter, *http.Request) {}); err != nil {
+		t.Fatalf("Register /users/{name}: %v", err)
+	}
+	_, err := app.RenderPage("/users/42")
+	if err == nil {
+		t.Fatal("RenderPage must return an error for conflicting dynamic patterns, not panic")
+	}
+	if !strings.Contains(err.Error(), "conflicting route patterns") {
+		t.Fatalf("RenderPage error = %v, want a conflicting route patterns error", err)
+	}
+}
+
 func TestAppRendersRegisteredPage(t *testing.T) {
 	app := New()
 	component := ComponentFunc(func(RenderContext) (Result, error) {

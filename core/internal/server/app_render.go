@@ -40,7 +40,11 @@ func (a *App) RenderPage(routePath string) (rendercore.Result, error) {
 	routes := append([]route(nil), a.routes...)
 	a.mu.RUnlock()
 	if !exists {
-		if pattern := matchingDynamicGETRoute(routes, routePath); pattern != "" {
+		pattern, err := a.matchingDynamicGETRoute(routes, routePath)
+		if err != nil {
+			return rendercore.Result{}, err
+		}
+		if pattern != "" {
 			return rendercore.Result{}, fmt.Errorf("%w: %s matches %s; use SSR or define a literal desktop route", ErrDynamicRenderRoute, routePath, pattern)
 		}
 		return rendercore.Result{}, fmt.Errorf("%w: %s", ErrRenderRouteNotFound, routePath)
@@ -48,15 +52,19 @@ func (a *App) RenderPage(routePath string) (rendercore.Result, error) {
 	return component.Render(rendercontext.NewRender(nil))
 }
 
-func matchingDynamicGETRoute(routes []route, routePath string) string {
+func (a *App) matchingDynamicGETRoute(routes []route, routePath string) (string, error) {
 	mux := http.NewServeMux()
-	for _, candidate := range routes {
-		if candidate.method != http.MethodGet || !strings.Contains(candidate.pattern, "{") {
-			continue
+	if err := a.handleMux(func() {
+		for _, candidate := range routes {
+			if candidate.method != http.MethodGet || !strings.Contains(candidate.pattern, "{") {
+				continue
+			}
+			mux.HandleFunc(http.MethodGet+" "+candidate.pattern, candidate.handler)
 		}
-		mux.HandleFunc(http.MethodGet+" "+candidate.pattern, candidate.handler)
+	}); err != nil {
+		return "", err
 	}
 	request := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: routePath}}
 	_, pattern := mux.Handler(request)
-	return strings.TrimPrefix(pattern, http.MethodGet+" ")
+	return strings.TrimPrefix(pattern, http.MethodGet+" "), nil
 }
