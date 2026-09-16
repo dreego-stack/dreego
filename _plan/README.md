@@ -32,7 +32,7 @@ multi-language Dreego: md -> html, ts -> js, lua -> js
 coordinated module boundaries (planned v0.8)
               |
               v
-Wails v3 Phase 1 (planned v0.9)
+Wails v3 Phase 1 (released v0.9)
               |
               v
 DreeJS foundation (planned v0.10)

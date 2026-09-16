@@ -86,7 +86,7 @@ possible, with `.dreego` source locations.
 ## Product boundary
 
 SSR remains the production baseline. The experimental Wails v3 Phase 1 host is
-the next target slice, followed by incremental DreeJS capabilities. Broader
+released in v0.9, followed by incremental DreeJS capabilities. Broader
 Wails v3 Phase 2 support waits for a stable upstream release and evidence from
 the Phase 1 reference application. Future extension points are kept only when
 they are inexpensive and proven by real applications. See the
