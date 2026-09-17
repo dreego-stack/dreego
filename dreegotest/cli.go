@@ -104,7 +104,7 @@ func latestTag(repoRoot string) string {
 		}
 	}
 	// Fall back to DREEGO_VERSION (set by make test / test.sh and the
-	// Dockerfile) only where git is absent or the repository has no root tag.
+	// Dockerfile) where no reachable .git/repository history exists.
 	if v := os.Getenv("DREEGO_VERSION"); v != "" {
 		return v
 	}
