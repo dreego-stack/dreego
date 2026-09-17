@@ -12,9 +12,13 @@ default and only supported head language.
 ```
 
 Expressions use the same context-aware escaping as body templates. Head content
-from a route is combined with its layout instead of being discarded. Dreego
-does not deduplicate arbitrary metadata, so the application remains responsible
-for intentional title, canonical-link, and social-card policies.
+from a route is combined with its layout instead of being discarded. For the two
+single-value tags a page must own, the route wins: when the route supplies a
+`<title>` or a `<meta name="description">`, the layout copy is dropped so the
+merged document contains exactly one of each. This holds whether the layout
+declares `<head>` at root level or inside a body-level `<body>` skeleton.
+Dreego does not deduplicate any other metadata, so the application remains
+responsible for intentional canonical-link and social-card policies.
 
 The section contains head *children*, not another `<head>` element. A layout may
 place `{#head}` where route metadata belongs. Without a layout, generated output
