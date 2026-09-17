@@ -96,17 +96,17 @@ func CLIBin(t *testing.T) string {
 }
 
 func latestTag(repoRoot string) string {
-	// Prefer DREEGO_VERSION (set by make test / test.sh and the Dockerfile) so
-	// tests behave identically inside the container (where git is absent).
-	if v := os.Getenv("DREEGO_VERSION"); v != "" {
-		return v
-	}
 	cmd := exec.Command("git", "describe", "--tags", "--match", "v[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
 	cmd.Dir = repoRoot
 	if out, err := cmd.Output(); err == nil {
 		if tag := strings.TrimSpace(string(out)); tag != "" {
 			return tag
 		}
+	}
+	// Fall back to DREEGO_VERSION (set by make test / test.sh and the
+	// Dockerfile) where no reachable .git/repository history exists.
+	if v := os.Getenv("DREEGO_VERSION"); v != "" {
+		return v
 	}
 	return "dev"
 }

@@ -94,7 +94,7 @@ Generation builds a client manifest from used components and directives. It
 includes only required modules and component code. A page with no client
 features produces no DreeJS asset.
 
-## Foundation scope — planned for v0.9
+## Foundation scope — planned for v0.10
 
 The foundation proves local client behavior before networked update modes:
 

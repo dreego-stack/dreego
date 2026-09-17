@@ -2,8 +2,8 @@
 
 ## Release strategy
 
-Wails support is split because Dreego begins its integration while Wails v3 is
-still beta. Phase 1 is planned as the v0.9 release slice. The reference app
+Wails support is split because Dreego began its integration while Wails v3 is
+still beta. Phase 1 was released as the v0.9 release slice. The reference app
 pins one upstream beta version and proves a small, opt-in desktop adapter. The release remains
 provisional and does not imply support for the complete Wails API.
 

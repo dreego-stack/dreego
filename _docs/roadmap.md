@@ -9,10 +9,10 @@ Release numbers report shipped changes; they do not promise that an entire
 phase fits into one release. A phase advances only when tests and real
 applications prove its contracts.
 
-The current release plan uses v0.8 for coordinated module boundaries, v0.9 to
-begin Wails v3 Phase 1, and v0.10 to begin DreeJS. These are planned slices rather
-than compatibility promises; evidence may move unfinished work to a later
-release.
+The release plan used v0.8 for coordinated module boundaries and v0.9 for
+Wails v3 Phase 1; both are released. v0.10 is planned to begin the DreeJS
+foundation. These are planned slices rather than compatibility promises;
+evidence may move unfinished work to a later release.
 
 Static site generation is not planned. Dreego prioritizes dynamic SSR with
 explicit caching and invalidation. See the
@@ -96,9 +96,9 @@ with one coordinated version and module-specific tags. Rename the HTTP host to
 `adapter/ssr` and the CLI source to `cmd/dreego`. Wails is intentionally not
 part of this release.
 
-## Phase: Wails v3 Phase 1 — planned for v0.9
+## Completed phase: Wails v3 Phase 1 — released in v0.9
 
-Add an experimental, opt-in first-party adapter, exercised by a reference app
+Added an experimental, opt-in first-party adapter, exercised by a reference app
 against one explicitly pinned Wails v3 beta release:
 
 - render initial documents without a listening TCP socket;
