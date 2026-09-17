@@ -14,8 +14,9 @@ releases.
 5. [Wails v3 Phase 1 and deferred Phase 2](phase-wails.md)
 6. [DreeJS foundation and extensions](phase-dreejs.md)
 7. [Live updates](phase-live.md)
-8. [Stabilization](phase-stabilization.md)
-9. [Future SPA and Wasm exploration](future-spa-wasm.md)
+8. [Explicit Dreefile composition](phase-dreefile.md)
+9. [Stabilization](phase-stabilization.md)
+10. [Future SPA and Wasm exploration](future-spa-wasm.md)
 
 The render foundation's original behavioral inventory remains in
 [phase-render-inventory.md](phase-render-inventory.md).
@@ -42,6 +43,9 @@ DreeJS data islands and extensions (planned after v0.10)
               |
               v
 polling and live transports
+              |
+              v
+explicit Dreefile composition (grammar, layout chaining, head dedupe)
               |
               v
 stabilization and the v1 contract review
