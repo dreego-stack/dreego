@@ -128,6 +128,44 @@ func TestGenTemplHeadMergeDedupesBodyLevelLayout(t *testing.T) {
 	}
 }
 
+// Regression (W1): a body-level layout that places its own <title>/meta
+// description AFTER the {#head} placeholder must still dedupe them at runtime.
+// Previously only the prefix region was captured, so the tail tags were emitted
+// raw and produced two <title> elements.
+func TestGenTemplHeadMergeDedupesBodyLevelLayoutTail(t *testing.T) {
+	layout := &layoutEntry{
+		file: parseFile(t, "<body>\n<html lang=\"en\">\n<head>\n{#head}\n<title>Site</title>\n<meta name=\"description\" content=\"site desc\">\n<meta charset=\"utf-8\">\n</head>\n<body><main>{#slot}</main></body>\n</html>\n</body>\n"),
+		name: "Default",
+	}
+
+	layoutOut, err := GenerateLayout(NewGenerator(), layout.file, "Default")
+	if err != nil {
+		t.Fatalf("GenerateLayout: %v", err)
+	}
+
+	if !strings.Contains(layoutOut, `b.WriteString(head)`) {
+		t.Errorf("body-level layout must emit the route head at the placeholder, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, "layoutTail := ") {
+		t.Errorf("body-level layout must capture the post-placeholder head region, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, "layoutTail = stripTitleTag(layoutTail)") {
+		t.Errorf("post-placeholder region must strip its own title, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, "layoutTail = stripMetaDescriptionTag(layoutTail)") {
+		t.Errorf("post-placeholder region must strip its own description, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, `<html lang="en">`) {
+		t.Errorf("generated layout must stay self-contained and emit <html>, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, "site desc") {
+		t.Errorf("layout tail must be captured as layoutTail, got:\n%s", layoutOut)
+	}
+	if !strings.Contains(layoutOut, `charset="utf-8"`) {
+		t.Errorf("layout tail must keep non-dedupe tags, got:\n%s", layoutOut)
+	}
+}
+
 // Control: without a route <title>, the layout <title> must be kept — dedupe
 // must not remove layout head content the route does not override.
 func TestGenTemplHeadMergeKeepsLayoutTitleWithoutRouteTitle(t *testing.T) {

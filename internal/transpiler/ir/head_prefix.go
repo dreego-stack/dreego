@@ -36,6 +36,35 @@ func (f *File) StaticBodyHead() (idx int, prefix, after string, ok bool) {
 	return -1, "", "", false
 }
 
+// StaticBodyHeadTail returns the literal markup that follows the {#head}
+// placeholder: the remainder of the placeholder node plus every following text
+// node until a non-text node or embedded template syntax appears. end is the
+// index of the first node that is not part of the captured markup, so callers
+// can skip the consumed nodes. It reports false when the placeholder remainder
+// itself contains template syntax that cannot be captured as a literal.
+func (f *File) StaticBodyHeadTail(idx int, after string) (tail string, end int, ok bool) {
+	if f == nil || f.Body == nil || idx < 0 {
+		return "", -1, false
+	}
+	if strings.Contains(after, "{#") || strings.Contains(after, "{{") || strings.Contains(after, "[[") {
+		return "", -1, false
+	}
+	var b strings.Builder
+	b.WriteString(after)
+	nodes := f.Body.Nodes
+	i := idx + 1
+	for ; i < len(nodes); i++ {
+		if nodes[i].Type != NodeText {
+			break
+		}
+		if strings.Contains(nodes[i].Content, "{#") || strings.Contains(nodes[i].Content, "{{") || strings.Contains(nodes[i].Content, "[[") {
+			break
+		}
+		b.WriteString(nodes[i].Content)
+	}
+	return b.String(), i, true
+}
+
 // HasHeadDedupeTag reports whether the given markup contains a tag whose layout
 // copy a route head may override: a <title> or a meta description.
 func HasHeadDedupeTag(s string) bool {
