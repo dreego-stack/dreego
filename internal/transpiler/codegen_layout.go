@@ -25,7 +25,33 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 
 	if file.Body != nil {
 		inSection := false
-		for _, n := range file.Body.Nodes {
+		headIdx, headAfter := -1, ""
+		headPrefix := ""
+		if file.Head == nil {
+			if idx, prefix, after, ok := file.StaticBodyHead(); ok && ir.HasHeadDedupeTag(prefix) {
+				headIdx, headAfter, headPrefix = idx, after, prefix
+			}
+		}
+		if headPrefix != "" {
+			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
+			buf.WriteString("\tif strings.Contains(head, \"<title\") {\n")
+			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
+			buf.WriteString("\t}\n")
+			buf.WriteString("\tif strings.Contains(head, `name=\"description\"`) || strings.Contains(head, `name='description'`) {\n")
+			buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
+			buf.WriteString("\t}\n")
+			buf.WriteString("\tb.WriteString(layoutHead)\n")
+			buf.WriteString("\tb.WriteString(head)\n")
+		}
+		for i, n := range file.Body.Nodes {
+			if headIdx >= 0 {
+				if i < headIdx {
+					continue
+				}
+				if i == headIdx {
+					n = TemplateNode{Type: ir.NodeText, Content: headAfter}
+				}
+			}
 			if styleCode != "" && n.Type == ir.NodeText && strings.Contains(n.Content, "</html>") {
 				buf.WriteString(styleCode)
 				styleCode = ""
