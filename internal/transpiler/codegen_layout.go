@@ -26,25 +26,40 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 	if file.Body != nil {
 		inSection := false
 		headIdx, headAfter := -1, ""
-		headPrefix := ""
+		headEnd := -1
+		headPrefix, headTail := "", ""
 		if file.Head == nil {
-			if idx, prefix, after, ok := file.StaticBodyHead(); ok && ir.HasHeadDedupeTag(prefix) {
-				headIdx, headAfter, headPrefix = idx, after, prefix
+			if idx, prefix, after, ok := file.StaticBodyHead(); ok {
+				tail, end, tailOK := file.StaticBodyHeadTail(idx, after)
+				captureTail := tailOK && ir.HasHeadDedupeTag(tail)
+				if captureTail || ir.HasHeadDedupeTag(prefix) {
+					headIdx, headAfter = idx, after
+					headPrefix = prefix
+					if captureTail {
+						headTail, headEnd = tail, end
+					}
+				}
 			}
 		}
-		if headPrefix != "" {
-			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
-			buf.WriteString("\tif strings.Contains(head, \"<title\") {\n")
-			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
-			buf.WriteString("\t}\n")
-			buf.WriteString("\tif strings.Contains(head, `name=\"description\"`) || strings.Contains(head, `name='description'`) {\n")
-			buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
-			buf.WriteString("\t}\n")
-			buf.WriteString("\tb.WriteString(layoutHead)\n")
+		if headPrefix != "" || headTail != "" {
+			if headPrefix != "" {
+				buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
+				writeHeadDedupe(&buf, "layoutHead")
+				buf.WriteString("\tb.WriteString(layoutHead)\n")
+			}
 			buf.WriteString("\tb.WriteString(head)\n")
+			if headTail != "" {
+				buf.WriteString(fmt.Sprintf("\tlayoutTail := %s\n", ir.GoLiteral(headTail)))
+				writeHeadDedupe(&buf, "layoutTail")
+				buf.WriteString("\tb.WriteString(layoutTail)\n")
+			}
 		}
 		for i, n := range file.Body.Nodes {
-			if headIdx >= 0 {
+			if headEnd >= 0 {
+				if i < headEnd {
+					continue
+				}
+			} else if headIdx >= 0 {
 				if i < headIdx {
 					continue
 				}
@@ -71,6 +86,15 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 	buf.WriteString("\n\treturn b.String(), nil\n")
 	buf.WriteString("}\n\n")
 	return buf.String(), nil
+}
+
+func writeHeadDedupe(buf *strings.Builder, varName string) {
+	buf.WriteString(fmt.Sprintf("\tif strings.Contains(head, \"<title\") {\n"))
+	buf.WriteString(fmt.Sprintf("\t\t%s = stripTitleTag(%s)\n", varName, varName))
+	buf.WriteString("\t}\n")
+	buf.WriteString("\tif strings.Contains(head, `name=\"description\"`) || strings.Contains(head, `name='description'`) {\n")
+	buf.WriteString(fmt.Sprintf("\t\t%s = stripMetaDescriptionTag(%s)\n", varName, varName))
+	buf.WriteString("\t}\n")
 }
 
 func genLayoutNode(gen *Generator, n TemplateNode, depth int) (string, error) {
