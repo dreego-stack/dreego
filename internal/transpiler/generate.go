@@ -134,7 +134,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	for _, rd := range routeDirs {
 		imports := gen.Imports[rd.pkg]
 		importLine := buildImportLine(imports, rd.pkg)
-		stdImports := stdImportsFor(rd.src)
+		stdImports := stdImportsFor(gen, rd.pkg, rd.src)
 		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
 		if strings.Contains(rd.src, "ssr.") {
 			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
@@ -156,7 +156,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 			pkg := sanitizePkgName(filepath.Base(pkgDir))
 			imports := gen.Imports[pkg]
 			importLine := buildImportLine(imports, pkg)
-			stdImports := stdImportsFor(strings.Join(srcs, ""))
+			stdImports := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
 			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
 			compOut += strings.Join(srcs, "")
 			files[filepath.Join(pkgDir, "dree.go")] = compOut
@@ -174,7 +174,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		layoutDir := filepath.Join(root, "layouts")
 		imports := gen.Imports["layouts"]
 		importLine := buildImportLine(imports, "layouts")
-		stdImports := stdImportsFor(strings.Join(layoutSrcs, ""))
+		stdImports := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
 		if layoutNeedsHeadHelpers(layoutSrcs) {
@@ -229,20 +229,6 @@ func buildImportLine(imports map[string]string, selfPkg string) string {
 	}
 	sort.Strings(lines)
 	return strings.Join(lines, "\n\t")
-}
-
-func stdImportsFor(src string) string {
-	var imports []string
-	if strings.Contains(src, "strings.") {
-		imports = append(imports, "\"strings\"")
-	}
-	if strings.Contains(src, "http.") {
-		imports = append(imports, "\"net/http\"")
-	}
-	if strings.Contains(src, "fmt.") {
-		imports = append(imports, "\"fmt\"")
-	}
-	return strings.Join(imports, "\n\t")
 }
 
 func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings, i18nConfig ...string) string {

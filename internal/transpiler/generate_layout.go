@@ -182,6 +182,9 @@ func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntr
 				funcName = "Default"
 			}
 			gen.Src = e.file.SourceContent
+			if err := registerGoImports(gen, "layouts", e.source, e.file.GoImports); err != nil {
+				return nil, err
+			}
 			src, err := GenerateLayout(gen, e.file, funcName)
 			if err != nil {
 				return nil, err

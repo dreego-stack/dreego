@@ -32,8 +32,8 @@ GOIMPORT { sync, encoding/json }           explicit Go import channel
 A component's name comes from its **filename**: `Card.dreego` becomes `<@Card>`.
 Props stay on the `DREEFILE` line. `COMPONENT` imports components from a path
 with optional aliases (`Card as ProductCard`). `GOIMPORT` is the designated
-channel for Go imports; it is parsed and reserved, and codegen consumption
-arrives with the server-import slice.
+channel for Go imports; it emits allow-listed standard-library imports into the
+generated package.
 
 ## Locked decisions
 
@@ -48,10 +48,8 @@ These are decided. The slices implement them; they do not reopen them.
    separately-proven need.
 3. A top-level `import "…"` becomes a **generate error** with a migration
    message pointing to `GOIMPORT` and `<server>`. Because Go imports therefore
-   move into `<server>`, this re-scopes
-   [`_todo/core/server-stdlib-imports.1.md`](../_todo/core/server-stdlib-imports.1.md)
-   from an optional gap into the defined import channel for route and component
-   code.
+   move into `<server>`, the server-import slice re-scopes them from an optional
+   gap into the defined import channel for route and component code.
 4. The layout directory stays `www/layouts` (plural). Slice 4 removes the
    *directory-driven resolution* (`default.dreego` / `layout.dreego` scope
    cascade and its ambiguity check), not the folder itself; layouts are selected
@@ -65,8 +63,9 @@ The grammar keywords are parsed, formatted, and enforced: `DREEFILE`,
 `LAYOUT`, `COMPONENT ... IMPORT`, and `GOIMPORT` are understood by the lexer
 and `dreego fmt`, the legacy `Component` / `import` / `from` forms are generate
 errors, and the repository `.dreego` files and public documentation are
-migrated. `LAYOUT` and `GOIMPORT` are stored on the file but have no codegen
-consumer yet; the anchors below describe the pre-grammar baseline that the
+migrated. `GOIMPORT` emits allow-listed standard-library imports into the
+generated route, component, and layout packages; `LAYOUT` still has no codegen
+consumer, so the anchors below describe the pre-grammar baseline that the
 remaining slices change.
 
 - `internal/transpiler/lexer/lexer_header.go` — `ParseFileHeaderStrict` parses
@@ -156,9 +155,9 @@ One pull request per slice, in this order. Slice 1 is mandatory first.
    (`generate_layout.go:90-111`). Layout files stay under `www/layouts`
    (decision 4) and are referenced only by explicit `LAYOUT`.
 5. **Server import channel.** Route and component stdlib imports move into
-   `<server>` and compile through `GOIMPORT` plus the allow-list from
-   `_todo/core/server-stdlib-imports.1.md`. The handwritten sibling-`package`
-   workaround stops being necessary for the common cases.
+   `<server>` and compile through `GOIMPORT` plus an explicit standard-library
+   allow-list. The handwritten sibling-`package` workaround stops being
+   necessary for the common cases. **Landed.**
 
 ## Smallest decisive fixture
 

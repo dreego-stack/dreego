@@ -16,6 +16,7 @@ type State struct {
 	CompPaths        map[string]string
 	CompAliases      map[string]string
 	Imports          map[string]map[string]string
+	GoImportPaths    map[string][]string
 	Lua              map[string]bool
 	MessageUses      []MessageUse
 	MessageArguments map[string]map[string]string
@@ -33,6 +34,7 @@ func NewState() *State {
 		CompPaths:        map[string]string{},
 		CompAliases:      map[string]string{},
 		Imports:          map[string]map[string]string{},
+		GoImportPaths:    map[string][]string{},
 		Lua:              map[string]bool{},
 		MessageUses:      nil,
 		MessageArguments: map[string]map[string]string{},
@@ -85,6 +87,18 @@ func (g *State) AddImport(pkg, alias, path string) {
 		g.Imports[pkg] = map[string]string{}
 	}
 	g.Imports[pkg][alias] = path
+}
+
+func (g *State) AddGoImportPath(pkg, path string) {
+	if g.GoImportPaths == nil {
+		g.GoImportPaths = map[string][]string{}
+	}
+	for _, existing := range g.GoImportPaths[pkg] {
+		if existing == path {
+			return
+		}
+	}
+	g.GoImportPaths[pkg] = append(g.GoImportPaths[pkg], path)
 }
 
 func (g *State) Qualify(funcName string) string {

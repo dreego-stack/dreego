@@ -69,6 +69,9 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 			if perr != nil {
 				return perr
 			}
+			if err := registerGoImports(gen, "routes", fpath, file.GoImports); err != nil {
+				return err
+			}
 
 			if len(file.Server) == 0 {
 				file.Server = []ServerSection{{Method: method}}
