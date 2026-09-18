@@ -134,6 +134,45 @@ func TestFormatBalancedDirectiveStillGroupsMultilineBlock(t *testing.T) {
 	}
 }
 
+func TestFormatBareDreefileStaysInHeader(t *testing.T) {
+	in := "DREEFILE\n<body><p>x</p></body>\n"
+	out := Format(in)
+	bodyIdx := strings.Index(out, "<body>")
+	if idx := strings.Index(out, "DREEFILE"); idx < 0 || idx > bodyIdx {
+		t.Fatalf("bare DREEFILE must stay before the body, got:\n%s", out)
+	}
+	twice := Format(out)
+	if twice != out {
+		t.Fatalf("Format must be idempotent for a bare DREEFILE\nonce:  %q\ntwice: %q", out, twice)
+	}
+}
+
+func TestFormatBareDreefileRoundTripStillRejected(t *testing.T) {
+	in := "DREEFILE\n<body><p>x</p></body>\n"
+	if _, _, err := ParseFileHeaderStrict(in); err == nil {
+		t.Fatal("generate must reject a bare DREEFILE")
+	}
+	out := Format(in)
+	if _, _, err := ParseFileHeaderStrict(out); err == nil {
+		t.Fatalf("fmt must not turn a rejected bare DREEFILE into an accepted file, got:\n%s", out)
+	}
+}
+
+func TestFormatCollapsesDuplicateHeaderBlankLines(t *testing.T) {
+	in := "DREEFILE component (title string)\n\n\nLAYOUT \"www/layouts/admin.dreego\"\n\n\n<body><p>x</p></body>\n"
+	out := Format(in)
+	if strings.Contains(out, "\n\n\n") {
+		t.Fatalf("Format must collapse duplicate header blank lines, got:\n%q", out)
+	}
+	if !strings.HasPrefix(out, "DREEFILE component (title string)\n\nLAYOUT") {
+		t.Fatalf("expected a single blank line between header directives, got:\n%q", out)
+	}
+	twice := Format(out)
+	if twice != out {
+		t.Fatalf("Format must be idempotent\nonce:  %q\ntwice: %q", out, twice)
+	}
+}
+
 func TestFormatNormalizesCRLF(t *testing.T) {
 	in := "DREEFILE component (title string)\r\n\r\n<body>\r\n  <p>{{ title }}</p>\r\n</body>\r\n"
 	out := Format(in)

@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -176,6 +178,42 @@ func TestDreefileGrammarFmtUnbalancedDirectiveKeepsBody(t *testing.T) {
 	bodyIdx := strings.Index(out, "<body>")
 	if idx := strings.Index(out, "COMPONENT"); idx < 0 || idx > bodyIdx {
 		t.Fatalf("COMPONENT directive must stay in the header, got:\n%s", out)
+	}
+}
+
+func TestDreefileGrammarFmtCheckStaysLenientOnLegacyHeader(t *testing.T) {
+	t.Parallel()
+	src := "Component Legacy (name string)\n\nimport dreego github.com/dreego-stack/dreego\n\n<body><p>x</p></body>\n"
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/routes/+page.dreego": src,
+	})
+	formatted, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/routes/+page.dreego")
+	if err != nil {
+		t.Fatalf("fmt: %v\n%s", err, formatted)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "www/routes/+page.dreego"), []byte(formatted), 0644); err != nil {
+		t.Fatalf("write formatted file: %v", err)
+	}
+	if out, err := dreegotest.RunCLI(t, dir, "fmt", "--check", "www/routes/+page.dreego"); err != nil {
+		t.Fatalf("fmt --check must stay lenient on a legacy header: %v\n%s", err, out)
+	}
+	if out, err := dreegotest.RunCLI(t, dir, "generate"); err == nil {
+		t.Fatalf("generate must keep rejecting the legacy header:\n%s", out)
+	}
+}
+
+func TestDreefileGrammarFmtBareKeywordMatchesGenerate(t *testing.T) {
+	t.Parallel()
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/routes/+page.dreego": "DREEFILE\n<body><p>x</p></body>\n",
+	})
+	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/routes/+page.dreego")
+	if err != nil {
+		t.Fatalf("fmt: %v\n%s", err, out)
+	}
+	bodyIdx := strings.Index(out, "<body>")
+	if idx := strings.Index(out, "DREEFILE"); idx < 0 || idx > bodyIdx {
+		t.Fatalf("fmt must keep a bare DREEFILE in the header, got:\n%s", out)
 	}
 }
 

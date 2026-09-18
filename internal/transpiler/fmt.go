@@ -41,7 +41,8 @@ func Format(input string) string {
 				}
 				i = end
 				continue
-			case strings.HasPrefix(trimmed, "DREEFILE "),
+			case trimmed == "DREEFILE",
+				strings.HasPrefix(trimmed, "DREEFILE "),
 				strings.HasPrefix(trimmed, "COMPONENT "),
 				strings.HasPrefix(trimmed, "GOIMPORT"):
 				if end := directiveBlockEnd(lines, i); end > i {
