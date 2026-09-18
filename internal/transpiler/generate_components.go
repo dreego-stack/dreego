@@ -36,6 +36,9 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 	gen.Pkg = "components"
 	for _, component := range components {
 		gen.Src = component.raw
+		if err := registerGoImports(gen, sanitizePkgName(filepath.Base(component.pkgDir)), component.path, component.file.GoImports); err != nil {
+			return nil, nil, err
+		}
 		src, err := GenerateComponent(gen, component.file, component.scopeHash)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error generating component %s: %w", component.path, err)

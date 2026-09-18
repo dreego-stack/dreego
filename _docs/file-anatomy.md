@@ -18,9 +18,15 @@ surface rule is: **uppercase is a keyword, lowercase is a value.**
   is still the directory cascade described in [Layouts](../core/_docs/layouts.md).
 - `COMPONENT "www/components" IMPORT { Card, Card as ProductCard }` imports
   components from a path; `as` creates an alias.
-- `GOIMPORT { sync, encoding/json }` records Go imports. It is parsed and
-  reserved for the upcoming server-import slice; generated code does not read it
-  yet.
+- `GOIMPORT { sync, encoding/json }` declares Go imports for the file's
+  generated package. Only allow-listed standard-library packages are accepted;
+  an unknown package fails at `dreego generate` with a diagnostic naming the
+  supported set. The list is fixed (`bytes`, `context`, `encoding/base64`,
+  `encoding/hex`, `encoding/json`, `errors`, `fmt`, `html`, `io`, `log`,
+  `maps`, `math`, `net/http`, `net/url`, `path`, `path/filepath`, `regexp`,
+  `slices`, `sort`, `strconv`, `strings`, `sync`, `time`, `unicode`,
+  `unicode/utf8`), so arbitrary or dynamic imports stay impossible. `strings`,
+  `net/http`, and `fmt` are also detected automatically from the code.
 
 Header directives are the only content allowed alongside the five root sections.
 

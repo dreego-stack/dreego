@@ -8,7 +8,7 @@ timestamp: 2026-09-18T00:00:00Z
 # Explicit Dreefile header grammar
 
 **Date:** 2026-09-18
-**Status:** Accepted; grammar parsing and formatting are implemented, `LAYOUT` and `GOIMPORT` codegen consumers follow in later slices
+**Status:** Accepted; grammar parsing and formatting and the `GOIMPORT` codegen consumer are implemented, the `LAYOUT` codegen consumer follows in a later slice
 
 ## Context
 
@@ -39,8 +39,11 @@ GOIMPORT { sync, encoding/json }      Go import channel
   `<@Card>`.
 - `COMPONENT ... IMPORT` imports components from a path; `as` creates a
   generator-global alias, consistent with the global component registry.
-- `LAYOUT` and `GOIMPORT` are parsed and reserved; their codegen consumers
-  arrive with the layout-chaining and server-import slices.
+- `LAYOUT` is parsed and reserved; its codegen consumer arrives with the
+  layout-chaining slice.
+- `GOIMPORT` emits allow-listed standard-library imports into the generated
+  route, component, and layout package. Unknown or dynamic package paths fail at
+  `dreego generate`, so type safety is preserved.
 
 The legacy `Component X (..)`, top-level `import "…"`, and
 `from "…" import {..}` forms are rejected at `dreego generate` with a
@@ -54,7 +57,8 @@ migrated in the same series.
 - Component call names are derived from filenames, so a file rename changes the
   callable name.
 - `GOIMPORT` becomes the single channel for generated Go imports, which moves
-  stdlib imports into `<server>` and re-scopes the server-import work.
+  stdlib imports into `<server>` and re-scopes the server-import work to an
+  explicit, allow-listed standard-library set.
 - The migration cost is deliberately paid before v0.1; no compatibility aliases
   are provided.
 - `dreego fmt` preserves legacy header lines verbatim rather than silently
