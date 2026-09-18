@@ -1,4 +1,33 @@
 
+## v0.10.1 - 2026-09-18
+
+- Fix: `dreego fmt` keeps a bare `DREEFILE` line in the header, matching generate
+- Docs: document that fmt collapses duplicate header blank lines
+- Docs: document that fmt stays lenient on legacy headers while generate rejects them
+- Hardening: reject nested or trailing content in DREEFILE brace lists with a source diagnostic
+- Hardening: reject empty or unquoted `GOIMPORT` and `LAYOUT` values
+- Hardening: reject duplicate or conflicting `DREEFILE` and `LAYOUT` directives
+- Chore: remove dead legacy header parsers and formatters
+- Docs: record component aliases as generator-global by design
+- Test: pin that dreegotest generates DREEFILE components via the filename-derived name
+- Docs: scope the future grammar todo legacy-form claim to `_tests/go`
+- Hardening: head dedupe detects `<title>` and meta description case-insensitively
+- Hardening: a non-literal layout head prefix emits a generate diagnostic instead of silently skipping dedupe
+- Chore: use the `ir.HeadPlaceholder` constant instead of hardcoded `{#head}`
+- Docs: record the internal layering and `internal/dreefile` compiler decision, the phase plan, and the corrected dependency rule
+- Docs: decide the shared Markdown home as `internal/md` before the compiler move
+- Fix: a LAYOUT chain longer than one layout fails at `dreego generate` instead of silently dropping the inner layout
+- Test: a layout without `LAYOUT` still renders unchanged
+- Docs: the future grammar todo records multi-level fragment rendering as open work
+- Feat: a layout can declare `LAYOUT "path"` and is wrapped by that layout (explicit layout chaining)
+- Feat: missing `LAYOUT` targets and layout cycles fail at `dreego generate` with a `file:line:col` diagnostic
+- Docs: ADR records the LAYOUT codegen consumer
+- Chore: remove the duplicate `exprKind` and source-position helpers from `internal/transpiler` and use the canonical `internal/transpiler/ir` implementations
+- Chore: drop the pass-through helper wall in `internal/transpiler/codegen_html.go` and call the `ir`, `output`, and `head` packages directly
+- Feat: `GOIMPORT` emits allow-listed standard library imports for `<server>` and component code
+- Test: a server section using `sync.Mutex` compiles
+- Docs: `GOIMPORT` is no longer parsed-and-reserved
+
 ## v0.10.0 - 2026-09-18
 
 - Feat: explicit Dreefile header grammar with `DREEFILE component|layout|page`, `LAYOUT`, `COMPONENT "path" IMPORT { Names, Name as Alias }` and `GOIMPORT { paths }`; `LAYOUT` and `GOIMPORT` are parsed and reserved, their codegen consumers follow in later slices
