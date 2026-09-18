@@ -9,7 +9,7 @@ import (
 func TestTemplateComponentNestedIfElse(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Grade.dreego": `Component Grade (score int)
+		"www/components/Grade.dreego": `DREEFILE component (score int)
 <body class="grade">
 {#if score >= 90}
 A

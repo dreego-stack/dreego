@@ -12,13 +12,15 @@ func componentNameFromPath(path string) (string, error) {
 	if name == base {
 		return "", nil
 	}
-	if !isExportedGoIdentifier(name) {
+	if !IsExportedGoIdentifier(name) {
 		return "", fmt.Errorf("invalid component filename %q: the component name comes from the file name and must be an exported Go identifier (start with an uppercase letter, then letters or digits), for example Card.dreego or ProductCard.dreego", base)
 	}
 	return name, nil
 }
 
-func isExportedGoIdentifier(name string) bool {
+// IsExportedGoIdentifier reports whether name is a valid exported Go
+// identifier, which is the requirement for a DREEFILE component file name.
+func IsExportedGoIdentifier(name string) bool {
 	if name == "" || name[0] < 'A' || name[0] > 'Z' {
 		return false
 	}

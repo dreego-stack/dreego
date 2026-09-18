@@ -34,11 +34,12 @@ func Format(input string) string {
 
 		if !headerDone {
 			switch {
-			case strings.HasPrefix(trimmed, "Component "):
-				headerLines = append(headerLines, formatCompHeader(trimmed))
-				continue
-			case strings.HasPrefix(trimmed, "import "):
-				headerLines = append(headerLines, formatImport(trimmed))
+			case isLegacyHeaderLine(trimmed):
+				end := legacyHeaderEnd(lines, i)
+				for j := i; j <= end; j++ {
+					headerLines = append(headerLines, strings.TrimRight(lines[j], " \t\r"))
+				}
+				i = end
 				continue
 			case strings.HasPrefix(trimmed, "DREEFILE "),
 				strings.HasPrefix(trimmed, "COMPONENT "),
@@ -88,6 +89,37 @@ func Format(input string) string {
 	result.WriteString("\n")
 
 	return result.String()
+}
+
+// isLegacyHeaderLine reports whether trimmed is one of the removed header forms
+// (Component ..., bare import ..., from ... import {...}). Format leaves these
+// lines untouched instead of normalizing them, so a legacy file is never
+// silently reformatted into something the generate error cannot explain.
+func isLegacyHeaderLine(trimmed string) bool {
+	return trimmed == "Component" || strings.HasPrefix(trimmed, "Component ") ||
+		trimmed == "import" || strings.HasPrefix(trimmed, "import ") ||
+		strings.HasPrefix(trimmed, "from ")
+}
+
+// legacyHeaderEnd returns the last line index belonging to a legacy header
+// block. A single-line form returns start; a legacy from-import brace block is
+// kept whole so its names are not moved into the body. A block that never
+// closes or that reaches a section line falls back to the start line.
+func legacyHeaderEnd(lines []string, start int) int {
+	if !strings.Contains(lines[start], "{") {
+		return start
+	}
+	depth := 0
+	for j := start; j < len(lines); j++ {
+		if j > start && strings.HasPrefix(strings.TrimSpace(lines[j]), "<") {
+			return start
+		}
+		depth += braceDelta(lines[j])
+		if depth <= 0 {
+			return j
+		}
+	}
+	return start
 }
 
 // directiveBlockEnd returns the index of the line that closes a brace block

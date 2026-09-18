@@ -9,7 +9,7 @@ import (
 func TestBugDivInSlot(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": `Component Card ()
+		"www/components/Card.dreego": `DREEFILE component ()
 <body><article>{#slot}</article></body>`,
 		"www/routes/+page.dreego": `<body><@Card><div class="inner">hi</div></@Card></body>`,
 	})

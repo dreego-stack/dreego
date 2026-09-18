@@ -179,21 +179,44 @@ func TestDreefileGrammarFmtUnbalancedDirectiveKeepsBody(t *testing.T) {
 	}
 }
 
-func TestDreefileGrammarLegacyForms(t *testing.T) {
+func TestDreefileGrammarLegacyFormsRejected(t *testing.T) {
 	t.Parallel()
-	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Legacy.dreego": `Component Legacy (name string)
-<body><p>legacy {{ name }}</p></body>`,
-		"www/routes/+page.dreego": `from "www/components" import {
-	Legacy,
-}
-<body><@Legacy name="kept"/></body>`,
-	})
-	code, body := c.Get(t, "/")
-	if code != 200 {
-		t.Fatalf("status = %d, want 200", code)
+	cases := []struct {
+		name string
+		src  string
+		want string
+	}{
+		{
+			name: "component line",
+			src:  "Component Legacy (name string)\n<body><p>x</p></body>",
+			want: "DREEFILE component",
+		},
+		{
+			name: "bare import",
+			src:  "import dreego github.com/dreego-stack/dreego\n<body><p>x</p></body>",
+			want: "GOIMPORT",
+		},
+		{
+			name: "from import",
+			src:  "from \"www/components\" import {\n\tLegacy,\n}\n<body><p>x</p></body>",
+			want: "COMPONENT",
+		},
 	}
-	if !strings.Contains(body, "<p>legacy kept</p>") {
-		t.Fatalf("expected legacy component rendered, got: %s", body)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			dir := dreegotest.ProjectDir(t, map[string]string{
+				"www/routes/+page.dreego": tc.src,
+			})
+			out, err := dreegotest.RunCLI(t, dir, "generate")
+			if err == nil {
+				t.Fatalf("generate accepted legacy header form %q:\n%s", tc.src, out)
+			}
+			for _, want := range []string{"+page.dreego", "1:1:", tc.want} {
+				if !strings.Contains(out, want) {
+					t.Fatalf("diagnostic must contain %q, got:\n%s", want, out)
+				}
+			}
+		})
 	}
 }

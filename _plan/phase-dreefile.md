@@ -31,16 +31,17 @@ GOIMPORT { sync, encoding/json }           explicit Go import channel
 
 A component's name comes from its **filename**: `Card.dreego` becomes `<@Card>`.
 Props stay on the `DREEFILE` line. `COMPONENT` imports components from a path
-with optional aliases (`Card as ProductCard`). `GOIMPORT` is the only channel
-that injects Go imports into generated code.
+with optional aliases (`Card as ProductCard`). `GOIMPORT` is the designated
+channel for Go imports; it is parsed and reserved, and codegen consumption
+arrives with the server-import slice.
 
 ## Locked decisions
 
 These are decided. The slices implement them; they do not reopen them.
 
-1. `DREEFILE` replaces the current `Component` header line. The component name
+1. `DREEFILE` replaces the legacy `Component` header line. The component name
    comes from the filename (`Card.dreego` -> `<@Card>`); props live on the
-   `DREEFILE` line.
+   `DREEFILE` line. Landed.
 2. Local versus module imports keep the existing dot heuristic. `COMPONENT` does
    not rework local-vs-external resolution; the heuristic in
    `internal/transpiler/generate_components.go:141-169` stays until a later,
@@ -60,12 +61,18 @@ These are decided. The slices implement them; they do not reopen them.
 
 ## Current state
 
-The grammar has no representation in the transpiler today. The relevant
-anchors:
+The grammar keywords are parsed, formatted, and enforced: `DREEFILE`,
+`LAYOUT`, `COMPONENT ... IMPORT`, and `GOIMPORT` are understood by the lexer
+and `dreego fmt`, the legacy `Component` / `import` / `from` forms are generate
+errors, and the repository `.dreego` files and public documentation are
+migrated. `LAYOUT` and `GOIMPORT` are stored on the file but have no codegen
+consumer yet; the anchors below describe the pre-grammar baseline that the
+remaining slices change.
 
-- `internal/transpiler/lexer/lexer_header.go:9-50` — `ParseHeader` is a
-  prefix-line loop that accepts only `Component `, `import `, and `from `;
-  every other line becomes body. New keywords must be parsed here.
+- `internal/transpiler/lexer/lexer_header.go` — `ParseFileHeaderStrict` parses
+  `DREEFILE`, `LAYOUT`, `COMPONENT ... IMPORT`, and `GOIMPORT`, and returns a
+  `file:line:col` error for the legacy `Component` / `import` / `from` forms.
+  Done; the remaining slices add codegen consumers, not parsing.
 - `internal/transpiler/discovery.go:57-60` — `isComponentsDir`; and
   `internal/transpiler/discovery.go:62-65` — `isLayoutsDir`. Both decide file
   kind by directory name, which is exactly the magic the `DREEFILE` line
@@ -73,10 +80,9 @@ anchors:
 - `internal/transpiler/generate_components.go:141-169` — `importedComponentPaths`
   walks only `root/routes`; the local-vs-module split is the dot heuristic at
   `:161` (`strings.Contains(imp.Path, ".")`). Locked decision 2 keeps this.
-- `internal/transpiler/fmt.go:24-46` — `Format` moves every non-`Component` /
-  non-`import` header line into the body. It **must** learn `DREEFILE`,
-  `LAYOUT`, `COMPONENT`, and `GOIMPORT`, or `dreego fmt` will corrupt every new
-  header.
+- `internal/transpiler/fmt.go` — `Format` knows all four header keywords and
+  keeps legacy header lines verbatim (so `dreego fmt` does not rewrite or
+  corrupt a file that generation will reject). Done.
 - `internal/transpiler/html/output/templ.go:80-124` — layout call and head
   merge. The runtime title/meta dedupe at `:94-112` is gated by
   `layout.File.Head != nil`, and `File.Head` is set only for a root-level
@@ -137,8 +143,9 @@ One pull request per slice, in this order. Slice 1 is mandatory first.
 2. **Grammar and fmt support.** Parse and emit `DREEFILE` (component / layout /
    page), `LAYOUT`, `COMPONENT ... IMPORT { ... }`, and `GOIMPORT` in
    `lexer/lexer_header.go:9-50`; teach `internal/transpiler/fmt.go:24-46` the
-   same keywords; turn `import "…"` into a generate error with a migration
-   message. Component name comes from the filename.
+   same keywords; turn `Component`, `import "…"`, and `from "…" import` into
+   generate errors with a migration message. Component name comes from the
+   filename. **Landed.**
 3. **Layout chaining with cycle detection.** Allow a layout to declare
    `LAYOUT` and be selected by another layout; reject cycles and missing targets
    with a source diagnostic. This makes the head-composition rule from the

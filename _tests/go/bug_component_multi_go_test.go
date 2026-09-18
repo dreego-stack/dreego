@@ -9,7 +9,7 @@ import (
 func TestBugComponentMultiGo(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/components/Greet.dreego": `Component Greet (name string)
+		"www/components/Greet.dreego": `DREEFILE component (name string)
 <server>greeting := "hello"</server>
 <server>msg := greeting + " world"</server>
 <body>{{ msg }} {{ name }}</body>`,

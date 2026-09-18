@@ -55,7 +55,7 @@ func TestCompTextWithAttrsLeavesScriptStyleBodiesUntouched(t *testing.T) {
 // (1) keep a <script>/<style> body literal, (2) still resolve a quoted attribute
 // placeholder like href="{{ url }}", and (3) produce syntactically valid Go.
 func TestGenerateComponentStatefulGenerator(t *testing.T) {
-	src := `Component Card (x string, url string)
+	src := `DREEFILE component (x string, url string)
 
 <body>
     <script>const s = "literal {x}";</script>
@@ -103,8 +103,9 @@ func TestGenerateComponentStatefulGenerator(t *testing.T) {
 // get NO fallback — an explicit false/0 is a valid value and must never be
 // overwritten, so their defaults are not supported (caller must pass the value).
 func TestGenerateComponentAppliesPropDefaults(t *testing.T) {
-	src := `Component Badge (title string = "Hi", count int = 5, active bool = true)`
+	src := `DREEFILE component (title string = "Hi", count int = 5, active bool = true)`
 	comp, _, body := ParseHeader(src)
+	comp.Name = "Badge"
 	if len(comp.Props) != 3 {
 		t.Fatalf("expected 3 props, got %+v", comp.Props)
 	}
@@ -136,8 +137,9 @@ func TestGenerateComponentAppliesPropDefaults(t *testing.T) {
 // An explicitly passed false must never be overwritten by a bool default: the
 // generated component must not contain a zero-fallback for bool props.
 func TestGenerateComponentBoolDefaultNotApplied(t *testing.T) {
-	src := `Component Toggle (active bool = true)`
+	src := `DREEFILE component (active bool = true)`
 	comp, _, body := ParseHeader(src)
+	comp.Name = "Toggle"
 	file := parseFile(t, body)
 	file.Component = comp
 
@@ -154,7 +156,7 @@ func TestGenerateComponentBoolDefaultNotApplied(t *testing.T) {
 // section into the exported core call, so a component using the stdlib syntax
 // emits valid Go.
 func TestGenerateComponentTranslatesMdtohtml(t *testing.T) {
-	src := `Component Post (content string)
+	src := `DREEFILE component (content string)
 
 <server>
     html, err := dreego.mdtohtml(content)
@@ -168,6 +170,7 @@ func TestGenerateComponentTranslatesMdtohtml(t *testing.T) {
 </body>
 `
 	comp, _, body := ParseHeader(src)
+	comp.Name = "Post"
 	file := parseFile(t, body)
 	file.Component = comp
 

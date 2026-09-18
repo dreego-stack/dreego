@@ -30,7 +30,7 @@ func TestErrorPropagationGeneric500NoDisclosure(t *testing.T) {
 func TestErrorPropagationComponentRenderFailure500(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Boom.dreego": `Component Boom ()
+		"www/components/Boom.dreego": `DREEFILE component ()
 <server>
     panic("component render failure")
 </server>

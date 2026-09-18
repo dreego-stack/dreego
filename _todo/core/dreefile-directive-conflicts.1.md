@@ -3,6 +3,6 @@
 - Area: compiler
 - Phase: Dreefile grammar
 - Goal: reject contradictory or duplicate kind directives in a file header.
-- Gap: `ParseFileHeaderStrict` (`internal/transpiler/lexer/lexer_header.go:14-93`) applies `DREEFILE` (`:23-29`), `LAYOUT` (`:32-36`) and the legacy `Component` line (`:56-64`) top down without conflict detection; `DREEFILE layout` plus a later legacy `Component X (..)` silently yields `KindComponent` with `Layout` still set, and two `LAYOUT` lines overwrite each other.
+- Gap: `ParseFileHeaderStrict` applies `DREEFILE` and `LAYOUT` top down without conflict detection; two `LAYOUT` lines overwrite each other silently, and a `DREEFILE` kind plus another `DREEFILE` kind is not rejected. The legacy `Component` line is no longer part of this: it now returns a hard legacy-header error before a conflict can form.
 - Acceptance: conflicting directives fail at generate with `file:line:col`.
 - Depends on: nothing.

@@ -10,8 +10,8 @@ import (
 func TestBugNestedNonSelfClosingComponentRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Child.dreego":  "Component Child ()\n<body><section>{#slot}</section></body>",
-		"www/components/Parent.dreego": "Component Parent ()\n<body><@Child><strong>inside</strong></@Child></body>",
+		"www/components/Child.dreego":  "DREEFILE component ()\n<body><section>{#slot}</section></body>",
+		"www/components/Parent.dreego": "DREEFILE component ()\n<body><@Child><strong>inside</strong></@Child></body>",
 		"www/routes/+page.dreego":      "<body><@Parent/></body>",
 	})
 	_, body := c.Get(t, "/")
@@ -23,8 +23,8 @@ func TestBugNestedNonSelfClosingComponentRenders(t *testing.T) {
 func TestBugNestedSelfClosingComponentRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Child.dreego":  "Component Child ()\n<body><strong>child</strong></body>",
-		"www/components/Parent.dreego": "Component Parent ()\n<body><@Child/></body>",
+		"www/components/Child.dreego":  "DREEFILE component ()\n<body><strong>child</strong></body>",
+		"www/components/Parent.dreego": "DREEFILE component ()\n<body><@Child/></body>",
 		"www/routes/+page.dreego":      "<body><@Parent/></body>",
 	})
 	_, body := c.Get(t, "/")
