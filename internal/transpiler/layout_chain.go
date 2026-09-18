@@ -5,6 +5,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 // buildLayoutIndex maps normalised layout paths to their entries. Each file is
@@ -80,7 +82,7 @@ func layoutDeclPosition(file *File, declared string) string {
 		return "?:?"
 	}
 	if idx := strings.Index(file.SourceContent, `"`+declared+`"`); idx >= 0 {
-		return sourceLocation(file.SourceContent, idx)
+		return ir.SourceLocation(file.SourceContent, idx)
 	}
 	return "?:?"
 }

@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 var update = flag.Bool("update", false, "rewrite golden fixtures with the current generator output")
@@ -23,7 +25,7 @@ func parseFile(t *testing.T, src string) *File {
 		t.Fatalf("parse: %v", err)
 	}
 	if file.Body != nil {
-		setSourceText(file.Body.Nodes, src)
+		ir.SetSourceText(file.Body.Nodes, src)
 	}
 	return file
 }

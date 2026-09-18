@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 type Diagnostic struct {
@@ -91,7 +93,7 @@ func checkImgAlt(n *TemplateNode, diags *[]Diagnostic) {
 		attrs := n.Content[m[2]:m[3]]
 		if !a11yHasAttr(attrs, "alt") {
 			pos := n.Pos + m[0]
-			line, col := posToLineCol(n.SourceText, pos)
+			line, col := ir.PosToLineCol(n.SourceText, pos)
 			*diags = append(*diags, Diagnostic{
 				File:  n.Source,
 				Line:  line,
@@ -118,7 +120,7 @@ func checkInputLabel(n *TemplateNode, labelForIDs map[string]bool, diags *[]Diag
 			continue
 		}
 		pos := n.Pos + m[0]
-		line, col := posToLineCol(n.SourceText, pos)
+		line, col := ir.PosToLineCol(n.SourceText, pos)
 		name := a11yAttrValue(full, "name")
 		*diags = append(*diags, Diagnostic{
 			File:  n.Source,

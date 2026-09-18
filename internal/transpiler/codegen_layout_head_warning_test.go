@@ -3,11 +3,13 @@ package transpiler
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func TestLayoutHeadDedupeWarningOnNonLiteralPrefix(t *testing.T) {
 	file := parseFile(t, "<body>\n<html>\n<head>\n[[ site.head ]]\n{#head}\n<title>Site</title>\n</head>\n<body>{#slot}</body>\n</html>\n</body>\n")
-	setNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
+	ir.SetNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
 	file.SourcePath = "www/layouts/default.dreego"
 
 	warning, ok := layoutHeadDedupeWarning(file)
@@ -23,7 +25,7 @@ func TestLayoutHeadDedupeWarningOnNonLiteralPrefix(t *testing.T) {
 
 func TestLayoutHeadDedupeWarningLiteralPrefixSilent(t *testing.T) {
 	file := parseFile(t, "<body>\n<html>\n<head>\n<title>Site</title>\n{#head}\n</head>\n<body>{#slot}</body>\n</html>\n</body>\n")
-	setNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
+	ir.SetNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
 
 	if _, ok := layoutHeadDedupeWarning(file); ok {
 		t.Fatal("literal layout head must not emit a dedupe diagnostic")
@@ -32,7 +34,7 @@ func TestLayoutHeadDedupeWarningLiteralPrefixSilent(t *testing.T) {
 
 func TestLayoutHeadDedupeWarningWithoutDedupeTagSilent(t *testing.T) {
 	file := parseFile(t, "<body>\n<html>\n<head>\n[[ site.head ]]\n{#head}\n</head>\n<body>{#slot}</body>\n</html>\n</body>\n")
-	setNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
+	ir.SetNodeSource(file.Body.Nodes, "www/layouts/default.dreego", 0)
 
 	if _, ok := layoutHeadDedupeWarning(file); ok {
 		t.Fatal("layout without a dedupe tag must not emit a diagnostic")
