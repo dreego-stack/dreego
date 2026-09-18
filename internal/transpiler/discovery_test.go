@@ -98,7 +98,7 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 		"routes/users/[id]/index.dreego": "<body>user</body>",
 		"routes/(auth)/login.dreego":     "<body>login</body>",
 	})
-	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
+	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +116,7 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 		"routes/about.dreego":        "<body>one</body>",
 		"routes/(auth)/about.dreego": "<body>two</body>",
 	})
-	_, _, _, err = scanRoutes(NewGenerator(), duplicateRoot, map[string]*layoutEntry{})
+	_, _, _, err = scanRoutes(NewGenerator(), duplicateRoot, map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err == nil || !strings.Contains(err.Error(), "about.dreego") {
 		t.Fatalf("expected duplicate source paths in error, got %v", err)
 	}
@@ -125,7 +125,7 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 		"routes/+page.dreego": "<body>plus page</body>",
 		"routes/index.dreego": "<body>index</body>",
 	})
-	_, _, _, err = scanRoutes(NewGenerator(), indexConflict, map[string]*layoutEntry{})
+	_, _, _, err = scanRoutes(NewGenerator(), indexConflict, map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err == nil || !strings.Contains(err.Error(), "duplicate route") {
 		t.Fatalf("expected duplicate route error for +page.dreego + index.dreego, got %v", err)
 	}
@@ -135,7 +135,7 @@ func TestNamedRouteFilesDefaultToGet(t *testing.T) {
 	root := writeTestProject(t, map[string]string{
 		"routes/profile.dreego": "<body>named route</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatal(err)
 	}
