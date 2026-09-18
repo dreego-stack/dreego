@@ -43,18 +43,41 @@ func TestLayoutChainCycleFailsGenerate(t *testing.T) {
 	}
 }
 
-func TestLayoutChainValidRendersOutermost(t *testing.T) {
+func TestLayoutChainNestedFailsGenerate(t *testing.T) {
 	t.Parallel()
-	c := dreegotest.Serve(t, map[string]string{
+	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/layouts/default.dreego":             "<body><html><body><nav>Base</nav>{#slot}</body></html></body>",
 		"www/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
 		"www/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
 	})
-	code, body := c.Get(t, "/admin")
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err == nil {
+		t.Fatalf("generate accepted a multi-level layout chain:\n%s", out)
+	}
+	for _, want := range []string{
+		"www/routes/admin/layouts/layout.dreego",
+		"3:8",
+		"www/layouts/default.dreego",
+		"not implemented",
+		"inline",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("diagnostic must contain %q, got:\n%s", want, out)
+		}
+	}
+}
+
+func TestLayoutWithoutDeclarationRenders(t *testing.T) {
+	t.Parallel()
+	c := dreegotest.Serve(t, map[string]string{
+		"www/layouts/default.dreego": "<body><html><body><nav>Base</nav>{#slot}</body></html></body>",
+		"www/routes/+page.dreego":    "<body><p>Home page</p></body>",
+	})
+	code, body := c.Get(t, "/")
 	if code != 200 {
 		t.Fatalf("status = %d, want 200", code)
 	}
-	for _, want := range []string{"<nav>Base</nav>", "Admin page"} {
+	for _, want := range []string{"<nav>Base</nav>", "Home page"} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("response missing %q, got: %s", want, body)
 		}
