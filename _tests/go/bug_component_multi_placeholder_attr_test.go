@@ -9,7 +9,7 @@ import (
 func TestBugComponentMultiPlaceholderAttr(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/components/Card.dreego": `Component Card (url string)
+		"www/components/Card.dreego": `DREEFILE component (url string)
 <body><a href="{{ url }}">go</a></body>`,
 		"www/routes/+page.dreego": `<server>left := "x"; right := "y"</server>
 <body><@Card url={left + "-" + right}/></body>`,

@@ -19,7 +19,7 @@ func TestBugTextBeforeSection(t *testing.T) {
 func TestBugRootComponentCallRejected(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"www/components/Card.dreego": "Component Card ()\n<body>Card</body>",
+		"www/components/Card.dreego": "DREEFILE component ()\n<body>Card</body>",
 		"www/routes/+page.dreego":    `<@Card />`,
 	})
 }

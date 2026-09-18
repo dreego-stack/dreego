@@ -47,7 +47,10 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 				return fmt.Errorf("error reading layout %s: %w", full, readErr)
 			}
 			raw := string(data)
-			_, imports, body := ParseHeader(raw)
+			header, body, headerErr := ParseFileHeaderStrict(raw)
+			if headerErr != nil {
+				return fmt.Errorf("%s:%w", full, headerErr)
+			}
 			tokens, lexErr := Lex(body)
 			if lexErr != nil {
 				return fmt.Errorf("error lexing layout %s: %w", full, lexErr)
@@ -57,7 +60,10 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 				return fmt.Errorf("error parsing layout %s: %w", full, parseErr)
 			}
 			if f != nil {
-				f.Imports = imports
+				f.Imports = header.Imports
+				f.Kind = header.Kind
+				f.Layout = header.Layout
+				f.GoImports = header.GoImports
 				f.SourceContent = raw
 				f.SourcePath = full
 				bodyOffset := len(raw) - len(body)

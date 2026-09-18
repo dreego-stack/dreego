@@ -10,8 +10,8 @@ import (
 func TestComponentForwardReferenceBindsPropsByName(t *testing.T) {
 	t.Parallel()
 	generated := dreegotest.Build(t, map[string]string{
-		"www/components/Alpha.dreego": "Component Alpha ()\n<body><@Zulu second=\"B\" first=\"A\"/></body>",
-		"www/components/Zulu.dreego":  "Component Zulu (first string, second string)\n<body><p>{{ first }}{{ second }}</p></body>",
+		"www/components/Alpha.dreego": "DREEFILE component ()\n<body><@Zulu second=\"B\" first=\"A\"/></body>",
+		"www/components/Zulu.dreego":  "DREEFILE component (first string, second string)\n<body><p>{{ first }}{{ second }}</p></body>",
 		"www/routes/+page.dreego":     `<body><@Alpha/></body>`,
 	})
 	components := generated["www/components/dree.go"]

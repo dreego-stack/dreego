@@ -1,4 +1,4 @@
-Component Card (title string, text string)
+DREEFILE component (title string, text string)
 
 <body>
     <article class="card">

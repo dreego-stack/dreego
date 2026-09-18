@@ -22,47 +22,139 @@ var sectionPatterns = map[string]*regexp.Regexp{
 }
 
 func Format(input string) string {
+	input = strings.ReplaceAll(input, "\r\n", "\n")
 	lines := strings.Split(input, "\n")
 	var headerLines []string
 	var remaining []string
 	headerDone := false
 
-	for _, line := range lines {
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
 		trimmed := strings.TrimSpace(line)
-		if !headerDone && strings.HasPrefix(trimmed, "Component ") {
-			headerLines = append(headerLines, formatCompHeader(trimmed))
-			continue
+
+		if !headerDone {
+			switch {
+			case isLegacyHeaderLine(trimmed):
+				end := legacyHeaderEnd(lines, i)
+				for j := i; j <= end; j++ {
+					headerLines = append(headerLines, strings.TrimRight(lines[j], " \t\r"))
+				}
+				i = end
+				continue
+			case strings.HasPrefix(trimmed, "DREEFILE "),
+				strings.HasPrefix(trimmed, "COMPONENT "),
+				strings.HasPrefix(trimmed, "GOIMPORT"):
+				if end := directiveBlockEnd(lines, i); end > i {
+					for j := i; j <= end; j++ {
+						headerLines = append(headerLines, strings.TrimRight(lines[j], " \t\r"))
+					}
+					i = end
+					continue
+				}
+				headerLines = append(headerLines, trimmed)
+				continue
+			case strings.HasPrefix(trimmed, "LAYOUT "):
+				headerLines = append(headerLines, formatLayoutLine(trimmed))
+				continue
+			case trimmed == "":
+				headerLines = append(headerLines, "")
+				continue
+			}
 		}
-		if !headerDone && strings.HasPrefix(trimmed, "import ") {
-			headerLines = append(headerLines, formatImport(trimmed))
-			continue
-		}
-		if !headerDone && trimmed == "" {
-			headerLines = append(headerLines, "")
-			continue
-		}
+
 		headerDone = true
 		remaining = append(remaining, line)
 	}
 
 	body := strings.Join(remaining, "\n")
 	body = formatSections(body)
-	body = strings.TrimRight(body, " \t")
+	body = strings.TrimRight(body, " \t\r")
 	body = strings.TrimLeft(body, "\n")
 	body = multiBlank.ReplaceAllString(body, "\n\n")
 
-	var result strings.Builder
+	var header strings.Builder
 	for _, h := range headerLines {
-		result.WriteString(h)
-		result.WriteString("\n")
+		header.WriteString(h)
+		header.WriteString("\n")
 	}
-	if len(headerLines) > 0 {
-		result.WriteString("\n")
+	headerText := multiBlank.ReplaceAllString(header.String(), "\n\n")
+	headerText = strings.Trim(headerText, "\n")
+
+	var result strings.Builder
+	if headerText != "" {
+		result.WriteString(headerText)
+		result.WriteString("\n\n")
 	}
 	result.WriteString(body)
 	result.WriteString("\n")
 
 	return result.String()
+}
+
+// isLegacyHeaderLine reports whether trimmed is one of the removed header forms
+// (Component ..., bare import ..., from ... import {...}). Format leaves these
+// lines untouched instead of normalizing them, so a legacy file is never
+// silently reformatted into something the generate error cannot explain.
+func isLegacyHeaderLine(trimmed string) bool {
+	return trimmed == "Component" || strings.HasPrefix(trimmed, "Component ") ||
+		trimmed == "import" || strings.HasPrefix(trimmed, "import ") ||
+		strings.HasPrefix(trimmed, "from ")
+}
+
+// legacyHeaderEnd returns the last line index belonging to a legacy header
+// block. A single-line form returns start; a legacy from-import brace block is
+// kept whole so its names are not moved into the body. A block that never
+// closes or that reaches a section line falls back to the start line.
+func legacyHeaderEnd(lines []string, start int) int {
+	if !strings.Contains(lines[start], "{") {
+		return start
+	}
+	depth := 0
+	for j := start; j < len(lines); j++ {
+		if j > start && strings.HasPrefix(strings.TrimSpace(lines[j]), "<") {
+			return start
+		}
+		depth += braceDelta(lines[j])
+		if depth <= 0 {
+			return j
+		}
+	}
+	return start
+}
+
+// directiveBlockEnd returns the index of the line that closes a brace block
+// opened by the directive at start, or -1 when the first line has no opening
+// brace, the block never closes, or a section line is reached first. A
+// non-negative result is always > start only for block directives; inline
+// directives return start. Callers fall back to a single header line when the
+// block does not close, so an unbalanced directive can never swallow the body.
+func directiveBlockEnd(lines []string, start int) int {
+	if !strings.Contains(lines[start], "{") {
+		return -1
+	}
+	depth := 0
+	for j := start; j < len(lines); j++ {
+		if j > start && strings.HasPrefix(strings.TrimSpace(lines[j]), "<") {
+			return -1
+		}
+		depth += braceDelta(lines[j])
+		if depth <= 0 {
+			return j
+		}
+	}
+	return -1
+}
+
+func braceDelta(line string) int {
+	return strings.Count(line, "{") - strings.Count(line, "}")
+}
+
+func formatLayoutLine(line string) string {
+	path := strings.TrimSpace(strings.TrimPrefix(line, "LAYOUT "))
+	if len(path) >= 2 && path[0] == '"' && path[len(path)-1] == '"' {
+		return `LAYOUT "` + path[1:len(path)-1] + `"`
+	}
+	return line
 }
 
 func formatCompHeader(line string) string {

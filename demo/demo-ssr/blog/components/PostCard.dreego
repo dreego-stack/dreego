@@ -1,4 +1,4 @@
-Component PostCard (title string, slug string, date string, excerpt string)
+DREEFILE component (title string, slug string, date string, excerpt string)
 
 <body>
     <a href="/blog/posts/{{ slug }}" class="group block rounded-3xl border border-slate-200 bg-white p-7 transition hover:-translate-y-1 hover:border-slate-400 hover:shadow-lg">

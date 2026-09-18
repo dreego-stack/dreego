@@ -1,6 +1,10 @@
 package codegen
 
-import "github.com/dreego-stack/dreego/internal/transpiler/ir"
+import (
+	"fmt"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
+)
 
 type State struct {
 	Defs             map[string]*ir.ComponentDef
@@ -10,6 +14,7 @@ type State struct {
 	RootRel          string
 	CompPkgs         map[string]string
 	CompPaths        map[string]string
+	CompAliases      map[string]string
 	Imports          map[string]map[string]string
 	Lua              map[string]bool
 	MessageUses      []MessageUse
@@ -26,6 +31,7 @@ func NewState() *State {
 		Defs:             map[string]*ir.ComponentDef{},
 		CompPkgs:         map[string]string{},
 		CompPaths:        map[string]string{},
+		CompAliases:      map[string]string{},
 		Imports:          map[string]map[string]string{},
 		Lua:              map[string]bool{},
 		MessageUses:      nil,
@@ -52,12 +58,26 @@ func (g *State) RegisterDef(name string, def *ir.ComponentDef) {
 }
 
 func (g *State) LookupDef(name string) *ir.ComponentDef {
+	if alias := g.CompAliases[name]; alias != "" {
+		name = alias
+	}
 	return g.Defs[name]
 }
 
 func (g *State) RegisterCompPkg(name, pkg, relDir string) {
 	g.CompPkgs[name] = pkg
 	g.CompPaths[pkg] = relDir
+}
+
+func (g *State) RegisterCompAlias(alias, target string) error {
+	if alias == "" || alias == target {
+		return nil
+	}
+	if existing, ok := g.CompAliases[alias]; ok && existing != target {
+		return fmt.Errorf("duplicate component alias %s: %s and %s", alias, existing, target)
+	}
+	g.CompAliases[alias] = target
+	return nil
 }
 
 func (g *State) AddImport(pkg, alias, path string) {
@@ -68,6 +88,9 @@ func (g *State) AddImport(pkg, alias, path string) {
 }
 
 func (g *State) Qualify(funcName string) string {
+	if alias := g.CompAliases[funcName]; alias != "" {
+		funcName = alias
+	}
 	pkg := g.CompPkgs[funcName]
 	if pkg == "" || pkg == g.Pkg {
 		return funcName

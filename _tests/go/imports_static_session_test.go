@@ -9,8 +9,8 @@ import (
 func TestImportsBasic(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
-		"www/routes/+page.dreego": `import "www/components/Card"
+		"www/components/Card.dreego": "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
+		"www/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Card }
 <body><@Card title="Imported!"/></body>`,
 	})
 }
@@ -18,7 +18,7 @@ func TestImportsBasic(t *testing.T) {
 func TestImportsMissing(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `import "www/components/Nope"
+		"www/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Nope }
 <body><p>hi</p></body>`,
 	})
 }
@@ -26,8 +26,8 @@ func TestImportsMissing(t *testing.T) {
 func TestImportsMultiFile(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/button/Login.dreego": "Component Login ()\n<body><button>Login</button></body>",
-		"www/routes/+page.dreego": `import "www/components/button"
+		"www/components/button/Login.dreego": "DREEFILE component ()\n<body><button>Login</button></body>",
+		"www/routes/+page.dreego": `COMPONENT "www/components/button" IMPORT { Login }
 <body><@Login/></body>`,
 	})
 }

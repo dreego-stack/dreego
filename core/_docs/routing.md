@@ -3,6 +3,9 @@
 > **Current implementation:** `+page.dreego` and `index.dreego` define a
 > directory URL. Every other `.dreego` filename defines a literal URL segment.
 > Routes support method-specific `<server>` and `<body>` sections.
+>
+> A route file may state its kind explicitly with the `DREEFILE page` header
+> directive; a missing `DREEFILE` line also means page.
 
 Route discovery is restricted to the website root's `routes/` tree. The
 website root is any directory containing `dreego.config.json`. Directories

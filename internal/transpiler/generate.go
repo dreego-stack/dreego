@@ -101,8 +101,15 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		return nil, genStats{}, err
 	}
 
+	if err := collectComponentAliases(gen, root); err != nil {
+		return nil, genStats{}, err
+	}
+
 	compSrcs, compPkgs, err := scanComponents(gen, root)
 	if err != nil {
+		return nil, genStats{}, err
+	}
+	if err := validateComponentAliases(gen); err != nil {
 		return nil, genStats{}, err
 	}
 
@@ -170,6 +177,9 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		stdImports := stdImportsFor(strings.Join(layoutSrcs, ""))
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
+		if layoutNeedsHeadHelpers(layoutSrcs) {
+			layoutOut += headMergeHelpers()
+		}
 		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
 	}
 	gen.Pkg = layoutPkg
@@ -199,6 +209,10 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	files[filepath.Join(root, "dree.go")] = rootOut
 
 	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
+}
+
+func layoutNeedsHeadHelpers(srcs []string) bool {
+	return strings.Contains(strings.Join(srcs, ""), "stripTitleTag(")
 }
 
 func buildImportLine(imports map[string]string, selfPkg string) string {

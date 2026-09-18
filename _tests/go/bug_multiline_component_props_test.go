@@ -9,7 +9,7 @@ import (
 func TestBugMultilineComponentPropsCompile(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string, count int)\n<body><p>{{ title }} {{ count }}</p></body>",
+		"www/components/Card.dreego": "DREEFILE component (title string, count int)\n<body><p>{{ title }} {{ count }}</p></body>",
 		"www/routes/+page.dreego": `<body><@Card
 			title="Hello"
 			count={2}

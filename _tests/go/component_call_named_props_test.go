@@ -10,7 +10,7 @@ import (
 func TestComponentCallNamedPropsOrder(t *testing.T) {
 	t.Parallel()
 	files := map[string]string{
-		"www/components/Greet.dreego": `Component Greet (first string, second string)
+		"www/components/Greet.dreego": `DREEFILE component (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
 		"www/routes/+page.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	}
@@ -23,7 +23,7 @@ func TestComponentCallNamedPropsOrder(t *testing.T) {
 func TestComponentCallMissingProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/Greet.dreego": `Component Greet (first string, second string)
+		"www/components/Greet.dreego": `DREEFILE component (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
 		"www/routes/+page.dreego": `<body><@Greet first="Hello"/></body>`,
 	})
@@ -45,7 +45,7 @@ func TestComponentCallMissingProp(t *testing.T) {
 func TestComponentCallUnknownProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/Greet.dreego": `Component Greet (first string)
+		"www/components/Greet.dreego": `DREEFILE component (first string)
 <body><p>{{ first }}</p></body>`,
 		"www/routes/+page.dreego": `<body><@Greet first="Hello" second="World"/></body>`,
 	})
@@ -67,7 +67,7 @@ func TestComponentCallUnknownProp(t *testing.T) {
 func TestComponentCallDuplicateProp(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/Greet.dreego": `Component Greet (first string)
+		"www/components/Greet.dreego": `DREEFILE component (first string)
 <body><p>{{ first }}</p></body>`,
 		"www/routes/+page.dreego": `<body><@Greet first="Hello" first="Again"/></body>`,
 	})
@@ -89,7 +89,7 @@ func TestComponentCallDuplicateProp(t *testing.T) {
 func TestComponentCallNamedPropsHTTP(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Greet.dreego": `Component Greet (first string, second string)
+		"www/components/Greet.dreego": `DREEFILE component (first string, second string)
 <body><p>{{ first }} {{ second }}</p></body>`,
 		"www/routes/+page.dreego": `<body><@Greet second="World" first="Hello"/></body>`,
 	})

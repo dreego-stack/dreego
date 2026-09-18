@@ -9,7 +9,7 @@ import (
 func TestBugComponentIfEach(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/components/List.dreego": `Component List (items []string)
+		"www/components/List.dreego": `DREEFILE component (items []string)
 <body><ul>
 {#each items as item}
     <li>{{ item }}</li>

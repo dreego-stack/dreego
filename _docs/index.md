@@ -67,6 +67,7 @@ contents or `dreego docs <path>` for a chapter.
 ## Decisions
 
 - [Architecture Decisions](https://github.com/dreego-stack/dreego/tree/main/_docs/decisions) — ADRs (context design, routing, middleware, forms, session, transpiler, ...)
+- [Explicit Dreefile header grammar](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/explicit-dreefile-header-grammar.md) — `DREEFILE`/`LAYOUT`/`COMPONENT`/`GOIMPORT` replace `Component`/`import`/`from`
 
 ## Meta
 

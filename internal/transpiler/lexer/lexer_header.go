@@ -6,35 +6,66 @@ import (
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
-func ParseHeader(input string) (comp *ir.ComponentDef, imports []ir.Import, body string) {
+func ParseFileHeader(input string) (*ir.FileHeader, string) {
+	header, body, _ := ParseFileHeaderStrict(input)
+	return header, body
+}
+
+func ParseFileHeaderStrict(input string) (*ir.FileHeader, string, error) {
+	header := &ir.FileHeader{}
 	lines := strings.Split(input, "\n")
 	i := 0
 
 	for i < len(lines) {
-		trimmed := strings.TrimSpace(lines[i])
+		line := lines[i]
+		trimmed := strings.TrimSpace(line)
 
-		if strings.HasPrefix(trimmed, "Component ") {
-			comp = parseComponentHeader(trimmed)
-			i++
-			continue
-		}
-
-		if strings.HasPrefix(trimmed, "import ") {
-			imp := parseImportLine(trimmed)
-			if imp != nil {
-				imports = append(imports, *imp)
+		if trimmed == "DREEFILE" || strings.HasPrefix(trimmed, "DREEFILE ") {
+			rest := strings.TrimSpace(strings.TrimPrefix(trimmed, "DREEFILE"))
+			if err := applyDreefileLine(header, rest); err != nil {
+				return header, "", &HeaderError{Line: i + 1, Col: strings.Index(line, "DREEFILE") + 1, Err: err}
 			}
 			i++
 			continue
 		}
 
-		if strings.HasPrefix(trimmed, "from ") {
-			imp, consumed := parseFromImport(lines[i:])
+		if strings.HasPrefix(trimmed, "LAYOUT ") {
+			header.Layout = parseLayoutLine(trimmed)
+			i++
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "COMPONENT ") {
+			imp, consumed := parseComponentImport(lines[i:])
 			if imp != nil {
-				imports = append(imports, *imp)
+				header.Imports = append(header.Imports, *imp)
 				i += consumed
 				continue
 			}
+		}
+
+		if strings.HasPrefix(trimmed, "GOIMPORT") {
+			paths, consumed := parseGoImport(lines[i:])
+			if consumed > 0 {
+				header.GoImports = append(header.GoImports, paths...)
+				i += consumed
+				continue
+			}
+		}
+
+		if trimmed == "Component" || strings.HasPrefix(trimmed, "Component ") {
+			return header, "", legacyHeaderError(line, i, "Component",
+				"use DREEFILE component (props); the component name comes from the filename")
+		}
+
+		if trimmed == "import" || strings.HasPrefix(trimmed, "import ") {
+			return header, "", legacyHeaderError(line, i, "import",
+				`use GOIMPORT { path } for Go imports and COMPONENT "path" IMPORT { A } for components`)
+		}
+
+		if strings.HasPrefix(trimmed, "from ") {
+			return header, "", legacyHeaderError(line, i, "from",
+				`use COMPONENT "path" IMPORT { A }`)
 		}
 
 		if trimmed == "" {
@@ -45,8 +76,15 @@ func ParseHeader(input string) (comp *ir.ComponentDef, imports []ir.Import, body
 		break
 	}
 
-	body = strings.Join(lines[i:], "\n")
-	return
+	return header, strings.Join(lines[i:], "\n"), nil
+}
+
+func ParseHeader(input string) (comp *ir.ComponentDef, imports []ir.Import, body string) {
+	header, body := ParseFileHeader(input)
+	if header.Kind == ir.FileKindComponent {
+		comp = &ir.ComponentDef{Name: header.Name, Props: header.Props, Slots: header.Slots}
+	}
+	return comp, header.Imports, body
 }
 
 func parseFromImport(lines []string) (*ir.Import, int) {

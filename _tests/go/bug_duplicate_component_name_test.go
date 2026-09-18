@@ -10,8 +10,8 @@ import (
 func TestBugDuplicateComponentNameFailsGenerate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/a/Card.dreego": "Component Card ()\n<body><p>A</p></body>",
-		"www/components/b/Card.dreego": "Component Card ()\n<body><p>B</p></body>",
+		"www/components/a/Card.dreego": "DREEFILE component ()\n<body><p>A</p></body>",
+		"www/components/b/Card.dreego": "DREEFILE component ()\n<body><p>B</p></body>",
 		"www/routes/+page.dreego":      "<body><@Card/></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")

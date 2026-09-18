@@ -1,0 +1,74 @@
+package ir
+
+import "strings"
+
+const HeadPlaceholder = "{#head}"
+
+// StaticBodyHead locates the first body-level {#head} placeholder and returns
+// the index of the text node carrying it, the literal markup before it and the
+// literal remainder after it on the same node. It reports false when no
+// placeholder exists, a non-text node precedes it, or the prefix contains
+// template syntax that cannot be captured as a single literal.
+func (f *File) StaticBodyHead() (idx int, prefix, after string, ok bool) {
+	if f == nil || f.Body == nil {
+		return -1, "", "", false
+	}
+	nodes := f.Body.Nodes
+	for i := range nodes {
+		if nodes[i].Type != NodeText {
+			return -1, "", "", false
+		}
+		pos := strings.Index(nodes[i].Content, HeadPlaceholder)
+		if pos < 0 {
+			continue
+		}
+		var b strings.Builder
+		for j := 0; j < i; j++ {
+			b.WriteString(nodes[j].Content)
+		}
+		prefix = b.String() + nodes[i].Content[:pos]
+		after = nodes[i].Content[pos+len(HeadPlaceholder):]
+		if strings.Contains(prefix, "{#") || strings.Contains(prefix, "{{") || strings.Contains(prefix, "[[") {
+			return -1, "", "", false
+		}
+		return i, prefix, after, true
+	}
+	return -1, "", "", false
+}
+
+// StaticBodyHeadTail returns the literal markup that follows the {#head}
+// placeholder: the remainder of the placeholder node plus every following text
+// node until a non-text node or embedded template syntax appears. end is the
+// index of the first node that is not part of the captured markup, so callers
+// can skip the consumed nodes. It reports false when the placeholder remainder
+// itself contains template syntax that cannot be captured as a literal.
+func (f *File) StaticBodyHeadTail(idx int, after string) (tail string, end int, ok bool) {
+	if f == nil || f.Body == nil || idx < 0 {
+		return "", -1, false
+	}
+	if strings.Contains(after, "{#") || strings.Contains(after, "{{") || strings.Contains(after, "[[") {
+		return "", -1, false
+	}
+	var b strings.Builder
+	b.WriteString(after)
+	nodes := f.Body.Nodes
+	i := idx + 1
+	for ; i < len(nodes); i++ {
+		if nodes[i].Type != NodeText {
+			break
+		}
+		if strings.Contains(nodes[i].Content, "{#") || strings.Contains(nodes[i].Content, "{{") || strings.Contains(nodes[i].Content, "[[") {
+			break
+		}
+		b.WriteString(nodes[i].Content)
+	}
+	return b.String(), i, true
+}
+
+// HasHeadDedupeTag reports whether the given markup contains a tag whose layout
+// copy a route head may override: a <title> or a meta description.
+func HasHeadDedupeTag(s string) bool {
+	return strings.Contains(s, "<title") ||
+		strings.Contains(s, `name="description"`) ||
+		strings.Contains(s, "name='description'")
+}

@@ -3,6 +3,7 @@ package dreegotest
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // Generate transpiles a .dreego source string to generated Go code using the
-// transpiler pipeline directly (ParseHeader → Lex → Parse → GenerateMethodHandler).
+// transpiler pipeline directly (ParseFileHeaderStrict → Lex → Parse → GenerateMethodHandler).
 // It replaces shell tests that run `dreego generate` and grep the output.
 func Generate(t *testing.T, src string) string {
 	t.Helper()
@@ -28,11 +29,15 @@ func MustGenerate(t *testing.T, src string) (string, error) {
 	return generate(src)
 }
 
-// MustCompile asserts that a .dreego source transpiles without error.
+// MustCompile asserts that a .dreego source transpiles to non-empty Go code.
 func MustCompile(t *testing.T, src string) {
 	t.Helper()
-	if _, err := generate(src); err != nil {
+	out, err := generate(src)
+	if err != nil {
 		t.Fatalf("MustCompile: %v", err)
+	}
+	if out == "" {
+		t.Fatal("MustCompile: generated empty output")
 	}
 }
 
@@ -73,27 +78,36 @@ func MustNotContain(t *testing.T, out, want string) {
 	}
 }
 
-// GenerateComponent transpiles a .dreego component source to generated Go code
-// using the transpiler pipeline directly (ParseHeader → Lex → Parse → GenerateComponent).
-func GenerateComponent(t *testing.T, src string) string {
+// GenerateComponent transpiles a DREEFILE component source to generated Go
+// code. The component name comes from the file name in the real pipeline, so
+// the caller must supply it explicitly; an empty or unusable name is an error.
+func GenerateComponent(t *testing.T, name, src string) string {
 	t.Helper()
-	out, err := generateComponent(src)
+	out, err := generateComponent(name, src)
 	if err != nil {
 		t.Fatalf("GenerateComponent: %v", err)
 	}
 	return out
 }
 
-// MustCompileComponent asserts that a .dreego component source transpiles.
-func MustCompileComponent(t *testing.T, src string) {
+// MustCompileComponent asserts that a DREEFILE component source transpiles to
+// non-empty Go code under the given component name.
+func MustCompileComponent(t *testing.T, name, src string) {
 	t.Helper()
-	if _, err := generateComponent(src); err != nil {
+	out, err := generateComponent(name, src)
+	if err != nil {
 		t.Fatalf("MustCompileComponent: %v", err)
+	}
+	if out == "" {
+		t.Fatal("MustCompileComponent: generated empty output")
 	}
 }
 
 func generate(src string) (string, error) {
-	_, imports, body := transpiler.ParseHeader(src)
+	header, body, err := transpiler.ParseFileHeaderStrict(src)
+	if err != nil {
+		return "", err
+	}
 	tokens, err := transpiler.Lex(body)
 	if err != nil {
 		return "", err
@@ -103,7 +117,10 @@ func generate(src string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	file.Imports = imports
+	file.Imports = header.Imports
+	file.Kind = header.Kind
+	file.Layout = header.Layout
+	file.GoImports = header.GoImports
 	file.SourceContent = src
 	if len(file.Server) == 0 {
 		file.Server = []transpiler.ServerSection{{Method: "GET"}}
@@ -120,21 +137,34 @@ func generate(src string) (string, error) {
 	return out, err
 }
 
-func generateComponent(src string) (string, error) {
-	comp, _, body := transpiler.ParseHeader(src)
-	if comp == nil || comp.Name == "" {
-		return "", nil
+func generateComponent(name, src string) (string, error) {
+	if name == "" {
+		return "", fmt.Errorf("component name is required: the DREEFILE component name comes from the file name")
+	}
+	if !transpiler.IsExportedGoIdentifier(name) {
+		return "", fmt.Errorf("invalid component name %q: must be an exported Go identifier such as Card or ProductCard", name)
+	}
+	header, body, err := transpiler.ParseFileHeaderStrict(src)
+	if err != nil {
+		return "", err
+	}
+	if !header.IsComponent() {
+		return "", fmt.Errorf("source is not a DREEFILE component")
 	}
 	tokens, err := transpiler.Lex(body)
 	if err != nil {
 		return "", err
 	}
-	p := transpiler.NewParser(tokens)
-	file, err := p.Parse()
+	file, err := transpiler.NewParserConcatServer(tokens).Parse()
 	if err != nil {
 		return "", err
 	}
+	comp := &transpiler.ComponentDef{Name: name, Props: header.Props, Slots: header.Slots}
 	file.Component = comp
+	file.Imports = header.Imports
+	file.Kind = header.Kind
+	file.Layout = header.Layout
+	file.GoImports = header.GoImports
 	file.SourceContent = src
 	if len(file.Server) == 0 {
 		file.Server = []transpiler.ServerSection{{Method: ""}}

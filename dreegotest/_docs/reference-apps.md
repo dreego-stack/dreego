@@ -73,10 +73,12 @@ go run .
 
 Teaches the component system:
 
-- `Component ProductCard (name string, price string, inStock bool)` — typed
-  props, `{#if inStock}` branch, scoped `<style>` (emits `data-scope=`)
-- `Component PageShell (title string)` — default slot `{#slot}` wrapping child
-  content
+- `DREEFILE component (name string, price string, inStock bool)` in
+  `www/components/ProductCard.dreego` — typed props, `{#if inStock}` branch,
+  scoped `<style>` (emits `data-scope=`)
+- `DREEFILE component (title string)` in `www/components/PageShell.dreego` —
+  default slot `{#slot}` wrapping child content; the callable name comes from
+  the filename
 - `<@ProductCard name={product.Name} .../>` — expression props from a Go struct
 - `{#each products as product}` — loop over a slice
 - `www/routes/products/[id]/+page.dreego` — dynamic route reusing the same

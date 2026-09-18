@@ -26,9 +26,16 @@ diagnostic naming both files.
 
 ## Syntax
 
+A layout file may declare its kind explicitly with the `DREEFILE layout` header
+directive. The declaration is optional; layouts are still resolved by the
+directory cascade described above, and layout files keep living under
+`www/layouts`.
+
 **`www/layouts/default.dreego`:**
 
 ```html
+DREEFILE layout
+
 <body>
 <!DOCTYPE html>
 <html>
@@ -46,7 +53,8 @@ The layout defines the outer `<html>`/`<head>`/`<body>` skeleton. At codegen tim
 
 ## Route Head Behavior
 
-- **With layout**: the route's `<head>` content (e.g. `<title>{{ doc.Title }}</title>`) is injected into the layout's `{#head}` placeholder. Expressions in the head are resolved and escaped.
+- **With layout**: the route's `<head>` content (e.g. `<title>{{ doc.Title }}</title>`) is injected into the layout's `{#head}` placeholder. Expressions in the head are resolved and escaped. Both layout shapes work: a root-level `<head>` section and a body-level `<body><html><head>…{#head}…</head>…` skeleton.
+- **Route overrides single-value tags**: when the route supplies a `<title>` or `<meta name="description">`, the layout's copy is dropped so exactly one of each survives. Layout titles and descriptions are kept when the route defines none.
 - **Without layout**: the rendered head fragment is emitted before the body
   wrapper. Dreego does not invent an `<html>` document or outer `<head>` element.
 - **No `<head>` in route**: when the route declares no `<head>`, nothing is injected into `{#head}`.

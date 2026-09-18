@@ -5,16 +5,32 @@ Dreego resolves component imports during `dreego generate`. The runtime never re
 Routes can select components from a local website path or a required Go module:
 
 ```dreego
-from "www/components" import {
+COMPONENT "www/components" IMPORT {
     Button,
     Card,
 }
 
-from "github.com/dreego-stack/dreego-ui/components/dreegoui" import {
+COMPONENT "github.com/dreego-stack/dreego-ui/components/dreegoui" IMPORT {
     Navbar,
     PriceCard,
 }
 ```
+
+Each `COMPONENT` directive names a path and lists the component names to import.
+An entry may alias a name with `as`:
+
+```dreego
+COMPONENT "www/components" IMPORT { Card, Card as ProductCard }
+```
+
+The component name is the name of the source `.dreego` file; the alias becomes
+the callable `<@ProductCard>` name. Alias resolution is currently
+generator-global rather than scoped to the declaring file; see
+`_todo/core/dreefile-alias-scope.1.md`.
+
+The legacy `from "<path>" import { ... }` form is rejected at `dreego generate`
+with a `file:line:col` diagnostic pointing to
+`COMPONENT "<path>" IMPORT { ... }`.
 
 The generator resolves the module through the application's `go.mod` and Go module resolution, parses the module's `.dreego` sources, and emits ordinary generated Go files in the application's `www/components` package tree. The source files are not copied into the application and are not loaded at runtime.
 

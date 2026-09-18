@@ -30,9 +30,10 @@ A `.dreego` file is divided into **5 clearly separated sections**:
 4. **`<client>`** — Client-side JavaScript (V1: Vanilla JS)
 5. **`<style>`** — Scoped CSS (automatically with hashes)
 
-Only these five section tags may appear at the file root. `Component` and
-`import` header directives may appear before them. Free text, HTML elements,
-and `<@Component>` calls outside `<body>` are generation errors.
+Only these five section tags may appear at the file root. Dreefile header
+directives (`DREEFILE`, `LAYOUT`, `COMPONENT`, `GOIMPORT`) may appear before
+them. Free text, HTML elements, and `<@Component>` calls outside `<body>` are
+generation errors.
 
 Escaped output uses `{{ expression }}`. Control flow keeps its distinct
 `{#if}`, `{#each}`, and slot syntax. Typed component props use unquoted Go

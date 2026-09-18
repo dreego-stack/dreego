@@ -96,7 +96,7 @@ func TestOutputContextRawOptInPassesThrough(t *testing.T) {
 func TestOutputContextComponentURLRejectsJavascript(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Link.dreego": `Component Link (url string)
+		"www/components/Link.dreego": `DREEFILE component (url string)
 <body><a href="{{ url }}">go</a></body>`,
 		"www/routes/+page.dreego": `<server>u := "javascript:alert(1)"</server>
 <body><@Link url={u}/></body>`,

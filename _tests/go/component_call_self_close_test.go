@@ -10,7 +10,7 @@ import (
 func TestComponentCallSelfCloseNoChildren(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/components/Card.dreego": "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
 		"www/routes/+page.dreego":    `<body><@Card title="Hello"/></body>`,
 	})
 }
@@ -18,7 +18,7 @@ func TestComponentCallSelfCloseNoChildren(t *testing.T) {
 func TestComponentCallDefaultSlotFallback(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/components/Card.dreego": "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
 		"www/routes/+page.dreego":    `<body><@Card title="Hello"></@Card></body>`,
 	})
 }
@@ -26,7 +26,7 @@ func TestComponentCallDefaultSlotFallback(t *testing.T) {
 func TestComponentCallSelfCloseHTTP(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/components/Card.dreego": "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
 		"www/routes/+page.dreego":    `<body><@Card title="Hello"/></body>`,
 	})
 	code, body := c.Get(t, "/")
@@ -43,7 +43,7 @@ func TestComponentCallSelfCloseHTTP(t *testing.T) {
 func TestComponentCallSelfCloseWhitespaceOnly(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Card.dreego": "Component Card (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
+		"www/components/Card.dreego": "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>",
 		"www/routes/+page.dreego":    "<body><@Card title=\"Hello\"/>   \n\t\n</body>",
 	})
 	code, body := c.Get(t, "/")
@@ -61,8 +61,8 @@ func TestComponentCallSelfCloseWhitespaceOnly(t *testing.T) {
 func TestComponentCallSelfCloseNested(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Outer.dreego": "Component Outer ()\n<body><section>{#slot}</section></body>",
-		"www/components/Inner.dreego": "Component Inner ()\n<body><span>inner</span></body>",
+		"www/components/Outer.dreego": "DREEFILE component ()\n<body><section>{#slot}</section></body>",
+		"www/components/Inner.dreego": "DREEFILE component ()\n<body><span>inner</span></body>",
 		"www/routes/+page.dreego":     "<body><@Outer><@Inner/></@Outer></body>",
 	})
 	code, body := c.Get(t, "/")
@@ -77,7 +77,7 @@ func TestComponentCallSelfCloseNested(t *testing.T) {
 func TestComponentCallSelfCloseNamedSlot(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Panel.dreego": "Component Panel ()\n<body><header>{#slot header}{/slot}</header><main>{#slot}</main></body>",
+		"www/components/Panel.dreego": "DREEFILE component ()\n<body><header>{#slot header}{/slot}</header><main>{#slot}</main></body>",
 		"www/routes/+page.dreego":     "<body><@Panel/></body>",
 	})
 	code, body := c.Get(t, "/")

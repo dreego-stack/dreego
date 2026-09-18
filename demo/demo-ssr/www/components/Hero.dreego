@@ -1,4 +1,4 @@
-Component Hero (badge string, title string, subtitle string, cta1 string, cta2 string)
+DREEFILE component (badge string, title string, subtitle string, cta1 string, cta2 string)
 
 <body>
     <main class="pt-28 pb-20 px-6 max-w-4xl mx-auto text-center relative">

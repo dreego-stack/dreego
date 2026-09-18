@@ -38,7 +38,10 @@ func fileRegisteredMethods(file *File) []string {
 
 func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, error) {
 	raw := string(data)
-	_, imports, body := ParseHeader(raw)
+	header, body, err := ParseFileHeaderStrict(raw)
+	if err != nil {
+		return nil, "", fmt.Errorf("%s:%w", fpath, err)
+	}
 	tokens, err := Lex(body)
 	if err != nil {
 		return nil, "", fmt.Errorf("error lexing %s: %w", fpath, err)
@@ -48,7 +51,10 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 	if err != nil {
 		return nil, "", fmt.Errorf("error parsing %s: %w", fpath, err)
 	}
-	file.Imports = imports
+	file.Imports = header.Imports
+	file.Kind = header.Kind
+	file.Layout = header.Layout
+	file.GoImports = header.GoImports
 	file.SourceContent = raw
 	file.SourcePath = fpath
 	bodyOffset := len(raw) - len(body)

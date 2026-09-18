@@ -103,12 +103,12 @@ func TestParseImportLineTooShort(t *testing.T) {
 }
 
 func TestParseHeaderGroupedImports(t *testing.T) {
-	_, imports, body := ParseHeader(`from "www/components" import {
+	_, imports, body := ParseHeader(`COMPONENT "www/components" IMPORT {
     Button,
     Card,
 }
 
-from "github.com/dreego-stack/dreego-ui/components/dreegoui" import {
+COMPONENT "github.com/dreego-stack/dreego-ui/components/dreegoui" IMPORT {
     Navbar,
     PriceCard,
 }

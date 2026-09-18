@@ -22,6 +22,15 @@ type File = ir.File
 type ComponentDef = ir.ComponentDef
 type Prop = ir.Prop
 type Import = ir.Import
+type FileKind = ir.FileKind
+type FileHeader = ir.FileHeader
+
+const (
+	FileKindPage      = ir.FileKindPage
+	FileKindComponent = ir.FileKindComponent
+	FileKindLayout    = ir.FileKindLayout
+)
+
 type HeadSection = ir.HeadSection
 type BodySection = ir.BodySection
 type ClientSection = ir.ClientSection
