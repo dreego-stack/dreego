@@ -9,3 +9,11 @@ func Lex(input string) ([]Token, error) {
 func ParseHeader(input string) (*ComponentDef, []Import, string) {
 	return lex.ParseHeader(input)
 }
+
+func ParseFileHeader(input string) (*FileHeader, string) {
+	return lex.ParseFileHeader(input)
+}
+
+func ParseFileHeaderStrict(input string) (*FileHeader, string, error) {
+	return lex.ParseFileHeaderStrict(input)
+}

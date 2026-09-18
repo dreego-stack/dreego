@@ -197,10 +197,24 @@ func loadComponent(path string) (componentSource, error) {
 		return componentSource{}, fmt.Errorf("error reading component %s: %w", path, err)
 	}
 	raw := string(data)
-	def, _, body := ParseHeader(raw)
-	if def == nil || def.Name == "" {
+	header, body, err := ParseFileHeaderStrict(raw)
+	if err != nil {
+		return componentSource{}, fmt.Errorf("%s:%w", path, err)
+	}
+	if header.Kind != FileKindComponent {
 		return componentSource{}, nil
 	}
+	name := header.Name
+	if header.Name == "" {
+		name, err = componentNameFromPath(path)
+		if err != nil {
+			return componentSource{}, fmt.Errorf("%s: %w", path, err)
+		}
+	}
+	if name == "" {
+		return componentSource{}, nil
+	}
+	def := &ComponentDef{Name: name, Props: header.Props, Slots: header.Slots}
 	tokens, err := Lex(body)
 	if err != nil {
 		return componentSource{}, fmt.Errorf("error lexing component %s: %w", path, err)
@@ -209,6 +223,10 @@ func loadComponent(path string) (componentSource, error) {
 	if err != nil {
 		return componentSource{}, fmt.Errorf("error parsing component %s: %w", path, err)
 	}
+	file.Imports = header.Imports
+	file.Kind = header.Kind
+	file.Layout = header.Layout
+	file.GoImports = header.GoImports
 	prepareComponentFile(file, def, path, raw, len(raw)-len(body))
 	return componentSource{
 		path:      path,
