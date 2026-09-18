@@ -142,8 +142,9 @@ func resolveLayoutForRoute(routeRel string, layouts, index map[string]*layoutEnt
 			if err != nil {
 				return nil, err
 			}
-			// The chain is rendered outermost-first in the next slice; until
-			// then a route is wrapped once by the outermost layout only.
+			if len(chain) > 1 {
+				return nil, layoutChainNestedError(e, chain)
+			}
 			return chain[len(chain)-1], nil
 		}
 	}

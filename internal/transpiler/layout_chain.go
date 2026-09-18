@@ -85,6 +85,23 @@ func layoutDeclPosition(file *File, declared string) string {
 	return "?:?"
 }
 
+func layoutChainNestedError(start *layoutEntry, chain []*layoutEntry) error {
+	names := make([]string, 0, len(chain))
+	for _, e := range chain {
+		names = append(names, e.source)
+	}
+	loc := "?:?"
+	path := ""
+	declared := ""
+	if start != nil {
+		loc = layoutDeclPosition(start.file, start.file.Layout)
+		path = start.source
+		declared = start.file.Layout
+	}
+	return fmt.Errorf("%s:%s: LAYOUT %q resolves to a chain of %d layouts (%s); multi-level layout rendering is not implemented yet, inline the parent markup into the child layout",
+		path, loc, declared, len(chain), strings.Join(names, " -> "))
+}
+
 func layoutChainCycleError(from *layoutEntry, cycle []*layoutEntry, repeated *layoutEntry) error {
 	names := make([]string, 0, len(cycle)+1)
 	for _, e := range cycle {
