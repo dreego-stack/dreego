@@ -96,7 +96,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		generatedI18n = transpileri18n.GoConfig(catalogs, settings.I18n.Detection, settings.I18n.URLStrategy, settings.I18n.Domains, settings.I18n.Fallbacks)
 	}
 
-	layouts, err := discoverLayouts(root)
+	layouts, layoutIndex, err := discoverLayouts(root)
 	if err != nil {
 		return nil, genStats{}, err
 	}
@@ -113,7 +113,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		return nil, genStats{}, err
 	}
 
-	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, root, layouts)
+	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, root, layouts, layoutIndex)
 	if err != nil {
 		return nil, genStats{}, err
 	}

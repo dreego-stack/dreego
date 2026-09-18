@@ -17,7 +17,7 @@ type layoutEntry struct {
 	name   string
 }
 
-func discoverLayouts(root string) (map[string]*layoutEntry, error) {
+func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEntry, error) {
 	entries := map[string]*layoutEntry{}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -85,12 +85,12 @@ func discoverLayouts(root string) (map[string]*layoutEntry, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := detectAmbiguousLayouts(entries); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return entries, nil
+	return entries, buildLayoutIndex(root, entries), nil
 }
 
 func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
@@ -126,17 +126,28 @@ func layoutScopeRel(root, layoutsDir string) string {
 	return rel
 }
 
-func resolveLayoutForRoute(routeRel string, layouts map[string]*layoutEntry) *layoutEntry {
+func resolveLayoutForRoute(routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
 	routeRel = strings.TrimPrefix(routeRel, "/")
 	scopes := cascadeScopes(routeRel)
 	for _, scope := range scopes {
 		for _, name := range []string{"default.dreego", "layout.dreego"} {
-			if e, ok := layouts[scope+":"+name]; ok {
-				return e
+			e, ok := layouts[scope+":"+name]
+			if !ok {
+				continue
 			}
+			if e.file == nil || e.file.Layout == "" {
+				return e, nil
+			}
+			chain, err := resolveLayoutChain(e, index)
+			if err != nil {
+				return nil, err
+			}
+			// The chain is rendered outermost-first in the next slice; until
+			// then a route is wrapped once by the outermost layout only.
+			return chain[len(chain)-1], nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 func cascadeScopes(routeRel string) []string {

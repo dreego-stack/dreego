@@ -14,7 +14,7 @@ type routeDir struct {
 	regs []string
 }
 
-func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
+func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
 	rd := &routeDir{dir: filepath.Join(root, "routes"), pkg: "routes"}
 	routePatterns := map[string]bool{}
 	found := 0
@@ -57,7 +57,10 @@ func scanRoutes(gen *Generator, root string, layouts map[string]*layoutEntry) ([
 				return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath)
 			}
 			pageName := buildPageName(rel)
-			layout := resolveLayoutForRoute(rel, layouts)
+			layout, err := resolveLayoutForRoute(rel, layouts, layoutIndex)
+			if err != nil {
+				return err
+			}
 			data, err := os.ReadFile(fpath)
 			if err != nil {
 				return fmt.Errorf("error reading %s: %w", fpath, err)
