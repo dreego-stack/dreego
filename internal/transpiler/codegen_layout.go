@@ -2,12 +2,16 @@ package transpiler
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func GenerateLayout(gen *Generator, file *File, funcName string) (string, error) {
+	if warning, ok := layoutHeadDedupeWarning(file); ok {
+		fmt.Fprintf(os.Stderr, "warning: %s\n", warning)
+	}
 	var buf strings.Builder
 	buf.WriteString(fmt.Sprintf("func %s(c dreego.RenderContext, content, head string) (string, error) {\n", funcName))
 	buf.WriteString("\tvar b strings.Builder\n\n")
@@ -89,10 +93,10 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 }
 
 func writeHeadDedupe(buf *strings.Builder, varName string) {
-	buf.WriteString(fmt.Sprintf("\tif strings.Contains(head, \"<title\") {\n"))
+	buf.WriteString(fmt.Sprintf("\tif strings.Contains(strings.ToLower(head), \"<title\") {\n"))
 	buf.WriteString(fmt.Sprintf("\t\t%s = stripTitleTag(%s)\n", varName, varName))
 	buf.WriteString("\t}\n")
-	buf.WriteString("\tif strings.Contains(head, `name=\"description\"`) || strings.Contains(head, `name='description'`) {\n")
+	buf.WriteString("\tif strings.Contains(strings.ToLower(head), `name=\"description\"`) || strings.Contains(strings.ToLower(head), `name='description'`) {\n")
 	buf.WriteString(fmt.Sprintf("\t\t%s = stripMetaDescriptionTag(%s)\n", varName, varName))
 	buf.WriteString("\t}\n")
 }
@@ -110,12 +114,12 @@ func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bo
 		}
 		return indent + "b.WriteString(content)\n", nil
 	}
-	if n.Type == ir.NodeText && (strings.Contains(n.Content, "{#head}") || strings.Contains(n.Content, "{#slot}")) {
+	if n.Type == ir.NodeText && (strings.Contains(n.Content, ir.HeadPlaceholder) || strings.Contains(n.Content, "{#slot}")) {
 		parts := splitLayoutText(n.Content)
 		var out strings.Builder
 		for _, p := range parts {
 			switch p {
-			case "{#head}":
+			case ir.HeadPlaceholder:
 				out.WriteString(indent + "b.WriteString(head)\n")
 			case "{#slot}":
 				out.WriteString(indent + "b.WriteString(content)\n")
@@ -131,17 +135,17 @@ func genLayoutNodeState(gen *Generator, n TemplateNode, depth int, inSection *bo
 func splitLayoutText(s string) []string {
 	var result []string
 	for s != "" {
-		headIdx := strings.Index(s, "{#head}")
+		headIdx := strings.Index(s, ir.HeadPlaceholder)
 		slotIdx := strings.Index(s, "{#slot}")
 
 		next := -1
 		nextLen := 0
 		if headIdx >= 0 && (slotIdx < 0 || headIdx <= slotIdx) {
 			next = headIdx
-			nextLen = 7
+			nextLen = len(ir.HeadPlaceholder)
 		} else if slotIdx >= 0 {
 			next = slotIdx
-			nextLen = 7
+			nextLen = len("{#slot}")
 		}
 
 		if next < 0 {

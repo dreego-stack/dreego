@@ -28,12 +28,48 @@ func (f *File) StaticBodyHead() (idx int, prefix, after string, ok bool) {
 		}
 		prefix = b.String() + nodes[i].Content[:pos]
 		after = nodes[i].Content[pos+len(HeadPlaceholder):]
-		if strings.Contains(prefix, "{#") || strings.Contains(prefix, "{{") || strings.Contains(prefix, "[[") {
+		if containsTemplateSyntax(prefix) {
 			return -1, "", "", false
 		}
 		return i, prefix, after, true
 	}
 	return -1, "", "", false
+}
+
+// BodyHeadConflict reports a body-level {#head} placeholder whose preceding
+// head markup cannot be captured as a literal, so runtime head dedupe is
+// disabled for that markup. nodeIndex is the index of the text node carrying
+// the placeholder and reason names the blocking shape. It reports false when no
+// placeholder exists or when the placeholder is preceded by literal markup
+// only.
+func (f *File) BodyHeadConflict() (nodeIndex int, reason string, found bool) {
+	if f == nil || f.Body == nil {
+		return -1, "", false
+	}
+	nodes := f.Body.Nodes
+	placeholderIdx := -1
+	for i := range nodes {
+		if nodes[i].Type == NodeText && strings.Contains(nodes[i].Content, HeadPlaceholder) {
+			placeholderIdx = i
+			break
+		}
+	}
+	if placeholderIdx < 0 {
+		return -1, "", false
+	}
+	if _, _, _, ok := f.StaticBodyHead(); ok {
+		return -1, "", false
+	}
+	for i := 0; i < placeholderIdx; i++ {
+		if nodes[i].Type != NodeText {
+			return placeholderIdx, "a non-text node precedes the " + HeadPlaceholder + " placeholder", true
+		}
+	}
+	return placeholderIdx, "the " + HeadPlaceholder + " prefix contains template syntax that cannot be captured as a literal", true
+}
+
+func containsTemplateSyntax(s string) bool {
+	return strings.Contains(s, "{#") || strings.Contains(s, "{{") || strings.Contains(s, "[[")
 }
 
 // StaticBodyHeadTail returns the literal markup that follows the {#head}
@@ -66,9 +102,11 @@ func (f *File) StaticBodyHeadTail(idx int, after string) (tail string, end int, 
 }
 
 // HasHeadDedupeTag reports whether the given markup contains a tag whose layout
-// copy a route head may override: a <title> or a meta description.
+// copy a route head may override: a <title> or a meta description. HTML is
+// case-insensitive, so the match folds the input before comparing.
 func HasHeadDedupeTag(s string) bool {
-	return strings.Contains(s, "<title") ||
-		strings.Contains(s, `name="description"`) ||
-		strings.Contains(s, "name='description'")
+	lower := strings.ToLower(s)
+	return strings.Contains(lower, "<title") ||
+		strings.Contains(lower, `name="description"`) ||
+		strings.Contains(lower, "name='description'")
 }
