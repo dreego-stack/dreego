@@ -33,7 +33,7 @@ func TestGenTemplHeadMergeDedupesTitle(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(out, `if strings.Contains(pageHead, "<title")`) {
+	if !strings.Contains(out, `if strings.Contains(strings.ToLower(pageHead), "<title")`) {
 		t.Errorf("runtime title dedupe must be emitted, got:\n%s", out)
 	}
 	if !strings.Contains(out, "layoutHead = stripTitleTag(layoutHead)") {
@@ -69,7 +69,7 @@ func TestGenTemplHeadMergeDedupesMetaDescription(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(out, `strings.Contains(pageHead, `+"`name=\"description\"`"+`)`) {
+	if !strings.Contains(out, `strings.Contains(strings.ToLower(pageHead), `+"`name=\"description\"`"+`)`) {
 		t.Errorf("runtime meta description dedupe must be emitted, got:\n%s", out)
 	}
 	if !strings.Contains(out, "layoutHead = stripMetaDescriptionTag(layoutHead)") {
@@ -114,7 +114,7 @@ func TestGenTemplHeadMergeDedupesBodyLevelLayout(t *testing.T) {
 	if !strings.Contains(layoutOut, `<html lang="en">`) {
 		t.Errorf("generated layout must stay self-contained and emit <html>, got:\n%s", layoutOut)
 	}
-	if !strings.Contains(layoutOut, `if strings.Contains(head, "<title")`) {
+	if !strings.Contains(layoutOut, `if strings.Contains(strings.ToLower(head), "<title")`) {
 		t.Errorf("body-level layout must emit the runtime title dedupe, got:\n%s", layoutOut)
 	}
 	if !strings.Contains(layoutOut, "layoutHead = stripTitleTag(layoutHead)") {

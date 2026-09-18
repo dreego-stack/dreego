@@ -98,10 +98,10 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 		headPrefix, headSuffix := SplitHeadPlaceholder(layoutHead)
 		if headPrefix != "" {
 			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", ir.GoLiteral(headPrefix)))
-			buf.WriteString("\tif strings.Contains(pageHead, \"<title\") {\n")
+			buf.WriteString("\tif strings.Contains(strings.ToLower(pageHead), \"<title\") {\n")
 			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
 			buf.WriteString("\t}\n")
-			buf.WriteString("\tif strings.Contains(pageHead, `name=\"description\"`) || strings.Contains(pageHead, `name='description'`) {\n")
+			buf.WriteString("\tif strings.Contains(strings.ToLower(pageHead), `name=\"description\"`) || strings.Contains(strings.ToLower(pageHead), `name='description'`) {\n")
 			buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
 			buf.WriteString("\t}\n")
 			buf.WriteString("\tb.WriteString(layoutHead)\n")
@@ -127,10 +127,10 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 }
 
 func SplitHeadPlaceholder(head string) (prefix, suffix string) {
-	if !strings.Contains(head, "{#head}") {
+	if !strings.Contains(head, ir.HeadPlaceholder) {
 		return head, ""
 	}
-	parts := strings.SplitN(head, "{#head}", 2)
+	parts := strings.SplitN(head, ir.HeadPlaceholder, 2)
 	return parts[0], parts[1]
 }
 
@@ -138,11 +138,11 @@ func HeadMergeHelpers() string {
 	return `
 func stripTitleTag(s string) string {
 	for {
-		open := strings.Index(s, "<title")
+		open := strings.Index(strings.ToLower(s), "<title")
 		if open < 0 {
 			return s
 		}
-		closeIdx := strings.Index(s[open:], "</title>")
+		closeIdx := strings.Index(strings.ToLower(s[open:]), "</title>")
 		if closeIdx < 0 {
 			return s
 		}
@@ -154,7 +154,7 @@ func stripTitleTag(s string) string {
 func stripMetaDescriptionTag(s string) string {
 	offset := 0
 	for {
-		open := strings.Index(s[offset:], "<meta")
+		open := strings.Index(strings.ToLower(s[offset:]), "<meta")
 		if open < 0 {
 			return s
 		}
@@ -164,7 +164,8 @@ func stripMetaDescriptionTag(s string) string {
 			return s
 		}
 		tag := s[open : open+end+1]
-		if strings.Contains(tag, "name=\"description\"") || strings.Contains(tag, "name='description'") {
+		lower := strings.ToLower(tag)
+		if strings.Contains(lower, "name=\"description\"") || strings.Contains(lower, "name='description'") {
 			s = s[:open] + s[open+end+1:]
 			offset = open
 			continue
