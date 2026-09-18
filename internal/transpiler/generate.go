@@ -101,8 +101,15 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		return nil, genStats{}, err
 	}
 
+	if err := collectComponentAliases(gen, root); err != nil {
+		return nil, genStats{}, err
+	}
+
 	compSrcs, compPkgs, err := scanComponents(gen, root)
 	if err != nil {
+		return nil, genStats{}, err
+	}
+	if err := validateComponentAliases(gen); err != nil {
 		return nil, genStats{}, err
 	}
 

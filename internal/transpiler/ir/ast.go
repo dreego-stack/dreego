@@ -57,6 +57,9 @@ type File struct {
 	Style         *StyleSection
 	Component     *ComponentDef
 	Imports       []Import
+	Kind          FileKind
+	Layout        string
+	GoImports     []string
 	FormActions   []string
 	SourceContent string
 	SourcePath    string
@@ -77,9 +80,10 @@ type Prop struct {
 }
 
 type Import struct {
-	Alias string
-	Path  string
-	Names []string
+	Alias   string
+	Path    string
+	Names   []string
+	Aliases map[string]string
 }
 
 type HeadSection struct {
