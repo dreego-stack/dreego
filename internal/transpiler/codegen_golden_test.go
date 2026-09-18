@@ -76,7 +76,7 @@ func TestGoldenSimpleRoute(t *testing.T) {
 
 // Golden for a component with props and a scoped <style> block.
 func TestGoldenComponentWithStyle(t *testing.T) {
-	src := "Component Badge (title string, tone string)\n\n<body class=\"badge\">\n    <span>{{ title }}</span>\n    <em>{{ tone }}</em>\n</body>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
+	src := "DREEFILE component (title string, tone string)\n\n<body class=\"badge\">\n    <span>{{ title }}</span>\n    <em>{{ tone }}</em>\n</body>\n\n<style>\n.badge { font-weight: bold; }\n.badge em { color: #666; }\n</style>\n"
 	_, _, body := ParseHeader(src)
 	file := parseFile(t, body)
 	file.Component = &ComponentDef{

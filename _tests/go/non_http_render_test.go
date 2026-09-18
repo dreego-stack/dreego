@@ -13,7 +13,7 @@ import (
 func TestGeneratedComponentRendersWithoutHTTP(t *testing.T) {
 	t.Parallel()
 	files := map[string]string{
-		"www/components/Badge.dreego": `Component Badge (label string)
+		"www/components/Badge.dreego": `DREEFILE component (label string)
 <body><span class="badge">{{ label }}</span></body>
 <style>.badge { font-weight: bold; }</style>`,
 		"www/routes/+page.dreego": `<head><title>Shop</title></head>

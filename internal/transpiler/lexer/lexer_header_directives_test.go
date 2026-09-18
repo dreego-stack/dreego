@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -147,24 +148,86 @@ func TestParseFileHeaderGoImports(t *testing.T) {
 	}
 }
 
-func TestParseFileHeaderKeepsLegacyForms(t *testing.T) {
-	header, body := ParseFileHeader(`Component Navbar (title string)
-
-from "www/components" import {
-    Button,
+func TestParseFileHeaderRejectsLegacyForms(t *testing.T) {
+	cases := []struct {
+		name string
+		src  string
+		want string
+	}{
+		{
+			name: "component line",
+			src:  "Component Navbar (title string)\n\n<body>x</body>",
+			want: "DREEFILE component",
+		},
+		{
+			name: "bare import",
+			src:  "import dreego github.com/dreego-stack/dreego\n\n<body>x</body>",
+			want: "GOIMPORT",
+		},
+		{
+			name: "from import",
+			src:  "from \"www/components\" import {\n    Button,\n}\n\n<body>x</body>",
+			want: "COMPONENT",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := ParseFileHeaderStrict(tc.src)
+			if err == nil {
+				t.Fatalf("expected a hard error for legacy header %q", tc.src)
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("error must name the replacement %q, got: %v", tc.want, err)
+			}
+		})
+	}
 }
 
-<body><@Button/></body>`)
-	if header.Kind != ir.FileKindComponent {
-		t.Fatalf("expected component kind from legacy Component line, got %v", header.Kind)
+func TestParseFileHeaderLegacyErrorPositionAfterLeadIn(t *testing.T) {
+	cases := []struct {
+		name string
+		src  string
+		line int
+		col  int
+	}{
+		{
+			name: "component after dreefile line",
+			src:  "DREEFILE page\nComponent Foo (title string)\n\n<body>x</body>",
+			line: 2,
+			col:  1,
+		},
+		{
+			name: "from after blank lead-in",
+			src:  "\nfrom \"www/components\" import {\n\tFoo,\n}\n\n<body>x</body>",
+			line: 2,
+			col:  1,
+		},
+		{
+			name: "bare import after blank lead-in",
+			src:  "\nimport \"sync\"\n\n<body>x</body>",
+			line: 2,
+			col:  1,
+		},
+		{
+			name: "indented bare import after dreefile line",
+			src:  "DREEFILE component ()\n   import \"sync\"\n\n<body>x</body>",
+			line: 2,
+			col:  4,
+		},
 	}
-	if header.Name != "Navbar" {
-		t.Fatalf("expected legacy name Navbar, got %q", header.Name)
-	}
-	if len(header.Imports) != 1 || header.Imports[0].Path != "www/components" {
-		t.Fatalf("expected legacy from-import, got %+v", header.Imports)
-	}
-	if body == "" {
-		t.Fatal("expected body after legacy header")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := ParseFileHeaderStrict(tc.src)
+			if err == nil {
+				t.Fatalf("expected a hard error for legacy header %q", tc.src)
+			}
+			var he *HeaderError
+			if !errors.As(err, &he) {
+				t.Fatalf("expected *HeaderError, got %T: %v", err, err)
+			}
+			if he.Line != tc.line || he.Col != tc.col {
+				t.Fatalf("expected position %d:%d, got %d:%d (%v)", tc.line, tc.col, he.Line, he.Col, err)
+			}
+		})
 	}
 }

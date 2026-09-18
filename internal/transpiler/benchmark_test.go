@@ -24,7 +24,7 @@ const benchPage = `<head>
     <@Card title="Hello" />
 </body>`
 
-const benchComponent = `Component Card (title string)
+const benchComponent = `DREEFILE component (title string)
 
 <body>
     <h2>{{ title }}</h2>
@@ -69,6 +69,7 @@ func BenchmarkGenerateComponent(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		comp, _, body := ParseHeader(benchComponent)
+		comp.Name = "Card"
 		tokens, err := Lex(body)
 		if err != nil {
 			b.Fatal(err)

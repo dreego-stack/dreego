@@ -9,7 +9,7 @@ import (
 func TestBugUnclosedNamedSlot(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"www/components/Card.dreego": `Component Card ()
+		"www/components/Card.dreego": `DREEFILE component ()
 <body><article>{#slot header}</article></body>`,
 		"www/routes/+page.dreego": `<body><@Card>{#slot header}no close</@Card></body>`,
 	})

@@ -43,11 +43,11 @@ func TestParityCLIAndDreegotestGenerate(t *testing.T) {
 func TestParityCLIAndDreegotestGenerateComponent(t *testing.T) {
 	t.Parallel()
 	fixtures := map[string]string{
-		"Badge": `Component Badge (label string)
+		"Badge": `DREEFILE component (label string)
 <body class="badge">{{ label }}</body>`,
-		"Status": `Component Status (ok bool)
+		"Status": `DREEFILE component (ok bool)
 <body>{#if ok}<span>on</span>{#else}<span>off</span>{/if}</body>`,
-		"Card": `Component Card (title string)
+		"Card": `DREEFILE component (title string)
 <style>.card { padding: 1rem; }</style>
 <body class="card"><h2>{{ title }}</h2></body>`,
 	}
@@ -58,7 +58,7 @@ func TestParityCLIAndDreegotestGenerateComponent(t *testing.T) {
 				"www/components/" + name + ".dreego": src,
 			})
 			cliOut := gen["www/components/dree.go"]
-			dgtOut := dreegotest.GenerateComponent(t, src)
+			dgtOut := dreegotest.GenerateComponent(t, name, src)
 			if dgtOut == "" {
 				t.Fatal("dreegotest.GenerateComponent returned empty output")
 			}

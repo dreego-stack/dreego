@@ -9,7 +9,7 @@ import (
 func TestBugComponentQuotedProp(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/components/Card.dreego": `Component Card (title string, active bool)
+		"www/components/Card.dreego": `DREEFILE component (title string, active bool)
 <body><h1>{{ title }}</h1><span>{{ active }}</span></body>`,
 		"www/routes/+page.dreego": `<server>myTitle := "Hello"</server>
 <body><@Card title={myTitle} active={true}/></body>`,

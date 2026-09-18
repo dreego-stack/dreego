@@ -46,7 +46,7 @@ func TestMethodRouteCanRenderComponentAndLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/layouts/default.dreego": `<body><html><body>{#slot}</body></html></body>`,
-		"www/components/Badge.dreego": `Component Badge ()
+		"www/components/Badge.dreego": `DREEFILE component ()
 <body class="badge">badge</body>`,
 		"www/routes/profile.dreego": `<server method="post">name := "Ada"</server><body method="post"><@Badge/> <span>{{ name }}</span></body>`,
 	})

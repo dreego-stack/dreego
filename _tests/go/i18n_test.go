@@ -104,7 +104,7 @@ func TestI18nBuildsAcrossTemplateContextsAndMethods(t *testing.T) {
 		"www/dreego.config.json":       config,
 		"www/locales/en/messages.json": catalog,
 		"www/layouts/default.dreego":   `<body><html><head>{#head}</head><body>{#slot}<footer>[[ layout.footer ]]</footer></body></html></body>`,
-		"www/components/Label.dreego":  `Component Label ()` + "\n" + `<body><span>[[ component.label ]]</span></body>`,
+		"www/components/Label.dreego":  `DREEFILE component ()` + "\n" + `<body><span>[[ component.label ]]</span></body>`,
 		"www/routes/+page.dreego":      `<head><title>[[ page.title ]]</title><meta name="description" content="[[ page.description ]]"/></head><body><h1>[[ page.heading ]]</h1><@Label/></body><body method="post">[[ method.saved ]]</body>`,
 		"www/routes/docs/+page.dreego": `<body lang="md"># [[ page.heading ]]</body>`,
 	})

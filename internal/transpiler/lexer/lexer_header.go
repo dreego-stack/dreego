@@ -53,32 +53,19 @@ func ParseFileHeaderStrict(input string) (*ir.FileHeader, string, error) {
 			}
 		}
 
-		if strings.HasPrefix(trimmed, "Component ") {
-			comp := parseComponentHeader(trimmed)
-			header.Kind = ir.FileKindComponent
-			header.Name = comp.Name
-			header.Props = comp.Props
-			header.Slots = comp.Slots
-			i++
-			continue
+		if trimmed == "Component" || strings.HasPrefix(trimmed, "Component ") {
+			return header, "", legacyHeaderError(line, i, "Component",
+				"use DREEFILE component (props); the component name comes from the filename")
 		}
 
-		if strings.HasPrefix(trimmed, "import ") {
-			imp := parseImportLine(trimmed)
-			if imp != nil {
-				header.Imports = append(header.Imports, *imp)
-			}
-			i++
-			continue
+		if trimmed == "import" || strings.HasPrefix(trimmed, "import ") {
+			return header, "", legacyHeaderError(line, i, "import",
+				`use GOIMPORT { path } for Go imports and COMPONENT "path" IMPORT { A } for components`)
 		}
 
 		if strings.HasPrefix(trimmed, "from ") {
-			imp, consumed := parseFromImport(lines[i:])
-			if imp != nil {
-				header.Imports = append(header.Imports, *imp)
-				i += consumed
-				continue
-			}
+			return header, "", legacyHeaderError(line, i, "from",
+				`use COMPONENT "path" IMPORT { A }`)
 		}
 
 		if trimmed == "" {

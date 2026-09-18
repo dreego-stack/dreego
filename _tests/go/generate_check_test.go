@@ -143,7 +143,7 @@ func TestGenerateCheckMissingGenFileFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/routes/+page.dreego":       `<body><p>page</p></body>`,
-		"www/components/Cmp.dreego":     "Component Card (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
+		"www/components/Card.dreego":    "DREEFILE component (title string)\n<body><article><h2>{{ title }}</h2></article></body>",
 		"www/routes/about/+page.dreego": `<body><@Card title="A"/></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
@@ -166,7 +166,7 @@ func TestGenerateCheckRemovesStaleGenFiles(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/routes/+page.dreego":    `<body><p>home</p></body>`,
-		"www/components/Card.dreego": "Component Card ()\n<body><p>card</p></body>",
+		"www/components/Card.dreego": "DREEFILE component ()\n<body><p>card</p></body>",
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)

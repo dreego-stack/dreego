@@ -12,7 +12,7 @@ import (
 func TestBugLayoutComponentCompiles(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/components/Nav.dreego":  "Component Nav (label string)\n<body><nav>{{ label }}</nav></body>",
+		"www/components/Nav.dreego":  "DREEFILE component (label string)\n<body><nav>{{ label }}</nav></body>",
 		"www/layouts/default.dreego": `<body><html><body><@Nav label="Home"/>{#slot}</body></html></body>`,
 		"www/routes/+page.dreego":    `<body><p>Page</p></body>`,
 	})
@@ -21,7 +21,7 @@ func TestBugLayoutComponentCompiles(t *testing.T) {
 func TestBugLayoutComponentRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Nav.dreego":  "Component Nav (label string)\n<body><nav>{{ label }}</nav></body>",
+		"www/components/Nav.dreego":  "DREEFILE component (label string)\n<body><nav>{{ label }}</nav></body>",
 		"www/layouts/default.dreego": `<body><html><body><@Nav label="Home"/>{#slot}</body></html></body>`,
 		"www/routes/+page.dreego":    `<body><p>Page</p></body>`,
 	})
@@ -40,8 +40,8 @@ func TestBugLayoutComponentRenders(t *testing.T) {
 func TestBugLayoutComponentImportDirective(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/Nav.dreego": "Component Nav (label string)\n<body><nav>{{ label }}</nav></body>",
-		"www/layouts/default.dreego": `import "www/components"
+		"www/components/Nav.dreego": "DREEFILE component (label string)\n<body><nav>{{ label }}</nav></body>",
+		"www/layouts/default.dreego": `COMPONENT "www/components" IMPORT { Nav }
 <body><html><body><@Nav label="Home"/>{#slot}</body></html></body>`,
 		"www/routes/+page.dreego": `<body><p>Page</p></body>`,
 	})
@@ -73,7 +73,7 @@ func TestBugLayoutComponentErrorPointsAtLayout(t *testing.T) {
 func TestBugComponentInRouteStillWorks(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/components/Nav.dreego": "Component Nav (label string)\n<body><nav>{{ label }}</nav></body>",
+		"www/components/Nav.dreego": "DREEFILE component (label string)\n<body><nav>{{ label }}</nav></body>",
 		"www/routes/+page.dreego":   `<body><@Nav label="Home"/></body>`,
 	})
 	code, body := c.Get(t, "/")
@@ -88,7 +88,7 @@ func TestBugComponentInRouteStillWorks(t *testing.T) {
 func TestBugLayoutComponentGeneratedImport(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/components/Nav.dreego":  "Component Nav (label string)\n<body><nav>{{ label }}</nav></body>",
+		"www/components/Nav.dreego":  "DREEFILE component (label string)\n<body><nav>{{ label }}</nav></body>",
 		"www/layouts/default.dreego": `<body><html><body><@Nav label="Home"/>{#slot}</body></html></body>`,
 		"www/routes/+page.dreego":    `<body><p>Page</p></body>`,
 	})

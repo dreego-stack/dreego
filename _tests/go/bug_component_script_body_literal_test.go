@@ -9,7 +9,7 @@ import (
 func TestBugComponentScriptBodyLiteral(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/components/Snippet.dreego": `Component Snippet (x string)
+		"www/components/Snippet.dreego": `DREEFILE component (x string)
 <body><script>const s = "literal {x}";</script></body>`,
 		"www/routes/+page.dreego": `<body><@Snippet x=42/></body>`,
 	})

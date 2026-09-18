@@ -122,18 +122,21 @@ func TestLoadComponentIgnoresNonComponentKind(t *testing.T) {
 	}
 }
 
-func TestLoadComponentKeepsLegacyComponentLine(t *testing.T) {
+func TestLoadComponentRejectsLegacyComponentLine(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "Legacy.dreego")
 	if err := os.WriteFile(path, []byte("Component Legacy (title string)\n\n<body>{{ title }}</body>\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	component, err := loadComponent(path)
-	if err != nil {
-		t.Fatalf("loadComponent: %v", err)
+	_, err := loadComponent(path)
+	if err == nil {
+		t.Fatal("expected a hard error for the legacy Component line")
 	}
-	if component.def == nil || component.def.Name != "Legacy" {
-		t.Fatalf("legacy Component line must still work, got %+v", component.def)
+	if !strings.Contains(err.Error(), "DREEFILE component") {
+		t.Fatalf("error must name the DREEFILE replacement, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), ":1:1:") {
+		t.Fatalf("error must carry file:line:col, got: %v", err)
 	}
 }

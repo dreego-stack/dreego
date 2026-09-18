@@ -58,9 +58,9 @@ func TestDiscoveryIgnoresComponentsOutsideProjectRoot(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                    `{}`,
-		"www/components/Inner.dreego":               "Component Inner ()\n<body><p>inner</p></body>",
+		"www/components/Inner.dreego":               "DREEFILE component ()\n<body><p>inner</p></body>",
 		"www/routes/+page.dreego":                   `<body><@Inner/></body>`,
-		"vendor/lib/dreego/components/Outer.dreego": "Component Outer ()\n<body><p>outer</p></body>",
+		"vendor/lib/dreego/components/Outer.dreego": "DREEFILE component ()\n<body><p>outer</p></body>",
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
