@@ -157,46 +157,6 @@ func formatLayoutLine(line string) string {
 	return line
 }
 
-func formatCompHeader(line string) string {
-	parts := strings.SplitN(line, "(", 2)
-	if len(parts) != 2 {
-		return line
-	}
-	name := strings.TrimSpace(strings.TrimPrefix(parts[0], "Component "))
-	params := strings.TrimRight(parts[1], ")")
-	params = strings.TrimSpace(params)
-
-	if params == "" {
-		return "Component " + name
-	}
-
-	var formatted []string
-	for p := range strings.SplitSeq(params, ",") {
-		p = strings.TrimSpace(p)
-		if p == "" {
-			continue
-		}
-		fields := strings.Fields(p)
-		if len(fields) == 0 {
-			continue
-		}
-		formatted = append(formatted, strings.Join(fields, " "))
-	}
-	return "Component " + name + " (" + strings.Join(formatted, ", ") + ")"
-}
-
-func formatImport(line string) string {
-	line = strings.TrimPrefix(line, "import ")
-	fields := strings.Fields(line)
-	if len(fields) == 0 {
-		return "import"
-	}
-	if len(fields) == 1 {
-		return "import " + fields[0]
-	}
-	return "import " + fields[0] + " " + fields[1]
-}
-
 func formatExpressions(input string) string {
 	return expressions.ReplaceAllStringFunc(input, func(m string) string {
 		inner := m[2 : len(m)-2]
