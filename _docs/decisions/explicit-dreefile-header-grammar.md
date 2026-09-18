@@ -37,7 +37,8 @@ GOIMPORT { sync, encoding/json }      Go import channel
 
 - A component's name comes from its **filename**: `Card.dreego` becomes
   `<@Card>`.
-- `COMPONENT ... IMPORT` imports components from a path; `as` creates an alias.
+- `COMPONENT ... IMPORT` imports components from a path; `as` creates a
+  generator-global alias, consistent with the global component registry.
 - `LAYOUT` and `GOIMPORT` are parsed and reserved; their codegen consumers
   arrive with the layout-chaining and server-import slices.
 

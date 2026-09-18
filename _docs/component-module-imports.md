@@ -24,9 +24,14 @@ COMPONENT "www/components" IMPORT { Card, Card as ProductCard }
 ```
 
 The component name is the name of the source `.dreego` file; the alias becomes
-the callable `<@ProductCard>` name. Alias resolution is currently
-generator-global rather than scoped to the declaring file; see
-`_todo/core/dreefile-alias-scope.1.md`.
+the callable `<@ProductCard>` name.
+
+Alias resolution is generator-global by design, consistent with the global
+component registry: components found under the website root are callable from
+every route, layout, and component, independent of the file that imported them.
+An alias declared in one file therefore resolves in every other file. Two files
+must not declare the same alias for different targets, and an alias must not
+shadow a real component; both collisions fail at `dreego generate`.
 
 The legacy `from "<path>" import { ... }` form is rejected at `dreego generate`
 with a `file:line:col` diagnostic pointing to
