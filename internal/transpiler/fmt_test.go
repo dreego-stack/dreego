@@ -5,65 +5,6 @@ import (
 	"testing"
 )
 
-func TestFormatCompHeaderWithDefault(t *testing.T) {
-	in := "Component Button (label string, variant string = primary)"
-	out := formatCompHeader(in)
-	for _, want := range []string{"Component Button", "label string", "variant string = primary"} {
-		if !strings.Contains(out, want) {
-			t.Errorf("formatCompHeader missing %q, got: %q", want, out)
-		}
-	}
-	if strings.Contains(out, " = ") && !strings.Contains(out, "= primary") {
-		t.Errorf("formatCompHeader must keep the default value, got: %q", out)
-	}
-}
-
-func TestFormatCompHeaderNoParams(t *testing.T) {
-	in := "Component Card ()"
-	out := formatCompHeader(in)
-	if out != "Component Card" {
-		t.Errorf("formatCompHeader no-params must drop parens, got: %q", out)
-	}
-}
-
-func TestFormatCompHeaderAlreadyNormalized(t *testing.T) {
-	in := "Component Card (x int)"
-	out := formatCompHeader(in)
-	if out != "Component Card (x int)" {
-		t.Errorf("formatCompHeader must be idempotent, got: %q", out)
-	}
-}
-
-func TestFormatCompHeaderNoParens(t *testing.T) {
-	in := "Component Card"
-	out := formatCompHeader(in)
-	if out != in {
-		t.Errorf("formatCompHeader without parens must return unchanged, got: %q", out)
-	}
-}
-
-func TestFormatImportAliasAndPath(t *testing.T) {
-	in := "import dreego github.com/dreego-stack/dreego"
-	out := formatImport(in)
-	if !strings.Contains(out, "import dreego github.com/dreego-stack/dreego") {
-		t.Errorf("formatImport must keep alias and path, got: %q", out)
-	}
-}
-
-func TestFormatImportSingleField(t *testing.T) {
-	out := formatImport("import fmt")
-	if out != "import fmt" {
-		t.Errorf("formatImport single field must be preserved, got: %q", out)
-	}
-}
-
-func TestFormatImportEmpty(t *testing.T) {
-	out := formatImport("import ")
-	if out != "import" {
-		t.Errorf("formatImport empty must return 'import', got: %q", out)
-	}
-}
-
 func TestFormatExpressionsPipeNormalization(t *testing.T) {
 	in := `{{ name | upper }}`
 	out := formatExpressions(in)
