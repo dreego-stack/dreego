@@ -59,6 +59,16 @@ migrated in the same series.
 - `dreego fmt` preserves legacy header lines verbatim rather than silently
   rewriting them, so a rejected file is not corrupted before its author fixes
   it.
+- `dreego fmt` is a formatter, not a validator: `dreego generate` remains the
+  single gate that rejects a legacy header. `dreego fmt --check` therefore
+  exits 0 on a file that `dreego generate` rejects, and this divergence is
+  deliberate. A formatter that refused legacy files would block formatting an
+  entire repository because of one unmigrated file, while still not telling the
+  author how to migrate it; `generate` already fails early with a
+  `file:line:col` diagnostic naming the replacement.
+- `dreego fmt` canonicalizes the header to at most one blank line between
+  directives. Duplicate blank lines in the header are collapsed to a single
+  blank line so the header is stable under repeated formatting.
 
 ## See also
 
