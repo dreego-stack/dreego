@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/gomod"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 type componentSource struct {
@@ -248,7 +249,7 @@ func prepareComponentFile(file *File, def *ComponentDef, path, raw string, bodyO
 		file.Client.Pos += bodyOffset
 	}
 	if file.Body != nil {
-		setNodeSource(file.Body.Nodes, path, bodyOffset)
+		ir.SetNodeSource(file.Body.Nodes, path, bodyOffset)
 		def.Slots = mergeUnique(def.Slots, collectSlotNames(file.Body.Nodes))
 		def.HasDefaultSlot = hasDefaultSlot(file.Body.Nodes)
 		def.HasNamedSlot = hasNamedSlot(file.Body.Nodes) || len(def.Slots) > 0

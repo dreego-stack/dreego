@@ -3,6 +3,9 @@ package transpiler
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html/output"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func TestScopeCSSKeepsDeclarationsWithBraces(t *testing.T) {
@@ -39,12 +42,12 @@ func TestScopeCSSMediaPreservesDeclarationsAndScopesInnerSelectors(t *testing.T)
 // Go expression (unquoted), not a literal string. Currently attrVal trims the
 // quotes and returns "{url}" as a literal.
 func TestExtractAttrValuesResolvesExprInQuotedValue(t *testing.T) {
-	out := extractAttrValues(`href="{url}" label="x"`)
+	out := output.ExtractAttrValues(`href="{url}" label="x"`)
 	if strings.Contains(out, "{url}") {
-		t.Errorf("extractAttrValues left {url} literal, must resolve to url. got: %s", out)
+		t.Errorf("output.ExtractAttrValues left {url} literal, must resolve to url. got: %s", out)
 	}
 	if !strings.Contains(out, "url") {
-		t.Errorf("extractAttrValues must contain url expression, got: %s", out)
+		t.Errorf("output.ExtractAttrValues must contain url expression, got: %s", out)
 	}
 }
 
@@ -53,15 +56,15 @@ func TestExtractAttrValuesResolvesExprInQuotedValue(t *testing.T) {
 // inner "a}-{b" as a single expression. Currently attrVal returns "a}-{b"
 // verbatim because it only handles the exact `{...}` (single placeholder) shape.
 func TestAttrValResolvesMultiplePlaceholdersToConcatenation(t *testing.T) {
-	out := attrVal(`href="{a}-{b}"`)
+	out := output.AttrVal(`href="{a}-{b}"`)
 	if strings.Contains(out, "a}-{b") {
-		t.Errorf("attrVal must split {a}-{b} into separate expressions, got: %s", out)
+		t.Errorf("output.AttrVal must split {a}-{b} into separate expressions, got: %s", out)
 	}
 	if !strings.Contains(out, "a") || !strings.Contains(out, "b") {
-		t.Errorf("attrVal must keep both placeholder expressions a and b, got: %s", out)
+		t.Errorf("output.AttrVal must keep both placeholder expressions a and b, got: %s", out)
 	}
 	if !strings.Contains(out, `"-"`) {
-		t.Errorf("attrVal must join placeholders with a literal separator \"-\", got: %s", out)
+		t.Errorf("output.AttrVal must join placeholders with a literal separator \"-\", got: %s", out)
 	}
 }
 
@@ -81,19 +84,19 @@ func TestScopeCSSPseudoSelectorKeepsDeclaration(t *testing.T) {
 }
 
 func TestGoLiteralPlain(t *testing.T) {
-	out := goLiteral(`<p>hi</p>`)
+	out := ir.GoLiteral(`<p>hi</p>`)
 	if out != "`<p>hi</p>`" {
-		t.Errorf("goLiteral plain must wrap in backticks, got: %q", out)
+		t.Errorf("ir.GoLiteral plain must wrap in backticks, got: %q", out)
 	}
 }
 
 func TestGoLiteralContainsBacktick(t *testing.T) {
-	out := goLiteral("a ` b")
+	out := ir.GoLiteral("a ` b")
 	if strings.Contains(out, "`") && !strings.Contains(out, "\"") {
-		t.Errorf("goLiteral with backtick must use quotes, got: %q", out)
+		t.Errorf("ir.GoLiteral with backtick must use quotes, got: %q", out)
 	}
 	if !strings.Contains(out, `"a `) {
-		t.Errorf("goLiteral with backtick must produce a quoted string, got: %q", out)
+		t.Errorf("ir.GoLiteral with backtick must produce a quoted string, got: %q", out)
 	}
 }
 
@@ -106,8 +109,8 @@ func TestToPascalCaseVariants(t *testing.T) {
 		{"alreadyPascal", "Alreadypascal"},
 	}
 	for _, c := range cases {
-		if got := toPascalCase(c.in); got != c.want {
-			t.Errorf("toPascalCase(%q) = %q, want %q", c.in, got, c.want)
+		if got := ir.ToPascalCase(c.in); got != c.want {
+			t.Errorf("ir.ToPascalCase(%q) = %q, want %q", c.in, got, c.want)
 		}
 	}
 }
@@ -151,25 +154,25 @@ func TestMatchBraceBalanced(t *testing.T) {
 // literal string. Feedback (testspace/feedback.md, core v0.0.23): prop="{var}"
 // generated []string{"{var}"} for slices and a compile error for bools.
 func TestAttrValQuotedExpr(t *testing.T) {
-	out := attrVal(`prop="{var}"`)
+	out := output.AttrVal(`prop="{var}"`)
 	if out != "var" {
-		t.Errorf("attrVal(prop=\"{var}\") = %q, want expression var", out)
+		t.Errorf("output.AttrVal(prop=\"{var}\") = %q, want expression var", out)
 	}
 }
 
 // attrVal must resolve an unquoted {var} attribute value as a Go expression.
 func TestAttrValUnquotedExpr(t *testing.T) {
-	out := attrVal(`prop={var}`)
+	out := output.AttrVal(`prop={var}`)
 	if out != "var" {
-		t.Errorf("attrVal(prop={var}) = %q, want expression var", out)
+		t.Errorf("output.AttrVal(prop={var}) = %q, want expression var", out)
 	}
 }
 
 // attrVal must keep a plain quoted literal as a Go string literal.
 func TestAttrValLiteral(t *testing.T) {
-	out := attrVal(`prop="literal"`)
+	out := output.AttrVal(`prop="literal"`)
 	if out != `"literal"` {
-		t.Errorf("attrVal(prop=\"literal\") = %q, want string literal \"literal\"", out)
+		t.Errorf("output.AttrVal(prop=\"literal\") = %q, want string literal \"literal\"", out)
 	}
 }
 
@@ -177,9 +180,9 @@ func TestAttrValLiteral(t *testing.T) {
 // documented behavior: a bool prop must be passed unquoted (active={true}),
 // passing active="false" yields a string and fails to compile at the call site.
 func TestAttrValQuotedBoolString(t *testing.T) {
-	out := attrVal(`active="false"`)
+	out := output.AttrVal(`active="false"`)
 	if out != `"false"` {
-		t.Errorf("attrVal(active=\"false\") = %q, want string literal \"false\"", out)
+		t.Errorf("output.AttrVal(active=\"false\") = %q, want string literal \"false\"", out)
 	}
 }
 
@@ -190,17 +193,17 @@ func TestAttrValQuotedBoolString(t *testing.T) {
 // NOT itself escape the expression. Otherwise multi-placeholder calls would be
 // double-escaped.
 func TestConcatPlaceholdersDoesNotEscape(t *testing.T) {
-	out := concatPlaceholders(`href="{a}-{b}"`)
+	out := output.ConcatPlaceholders(`href="{a}-{b}"`)
 	if strings.Contains(out, "html.EscapeString") {
-		t.Errorf("concatPlaceholders must not escape, escaping is deferred to prop injection. got: %s", out)
+		t.Errorf("output.ConcatPlaceholders must not escape, escaping is deferred to prop injection. got: %s", out)
 	}
 	if !strings.Contains(out, "fmt.Sprintf(\"%v\", a)") {
-		t.Errorf("concatPlaceholders must emit fmt.Sprintf for placeholder a, got: %s", out)
+		t.Errorf("output.ConcatPlaceholders must emit fmt.Sprintf for placeholder a, got: %s", out)
 	}
 	if !strings.Contains(out, "fmt.Sprintf(\"%v\", b)") {
-		t.Errorf("concatPlaceholders must emit fmt.Sprintf for placeholder b, got: %s", out)
+		t.Errorf("output.ConcatPlaceholders must emit fmt.Sprintf for placeholder b, got: %s", out)
 	}
 	if !strings.Contains(out, `"-"`) {
-		t.Errorf("concatPlaceholders must keep the literal separator \"-\", got: %s", out)
+		t.Errorf("output.ConcatPlaceholders must keep the literal separator \"-\", got: %s", out)
 	}
 }

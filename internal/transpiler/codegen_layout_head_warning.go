@@ -14,7 +14,7 @@ func layoutHeadDedupeWarning(file *File) (string, bool) {
 		return "", false
 	}
 	node := file.Body.Nodes[idx]
-	line, col := posToLineCol(node.SourceText, node.Pos)
+	line, col := ir.PosToLineCol(node.SourceText, node.Pos)
 	location := node.Source
 	if location == "" {
 		location = file.SourcePath

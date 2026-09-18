@@ -3,6 +3,9 @@ package transpiler
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/html/head"
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func TestHeadSafeFuncClassifies(t *testing.T) {
@@ -22,8 +25,8 @@ func TestHeadSafeFuncClassifies(t *testing.T) {
 		if i < 0 {
 			t.Fatalf("no placeholder in %q", c.content)
 		}
-		if got := headSafeFunc(c.content, i); got != c.want {
-			t.Errorf("headSafeFunc(%q) = %q, want %q", c.content, got, c.want)
+		if got := head.HeadSafeFunc(c.content, i); got != c.want {
+			t.Errorf("head.HeadSafeFunc(%q) = %q, want %q", c.content, got, c.want)
 		}
 	}
 }
@@ -43,8 +46,8 @@ func TestHeadSafeFuncClassifiesWhitespaceAroundEquals(t *testing.T) {
 		if i < 0 {
 			t.Fatalf("no placeholder in %q", c.content)
 		}
-		if got := headSafeFunc(c.content, i); got != c.want {
-			t.Errorf("headSafeFunc(%q) = %q, want %q", c.content, got, c.want)
+		if got := head.HeadSafeFunc(c.content, i); got != c.want {
+			t.Errorf("head.HeadSafeFunc(%q) = %q, want %q", c.content, got, c.want)
 		}
 	}
 }
@@ -63,8 +66,8 @@ func TestHeadSafeFuncClassifiesUnquotedValue(t *testing.T) {
 		if i < 0 {
 			t.Fatalf("no placeholder in %q", c.content)
 		}
-		if got := headSafeFunc(c.content, i); got != c.want {
-			t.Errorf("headSafeFunc(%q) = %q, want %q", c.content, got, c.want)
+		if got := head.HeadSafeFunc(c.content, i); got != c.want {
+			t.Errorf("head.HeadSafeFunc(%q) = %q, want %q", c.content, got, c.want)
 		}
 	}
 }
@@ -81,8 +84,8 @@ func TestAttrValueWhitespaceTolerance(t *testing.T) {
 		{`<meta name="description">`, "http-equiv", ""},
 	}
 	for _, c := range cases {
-		if got := attrValue(c.tag, c.attr); got != c.want {
-			t.Errorf("attrValue(%q, %q) = %q, want %q", c.tag, c.attr, got, c.want)
+		if got := ir.AttrValue(c.tag, c.attr); got != c.want {
+			t.Errorf("ir.AttrValue(%q, %q) = %q, want %q", c.tag, c.attr, got, c.want)
 		}
 	}
 }

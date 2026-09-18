@@ -3,6 +3,8 @@ package transpiler
 import (
 	"fmt"
 	"os"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 func fileRegisteredMethods(file *File) []string {
@@ -62,8 +64,8 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 		file.Client.Pos += bodyOffset
 	}
 	if file.Body != nil {
-		setNodeSource(file.Body.Nodes, fpath, bodyOffset)
-		setSourceText(file.Body.Nodes, raw)
+		ir.SetNodeSource(file.Body.Nodes, fpath, bodyOffset)
+		ir.SetSourceText(file.Body.Nodes, raw)
 		file.FormActions = scanFormActions(file.Body.Nodes)
 		for _, diagnostic := range a11yDiagnostics(file.Body.Nodes) {
 			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)

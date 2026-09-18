@@ -8,6 +8,8 @@ import (
 	"slices"
 	"sort"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/transpiler/ir"
 )
 
 type layoutEntry struct {
@@ -71,8 +73,8 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 					f.Client.Pos += bodyOffset
 				}
 				if f.Body != nil {
-					setNodeSource(f.Body.Nodes, full, bodyOffset)
-					setSourceText(f.Body.Nodes, raw)
+					ir.SetNodeSource(f.Body.Nodes, full, bodyOffset)
+					ir.SetSourceText(f.Body.Nodes, raw)
 				}
 				rel := layoutScopeRel(root, path)
 				funcName := "Layout"

@@ -111,31 +111,3 @@ func attrContext(name string) string {
 func isScriptAttr(name string) bool {
 	return ir.IsScriptAttr(name)
 }
-
-func headSafeFunc(htmlText string, i int) string {
-	return head.HeadSafeFunc(htmlText, i)
-}
-
-func attrValue(tag string, attr string) string {
-	return ir.AttrValue(tag, attr)
-}
-
-func goLiteral(s string) string {
-	return ir.GoLiteral(s)
-}
-
-func toPascalCase(s string) string {
-	return ir.ToPascalCase(s)
-}
-
-func extractAttrValues(attrs string) string {
-	return output.ExtractAttrValues(attrs)
-}
-
-func attrVal(part string) string {
-	return output.AttrVal(part)
-}
-
-func concatPlaceholders(val string) string {
-	return output.ConcatPlaceholders(val)
-}
