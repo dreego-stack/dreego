@@ -26,9 +26,16 @@ diagnostic naming both files.
 
 ## Syntax
 
+A layout file may declare its kind explicitly with the `DREEFILE layout` header
+directive. The declaration is optional; layouts are still resolved by the
+directory cascade described above, and layout files keep living under
+`www/layouts`.
+
 **`www/layouts/default.dreego`:**
 
 ```html
+DREEFILE layout
+
 <body>
 <!DOCTYPE html>
 <html>

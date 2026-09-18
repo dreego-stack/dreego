@@ -147,7 +147,7 @@ Create `www/layouts/default.dreego` — wraps all pages:
 Create `www/components/Card.dreego`:
 
 ```
-Component Card (title string)
+DREEFILE component (title string)
 
 <body>
     <article class="card">
@@ -164,7 +164,7 @@ Component Card (title string)
 Use it in any route or layout:
 
 ```html
-import Card "components/Card.dreego"
+COMPONENT "www/components" IMPORT { Card }
 
 <body>
 <@Card title="Welcome">
@@ -173,7 +173,9 @@ import Card "components/Card.dreego"
 </body>
 ```
 
-Imports are header directives and therefore appear before the root sections.
+The `COMPONENT … IMPORT` directive is a header directive and therefore appears
+before the root sections. The component name comes from its filename, so
+`Card.dreego` is called as `<@Card>`.
 
 ## Dynamic Routes
 

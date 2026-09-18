@@ -1,4 +1,4 @@
-Component ProductCard (name string, price string, inStock bool)
+DREEFILE component (name string, price string, inStock bool)
 
 <body>
     <article class="product-card">
