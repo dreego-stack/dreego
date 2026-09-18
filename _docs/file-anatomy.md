@@ -3,6 +3,27 @@
 A `.dreego` file groups code by purpose. Root sections select where code runs;
 the optional `lang` attribute selects how that section is compiled.
 
+## File header
+
+Before the first root section a file may carry Dreefile header directives. The
+surface rule is: **uppercase is a keyword, lowercase is a value.**
+
+- `DREEFILE component (props)` declares a component file; the component name
+  comes from the filename (`Card.dreego` becomes `<@Card>`).
+- `DREEFILE layout` declares a layout file.
+- `DREEFILE page` declares a page explicitly; omitting the `DREEFILE` line also
+  means page.
+- `LAYOUT "www/layouts/admin.dreego"` records an explicit layout path. It is
+  parsed and reserved for the upcoming layout-chaining slice; layout selection
+  is still the directory cascade described in [Layouts](../core/_docs/layouts.md).
+- `COMPONENT "www/components" IMPORT { Card, Card as ProductCard }` imports
+  components from a path; `as` creates an alias.
+- `GOIMPORT { sync, encoding/json }` records Go imports. It is parsed and
+  reserved for the upcoming server-import slice; generated code does not read it
+  yet.
+
+Header directives are the only content allowed alongside the five root sections.
+
 ```html
 <server lang="go">
 title := "Dashboard"

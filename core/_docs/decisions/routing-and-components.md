@@ -61,7 +61,7 @@ without adding a URL segment.
 section to another HTTP method:
 
 ```dreego
-import UserResult "components/UserResult.dreego"
+COMPONENT "www/components" IMPORT { UserResult }
 
 <server method="post">
 result, err := createUser(c)
@@ -86,11 +86,12 @@ explicitly against their owning App and cannot silently override another route.
 
 ## Component imports and calls
 
-Component declarations and imports are the only directives allowed outside the
-five root sections: `<server>`, `<head>`, `<body>`, `<style>`, and `<client>`.
+Header directives and component imports are the only content allowed outside
+the five root sections: `<server>`, `<head>`, `<body>`, `<style>`, and
+`<client>`.
 
 ```dreego
-import Button "components/Button.dreego"
+COMPONENT "www/components" IMPORT { Button }
 
 <body>
     <@Button class="primary" disabled={isLoading}>

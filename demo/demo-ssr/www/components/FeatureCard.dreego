@@ -1,4 +1,4 @@
-Component FeatureCard (icon string, title string, text string)
+DREEFILE component (icon string, title string, text string)
 
 <body>
     <div class="bg-white p-8 group hover:bg-slate-50 transition-colors">

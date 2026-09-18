@@ -4,22 +4,23 @@ Component = reusable `.dreego` file with props and its own scope.
 
 ## Declaration
 
-```html
-Component Name (prop Type, prop Type = default)
+```text
+DREEFILE component (prop Type, prop Type = default)
 ```
 
-The first line of a component file **must** be the `Component` declaration.
+A component declares itself with a `DREEFILE component` header. The name comes
+from the filename (`Card.dreego` → `<@Card>`); a missing `DREEFILE` means page.
 
 | Element | Description |
 |---------|-------------|
-| `Name` | Component name (PascalCase). Becomes `<@Name>`. |
+| `DREEFILE component` | Declares the file kind; values are lowercase. |
 | `(prop Type)` | Props with Go type. `= default` optional. |
 | `{#slot}` | Default slot (always available). |
 
 **Example:**
 
 ```
-Component Card (title string)
+DREEFILE component (title string)
 
 <body>
     <article class="card">
@@ -34,13 +35,12 @@ Component Card (title string)
 
 ## Usage
 
-Component declarations and imports are header directives. They are the only
-content allowed outside the five root sections: `<server>`, `<head>`, `<body>`,
-`<style>`, and `<client>`. Free text, HTML, and component calls at the root are
-generation errors.
+The Dreefile header directives and component imports are the only content
+allowed outside the five root sections: `<server>`, `<head>`, `<body>`,
+`<style>`, and `<client>`. Free text, HTML, and root component calls fail.
 
 ```dreego
-import Card "components/Card.dreego"
+COMPONENT "www/components" IMPORT { Card }
 
 <body><@Card title="Hello" /></body>
 ```
@@ -93,7 +93,7 @@ component call.
 **In the component body:**
 
 ```html
-Component Link (url string)
+DREEFILE component (url string)
 <body><a href="{{ url }}">{#slot}</a></body>
 ```
 
@@ -106,7 +106,7 @@ against the declared prop type at `dreego generate` time. Non-literal expression
 are accepted unchecked because the transpiler does not evaluate Go scope.
 
 ```dreego
-Component Card (title string)
+DREEFILE component (title string)
 <body><@Card title={42}/></body>
 ```
 
@@ -125,7 +125,7 @@ for the exact context rules and the `|raw` opt-in.
 
 ## Rules
 
-1. **`Component` line** — Always line 1 of the file.
+1. **`DREEFILE component` line** — Header directive that declares the component; the name comes from the filename.
 2. **`<@Name>`** — Component call. `@` prefix distinguishes from HTML tags.
 3. **File-based Discovery** — `www/components/Card.dreego` → `<@Card>`.
 4. **Scoped Styles** — `data-scope` per component. No leak to parent.
@@ -146,7 +146,7 @@ A page shell should provide one `<main id="main">` landmark and a skip link as
 its first focusable element:
 
 ```dreego
-Component PageShell (title string)
+DREEFILE component (title string)
 
 <body>
     <a href="#main" class="skip-link">skip to content</a>
@@ -179,7 +179,7 @@ Component props are **named** and **order-independent**. The set of props passed
 **Component:**
 
 ```
-Component Card (title string)
+DREEFILE component (title string)
 ```
 
 **Valid call:**
@@ -216,7 +216,7 @@ Every component's `<style>` block is scoped via a `data-scope` attribute (a 12-c
 - **`@keyframes`**: header and full body are copied verbatim (unscoped) so animation steps (`from`, `to`, percent) are preserved; only referencing selectors are scoped.
 
 ```html
-Component Spinner ()
+DREEFILE component ()
 <body class="spinner"></body>
 <style>
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
@@ -228,7 +228,7 @@ Component Spinner ()
 
 **Component:**
 ```
-Component Card (title string)
+DREEFILE component (title string)
 
 <body>
     <article>
@@ -241,7 +241,7 @@ Component Card (title string)
 
 **Route:**
 ```html
-import Card "components/Card.dreego"
+COMPONENT "www/components" IMPORT { Card }
 
 <body>
 <@Card title="Hi">
@@ -288,7 +288,7 @@ Generated components receive **`ctx`** as a `dreego.RenderContext`, a smaller
 boundary than the request-bound `dreego.SSRContext` available to routes:
 
 ```dreego
-Component Greeting (name string)
+DREEFILE component (name string)
 <server>
 prefix, _ := ctx.Data("greetingPrefix").(string)
 greeting := prefix + name
