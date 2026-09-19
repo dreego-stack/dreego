@@ -14,7 +14,7 @@ timestamp: 2026-08-20T00:00:00Z
 > `internal/transpiler/`. This document's reasoning (a shared root `internal/`
 > for multiple in-repo consumers; the CLI and `dreegotest` as the only users)
 > still holds; only the package name and location changed. See
-> [Internal layering and the dreefile package](../../../../_docs/decisions/internal-layering-and-dreefile.md).
+> [Internal layering and the dreefile package](internal-layering-and-dreefile.md).
 > The `internal/transpiler/...` paths below are the historical state at the
 > time of the decision.
 

@@ -99,12 +99,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 		headPrefix, headSuffix := SplitHeadPlaceholder(layoutHead)
 		if headPrefix != "" {
 			buf.WriteString(fmt.Sprintf("\tlayoutHead := %s\n", gogen.GoLiteral(headPrefix)))
-			buf.WriteString("\tif strings.Contains(strings.ToLower(pageHead), \"<title\") {\n")
-			buf.WriteString("\t\tlayoutHead = stripTitleTag(layoutHead)\n")
-			buf.WriteString("\t}\n")
-			buf.WriteString("\tif strings.Contains(strings.ToLower(pageHead), `name=\"description\"`) || strings.Contains(strings.ToLower(pageHead), `name='description'`) {\n")
-			buf.WriteString("\t\tlayoutHead = stripMetaDescriptionTag(layoutHead)\n")
-			buf.WriteString("\t}\n")
+			buf.WriteString("\tlayoutHead = dedupeLayoutHead(layoutHead, pageHead)\n")
 			buf.WriteString("\tb.WriteString(layoutHead)\n")
 		}
 		buf.WriteString("\tb.WriteString(pageHead)\n")
@@ -137,6 +132,23 @@ func SplitHeadPlaceholder(head string) (prefix, suffix string) {
 
 func HeadMergeHelpers() string {
 	return `
+func dedupeLayoutHead(layoutHead, pageHead string) string {
+	lower := strings.ToLower(pageHead)
+	if strings.Contains(lower, "<title") {
+		layoutHead = stripTitleTag(layoutHead)
+	}
+	if strings.Contains(lower, `+"`"+`name="description"`+"`"+`) || strings.Contains(lower, `+"`"+`name='description'`+"`"+`) {
+		layoutHead = stripMetaTag(layoutHead, "name=\"description\"", "name='description'")
+	}
+	if strings.Contains(lower, `+"`"+`name="viewport"`+"`"+`) || strings.Contains(lower, `+"`"+`name='viewport'`+"`"+`) {
+		layoutHead = stripMetaTag(layoutHead, "name=\"viewport\"", "name='viewport'")
+	}
+	if strings.Contains(lower, "charset") {
+		layoutHead = stripMetaTag(layoutHead, "charset")
+	}
+	return layoutHead
+}
+
 func stripTitleTag(s string) string {
 	for {
 		open := strings.Index(strings.ToLower(s), "<title")
@@ -153,6 +165,10 @@ func stripTitleTag(s string) string {
 }
 
 func stripMetaDescriptionTag(s string) string {
+	return stripMetaTag(s, "name=\"description\"", "name='description'")
+}
+
+func stripMetaTag(s string, markers ...string) string {
 	offset := 0
 	for {
 		open := strings.Index(strings.ToLower(s[offset:]), "<meta")
@@ -164,9 +180,15 @@ func stripMetaDescriptionTag(s string) string {
 		if end < 0 {
 			return s
 		}
-		tag := s[open : open+end+1]
-		lower := strings.ToLower(tag)
-		if strings.Contains(lower, "name=\"description\"") || strings.Contains(lower, "name='description'") {
+		tag := strings.ToLower(s[open : open+end+1])
+		matched := false
+		for _, marker := range markers {
+			if strings.Contains(tag, marker) {
+				matched = true
+				break
+			}
+		}
+		if matched {
 			s = s[:open] + s[open+end+1:]
 			offset = open
 			continue

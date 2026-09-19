@@ -132,7 +132,7 @@ func TestInstallRealTemplate(t *testing.T) {
 	if err := Install(target, "example.com/acme/app", DefaultName); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"main.go", "Taskfile.yml", ".gitignore", filepath.Join("www", "dreego.config.json")} {
+	for _, name := range []string{"main.go", "Taskfile.yml", "Dockerfile", "docker-compose.yml", ".gitignore", filepath.Join("www", "dreego.config.json")} {
 		if _, err := os.Stat(filepath.Join(target, name)); err != nil {
 			t.Errorf("expected %s in target: %v", name, err)
 		}

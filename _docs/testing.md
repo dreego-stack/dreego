@@ -81,6 +81,6 @@ sh _tests/sh/import-check.sh           # Tailwind CDN import black-box check
 
 ## See Also
 
-- [Accessibility](../../_docs/accessibility.md) — Framework accessibility guarantees
-- [CLI](../../cmd/dreego/_docs/cli.md) — CLI reference
-- [Getting Started](../../_docs/getting-started.md) — Tutorial
+- [Accessibility](accessibility.md) — Framework accessibility guarantees
+- [CLI](cli.md) — CLI reference
+- [Getting Started](getting-started.md) — Tutorial

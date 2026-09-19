@@ -127,7 +127,7 @@ path is unchanged: without JavaScript the form submits normally.
 
 HTMX does **not** send the CSRF token on its own. The middleware accepts the
 token either as the `X-CSRF-Token` header or as the `csrf_token` form field
-(see [Forms](../core/_docs/forms.md)). The hidden field in Step 1 covers both paths, so no
+(see [Forms](forms.md)). The hidden field in Step 1 covers both paths, so no
 extra configuration is needed. If you prefer the header, configure it once on
 the `<body>`:
 
@@ -196,11 +196,38 @@ cover. It follows the same rule: enhance, never require.
   validators. Never trust the client.
 - **CSP:** The default Content-Security-Policy allows `unsafe-inline` for
   scripts and styles so HTMX, Alpine.js, and scoped CSS work out of the box.
-  If you tighten the CSP with `app.SetCSP`, you must allow the scripts you
-  actually load — see [Middleware](../adapter/ssr/_docs/middleware.md).
+  It does **not** allow `'unsafe-eval'`, which Alpine.js requires because it
+  compiles directive expressions with `new Function()`. An Alpine page under
+  the default policy loads its script but stays inert, and `dreego generate`
+  warns when a route uses Alpine directives. If you tighten the CSP with
+  `app.SetCSP`, you must allow the scripts you actually load — see
+  [Middleware](middleware.md).
 - **CDN origins:** If scripts are loaded from a CDN (e.g. `unpkg.com`), the
   CDN origin must be included in `script-src` (e.g.
   `script-src 'self' 'unsafe-inline' https://unpkg.com`).
+- **Copy-paste CSP per library.** HTMX needs only the CDN origin and
+  `unsafe-inline` (the default already covers both):
+
+  ```go
+  app.SetCSP("default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' https://unpkg.com; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; font-src 'self' https:; " +
+      "connect-src 'self'; base-uri 'self'; form-action 'self'")
+  ```
+
+  Alpine.js additionally needs `'unsafe-eval'`:
+
+  ```go
+  app.SetCSP("default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: https:; font-src 'self' https:; " +
+      "connect-src 'self'; base-uri 'self'; form-action 'self'")
+  ```
+
+  Prefer HTMX or plain JavaScript when you can avoid `'unsafe-eval'`. Alpine is
+  an enhancement: the no-JS path must keep working either way.
 
 ## Failure Behavior
 
@@ -237,7 +264,7 @@ The no-JavaScript path is the baseline, not an afterthought:
 
 ## See Also
 
-- [Forms](../core/_docs/forms.md) — `g-action`, validation, CSRF
-- [Middleware](../adapter/ssr/_docs/middleware.md) — CSP and security headers
-- [Components](../core/_docs/components.md) — component system
+- [Forms](forms.md) — `g-action`, validation, CSRF
+- [Middleware](middleware.md) — CSP and security headers
+- [Components](components.md) — component system
 - [Roadmap](roadmap.md) — progressive enhancement in the v0.0.x phase

@@ -94,12 +94,7 @@ func GenerateLayout(gen *Generator, file *File, funcName string) (string, error)
 }
 
 func writeHeadDedupe(buf *strings.Builder, varName string) {
-	buf.WriteString(fmt.Sprintf("\tif strings.Contains(strings.ToLower(head), \"<title\") {\n"))
-	buf.WriteString(fmt.Sprintf("\t\t%s = stripTitleTag(%s)\n", varName, varName))
-	buf.WriteString("\t}\n")
-	buf.WriteString("\tif strings.Contains(strings.ToLower(head), `name=\"description\"`) || strings.Contains(strings.ToLower(head), `name='description'`) {\n")
-	buf.WriteString(fmt.Sprintf("\t\t%s = stripMetaDescriptionTag(%s)\n", varName, varName))
-	buf.WriteString("\t}\n")
+	buf.WriteString(fmt.Sprintf("\t%s = dedupeLayoutHead(%s, head)\n", varName, varName))
 }
 
 func genLayoutNode(gen *Generator, n TemplateNode, depth int) (string, error) {

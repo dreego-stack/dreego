@@ -72,7 +72,7 @@ html/output HTML IR          -> generated Go renderer
 ```
 
 Stable client languages and their version targets are tracked in the
-[client-language compatibility matrix](../cmd/dreego/_docs/client-languages.md).
+[client-language compatibility matrix](client-languages.md).
 
 Markdown-to-HTML, TypeScript-to-JavaScript, and Browser Lua are shipped. Browser
 Lua includes isolated scripts, safe emission, source-accurate diagnostics,

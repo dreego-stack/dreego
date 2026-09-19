@@ -16,7 +16,7 @@ timestamp: 2026-07-28T00:00:00Z
 > `Target` interface and context examples below are not accepted APIs. Planned
 > work uses a typed render foundation and adds Wails through capabilities
 > proven by implementations. Static site generation is not planned. See
-> [target-neutral-application-and-first-party-targets](../../../../_docs/decisions/target-neutral-application-and-first-party-targets.md).
+> [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output3.md)
 
 ## Current package boundaries

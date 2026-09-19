@@ -88,7 +88,7 @@ func (a *App) Build() error {
 		return err
 	}
 
-	if a.csrfEnabled && a.sessionStore == nil {
+	if a.csrfEnabled && a.sessionStore == nil && a.stateChangingRoute() {
 		a.warnMissingSessionStore()
 	}
 

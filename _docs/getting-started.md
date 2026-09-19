@@ -208,8 +208,8 @@ Visiting `/users/42` shows "User: 42".
 
 ## See Also
 
-- [Components](https://github.com/dreego-stack/dreego/blob/main/core/_docs/components.md) — full component docs
-- [Routing](https://github.com/dreego-stack/dreego/blob/main/core/_docs/routing.md) — dynamic segments, groups, methods
-- [Runtime API](https://github.com/dreego-stack/dreego/blob/main/core/_docs/runtime.md) — SSRContext, sessions, config
-- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/cmd/dreego/_docs/cli.md)
+- [Components](https://github.com/dreego-stack/dreego/blob/main/_docs/components.md) — full component docs
+- [Routing](https://github.com/dreego-stack/dreego/blob/main/_docs/routing.md) — dynamic segments, groups, methods
+- [Runtime API](https://github.com/dreego-stack/dreego/blob/main/_docs/runtime.md) — SSRContext, sessions, config
+- [CLI Reference](https://github.com/dreego-stack/dreego/blob/main/_docs/cli.md)
 - [Docs Index](https://github.com/dreego-stack/dreego/blob/main/_docs/index.md)

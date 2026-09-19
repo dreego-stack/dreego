@@ -12,7 +12,6 @@ import (
 )
 
 const coreModule = "github.com/dreego-stack/dreego"
-const cliModule = "github.com/dreego-stack/dreego/cmd/dreego"
 const pluginOrgPrefix = "github.com/dreego-stack/"
 
 var wdFunc = func() string {
@@ -190,10 +189,6 @@ func cmdList() {
 	if !seen[gm.Module] {
 		seen[gm.Module] = true
 		mods = append(mods, gm.Module)
-	}
-	if !seen[cliModule] {
-		seen[cliModule] = true
-		mods = append(mods, cliModule)
 	}
 	var plugins []string
 	for path := range gm.Requires {

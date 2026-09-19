@@ -102,6 +102,9 @@ func TestModuleBoundaries(t *testing.T) {
 	} else if !semanticVersionPattern.MatchString(version) {
 		t.Errorf("coordinated module version %q is not a semantic version", version)
 	}
+	if info, err := os.Stat(filepath.Join(repoRoot, "_docs")); err != nil || !info.IsDir() {
+		t.Error("central documentation directory _docs is missing")
+	}
 	for _, path := range []string{
 		"core/_docs",
 		"adapter/ssr/_docs",
@@ -109,8 +112,8 @@ func TestModuleBoundaries(t *testing.T) {
 		"dreegotest/_docs",
 		"cmd/dreego/_docs",
 	} {
-		if info, err := os.Stat(filepath.Join(repoRoot, path)); err != nil || !info.IsDir() {
-			t.Errorf("required module documentation directory %s is missing", path)
+		if _, err := os.Stat(filepath.Join(repoRoot, path)); err == nil {
+			t.Errorf("module documentation directory %s must live centrally in _docs", path)
 		}
 	}
 	for _, path := range []string{"core/ssr", "cli/dreego", "target"} {

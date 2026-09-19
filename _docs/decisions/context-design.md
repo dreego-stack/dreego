@@ -16,7 +16,7 @@ timestamp: 2026-07-28T00:00:00Z
 > three concrete target structs below are historical sketches, not accepted
 > APIs. Planned v0.x work uses explicit host capabilities and must not model a
 > non-HTTP render as an SSR context with nil fields. See
-> [target-neutral-application-and-first-party-targets](../../../_docs/decisions/target-neutral-application-and-first-party-targets.md).
+> [target-neutral-application-and-first-party-targets](target-neutral-application-and-first-party-targets.md).
 **Review:** GLM-5.2 Expert Review (.tmp/output1.md)
 
 **Current state:** `SSRContext` is the only concrete context in use. Wails is

@@ -212,7 +212,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 }
 
 func layoutNeedsHeadHelpers(srcs []string) bool {
-	return strings.Contains(strings.Join(srcs, ""), "stripTitleTag(")
+	return strings.Contains(strings.Join(srcs, ""), "dedupeLayoutHead(")
 }
 
 func buildImportLine(imports map[string]string, selfPkg string) string {

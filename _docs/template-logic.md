@@ -15,7 +15,7 @@ Use double braces in text and attributes:
 
 Dreego escapes expressions for their output context. Text, quoted attributes,
 URLs, event attributes, and inline style values do not share one generic
-escaping rule. See [Output Safety](../../_docs/security.md).
+escaping rule. See [Output Safety](security.md).
 
 Filters form a pipe-separated chain:
 

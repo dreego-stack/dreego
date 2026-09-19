@@ -67,6 +67,6 @@ Automated checks cover static markup and CLI behavior. Before claiming accessibi
 
 ## See Also
 
-- [Testing](../dreegotest/_docs/testing.md) — Accessibility test entries
-- [CLI](../cmd/dreego/_docs/cli.md) — CLI reference
+- [Testing](testing.md) — Accessibility test entries
+- [CLI](cli.md) — CLI reference
 - [Getting Started](getting-started.md) — Tutorial

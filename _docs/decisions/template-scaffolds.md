@@ -33,6 +33,8 @@ cmd/dreego/internal/templates/
 ├── _common/
 │   ├── main.go.tmpl          ← SSR entrypoint
 │   ├── Taskfile.yml
+│   ├── Dockerfile            ← CLI install + generate + static runtime build
+│   ├── docker-compose.yml
 │   ├── .gitignore.tmpl
 │   └── www/dreego.config.json
 ├── web-minimal/
@@ -90,6 +92,9 @@ those expressions and corrupt the generated application.
 |----------|---------|
 | `web-minimal` | Smallest SSR application: SSR entrypoint, config, one layout, one route, and one style block. Default for `dreego new` and `dreego init`. |
 | `web-app` | Full SSR application starter: app shell with a `Nav` component in the layout header, a `Card` component, `/` with a server-rendered typed form, and a nested `/dashboard` route. Local `<style>` only, no CDN. |
+
+Both templates share the `_common` overlay, which includes `Dockerfile` and
+`docker-compose.yml`, so every scaffold has a working container build.
 
 Both templates declare `type` `web` and `adapter` `ssr` with an empty
 `extraRequires` list. The `web-app` layout deliberately declares no static

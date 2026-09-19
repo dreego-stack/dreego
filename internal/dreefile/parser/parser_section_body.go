@@ -21,7 +21,7 @@ func (p *Parser) parseBodySection() (*ir.BodySection, error) {
 	}
 	language := sectionLanguage(tok.Attr)
 	method, explicit := parseBodyMethod(tok.Attr)
-	return &ir.BodySection{Nodes: nodes, Language: language, Method: method, MethodExplicit: explicit}, nil
+	return &ir.BodySection{Nodes: nodes, Language: language, Method: method, MethodExplicit: explicit, Attrs: bodySectionAttrs(tok.Attr), Pos: tok.Pos}, nil
 }
 
 func parseBodyMethod(attrs string) (string, bool) {

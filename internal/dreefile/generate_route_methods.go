@@ -3,6 +3,7 @@ package dreefile
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dreego-stack/dreego/internal/dreefile/gogen"
 )
@@ -70,6 +71,32 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 		for _, diagnostic := range a11yDiagnostics(file.Body.Nodes) {
 			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
 		}
+		if diagnostic, ok := bodyAttrDiagnostic(file, fpath, bodyOffset); ok {
+			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
+		}
+		if diagnostic, ok := alpineCSPDiagnostic(file.Body.Nodes, fpath); ok {
+			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
+		}
 	}
 	return file, raw, nil
+}
+
+// bodyAttrDiagnostic warns when the <body> section tag carries HTML attributes.
+// Those attributes sit on the route's body wrapper, but a layout supplies the
+// real document <body>, so the attributes never reach the rendered element.
+// The framework would otherwise drop them silently, leaving Alpine/HTMX hooks
+// inert.
+func bodyAttrDiagnostic(file *File, fpath string, bodyOffset int) (string, bool) {
+	if file.Body == nil || strings.TrimSpace(file.Body.Attrs) == "" {
+		return "", false
+	}
+	line, col := gogen.PosToLineCol(file.SourceContent, file.Body.Pos+bodyOffset)
+	d := Diagnostic{
+		File:  fpath,
+		Line:  line,
+		Col:   col,
+		Cause: fmt.Sprintf("attributes on the route <body> tag (%s) are not applied to the layout's <body>", file.Body.Attrs),
+		Fix:   "move them onto an element inside <body>, or add them to the layout's body tag",
+	}
+	return d.String(), true
 }

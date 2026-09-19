@@ -210,7 +210,7 @@ Phase-specific additions:
   diagnostic. The grammar is line-keyword based on purpose.
 - **Do not remove `dreego generate`.** The compiler is `internal/dreefile/`,
   `_tests/sh/check-core-deps.sh` enforces the dependency boundary, the accepted
-  ADR `cmd/dreego/_docs/decisions/transpiler-vs-runtime.md` requires compile-time
+  ADR `_docs/decisions/transpiler-vs-runtime.md` requires compile-time
   safety, and `README.md` states that Dreego is a compile-time transpiler.
 - **No universal interfaces.** No `Target`, processor, or cache interface before
   real implementations prove a small shared contract.

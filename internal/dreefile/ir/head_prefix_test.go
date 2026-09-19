@@ -11,7 +11,9 @@ func TestHasHeadDedupeTagCaseInsensitive(t *testing.T) {
 		`<meta NAME="description" content="d">`: true,
 		`<meta name='description' content='d'>`: true,
 		`<meta name='DESCRIPTION' content='d'>`: true,
-		`<meta name="viewport" content="w">`:    false,
+		`<meta name="viewport" content="w">`:    true,
+		`<meta name='viewport' content='w'>`:    true,
+		`<meta charset="utf-8">`:                true,
 		`<p>hello</p>`:                          false,
 	}
 	for in, want := range cases {

@@ -20,6 +20,8 @@ func TestCLINew(t *testing.T) {
 		"testapp/main.go",
 		"testapp/go.mod",
 		"testapp/Taskfile.yml",
+		"testapp/Dockerfile",
+		"testapp/docker-compose.yml",
 		"testapp/www/routes/+page.dreego",
 		"testapp/www/layouts/default.dreego",
 	} {

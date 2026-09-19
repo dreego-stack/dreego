@@ -13,7 +13,7 @@ timestamp: 2026-07-28T00:00:00Z
 
 > **Historical note:** The generated `g-action` pipeline is current. The
 > dependency on `go-playground/validator` is superseded — validation uses
-> built-in validators in Core (see [_docs/forms.md](../../_docs/forms.md)). The
+> built-in validators in Core (see [_docs/forms.md](../forms.md)). The
 > `dreego.Context` interface and target-agnostic handler signature remain
 > current (see [context-design](context-design.md)).
 
