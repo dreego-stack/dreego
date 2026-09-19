@@ -3,8 +3,8 @@ module importcheck
 go 1.27
 
 require (
-	github.com/dreego-stack/dreego/adapter/ssr v0.10.2
-	github.com/dreego-stack/dreego/core v0.10.2
+	github.com/dreego-stack/dreego/adapter/ssr v0.10.3
+	github.com/dreego-stack/dreego/core v0.10.3
 	golang.org/x/text v0.22.0
 )
 
