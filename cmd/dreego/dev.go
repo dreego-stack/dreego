@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
+	dreefile "github.com/dreego-stack/dreego/internal/dreefile"
 )
 
 const devServerStopTimeout = 2 * time.Second
@@ -74,7 +74,7 @@ func shouldRestart(changed []string) bool {
 }
 
 func cmdDev(args []string) {
-	if err := transpiler.Run(false); err != nil {
+	if err := dreefile.Run(false); err != nil {
 		fmt.Fprintf(os.Stderr, "generate error: %v\n", err)
 		os.Exit(1)
 	}

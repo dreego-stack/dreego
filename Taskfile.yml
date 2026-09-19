@@ -38,6 +38,7 @@ tasks:
       - |
         run_tests() {
           go run ./cmd/dreego tools install typescript
+          sh _tests/sh/check-layering.sh
           sh _tests/sh/check-wails-demo.sh
           CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
           task coverage

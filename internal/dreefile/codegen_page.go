@@ -1,0 +1,229 @@
+package dreefile
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/dreego-stack/dreego/internal/dreefile/codegen"
+	"github.com/dreego-stack/dreego/internal/dreefile/gogen"
+	"github.com/dreego-stack/dreego/internal/dreefile/ir"
+	bodyhtml "github.com/dreego-stack/dreego/internal/dreefile/sections/body/html"
+)
+
+func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+	var l *codegen.Layout
+	if layout != nil {
+		l = &codegen.Layout{File: layout.file, Name: layout.name}
+	}
+	if len(file.FormActions) > 0 {
+		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash)
+	}
+	methods := fileRegisteredMethods(file)
+	var src, regs strings.Builder
+	for _, method := range methods {
+		copy := *file
+		copy.Server = nil
+		for _, section := range file.Server {
+			if section.Method == method || (method == "GET" && section.Method == "") {
+				copy.Server = append(copy.Server, section)
+			}
+		}
+		if len(copy.Server) == 0 {
+			copy.Server = []ServerSection{{Method: method}}
+		}
+		copy.Body = templateForMethod(file, method)
+		part, reg, err := generateMethodHandler(gen, &copy, l, pkgName, baseName, pattern, scopeHash)
+		if err != nil {
+			return "", "", err
+		}
+		src.WriteString(part)
+		regs.WriteString(reg)
+	}
+	return src.String(), regs.String(), nil
+}
+
+func templateForMethod(file *File, method string) *BodySection {
+	for i := range file.Bodies {
+		if file.Bodies[i].Method == method {
+			section := file.Bodies[i]
+			return &section
+		}
+	}
+	if len(file.Bodies) > 0 {
+		return nil
+	}
+	return file.Body
+}
+
+func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+	hasTypedBlocks := false
+	for _, g := range file.Server {
+		if g.ContentType != "" && g.ContentType != "custom" {
+			hasTypedBlocks = true
+		}
+	}
+	hasFormActions := len(file.FormActions) > 0
+
+	pascalBase := gogen.ToPascalCase(baseName)
+	renderFunc := "render" + pascalBase
+
+	var firstMethod string
+	var getHandler string
+	var postHandler string
+
+	if hasFormActions {
+		getHandler = "Handle" + pascalBase + "Get"
+		postHandler = "Handle" + pascalBase + "Post"
+		firstMethod = ""
+	} else {
+		firstMethod = "GET"
+		for _, g := range file.Server {
+			if g.Method != "GET" {
+				firstMethod = g.Method
+			}
+		}
+		methodSuffix := ""
+		if firstMethod != "GET" {
+			methodSuffix = strings.ToUpper(firstMethod)
+		}
+		renderFunc = "render" + pascalBase + methodSuffix
+		getHandler = "Handle" + pascalBase + methodSuffix
+	}
+
+	var buf strings.Builder
+
+	pkgCode, inlineCode := splitServerSections(file.Server, hasFormActions)
+	if pkgCode != "" {
+		buf.WriteString(pkgCode)
+	}
+
+	contextType := "*dreego.SSRContext"
+	if firstMethod == "GET" && inlineCode == "" && !hasTypedBlocks {
+		contextType = "dreego.RenderContext"
+	}
+	buf.WriteString(fmt.Sprintf("\nfunc %s(c %s) (string, error) {\n", renderFunc, contextType))
+	buf.WriteString("\tvar b strings.Builder\n\n")
+
+	if inlineCode != "" {
+		for line := range strings.SplitSeq(strings.Trim(inlineCode, "\n"), "\n") {
+			buf.WriteString("\t" + strings.TrimSpace(line) + "\n")
+		}
+		buf.WriteString("\n")
+	}
+
+	if hasTypedBlocks {
+		typedCode, err := genTypedBlocks(file)
+		if err != nil {
+			return "", "", err
+		}
+		buf.WriteString(typedCode)
+	}
+
+	if file.Body != nil {
+		templCode, err := bodyhtml.GenTempl(gen, file, layout, scopeHash, true)
+		if err != nil {
+			return "", "", err
+		}
+		buf.WriteString(templCode)
+	} else if !hasFormActions && firstMethod != "GET" {
+		buf.WriteString("\tb.WriteString(\"OK\")\n")
+	}
+	buf.WriteString("\n\treturn dreego.LocalizedHTML(c, b.String()), nil\n")
+	buf.WriteString("}\n\n")
+	if contextType == "dreego.RenderContext" {
+		pageFunc := "Page" + pascalBase
+		buf.WriteString(fmt.Sprintf("func %s() dreego.Component {\n", pageFunc))
+		buf.WriteString("\treturn dreego.ComponentFunc(func(c dreego.RenderContext) (dreego.Result, error) {\n")
+		buf.WriteString(fmt.Sprintf("\t\thtml, err := %s(c)\n", renderFunc))
+		buf.WriteString("\t\tif err != nil { return dreego.Result{}, err }\n")
+		buf.WriteString("\t\treturn dreego.Result{HTML: []byte(html)}, nil\n")
+		buf.WriteString("\t})\n")
+		buf.WriteString("}\n\n")
+	}
+
+	buf.WriteString(fmt.Sprintf("func %s(w http.ResponseWriter, r *http.Request) {\n", getHandler))
+	buf.WriteString("\tc := dreego.NewSSR(w, r)\n")
+	buf.WriteString(fmt.Sprintf("\thtml, err := %s(c)\n", renderFunc))
+	buf.WriteString("\tif err != nil {\n")
+	buf.WriteString("\t\thttp.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)\n")
+	buf.WriteString("\t\treturn\n")
+	buf.WriteString("\t}\n")
+	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
+	buf.WriteString("\tw.Write([]byte(html))\n")
+	buf.WriteString("}\n")
+
+	var postCode string
+	if hasFormActions {
+		var err error
+		postCode, err = generateFormPostHandler(file, renderFunc, postHandler, pattern)
+		if err != nil {
+			return "", "", err
+		}
+		if !strings.HasPrefix(postCode, "//") {
+			buf.WriteString(postCode)
+		}
+	}
+
+	var reg strings.Builder
+	if hasFormActions {
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", "GET", pattern, getHandler)))
+		if postCode != "" && !strings.HasPrefix(postCode, "//") {
+			handler := fmt.Sprintf("func(w http.ResponseWriter, r *http.Request) { %s(app, w, r) }", postHandler)
+			reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", "POST", pattern, handler)))
+		}
+	} else {
+		reg.WriteString(registrationStatement(fmt.Sprintf("app.Register(%q, %q, %s)", firstMethod, pattern, getHandler)))
+		if contextType == "dreego.RenderContext" {
+			if routePath, ok := desktopRoutePath(pattern); ok {
+				pageFunc := "Page" + pascalBase
+				reg.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRender(%q, %s())", routePath, pageFunc)))
+			}
+		}
+	}
+
+	return buf.String(), reg.String(), nil
+}
+
+func desktopRoutePath(pattern string) (string, bool) {
+	if strings.Contains(pattern, "{") && !strings.HasSuffix(pattern, "/{$}") {
+		return "", false
+	}
+	if pattern == "/{$}" {
+		return "/", true
+	}
+	if routePath, ok := strings.CutSuffix(pattern, "/{$}"); ok {
+		return routePath + "/", true
+	}
+	return pattern, true
+}
+
+func registrationStatement(call string) string {
+	return fmt.Sprintf("\tif err := %s; err != nil {\n\t\treturn err\n\t}\n", call)
+}
+
+func genTypedBlocks(file *File) (string, error) {
+	var buf strings.Builder
+	buf.WriteString("\tif true {\n")
+	for _, g := range file.Server {
+		if g.ContentType == "json" {
+			buf.WriteString("\t\tif c.Wants(\"application/json\") {\n")
+			buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n")
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+				buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\t\t\treturn \"\", nil\n")
+			buf.WriteString("\t\t}\n")
+		}
+		if g.ContentType == "xml" {
+			buf.WriteString("\t\tif c.Wants(\"application/xml\") {\n")
+			buf.WriteString("\t\t\tc.W.Header().Set(\"Content-Type\", \"application/xml; charset=utf-8\")\n")
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+				buf.WriteString("\t\t\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\t\t\treturn \"\", nil\n")
+			buf.WriteString("\t\t}\n")
+		}
+	}
+	buf.WriteString("\t}\n\n")
+	return buf.String(), nil
+}

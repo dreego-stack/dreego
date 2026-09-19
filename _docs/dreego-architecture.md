@@ -45,7 +45,7 @@ middleware, rendering, session, context, and validation responsibilities.
 core/                  public runtime facade
 core/internal/         runtime implementation
 adapter/ssr/           first-party HTTP host
-internal/transpiler/   .dreego compiler and code generation
+internal/dreefile/     .dreego compiler and code generation
 cmd/dreego/            command-line application
 dreegotest/            public test helpers
 _tests/go/             integration and regression tests

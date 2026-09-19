@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	typescript "github.com/dreego-stack/dreego/internal/transpiler/js/ts"
+	typescript "github.com/dreego-stack/dreego/internal/dreefile/sections/client/ts"
 )
 
 func cmdTools(args []string) error {

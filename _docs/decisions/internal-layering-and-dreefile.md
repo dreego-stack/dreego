@@ -59,7 +59,8 @@ emitted string.
 
 `internal/transpiler/` becomes `internal/dreefile/`. Central orchestration stays
 in `dreefile/generate.go` (`Run`, `RunCheck`, `buildPlan`, `buildRootPlan`,
-`buildRootFile`) plus `plan.go` and `support.go`.
+`buildRootFile`) plus `generate_check.go` (plan diff, disk I/O, apply) and
+`generate_support.go`.
 
 Shared packages sit directly on the dreefile level:
 
@@ -78,8 +79,8 @@ Shared packages sit directly on the dreefile level:
   needs.
 - `dreefile/jsoutput/` — the shared client emission artifact and `<script>`
   tag generation (former `js/output`: `Artifact`, `GenClient`, `GenClientTo`).
-  It imports `ir`. It is shared because the body/html section and every client
-  language emit the same script form.
+  It imports `gogen`, not `ir`. It is shared because the body/html section and
+  every client language emit the same script form.
 
 ### Front-end stage
 
@@ -87,12 +88,14 @@ The tokenizing and parsing stack keeps explicit homes at the dreefile level,
 parallel to the shared packages:
 
 - `dreefile/tokens/` — token types.
-- `dreefile/lexer/` — the scanner; imports `tokens`.
-- `dreefile/parser/` — the section parser; imports `tokens`, `lexer`, `ir`.
+- `dreefile/lexer/` — the scanner; imports `tokens`, `ir`, and `dreecode`.
+- `dreefile/parser/` — the section parser; imports `tokens`, `ir`, and
+  `dreecode`. It does **not** import `lexer` in non-test code.
 
 The front-end stage produces the `ir` tree; sections consume it. `dreecode` is
-the mini-template-language semantics that sections use for control flow,
-expressions, filters, and slots — not the token/lexer/parser stack.
+the mini-template-language semantics that BOTH the front-end (`lexer`, `parser`)
+and the sections use for control flow, expressions, filters, and slots — not the
+token/lexer/parser stack.
 
 ### Sections
 
@@ -100,9 +103,7 @@ expressions, filters, and slots — not the token/lexer/parser stack.
 
 ```text
 dreefile/sections/
-├── header/       DREEFILE, LAYOUT, COMPONENT, GOIMPORT
 ├── head/
-├── server/
 ├── style/
 ├── body/html/
 ├── body/md/      Markdown processor home (see below)
@@ -112,6 +113,11 @@ dreefile/sections/
 │   └── lua/
 ```
 
+The `header/` and `server/` section processors did **not** become own packages
+in this phase; they remain in the dreefile root. This is a deliberate,
+recorded deviation, not an oversight — see Consequences and the open item in
+[`_plan/phase-restructure.md`](../../_plan/phase-restructure.md).
+
 Language subfolders exist **only** where real language variants exist: `body`
 and `client`. A section that has one language stays flat.
 
@@ -119,42 +125,65 @@ The `client/` orchestrator (former `js/process`) is the single legal entry point
 into the client languages. It imports its children `client/js`, `client/ts`, and
 `client/lua`; the children never import the orchestrator or each other. The
 orchestrator is a shared emission entry point rather than a section processor,
-so `body/html` may import it without a section-to-section exception.
+so `body/html` may import it as an explicit composition edge.
 
 The `body/md/` package is the **Markdown processor home** (former `html/md`).
 It owns both the `lang="md"` body transform and the `<md>`-tag region scanning
-that currently lives in `parser/parser_md_tag.go`; that scanning moves out of
-the parser into `body/md/`. The parser therefore imports no Markdown package.
+that previously lived in `parser/parser_md_tag.go`; that scanning moved out of
+the parser into `body/md/`. The parser imports no Markdown package.
 
 Message-expression parsing (`ParseMessageExpression`) is
-mini-template-language semantics and belongs to `dreecode`, not to the parser
-stack; the sections that need it use `dreecode`.
+mini-template-language semantics and belongs to `dreecode`. Both the front-end
+(`lexer`/`parser`) and the sections use it; `dreecode` is shared semantics, not
+a section-only package.
 
 ### Discovery and code generation
 
-`dreefile/route/`, `dreefile/component/`, `dreefile/layout/`,
-`dreefile/assets/`, `dreefile/format/`, `dreefile/config/`, `dreefile/check/`,
-and `dreefile/i18n/` own discovery and per-concern generation.
+`dreefile/route/`, `dreefile/component/`, `dreefile/layout/`, and
+`dreefile/assets/` were **not** split into their own packages in this phase;
+they remain in the dreefile root. Moving them would require exporting root-only
+helpers and would create front-end imports the rule does not grant. The
+`dreefile/i18n/` catalog-extraction package **was** split out. `format/`,
+`config/`, and `check/` staying in the root is already sanctioned by the phase
+Risks. See the open item in
+[`_plan/phase-restructure.md`](../../_plan/phase-restructure.md).
 
 ### Shared Markdown home is `internal/md`
 
-`core/markdown.go` imports the Markdown implementation and `ir`. After the move
+`core/markdown.go` imports the shared Markdown implementation. After the move
 it must not import the compiler, so the shared Markdown implementation lives at
 **`internal/md`** — *not* `internal/render/markdown`, because `render` is the
 target-neutral render contract and must not grow a Markdown dependency.
 
 `internal/md` is shared implementation and therefore imports **no compiler
-package** (`ir` included). It exposes an HTML-string entry point and the
-`Mode` values (`ModeSafe`, `ModeTrusted`). Exact names are a PR2 code decision;
-the runtime's exported `core.MarkdownToHTML`/`MarkdownToHTMLTrusted` keep their
-current public signatures.
+package** (`ir` included). It owns the runtime string path: it exposes an
+HTML-string entry point, the `Mode` values (`ModeSafe`, `ModeTrusted`), the
+block parser (`ParseBlocks`), and the inline renderer and shared helpers
+(`SafeURL`, `IsHR`, `SafeFenceLanguage`, table alignment). `core/markdown.go`
+calls `md.ToHTML` directly. The runtime's exported
+`core.MarkdownToHTML`/`MarkdownToHTMLTrusted` keep their current public
+signatures.
 
 The compiler keeps its `TemplateNode` path in `dreefile/sections/body/md/`
-(`ToNodes`, `TransformNodes`): that adapter imports `ir` and may call
-`internal/md`, but the dependency points compiler -> shared, never shared ->
-compiler. The runtime only ever needs rendered text — `core/markdown.go` rejects
-every non-`NodeText` node — so `core` calls `internal/md` directly on the string
-path and never touches the node adapter or `ir`.
+(`ToNodes`, `TransformNodes`). That package is the compiler-side home of the
+Markdown-to-`ir` adapter and imports `ir`. It **delegates inline rendering and
+the shared helpers** to `internal/md`; it keeps the `ir.TemplateNode` adapter,
+the i18n, control-flow, and `<md>`-tag-scanning logic, and its **own block
+parser** inside `TransformNodes`. That block parser stays separate from
+`shared.ParseBlocks` because embedded `{#if}`/`{{ }}` boundaries must survive
+parsing — a plain parsed string block cannot carry them.
+
+`ToNodes` is the only path to `shared.ParseBlocks`, and it is currently reached
+only by tests; the production compiler block path is
+`ProcessBody -> TransformNodes`. There is **no parity test** between the
+compiler block parser and `shared.ParseBlocks`. That is a flagged open item
+(see [`_plan/phase-restructure.md`](../../_plan/phase-restructure.md)), not a
+settled equivalence.
+
+The dependency direction is `internal/dreefile/sections/body/md -> internal/md`,
+never the reverse: `internal/md` stays compiler-free. The runtime only ever
+needs rendered text, so `core` calls `internal/md` directly on the string path
+and never touches the node adapter or `ir`.
 
 This replaces the earlier open item; it is decided, not deferred.
 
@@ -168,49 +197,83 @@ its own slice before the structural moves can be trusted.
 
 ### Dependency rule
 
-The rule must match the real code, not an idealized tree. The verified edges
-are: every section imports `codegen.State`; the body/html output stage imports
-the client orchestrator and the client script emitter; the client orchestrator
-imports its three language children; and the front-end stage produces the `ir`
-tree for the sections.
+The rule must match the real code, not an idealized tree. It states the maximum
+set of in-repository imports each package may have; a package may use a subset.
+The required structural check inspects **non-test** files only, because test
+files add edges the packages themselves do not have: `dreecode` and
+`sections/body/md` tests import `lexer` and `parser`, and `parser` tests import
+`lexer`.
+
+`dreecode` is shared semantics used by BOTH the front-end and the sections — it
+is **not** a section-only package. The `lexer` and `parser` stages use
+`dreecode` for message-expression and mini-template-language scanning, and the
+sections use the same semantics for control flow, expressions, filters, and
+slots.
 
 ```text
-sections/*            -> codegen, dreecode, gogen, ir, jsoutput
-sections/body/html    -> sections/client            (client orchestrator, explicit entry)
-sections/client       -> sections/client/{js,ts,lua} (parent -> child only)
-sections/client/{js,ts,lua} -> codegen, jsoutput, ir
-dreecode              -> ir
-gogen                 -> ir
-codegen               -> ir
-jsoutput              -> ir
-lexer                 -> tokens
-parser                -> tokens, lexer, ir
-dreefile root (generate.go, plan.go, support.go, codegen_*.go)
-                      -> sections, front-end, codegen, dreecode, gogen, ir, jsoutput
+front-end
+  lexer                  -> dreecode, ir, tokens
+  parser                 -> dreecode, ir, tokens
+  tokens                 -> (no in-repo imports)
+  ir                     -> (no in-repo imports)
+
+shared
+  dreecode               -> ir
+  gogen                  -> ir
+  codegen                -> ir
+  jsoutput               -> gogen
+  i18n                   -> (no in-repo imports)
+
+sections (general)
+  sections/*             -> codegen, dreecode, gogen, ir, jsoutput (nothing else
+                            in-repo, except the explicit composition edges below)
+
+sections (explicit composition edges)
+  sections/body/html     -> the general set, plus sections/head, sections/style,
+                            and sections/client (the explicit client orchestrator)
+  sections/body/md       -> the general set, plus internal/md (the single shared
+                            Markdown implementation; it is the only legal
+                            compiler consumer of internal/md)
+  sections/client        -> the general set, plus sections/client/{js,ts,lua}
+                            (parent -> child only)
+  sections/client/{js,ts,lua} -> codegen, ir, jsoutput (never a parent or sibling)
+
+dreefile root (generate.go, codegen_*.go, generate_*.go, parser_facade.go,
+lex_facade.go, i18n_export.go)
+                         -> sections (incl. sections/body/md), front-end, codegen,
+                            dreecode, gogen, ir, jsoutput, i18n, internal/gomod
 ```
 
-The dreefile root orchestrates: it may import the sections, the front-end, and
-the shared packages, but nothing imports the root back.
+The dreefile root orchestrates: it may import the sections, the front-end, the
+shared compiler packages, and the root shared implementation (`internal/gomod`),
+but nothing imports the root back. The only compiler package that imports
+`internal/md` is `sections/body/md`, which delegates its Markdown parsing and
+rendering there; `internal/md` never imports a compiler package, and the runtime
+string path (`core/markdown.go`) reaches it directly.
 
-No section imports another **sibling** section family. The client orchestrator
-(`sections/client/`) is a shared emission entry point, not a section processor:
-it is the one legal target for `body/html -> sections/client`, and the language
-children never import the orchestrator, `body/html`, or each other. A section
-that needs shared behavior otherwise uses `codegen` (generation state),
-`dreecode` (language semantics), `gogen` (Go emission), `jsoutput` (client
-script emission), or `ir` (types).
+No section imports a sibling section **family**, with two verified exceptions:
+`body/html` composes the leaf processors `sections/head` and `sections/style`,
+and it imports `sections/client` as the explicit client orchestrator. The leaf
+sections (`head`, `style`, `body/md`) and the language children
+(`client/{js,ts,lua}`) import no sibling and no parent. A section that needs
+shared behavior otherwise uses `codegen` (generation state), `dreecode`
+(language semantics), `gogen` (Go emission), `jsoutput` (client script
+emission), `ir` (types), or — for `body/md` only — the shared implementation
+`internal/md`.
 
 `dreecode` owns the mini-template-language semantics, including message
-expression parsing; the parser stack is not a section dependency.
+expression parsing; the parser stack is a consumer of `dreecode`, not a
+dependency of the sections.
 
 ### Layer summary
 
 | Layer | Packages | May import | Must not import |
 |---|---|---|---|
 | Shared implementation | `internal/{render,context,i18n,server,middleware,session,validate,gomod,templates,md}` | standard library, `golang.org/x/*`, each other per direction | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/dreefile/...` as Go packages |
-| Compiler shared | `internal/dreefile/{ir,dreecode,gogen,codegen,jsoutput}` | standard library, `ir` per the rule | other compiler packages outside the rule, shared implementation, `core`, `adapter/*` |
-| Compiler front-end | `internal/dreefile/{tokens,lexer,parser}` | `tokens`, `lexer`, `ir` per the rule | sections, `core`, `adapter/*` |
-| Compiler sections | `internal/dreefile/sections/...` | `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`, `sections/client` (orchestrator only) | sibling sections, `core`, `adapter/*` |
+| Compiler shared | `internal/dreefile/{ir,dreecode,gogen,codegen,jsoutput,i18n}` | standard library, `ir`; `jsoutput` may import `gogen` | other compiler packages outside the rule, shared implementation, `core`, `adapter/*` |
+| Compiler front-end | `internal/dreefile/{tokens,lexer,parser}` | `tokens`, `ir`, and `dreecode`; `parser` must not import `lexer` in non-test code | sections, `core`, `adapter/*` |
+| Compiler sections | `internal/dreefile/sections/...` | `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`; `body/html` also `head`, `style`, `sections/client` (orchestrator only); `client` also `client/{js,ts,lua}`; `body/md` also `internal/md` (the single Markdown implementation; its only legal compiler consumer) | other sibling sections, parents or siblings from `client/{js,ts,lua}`, `core`, `adapter/*` |
+| Compiler root | `internal/dreefile` | sections (incl. `sections/body/md`), front-end, `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`, `i18n`, `internal/gomod` | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/md` |
 | Facades and hosts | `core`, `adapter/ssr`, `adapter/wails`, `cmd/dreego`, `dreegotest` | shared implementation, public facades | — |
 
 The compiler dependency rule is a review invariant and is enforced by the
@@ -233,12 +296,23 @@ compiler package.
 - `_tests/sh/check-core-deps.sh` keeps the **external** dependency boundary
   checked after the moves. It does **not** check the layering rule, so the
   required structural check is a separate, necessary artifact.
-- Structural invariants (no sibling-section imports; `dreecode`, `gogen`,
-  `codegen`, and `jsoutput` import only `ir`; the client orchestrator is the
-  only parent of the language children; root `internal/` never imports `core`)
-  are asserted by the required dedicated check.
+- Structural invariants (no sibling-section imports except the two explicit
+  `body/html` composition edges; `dreecode`, `gogen`, and `codegen` import only
+  `ir` and `jsoutput` imports only `gogen`; the client orchestrator is the only
+  parent of the language children; `sections/body/md` is the only compiler
+  consumer of `internal/md`, and `internal/md` imports no compiler package; root
+  `internal/` never imports `core`) are asserted by the required dedicated check
+  over non-test files.
 - The `internal/transpiler` name disappears; documentation, plans, and todos
   that cite `internal/transpiler/...` anchors must be re-pointed.
+- **Recorded scope deviation.** `route/`, `component/`, `layout/`, and
+  `assets/` did **not** move into their own packages in this phase; they remain
+  in the `dreefile` root. Splitting them would have required exporting
+  root-only helpers and would have created front-end imports the dependency
+  rule does not grant, so the move was deliberately deferred rather than hidden.
+  `format/`, `config/`, and `check/` staying in the root was already sanctioned
+  by the phase Risks. The deviation is tracked as an explicit open item in
+  [`_plan/phase-restructure.md`](../../_plan/phase-restructure.md).
 - `ir/mdtohtml.go` (`TranslateMdtohtml`) is codegen **string rewriting**, not
   AST/type code, so it is miscategorized in `ir`. Moving it to `gogen` or the
   server section is a small, non-blocking follow-up and is not part of the

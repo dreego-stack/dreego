@@ -28,7 +28,7 @@ SSR target.
 
 ## Generated code coupling
 
-Source: internal/transpiler/
+Source: internal/dreefile/
 
 - codegen_component.go: components render as dreego.ComponentFunc(func(ctx *dreego.SSRContext) (string, error))
 - codegen_page.go: pages have a separate render func (c *dreego.SSRContext) and handler func (w, r)

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
+	dreefile "github.com/dreego-stack/dreego/internal/dreefile"
 )
 
 // Generate transpiles a .dreego source string to generated Go code using the
@@ -104,15 +104,15 @@ func MustCompileComponent(t *testing.T, name, src string) {
 }
 
 func generate(src string) (string, error) {
-	header, body, err := transpiler.ParseFileHeaderStrict(src)
+	header, body, err := dreefile.ParseFileHeaderStrict(src)
 	if err != nil {
 		return "", err
 	}
-	tokens, err := transpiler.Lex(body)
+	tokens, err := dreefile.Lex(body)
 	if err != nil {
 		return "", err
 	}
-	p := transpiler.NewParser(tokens)
+	p := dreefile.NewParser(tokens)
 	file, err := p.Parse()
 	if err != nil {
 		return "", err
@@ -123,7 +123,7 @@ func generate(src string) (string, error) {
 	file.GoImports = header.GoImports
 	file.SourceContent = src
 	if len(file.Server) == 0 {
-		file.Server = []transpiler.ServerSection{{Method: "GET"}}
+		file.Server = []dreefile.ServerSection{{Method: "GET"}}
 	}
 	for i := range file.Server {
 		if !file.Server[i].MethodExplicit {
@@ -132,8 +132,8 @@ func generate(src string) (string, error) {
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	gen := transpiler.NewGenerator()
-	out, _, err := transpiler.GenerateMethodHandler(gen, file, nil, "routes", "index", "/{$}", scopeHash)
+	gen := dreefile.NewGenerator()
+	out, _, err := dreefile.GenerateMethodHandler(gen, file, nil, "routes", "index", "/{$}", scopeHash)
 	return out, err
 }
 
@@ -141,25 +141,25 @@ func generateComponent(name, src string) (string, error) {
 	if name == "" {
 		return "", fmt.Errorf("component name is required: the DREEFILE component name comes from the file name")
 	}
-	if !transpiler.IsExportedGoIdentifier(name) {
+	if !dreefile.IsExportedGoIdentifier(name) {
 		return "", fmt.Errorf("invalid component name %q: must be an exported Go identifier such as Card or ProductCard", name)
 	}
-	header, body, err := transpiler.ParseFileHeaderStrict(src)
+	header, body, err := dreefile.ParseFileHeaderStrict(src)
 	if err != nil {
 		return "", err
 	}
 	if !header.IsComponent() {
 		return "", fmt.Errorf("source is not a DREEFILE component")
 	}
-	tokens, err := transpiler.Lex(body)
+	tokens, err := dreefile.Lex(body)
 	if err != nil {
 		return "", err
 	}
-	file, err := transpiler.NewParserConcatServer(tokens).Parse()
+	file, err := dreefile.NewParserConcatServer(tokens).Parse()
 	if err != nil {
 		return "", err
 	}
-	comp := &transpiler.ComponentDef{Name: name, Props: header.Props, Slots: header.Slots}
+	comp := &dreefile.ComponentDef{Name: name, Props: header.Props, Slots: header.Slots}
 	file.Component = comp
 	file.Imports = header.Imports
 	file.Kind = header.Kind
@@ -167,10 +167,10 @@ func generateComponent(name, src string) (string, error) {
 	file.GoImports = header.GoImports
 	file.SourceContent = src
 	if len(file.Server) == 0 {
-		file.Server = []transpiler.ServerSection{{Method: ""}}
+		file.Server = []dreefile.ServerSection{{Method: ""}}
 	}
 	h := sha256.Sum256([]byte(src))
 	scopeHash := hex.EncodeToString(h[:])[:12]
-	gen := transpiler.NewGenerator()
-	return transpiler.GenerateComponent(gen, file, scopeHash)
+	gen := dreefile.NewGenerator()
+	return dreefile.GenerateComponent(gen, file, scopeHash)
 }

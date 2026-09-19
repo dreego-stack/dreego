@@ -1,0 +1,222 @@
+package parser
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+
+	"github.com/dreego-stack/dreego/internal/dreefile/ir"
+	"github.com/dreego-stack/dreego/internal/dreefile/tokens"
+)
+
+type Parser struct {
+	tokens           []tokens.Token
+	pos              int
+	templateFromBody bool
+	concatServer     bool
+}
+
+func NewParser(tokens []tokens.Token) *Parser {
+	return &Parser{tokens: tokens}
+}
+
+// NewParserConcatServer returns a parser that concatenates multiple <server>
+// sections instead of rejecting duplicates. Used for components, where server
+// blocks are merged into a single render body rather than dispatched by method.
+func NewParserConcatServer(tokens []tokens.Token) *Parser {
+	return &Parser{tokens: tokens, concatServer: true}
+}
+
+func (p *Parser) Parse() (*ir.File, error) {
+	file := &ir.File{}
+
+	for p.pos < len(p.tokens) {
+		tok := p.current()
+
+		if tok.Type == tokens.TokenEOF {
+			break
+		}
+
+		if tok.Type == tokens.TokenText && strings.TrimSpace(tok.Value) == "" {
+			p.advance()
+			continue
+		}
+
+		if tok.Type != tokens.TokenTagOpen {
+			return nil, fmt.Errorf("expected root section, got %s at position %d", tok.Type, tok.Pos)
+		}
+
+		switch tok.Tag {
+		case "server":
+			language, err := parseSectionLanguage(tok, "go")
+			if err != nil {
+				return nil, err
+			}
+			section, err := p.parseServerSection()
+			if err != nil {
+				return nil, err
+			}
+			section.Method = "GET"
+			section.Language = language
+			section.ContentType = parseServerAttrs(tok.Attr)
+			if m := parseServerMethod(tok.Attr); m != "" {
+				section.Method = m
+				section.MethodExplicit = true
+			}
+			for _, existing := range file.Server {
+				if !p.concatServer && existing.Method == section.Method && existing.ContentType == section.ContentType {
+					return nil, fmt.Errorf("duplicate <server> section for method %s at position %d", section.Method, tok.Pos)
+				}
+			}
+			file.Server = append(file.Server, *section)
+		case "body":
+			language := sectionLanguage(tok.Attr)
+			if language == "" {
+				language = "html"
+			}
+			if language != "html" && language != "md" {
+				return nil, fmt.Errorf("unsupported language %q for <body> at position %d; install a processor for this section and language", language, tok.Pos)
+			}
+			section, err := p.parseBodySection()
+			if err != nil {
+				return nil, err
+			}
+			section.Language = language
+			for _, existing := range file.Bodies {
+				if existing.Method == section.Method {
+					return nil, fmt.Errorf("duplicate <body> section for method %s at position %d", section.Method, tok.Pos)
+				}
+			}
+			if file.Body == nil && section.Method == "GET" {
+				file.Body = section
+			}
+			file.Bodies = append(file.Bodies, *section)
+			p.templateFromBody = true
+		case "head":
+			language, err := parseSectionLanguage(tok, "html")
+			if err != nil {
+				return nil, err
+			}
+			section, err := p.parseRawSection("head")
+			if err != nil {
+				return nil, err
+			}
+			if file.Head != nil {
+				return nil, fmt.Errorf("duplicate <head> section at position %d", tok.Pos)
+			}
+			file.Head = &ir.HeadSection{Content: strings.TrimSpace(section), Language: language}
+		case "client":
+			language, err := parseAllowedLanguage(tok, "js", "ts", "lua")
+			if err != nil {
+				return nil, err
+			}
+			contentPos := p.peek().Pos
+			section, err := p.parseRawSection("client")
+			if err != nil {
+				return nil, err
+			}
+			if file.Client != nil {
+				return nil, fmt.Errorf("duplicate <client> section at position %d", tok.Pos)
+			}
+			trimmed := strings.TrimSpace(section)
+			contentPos += strings.Index(section, trimmed)
+			file.Client = &ir.ClientSection{Code: trimmed, Language: language, Pos: contentPos}
+		case "style":
+			language, err := parseSectionLanguage(tok, "css")
+			if err != nil {
+				return nil, err
+			}
+			section, err := p.parseRawSection("style")
+			if err != nil {
+				return nil, err
+			}
+			if file.Style != nil {
+				return nil, fmt.Errorf("duplicate <style> section at position %d", tok.Pos)
+			}
+			file.Style = &ir.StyleSection{Code: strings.TrimSpace(section), Language: language}
+		case "go":
+			return nil, fmt.Errorf("legacy root <go> at position %d: replace root <go> with <server>", tok.Pos)
+		case "div":
+			return nil, fmt.Errorf("legacy root <div> at position %d: replace root <div> with <body>", tok.Pos)
+		case "script":
+			return nil, fmt.Errorf("legacy root <script> at position %d: replace root <script> with <client>", tok.Pos)
+		default:
+			return nil, fmt.Errorf("expected root section, got <%s> at position %d", tok.Tag, tok.Pos)
+		}
+	}
+
+	return file, nil
+}
+
+func parseSectionLanguage(tok tokens.Token, defaultLanguage string) (string, error) {
+	return parseAllowedLanguage(tok, defaultLanguage)
+}
+
+func parseAllowedLanguage(tok tokens.Token, defaultLanguage string, allowed ...string) (string, error) {
+	language := sectionLanguage(tok.Attr)
+	if language == "" {
+		return defaultLanguage, nil
+	}
+	if language == defaultLanguage {
+		return language, nil
+	}
+	if slices.Contains(allowed, language) {
+		return language, nil
+	}
+	return "", fmt.Errorf("unsupported language %q for <%s> at position %d; install a processor for this section and language", language, tok.Tag, tok.Pos)
+}
+
+func sectionLanguage(attrs string) string {
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "lang="); ok {
+			return strings.ToLower(strings.Trim(after, "\"'"))
+		}
+	}
+	return ""
+}
+
+func (p *Parser) advance() {
+	p.pos++
+}
+
+func (p *Parser) current() tokens.Token {
+	if p.pos < len(p.tokens) {
+		return p.tokens[p.pos]
+	}
+	return tokens.Token{Type: tokens.TokenEOF}
+}
+
+func (p *Parser) peek() tokens.Token {
+	if p.pos+1 < len(p.tokens) {
+		return p.tokens[p.pos+1]
+	}
+	return tokens.Token{Type: tokens.TokenEOF}
+}
+
+func parseServerAttrs(attrs string) string {
+	if attrs == "" {
+		return ""
+	}
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "type="); ok {
+			v := after
+			return strings.Trim(v, "\"'")
+		}
+	}
+	return ""
+}
+
+// parseServerMethod extracts an explicit method= attribute from a <server> section's
+// attributes. It returns "" when no method attribute is present.
+func parseServerMethod(attrs string) string {
+	if attrs == "" {
+		return ""
+	}
+	for part := range strings.FieldsSeq(attrs) {
+		if after, ok := strings.CutPrefix(part, "method="); ok {
+			v := strings.Trim(after, "\"'")
+			return strings.ToUpper(v)
+		}
+	}
+	return ""
+}

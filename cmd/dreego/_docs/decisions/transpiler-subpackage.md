@@ -1,14 +1,22 @@
 ---
 type: Decision
 title: Transpiler as internal subpackage
-description: The transpiler lives in internal/transpiler/; core/ is the runtime framework only
+description: Historical — the transpiler was moved to internal/transpiler/; it is now internal/dreefile/
 tags: [architecture]
 timestamp: 2026-08-20T00:00:00Z
 ---
 # Transpiler as internal subpackage
 
 **Date:** 2026-08-20
-**Status:** Accepted
+**Status:** Superseded in name and location
+
+> **Superseded:** The compiler is now `internal/dreefile/`, not
+> `internal/transpiler/`. This document's reasoning (a shared root `internal/`
+> for multiple in-repo consumers; the CLI and `dreegotest` as the only users)
+> still holds; only the package name and location changed. See
+> [Internal layering and the dreefile package](../../../../_docs/decisions/internal-layering-and-dreefile.md).
+> The `internal/transpiler/...` paths below are the historical state at the
+> time of the decision.
 
 ## Context
 

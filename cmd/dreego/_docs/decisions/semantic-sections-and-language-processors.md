@@ -64,11 +64,11 @@ client Lua does not imply supporting server Lua.
 Stable language processors for a small, closed set of source languages are part
 of the Dreego monorepo under the relevant transpiler output package:
 
-- Markdown (`md` → HTML IR) under `internal/transpiler/html/md`;
+- Markdown (`md` → HTML IR) under `internal/dreefile/sections/body/md`;
 - TypeScript (`ts` → `js`) via Microsoft's pinned native Go compiler for type
-  checking and transpilation under `internal/transpiler/js/ts`;
+  checking and transpilation under `internal/dreefile/sections/client/ts`;
 - Lua (`lua` → `js`) through Dreego's own compiler and feature-linked browser
-  helpers under `internal/transpiler/js/lua`.
+  helpers under `internal/dreefile/sections/client/lua`.
 
 JavaScript, TypeScript, and Browser Lua are the complete client-language set
 for the foreseeable future. New language processors are outside the accepted

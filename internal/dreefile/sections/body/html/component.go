@@ -1,0 +1,71 @@
+package html
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/dreego-stack/dreego/internal/dreefile/codegen"
+	"github.com/dreego-stack/dreego/internal/dreefile/gogen"
+	"github.com/dreego-stack/dreego/internal/dreefile/ir"
+	"github.com/dreego-stack/dreego/internal/dreefile/sections/style"
+)
+
+func Generate(gen *codegen.State, file *ir.File, scopeHash string) (string, error) {
+	comp := file.Component
+	if comp == nil {
+		return "", fmt.Errorf("no component definition")
+	}
+
+	var buf strings.Builder
+
+	declParams, implParams, callArgs, variadicName := Params(comp)
+
+	if variadicName != "" {
+		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
+		buf.WriteString("\t" + variadicName + "0 := \"\"\n")
+		buf.WriteString("\tif len(" + variadicName + ") > 0 {\n\t\t" + variadicName + "0 = " + variadicName + "[0]\n\t}\n")
+		buf.WriteString("\treturn component" + comp.Name + "(" + callArgs + ")\n")
+		buf.WriteString("}\n\n")
+		buf.WriteString(fmt.Sprintf("func component%s(%s) dreego.Component {\n", comp.Name, implParams))
+	} else {
+		buf.WriteString(fmt.Sprintf("func %s(%s) dreego.Component {\n", comp.Name, declParams))
+	}
+	buf.WriteString("\treturn dreego.ComponentFunc(func(ctx dreego.RenderContext) (dreego.Result, error) {\n")
+	WritePropDefaultFallbacks(&buf, comp)
+	buf.WriteString("\t\tvar b strings.Builder\n\n")
+
+	for _, g := range file.Server {
+		if g.Code != "" {
+			for line := range strings.SplitSeq(strings.Trim(ir.TranslateMdtohtml(g.Code), "\n"), "\n") {
+				buf.WriteString("\t\t" + strings.TrimSpace(line) + "\n")
+			}
+			buf.WriteString("\n")
+		}
+	}
+
+	if file.Body != nil {
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(\"<div data-scope=\\\"%s\\\">\")\n", scopeHash))
+		g := &CompGen{Gen: gen, Component: comp, Server: file.Server, Builder: "b"}
+		for _, n := range file.Body.Nodes {
+			code, err := g.Node(n)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString("\t\t" + code + "\n")
+		}
+		buf.WriteString("\t\tb.WriteString(\"</div>\")\n")
+	}
+
+	if file.Style != nil {
+		scoped := style.ScopeCSS(file.Style.Code, scopeHash)
+		buf.WriteString("\t\tb.WriteString(\"<style>\")\n")
+		buf.WriteString(fmt.Sprintf("\t\tb.WriteString(%s)\n", gogen.GoLiteral(scoped)))
+		buf.WriteString("\t\tb.WriteString(\"</style>\")\n")
+	}
+
+	buf.WriteString("\n\t\treturn dreego.Result{HTML: []byte(b.String())}, nil\n")
+	buf.WriteString("\t})\n")
+	buf.WriteString("}\n")
+
+	return buf.String(), nil
+}
