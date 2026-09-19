@@ -102,11 +102,15 @@ func (f *File) StaticBodyHeadTail(idx int, after string) (tail string, end int, 
 }
 
 // HasHeadDedupeTag reports whether the given markup contains a tag whose layout
-// copy a route head may override: a <title> or a meta description. HTML is
-// case-insensitive, so the match folds the input before comparing.
+// copy a route head may override: a <title>, a meta description, a meta
+// viewport, or a meta charset. HTML is case-insensitive, so the match folds the
+// input before comparing.
 func HasHeadDedupeTag(s string) bool {
 	lower := strings.ToLower(s)
 	return strings.Contains(lower, "<title") ||
+		strings.Contains(lower, "charset") ||
 		strings.Contains(lower, `name="description"`) ||
-		strings.Contains(lower, "name='description'")
+		strings.Contains(lower, "name='description'") ||
+		strings.Contains(lower, `name="viewport"`) ||
+		strings.Contains(lower, "name='viewport'")
 }

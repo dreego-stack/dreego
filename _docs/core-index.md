@@ -6,7 +6,7 @@ Core provides Dreego's target-neutral application and rendering runtime.
 
 - [Configuration](config.md)
 - [Runtime API](runtime.md)
-- [File Anatomy](../../_docs/file-anatomy.md)
+- [File Anatomy](file-anatomy.md)
 - [Server Section](server-section.md)
 - [Head Section](head-section.md)
 - [HTML Body](body-html.md)

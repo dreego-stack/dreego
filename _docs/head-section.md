@@ -33,5 +33,5 @@ place `{#head}` where route metadata belongs. Without a layout, generated output
 contains the rendered head fragment followed by the body wrapper; Dreego does
 not invent a complete HTML document around it.
 
-See [Layouts](layouts.md) for head composition and [Output Safety](../../_docs/security.md)
+See [Layouts](layouts.md) for head composition and [Output Safety](security.md)
 for expression contexts.

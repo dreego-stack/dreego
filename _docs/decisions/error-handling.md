@@ -128,7 +128,7 @@ No error boundary at component level in V1. Rationale:
 - `{#if hasError}` covers the use case
 - Error boundaries are an SPA concept (React), not needed for SSR
 
-→ See [no-catch-tag](../../../_docs/decisions/no-catch-tag.md): errors via `{#if hasError}`, no special tag.
+→ See [no-catch-tag](no-catch-tag.md): errors via `{#if hasError}`, no special tag.
 
 ### Logging Strategy
 

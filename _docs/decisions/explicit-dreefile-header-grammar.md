@@ -78,5 +78,5 @@ migrated in the same series.
 ## See also
 
 - [Phase: explicit Dreefile composition](../../_plan/phase-dreefile.md)
-- [Components](../../core/_docs/components.md)
+- [Components](../components.md)
 - [File Anatomy](../file-anatomy.md)

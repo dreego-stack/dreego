@@ -17,5 +17,5 @@ does not ship a browser CSS runtime.
 
 Keep global design tokens and resets in normal static assets. Use component
 style sections for rules that belong to one component. See
-[Components](components.md) for the scoping contract and [Output Safety](../../_docs/security.md)
+[Components](components.md) for the scoping contract and [Output Safety](security.md)
 for dynamic style attributes inside body templates.

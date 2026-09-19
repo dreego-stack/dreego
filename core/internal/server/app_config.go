@@ -28,6 +28,19 @@ func (a *App) warnMissingSessionStore() {
 	slog.Warn("dreego: CSRF is enabled but no session store is configured; CSRF protection will not be active")
 }
 
+// stateChangingRoute reports whether any registered route mutates state. An
+// application that only serves safe methods (GET/HEAD/OPTIONS) never needs CSRF
+// protection, so the missing-session warning is suppressed for pure read APIs.
+func (a *App) stateChangingRoute() bool {
+	for _, r := range a.routes {
+		switch r.method {
+		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+			return true
+		}
+	}
+	return false
+}
+
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.Handler().ServeHTTP(w, r)
 }

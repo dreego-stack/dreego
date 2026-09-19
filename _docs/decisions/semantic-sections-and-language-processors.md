@@ -126,10 +126,10 @@ become ambiguous. Mixed content uses component composition.
   the roadmap as speculative.
 - Runtime plugins and provider integrations remain external plugin
   repositories.
-- [5 Sections in .dreego Files](../../../../_docs/decisions/sections-in-dreego.md).
+- [5 Sections in .dreego Files](sections-in-dreego.md).
 - The TypeScript timing and in-core esbuild direction in
   [TypeScript Deferred to V2](typescript-v2.md).
 
 ## Detailed plan
 
-See [the multi-language Dreego phase](../../../../_plan/phase-multilanguage-dreego.md).
+See [the multi-language Dreego phase](../../_plan/phase-multilanguage-dreego.md).

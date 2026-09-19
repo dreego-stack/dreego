@@ -101,7 +101,7 @@ lifecycles. Shared interfaces will be extracted from working implementations.
   [SSG & Wails Integration in V2](ssg-wails-v2.md).
 - The post-v1 target restriction in [SSR-First](ssr-first.md).
 - Historical target-interface examples in
-  [Transpiler Pipeline](../../cmd/dreego/_docs/decisions/transpiler-pipeline.md) where they conflict with the
+  [Transpiler Pipeline](transpiler-pipeline.md) where they conflict with the
   capability-first direction.
 - The SSG parts of this decision are superseded by
   [Prefer dynamic SSR and explicit caching over static site generation](ssr-over-ssg.md).

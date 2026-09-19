@@ -332,7 +332,7 @@ compiler package.
   conclusions of that completed phase remain valid; only the location map is
   superseded.
 - The package **name and location** in
-  [Transpiler as internal subpackage](../../cmd/dreego/_docs/decisions/transpiler-subpackage.md);
+  [Transpiler as internal subpackage](transpiler-subpackage.md);
   its reasoning (a shared root `internal/` for multiple in-repo consumers) still
   holds, the compiler is now `internal/dreefile/`.
 

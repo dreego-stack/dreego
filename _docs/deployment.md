@@ -30,23 +30,30 @@ GOOS=linux GOARCH=arm64 dreego build
 
 ## Container
 
-A two-stage build with a non-root distroless runtime looks like this. The
-scaffolded `web-minimal` template does not ship a Dockerfile; add one alongside
-your project.
+Scaffolded projects ship a multi-stage `Dockerfile` and a `docker-compose.yml`
+that build the Dreego CLI, run `dreego generate`, and compile a static binary
+into a `scratch` runtime image. Run it with:
+
+```sh
+docker compose up --build
+```
+
+The generated `Dockerfile` installs the CLI from the module proxy; pin it to
+your release with `--build-arg DREEGO_CLI_VERSION=v0.1.0`. A minimal
+hand-written equivalent looks like this:
 
 ```dockerfile
-FROM golang:1.27-alpine AS builder
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+FROM golang:1.27-alpine AS build
+WORKDIR /src
+RUN go install github.com/dreego-stack/dreego/cmd/dreego@latest
 COPY . .
-RUN CGO_ENABLED=0 go build -o /app/bin/server .
+RUN dreego generate && CGO_ENABLED=0 go build -o /app -ldflags="-s -w" .
 
-FROM gcr.io/distroless/static:nonroot
-COPY --from=builder /app/bin/server /server
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /app /app
 EXPOSE 8080
-USER nonroot
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/app"]
 ```
 
 Generated static assets are embedded in the binary. No separate

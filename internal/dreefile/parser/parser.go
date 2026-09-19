@@ -43,7 +43,7 @@ func (p *Parser) Parse() (*ir.File, error) {
 		}
 
 		if tok.Type != tokens.TokenTagOpen {
-			return nil, fmt.Errorf("expected root section, got %s at position %d", tok.Type, tok.Pos)
+			return nil, fmt.Errorf("expected root section, got %s at position %d%s", tok.Type, tok.Pos, rootSectionHint(""))
 		}
 
 		switch tok.Tag {
@@ -141,11 +141,24 @@ func (p *Parser) Parse() (*ir.File, error) {
 		case "script":
 			return nil, fmt.Errorf("legacy root <script> at position %d: replace root <script> with <client>", tok.Pos)
 		default:
-			return nil, fmt.Errorf("expected root section, got <%s> at position %d", tok.Tag, tok.Pos)
+			return nil, fmt.Errorf("expected root section, got <%s> at position %d%s", tok.Tag, tok.Pos, rootSectionHint(tok.Tag))
 		}
 	}
 
 	return file, nil
+}
+
+// rootSectionHint returns a placement hint for tags that are commonly put at
+// the top of a file but belong inside the <body> section. The doctype and the
+// <html> element are the document skeleton, so they must live in the layout's
+// <body> section, not before the first root section.
+func rootSectionHint(tag string) string {
+	switch strings.ToLower(strings.TrimSpace(tag)) {
+	case "!doctype", "html":
+		return "; a document doctype or <html> element belongs inside the <body> section (for example a layout's <body><html>…), not before the first root section"
+	default:
+		return ""
+	}
 }
 
 func parseSectionLanguage(tok tokens.Token, defaultLanguage string) (string, error) {

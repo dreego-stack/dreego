@@ -62,7 +62,7 @@ func TestGeneratedDedupeChecksAreCaseInsensitive(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, `strings.ToLower(pageHead)`) {
+	if !strings.Contains(out, `dedupeLayoutHead(layoutHead, pageHead)`) {
 		t.Errorf("runtime dedupe must fold the head markup to lower case, got:\n%s", out)
 	}
 

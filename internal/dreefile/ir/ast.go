@@ -96,6 +96,8 @@ type BodySection struct {
 	Language       string
 	Method         string
 	MethodExplicit bool
+	Attrs          string
+	Pos            int
 }
 
 type ClientSection struct {

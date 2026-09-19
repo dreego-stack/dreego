@@ -36,4 +36,4 @@ JavaScript and stay at their original body position. An ordinary nested
 `<script>` remains ordinary HTML and is not treated as a root client section.
 
 For a complete Markdown body use `<body lang="md">`; see
-[Markdown Bodies and Regions](../../cmd/dreego/_docs/markdown.md).
+[Markdown Bodies and Regions](markdown.md).

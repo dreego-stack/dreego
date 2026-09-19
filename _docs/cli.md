@@ -119,7 +119,7 @@ Runs `generate` + `build`, starts the server, then watches `.dreego` files (500 
 dreego docs [-p <name>] [--web] [--json] [--dump] [--list] [path]
 ```
 
-Reads documentation from the **local module store** — no HTTP, no embedded copy. The docs live next to the source in each module's `_docs/` directory, so there is a single source of truth per module.
+Reads documentation from the **local module store** — no HTTP, no embedded copy. Dreego's own documentation lives in one central `_docs/` tree at the repository root, so a feature is documented in a single place. External plugins keep their own `_docs/`.
 
 Resolution follows Go itself: the current module, workspaces, replacements,
 vendor trees, and downloaded modules are resolved with `go list -m`. For the
@@ -127,22 +127,21 @@ installed CLI and its dependencies, build information supplies the exact
 version to `go mod download -json` when the project does not require that
 module directly.
 
-Without arguments, `dreego docs` shows the core index `/_docs/index.md`. Flags:
+Without arguments, `dreego docs` shows the documentation index `/_docs/index.md`. Flags:
 
-- `-p <name>`: read another Dreego module's docs, such as `core`,
-  `adapter/ssr`, `cmd/dreego`, or an external plugin name
-- `--list`: list every core + plugin page from each module's `_docs/sitemap.json`
+- `-p <name>`: read an external plugin's docs, such as `plugin-sse`
+- `--list`: list the documentation index plus every plugin's `_docs/sitemap.json`
 - `--dump`: print all sitemap pages (or a comma-separated list of paths) in one output
 - `--json`: structured JSON (headings, code blocks, links) for AI agents
 - `--web`: open the docs page in a browser
 
 Examples:
 ```bash
-dreego docs                    show core docs index
-dreego docs /README.md         show core readme
-dreego docs -p cmd/dreego /_docs/cli.md   show CLI docs
+dreego docs                    show the documentation index
+dreego docs /README.md         show the readme
+dreego docs /_docs/cli.md      show the CLI reference
 dreego docs -p plugin-sse /_docs/index.md   show a plugin's docs
-dreego docs --list             list all core + plugin pages
+dreego docs --list             list the index and plugin pages
 ```
 
 > **Note:** `dreego docs` reads the version installed in your project's `go.mod`. If a module is not downloaded yet, run `go mod download` first.

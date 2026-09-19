@@ -75,7 +75,7 @@ commands:
   build [--target <os/arch>] [--yes]  generate + go build → build/bin/<name>
   run [-d] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change
-  docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: core /_docs/index.md)
+  docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: /_docs/index.md)
   feedback               open browser to submit feedback/issue
   version, --version, -v  show the dreego CLI version
   help                   show this help
@@ -88,7 +88,7 @@ flags:
   --yes                  auto-approve all plugin build hooks (no prompt)
   -p <name>              docs of a dreego plugin (github.com/dreego-stack/<name>)
   --web                  open docs in browser instead of terminal
-  --list                 list all core + plugin doc pages
+  --list                 list the docs index and plugin doc pages
   -d                     debug mode: write logs to build/logs/<utc>.log
 
 examples:
@@ -106,9 +106,9 @@ examples:
   dreego run                  build + start server (foreground)
   dreego run -d               build + start + log to file
   dreego dev                  watch + rebuild + restart on change
-  dreego docs                 show core docs index (terminal)
+  dreego docs                 show docs index (terminal)
   dreego docs -p plugin-sse   show plugin docs index
-  dreego docs --list          list all core + plugin pages
+  dreego docs --list          list the docs index and plugin pages
   dreego docs --web           open docs index in browser
   dreego docs --json          structured JSON for AI agents
   dreego docs --dump          all docs for LLM context
