@@ -22,34 +22,39 @@ timestamp: 2026-07-28T00:00:00Z
 ## Current package boundaries
 
 The implementation follows the pipeline with packages named after their
-responsibility:
+responsibility. The compiler package is `internal/dreefile/` (the location and
+name in the block below were re-pointed from the former `internal/transpiler/`):
 
 ```text
-internal/transpiler/
+internal/dreefile/
 ├── tokens/       token definitions
 ├── lexer/        source text to tokens
 ├── parser/       tokens to IR
 ├── ir/           intermediate representation and source metadata
 ├── codegen/      mutable generation state and layout metadata
-├── html/         processors that produce HTML IR plus shared output generation
-│   ├── html/      HTML input
-│   ├── md/        Markdown input
-│   ├── head/      head input
-│   ├── css/       CSS input
-│   └── output/    HTML IR to generated Go
-└── js/           processors that produce JavaScript output
-    └── js/        JavaScript input
+├── dreecode/     mini-template-language semantics (control flow, expressions, filters, slots)
+├── gogen/        Go emission helpers and source positions
+├── jsoutput/     shared client emission artifact and <script> tag
+└── sections/     semantic section processors
+    ├── head/      head input
+    ├── style/     CSS input
+    ├── body/html/ HTML input and shared output generation
+    ├── body/md/   Markdown input (was html/md)
+    └── client/    explicit client orchestrator (was js/process)
+        ├── js/    JavaScript input
+        ├── ts/    TypeScript input (was js/ts)
+        └── lua/   Browser Lua input (was js/lua)
 ```
 
 The first directory in the processor matrix names the normalized output
-language and the second names the source language. Future `js/ts` and `js/lua`
-processors may therefore share JavaScript output generation without implying a
+language and the second names the source language. The `client/{ts,lua}`
+processors therefore share JavaScript output generation without implying a
 Lua-to-Go processor.
 
-The root transpiler package owns project discovery, generation planning, and
+The root compiler package owns project discovery, generation planning, and
 the narrow entry points used by the CLI and `dreegotest`. It may provide small
 compatibility helpers for its package-level tests, but it does not add facade
-packages that mirror every lower-level function. The IR package contains the
+packages that mirror every lower-level function. The `ir` package contains the
 data exchanged between pipeline stages; mutable code-generation state belongs
 to `codegen`.
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
+	dreefile "github.com/dreego-stack/dreego/internal/dreefile"
 )
 
 func main() {
@@ -128,13 +128,13 @@ func cmdGenerate(args []string) {
 		}
 	}
 	if check {
-		if err := transpiler.RunCheck(); err != nil {
+		if err := dreefile.RunCheck(); err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", formatGenerateError(err))
 			os.Exit(1)
 		}
 		return
 	}
-	if err := transpiler.Run(force); err != nil {
+	if err := dreefile.Run(force); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", formatGenerateError(err))
 		os.Exit(1)
 	}
@@ -165,7 +165,7 @@ func cmdBuildE(args []string) error {
 		}
 	}
 
-	if err := transpiler.Run(false); err != nil {
+	if err := dreefile.Run(false); err != nil {
 		return err
 	}
 

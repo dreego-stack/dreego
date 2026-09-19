@@ -122,7 +122,8 @@ repo-root/
 ├── adapter/ssr/            ← Explicit HTTP host module
 ├── adapter/wails/          ← Listener-free desktop render adapter module
 ├── dreegotest/             ← Public testing module
-├── internal/transpiler/    ← Transpiler (.dreego → Go), used by CLI and dreegotest
+├── internal/               ← Shared protected implementation (md, gomod, middleware, session, validate)
+│   └── dreefile/           ← .dreego compiler (lexer, parser, sections, codegen), used by CLI and dreegotest
 ├── cmd/dreego/             ← Installable CLI module
 ├── .github/workflows/      ← CI: pull-request-check.yml, main-push.yml
 │
@@ -210,7 +211,7 @@ host paths that do not exist in the container.
   immediate predecessor and links to the official release notes.
 - Coordinated published modules: root, `core`, `adapter/ssr`, `adapter/wails`, `dreegotest`, and `cmd/dreego`. Wails joined at v0.9; every release uses one version across all participating module-specific tags on the same commit.
 - Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_tests/sh/check-core-deps.sh`.
-- Transpiler in `internal/transpiler/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the transpiler.
+- The compiler in `internal/dreefile/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the compiler.
 - CLI in `cmd/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
 - Build via `dreego` CLI, not directly `go build`
@@ -230,7 +231,7 @@ Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
 Every feature follows this cycle:
 
 1. **`_tests/`** — Create integration test in `_tests/go/<name>_test.go` using `dreegotest` (see `_docs/testing.md` and existing `_tests/go/*_test.go` for the pattern)
-2. **Code** — Implement in `core/internal/` or `internal/transpiler/`; public API lives in `core/` (facade, one logical thing per file, max 300 lines)
+2. **Code** — Implement in `core/internal/` or `internal/dreefile/`; public API lives in `core/` (facade, one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
 4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `task test`) — must be GREEN
 5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it

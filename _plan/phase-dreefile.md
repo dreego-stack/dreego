@@ -44,7 +44,7 @@ These are decided. The slices implement them; they do not reopen them.
    `DREEFILE` line. Landed.
 2. Local versus module imports keep the existing dot heuristic. `COMPONENT` does
    not rework local-vs-external resolution; the heuristic in
-   `internal/transpiler/generate_components.go:141-169` stays until a later,
+   `internal/dreefile/generate_components.go:145-173` stays until a later,
    separately-proven need.
 3. A top-level `import "…"` becomes a **generate error** with a migration
    message pointing to `GOIMPORT` and `<server>`. Because Go imports therefore
@@ -68,27 +68,27 @@ generated route, component, and layout packages; `LAYOUT` still has no codegen
 consumer, so the anchors below describe the pre-grammar baseline that the
 remaining slices change.
 
-- `internal/transpiler/lexer/lexer_header.go` — `ParseFileHeaderStrict` parses
+- `internal/dreefile/lexer/lexer_header.go` — `ParseFileHeaderStrict` parses
   `DREEFILE`, `LAYOUT`, `COMPONENT ... IMPORT`, and `GOIMPORT`, and returns a
   `file:line:col` error for the legacy `Component` / `import` / `from` forms.
   Done; the remaining slices add codegen consumers, not parsing.
-- `internal/transpiler/discovery.go:57-60` — `isComponentsDir`; and
-  `internal/transpiler/discovery.go:62-65` — `isLayoutsDir`. Both decide file
+- `internal/dreefile/discovery.go:57-60` — `isComponentsDir`; and
+  `internal/dreefile/discovery.go:62-65` — `isLayoutsDir`. Both decide file
   kind by directory name, which is exactly the magic the `DREEFILE` line
   replaces.
-- `internal/transpiler/generate_components.go:141-169` — `importedComponentPaths`
+- `internal/dreefile/generate_components.go:145-173` — `importedComponentPaths`
   walks only `root/routes`; the local-vs-module split is the dot heuristic at
-  `:161` (`strings.Contains(imp.Path, ".")`). Locked decision 2 keeps this.
-- `internal/transpiler/fmt.go` — `Format` knows all four header keywords and
+  `:165` (`strings.Contains(imp.Path, ".")`). Locked decision 2 keeps this.
+- `internal/dreefile/fmt.go` — `Format` knows all four header keywords and
   keeps legacy header lines verbatim (so `dreego fmt` does not rewrite or
   corrupt a file that generation will reject). Done.
-- `internal/transpiler/html/output/templ.go:80-124` — layout call and head
-  merge. The runtime title/meta dedupe at `:94-112` is gated by
+- `internal/dreefile/sections/body/html/templ.go:81-125` — layout call and head
+  merge. The runtime title/meta dedupe at `:95-113` is gated by
   `layout.File.Head != nil`, and `File.Head` is set only for a root-level
-  `<head>` (`internal/transpiler/parser/parser.go:107`). Canonical body-level
+  `<head>` (`internal/dreefile/parser/parser.go:107`). Canonical body-level
   layouts therefore never dedupe.
-- `internal/transpiler/generate_layout.go:20-88` — directory-based layout
-  discovery; `:123-134` — `resolveLayoutForRoute` scope cascade; `:90-111` —
+- `internal/dreefile/generate_layout.go:22-96` — directory-based layout
+  discovery; `:131-154` — `resolveLayoutForRoute` scope cascade; `:98-119` —
   `detectAmbiguousLayouts`. Slice 4 retires this resolution path.
 
 ## Head composition rule
@@ -137,11 +137,12 @@ One pull request per slice, in this order. Slice 1 is mandatory first.
 1. **Head dedupe fix.** Make the head merge produce exactly one `<title>` and one
    meta description for both root-level and body-level layout shapes. This is the
    bug in `_todo/core/layout-head-title-dedupe.1.md`
-   (`templ.go:94-112` gated by `layout.File.Head != nil`; `parser.go:107`).
+   (`internal/dreefile/sections/body/html/templ.go:95-113` gated by
+   `layout.File.Head != nil`; `parser/parser.go:107`).
    Dependency-free, and a prerequisite for trustworthy chained-head tests.
 2. **Grammar and fmt support.** Parse and emit `DREEFILE` (component / layout /
    page), `LAYOUT`, `COMPONENT ... IMPORT { ... }`, and `GOIMPORT` in
-   `lexer/lexer_header.go:9-50`; teach `internal/transpiler/fmt.go:24-46` the
+   `lexer/lexer_header.go:15-146`; teach `internal/dreefile/fmt.go:24-53` the
    same keywords; turn `Component`, `import "…"`, and `from "…" import` into
    generate errors with a migration message. Component name comes from the
    filename. **Landed.**
@@ -151,8 +152,8 @@ One pull request per slice, in this order. Slice 1 is mandatory first.
    section above observable across a chain.
 4. **Directory-resolution removal.** Retire `isLayoutsDir`
    (`discovery.go:62-65`), the `default.dreego` / `layout.dreego` scope cascade
-   (`generate_layout.go:123-134`), and `detectAmbiguousLayouts`
-   (`generate_layout.go:90-111`). Layout files stay under `www/layouts`
+   (`generate_layout.go:131-154`), and `detectAmbiguousLayouts`
+   (`generate_layout.go:98-119`). Layout files stay under `www/layouts`
    (decision 4) and are referenced only by explicit `LAYOUT`.
 5. **Server import channel.** Route and component stdlib imports move into
    `<server>` and compile through `GOIMPORT` plus an explicit standard-library
@@ -203,11 +204,11 @@ Phase-specific additions:
 
 ## Not in this phase
 
-- **No YAML frontmatter.** A YAML dependency is not allowed in the transpiler;
+- **No YAML frontmatter.** A YAML dependency is not allowed in the compiler;
   `---` collides with the header terminator; and fence arithmetic in
-  `internal/transpiler/source_pos.go:27` would shift every `file:line:col`
+  `internal/dreefile/gogen/source_pos.go:9` would shift every `file:line:col`
   diagnostic. The grammar is line-keyword based on purpose.
-- **Do not remove `dreego generate`.** The transpiler is `internal/`,
+- **Do not remove `dreego generate`.** The compiler is `internal/dreefile/`,
   `_tests/sh/check-core-deps.sh` enforces the dependency boundary, the accepted
   ADR `cmd/dreego/_docs/decisions/transpiler-vs-runtime.md` requires compile-time
   safety, and `README.md` states that Dreego is a compile-time transpiler.

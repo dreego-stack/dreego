@@ -52,7 +52,7 @@ so raw HTML is trusted exactly like the class passthrough on the inline `<md>`
 tag. It is not a runtime sanitization boundary.
 
 The processor is a small hand-written Markdown parser with no external
-dependencies. It lives at `internal/transpiler/html/md` in the transpiler
+dependencies. It lives at `internal/dreefile/sections/body/md` in the compiler
 matrix and requires no external tooling.
 
 ## Protected Dreego constructs

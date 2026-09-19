@@ -4,7 +4,7 @@ Tests run as Go integration tests in `_tests/go/` via Docker (`task test`), usin
 
 ## Test Layout
 
-- `internal/transpiler/*_test.go` — unit tests for the lexer, parser, and codegen (run with `go test ./internal/transpiler/...`).
+- `internal/dreefile/**/*_test.go` — unit tests for the compiler (lexer, parser, sections, codegen; run with `go test ./internal/dreefile/...`).
 - `core/*_test.go` and `core/internal/*/*_test.go` — unit tests for the runtime framework facade and its internal packages (run with `go test ./core/...`).
 - `_tests/go/*_test.go` — integration tests that build a real project, run the CLI, and assert on generated code and HTTP behavior.
 - `_tests/sh/*.sh` — shell-level black-box checks run as part of `task test` (see below).
@@ -47,7 +47,7 @@ Props, self-closing calls, default and named slots, scoped CSS, nested component
 `<form g-action>` generation, int/bool binding, validation, PRG redirect, error re-render with `c.Errors` and `c.Old`.
 
 ### Bugs (Regression)
-Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, `core/internal/*/*_test.go`, or `internal/transpiler/*_test.go`.
+Every fixed bug keeps a regression test in `_tests/go/bug_*_test.go`, `core/*_test.go`, `core/internal/*/*_test.go`, or `internal/dreefile/**/*_test.go`.
 
 ### Shell Checks (`_tests/sh/`)
 
@@ -66,7 +66,7 @@ counterpart to the Go integration tests.
 - CLI output is color-free and screen-reader-linear (`_tests/go/cli_accessibility_test.go`).
 - Generator diagnostics lead with `file:line:col`, the cause, and a practical `Fix:` action.
 - The `web-minimal` template layout ships `<html lang="en">`, a skip link, and a `<main id="main">` landmark. The route is tested as a minimal page, not as a complete accessible application shell.
-- The transpiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`internal/transpiler/a11y_check_test.go`).
+- The compiler emits a11y diagnostics for missing image alternatives and unassociated form labels (`internal/dreefile/a11y_check_test.go`).
 
 ## Running Tests
 
@@ -74,7 +74,7 @@ counterpart to the Go integration tests.
 task test                              # Docker-based full suite
 task coverage                          # core coverage gate (35% minimum per package)
 go test ./core/...                     # runtime unit tests only
-go test ./internal/transpiler/...     # transpiler unit tests only
+go test ./internal/dreefile/...     # compiler unit tests only
 go test ./_tests/go/ -parallel 1 -p 1  # integration tests (no parallelism for CLI builds)
 sh _tests/sh/import-check.sh           # Tailwind CDN import black-box check
 ```

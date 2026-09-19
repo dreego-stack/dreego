@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	transpiler "github.com/dreego-stack/dreego/internal/transpiler"
+	dreefile "github.com/dreego-stack/dreego/internal/dreefile"
 )
 
 func cmdFmt(args []string) {
@@ -49,7 +49,7 @@ func cmdFmt(args []string) {
 		}
 
 		original := string(data)
-		formatted := transpiler.Format(original)
+		formatted := dreefile.Format(original)
 
 		if formatted == original {
 			if !check && !write {

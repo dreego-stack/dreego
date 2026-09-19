@@ -48,6 +48,14 @@ run_suite() {
         echo "==> PASS <=> Core deps <========="
     fi
 
+    if ! layering_out="$(cd "$REPO_DIR" && sh _tests/sh/check-layering.sh 2>&1)"; then
+        echo "$layering_out" | grep -E '^(FAIL|  )' || true
+        echo "==> FAIL   <=>  internal layering <==========="
+        FAIL=$((FAIL + 1))
+    else
+        echo "==> PASS <=> internal layering <========="
+    fi
+
     if ! out=$(sh "$DIR/find-binary.sh" 2>&1); then
         echo "$out" | grep '^->' || true
         echo "==> FAIL   <=>  find-binary <==========="
