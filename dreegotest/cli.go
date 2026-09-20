@@ -165,17 +165,29 @@ func MustBuildInDir(t *testing.T, dir string) {
 	}
 }
 
+// NewProject runs `dreego new <name> [-t <template>]` in a temp parent
+// directory and returns the created project directory. It does not run
+// generate or build. An empty template selects the CLI default.
+func NewProject(t *testing.T, name, template string) string {
+	t.Helper()
+	parent := t.TempDir()
+	args := []string{"new", name}
+	if template != "" {
+		args = append(args, "-t", template)
+	}
+	if out, err := RunCLI(t, parent, args...); err != nil {
+		t.Fatalf("dreego %v: %v\n%s", args, err, out)
+	}
+	return filepath.Join(parent, name)
+}
+
 // MustScaffold runs the canonical quick-start ritual: `dreego new <name>`,
 // `dreego generate`, then `go build` in the generated project. It returns the
 // project directory. It replaces shell tests that re-implement the
 // init+generate+build steps by hand.
 func MustScaffold(t *testing.T, name string) string {
 	t.Helper()
-	parent := t.TempDir()
-	if out, err := RunCLI(t, parent, "new", name); err != nil {
-		t.Fatalf("dreego new %s: %v\n%s", name, err, out)
-	}
-	dir := filepath.Join(parent, name)
+	dir := NewProject(t, name, "")
 	if out, err := RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("dreego generate: %v\n%s", err, out)
 	}

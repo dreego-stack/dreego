@@ -7,8 +7,8 @@ dreego new <name> [-t <template>] [-l|--list]
 ```
 
 Scaffolds a new project from the `web-minimal` template in a new directory. It
-writes `main.go`, `Taskfile.yml`, `.gitignore`, and the `www/` tree, then runs
-`go mod init` and `go mod tidy`.
+writes `main.go`, `Taskfile.yml`, `Dockerfile`, `docker-compose.yml`,
+`.gitignore`, and the `www/` tree, then runs `go mod init` and `go mod tidy`.
 
 - `-t <template>`, `--template <template>`: select a template; `web-minimal` is
   the default, and `web-app` is the other shipped template
@@ -16,16 +16,6 @@ writes `main.go`, `Taskfile.yml`, `.gitignore`, and the `www/` tree, then runs
 
 An unknown template name fails with an error that lists the valid names. A
 missing `-t` value also fails. Both exit non-zero.
-
-## dreego init
-
-```bash
-dreego init <path> [-t <template>] [-l|--list]
-```
-
-Scaffolds the `web-minimal` template into an existing or new path. It accepts
-the same `-t`/`--template` and `-l`/`--list` flags as `dreego new`, with
-`web-minimal` as the default.
 
 ## dreego task
 

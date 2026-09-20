@@ -55,7 +55,7 @@ func cmdNew(args []string) {
 
 	fmt.Printf("Creating %s/\n", name)
 
-	if err := templates.Install(target, moduleName(target), meta.Name); err != nil {
+	if err := templates.Install(target, name, meta.Name); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}

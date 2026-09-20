@@ -8,38 +8,17 @@ import (
 
 func TestRouting404Page(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRouting500Page(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingCatchall(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingDeepNesting(t *testing.T) {
@@ -66,38 +45,17 @@ func TestRoutingDeleteMethod(t *testing.T) {
 
 func TestRoutingDynamic(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingGetMethod(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingGroups(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingMultiSegment(t *testing.T) {
@@ -126,26 +84,12 @@ func TestRoutingNestedRoutes(t *testing.T) {
 
 func TestRoutingOptional(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingPostMethod(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
-	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
-		t.Fatalf("generate: %v\n%s", err, out)
-	}
-	dreegotest.MustBuildInDir(t, dir)
+	dreegotest.MustScaffold(t, "app")
 }
 
 func TestRoutingPutMethod(t *testing.T) {

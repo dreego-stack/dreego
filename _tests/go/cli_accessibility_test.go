@@ -137,10 +137,7 @@ func TestCLITemplateSemanticHTML(t *testing.T) {
 		t.Error("web-minimal must not depend on a Tailwind CDN script")
 	}
 
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate in scaffold: %v\n%s", err, out)
 	}
@@ -151,10 +148,7 @@ func TestCLITemplateSemanticHTML(t *testing.T) {
 
 func TestCLITemplateRouteAccessible(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	route, err := os.ReadFile(filepath.Join(dir, "www/routes/+page.dreego"))
 	if err != nil {
 		t.Fatalf("read route: %v", err)

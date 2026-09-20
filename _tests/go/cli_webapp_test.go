@@ -13,10 +13,7 @@ import (
 
 func webAppTemplateFiles(t *testing.T) map[string]string {
 	t.Helper()
-	dir := t.TempDir()
-	if out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "web-app"); err != nil {
-		t.Fatalf("init -t web-app: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "webapp", "web-app")
 	root := filepath.Join(dir, "www")
 	files := map[string]string{}
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, walkErr error) error {

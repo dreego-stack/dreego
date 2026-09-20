@@ -50,8 +50,8 @@ func TestCommonMainEntrypointSSRHost(t *testing.T) {
 	if !strings.Contains(content, "ssr.Listen(app, addr)") {
 		t.Errorf("_common/main.go.tmpl must call ssr.Listen(app, addr), got:\n%s", content)
 	}
-	if !strings.Contains(content, "ssr.DefaultAddr()") {
-		t.Errorf("_common/main.go.tmpl must use ssr.DefaultAddr() for the default addr, got:\n%s", content)
+	if !strings.Contains(content, `const port = "8080"`) {
+		t.Errorf("_common/main.go.tmpl must declare the listening port as a constant, got:\n%s", content)
 	}
 }
 

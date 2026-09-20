@@ -26,7 +26,12 @@ func splitServerSections(sections []ServerSection, hasFormActions bool) (pkgCode
 			firstLine = line
 			break
 		}
-		isDeclaration := strings.HasPrefix(firstLine, "type ") || strings.HasPrefix(firstLine, "func ")
+		isDeclaration := strings.HasPrefix(firstLine, "type ") ||
+			strings.HasPrefix(firstLine, "func ") ||
+			strings.HasPrefix(firstLine, "var ") ||
+			strings.HasPrefix(firstLine, "var (") ||
+			strings.HasPrefix(firstLine, "const ") ||
+			strings.HasPrefix(firstLine, "const (")
 		if isDeclaration && hasFormActions {
 			pkg = append(pkg, ir.TranslateMdtohtml(unindent(g.Code)))
 		} else {

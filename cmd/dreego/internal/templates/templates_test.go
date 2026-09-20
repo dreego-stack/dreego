@@ -184,7 +184,6 @@ func TestInstallWebApp(t *testing.T) {
 		filepath.Join("www", "components", "Nav.dreego"),
 		filepath.Join("www", "components", "Card.dreego"),
 		filepath.Join("www", "routes", "+page.dreego"),
-		filepath.Join("www", "routes", "notes_store.go"),
 		filepath.Join("www", "routes", "dashboard", "+page.dreego"),
 	} {
 		if _, err := os.Stat(filepath.Join(target, name)); err != nil {

@@ -180,21 +180,23 @@ func cmdDump(dir, path, webBase, rawBase string) {
 func cmdList() {
 	cwd := wdFunc()
 	gm, err := parseGoMod(filepath.Join(cwd, "go.mod"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "docs error: no go.mod found (%v)\n", err)
-		os.Exit(1)
-	}
 	seen := map[string]bool{}
 	mods := []string{}
-	if !seen[gm.Module] {
-		seen[gm.Module] = true
-		mods = append(mods, gm.Module)
+	if err != nil {
+		mods = append(mods, coreModule)
+	} else {
+		if !seen[gm.Module] {
+			seen[gm.Module] = true
+			mods = append(mods, gm.Module)
+		}
 	}
 	var plugins []string
-	for path := range gm.Requires {
-		if strings.HasPrefix(path, pluginOrgPrefix) && !seen[path] {
-			seen[path] = true
-			plugins = append(plugins, path)
+	if err == nil {
+		for path := range gm.Requires {
+			if strings.HasPrefix(path, pluginOrgPrefix) && !seen[path] {
+				seen[path] = true
+				plugins = append(plugins, path)
+			}
 		}
 	}
 	sort.Strings(plugins)

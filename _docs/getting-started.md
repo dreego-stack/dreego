@@ -44,8 +44,8 @@ Both starters style themselves with local `<style>` blocks and load no Tailwind
 or any other stylesheet from a CDN. No CDN origin is added to the Content
 Security Policy.
 
-Two templates ship today. `web-minimal` is the default for both `dreego new` and
-`dreego init` and stays the smallest starting point. `web-app` is a full SSR
+Two templates ship today. `web-minimal` is the default for `dreego new` and
+stays the smallest starting point. `web-app` is a full SSR
 application starter: an app shell with a `Nav` component in the layout header, a
 `Card` component, `/` with a server-rendered typed form, and a nested
 `/dashboard` route. `-t` (or `--template`) selects a template explicitly, and
@@ -55,9 +55,6 @@ application starter: an app shell with a `Nav` component in the layout header, a
 dreego new myapp -t web-app
 dreego new myapp -l
 ```
-
-`dreego init <path>` scaffolds the same templates into an existing or new path
-and defaults to `web-minimal`. It accepts the same `-t` and `-l` flags.
 
 The project name must be a valid Go module path segment (letters, digits,
 hyphens, underscores; must start with a letter). `dreego new myapp` creates a
@@ -103,12 +100,14 @@ import (
 	"myapp/www"
 )
 
+const port = "8080"
+
 func main() {
 	app := dreego.New()
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	addr := ssr.DefaultAddr()
+	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
 	}
@@ -121,8 +120,9 @@ func main() {
 `dreego.New()` returns an `*App` that owns route declarations, middleware, and
 session policy. `www.Register(app)` wires generated routes and components into
 the `App`. `ssr.Listen(app, addr)` creates the explicit HTTP host with secure
-timeout defaults. The scaffold listens on `DREEGO_PORT` when that variable is
-set, otherwise on the SSR adapter's default address.
+timeout defaults. The listening port is a `const` in `main.go`, so there is one
+obvious place to change it; `DREEGO_PORT` overrides it at runtime for
+containers.
 
 ## Adding a Layout
 
