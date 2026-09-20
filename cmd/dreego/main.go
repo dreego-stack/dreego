@@ -20,8 +20,6 @@ func main() {
 	switch os.Args[1] {
 	case "new":
 		cmdNew(os.Args[2:])
-	case "init":
-		cmdInit(os.Args[2:])
 	case "generate":
 		cmdGenerate(os.Args[2:])
 	case "build":
@@ -66,7 +64,6 @@ usage: dreego <command> [flags]
 
 commands:
   new <name> [-t <template>]  create a new project in a new directory
-  init <path> [-t <template>] scaffold a project into an existing directory
   task [args...]         run a Taskfile task through the external task binary
   generate [--force] [--check] transpile .dreego files to Go code
   fmt [--check] [--stdout] [path]  format .dreego files (like gofmt)
@@ -81,7 +78,7 @@ commands:
   help                   show this help
 
 flags:
-  -t <template>          project template for new/init (default: web-minimal)
+  -t <template>          project template for new (default: web-minimal)
   -l, --list             list the available project templates
   --force                force regeneration of all files
   --target <os/arch>     cross-compile target (e.g. linux/amd64, darwin/arm64)
@@ -94,8 +91,6 @@ flags:
 examples:
   dreego new myapp            create a project in ./myapp
   dreego new myapp -t web-minimal  create a project with an explicit template
-  dreego init .               scaffold into the current directory
-  dreego init . -l            list the available templates
   dreego task build           run the Taskfile 'build' task
   dreego generate             transpile changed .dreego files
   dreego generate --force     force full regeneration

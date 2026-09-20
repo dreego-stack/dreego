@@ -109,12 +109,9 @@ func TestCLIVersionFlag(t *testing.T) {
 	}
 }
 
-func TestCLIInit(t *testing.T) {
+func TestCLINewScaffoldsProject(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	if _, err := os.Stat(filepath.Join(dir, "main.go")); err != nil {
 		t.Fatalf("missing main.go: %v", err)
 	}
@@ -123,27 +120,24 @@ func TestCLIInit(t *testing.T) {
 	}
 }
 
-func TestCLIInitNoArg(t *testing.T) {
+func TestCLINewNoNameArg(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init")
+	out, err := dreegotest.RunCLI(t, dir, "new")
 	if err == nil {
-		t.Fatal("expected non-zero exit when no path given")
+		t.Fatal("expected non-zero exit when no name given")
 	}
-	if !strings.Contains(out, "usage: dreego init") {
+	if !strings.Contains(out, "usage: dreego new") {
 		t.Fatalf("expected usage message, got: %s", out)
 	}
 }
 
-func TestCLIInitImport(t *testing.T) {
+func TestCLINewImportBuilds(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	mainGo, _ := os.ReadFile(filepath.Join(dir, "main.go"))
-	if !strings.Contains(string(mainGo), `"t/www"`) {
-		t.Fatalf("main.go does not import \"t/www\": %s", mainGo)
+	if !strings.Contains(string(mainGo), `"app/www"`) {
+		t.Fatalf("main.go does not import \"app/www\": %s", mainGo)
 	}
 	if !strings.Contains(string(mainGo), "www.Register(app)") {
 		t.Fatalf("main.go does not call www.Register(app): %s", mainGo)
@@ -152,16 +146,13 @@ func TestCLIInitImport(t *testing.T) {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
 	if !dreegotest.BuildInDirOK(t, dir) {
-		t.Fatal("init project must build")
+		t.Fatal("scaffolded project must build")
 	}
 }
 
 func TestCLICheck(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}

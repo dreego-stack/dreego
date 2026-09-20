@@ -26,10 +26,7 @@ func TestLayoutNoLayout(t *testing.T) {
 
 func TestLayoutWithHead(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
@@ -38,10 +35,7 @@ func TestLayoutWithHead(t *testing.T) {
 
 func TestLayoutWithSlot(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", "."); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "")
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}

@@ -10,59 +10,35 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-func TestCLIInitListTemplates(t *testing.T) {
+func TestCLINewSelectedTemplate(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-l")
-	if err != nil {
-		t.Fatalf("init -l: %v\n%s", err, out)
-	}
-	if !strings.Contains(out, "web-minimal") {
-		t.Fatalf("init -l must list web-minimal, got: %s", out)
-	}
-	if _, statErr := os.Stat(filepath.Join(dir, "Taskfile.yml")); statErr == nil {
-		t.Error("init -l must not scaffold files")
-	}
-}
-
-func TestCLIInitSelectedTemplate(t *testing.T) {
-	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "web-minimal")
-	if err != nil {
-		t.Fatalf("init -t web-minimal: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "web-minimal")
 	for _, f := range []string{"main.go", "www/routes/+page.dreego"} {
 		if _, statErr := os.Stat(filepath.Join(dir, f)); statErr != nil {
-			t.Fatalf("missing %s after init: %v", f, statErr)
+			t.Fatalf("missing %s after new: %v", f, statErr)
 		}
 	}
 }
 
-func TestCLIInitWebAppTemplate(t *testing.T) {
+func TestCLINewWebAppTemplate(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "web-app")
-	if err != nil {
-		t.Fatalf("init -t web-app: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "web-app")
 	for _, f := range []string{
 		"main.go",
 		"www/layouts/default.dreego",
 		"www/components/Nav.dreego",
 		"www/components/Card.dreego",
 		"www/routes/+page.dreego",
-		"www/routes/notes_store.go",
 		"www/routes/dashboard/+page.dreego",
 	} {
 		if _, statErr := os.Stat(filepath.Join(dir, f)); statErr != nil {
-			t.Fatalf("missing %s after init -t web-app: %v", f, statErr)
+			t.Fatalf("missing %s after new -t web-app: %v", f, statErr)
 		}
 	}
 	if _, statErr := os.Stat(filepath.Join(dir, "template.json")); statErr == nil {
 		t.Error("scaffolded web-app tree must not contain template.json")
 	}
-	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
 			return walkErr
 		}
@@ -86,41 +62,24 @@ func TestCLIInitWebAppTemplate(t *testing.T) {
 	}
 }
 
-func TestCLIInitWebAppListsBothTemplates(t *testing.T) {
+func TestCLINewUnknownTemplateFails(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-l")
-	if err != nil {
-		t.Fatalf("init -l: %v\n%s", err, out)
-	}
-	for _, name := range []string{"web-app", "web-minimal"} {
-		if !strings.Contains(out, name) {
-			t.Fatalf("init -l must list %s, got: %s", name, out)
-		}
-	}
-}
-
-func TestCLIInitUnknownTemplateFails(t *testing.T) {
-	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "does-not-exist")
+	parent := t.TempDir()
+	out, err := dreegotest.RunCLI(t, parent, "new", "app", "-t", "does-not-exist")
 	if err == nil {
 		t.Fatal("expected non-zero exit for an unknown template")
 	}
 	if !strings.Contains(out, "does-not-exist") || !strings.Contains(out, "web-minimal") {
 		t.Fatalf("unknown-template error must name the value and valid names, got: %s", out)
 	}
-	if _, statErr := os.Stat(filepath.Join(dir, "Taskfile.yml")); statErr == nil {
-		t.Error("a failed init must not scaffold files")
+	if _, statErr := os.Stat(filepath.Join(parent, "app")); statErr == nil {
+		t.Error("a failed new must not scaffold files")
 	}
 }
 
-func TestCLIInitScaffoldClean(t *testing.T) {
+func TestCLINewScaffoldClean(t *testing.T) {
 	t.Parallel()
-	dir := dreegotest.ProjectDir(t, nil)
-	if out, err := dreegotest.RunCLI(t, dir, "init", ".", "-t", "web-minimal"); err != nil {
-		t.Fatalf("init: %v\n%s", err, out)
-	}
+	dir := dreegotest.NewProject(t, "app", "web-minimal")
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
 			return walkErr
@@ -149,8 +108,10 @@ func TestCLINewListTemplates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new --list: %v\n%s", err, out)
 	}
-	if !strings.Contains(out, "web-minimal") {
-		t.Fatalf("new --list must list web-minimal, got: %s", out)
+	for _, name := range []string{"web-app", "web-minimal"} {
+		if !strings.Contains(out, name) {
+			t.Fatalf("new --list must list %s, got: %s", name, out)
+		}
 	}
 	if _, statErr := os.Stat(filepath.Join(dir, "myapp")); statErr == nil {
 		t.Error("new --list must not scaffold a project")

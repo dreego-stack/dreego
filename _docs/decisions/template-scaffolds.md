@@ -12,7 +12,7 @@ timestamp: 2026-09-15T00:00:00Z
 
 ## Context
 
-`dreego new` and `dreego init` copied one of two fixed blueprints from
+`dreego new` previously copied one of two fixed blueprints from
 `cmd/dreego/blueprints/{default,landing}`. Both blueprints carried their own
 `main.go.tmpl`, `Taskfile.yml`, `.gitignore`, and `www/dreego.config.json`, so
 the files were duplicated and drifted independently. The blueprint name was
@@ -90,7 +90,7 @@ those expressions and corrupt the generated application.
 
 | Template | Purpose |
 |----------|---------|
-| `web-minimal` | Smallest SSR application: SSR entrypoint, config, one layout, one route, and one style block. Default for `dreego new` and `dreego init`. |
+| `web-minimal` | Smallest SSR application: SSR entrypoint, config, one layout, one route, and one style block. Default for `dreego new`. |
 | `web-app` | Full SSR application starter: app shell with a `Nav` component in the layout header, a `Card` component, `/` with a server-rendered typed form, and a nested `/dashboard` route. Local `<style>` only, no CDN. |
 
 Both templates share the `_common` overlay, which includes `Dockerfile` and
@@ -106,7 +106,6 @@ Installation skips `template.json`, `.DS_Store`, and generated files
 
 ### CLI surface
 
-- `dreego init <path> [-t <template>]` — default template `web-minimal`.
 - `dreego new <name> [-t <template>]` — default template `web-minimal`.
 - `-l` / `--list` — lists the available templates and exits without
   scaffolding.

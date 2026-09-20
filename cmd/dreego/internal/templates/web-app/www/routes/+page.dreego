@@ -1,3 +1,5 @@
+GOIMPORT { sync }
+
 <head>
     <title>Notes — §$name$§</title>
     <meta name="description" content="§$name$§ — notes demo home page">
@@ -8,6 +10,23 @@
     c.Set("current", "/")
 </server>
 <server method="post">
+    var (
+        notesMu sync.Mutex
+        notes   []string
+    )
+
+    func addNote(title string) {
+        notesMu.Lock()
+        defer notesMu.Unlock()
+        notes = append(notes, title)
+    }
+
+    func notesSnapshot() []string {
+        notesMu.Lock()
+        defer notesMu.Unlock()
+        return append([]string(nil), notes...)
+    }
+
     type NoteForm struct {
         Title string `form:"title" validate:"required"`
     }

@@ -41,3 +41,35 @@ func TestModuleVersionUsesBuildInformation(t *testing.T) {
 		t.Fatalf("dependency module version = %q", got)
 	}
 }
+
+func TestFindModDirWithoutGoMod(t *testing.T) {
+	cache := t.TempDir()
+	t.Setenv("GOMODCACHE", cache)
+	root := t.TempDir()
+	if _, err := findModDir(root, "github.com/dreego-stack/dreego"); err == nil {
+		t.Fatal("expected an error when there is no go.mod and no cached module")
+	}
+}
+
+func TestModuleCacheDirPicksCachedVersion(t *testing.T) {
+	cache := t.TempDir()
+	t.Setenv("GOMODCACHE", cache)
+	versioned := filepath.Join(cache, "github.com", "dreego-stack", "dreego@v0.10.3")
+	if err := os.MkdirAll(versioned, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	got, ok := moduleCacheDir("github.com/dreego-stack/dreego", "")
+	if !ok || got != versioned {
+		t.Fatalf("moduleCacheDir without version = %q, %v; want %q", got, ok, versioned)
+	}
+	got, ok = moduleCacheDir("github.com/dreego-stack/dreego", "v0.10.3")
+	if !ok || got != versioned {
+		t.Fatalf("moduleCacheDir with version = %q, %v; want %q", got, ok, versioned)
+	}
+}
+
+func TestEscapeModulePathUppercase(t *testing.T) {
+	if got := escapeModulePath("github.com/Acme/App"); got != "github.com/!acme/!app" {
+		t.Fatalf("escapeModulePath = %q", got)
+	}
+}

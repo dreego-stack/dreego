@@ -103,7 +103,7 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 - **CSRF** — Double-submit cookie, auto-validation on POST/PUT/DELETE, Secure flag TLS-aware
 
 ### Developer Experience
-- **CLI** — `dreego new [-t <template>] [-l]`, `dreego init [-t <template>] [-l]`, `dreego task [args...]`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
+- **CLI** — `dreego new [-t <template>] [-l]`, `dreego task [args...]`, `dreego generate [--force] [--check]`, `dreego fmt [--check]`
 - **CI Mode** — `dreego generate --check` exits non-zero when generated files are stale
 - **Auto-Imports** — Required standard-library packages are added to generated code as needed
 - **Accessibility Checks** — `dreego generate` warns about missing image alternatives and unassociated form labels; CLI output is color-free and screen-reader-linear
@@ -146,12 +146,14 @@ import (
 	"myapp/www"
 )
 
+const port = "8080"
+
 func main() {
 	app := dreego.New()
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	addr := ssr.DefaultAddr()
+	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
 	}

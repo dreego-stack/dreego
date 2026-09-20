@@ -39,8 +39,11 @@ docker compose up --build
 ```
 
 The generated `Dockerfile` installs the CLI from the module proxy; pin it to
-your release with `--build-arg DREEGO_CLI_VERSION=v0.1.0`. A minimal
-hand-written equivalent looks like this:
+your release with `--build-arg DREEGO_CLI_VERSION=v0.1.0`. The listening port is
+the `port` constant in `main.go`; `DREEGO_PORT` overrides it at runtime, and the
+scaffolded `Dockerfile`/`docker-compose.yml` read the same variable (build arg
+`DREEGO_PORT`, default `8080`). A minimal hand-written equivalent looks like
+this:
 
 ```dockerfile
 FROM golang:1.27-alpine AS build

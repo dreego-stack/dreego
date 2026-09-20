@@ -9,12 +9,14 @@ import (
 	"§$name$§/www"
 )
 
+const port = "8080"
+
 func main() {
 	app := dreego.New()
 	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
-	addr := ssr.DefaultAddr()
+	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
 	}
