@@ -78,9 +78,16 @@ func compTextSection(gen *codegen.State, content string, inSection bool, context
 			if start < i {
 				parts = append(parts, gogen.GoLiteral(content[start:i]))
 			}
-			expr := strings.TrimSpace(content[i+2 : i+2+closeIdx])
-			code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", expr)
-			parts = append(parts, fmt.Sprintf("dreego.%s(%s)", AttrSafeFunc(content, tagStart, i), code))
+			expr, filters := dreecode.ParseExpression(strings.TrimSpace(content[i+2 : i+2+closeIdx]))
+			code, raw, err := expressionCode(expr, filters, i)
+			if err != nil {
+				return "", cur, err
+			}
+			if raw {
+				parts = append(parts, code)
+			} else {
+				parts = append(parts, fmt.Sprintf("dreego.%s(%s)", AttrSafeFunc(content, tagStart, i), code))
+			}
 			i += 2 + closeIdx + 2
 			start = i
 			continue
