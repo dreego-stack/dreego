@@ -16,9 +16,10 @@ func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 		l = &codegen.Layout{File: layout.file, Name: layout.name}
 	}
 	if len(file.FormActions) > 0 {
-		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash)
+		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash, map[string]bool{})
 	}
 	methods := fileRegisteredMethods(file)
+	emitted := map[string]bool{}
 	var src, regs strings.Builder
 	for _, method := range methods {
 		copy := *file
@@ -32,7 +33,7 @@ func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgN
 			copy.Server = []ServerSection{{Method: method}}
 		}
 		copy.Body = templateForMethod(file, method)
-		part, reg, err := generateMethodHandler(gen, &copy, l, pkgName, baseName, pattern, scopeHash)
+		part, reg, err := generateMethodHandler(gen, &copy, l, pkgName, baseName, pattern, scopeHash, emitted)
 		if err != nil {
 			return "", "", err
 		}
@@ -55,7 +56,7 @@ func templateForMethod(file *File, method string) *BodySection {
 	return file.Body
 }
 
-func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
+func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, pkgName string, baseName string, pattern string, scopeHash string, emitted map[string]bool) (string, string, error) {
 	hasTypedBlocks := false
 	for _, g := range file.Server {
 		if g.ContentType != "" && g.ContentType != "custom" {
@@ -92,7 +93,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 
 	var buf strings.Builder
 
-	pkgCode, inlineCode := splitServerSections(file.Server, hasFormActions)
+	pkgCode, inlineCode := splitServerSections(file.Server, emitted)
 	if pkgCode != "" {
 		buf.WriteString(pkgCode)
 	}
@@ -148,7 +149,9 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 	buf.WriteString("\t\thttp.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)\n")
 	buf.WriteString("\t\treturn\n")
 	buf.WriteString("\t}\n")
-	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
+	buf.WriteString("\tif w.Header().Get(\"Content-Type\") == \"\" {\n")
+	buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
+	buf.WriteString("\t}\n")
 	buf.WriteString("\tw.Write([]byte(html))\n")
 	buf.WriteString("}\n")
 

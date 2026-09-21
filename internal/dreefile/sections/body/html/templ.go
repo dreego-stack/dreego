@@ -137,10 +137,10 @@ func dedupeLayoutHead(layoutHead, pageHead string) string {
 	if strings.Contains(lower, "<title") {
 		layoutHead = stripTitleTag(layoutHead)
 	}
-	if strings.Contains(lower, `+"`"+`name="description"`+"`"+`) || strings.Contains(lower, `+"`"+`name='description'`+"`"+`) {
+	if strings.Contains(lower, ` + "`" + `name="description"` + "`" + `) || strings.Contains(lower, ` + "`" + `name='description'` + "`" + `) {
 		layoutHead = stripMetaTag(layoutHead, "name=\"description\"", "name='description'")
 	}
-	if strings.Contains(lower, `+"`"+`name="viewport"`+"`"+`) || strings.Contains(lower, `+"`"+`name='viewport'`+"`"+`) {
+	if strings.Contains(lower, ` + "`" + `name="viewport"` + "`" + `) || strings.Contains(lower, ` + "`" + `name='viewport'` + "`" + `) {
 		layoutHead = stripMetaTag(layoutHead, "name=\"viewport\"", "name='viewport'")
 	}
 	if strings.Contains(lower, "charset") {
