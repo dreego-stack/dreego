@@ -28,7 +28,7 @@ func TestGenTemplateNodeIfElseIfChain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"if a", "else if b", "`A`", "`B`"} {
+	for _, want := range []string{"if dreego.Truthy(a)", "else if dreego.Truthy(b)", "`A`", "`B`"} {
 		if !strings.Contains(result, want) {
 			t.Errorf("else-if chain missing %q, got:\n%s", want, result)
 		}
@@ -105,7 +105,7 @@ func TestGenTemplateNodeEachSubstitutesLoopInIfCond(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(result, "if !loop.Last {") {
+	if !strings.Contains(result, "if dreego.Truthy(!loop.Last) {") {
 		t.Errorf("$loop. in {#if} cond must be substituted to loop., got:\n%s", result)
 	}
 	if strings.Contains(result, "$loop.") {
@@ -140,7 +140,7 @@ func TestGenTemplateNodeEachSubstitutesLoopInElseIfCond(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"if loop.First {", "} else if loop.Last {"} {
+	for _, want := range []string{"if dreego.Truthy(loop.First) {", "} else if dreego.Truthy(loop.Last) {"} {
 		if !strings.Contains(result, want) {
 			t.Errorf("$loop. in else-if cond must be substituted, missing %q, got:\n%s", want, result)
 		}
@@ -166,7 +166,7 @@ func TestGenTemplateNodeEachLoopInIfCondFullParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "if !loop.Last {") {
+	if !strings.Contains(out, "if dreego.Truthy(!loop.Last) {") {
 		t.Errorf("full pipeline must substitute $loop. in {#if} cond, got:\n%s", out)
 	}
 	if strings.Contains(out, "$loop.") {

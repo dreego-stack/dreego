@@ -39,17 +39,9 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 		g.InSection = next
 		return fmt.Sprintf("%s.WriteString(%s)", g.Builder, code), nil
 	case ir.NodeExpression:
-		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
-		raw := false
-		for _, f := range n.Filters {
-			switch f {
-			case "raw":
-				raw = true
-			case "upper":
-				code = fmt.Sprintf("strings.ToUpper(%s)", code)
-			default:
-				return "", fmt.Errorf("unknown filter '%s' at position %d", f, n.Pos)
-			}
+		code, raw, err := expressionCode(n.Content, n.Filters, n.Pos)
+		if err != nil {
+			return "", err
 		}
 		if raw {
 			return fmt.Sprintf("%s.WriteString(%s)", g.Builder, code), nil
@@ -62,7 +54,7 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 		return fmt.Sprintf("%s.WriteString(dreego.SafeText(%s))", g.Builder, messageCall(g.Gen, "ctx", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("if %s {\n", n.Cond))
+		buf.WriteString(fmt.Sprintf("if %s {\n", conditionCode(n.Cond)))
 		for _, child := range n.Children {
 			code, err := g.Node(child)
 			if err != nil {
@@ -79,7 +71,7 @@ func (g *CompGen) Node(n ir.TemplateNode) (string, error) {
 		}
 		if chain {
 			for _, ec := range n.ElseChildren {
-				buf.WriteString(fmt.Sprintf("\t} else if %s {\n", ec.Cond))
+				buf.WriteString(fmt.Sprintf("\t} else if %s {\n", conditionCode(ec.Cond)))
 				for _, child := range ec.Children {
 					code, err := g.Node(child)
 					if err != nil {

@@ -23,5 +23,5 @@ D
 {/if}
 </body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "if score >= 80")
+	dreegotest.MustContain(t, gen["www/routes/dree.go"], "if dreego.Truthy(score >= 80)")
 }

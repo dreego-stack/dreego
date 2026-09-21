@@ -34,17 +34,9 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		*inSection = next
 		return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
 	case ir.NodeExpression:
-		code := fmt.Sprintf("fmt.Sprintf(\"%%v\", %s)", n.Content)
-		raw := false
-		for _, f := range n.Filters {
-			switch f {
-			case "raw":
-				raw = true
-			case "upper":
-				code = fmt.Sprintf("strings.ToUpper(%s)", code)
-			default:
-				return "", fmt.Errorf("unknown filter '%s' at position %d", f, n.Pos)
-			}
+		code, raw, err := expressionCode(n.Content, n.Filters, n.Pos)
+		if err != nil {
+			return "", err
 		}
 		if raw {
 			return fmt.Sprintf("%s%s.WriteString(%s)\n", indent, builder, code), nil
@@ -57,7 +49,7 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		return fmt.Sprintf("%s%s.WriteString(dreego.SafeText(%s))\n", indent, builder, messageCall(gen, "c", n)), nil
 	case ir.NodeIf:
 		var buf strings.Builder
-		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, n.Cond))
+		buf.WriteString(fmt.Sprintf("%sif %s {\n", indent, conditionCode(n.Cond)))
 		for _, child := range n.Children {
 			code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 			if err != nil {
@@ -74,7 +66,7 @@ func genTemplateNodeToState(gen *codegen.State, n ir.TemplateNode, depth int, bu
 		}
 		if chain {
 			for _, ec := range n.ElseChildren {
-				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, ec.Cond))
+				buf.WriteString(fmt.Sprintf("%s} else if %s {\n", indent, conditionCode(ec.Cond)))
 				for _, child := range ec.Children {
 					code, err := genTemplateNodeToState(gen, child, depth+1, builder, inSection, server)
 					if err != nil {

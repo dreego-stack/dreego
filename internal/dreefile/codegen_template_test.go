@@ -89,7 +89,7 @@ func TestGenTemplateNodeNestedIfInElseNotDropped(t *testing.T) {
 	if out == "" {
 		t.Fatal("nested {#if} inside {#else} silently dropped: generated code is empty")
 	}
-	for _, want := range []string{"if a", "if b", "`A`", "`B`", "`C`", "`D`"} {
+	for _, want := range []string{"if dreego.Truthy(a)", "if dreego.Truthy(b)", "`A`", "`B`", "`C`", "`D`"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("generated code missing %q, got:\n%s", want, out)
 		}
@@ -113,7 +113,7 @@ func TestGenTemplateNodeCompNestedIfInElseNotDropped(t *testing.T) {
 	if out == "" {
 		t.Fatal("nested {#if} inside {#else} in component silently dropped")
 	}
-	for _, want := range []string{"if a", "if b", "`A`", "`B`", "`C`", "`D`"} {
+	for _, want := range []string{"if dreego.Truthy(a)", "if dreego.Truthy(b)", "`A`", "`B`", "`C`", "`D`"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("generated component code missing %q, got:\n%s", want, out)
 		}

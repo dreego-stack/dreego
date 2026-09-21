@@ -53,7 +53,7 @@ func TestCompGenEachSubstitutesLoopInIfCond(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "if !loop.Last {") {
+	if !strings.Contains(out, "if dreego.Truthy(!loop.Last) {") {
 		t.Errorf("compGen $loop. in {#if} cond must be substituted to loop., got:\n%s", out)
 	}
 	if strings.Contains(out, "$loop.") {
@@ -77,7 +77,7 @@ func TestCompGenEachLoopInIfCondFullParse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(out, "if !loop.Last {") {
+	if !strings.Contains(out, "if dreego.Truthy(!loop.Last) {") {
 		t.Errorf("compGen full pipeline must substitute $loop. in {#if} cond, got:\n%s", out)
 	}
 	if strings.Contains(out, "$loop.") {
@@ -108,7 +108,7 @@ func TestCompGenIfElseIfChain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"if a {", "} else if b {", "`A`", "`B`"} {
+	for _, want := range []string{"if dreego.Truthy(a) {", "} else if dreego.Truthy(b) {", "`A`", "`B`"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("compGen else-if chain missing %q, got:\n%s", want, out)
 		}
@@ -143,7 +143,7 @@ func TestCompGenIfElseMixedChildren(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, want := range []string{"if a {", "} else {", "if b {", "`A`", "`B`", "`fallback`"} {
+	for _, want := range []string{"if dreego.Truthy(a) {", "} else {", "if dreego.Truthy(b) {", "`A`", "`B`", "`fallback`"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("compGen mixed else missing %q, got:\n%s", want, out)
 		}
