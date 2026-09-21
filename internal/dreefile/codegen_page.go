@@ -92,7 +92,7 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 
 	var buf strings.Builder
 
-	pkgCode, inlineCode := splitServerSections(file.Server, hasFormActions)
+	pkgCode, inlineCode := splitServerSections(file.Server)
 	if pkgCode != "" {
 		buf.WriteString(pkgCode)
 	}
@@ -148,7 +148,9 @@ func generateMethodHandler(gen *Generator, file *File, layout *codegen.Layout, p
 	buf.WriteString("\t\thttp.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)\n")
 	buf.WriteString("\t\treturn\n")
 	buf.WriteString("\t}\n")
-	buf.WriteString("\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
+	buf.WriteString("\tif w.Header().Get(\"Content-Type\") == \"\" {\n")
+	buf.WriteString("\t\tw.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n")
+	buf.WriteString("\t}\n")
 	buf.WriteString("\tw.Write([]byte(html))\n")
 	buf.WriteString("}\n")
 
