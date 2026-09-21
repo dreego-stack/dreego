@@ -3,8 +3,8 @@ module components
 go 1.27
 
 require (
-	github.com/dreego-stack/dreego/adapter/ssr v0.10.7
-	github.com/dreego-stack/dreego/core v0.10.7
+	github.com/dreego-stack/dreego/adapter/ssr v0.10.8
+	github.com/dreego-stack/dreego/core v0.10.8
 )
 
 replace github.com/dreego-stack/dreego => ../../..
