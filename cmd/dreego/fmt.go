@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,6 +11,16 @@ import (
 )
 
 func cmdFmt(args []string) {
+	if err := cmdFmtE(args, os.Stdout); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+// cmdFmtE formats .dreego files and returns an error when --check finds files
+// that would change. It never writes in check mode; a caller other than main
+// can therefore use it in tests without exiting the process.
+func cmdFmtE(args []string, stdout io.Writer) error {
 	check := false
 	write := true
 	var targets []string
@@ -53,7 +64,7 @@ func cmdFmt(args []string) {
 
 		if formatted == original {
 			if !check && !write {
-				fmt.Print(formatted)
+				fmt.Fprint(stdout, formatted)
 			}
 			continue
 		}
@@ -65,14 +76,14 @@ func cmdFmt(args []string) {
 		}
 		if write {
 			os.WriteFile(f, []byte(formatted), 0644)
-			fmt.Printf("%s\n", f)
+			fmt.Fprintf(stdout, "%s\n", f)
 		} else {
-			fmt.Print(formatted)
+			fmt.Fprint(stdout, formatted)
 		}
 	}
 
 	if check && changed > 0 {
-		fmt.Fprintf(os.Stderr, "fmt: %d file(s) need formatting\n", changed)
-		os.Exit(1)
+		return fmt.Errorf("fmt: %d file(s) need formatting", changed)
 	}
+	return nil
 }
