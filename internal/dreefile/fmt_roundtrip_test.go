@@ -142,6 +142,28 @@ Outro text
 </body>
 `,
 		},
+		{
+			name: "expression string literal keeps spaces and pipes",
+			src: `<server>
+msg := "hi"
+</server>
+
+<body><p>{{ "a  b" }}{{ "c | d" }}</p></body>
+`,
+		},
+		{
+			name: "condition string literal keeps spaces and pipes",
+			src: `<server>
+cond := true
+</server>
+
+<body>{#if cond == "a  b" || cond == "c | d"}<p>x</p>{/if}</body>
+`,
+		},
+		{
+			name: "server raw string keeps blank lines and spacing",
+			src:  "<server>\nraw := `line1\n\n\nline3`\nmsg   :=   \"a  b\"\n</server>\n\n<body><p>ok</p></body>\n",
+		},
 	}
 }
 
@@ -171,7 +193,23 @@ func TestFormatRoundTripPreservesSemantics(t *testing.T) {
 					t.Fatalf("Format changed the number of %q\ngot:\n%s", tag, out)
 				}
 			}
+			assertCodeSectionsVerbatim(t, tc.src, out)
 		})
+	}
+}
+
+// assertCodeSectionsVerbatim requires every server, client, and style section to
+// survive formatting byte for byte: the formatter must never rewrite Go, JS, or
+// CSS, including string literals and blank lines inside them.
+func assertCodeSectionsVerbatim(t *testing.T, src, out string) {
+	t.Helper()
+	for _, s := range collectFmtSections(src) {
+		if !isCodeSection(s.tag) {
+			continue
+		}
+		if !strings.Contains(out, s.text) {
+			t.Fatalf("Format rewrote a <%s> section\nwant exact:\n%s\ngot:\n%s", s.tag, s.text, out)
+		}
 	}
 }
 

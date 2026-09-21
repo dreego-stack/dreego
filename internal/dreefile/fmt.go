@@ -71,7 +71,6 @@ func Format(input string) string {
 	body = formatSections(body)
 	body = strings.TrimRight(body, " \t\r")
 	body = strings.TrimLeft(body, "\n")
-	body = multiBlank.ReplaceAllString(body, "\n\n")
 
 	var header strings.Builder
 	for _, h := range headerLines {
@@ -159,24 +158,14 @@ func formatLayoutLine(line string) string {
 
 func formatExpressions(input string) string {
 	return expressions.ReplaceAllStringFunc(input, func(m string) string {
-		inner := m[2 : len(m)-2]
-		inner = strings.TrimSpace(inner)
-		inner = multiSpace.ReplaceAllString(inner, " ")
-		inner = strings.ReplaceAll(inner, " |", "|")
-		inner = strings.ReplaceAll(inner, "| ", "|")
+		inner := normalizeExpressionInner(m[2 : len(m)-2])
 		return "{{ " + inner + " }}"
 	})
 }
 
 func formatControlFlow(input string) string {
-	input = controlOpen.ReplaceAllStringFunc(input, func(m string) string {
-		m = multiSpace.ReplaceAllString(m, " ")
-		return m
-	})
-	input = controlClose.ReplaceAllStringFunc(input, func(m string) string {
-		m = multiSpace.ReplaceAllString(m, " ")
-		return m
-	})
+	input = controlOpen.ReplaceAllStringFunc(input, normalizeControlTag)
+	input = controlClose.ReplaceAllStringFunc(input, normalizeControlTag)
 	return input
 }
 
@@ -206,24 +195,30 @@ func formatSections(input string) string {
 
 	var result strings.Builder
 	if strings.TrimSpace(sections[0].gap) != "" {
-		result.WriteString(sections[0].gap)
+		result.WriteString(collapseBlankLines(sections[0].gap))
 	}
 	for i, s := range ordered {
 		if i > 0 {
 			if !reorder && strings.TrimSpace(s.gap) != "" {
-				result.WriteString(s.gap)
+				result.WriteString(collapseBlankLines(s.gap))
 			} else {
 				result.WriteString("\n\n")
 			}
 		}
-		text := formatSectionBody(s.tag, s.text)
-		if s.tag == "body" {
-			text = formatControlFlow(formatExpressions(text))
+		var text string
+		if isCodeSection(s.tag) {
+			text = s.text
+		} else {
+			text = formatSectionBody(s.tag, s.text)
+			if s.tag == "body" {
+				text = formatControlFlow(formatExpressions(text))
+			}
+			text = multiBlank.ReplaceAllString(text, "\n\n")
 		}
 		result.WriteString(text)
 	}
 	if tail := input[sections[len(sections)-1].offset:]; strings.TrimSpace(tail) != "" {
-		result.WriteString(tail)
+		result.WriteString(collapseBlankLines(tail))
 	}
 	return result.String()
 }
