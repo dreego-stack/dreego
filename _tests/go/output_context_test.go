@@ -49,6 +49,26 @@ func TestOutputContextURLAllowsHTTPS(t *testing.T) {
 	dreegotest.MustContainBody(t, body, `href="https://example.com/x"`)
 }
 
+func TestOutputContextURLAllowsCalendarSchemes(t *testing.T) {
+	t.Parallel()
+	cases := []struct{ name, url string }{
+		{"webcal", "webcal://example.com/cal.ics"},
+		{"caldav", "caldav://example.com/calendars/user/"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			c := dreegotest.Serve(t, map[string]string{
+				"www/routes/+page.dreego": `<server>u := "` + tc.url + `"</server>
+<body><a href="{{ u }}">link</a></body>`,
+			})
+			_, body := c.Get(t, "/")
+			dreegotest.MustContainBody(t, body, `href="`+tc.url+`"`)
+			dreegotest.MustNotContainBody(t, body, `href="#"`)
+		})
+	}
+}
+
 func TestOutputContextURLRejectsDataScheme(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{

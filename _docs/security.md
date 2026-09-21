@@ -44,13 +44,13 @@ classified as a refresh meta tag.
 
 `SafeURL` allows relative URLs, fragment-only values (`#fragment`),
 protocol-relative URLs (`//host/path`), and the `http`, `https`, `mailto`,
-and `tel` schemes. Any other scheme — including `javascript:`, `data:`,
-`vbscript:`, and `file:` — is replaced with `#`. The check is case-insensitive
-and rejects obfuscated schemes that embed whitespace or control characters
-(`\x00`, `\x0b`, `\x0c`, space, tab, newline, carriage return) before the
-colon, because browsers strip those characters while parsing URLs. `srcset`
-values are validated as a whole: a value that contains an unsafe scheme
-anywhere (`a.jpg 1x, javascript:alert(1)`) is rejected.
+`tel`, `webcal`, and `caldav` schemes. Any other scheme — including
+`javascript:`, `data:`, `vbscript:`, and `file:` — is replaced with `#`. The
+check is case-insensitive and rejects obfuscated schemes that embed whitespace
+or control characters (`\x00`, `\x0b`, `\x0c`, space, tab, newline, carriage
+return) before the colon, because browsers strip those characters while parsing
+URLs. `srcset` values are validated as a whole: a value that contains an unsafe
+scheme anywhere (`a.jpg 1x, javascript:alert(1)`) is rejected.
 
 `SafeRefresh` extracts the URL portion after `url=` with the same tolerance
 that browsers apply: the `url` keyword is matched case-insensitively and

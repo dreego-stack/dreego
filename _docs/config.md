@@ -1,6 +1,11 @@
 # dreego.config.json
 
-The configuration file is located at `dreego.config.json` in the project root.
+The configuration file lives in the **website root** — the directory that
+contains the `routes/`, `layouts/`, `components/`, and `static/` trees. That
+directory is not necessarily the project root: `dreego new` scaffolds it as
+`www/`, so the file is `www/dreego.config.json` in a default project. Any
+directory containing `dreego.config.json` is treated as a website root; a repo
+may contain more than one.
 
 ## Schema
 
