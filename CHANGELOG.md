@@ -1,4 +1,9 @@
 
+## v0.10.7 - 2026-09-21
+
+- Bug: apply `|raw` and other expression filters in attribute, URL, script, and style contexts instead of emitting invalid Go (`undefined: raw`)
+- Bug: allow `{#if}` conditions on strings, numbers, and slices by routing them through a truthiness helper (empty string, zero, and empty collections are false), fixing the non-compiling `_docs/forms.md` example
+
 ## v0.10.6 - 2026-09-21
 
 - Bug: `<server>` sections that mix Go declarations and statements now compile; the leading declaration block (type/func/var/const) and any top-level func are emitted at package level and the remaining statements stay inside the render function, instead of emitting the whole section at package level
