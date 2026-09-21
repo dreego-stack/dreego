@@ -72,6 +72,31 @@ item := Item{Name: "b"}
 	}
 }
 
+// Two route files that hoist the same package-level name must fail generation
+// with a dreego diagnostic, not a raw compiler redeclaration error.
+func TestBugServerSectionDuplicateDeclarationDiagnostic(t *testing.T) {
+	t.Parallel()
+	dir := dreegotest.ProjectDir(t, map[string]string{
+		"www/routes/+page.dreego": `<server>
+type Product struct{ Name string }
+</server>
+<body>{{ (Product{Name: "a"}).Name }}</body>`,
+		"www/routes/other.dreego": `<server>
+type Product struct{ Name string }
+</server>
+<body>{{ (Product{Name: "b"}).Name }}</body>`,
+	})
+	out, err := dreegotest.RunCLI(t, dir, "generate")
+	if err == nil {
+		t.Fatalf("generate must reject duplicate package-level declarations, got:\n%s", out)
+	}
+	for _, want := range []string{"duplicate package-level declaration", "Product", "Fix:"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("diagnostic must contain %q, got:\n%s", want, out)
+		}
+	}
+}
+
 // A pure statements section must still compile inside the render function.
 func TestBugServerSectionStatementsOnlyStillCompiles(t *testing.T) {
 	t.Parallel()

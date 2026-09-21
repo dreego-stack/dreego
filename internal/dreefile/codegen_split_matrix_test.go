@@ -132,7 +132,7 @@ func TestServerSectionMixedDeclarationAndStatementSplit(t *testing.T) {
 	sections := []ServerSection{{
 		Code: "type T struct{ V int }\nfunc (t T) Get() int { return t.V }\nx := T{V: 5}\n_ = x",
 	}}
-	pkg, inline := splitServerSections(sections)
+	pkg, inline := splitServerSections(sections, map[string]bool{})
 	for _, want := range []string{"type T struct", "func (t T) Get() int"} {
 		if !strings.Contains(pkg, want) {
 			t.Errorf("mixed section declaration %q must go to package level, got:\n%s", want, pkg)
@@ -147,7 +147,7 @@ func TestServerSectionMixedDeclarationAndStatementSplit(t *testing.T) {
 }
 
 func TestServerSectionStatementsOnlyStayInline(t *testing.T) {
-	pkg, inline := splitServerSections([]ServerSection{{Code: "a := 1\nb := 2\n_ = a + b"}})
+	pkg, inline := splitServerSections([]ServerSection{{Code: "a := 1\nb := 2\n_ = a + b"}}, map[string]bool{})
 	if pkg != "" {
 		t.Fatalf("statements-only must not emit package code, got:\n%s", pkg)
 	}
@@ -158,7 +158,7 @@ func TestServerSectionStatementsOnlyStayInline(t *testing.T) {
 
 func TestServerSectionConstBlockIsPackageLevel(t *testing.T) {
 	sections := []ServerSection{{Code: "const (\n\tA = 1\n\tB = 2\n)\n_ = A"}}
-	pkg, inline := splitServerSections(sections)
+	pkg, inline := splitServerSections(sections, map[string]bool{})
 	if !strings.Contains(pkg, "const (") || !strings.Contains(pkg, "B = 2") {
 		t.Fatalf("const block must be package level, got:\n%s", pkg)
 	}

@@ -8,9 +8,10 @@ import (
 	"github.com/dreego-stack/dreego/internal/dreefile/ir"
 )
 
-func splitServerSections(sections []ServerSection) (pkgCode string, inlineCode string) {
+func splitServerSections(sections []ServerSection, emitted map[string]bool) (pkgCode string, inlineCode string) {
 	var pkg []string
 	var inl []string
+	seen := map[string]bool{}
 	for _, g := range sections {
 		if g.ContentType != "" && g.ContentType != "custom" {
 			continue
@@ -26,6 +27,13 @@ func splitServerSections(sections []ServerSection) (pkgCode string, inlineCode s
 				continue
 			}
 			if isFuncDeclaration(clean) || (leading && isPackageDeclaration(clean)) {
+				if name := declarationName(clean); name != "" {
+					if seen[name] || emitted[name] {
+						continue
+					}
+					seen[name] = true
+					emitted[name] = true
+				}
 				pkg = append(pkg, clean)
 				continue
 			}
@@ -38,6 +46,37 @@ func splitServerSections(sections []ServerSection) (pkgCode string, inlineCode s
 		result += "\n"
 	}
 	return result, strings.Join(inl, "\n")
+}
+
+// hoistedDeclarationNames lists the package-level names a route file hoists to
+// the shared routes package. Method sections repeat the same leading
+// declaration block, so the set is deduplicated.
+func hoistedDeclarationNames(file *File) []string {
+	seen := map[string]bool{}
+	var names []string
+	for _, g := range file.Server {
+		if g.ContentType != "" && g.ContentType != "custom" {
+			continue
+		}
+		code := strings.TrimSpace(ir.TranslateMdtohtml(g.Code))
+		leading := true
+		for _, chunk := range splitTopLevelChunks(code) {
+			clean := strings.TrimSpace(unindent(chunk))
+			if clean == "" {
+				continue
+			}
+			if !isFuncDeclaration(clean) && !(leading && isPackageDeclaration(clean)) {
+				leading = false
+				continue
+			}
+			name := declarationName(clean)
+			if name != "" && !seen[name] {
+				seen[name] = true
+				names = append(names, name)
+			}
+		}
+	}
+	return names
 }
 
 // splitTopLevelChunks splits Go source at automatic semicolons (newlines) that

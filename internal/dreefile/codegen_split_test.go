@@ -15,7 +15,7 @@ func TestSplitServerSectionsDeclarationWithStatements(t *testing.T) {
 		{Code: "c.W.Write([]byte(\"{}\"))", ContentType: "json"},
 		{Code: "// custom", ContentType: "custom"},
 	}
-	pkg, inline := splitServerSections(sections)
+	pkg, inline := splitServerSections(sections, map[string]bool{})
 
 	if !strings.Contains(pkg, "type Item struct") {
 		t.Errorf("declaration must go to pkgCode, got pkg:\n%s", pkg)

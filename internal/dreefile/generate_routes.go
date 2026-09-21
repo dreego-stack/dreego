@@ -19,6 +19,7 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 	routePatterns := map[string]bool{}
 	found := 0
 	routeSources := map[string]string{}
+	declSources := map[string]string{}
 	needsHeadHelpers := false
 
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
@@ -74,6 +75,12 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 			}
 			if err := registerGoImports(gen, "routes", fpath, file.GoImports); err != nil {
 				return err
+			}
+			for _, name := range hoistedDeclarationNames(file) {
+				if prev, dup := declSources[name]; dup {
+					return serverDeclarationConflict(name, prev, fpath)
+				}
+				declSources[name] = fpath
 			}
 
 			if len(file.Server) == 0 {
