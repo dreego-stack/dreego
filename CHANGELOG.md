@@ -1,4 +1,11 @@
 
+## v0.10.6 - 2026-09-21
+
+- Bug: `<server>` sections that mix Go declarations and statements now compile; the leading declaration block (type/func/var/const) and any top-level func are emitted at package level and the remaining statements stay inside the render function, instead of emitting the whole section at package level
+- Bug: declarations at the top of a `<server>` section are hoisted to package level, so route files in one directory can share types, consts, funcs, and stores
+- Bug: request-local `var` declarations that follow a statement stay inside the render function, so they are not turned into shared package state
+- Bug: the generated GET handler no longer overwrites a `Content-Type` already written by a `<server type="custom">` route
+
 ## v0.10.5 - 2026-09-21
 
 - Bug: `dreego fmt` is now semantics-preserving for body-level layouts; a document-level `<head>` nested in `<body>` is no longer hoisted and trailing `</html>`/`</body>` are no longer dropped

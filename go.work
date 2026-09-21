@@ -12,14 +12,14 @@ use (
 	./demo/demo-wailsv3
 )
 
-replace github.com/dreego-stack/dreego v0.10.5 => .
+replace github.com/dreego-stack/dreego v0.10.6 => .
 
-replace github.com/dreego-stack/dreego/core v0.10.5 => ./core
+replace github.com/dreego-stack/dreego/core v0.10.6 => ./core
 
-replace github.com/dreego-stack/dreego/adapter/ssr v0.10.5 => ./adapter/ssr
+replace github.com/dreego-stack/dreego/adapter/ssr v0.10.6 => ./adapter/ssr
 
-replace github.com/dreego-stack/dreego/adapter/wails v0.10.5 => ./adapter/wails
+replace github.com/dreego-stack/dreego/adapter/wails v0.10.6 => ./adapter/wails
 
-replace github.com/dreego-stack/dreego/dreegotest v0.10.5 => ./dreegotest
+replace github.com/dreego-stack/dreego/dreegotest v0.10.6 => ./dreegotest
 
-replace github.com/dreego-stack/dreego/cmd/dreego v0.10.5 => ./cmd/dreego
+replace github.com/dreego-stack/dreego/cmd/dreego v0.10.6 => ./cmd/dreego
