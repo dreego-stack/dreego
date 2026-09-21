@@ -155,6 +155,32 @@ func TestSSRContextWrite(t *testing.T) {
 	}
 }
 
+func TestSSRContextWriteContentType(t *testing.T) {
+	cases := []struct {
+		name        string
+		contentType string
+		want        string
+	}{
+		{"append charset", "text/html", "text/html; charset=utf-8"},
+		{"keep caller charset", "text/calendar; charset=utf-8", "text/calendar; charset=utf-8"},
+		{"keep caller charset case", "text/calendar; charset=UTF-8", "text/calendar; charset=UTF-8"},
+		{"keep non-utf8 charset", "application/json; charset=iso-8859-1", "application/json; charset=iso-8859-1"},
+		{"keep spaced charset", "text/plain; charset = utf-8", "text/plain; charset = utf-8"},
+		{"append after other params", "text/calendar; boundary=xyz", "text/calendar; boundary=xyz; charset=utf-8"},
+		{"append for empty type", "", "; charset=utf-8"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			c := NewSSR(rec, httptest.NewRequest("GET", "/", nil))
+			c.Write(http.StatusOK, tc.contentType, []byte("x"))
+			if ct := rec.Header().Get("Content-Type"); ct != tc.want {
+				t.Errorf("content-type: expected %q, got %q", tc.want, ct)
+			}
+		})
+	}
+}
+
 func TestSSRContextWants(t *testing.T) {
 	r := httptest.NewRequest("GET", "/", nil)
 	r.Header.Set("Accept", "text/html, application/json")

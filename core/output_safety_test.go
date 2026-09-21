@@ -23,10 +23,26 @@ func TestSafeURLAllowsSafeSchemes(t *testing.T) {
 		"http://example.com",
 		"mailto:a@b.de",
 		"tel:+4912345",
+		"webcal://example.com/cal.ics",
+		"webcal:https://example.com/cal.ics",
+		"caldav://example.com/calendars/user/",
 		"/relative/path",
 		"#anchor",
 		"//cdn.example.com/lib.js",
 		"",
+	} {
+		if got := SafeURL(in); got == "#" {
+			t.Errorf("SafeURL(%q) = %q, want value kept", in, got)
+		}
+	}
+}
+
+func TestSafeURLCalendarSchemesCaseInsensitive(t *testing.T) {
+	for _, in := range []string{
+		"WEBCAL://example.com/cal.ics",
+		"WebCal://example.com/cal.ics",
+		"CALDAV://example.com/calendars/user/",
+		"CalDav://example.com/calendars/user/",
 	} {
 		if got := SafeURL(in); got == "#" {
 			t.Errorf("SafeURL(%q) = %q, want value kept", in, got)

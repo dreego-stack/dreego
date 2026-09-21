@@ -100,3 +100,36 @@ func TestDocsLinksResolve(t *testing.T) {
 		}
 	}
 }
+
+func TestConfigDocWebsiteRoot(t *testing.T) {
+	t.Parallel()
+	root, err := dreegotest.RepoRoot()
+	if err != nil {
+		t.Fatalf("RepoRoot: %v", err)
+	}
+	data, err := os.ReadFile(filepath.Join(root, "_docs", "config.md"))
+	if err != nil {
+		t.Fatalf("read config.md: %v", err)
+	}
+	text := string(data)
+	if strings.Contains(text, "in the project root") {
+		t.Error("config.md still says dreego.config.json lives in the project root; it lives in the website root (www/ by default)")
+	}
+	if !strings.Contains(text, "website root") {
+		t.Error("config.md must name the website root as the location of dreego.config.json")
+	}
+}
+
+func TestDocsInstallPathUsesCmdDreego(t *testing.T) {
+	t.Parallel()
+	for _, f := range docsFiles(t) {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatalf("read %s: %v", f, err)
+		}
+		text := string(data)
+		if strings.Contains(text, "go install github.com/dreego-stack/dreego@") {
+			t.Errorf("%s documents the module-root install path; the CLI install path is github.com/dreego-stack/dreego/cmd/dreego@…", f)
+		}
+	}
+}

@@ -22,6 +22,11 @@ Go 1.27 features and `go mod` directives.
 go install github.com/dreego-stack/dreego/cmd/dreego@latest
 ```
 
+The install path must include the `/cmd/dreego` suffix. The module root
+`github.com/dreego-stack/dreego` is the shared implementation module and does
+not contain an installable `main` package, so installing it directly fails with
+`module … found, but does not contain package`.
+
 This installs the `dreego` binary into your `GOPATH/bin` directory. Make sure
 that directory is on your `PATH` (the Go installer usually adds it).
 
