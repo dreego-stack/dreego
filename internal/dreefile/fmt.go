@@ -2,6 +2,7 @@ package dreefile
 
 import (
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -11,14 +12,13 @@ var controlClose = regexp.MustCompile(`\{/(\w+)\}`)
 var multiBlank = regexp.MustCompile(`\n{3,}`)
 var multiSpace = regexp.MustCompile(` {2,}`)
 
-var knownSections = []string{"server", "head", "body", "style", "client"}
+var fmtSectionOrder = map[string]int{"server": 0, "head": 1, "body": 2, "style": 3, "client": 4}
 
-var sectionPatterns = map[string]*regexp.Regexp{
-	"server": regexp.MustCompile(`<server(?:\s[^>]*)?>[\s\S]*?</server>`),
-	"head":   regexp.MustCompile(`<head(?:\s[^>]*)?>[\s\S]*?</head>`),
-	"body":   regexp.MustCompile(`<body(?:\s[^>]*)?>[\s\S]*?</body>`),
-	"style":  regexp.MustCompile(`<style(?:\s[^>]*)?>[\s\S]*?</style>`),
-	"client": regexp.MustCompile(`<client(?:\s[^>]*)?>[\s\S]*?</client>`),
+type fmtSection struct {
+	tag    string
+	text   string
+	gap    string
+	offset int
 }
 
 func Format(input string) string {
@@ -71,7 +71,6 @@ func Format(input string) string {
 	body = formatSections(body)
 	body = strings.TrimRight(body, " \t\r")
 	body = strings.TrimLeft(body, "\n")
-	body = multiBlank.ReplaceAllString(body, "\n\n")
 
 	var header strings.Builder
 	for _, h := range headerLines {
@@ -87,9 +86,8 @@ func Format(input string) string {
 		result.WriteString("\n\n")
 	}
 	result.WriteString(body)
-	result.WriteString("\n")
 
-	return result.String()
+	return strings.TrimRight(result.String(), " \t\r\n") + "\n"
 }
 
 // isLegacyHeaderLine reports whether trimmed is one of the removed header forms
@@ -160,58 +158,102 @@ func formatLayoutLine(line string) string {
 
 func formatExpressions(input string) string {
 	return expressions.ReplaceAllStringFunc(input, func(m string) string {
-		inner := m[2 : len(m)-2]
-		inner = strings.TrimSpace(inner)
-		inner = multiSpace.ReplaceAllString(inner, " ")
-		inner = strings.ReplaceAll(inner, " |", "|")
-		inner = strings.ReplaceAll(inner, "| ", "|")
+		inner := normalizeExpressionInner(m[2 : len(m)-2])
 		return "{{ " + inner + " }}"
 	})
 }
 
 func formatControlFlow(input string) string {
-	input = controlOpen.ReplaceAllStringFunc(input, func(m string) string {
-		m = multiSpace.ReplaceAllString(m, " ")
-		return m
-	})
-	input = controlClose.ReplaceAllStringFunc(input, func(m string) string {
-		m = multiSpace.ReplaceAllString(m, " ")
-		return m
-	})
+	input = controlOpen.ReplaceAllStringFunc(input, normalizeControlTag)
+	input = controlClose.ReplaceAllStringFunc(input, normalizeControlTag)
 	return input
 }
 
+// formatSections normalizes a section file without inventing or dropping
+// content. Section boundaries come from the real lexer, so a document-level
+// <head> nested inside a body-level <body> layout stays part of its outer
+// <body> instead of being hoisted to a root section. Text before, between, and
+// after sections is preserved, and a file the lexer rejects is left unchanged.
 func formatSections(input string) string {
-	found := map[string]string{}
-	for _, tag := range knownSections {
-		re := sectionPatterns[tag]
-		m := re.FindString(input)
-		if m != "" {
-			found[tag] = formatSectionBody(tag, strings.TrimSpace(m))
-		}
-	}
-	if len(found) == 0 {
+	sections := collectFmtSections(input)
+	if len(sections) == 0 {
 		return input
 	}
 
-	if body, ok := found["body"]; ok {
-		body = formatExpressions(body)
-		body = formatControlFlow(body)
-		found["body"] = body
+	reorder := true
+	for _, s := range sections[1:] {
+		if strings.TrimSpace(s.gap) != "" {
+			reorder = false
+			break
+		}
+	}
+	ordered := sections
+	if reorder {
+		ordered = append([]fmtSection(nil), sections...)
+		sort.SliceStable(ordered, func(i, j int) bool { return fmtSectionOrder[ordered[i].tag] < fmtSectionOrder[ordered[j].tag] })
 	}
 
 	var result strings.Builder
-	for i, tag := range knownSections {
-		body, ok := found[tag]
-		if !ok {
-			continue
+	if strings.TrimSpace(sections[0].gap) != "" {
+		result.WriteString(collapseBlankLines(sections[0].gap))
+	}
+	for i, s := range ordered {
+		if i > 0 {
+			if !reorder && strings.TrimSpace(s.gap) != "" {
+				result.WriteString(collapseBlankLines(s.gap))
+			} else {
+				result.WriteString("\n\n")
+			}
 		}
-		if i > 0 && result.Len() > 0 {
-			result.WriteString("\n\n")
+		var text string
+		if isCodeSection(s.tag) {
+			text = s.text
+		} else {
+			text = formatSectionBody(s.tag, s.text)
+			if s.tag == "body" {
+				text = formatControlFlow(formatExpressions(text))
+			}
+			text = multiBlank.ReplaceAllString(text, "\n\n")
 		}
-		result.WriteString(body)
+		result.WriteString(text)
+	}
+	if tail := input[sections[len(sections)-1].offset:]; strings.TrimSpace(tail) != "" {
+		result.WriteString(collapseBlankLines(tail))
 	}
 	return result.String()
+}
+
+// collectFmtSections returns each root section with its exact source text, the
+// verbatim gap before it, and its end offset. Section nesting comes from the
+// lexer, so a section-like tag inside another section stays nested.
+func collectFmtSections(input string) []fmtSection {
+	toks, err := Lex(input)
+	if err != nil {
+		return nil
+	}
+	var out []fmtSection
+	prev, depth, start, tag := 0, 0, -1, ""
+	for _, tok := range toks {
+		switch {
+		case tok.Type == TokenTagOpen && depth == 0 && isFmtSection(tok.Tag):
+			start, tag, depth = tok.Pos, tok.Tag, 1
+		case depth > 0 && tok.Type == TokenTagOpen && tok.Tag == tag:
+			depth++
+		case depth > 0 && tok.Type == TokenTagClose && tok.Tag == tag:
+			depth--
+			if depth == 0 {
+				end := tok.Pos + len("</"+tag+">")
+				out = append(out, fmtSection{tag: tag, text: input[start:end], gap: input[prev:start], offset: end})
+				prev = end
+			}
+		}
+	}
+	return out
+}
+
+func isFmtSection(tag string) bool {
+	_, ok := fmtSectionOrder[tag]
+	return ok
 }
 
 func formatSectionBody(tag, raw string) string {
