@@ -9,9 +9,9 @@ import (
 	"github.com/dreego-stack/dreego/dreegotest"
 )
 
-// The <server> scope contract must stay documented: route files share one Go
-// package, the leading declaration block is hoisted, and shared declarations
-// must be unique across route files.
+// The <server> scope contract must stay documented: each route folder is its
+// own Go package, the leading declaration block is hoisted, and shared
+// declarations must be unique within one folder.
 func TestServerSectionDocScope(t *testing.T) {
 	t.Parallel()
 	root, err := dreegotest.RepoRoot()
@@ -24,7 +24,7 @@ func TestServerSectionDocScope(t *testing.T) {
 	}
 	text := strings.ToLower(string(data))
 	for _, want := range []string{
-		"one go package",
+		"its own go package",
 		"leading declaration block",
 	} {
 		if !strings.Contains(text, want) {
@@ -32,6 +32,6 @@ func TestServerSectionDocScope(t *testing.T) {
 		}
 	}
 	if !strings.Contains(text, "must be unique") && !strings.Contains(text, "cannot each declare") {
-		t.Error("server-section.md must document that shared declarations must be unique across route files")
+		t.Error("server-section.md must document that declarations must be unique within one route folder")
 	}
 }

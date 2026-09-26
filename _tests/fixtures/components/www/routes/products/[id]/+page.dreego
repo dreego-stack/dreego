@@ -1,14 +1,13 @@
+GOIMPORT { catalog "components/catalog" }
+
 <head>
     <title>Product</title>
 </head>
 
 <server>
-    products := []Product{
-        {Name: "Dreego Mug", Price: "$12", InStock: true},
-        {Name: "Dreego Tee", Price: "$24", InStock: false},
-    }
+    products := catalog.Products()
     id := c.Param("id")
-    var product Product
+    var product catalog.Product
     if id == "1" {
         product = products[0]
     } else {
