@@ -269,6 +269,10 @@ github.com/dreego-stack/
 | `_docs/progressive-enhancement.md` | HTMX, Alpine.js, plain JavaScript |
 | `_docs/security.md` | Context-aware escaping, output safety |
 | `_docs/accessibility.md` | Accessibility guarantees and template defaults |
+| `_docs/recipes/app-code.md` | Calling app code from `<server>`: imports, glue, service injection |
+| `_docs/recipes/machine-endpoints.md` | Webhooks and CSRF scoping with `PROFILE` |
+| `_docs/recipes/auth-basics.md` | Session-store login, `DestroySession` logout, flash |
+| `_docs/recipes/context-methods.md` | Context vs SSRContext vs RenderContext method table |
 
 ### Reference
 

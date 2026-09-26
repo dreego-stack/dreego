@@ -18,15 +18,16 @@ surface rule is: **uppercase is a keyword, lowercase is a value.**
   is still the directory cascade described in [Layouts](layouts.md).
 - `COMPONENT "www/components" IMPORT { Card, Card as ProductCard }` imports
   components from a path; `as` creates an alias.
-- `GOIMPORT { sync, encoding/json }` declares Go imports for the file's
-  generated package. Only allow-listed standard-library packages are accepted;
-  an unknown package fails at `dreego generate` with a diagnostic naming the
-  supported set. The list is fixed (`bytes`, `context`, `encoding/base64`,
-  `encoding/hex`, `encoding/json`, `errors`, `fmt`, `html`, `io`, `log`,
-  `maps`, `math`, `net/http`, `net/url`, `path`, `path/filepath`, `regexp`,
-  `slices`, `sort`, `strconv`, `strings`, `sync`, `time`, `unicode`,
-  `unicode/utf8`), so arbitrary or dynamic imports stay impossible. `strings`,
-  `net/http`, and `fmt` are also detected automatically from the code.
+- `GOIMPORT { path1, alias "path2" }` declares Go imports for the file's
+  generated package. Any package that resolves in the application is accepted:
+  the standard library, packages in your own module, and dependencies listed in
+  `go.mod`. An entry may carry an alias (`alias "path"`); the base name is used
+  when no alias is given. A package that is not in `go.mod` fails at
+  `dreego generate` with a diagnostic naming the path, `not in go.mod`, and the
+  matching `go get` command. Two imports whose aliases or base names collide
+  without an explicit alias fail with a diagnostic naming both paths. Dreego
+  never runs `go get` automatically. `strings`, `net/http`, and `fmt` are also
+  detected automatically from the code.
 
 Header directives are the only content allowed alongside the five root sections.
 

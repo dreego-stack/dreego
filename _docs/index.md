@@ -51,6 +51,13 @@ in one place instead of across module directories.
 - [Plugin Interfaces](https://github.com/dreego-stack/dreego/blob/main/_docs/plugin-interfaces.md) — Plugin System (planned)
 - [Plugins](https://github.com/dreego-stack/dreego/blob/main/_docs/plugins.md) — Plugin model, middleware + route hooks
 
+## Recipes
+
+- [Calling App Code](https://github.com/dreego-stack/dreego/blob/main/_docs/recipes/app-code.md) — Go imports, glue files, and service injection from `<server>`
+- [Machine Endpoints](https://github.com/dreego-stack/dreego/blob/main/_docs/recipes/machine-endpoints.md) — Webhooks with `PROFILE` and CSRF scoping
+- [Authentication Basics](https://github.com/dreego-stack/dreego/blob/main/_docs/recipes/auth-basics.md) — Session store, `DestroySession` logout, flash messages
+- [Context Methods](https://github.com/dreego-stack/dreego/blob/main/_docs/recipes/context-methods.md) — Context vs SSRContext vs RenderContext
+
 ## Planned architecture
 
 - [Roadmap](https://github.com/dreego-stack/dreego/blob/main/_docs/roadmap.md) — Public v0.x product direction
