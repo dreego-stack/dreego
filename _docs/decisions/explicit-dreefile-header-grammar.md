@@ -41,9 +41,15 @@ GOIMPORT { sync, encoding/json }      Go import channel
   generator-global alias, consistent with the global component registry.
 - `LAYOUT` is parsed and reserved; its codegen consumer arrives with the
   layout-chaining slice.
-- `GOIMPORT` emits allow-listed standard-library imports into the generated
-  route, component, and layout package. Unknown or dynamic package paths fail at
-  `dreego generate`, so type safety is preserved.
+- `GOIMPORT` emits Go imports into the generated route, component, and layout
+  package. Any package that resolves in the application is accepted: the
+  standard library, packages in the application's own module, and dependencies
+  listed in `go.mod`. An entry may carry an alias (`alias "path"`). An
+  unresolvable package fails at `dreego generate` with a diagnostic naming the
+  path, `not in go.mod`, and the matching `go get` command; a base-name or alias
+  collision fails with a diagnostic naming both paths. Type safety is preserved
+  by resolving against `go.mod` rather than executing arbitrary packages
+  dynamically.
 
 The legacy `Component X (..)`, top-level `import "…"`, and
 `from "…" import {..}` forms are rejected at `dreego generate` with a
@@ -57,8 +63,10 @@ migrated in the same series.
 - Component call names are derived from filenames, so a file rename changes the
   callable name.
 - `GOIMPORT` becomes the single channel for generated Go imports, which moves
-  stdlib imports into `<server>` and re-scopes the server-import work to an
-  explicit, allow-listed standard-library set.
+  Go imports into `<server>` and re-scopes the server-import work to an explicit
+  channel resolved against the application's `go.mod`. v0.10.9 removes the
+  earlier standard-library allowlist and adds the alias form; the grammar
+  keywords above are unchanged.
 - The migration cost is deliberately paid before v0.1; no compatibility aliases
   are provided.
 - `dreego fmt` preserves legacy header lines verbatim rather than silently
