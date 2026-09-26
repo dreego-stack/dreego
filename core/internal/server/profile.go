@@ -51,6 +51,9 @@ func (a *App) ApplyProfile(pattern, name string) error {
 	if err := a.mutable(); err != nil {
 		return err
 	}
+	if !strings.HasPrefix(pattern, "/") {
+		return fmt.Errorf("dreego: ApplyProfile pattern %q must start with '/'; bind a route path such as \"/hooks\"", pattern)
+	}
 	a.profileBindings = append(a.profileBindings, profileBinding{pattern: pattern, name: name})
 	return nil
 }

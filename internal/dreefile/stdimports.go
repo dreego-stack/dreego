@@ -27,7 +27,28 @@ func isDotlessImport(importPath string) bool {
 }
 
 func importBaseName(importPath string) string {
-	return path.Base(importPath)
+	base := path.Base(importPath)
+	if isModuleVersionSegment(base) {
+		if parent := path.Base(path.Dir(importPath)); parent != "." && parent != "/" {
+			return parent
+		}
+	}
+	return base
+}
+
+// isModuleVersionSegment reports whether seg is a semantic import version
+// suffix such as "v2". Such a segment is not a usable Go identifier, so the
+// alias derives from the parent path instead.
+func isModuleVersionSegment(seg string) bool {
+	if len(seg) < 2 || seg[0] != 'v' {
+		return false
+	}
+	for i := 1; i < len(seg); i++ {
+		if seg[i] < '0' || seg[i] > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func importSpecName(imp ir.GoImport) string {

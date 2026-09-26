@@ -36,7 +36,7 @@ func CSRFWithForbidden(store session.Store, onForbidden http.HandlerFunc) func(h
 			http.SetCookie(w, &http.Cookie{
 				Name:     "csrf_token",
 				Value:    token,
-				Path:     "/",
+				Path:     csrfCookiePath(store),
 				HttpOnly: false,
 				Secure:   secure,
 				SameSite: http.SameSiteStrictMode,
@@ -78,6 +78,15 @@ func isSecureForCSRF(r *http.Request, store session.Store) bool {
 		return session.IsTLS(r, cs.TrustedProxies())
 	}
 	return false
+}
+
+func csrfCookiePath(store session.Store) string {
+	if cs, ok := store.(*session.CookieStore); ok {
+		if path := cs.CookiePath(); path != "" {
+			return path
+		}
+	}
+	return "/"
 }
 
 func generateCSRFToken() string {
