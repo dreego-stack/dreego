@@ -26,8 +26,9 @@ func TestWailsTimerDemoGeneratesAccessibleDocument(t *testing.T) {
 		"www/routes/about/+page.dreego": string(about),
 	}
 	generated := dreegotest.Build(t, files)
-	routes := generated["www/routes/dree.go"]
-	regenerated := dreegotest.Build(t, files)["www/routes/dree.go"]
+	second := dreegotest.Build(t, files)
+	routes := generated["www/routes/dree.go"] + generated["www/routes/about/dree.go"]
+	regenerated := second["www/routes/dree.go"] + second["www/routes/about/dree.go"]
 	if routes != regenerated {
 		t.Fatal("restart-based generation produced different route output")
 	}

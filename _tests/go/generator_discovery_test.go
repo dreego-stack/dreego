@@ -178,15 +178,20 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after add: %v\n%s", err, out)
 	}
-	gen2, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	aboutGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "about", "dree.go"))
 	if err != nil {
-		t.Fatalf("read routes dree.go: %v", err)
+		t.Fatalf("read about/dree.go: %v", err)
 	}
-	if !strings.Contains(string(gen2), "about") {
-		t.Fatalf("added route not discovered: %s", gen2)
+	if !strings.Contains(string(aboutGen), "about") {
+		t.Fatalf("added route not discovered: %s", aboutGen)
 	}
 	if !strings.Contains(string(gen1["www/routes/dree.go"]), "home") {
 		t.Fatalf("baseline missing home: %s", gen1["www/routes/dree.go"])
+	}
+	for _, want := range []string{"about \"t/www/routes/about\"", "about.Register(app)"} {
+		if !strings.Contains(string(gen1["www/routes/dree.go"]), want) {
+			t.Fatalf("root routes collector missing %q: %s", want, gen1["www/routes/dree.go"])
+		}
 	}
 	if err := os.Rename(filepath.Join(dir, "www", "routes", "about"), filepath.Join(dir, "www", "routes", "info")); err != nil {
 		t.Fatalf("move about -> info: %v", err)
@@ -194,15 +199,18 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after move: %v\n%s", err, out)
 	}
-	gen3, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	infoGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "info", "dree.go"))
 	if err != nil {
-		t.Fatalf("read routes dree.go after move: %v", err)
+		t.Fatalf("read info/dree.go after move: %v", err)
 	}
-	if strings.Contains(string(gen3), "HandleAbout") {
-		t.Fatalf("stale About handler remained after move: %s", gen3)
+	if strings.Contains(string(infoGen), "HandleAbout") {
+		t.Fatalf("stale About handler remained after move: %s", infoGen)
 	}
-	if !strings.Contains(string(gen3), "HandleInfo") {
-		t.Fatalf("moved route not discovered as Info: %s", gen3)
+	if !strings.Contains(string(infoGen), "HandleInfo") {
+		t.Fatalf("moved route not discovered as Info: %s", infoGen)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "www", "routes", "about")); !os.IsNotExist(err) {
+		t.Fatalf("stale about package directory remained after move: %v", err)
 	}
 	if err := os.RemoveAll(filepath.Join(dir, "www", "routes", "info")); err != nil {
 		t.Fatalf("remove info: %v", err)
@@ -210,12 +218,15 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after delete: %v\n%s", err, out)
 	}
-	gen4, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	rootGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
 	if err != nil {
-		t.Fatalf("read routes dree.go after delete: %v", err)
+		t.Fatalf("read routes/dree.go after delete: %v", err)
 	}
-	if strings.Contains(string(gen4), "Info") || strings.Contains(string(gen4), "About") {
-		t.Fatalf("deleted route handlers remained: %s", gen4)
+	if strings.Contains(string(rootGen), "Info") || strings.Contains(string(rootGen), "About") {
+		t.Fatalf("deleted route package still registered: %s", rootGen)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "www", "routes", "info")); !os.IsNotExist(err) {
+		t.Fatalf("stale info package directory remained after delete: %v", err)
 	}
 }
 
@@ -231,13 +242,18 @@ func TestDiscoveryGeneratesRoutesNamedStaticAndGen(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	gen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
-	if err != nil {
-		t.Fatalf("read routes dree.go: %v", err)
+	cases := map[string]string{
+		"www/routes/static/dree.go":      "HandleStatic",
+		"www/routes/gen/dree.go":         "HandleGen",
+		"www/routes/blog/static/dree.go": "HandleBlogStatic",
 	}
-	for _, want := range []string{"HandleStatic", "HandleGen", "HandleBlogStatic"} {
+	for rel, want := range cases {
+		gen, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		if err != nil {
+			t.Fatalf("read %s: %v", rel, err)
+		}
 		if !strings.Contains(string(gen), want) {
-			t.Fatalf("expected %s handler in generated routes dree.go: %s", want, gen)
+			t.Fatalf("expected %s handler in %s: %s", want, rel, gen)
 		}
 	}
 }

@@ -10,6 +10,8 @@ type State struct {
 	Defs             map[string]*ir.ComponentDef
 	Src              string
 	Pkg              string
+	ImportKey        string
+	ImportKeySet     bool
 	Module           string
 	RootRel          string
 	CompPkgs         map[string]string
@@ -89,6 +91,17 @@ func (g *State) AddImport(pkg, alias, path string) {
 	g.Imports[pkg][alias] = path
 }
 
+func (g *State) AddImportForCurrent(alias, path string) {
+	g.AddImport(g.importKey(), alias, path)
+}
+
+func (g *State) importKey() string {
+	if g.ImportKeySet {
+		return g.ImportKey
+	}
+	return g.Pkg
+}
+
 func (g *State) AddGoImportPath(pkg, path string) {
 	if g.GoImportPaths == nil {
 		g.GoImportPaths = map[string][]string{}
@@ -111,6 +124,6 @@ func (g *State) Qualify(funcName string) string {
 	}
 	rel := g.CompPaths[pkg]
 	path := g.Module + "/" + g.RootRel + "/" + rel
-	g.AddImport(g.Pkg, pkg, path)
+	g.AddImport(g.importKey(), pkg, path)
 	return pkg + "." + funcName
 }

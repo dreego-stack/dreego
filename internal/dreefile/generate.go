@@ -132,22 +132,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {
-		imports := gen.Imports[rd.pkg]
-		importLine := buildImportLine(imports, rd.pkg)
-		stdImports := stdImportsFor(gen, rd.pkg, rd.src)
-		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
-		if strings.Contains(rd.src, "ssr.") {
-			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
-		}
-		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\t%s\n)\n\n", rd.pkg, importLine, coreImport)
-		if stdImports != "" {
-			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\t%s\n)\n\n", rd.pkg, stdImports, importLine, coreImport)
-		}
-		out += rd.src
-		out += "func Register(app *dreego.App) error {\n"
-		out += strings.Join(rd.regs, "")
-		out += "\treturn nil\n}\n"
-		files[filepath.Join(rd.dir, "dree.go")] = out
+		files[filepath.Join(rd.dir, "dree.go")] = buildRoutePackageFile(gen, rd)
 	}
 
 	if len(compSrcs) > 0 {
@@ -231,13 +216,17 @@ func buildImportLine(imports map[string]string, selfPkg string) string {
 	return strings.Join(lines, "\n\t")
 }
 
-func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings, i18nConfig ...string) string {
+func buildRootFile(root, module string, routeDirs []*routePkg, staticSrc string, settings *Settings, i18nConfig ...string) string {
 	pkg := sanitizePkgName(filepath.Base(root))
 	var imports []string
 	var regCalls []string
 	for _, rd := range routeDirs {
-		imports = append(imports, fmt.Sprintf("%s %q", rd.pkg, module+"/"+relToRoot(".", root)+"/"+relToRoot(root, rd.dir)))
-		regCalls = append(regCalls, fmt.Sprintf("\tif err := %s.Register(app); err != nil {\n\t\treturn err\n\t}\n", rd.pkg))
+		if rd.rel != "" {
+			continue
+		}
+		path := module + "/" + relToRoot(".", root) + "/" + relToRoot(root, rd.dir)
+		imports = append(imports, fmt.Sprintf("routes %q", path))
+		regCalls = append(regCalls, "\tif err := routes.Register(app); err != nil {\n\t\treturn err\n\t}\n")
 	}
 	importLine := strings.Join(imports, "\n\t")
 

@@ -179,6 +179,8 @@ func cascadeScopes(routeRel string) []string {
 
 func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntry) ([]string, error) {
 	var srcs []string
+	gen.ImportKey = ""
+	gen.ImportKeySet = false
 	scopes := map[string]bool{}
 	for _, e := range layouts {
 		scopes[e.rel] = true

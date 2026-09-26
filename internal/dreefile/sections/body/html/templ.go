@@ -113,7 +113,7 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 
 		layoutPkg := "layouts"
 		layoutPath := gen.Module + "/" + gen.RootRel + "/layouts"
-		gen.AddImport(gen.Pkg, layoutPkg, layoutPath)
+		gen.AddImportForCurrent(layoutPkg, layoutPath)
 		buf.WriteString(fmt.Sprintf("\thtml, err := %s.%s(c, pageContent, head)\n", layoutPkg, layout.Name))
 		buf.WriteString("\tif err != nil { return \"\", err }\n")
 		buf.WriteString("\tb.WriteString(html)\n")
