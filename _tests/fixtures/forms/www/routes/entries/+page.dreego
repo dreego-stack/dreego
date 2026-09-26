@@ -1,8 +1,11 @@
+GOIMPORT { store "forms/store" }
+
 <head>
     <title>Entries</title>
 </head>
 
 <server>
+    entries := store.All()
     empty := len(entries) == 0
 </server>
 

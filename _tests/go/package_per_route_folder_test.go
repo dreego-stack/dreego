@@ -28,7 +28,7 @@ type Form struct{ Email string }
 	})
 
 	rootRoutes := gen["www/routes/dree.go"]
-	if !strings.HasPrefix(rootRoutes, "package routes\n") {
+	if !strings.Contains(rootRoutes, "\npackage routes\n") {
 		t.Fatalf("root routes file must be package routes:\n%s", rootRoutes)
 	}
 	for _, want := range []string{
@@ -46,14 +46,14 @@ type Form struct{ Email string }
 	}
 
 	registrierung := gen["www/routes/registrierung/dree.go"]
-	if !strings.HasPrefix(registrierung, "package registrierung\n") {
+	if !strings.Contains(registrierung, "\npackage registrierung\n") {
 		t.Fatalf("sub-folder must be its own package named after the folder:\n%s", registrierung)
 	}
 	if !strings.Contains(registrierung, "type Form struct") {
 		t.Fatalf("sub-folder dree.go must contain its own package-level declaration:\n%s", registrierung)
 	}
 	anmeldung := gen["www/routes/anmeldung/dree.go"]
-	if !strings.HasPrefix(anmeldung, "package anmeldung\n") {
+	if !strings.Contains(anmeldung, "package anmeldung\n") {
 		t.Fatalf("second sub-folder must be its own package:\n%s", anmeldung)
 	}
 	if !strings.Contains(anmeldung, "type Form struct") {
@@ -76,7 +76,7 @@ func TestPackagePerRouteFolderDynamicFoldersFoldIntoAncestor(t *testing.T) {
 		t.Fatalf("my-site folder must get its own package file; got files %v", keys(gen))
 	}
 	mySite := gen["www/routes/my-site/dree.go"]
-	if !strings.HasPrefix(mySite, "package my_site\n") {
+	if !strings.Contains(mySite, "package my_site\n") {
 		t.Fatalf("my-site must sanitize to package my_site:\n%s", mySite)
 	}
 

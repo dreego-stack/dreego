@@ -1,3 +1,5 @@
+GOIMPORT { newstore "demo/blog/newstore" }
+
 <head>
     <title>News — Dreego</title>
     <meta name="description" content="Announcements from the Dreego team, rendered from markdown at runtime.">
@@ -10,15 +12,13 @@
     }
 
     func CreateNews(c dreego.Context, form NewsForm) error {
-        newsMu.Lock()
-        newsPosts = append(newsPosts, NewsPost{Title: form.Title, Date: "2026-09-05", Content: form.Content})
-        newsMu.Unlock()
+        newstore.Add(newstore.NewsPost{Title: form.Title, Date: "2026-09-05", Content: form.Content})
         return c.Redirect("/blog/news", 303)
     }
 </server>
 
 <server>
-    newsHTML, err := RenderNewsPosts()
+    newsHTML, err := newstore.RenderNewsPosts()
     if err != nil {
         return "", err
     }
