@@ -129,7 +129,7 @@ func parseComponentImport(lines []string) (*ir.Import, int, error) {
 	return imp, consumed, nil
 }
 
-func parseGoImport(lines []string) ([]string, int, error) {
+func parseGoImport(lines []string) ([]ir.GoImport, int, error) {
 	line := lines[0]
 	kw := strings.Index(line, "GOIMPORT")
 	if kw < 0 {
@@ -144,16 +144,76 @@ func parseGoImport(lines []string) ([]string, int, error) {
 		return nil, 0, &HeaderError{Line: 1, Col: kw + 1,
 			Err: fmt.Errorf("invalid GOIMPORT value: directive requires at least one path")}
 	}
-	paths := make([]string, 0, len(items))
+	imports := make([]ir.GoImport, 0, len(items))
 	for _, item := range items {
-		path := strings.Trim(strings.TrimSpace(item), `"`)
-		if path == "" || strings.ContainsAny(path, " \t\r\n") {
-			return nil, 0, &HeaderError{Line: 1, Col: kw + 1,
-				Err: fmt.Errorf("invalid GOIMPORT path %q: path must be a non-empty import path without spaces", item)}
+		imp, err := parseGoImportItem(item, kw)
+		if err != nil {
+			return nil, 0, err
 		}
-		paths = append(paths, path)
+		imports = append(imports, imp)
 	}
-	return paths, consumed, nil
+	return imports, consumed, nil
+}
+
+func parseGoImportItem(item string, kw int) (ir.GoImport, error) {
+	badPath := func() error {
+		return &HeaderError{Line: 1, Col: kw + 1,
+			Err: fmt.Errorf("invalid GOIMPORT path %q: use path or alias \"path\" with a non-empty import path without spaces", item)}
+	}
+	fields := strings.Fields(item)
+	switch len(fields) {
+	case 1:
+		path := unquoteGoImportPath(fields[0])
+		if path == "" {
+			return ir.GoImport{}, badPath()
+		}
+		return ir.GoImport{Path: path}, nil
+	case 2:
+		alias := fields[0]
+		if !validGoImportAlias(alias) {
+			return ir.GoImport{}, badPath()
+		}
+		if !isQuotedGoImportPath(fields[1]) {
+			return ir.GoImport{}, badPath()
+		}
+		path := fields[1][1 : len(fields[1])-1]
+		if path == "" {
+			return ir.GoImport{}, badPath()
+		}
+		return ir.GoImport{Alias: alias, Path: path}, nil
+	default:
+		return ir.GoImport{}, badPath()
+	}
+}
+
+func unquoteGoImportPath(field string) string {
+	if isQuotedGoImportPath(field) {
+		field = field[1 : len(field)-1]
+	}
+	if field == "" || strings.ContainsAny(field, " \t\r\n\"") {
+		return ""
+	}
+	return field
+}
+
+func isQuotedGoImportPath(field string) bool {
+	return len(field) >= 2 && field[0] == '"' && field[len(field)-1] == '"'
+}
+
+func validGoImportAlias(alias string) bool {
+	if alias == "" {
+		return false
+	}
+	for i, r := range alias {
+		if r == '_' || r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' {
+			continue
+		}
+		if i > 0 && r >= '0' && r <= '9' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func parseBraceList(lines []string, from int, directive string) ([]string, int, error) {

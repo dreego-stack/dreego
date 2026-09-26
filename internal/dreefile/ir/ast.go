@@ -59,7 +59,7 @@ type File struct {
 	Imports       []Import
 	Kind          FileKind
 	Layout        string
-	GoImports     []string
+	GoImports     []GoImport
 	FormActions   []string
 	SourceContent string
 	SourcePath    string

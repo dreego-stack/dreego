@@ -2,86 +2,141 @@ package dreefile
 
 import (
 	"fmt"
+	"go/build"
+	"path"
 	"sort"
 	"strings"
+
+	"github.com/dreego-stack/dreego/internal/dreefile/ir"
 )
 
-var stdlibAllowList = map[string]bool{
-	"bytes":           true,
-	"context":         true,
-	"encoding/base64": true,
-	"encoding/hex":    true,
-	"encoding/json":   true,
-	"errors":          true,
-	"fmt":             true,
-	"html":            true,
-	"io":              true,
-	"log":             true,
-	"maps":            true,
-	"math":            true,
-	"net/http":        true,
-	"net/url":         true,
-	"path":            true,
-	"path/filepath":   true,
-	"regexp":          true,
-	"slices":          true,
-	"sort":            true,
-	"strconv":         true,
-	"strings":         true,
-	"sync":            true,
-	"time":            true,
-	"unicode":         true,
-	"unicode/utf8":    true,
-}
-
-func allowedStdlibImport(path string) bool {
-	return stdlibAllowList[path]
-}
-
-func allowedStdlibImports() string {
-	paths := make([]string, 0, len(stdlibAllowList))
-	for path := range stdlibAllowList {
-		paths = append(paths, path)
+func isStdlibImport(importPath string) bool {
+	pkg, err := build.Default.Import(importPath, ".", build.FindOnly)
+	if err == nil && pkg.Goroot {
+		return true
 	}
-	sort.Strings(paths)
-	return strings.Join(paths, ", ")
+	if build.Default.GOROOT == "" {
+		return isDotlessImport(importPath)
+	}
+	return false
 }
 
-func registerGoImports(gen *Generator, pkg, source string, paths []string) error {
-	for _, path := range paths {
-		if path == "" {
+func isDotlessImport(importPath string) bool {
+	first, _, _ := strings.Cut(importPath, "/")
+	return first != "" && !strings.Contains(first, ".")
+}
+
+func importBaseName(importPath string) string {
+	return path.Base(importPath)
+}
+
+func importSpecName(imp ir.GoImport) string {
+	if imp.Alias != "" {
+		return imp.Alias
+	}
+	return importBaseName(imp.Path)
+}
+
+func resolvesGoImport(gen *Generator, importPath string) bool {
+	if gen.Module != "" && (importPath == gen.Module || strings.HasPrefix(importPath, gen.Module+"/")) {
+		return true
+	}
+	for modulePath := range gen.Requires {
+		if importPath == modulePath || strings.HasPrefix(importPath, modulePath+"/") {
+			return true
+		}
+	}
+	return isStdlibImport(importPath)
+}
+
+func registerGoImports(gen *Generator, pkg, source string, imports []ir.GoImport) error {
+	for _, imp := range imports {
+		if imp.Path == "" {
 			return fmt.Errorf("%s: GOIMPORT contains an empty package path", source)
 		}
-		if !allowedStdlibImport(path) {
-			return fmt.Errorf("%s: GOIMPORT %q is not allowed; supported packages: %s", source, path, allowedStdlibImports())
+		if !resolvesGoImport(gen, imp.Path) {
+			return fmt.Errorf("%s: GOIMPORT %q is not in go.mod; run 'go get %s' to add it", source, imp.Path, imp.Path)
 		}
-		gen.AddGoImportPath(pkg, path)
+		gen.AddGoImport(pkg, imp)
 	}
 	return nil
 }
 
-func stdImportsFor(gen *Generator, pkg, src string) string {
-	used := map[string]bool{}
-	if strings.Contains(src, "strings.") {
-		used["strings"] = true
+type goImportSpec struct {
+	Name string
+	Path string
+}
+
+func stdImportsFor(gen *Generator, pkg, src string) (string, error) {
+	specs, err := collectGoImportSpecs(gen, pkg, src)
+	if err != nil {
+		return "", err
 	}
-	if strings.Contains(src, "http.") {
-		used["net/http"] = true
+	lines := make([]string, 0, len(specs))
+	for _, spec := range specs {
+		if spec.Name == importBaseName(spec.Path) {
+			lines = append(lines, fmt.Sprintf("%q", spec.Path))
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("%s %q", spec.Name, spec.Path))
 	}
-	if strings.Contains(src, "fmt.") {
-		used["fmt"] = true
+	sort.Strings(lines)
+	return strings.Join(lines, "\n\t"), nil
+}
+
+func collectGoImportSpecs(gen *Generator, pkg, src string) ([]goImportSpec, error) {
+	byPath := map[string]bool{}
+	var specs []goImportSpec
+	add := func(name, importPath string) {
+		if byPath[importPath] {
+			return
+		}
+		byPath[importPath] = true
+		specs = append(specs, goImportSpec{Name: name, Path: importPath})
 	}
-	for _, path := range gen.GoImportPaths[pkg] {
-		used[path] = true
+	for _, imp := range gen.GoImports[pkg] {
+		add(importSpecName(imp), imp.Path)
 	}
-	paths := make([]string, 0, len(used))
-	for path := range used {
-		paths = append(paths, path)
+	for _, detected := range []struct{ name, path string }{
+		{"strings", "strings"},
+		{"http", "net/http"},
+		{"fmt", "fmt"},
+	} {
+		if containsQualifiedIdent(src, detected.name) {
+			add(detected.name, detected.path)
+		}
 	}
-	sort.Strings(paths)
-	lines := make([]string, 0, len(paths))
-	for _, path := range paths {
-		lines = append(lines, fmt.Sprintf("%q", path))
+	seenName := map[string]string{}
+	var collisions []string
+	for _, spec := range specs {
+		if previous, ok := seenName[spec.Name]; ok && previous != spec.Path {
+			collisions = append(collisions, fmt.Sprintf("GOIMPORT %q and %q share the name %q in package %s; add an alias", previous, spec.Path, spec.Name, pkg))
+			continue
+		}
+		seenName[spec.Name] = spec.Path
 	}
-	return strings.Join(lines, "\n\t")
+	if len(collisions) > 0 {
+		sort.Strings(collisions)
+		return nil, fmt.Errorf("%s", strings.Join(collisions, "; "))
+	}
+	return specs, nil
+}
+
+func containsQualifiedIdent(src, name string) bool {
+	needle := name + "."
+	for idx := 0; ; {
+		at := strings.Index(src[idx:], needle)
+		if at < 0 {
+			return false
+		}
+		at += idx
+		if at == 0 || !isIdentByte(src[at-1]) {
+			return true
+		}
+		idx = at + 1
+	}
+}
+
+func isIdentByte(b byte) bool {
+	return b == '_' || b >= 'a' && b <= 'z' || b >= 'A' && b <= 'Z' || b >= '0' && b <= '9'
 }

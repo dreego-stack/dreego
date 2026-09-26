@@ -37,6 +37,9 @@ func RunCheck() error {
 	if err != nil {
 		return err
 	}
+	if err := validateGeneratedMarkers(disk); err != nil {
+		return err
+	}
 	diffs := plan.diff(disk)
 	if len(diffs) == 0 {
 		fmt.Println("generated code is up-to-date")
@@ -83,6 +86,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 	gen := NewGenerator()
 	gen.Module = module
+	gen.Requires = moduleRequires()
 	gen.RootRel = relToRoot(".", root)
 	gen.Pkg = sanitizePkgName(filepath.Base(root))
 	var catalogs transpileri18n.Set
@@ -134,7 +138,10 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	for _, rd := range routeDirs {
 		imports := gen.Imports[rd.pkg]
 		importLine := buildImportLine(imports, rd.pkg)
-		stdImports := stdImportsFor(gen, rd.pkg, rd.src)
+		stdImports, err := stdImportsFor(gen, rd.pkg, rd.src)
+		if err != nil {
+			return nil, genStats{}, err
+		}
 		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
 		if strings.Contains(rd.src, "ssr.") {
 			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
@@ -147,7 +154,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		out += "func Register(app *dreego.App) error {\n"
 		out += strings.Join(rd.regs, "")
 		out += "\treturn nil\n}\n"
-		files[filepath.Join(rd.dir, "dree.go")] = out
+		files[filepath.Join(rd.dir, "dree.go")] = withGeneratedMarker(relToRoot(".", rd.dir), out)
 	}
 
 	if len(compSrcs) > 0 {
@@ -156,10 +163,13 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 			pkg := sanitizePkgName(filepath.Base(pkgDir))
 			imports := gen.Imports[pkg]
 			importLine := buildImportLine(imports, pkg)
-			stdImports := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
+			stdImports, err := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
+			if err != nil {
+				return nil, genStats{}, err
+			}
 			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
 			compOut += strings.Join(srcs, "")
-			files[filepath.Join(pkgDir, "dree.go")] = compOut
+			files[filepath.Join(pkgDir, "dree.go")] = withGeneratedMarker(relToRoot(".", pkgDir), compOut)
 			_ = rel
 		}
 	}
@@ -174,13 +184,16 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		layoutDir := filepath.Join(root, "layouts")
 		imports := gen.Imports["layouts"]
 		importLine := buildImportLine(imports, "layouts")
-		stdImports := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
+		stdImports, err := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
+		if err != nil {
+			return nil, genStats{}, err
+		}
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
 		if layoutNeedsHeadHelpers(layoutSrcs) {
 			layoutOut += headMergeHelpers()
 		}
-		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
+		files[filepath.Join(layoutDir, "dree.go")] = withGeneratedMarker(relToRoot(".", layoutDir), layoutOut)
 	}
 	gen.Pkg = layoutPkg
 
@@ -206,7 +219,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 
 	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings, generatedI18n)
-	files[filepath.Join(root, "dree.go")] = rootOut
+	files[filepath.Join(root, "dree.go")] = withGeneratedMarker(relToRoot(".", root), rootOut)
 
 	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
 }

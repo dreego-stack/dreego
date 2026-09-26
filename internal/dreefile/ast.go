@@ -22,6 +22,7 @@ type File = ir.File
 type ComponentDef = ir.ComponentDef
 type Prop = ir.Prop
 type Import = ir.Import
+type GoImport = ir.GoImport
 type FileKind = ir.FileKind
 type FileHeader = ir.FileHeader
 

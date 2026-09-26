@@ -20,6 +20,14 @@ func modulePath() string {
 	return ""
 }
 
+func moduleRequires() map[string]string {
+	file, err := gomod.Read("go.mod")
+	if err != nil {
+		return nil
+	}
+	return file.Requires
+}
+
 func loadSettings(root string) (*Settings, error) {
 	settingsPath := filepath.Join(root, configFileName)
 	settings, err := LoadConfig(settingsPath)

@@ -143,8 +143,24 @@ func TestParseFileHeaderGoImports(t *testing.T) {
 	if len(header.GoImports) != 2 {
 		t.Fatalf("expected 2 go imports, got %+v", header.GoImports)
 	}
-	if header.GoImports[0] != "sync" || header.GoImports[1] != "encoding/json" {
+	if header.GoImports[0].Path != "sync" || header.GoImports[0].Alias != "" ||
+		header.GoImports[1].Path != "encoding/json" || header.GoImports[1].Alias != "" {
 		t.Errorf("unexpected go imports: %+v", header.GoImports)
+	}
+}
+
+func TestParseFileHeaderGoImportAlias(t *testing.T) {
+	header, _ := ParseFileHeader(`GOIMPORT { strings, myauth "statuna/auth" }
+
+<body>ok</body>`)
+	if len(header.GoImports) != 2 {
+		t.Fatalf("expected 2 go imports, got %+v", header.GoImports)
+	}
+	if header.GoImports[0].Path != "strings" || header.GoImports[0].Alias != "" {
+		t.Errorf("unexpected bare import: %+v", header.GoImports[0])
+	}
+	if header.GoImports[1].Alias != "myauth" || header.GoImports[1].Path != "statuna/auth" {
+		t.Errorf("unexpected aliased import: %+v", header.GoImports[1])
 	}
 }
 

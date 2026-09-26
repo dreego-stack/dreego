@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	dreefile.Version = dreegoVersion()
 	if len(os.Args) < 2 {
 		printHelp()
 		os.Exit(1)
