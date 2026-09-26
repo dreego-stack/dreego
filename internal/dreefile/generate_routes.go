@@ -4,25 +4,42 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
-type routeDir struct {
-	dir  string
-	pkg  string
-	src  string
-	regs []string
-}
+type routeDir = routePkg
 
-func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
-	rd := &routeDir{dir: filepath.Join(root, "routes"), pkg: "routes"}
+func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*layoutEntry) ([]*routePkg, map[string]bool, int, error) {
+	rootRoutes := filepath.Join(root, "routes")
+	pkgs := map[string]*routePkg{}
 	routePatterns := map[string]bool{}
 	found := 0
 	routeSources := map[string]string{}
-	declSources := map[string]string{}
-	needsHeadHelpers := false
+	declSources := map[string]map[string]string{}
 
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+	getPkg := func(dir string) *routePkg {
+		pkgDir := routePackageDir(root, dir)
+		rel := routeDirRel(root, pkgDir)
+		if p, ok := pkgs[rel]; ok {
+			return p
+		}
+		pkg := "routes"
+		if rel != "" {
+			pkg = sanitizePkgName(filepath.Base(pkgDir))
+		}
+		p := &routePkg{dir: pkgDir, rel: rel, pkg: pkg, key: rel}
+		pkgs[rel] = p
+		return p
+	}
+
+	profiles, err := discoverRouteProfiles(root)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	appliedProfiles := map[string]bool{}
+
+	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
@@ -46,10 +63,21 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 			return nil
 		}
 
-		gen.Pkg = "routes"
+		p := getPkg(path)
+		gen.Pkg = p.pkg
+		gen.ImportKey = p.key
+		gen.ImportKeySet = true
+		decls := declSources[p.key]
+		if decls == nil {
+			decls = map[string]string{}
+			declSources[p.key] = decls
+		}
 
+		folder := routeDirRel(root, path)
+		folderProfile := resolveRouteProfile(profiles, folder)
 		var src strings.Builder
 		var regs []string
+		var profilePatterns []string
 
 		for _, fpath := range dreegoFiles {
 			rel := routeFileRel(root, path, filepath.Base(fpath))
@@ -73,14 +101,14 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 			if perr != nil {
 				return perr
 			}
-			if err := registerGoImports(gen, "routes", fpath, file.GoImports); err != nil {
+			if err := registerGoImports(gen, p.key, fpath, file.GoImports); err != nil {
 				return err
 			}
 			for _, name := range hoistedDeclarationNames(file) {
-				if prev, dup := declSources[name]; dup {
+				if prev, dup := decls[name]; dup {
 					return serverDeclarationConflict(name, prev, fpath)
 				}
-				declSources[name] = fpath
+				decls[name] = fpath
 			}
 
 			if len(file.Server) == 0 {
@@ -113,12 +141,16 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 					}
 					routeSources[catchKey] = fpath
 				}
-				s, reg, err := GenerateErrorHandler(gen, file, "routes", errCode, catchPattern, scopeHash)
+				s, reg, err := GenerateErrorHandler(gen, file, p.pkg, errCode, catchPattern, scopeHash)
 				if err != nil {
 					return fmt.Errorf("error generating error page %s: %w", fpath, err)
 				}
 				src.WriteString(s)
 				regs = append(regs, reg)
+				if folderProfile != "" && !appliedProfiles[pattern] {
+					appliedProfiles[pattern] = true
+					profilePatterns = append(profilePatterns, pattern)
+				}
 				continue
 			}
 
@@ -131,19 +163,26 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 				routePatterns[key] = true
 			}
 
-			s, reg, err := GenerateMethodHandler(gen, file, layout, "routes", pageName, pattern, scopeHash)
+			s, reg, err := GenerateMethodHandler(gen, file, layout, p.pkg, pageName, pattern, scopeHash)
 			if err != nil {
 				return fmt.Errorf("error generating %s: %w", fpath, err)
 			}
 			src.WriteString(s)
 			regs = append(regs, reg)
+			if folderProfile != "" && !appliedProfiles[pattern] {
+				appliedProfiles[pattern] = true
+				profilePatterns = append(profilePatterns, pattern)
+			}
 			if layout != nil {
-				needsHeadHelpers = true
+				p.needsHead = true
 			}
 		}
 
-		rd.src += src.String()
-		rd.regs = append(rd.regs, regs...)
+		p.src.WriteString(src.String())
+		for _, pattern := range profilePatterns {
+			p.regs = append(p.regs, registrationStatement(fmt.Sprintf("app.ApplyProfile(%q, %q)", pattern, folderProfile)))
+		}
+		p.regs = append(p.regs, regs...)
 		found += len(regs)
 		return nil
 	})
@@ -151,14 +190,45 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 		return nil, nil, 0, err
 	}
 
-	if needsHeadHelpers {
-		rd.src += headMergeHelpers()
-	}
-
 	if found == 0 {
 		return nil, routePatterns, 0, nil
 	}
-	return []routeDir{*rd}, routePatterns, found, nil
+
+	if _, ok := pkgs[""]; !ok {
+		pkgs[""] = &routePkg{dir: rootRoutes, pkg: "routes", key: ""}
+	}
+
+	for rel, p := range pkgs {
+		if rel == "" {
+			continue
+		}
+		if parent := parentRoutePkg(pkgs, rel); parent != nil {
+			parent.children = append(parent.children, p)
+		}
+	}
+
+	list := make([]*routePkg, 0, len(pkgs))
+	for _, p := range pkgs {
+		if p.needsHead {
+			p.src.WriteString(headMergeHelpers())
+		}
+		list = append(list, p)
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].rel < list[j].rel })
+	return list, routePatterns, found, nil
+}
+
+func parentRoutePkg(pkgs map[string]*routePkg, rel string) *routePkg {
+	for {
+		idx := strings.LastIndex(rel, "/")
+		if idx < 0 {
+			return pkgs[""]
+		}
+		rel = rel[:idx]
+		if p, ok := pkgs[rel]; ok {
+			return p
+		}
+	}
 }
 
 func routeFileRel(root, dir, name string) string {
@@ -171,108 +241,4 @@ func routeFileRel(root, dir, name string) string {
 		return base
 	}
 	return filepath.ToSlash(filepath.Join(rel, base))
-}
-
-func buildPageName(rel string) string {
-	parts := []string{}
-	for seg := range strings.SplitSeq(rel, "/") {
-		if seg == "" {
-			continue
-		}
-		parts = append(parts, cleanSegment(seg))
-	}
-	if len(parts) == 0 {
-		return "index"
-	}
-	return strings.Join(parts, "_")
-}
-
-func buildPattern(rel string) string {
-	if rel == "" || rel == "." {
-		return "/{$}"
-	}
-	segments := []string{}
-	for seg := range strings.SplitSeq(rel, "/") {
-		if seg == "" {
-			continue
-		}
-		s := patternSegment(seg)
-		if s != "" {
-			segments = append(segments, s)
-		}
-	}
-	if len(segments) == 0 {
-		return "/{$}"
-	}
-	return "/" + strings.Join(segments, "/")
-}
-
-func errorCatchPattern(dirPattern string) string {
-	if before, ok := strings.CutSuffix(dirPattern, "/{$}"); ok {
-		return before + "/{p...}"
-	}
-	return dirPattern + "/{p...}"
-}
-
-func cleanSegment(seg string) string {
-	for {
-		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
-			return ""
-		}
-		if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
-			seg = seg[1 : len(seg)-1]
-			continue
-		}
-		if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
-			seg = seg[1 : len(seg)-1]
-			continue
-		}
-		if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
-			seg = seg[1 : len(seg)-1]
-			continue
-		}
-		return seg
-	}
-}
-
-func patternSegment(seg string) string {
-	if strings.HasPrefix(seg, "(") && strings.HasSuffix(seg, ")") {
-		return ""
-	}
-	if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
-		return ""
-	}
-	wrapped := false
-	for {
-		if strings.HasPrefix(seg, "[") && strings.HasSuffix(seg, "]") {
-			seg = seg[1 : len(seg)-1]
-			wrapped = true
-			continue
-		}
-		if strings.HasPrefix(seg, "_") && strings.HasSuffix(seg, "_") {
-			seg = seg[1 : len(seg)-1]
-			wrapped = true
-			continue
-		}
-		break
-	}
-	if !wrapped {
-		return seg
-	}
-	if seg == "" {
-		return ""
-	}
-	if after, ok := strings.CutPrefix(seg, "..."); ok {
-		return "{" + after + "...}"
-	}
-	return "{" + seg + "}"
-}
-
-func doubleBracketSegment(rel string) string {
-	for seg := range strings.SplitSeq(rel, "/") {
-		if strings.HasPrefix(seg, "[[") && strings.HasSuffix(seg, "]]") {
-			return seg
-		}
-	}
-	return ""
 }

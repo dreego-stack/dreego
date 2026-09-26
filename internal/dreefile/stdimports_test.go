@@ -3,42 +3,109 @@ package dreefile
 import (
 	"strings"
 	"testing"
+
+	"github.com/dreego-stack/dreego/internal/dreefile/ir"
 )
 
-func TestAllowedStdlibImportList(t *testing.T) {
-	for _, path := range []string{"strings", "net/http", "fmt", "sync", "encoding/json", "time", "errors", "strconv"} {
-		if !allowedStdlibImport(path) {
-			t.Errorf("expected %q to be allow-listed", path)
-		}
-	}
-	for _, path := range []string{"os", "os/exec", "unsafe", "reflect", "syscall", "net", "plugin", "github.com/evil/pkg"} {
-		if allowedStdlibImport(path) {
-			t.Errorf("expected %q to be rejected", path)
-		}
-	}
-}
-
-func TestRegisterGoImportsRejectsUnknown(t *testing.T) {
+func TestRegisterGoImportsAcceptsStdlibAndModule(t *testing.T) {
 	gen := NewGenerator()
-	err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []string{"os"})
-	if err == nil {
-		t.Fatal("expected an error for a non-allow-listed import")
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"statuna/auth": "v1.2.3", "github.com/dreego-stack/dreego-ui": "v0.4.0"}
+	imports := []ir.GoImport{
+		{Path: "os"},
+		{Path: "strings"},
+		{Alias: "myauth", Path: "statuna/auth"},
+		{Path: "example.com/app/internal/foo"},
+		{Path: "github.com/dreego-stack/dreego-ui/components"},
 	}
-	if !strings.Contains(err.Error(), "os") || !strings.Contains(err.Error(), "www/routes/+page.dreego") {
-		t.Fatalf("diagnostic must name the path and the file, got: %v", err)
-	}
-	if !strings.Contains(err.Error(), "strings") {
-		t.Fatalf("diagnostic must list supported packages, got: %v", err)
-	}
-}
-
-func TestStdImportsForIncludesDeclared(t *testing.T) {
-	gen := NewGenerator()
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []string{"sync", "encoding/json"}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", imports); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
-	out := stdImportsFor(gen, "routes", "")
-	for _, want := range []string{`"sync"`, `"encoding/json"`} {
+	if len(gen.GoImports["routes"]) != len(imports) {
+		t.Fatalf("expected %d imports, got %+v", len(imports), gen.GoImports["routes"])
+	}
+}
+
+func TestRegisterGoImportsRejectsMissingModule(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
+	err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "statuna/missing"}})
+	if err == nil {
+		t.Fatal("expected an error for an unresolvable import")
+	}
+	for _, want := range []string{"statuna/missing", "not in go.mod", "go get"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("diagnostic must contain %q, got: %v", want, err)
+		}
+	}
+}
+
+func TestStdImportsForEmitsAlias(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Alias: "myauth", Path: "statuna/auth"}}); err != nil {
+		t.Fatalf("registerGoImports: %v", err)
+	}
+	out, err := stdImportsFor(gen, "routes", "")
+	if err != nil {
+		t.Fatalf("stdImportsFor: %v", err)
+	}
+	if !strings.Contains(out, `myauth "statuna/auth"`) {
+		t.Fatalf("expected aliased import, got:\n%s", out)
+	}
+}
+
+func TestStdImportsForBarePathUsesBaseName(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "statuna/auth"}}); err != nil {
+		t.Fatalf("registerGoImports: %v", err)
+	}
+	out, err := stdImportsFor(gen, "routes", "")
+	if err != nil {
+		t.Fatalf("stdImportsFor: %v", err)
+	}
+	if !strings.Contains(out, `"statuna/auth"`) || strings.Contains(out, "auth ") {
+		t.Fatalf("expected bare import path, got:\n%s", out)
+	}
+}
+
+func TestStdImportsForRejectsBaseNameCollision(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"a/auth": "v1", "b/auth": "v1"}
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "a/auth"}, {Path: "b/auth"}}); err != nil {
+		t.Fatalf("registerGoImports: %v", err)
+	}
+	_, err := stdImportsFor(gen, "routes", "")
+	if err == nil {
+		t.Fatal("expected a base-name collision error")
+	}
+	for _, want := range []string{"a/auth", "b/auth", "auth"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("collision diagnostic must contain %q, got: %v", want, err)
+		}
+	}
+}
+
+func TestStdImportsForVersionSuffixUsesParentName(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"github.com/a/auth/v2": "v2", "github.com/b/storage/v3": "v3"}
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{
+		{Path: "github.com/a/auth/v2"},
+		{Path: "github.com/b/storage/v3"},
+	}); err != nil {
+		t.Fatalf("registerGoImports: %v", err)
+	}
+	out, err := stdImportsFor(gen, "routes", "")
+	if err != nil {
+		t.Fatalf("version-suffixed imports must not collide: %v", err)
+	}
+	for _, want := range []string{`"github.com/a/auth/v2"`, `"github.com/b/storage/v3"`} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in import block, got:\n%s", want, out)
 		}
@@ -47,7 +114,10 @@ func TestStdImportsForIncludesDeclared(t *testing.T) {
 
 func TestStdImportsForKeepsAutoDetected(t *testing.T) {
 	gen := NewGenerator()
-	out := stdImportsFor(gen, "routes", `v := strings.ToUpper("x"); _ = fmt.Sprintf("%v", v)`)
+	out, err := stdImportsFor(gen, "routes", `v := strings.ToUpper("x"); _ = fmt.Sprintf("%v", v)`)
+	if err != nil {
+		t.Fatalf("stdImportsFor: %v", err)
+	}
 	for _, want := range []string{`"strings"`, `"fmt"`} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in import block, got:\n%s", want, out)
@@ -55,13 +125,40 @@ func TestStdImportsForKeepsAutoDetected(t *testing.T) {
 	}
 }
 
+func TestStdImportsForDetectsOnlyWholeIdentifiers(t *testing.T) {
+	gen := NewGenerator()
+	out, err := stdImportsFor(gen, "routes", `v := mystrings.ToUpper("x"); _ = myfmt.Sprintf("%v", v)`)
+	if err != nil {
+		t.Fatalf("stdImportsFor: %v", err)
+	}
+	if strings.Contains(out, `"strings"`) || strings.Contains(out, `"fmt"`) {
+		t.Fatalf("aliased identifiers must not trigger auto-detection, got:\n%s", out)
+	}
+}
+
 func TestStdImportsForDeduplicatesDeclaredAndDetected(t *testing.T) {
 	gen := NewGenerator()
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []string{"strings"}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "strings"}}); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
-	out := stdImportsFor(gen, "routes", `v := strings.ToUpper("x")`)
+	out, err := stdImportsFor(gen, "routes", `v := strings.ToUpper("x")`)
+	if err != nil {
+		t.Fatalf("stdImportsFor: %v", err)
+	}
 	if strings.Count(out, `"strings"`) != 1 {
 		t.Fatalf("expected exactly one strings import, got:\n%s", out)
+	}
+}
+
+func TestIsStdlibImport(t *testing.T) {
+	for _, path := range []string{"strings", "net/http", "fmt", "os", "encoding/json"} {
+		if !isStdlibImport(path) {
+			t.Errorf("expected %q to be stdlib", path)
+		}
+	}
+	for _, path := range []string{"github.com/evil/pkg", "statuna/auth", "unsafe/x"} {
+		if isStdlibImport(path) {
+			t.Errorf("expected %q not to be stdlib", path)
+		}
 	}
 }

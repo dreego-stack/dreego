@@ -1,3 +1,5 @@
+GOIMPORT { store "forms/store" }
+
 <head>
     <title>Guestbook</title>
 </head>
@@ -8,10 +10,8 @@
         Message string `form:"message" validate:"required"`
     }
 
-    var entries []string
-
     func AddEntry(c dreego.Context, form EntryForm) error {
-        entries = append(entries, form.Name+": "+form.Message)
+        store.Add(form.Name + ": " + form.Message)
         return c.Redirect("/entries", 303)
     }
 </server>

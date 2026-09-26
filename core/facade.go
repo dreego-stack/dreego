@@ -35,6 +35,8 @@ func (f ComponentFunc) Render(ctx RenderContext) (Result, error) {
 
 type App = server.App
 type StaticAsset = server.StaticAsset
+type Profile = server.Profile
+type ProfileCookie = server.ProfileCookie
 
 func New() *App {
 	return server.New()

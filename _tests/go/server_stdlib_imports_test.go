@@ -69,22 +69,38 @@ mu.Unlock()
 	}
 }
 
-func TestStdlibImportRejectsUnknownPackage(t *testing.T) {
+func TestGoImportRejectsModuleNotInGoMod(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { os }
+		"www/routes/+page.dreego": `GOIMPORT { statuna/auth }
 <server>
-value := os.Getenv("HOME")
+value := "x"
 </server>
 <body><p>{{ value }}</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
-		t.Fatalf("generate accepted a non-allow-listed import:\n%s", out)
+		t.Fatalf("generate accepted a module that is not in go.mod:\n%s", out)
 	}
-	for _, want := range []string{"os", "not allowed", "sync"} {
+	for _, want := range []string{"statuna/auth", "not in go.mod", "go get"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("diagnostic must contain %q, got:\n%s", want, out)
 		}
+	}
+}
+
+func TestGoImportStdlibWithoutAllowlist(t *testing.T) {
+	t.Parallel()
+	gen := dreegotest.Build(t, map[string]string{
+		"www/routes/+page.dreego": `GOIMPORT { os }
+<server>
+value := os.Getenv("HOME")
+if value == "" { value = "none" }
+</server>
+<body><p>{{ value }}</p></body>`,
+	})
+	routes := gen["www/routes/dree.go"]
+	if !strings.Contains(routes, `"os"`) {
+		t.Fatalf("generated import block must contain \"os\", got:\n%s", routes)
 	}
 }

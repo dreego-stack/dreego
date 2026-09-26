@@ -84,6 +84,24 @@ func TestParseFileHeaderRejectsUnquotedGoImportPath(t *testing.T) {
 	assertHeaderPosition(t, err)
 }
 
+func TestParseFileHeaderRejectsInvalidGoImportAlias(t *testing.T) {
+	for _, src := range []string{
+		`GOIMPORT { 1bad "statuna/auth" }`,
+		`GOIMPORT { bad- "statuna/auth" }`,
+		`GOIMPORT { alias "statuna/auth`,
+		`GOIMPORT { "a b" }`,
+	} {
+		_, _, err := ParseFileHeaderStrict(src + "\n<body>x</body>")
+		if err == nil {
+			t.Fatalf("expected invalid GOIMPORT alias/path error for %q", src)
+		}
+		if !strings.Contains(err.Error(), "GOIMPORT") {
+			t.Fatalf("error must name GOIMPORT, got: %v", err)
+		}
+		assertHeaderPosition(t, err)
+	}
+}
+
 func TestParseFileHeaderRejectsUnquotedLayout(t *testing.T) {
 	_, _, err := ParseFileHeaderStrict("LAYOUT www/layouts/x.dreego\n\n<body>x</body>")
 	if err == nil {

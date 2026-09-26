@@ -65,6 +65,7 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 				f.Imports = header.Imports
 				f.Kind = header.Kind
 				f.Layout = header.Layout
+				f.Profile = header.Profile
 				f.GoImports = header.GoImports
 				f.SourceContent = raw
 				f.SourcePath = full
@@ -179,6 +180,8 @@ func cascadeScopes(routeRel string) []string {
 
 func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntry) ([]string, error) {
 	var srcs []string
+	gen.ImportKey = ""
+	gen.ImportKeySet = false
 	scopes := map[string]bool{}
 	for _, e := range layouts {
 		scopes[e.rel] = true

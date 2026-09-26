@@ -21,13 +21,17 @@ the matching head and body templates.
 
 ## Scope
 
-All route files under `www/routes` compile into **one Go package** (`routes`).
-A `<server>` section is split at generation time:
+Each route directory under `www/routes` compiles into **its own Go package**
+(named after the folder, sanitized to a valid Go identifier). The top-level
+`www/routes/dree.go` collects the `Register(app)` call of every sub-package, so
+the website entry point still calls one `routes.Register`. A `<server>` section
+is split at generation time:
 
 - The **leading declaration block** — `type`, `func`, `var`, and `const`
   declarations at the top of the section, plus any top-level `func` — is emitted
-  at package level. Because every route file shares the package, a declaration
-  there is visible to the other route files and must be unique across them.
+  at package level. It is visible to the other route files **in the same
+  folder** and must be unique within that folder. The same name may be reused in
+  a different route folder, because each folder is a separate package.
 - **Statements** and any `var` that follows a statement stay inside the render
   function and are local to one request.
 
@@ -56,9 +60,14 @@ A shared store is package-level mutable state across requests; synchronize it
 with a mutex. Keep request-local `var`s after a statement so they stay inside
 the render function.
 
-The section name is not a namespace: two route files cannot each declare their
-own `type Product`. Declare it once and reuse it, or give the second type a
-distinct name. See [Routing](routing.md) for the per-route file contract.
+Because folders are separate packages, two route folders may each declare their
+own `type Product`. Within **one** folder the name must be declared once;
+declare it again with the same name in the same folder and generation fails. To
+share a type or store across folders, put it in a package both folders import
+with `GOIMPORT` (see the app-code recipe). Directories that cannot be Go
+packages — dynamic segments such as `[id]` and groups such as `(group)` — fold
+into their nearest valid ancestor package. See [Routing](routing.md) for the
+per-route file contract.
 
 Component server code receives the component's typed props and render context;
 it is not a second HTTP handler. See [Components](components.md) for the smaller

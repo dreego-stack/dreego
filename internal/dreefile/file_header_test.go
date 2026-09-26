@@ -28,7 +28,7 @@ COMPONENT "www/components" IMPORT { Card, Button, Card as ProductCard }
 	if file.Layout != "www/layouts/admin.dreego" {
 		t.Errorf("expected layout path, got %q", file.Layout)
 	}
-	if len(file.GoImports) != 2 || file.GoImports[0] != "sync" {
+	if len(file.GoImports) != 2 || file.GoImports[0].Path != "sync" {
 		t.Errorf("expected go imports, got %+v", file.GoImports)
 	}
 	if len(file.Imports) != 1 || file.Imports[0].Aliases["ProductCard"] != "Card" {

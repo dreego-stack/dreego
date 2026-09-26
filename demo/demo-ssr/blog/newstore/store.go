@@ -1,4 +1,4 @@
-package routes
+package newstore
 
 import (
 	"encoding/json"
@@ -41,6 +41,12 @@ const newsSeedJSON = `[
 
 func init() {
 	_ = json.Unmarshal([]byte(newsSeedJSON), &newsPosts)
+}
+
+func Add(post NewsPost) {
+	newsMu.Lock()
+	defer newsMu.Unlock()
+	newsPosts = append(newsPosts, post)
 }
 
 func RenderNewsPosts() (string, error) {

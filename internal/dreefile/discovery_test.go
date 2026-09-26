@@ -105,7 +105,7 @@ func TestScanRoutesGeneratesFlatPatternsAndRejectsDuplicates(t *testing.T) {
 	if count != 4 {
 		t.Fatalf("scanRoutes count = %d, want 4", count)
 	}
-	src := strings.Join(dirs[0].regs, "")
+	src := strings.Join(allRegs(dirs), "")
 	for _, want := range []string{"app.Register(\"GET\", \"/about\"", "app.Register(\"GET\", \"/{$}\"", "app.Register(\"GET\", \"/users/{id}\"", "app.Register(\"GET\", \"/login\""} {
 		if !strings.Contains(src, want) {
 			t.Errorf("generated source missing %q", want)
@@ -139,7 +139,15 @@ func TestNamedRouteFilesDefaultToGet(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := strings.Join(dirs[0].regs, ""); !strings.Contains(got, `app.Register("GET", "/profile"`) {
+	if got := strings.Join(allRegs(dirs), ""); !strings.Contains(got, `app.Register("GET", "/profile"`) {
 		t.Fatalf("named route must default to GET: %s", got)
 	}
+}
+
+func allRegs(dirs []*routePkg) []string {
+	var regs []string
+	for _, dir := range dirs {
+		regs = append(regs, dir.regs...)
+	}
+	return regs
 }

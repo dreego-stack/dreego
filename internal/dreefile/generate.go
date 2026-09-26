@@ -37,6 +37,9 @@ func RunCheck() error {
 	if err != nil {
 		return err
 	}
+	if err := validateGeneratedMarkers(disk); err != nil {
+		return err
+	}
 	diffs := plan.diff(disk)
 	if len(diffs) == 0 {
 		fmt.Println("generated code is up-to-date")
@@ -83,6 +86,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 	gen := NewGenerator()
 	gen.Module = module
+	gen.Requires = moduleRequires()
 	gen.RootRel = relToRoot(".", root)
 	gen.Pkg = sanitizePkgName(filepath.Base(root))
 	var catalogs transpileri18n.Set
@@ -132,21 +136,10 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	files := map[string]string{}
 
 	for _, rd := range routeDirs {
-		imports := gen.Imports[rd.pkg]
-		importLine := buildImportLine(imports, rd.pkg)
-		stdImports := stdImportsFor(gen, rd.pkg, rd.src)
-		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
-		if strings.Contains(rd.src, "ssr.") {
-			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
+		out, err := buildRoutePackageFile(gen, rd)
+		if err != nil {
+			return nil, genStats{}, err
 		}
-		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\t%s\n)\n\n", rd.pkg, importLine, coreImport)
-		if stdImports != "" {
-			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\t%s\n)\n\n", rd.pkg, stdImports, importLine, coreImport)
-		}
-		out += rd.src
-		out += "func Register(app *dreego.App) error {\n"
-		out += strings.Join(rd.regs, "")
-		out += "\treturn nil\n}\n"
 		files[filepath.Join(rd.dir, "dree.go")] = out
 	}
 
@@ -156,10 +149,13 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 			pkg := sanitizePkgName(filepath.Base(pkgDir))
 			imports := gen.Imports[pkg]
 			importLine := buildImportLine(imports, pkg)
-			stdImports := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
+			stdImports, err := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
+			if err != nil {
+				return nil, genStats{}, err
+			}
 			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
 			compOut += strings.Join(srcs, "")
-			files[filepath.Join(pkgDir, "dree.go")] = compOut
+			files[filepath.Join(pkgDir, "dree.go")] = withGeneratedMarker(relToRoot(".", pkgDir), compOut)
 			_ = rel
 		}
 	}
@@ -174,13 +170,16 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 		layoutDir := filepath.Join(root, "layouts")
 		imports := gen.Imports["layouts"]
 		importLine := buildImportLine(imports, "layouts")
-		stdImports := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
+		stdImports, err := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
+		if err != nil {
+			return nil, genStats{}, err
+		}
 		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
 		layoutOut += strings.Join(layoutSrcs, "")
 		if layoutNeedsHeadHelpers(layoutSrcs) {
 			layoutOut += headMergeHelpers()
 		}
-		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
+		files[filepath.Join(layoutDir, "dree.go")] = withGeneratedMarker(relToRoot(".", layoutDir), layoutOut)
 	}
 	gen.Pkg = layoutPkg
 
@@ -206,7 +205,7 @@ func buildRootPlan(root, module string) (map[string]string, genStats, error) {
 	}
 
 	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings, generatedI18n)
-	files[filepath.Join(root, "dree.go")] = rootOut
+	files[filepath.Join(root, "dree.go")] = withGeneratedMarker(relToRoot(".", root), rootOut)
 
 	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
 }
@@ -231,13 +230,17 @@ func buildImportLine(imports map[string]string, selfPkg string) string {
 	return strings.Join(lines, "\n\t")
 }
 
-func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings, i18nConfig ...string) string {
+func buildRootFile(root, module string, routeDirs []*routePkg, staticSrc string, settings *Settings, i18nConfig ...string) string {
 	pkg := sanitizePkgName(filepath.Base(root))
 	var imports []string
 	var regCalls []string
 	for _, rd := range routeDirs {
-		imports = append(imports, fmt.Sprintf("%s %q", rd.pkg, module+"/"+relToRoot(".", root)+"/"+relToRoot(root, rd.dir)))
-		regCalls = append(regCalls, fmt.Sprintf("\tif err := %s.Register(app); err != nil {\n\t\treturn err\n\t}\n", rd.pkg))
+		if rd.rel != "" {
+			continue
+		}
+		path := module + "/" + relToRoot(".", root) + "/" + relToRoot(root, rd.dir)
+		imports = append(imports, fmt.Sprintf("routes %q", path))
+		regCalls = append(regCalls, "\tif err := routes.Register(app); err != nil {\n\t\treturn err\n\t}\n")
 	}
 	importLine := strings.Join(imports, "\n\t")
 
