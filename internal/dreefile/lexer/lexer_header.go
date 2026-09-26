@@ -18,6 +18,7 @@ func ParseFileHeaderStrict(input string) (*ir.FileHeader, string, error) {
 	i := 0
 	seenDreefile := false
 	seenLayout := false
+	seenProfile := false
 
 	for i < len(lines) {
 		line := lines[i]
@@ -48,6 +49,21 @@ func ParseFileHeaderStrict(input string) (*ir.FileHeader, string, error) {
 			}
 			header.Layout = path
 			seenLayout = true
+			i++
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "PROFILE ") || trimmed == "PROFILE" {
+			if seenProfile {
+				return header, "", &HeaderError{Line: i + 1, Col: strings.Index(line, "PROFILE") + 1,
+					Err: fmt.Errorf("duplicate PROFILE directive: declare the profile exactly once")}
+			}
+			name, err := parseProfileLine(trimmed)
+			if err != nil {
+				return header, "", &HeaderError{Line: i + 1, Col: strings.Index(line, "PROFILE") + 1, Err: err}
+			}
+			header.Profile = name
+			seenProfile = true
 			i++
 			continue
 		}

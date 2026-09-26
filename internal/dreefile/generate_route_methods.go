@@ -57,6 +57,7 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 	file.Imports = header.Imports
 	file.Kind = header.Kind
 	file.Layout = header.Layout
+	file.Profile = header.Profile
 	file.GoImports = header.GoImports
 	file.SourceContent = raw
 	file.SourcePath = fpath

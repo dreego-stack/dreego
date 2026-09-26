@@ -14,6 +14,7 @@ type FileHeader struct {
 	Props     []Prop
 	Slots     []string
 	Layout    string
+	Profile   string
 	Imports   []Import
 	GoImports []string
 }
