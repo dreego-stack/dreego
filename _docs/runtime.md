@@ -19,11 +19,16 @@ See [Components](components.md).
 | `c.Data("key")` | `any` | Arbitrary data stored in context |
 | `c.Set("key", val)` | — | Store data for use between nested calls |
 | `c.Get("key")` | `string` | Retrieve string data (used for slot passing) |
+| `c.Delete("key")` | — | Remove a stored data key |
 | `c.SessionVal("key")` | `string` | Session value (requires `SetSessionStore`; `""` on store failure) |
 | `c.SetSessionVal("k","v")` | — | Write session value (secure defaults) |
 | `c.DelSessionVal("key")` | — | Delete single session key |
 | `c.DestroySession()` | — | Destroy entire session |
 | `c.CSRFToken()` | `string` | Current CSRF token (from session) |
+| `c.CSRFInput()` | `string` | Ready-to-render hidden `csrf_token` input field |
+| `c.Flash("key","msg")` | — | Store a one-shot flash message in the session |
+| `c.FlashGet("key")` | `string` | Read **and consume** a flash message |
+| `c.FlashPeek("key")` | `string` | Read a flash message without consuming it |
 | `c.SessionError()` | `error` | Non-nil when the last session read/write/delete/destroy call failed; `nil` otherwise |
 | `c.R` | `*http.Request` | Raw request (use sparingly) |
 | `c.W` | `http.ResponseWriter` | Raw writer (use sparingly) |

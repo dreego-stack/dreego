@@ -28,6 +28,13 @@ surface rule is: **uppercase is a keyword, lowercase is a value.**
   without an explicit alias fail with a diagnostic naming both paths. Dreego
   never runs `go get` automatically. `strings`, `net/http`, and `fmt` are also
   detected automatically from the code.
+- `PROFILE "name"` binds the route folder to a named profile registered with
+  `app.Profile(name, dreego.Profile{…})` in `main.go`. A profile selects its own
+  session store, CSRF switch, and cookie policy for the routes in that folder.
+  The nearest ancestor `PROFILE` wins; a `PROFILE` in a `(group)/` folder applies
+  to every descendant route folder. Without any `PROFILE` directive the app keeps
+  the global session and CSRF behavior. A route bound to a profile that was
+  never registered fails at start-up with an error naming the profile.
 
 Header directives are the only content allowed alongside the five root sections.
 

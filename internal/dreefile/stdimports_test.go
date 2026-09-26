@@ -91,6 +91,27 @@ func TestStdImportsForRejectsBaseNameCollision(t *testing.T) {
 	}
 }
 
+func TestStdImportsForVersionSuffixUsesParentName(t *testing.T) {
+	gen := NewGenerator()
+	gen.Module = "example.com/app"
+	gen.Requires = map[string]string{"github.com/a/auth/v2": "v2", "github.com/b/storage/v3": "v3"}
+	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{
+		{Path: "github.com/a/auth/v2"},
+		{Path: "github.com/b/storage/v3"},
+	}); err != nil {
+		t.Fatalf("registerGoImports: %v", err)
+	}
+	out, err := stdImportsFor(gen, "routes", "")
+	if err != nil {
+		t.Fatalf("version-suffixed imports must not collide: %v", err)
+	}
+	for _, want := range []string{`"github.com/a/auth/v2"`, `"github.com/b/storage/v3"`} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("expected %q in import block, got:\n%s", want, out)
+		}
+	}
+}
+
 func TestStdImportsForKeepsAutoDetected(t *testing.T) {
 	gen := NewGenerator()
 	out, err := stdImportsFor(gen, "routes", `v := strings.ToUpper("x"); _ = fmt.Sprintf("%v", v)`)

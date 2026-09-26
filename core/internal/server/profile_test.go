@@ -93,3 +93,17 @@ func TestProfiledAppLeavesUnboundRoutesWithoutStore(t *testing.T) {
 		t.Fatalf("unbound route leaked session store: %d %s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestApplyProfileRequiresLeadingSlash(t *testing.T) {
+	app := New()
+	store := session.NewCookieStore([]byte("01234567890123456789012345678901"))
+	if err := app.Profile("hooks", Profile{Session: store}); err != nil {
+		t.Fatal(err)
+	}
+	if err := app.ApplyProfile("hooks", "hooks"); err == nil {
+		t.Fatal("ApplyProfile must reject a pattern without a leading slash")
+	}
+	if err := app.ApplyProfile("/hooks", "hooks"); err != nil {
+		t.Fatalf("ApplyProfile must accept a rooted pattern: %v", err)
+	}
+}

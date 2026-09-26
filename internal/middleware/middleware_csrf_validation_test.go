@@ -92,6 +92,22 @@ func TestCSRFGetSetsTokenCookieAndSession(t *testing.T) {
 	}
 }
 
+func TestCSRFCookieFollowsStorePath(t *testing.T) {
+	store := session.NewCookieStore([]byte("01234567890123456789012345678901"))
+	store.SetCookiePolicy(session.CookiePolicy{Path: "/app"})
+	mw := CSRF(store)
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/app/page", nil)
+	mw(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})).ServeHTTP(w, r)
+	c := csrfReadableCookie(w)
+	if c == nil {
+		t.Fatal("expected csrf_token cookie")
+	}
+	if c.Path != "/app" {
+		t.Fatalf("csrf cookie path = %q, want /app", c.Path)
+	}
+}
+
 func TestCSRFGetWithoutTokenPasses(t *testing.T) {
 	store := newCSRFMockStore()
 	mw := CSRF(store)
