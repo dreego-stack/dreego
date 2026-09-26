@@ -78,6 +78,9 @@ func parseRouteFile(gen *Generator, fpath string, data []byte) (*File, string, e
 		if diagnostic, ok := alpineCSPDiagnostic(file.Body.Nodes, fpath); ok {
 			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
 		}
+		for _, diagnostic := range csrfFormDiagnostics(file.Body.Nodes, fpath) {
+			fmt.Fprintf(os.Stderr, "warning: %s\n", diagnostic)
+		}
 	}
 	return file, raw, nil
 }
