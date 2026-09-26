@@ -12,11 +12,12 @@ type State struct {
 	Pkg              string
 	Module           string
 	RootRel          string
+	Requires         map[string]string
 	CompPkgs         map[string]string
 	CompPaths        map[string]string
 	CompAliases      map[string]string
 	Imports          map[string]map[string]string
-	GoImportPaths    map[string][]string
+	GoImports        map[string][]ir.GoImport
 	Lua              map[string]bool
 	MessageUses      []MessageUse
 	MessageArguments map[string]map[string]string
@@ -34,7 +35,7 @@ func NewState() *State {
 		CompPaths:        map[string]string{},
 		CompAliases:      map[string]string{},
 		Imports:          map[string]map[string]string{},
-		GoImportPaths:    map[string][]string{},
+		GoImports:        map[string][]ir.GoImport{},
 		Lua:              map[string]bool{},
 		MessageUses:      nil,
 		MessageArguments: map[string]map[string]string{},
@@ -89,16 +90,16 @@ func (g *State) AddImport(pkg, alias, path string) {
 	g.Imports[pkg][alias] = path
 }
 
-func (g *State) AddGoImportPath(pkg, path string) {
-	if g.GoImportPaths == nil {
-		g.GoImportPaths = map[string][]string{}
+func (g *State) AddGoImport(pkg string, imp ir.GoImport) {
+	if g.GoImports == nil {
+		g.GoImports = map[string][]ir.GoImport{}
 	}
-	for _, existing := range g.GoImportPaths[pkg] {
-		if existing == path {
+	for _, existing := range g.GoImports[pkg] {
+		if existing == imp {
 			return
 		}
 	}
-	g.GoImportPaths[pkg] = append(g.GoImportPaths[pkg], path)
+	g.GoImports[pkg] = append(g.GoImports[pkg], imp)
 }
 
 func (g *State) Qualify(funcName string) string {

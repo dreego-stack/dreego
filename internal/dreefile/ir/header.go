@@ -8,6 +8,11 @@ const (
 	FileKindLayout
 )
 
+type GoImport struct {
+	Alias string
+	Path  string
+}
+
 type FileHeader struct {
 	Kind      FileKind
 	Name      string
@@ -15,7 +20,7 @@ type FileHeader struct {
 	Slots     []string
 	Layout    string
 	Imports   []Import
-	GoImports []string
+	GoImports []GoImport
 }
 
 func (h FileHeader) IsComponent() bool {
