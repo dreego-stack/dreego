@@ -35,6 +35,8 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 
 	sourcesByPkg := map[string][]string{}
 	gen.Pkg = "components"
+	gen.ImportKey = ""
+	gen.ImportKeySet = false
 	for _, component := range components {
 		gen.Src = component.raw
 		if err := registerGoImports(gen, sanitizePkgName(filepath.Base(component.pkgDir)), component.path, component.file.GoImports); err != nil {

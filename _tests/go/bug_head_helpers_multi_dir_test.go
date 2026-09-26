@@ -40,14 +40,24 @@ func TestBugHeadHelpersEmittedOnceAndLayoutStyleKept(t *testing.T) {
 	}
 	out := all.String()
 
-	if n := strings.Count(out, "func stripTitleTag("); n != 1 {
-		t.Fatalf("expected stripTitleTag defined exactly once in generated code, got %d:\n%s", n, out)
+	// Each route folder is its own Go package, so the head helpers may be
+	// defined once per package that uses a layout. What must never happen is a
+	// duplicate definition inside one generated file (the original bug).
+	for _, k := range keys {
+		src := generated[k]
+		if n := strings.Count(src, "func stripTitleTag("); n > 1 {
+			t.Fatalf("stripTitleTag defined %d times in %s:\n%s", n, k, src)
+		}
+		if n := strings.Count(src, "func stripMetaDescriptionTag("); n > 1 {
+			t.Fatalf("stripMetaDescriptionTag defined %d times in %s:\n%s", n, k, src)
+		}
 	}
-	if n := strings.Count(out, "func stripMetaDescriptionTag("); n != 1 {
-		t.Fatalf("expected stripMetaDescriptionTag defined exactly once in generated code, got %d:\n%s", n, out)
+	if n := strings.Count(out, "func stripTitleTag("); n < 1 {
+		t.Fatalf("expected stripTitleTag to be defined at least once:\n%s", out)
 	}
+
 	layoutStart := strings.Index(out, "func Default(")
-	layoutEnd := strings.Index(out, "package routes")
+	layoutEnd := strings.Index(out, "package routes\n")
 	if layoutStart < 0 || layoutEnd < 0 || layoutEnd <= layoutStart {
 		t.Fatalf("could not locate generated layout function in output:\n%s", out)
 	}
