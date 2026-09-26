@@ -81,7 +81,10 @@ func TestRootRoutePackageCollectsSubPackages(t *testing.T) {
 	var rootFile string
 	for _, d := range dirs {
 		if d.rel == "" {
-			rootFile = buildRoutePackageFile(gen, d)
+			rootFile, err = buildRoutePackageFile(gen, d)
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
 	if rootFile == "" {
@@ -150,7 +153,10 @@ func TestRunSplitsRouteFoldersIntoPackages(t *testing.T) {
 	}
 
 	root := read("www/routes/dree.go")
-	if !strings.HasPrefix(root, "package routes\n") {
+	if !isGeneratedFile(root) {
+		t.Fatalf("root routes file must carry a generated marker:\n%s", root)
+	}
+	if !strings.Contains(root, "\npackage routes\n") {
 		t.Fatalf("root routes file must be package routes:\n%s", root)
 	}
 	for _, want := range []string{"registrierung.Register(app)", "anmeldung.Register(app)"} {
@@ -164,7 +170,7 @@ func TestRunSplitsRouteFoldersIntoPackages(t *testing.T) {
 
 	for folder, pkg := range map[string]string{"registrierung": "registrierung", "anmeldung": "anmeldung"} {
 		src := read("www/routes/" + folder + "/dree.go")
-		if !strings.HasPrefix(src, "package "+pkg+"\n") {
+		if !strings.Contains(src, "\npackage "+pkg+"\n") {
 			t.Errorf("%s/dree.go must be package %s:\n%s", folder, pkg, src)
 		}
 		for _, want := range []string{"type Form struct", "func label() string"} {

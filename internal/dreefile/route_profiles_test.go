@@ -7,6 +7,23 @@ import (
 	"testing"
 )
 
+func allRouteRegs(dirs []*routePkg) string {
+	var b strings.Builder
+	var collect func(p *routePkg)
+	collect = func(p *routePkg) {
+		for _, r := range p.regs {
+			b.WriteString(r)
+		}
+		for _, c := range p.children {
+			collect(c)
+		}
+	}
+	for _, d := range dirs {
+		collect(d)
+	}
+	return b.String()
+}
+
 func TestResolveRouteProfileNearestAncestorWins(t *testing.T) {
 	profiles := map[string]string{
 		"":             "root",
@@ -88,7 +105,7 @@ func TestScanRoutesEmitsApplyProfileForGroupFolder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
-	regs := strings.Join(dirs[0].regs, "")
+	regs := allRouteRegs(dirs)
 	for _, want := range []string{
 		`app.ApplyProfile("/hooks", "hooks")`,
 		`app.ApplyProfile("/github", "hooks")`,
@@ -113,7 +130,7 @@ func TestScanRoutesNearestProfileWins(t *testing.T) {
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
-	regs := strings.Join(dirs[0].regs, "")
+	regs := allRouteRegs(dirs)
 	if !strings.Contains(regs, `app.ApplyProfile("/admin", "outer")`) {
 		t.Errorf("missing outer profile for /admin: %s", regs)
 	}
@@ -137,8 +154,8 @@ func TestScanRoutesNoProfileEmitsNothing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
-	if strings.Contains(strings.Join(dirs[0].regs, ""), "ApplyProfile") {
-		t.Fatalf("no PROFILE must emit no ApplyProfile: %s", strings.Join(dirs[0].regs, ""))
+	if strings.Contains(allRouteRegs(dirs), "ApplyProfile") {
+		t.Fatalf("no PROFILE must emit no ApplyProfile: %s", allRouteRegs(dirs))
 	}
 }
 
@@ -152,7 +169,7 @@ func TestScanRoutesRootProfileAppliesToDescendants(t *testing.T) {
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
-	regs := strings.Join(dirs[0].regs, "")
+	regs := allRouteRegs(dirs)
 	for _, want := range []string{
 		`app.ApplyProfile("/{$}", "app")`,
 		`app.ApplyProfile("/about", "app")`,
