@@ -89,9 +89,12 @@ type routeImport struct {
 // buildRoutePackageFile renders one route folder's dree.go. For the top-level
 // routes folder it also imports every sub-package and calls its Register, so
 // the website entry point only has to call routes.Register(app).
-func buildRoutePackageFile(gen *Generator, p *routePkg) string {
+func buildRoutePackageFile(gen *Generator, p *routePkg) (string, error) {
 	src := p.src.String()
-	stdImports := stdImportsFor(gen, p.key, src)
+	stdImports, err := stdImportsFor(gen, p.key, src)
+	if err != nil {
+		return "", err
+	}
 	lines := []routeImport{}
 	used := map[string]bool{"dreego": true, "ssr": true, p.pkg: true}
 	for _, line := range strings.Split(stdImports, "\n") {
@@ -146,7 +149,7 @@ func buildRoutePackageFile(gen *Generator, p *routePkg) string {
 		b.WriteString(registrationStatement(fmt.Sprintf("%s.Register(app)", child.alias)))
 	}
 	b.WriteString("\treturn nil\n}\n")
-	return b.String()
+	return withGeneratedMarker(relToRoot(".", p.dir), b.String()), nil
 }
 
 func uniqueImportAlias(base string, used map[string]bool) string {
