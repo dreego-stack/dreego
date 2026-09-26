@@ -33,7 +33,13 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 		return p
 	}
 
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+	profiles, err := discoverRouteProfiles(root)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	appliedProfiles := map[string]bool{}
+
+	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
@@ -67,8 +73,11 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 			declSources[p.key] = decls
 		}
 
+		folder := routeDirRel(root, path)
+		folderProfile := resolveRouteProfile(profiles, folder)
 		var src strings.Builder
 		var regs []string
+		var profilePatterns []string
 
 		for _, fpath := range dreegoFiles {
 			rel := routeFileRel(root, path, filepath.Base(fpath))
@@ -138,6 +147,10 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 				}
 				src.WriteString(s)
 				regs = append(regs, reg)
+				if folderProfile != "" && !appliedProfiles[pattern] {
+					appliedProfiles[pattern] = true
+					profilePatterns = append(profilePatterns, pattern)
+				}
 				continue
 			}
 
@@ -156,12 +169,19 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 			}
 			src.WriteString(s)
 			regs = append(regs, reg)
+			if folderProfile != "" && !appliedProfiles[pattern] {
+				appliedProfiles[pattern] = true
+				profilePatterns = append(profilePatterns, pattern)
+			}
 			if layout != nil {
 				p.needsHead = true
 			}
 		}
 
 		p.src.WriteString(src.String())
+		for _, pattern := range profilePatterns {
+			p.regs = append(p.regs, registrationStatement(fmt.Sprintf("app.ApplyProfile(%q, %q)", pattern, folderProfile)))
+		}
 		p.regs = append(p.regs, regs...)
 		found += len(regs)
 		return nil

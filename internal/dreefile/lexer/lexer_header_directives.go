@@ -78,6 +78,18 @@ func parseLayoutLine(line string) (string, error) {
 	return path, nil
 }
 
+func parseProfileLine(line string) (string, error) {
+	raw := strings.TrimSpace(strings.TrimPrefix(line, "PROFILE"))
+	if len(raw) < 2 || raw[0] != '"' || raw[len(raw)-1] != '"' {
+		return "", fmt.Errorf("invalid PROFILE value %q: name must be a quoted string", raw)
+	}
+	name := raw[1 : len(raw)-1]
+	if name == "" {
+		return "", fmt.Errorf("invalid PROFILE value: name must not be empty")
+	}
+	return name, nil
+}
+
 func parseComponentImport(lines []string) (*ir.Import, int, error) {
 	line := lines[0]
 	kw := strings.Index(line, "COMPONENT")

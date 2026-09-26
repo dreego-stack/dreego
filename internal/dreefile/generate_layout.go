@@ -65,6 +65,7 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 				f.Imports = header.Imports
 				f.Kind = header.Kind
 				f.Layout = header.Layout
+				f.Profile = header.Profile
 				f.GoImports = header.GoImports
 				f.SourceContent = raw
 				f.SourcePath = full
