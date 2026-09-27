@@ -46,6 +46,9 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 		if !d.IsDir() {
 			return nil
 		}
+		if isLayoutsDir(root, path) {
+			return filepath.SkipDir
+		}
 		if !isRoutesDir(root, path) {
 			return nil
 		}
