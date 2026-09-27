@@ -33,8 +33,11 @@ func TestBugRouteLocalLayoutGeneratedNames(t *testing.T) {
 
 	routes := gen["www/routes/dree.go"]
 	dreegotest.MustContain(t, routes, "layouts.Default(c, pageContent, head)")
-	dreegotest.MustContain(t, routes, "layouts.DefaultRegistrierung(c, pageContent, head)")
+
+	routeLocal := gen["www/routes/registrierung/dree.go"]
+	dreegotest.MustContain(t, routeLocal, "layouts.DefaultRegistrierung(c, pageContent, head)")
 	dreegotest.MustNotContain(t, routes, "/registrierung/layouts")
+	dreegotest.MustNotContain(t, routeLocal, "/registrierung/layouts")
 }
 
 func TestBugRouteLocalLayoutCascade(t *testing.T) {
