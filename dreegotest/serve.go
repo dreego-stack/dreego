@@ -47,10 +47,16 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 	}
 	copyModuleSum(t, dir, repoRoot)
 	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/adapter/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", setup)
+	if custom, ok := files["main.go"]; ok {
+		mainGo = custom
+	}
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}
 	for path, content := range files {
+		if path == "main.go" {
+			continue
+		}
 		full := filepath.Join(dir, path)
 		if err := os.MkdirAll(filepath.Dir(full), 0755); err != nil {
 			t.Fatalf("Serve: mkdir %s: %v", filepath.Dir(full), err)

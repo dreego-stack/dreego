@@ -80,15 +80,5 @@ jobs:
       - name: Install pinned native TypeScript compiler
         run: go run ./cmd/dreego tools install typescript
 
-      - name: go test -race
-        run: CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
-
-      - name: fuzz MarkdownToHTML safe
-        run: |
-          timeout 120s go test ./core/ -run FuzzMarkdownToHTMLSafe -fuzz=FuzzMarkdownToHTMLSafe -fuzztime=30s
-
-      - name: coverage gate
-        run: task coverage
-
       - name: task test
         run: task test

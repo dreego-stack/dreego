@@ -189,7 +189,7 @@ This replaces the earlier open item; it is decided, not deferred.
 
 ### Structural check is required
 
-`_tests/sh/check-core-deps.sh` only checks **external** dependencies (it greps
+`_tests/e2e/invariants/core-deps/` only checks **external** dependencies (it greps
 out every `github.com/dreego-stack/dreego` and `golang.org/x/` import). It does
 not catch layering or section-to-section violations. A dedicated structural
 check for the rules above is therefore **required**, not optional, and lands as
@@ -293,7 +293,7 @@ compiler package.
   only their location changes. No re-export or forwarding package is added
   inside `core/`.
 - The 300-line rule stays enforced per file inside the split.
-- `_tests/sh/check-core-deps.sh` keeps the **external** dependency boundary
+- `_tests/e2e/invariants/core-deps/` keeps the **external** dependency boundary
   checked after the moves. It does **not** check the layering rule, so the
   required structural check is a separate, necessary artifact.
 - Structural invariants (no sibling-section imports except the two explicit

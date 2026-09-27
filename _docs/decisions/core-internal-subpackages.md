@@ -57,7 +57,7 @@ No cycles.
 ## Consequences
 
 - The public API is unchanged: type aliases preserve methods and receivers;
-  wrapper functions preserve signatures. Generated code and `_tests/go`
+  wrapper functions preserve signatures. Generated code and `_tests/e2e`
   integration tests compile unmodified.
 - Unexported helpers (`responseWriter`, `jsonlHandler`, `gzipBuffer`,
   `isTLS`, `deriveKeys`, `encryptPayload`) are no longer accessible outside
@@ -67,6 +67,6 @@ No cycles.
 - Mixed test files were split at the package boundary; tests using unexported
   internals moved into the internal packages, facade tests stayed at `core/`.
 - CI (`_tests/test.sh`, `pull-request-check.yml`) already runs `./core/...`,
-  which covers the internal packages; `_tests/sh/check-core-deps.sh` now checks
+  which covers the internal packages; `_tests/e2e/invariants/core-deps/` now checks
   `./core/...` too.
 - The 300-line rule is now enforced per file inside the split.

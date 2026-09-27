@@ -31,23 +31,14 @@ tasks:
 
   coverage:
     cmds:
-      - sh .github/scripts/coverage-gate.sh
+      - sh _tests/e2e/invariants/coverage/test.sh
 
   test:
     cmds:
       - |
         run_tests() {
-          go run ./cmd/dreego tools install typescript
-          sh _tests/sh/check-layering.sh
-          sh _tests/sh/check-wails-demo.sh
-          CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/... ./_tests/go/...
-          task coverage
-          if [ ! -f /.dockerenv ] && [ "${DREEGO_IN_SMD:-}" != "1" ]; then
-            docker build -q --build-arg DREEGO_VERSION="{{.ROOT_VERSION}}" -f _tests/Dockerfile -t dreego-test . > /dev/null 2>&1
-            docker run --rm -e DREEGO_FILTER="${DREEGO_FILTER:-}" -e DREEGO_RUNS="${DREEGO_RUNS:-1}" -e DREEGO_VERSION="{{.ROOT_VERSION}}" dreego-test
-          else
-            echo "Skipping Docker black-box tests inside smd"
-          fi
+          CGO_ENABLED=1 go test -race ./internal/... ./core/... ./adapter/ssr/... ./adapter/wails/... ./dreegotest/... ./cmd/dreego/...
+          DREEGO_VERSION="{{.ROOT_VERSION}}" sh _tests/test.sh
         }
         if [ -f /.dockerenv ] || [ "${DREEGO_IN_SMD:-}" = "1" ] || [ "${CI:-}" = "true" ]; then
           run_tests
