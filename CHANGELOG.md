@@ -1,4 +1,9 @@
 
+## v0.10.10 - 2026-09-27
+
+- Bug: a route-local `www/routes/<route>/layouts/default.dreego` no longer collides with the root `www/layouts/default.dreego`; layout renderers are scope-qualified (`DefaultRegistrierung`) so several scopes coexist in the `www/layouts` package
+- Bug: `www/routes/<route>/layouts/` is no longer scanned as a route directory, so route-local layouts no longer emit a stray route (for example `/registrierung/layouts`)
+
 ## v0.10.9 - 2026-09-26
 
 - Feat: `PROFILE "name"` header directive binds a route (and a `(group)/` subtree) to an `App.Profile` with its own session store, CSRF switch and cookie policy; without a profile the previous global session+CSRF behavior is unchanged
