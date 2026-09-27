@@ -78,11 +78,7 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 					gogen.SetSourceText(f.Body.Nodes, raw)
 				}
 				rel := layoutScopeRel(root, path)
-				funcName := "Layout"
-				if name == "default.dreego" {
-					funcName = "Default"
-				}
-				entries[rel+":"+name] = &layoutEntry{rel: rel, source: full, file: f, name: funcName}
+				entries[rel+":"+name] = &layoutEntry{rel: rel, source: full, file: f, name: layoutFuncName(rel, name)}
 			}
 		}
 		return nil
@@ -127,6 +123,17 @@ func layoutScopeRel(root, layoutsDir string) string {
 	rel = strings.TrimSuffix(rel, "/layouts")
 	rel = strings.TrimPrefix(rel, "routes/")
 	return rel
+}
+
+func layoutFuncName(scope, fileName string) string {
+	base := "Layout"
+	if fileName == "default.dreego" {
+		base = "Default"
+	}
+	if scope == "" {
+		return base
+	}
+	return base + gogen.ToPascalCase(scope)
 }
 
 func resolveLayoutForRoute(routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
@@ -194,15 +201,11 @@ func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntr
 			if !ok {
 				continue
 			}
-			funcName := "Layout"
-			if name == "default.dreego" {
-				funcName = "Default"
-			}
 			gen.Src = e.file.SourceContent
 			if err := registerGoImports(gen, "layouts", e.source, e.file.GoImports); err != nil {
 				return nil, err
 			}
-			src, err := GenerateLayout(gen, e.file, funcName)
+			src, err := GenerateLayout(gen, e.file, e.name)
 			if err != nil {
 				return nil, err
 			}

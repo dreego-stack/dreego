@@ -83,6 +83,13 @@ Generated route rendering passes page content and head content directly to the
 selected layout renderer. Layout composition does not depend on mutable
 request-context keys.
 
+Layout renderers live in one `www/layouts` package and are named after their
+scope so several scopes can coexist: the root layout is `Default` (or `Layout`
+for a root `layout.dreego`), and a route-local layout is prefixed with its
+scope, e.g. `www/routes/registrierung/layouts/default.dreego` becomes
+`DefaultRegistrierung`. The generated `www/routes/<route>/layouts/` directory is
+not treated as a route, so route-local layouts do not create routes.
+
 ## Rules
 
 1. `{#slot}` — required to render route content; always available.
