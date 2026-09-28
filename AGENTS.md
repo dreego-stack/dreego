@@ -114,8 +114,7 @@ repo-root/
 ├── _docs/                  ← Public documentation
 ├── _plan/                  ← Detailed phased architecture and worker guidance
 ├── _tests/                 ← Integration tests (Docker, `task test`)
-│   ├── go/                 ← Go integration tests (bug regressions, transpiler, blackbox, CLI)
-│   └── fixtures/           ← Reference apps for integration tests
+│   ├── e2e/                ← End-to-end tests, one folder per test (go or sh)
 ├── .tmp/                   ← Temporary debug spaces (no permanent tests)
 │
 ├── core/                   ← Target-neutral public runtime module
@@ -210,7 +209,7 @@ host paths that do not exist in the container.
   `_docs/handbook/go-1.27.md`. Each page contains only the delta from its
   immediate predecessor and links to the official release notes.
 - Coordinated published modules: root, `core`, `adapter/ssr`, `adapter/wails`, `dreegotest`, and `cmd/dreego`. Wails joined at v0.9; every release uses one version across all participating module-specific tags on the same commit.
-- Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_tests/sh/check-core-deps.sh`.
+- Core code in `core/`; shared protected implementation in root `internal/`; HTTP hosting in `adapter/ssr/`. These modules may use the standard library and modules maintained by the Go project under `golang.org/x/`; third-party dependencies stay outside them. CI enforces this boundary through `_tests/e2e/invariants/core-deps/`.
 - The compiler in `internal/dreefile/` may use the standard library and modules maintained by the Go project under `golang.org/x/`; it remains importable only from within this repo (CLI, dreegotest). Third-party processors and dependencies stay outside the compiler.
 - CLI in `cmd/dreego/` (imports core)
 - Plugins live in separate repos under `github.com/dreego-stack/` (each with own `go.mod`)
@@ -219,8 +218,8 @@ host paths that do not exist in the container.
 
 ## Bug → Test → Fix Workflow
 
-Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
-1. Bug found → create `_tests/go/bug_<name>_test.go` that reproduces the bug (must FAIL)
+Every bug gets a permanent test in `_tests/e2e/bugs/<name>/`. Workflow:
+1. Bug found → create `_tests/e2e/bugs/<name>/<name>_test.go` that reproduces the bug (must FAIL)
 2. Fix code until `task test` shows the new test GREEN
 3. Bug is permanently covered — no regression risk
 
@@ -230,10 +229,10 @@ Every bug gets a permanent test in `_tests/go/bug_<name>_test.go`. Workflow:
 
 Every feature follows this cycle:
 
-1. **`_tests/`** — Create integration test in `_tests/go/<name>_test.go` using `dreegotest` (see `_docs/testing.md` and existing `_tests/go/*_test.go` for the pattern)
+1. **`_tests/`** — Create the end-to-end test folder `_tests/e2e/<group>/<name>/` with `<name>_test.go` or `test.sh` (see `_docs/testing.md` and `_tests/how-to-test.md` for the pattern)
 2. **Code** — Implement in `core/internal/` or `internal/dreefile/`; public API lives in `core/` (facade, one logical thing per file, max 300 lines)
 3. **`_docs/`** — Update relevant documentation
-4. **Test** — `go test ./_tests/go/ -run <TestName>` (or `task test`) — must be GREEN
+4. **Test** — `sh _tests/test.sh` (or `task test`) — must be GREEN
 5. **PR** — Create a PR with one `.changes/*.md` file (version bump + changelog lines); CI validates it
 6. **Docs** — Update `_docs/` + relevant decision docs in `_docs/decisions/`
 

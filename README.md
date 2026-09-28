@@ -291,7 +291,6 @@ github.com/dreego-stack/
 |-----|-------|
 | `_docs/testing.md` | Integration test strategy |
 | `_docs/benchmarks.md` | Code generation and request benchmarks |
-| `_docs/reference-apps.md` | Reference applications under `_tests/fixtures/` |
 | `_docs/dev-server.md` | `dreego dev` watcher and auto-reload |
 | `_docs/hot-reload.md` | Hot reload with Air (.air.toml config) |
 | `_docs/deployment.md` | Build, cross-compile, containers |

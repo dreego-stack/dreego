@@ -48,7 +48,7 @@ adapter/ssr/           first-party HTTP host
 internal/dreefile/     .dreego compiler and code generation
 cmd/dreego/            command-line application
 dreegotest/            public test helpers
-_tests/go/             integration and regression tests
+_tests/e2e/            end-to-end tests, one folder per test (go or sh)
 _docs/                 versioned public documentation
 _docs/decisions/       architecture decisions
 _todo/                 one file per open work item

@@ -4,5 +4,4 @@
 CLI integration tests.
 
 - [Testing](testing.md)
-- [Reference Applications](reference-apps.md)
 - [Benchmarks](benchmarks.md)

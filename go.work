@@ -2,7 +2,7 @@ go 1.27
 
 use (
 	.
-	./_tests/go
+	./_tests/e2e
 	./adapter/ssr
 	./adapter/wails
 	./cmd/dreego
