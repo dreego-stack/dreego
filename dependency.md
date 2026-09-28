@@ -1,16 +1,17 @@
 # Dependencies
 
 Generated with `go1.27.1` from the `go.work` workspace.
-For every module the standard-library, external and workspace-internal
-packages **actually imported** are listed (imports, test imports and
-external test imports; deduplicated and sorted).
+
+Per module, only the packages that leave this repo are listed:
+the **standard library** and the **external dependencies**.
+All imports internal to this repo (the workspace modules and their
+packages) are intentionally omitted.
 
 Command per module: `go list -f '{{range .Imports}}{{.}}\n{{end}}{{range .TestImports}}{{.}}\n{{end}}{{range .XTestImports}}{{.}}\n{{end}}' ./...`
 
 Classification:
-- **Standard library**: first path segment contains no dot.
-- **Workspace-internal modules**: package belongs to a module listed in `go.work`.
-- **External dependencies**: first path segment contains a dot, excluding workspace-internal packages.
+- **Standard library**: first path segment contains no dot and is not part of this repo.
+- **External dependencies**: first path segment contains a dot and is not part of this repo.
 
 ## github.com/dreego-stack/dreego
 
@@ -69,29 +70,6 @@ unicode/utf8
 golang.org/x/mod/modfile
 golang.org/x/text/language
 
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/internal/dreefile/codegen
-github.com/dreego-stack/dreego/internal/dreefile/dreecode
-github.com/dreego-stack/dreego/internal/dreefile/gogen
-github.com/dreego-stack/dreego/internal/dreefile/i18n
-github.com/dreego-stack/dreego/internal/dreefile/ir
-github.com/dreego-stack/dreego/internal/dreefile/jsoutput
-github.com/dreego-stack/dreego/internal/dreefile/lexer
-github.com/dreego-stack/dreego/internal/dreefile/parser
-github.com/dreego-stack/dreego/internal/dreefile/sections/body/html
-github.com/dreego-stack/dreego/internal/dreefile/sections/body/md
-github.com/dreego-stack/dreego/internal/dreefile/sections/client
-github.com/dreego-stack/dreego/internal/dreefile/sections/client/js
-github.com/dreego-stack/dreego/internal/dreefile/sections/client/lua
-github.com/dreego-stack/dreego/internal/dreefile/sections/client/ts
-github.com/dreego-stack/dreego/internal/dreefile/sections/head
-github.com/dreego-stack/dreego/internal/dreefile/sections/style
-github.com/dreego-stack/dreego/internal/dreefile/tokens
-github.com/dreego-stack/dreego/internal/gomod
-github.com/dreego-stack/dreego/internal/md
-github.com/dreego-stack/dreego/internal/session
-
 ## github.com/dreego-stack/dreego/core
 
 ### Standard library
@@ -133,17 +111,6 @@ golang.org/x/text/feature/plural
 golang.org/x/text/language
 golang.org/x/text/message
 
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/core/internal/context
-github.com/dreego-stack/dreego/core/internal/i18n
-github.com/dreego-stack/dreego/core/internal/render
-github.com/dreego-stack/dreego/core/internal/server
-github.com/dreego-stack/dreego/internal/md
-github.com/dreego-stack/dreego/internal/middleware
-github.com/dreego-stack/dreego/internal/session
-github.com/dreego-stack/dreego/internal/validate
-
 ## github.com/dreego-stack/dreego/cmd/dreego
 
 ### Standard library
@@ -177,13 +144,6 @@ time
 
 _none_
 
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/cmd/dreego/internal/templates
-github.com/dreego-stack/dreego/internal/dreefile
-github.com/dreego-stack/dreego/internal/dreefile/sections/client/ts
-github.com/dreego-stack/dreego/internal/gomod
-
 ## github.com/dreego-stack/dreego/adapter/ssr
 
 ### Standard library
@@ -206,13 +166,6 @@ time
 
 _none_
 
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/core
-github.com/dreego-stack/dreego/internal/middleware
-github.com/dreego-stack/dreego/internal/session
-github.com/dreego-stack/dreego/internal/validate
-
 ## github.com/dreego-stack/dreego/adapter/wails
 
 ### Standard library
@@ -228,10 +181,6 @@ testing
 ### External dependencies
 
 _none_
-
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/core
 
 ## github.com/dreego-stack/dreego/dreegotest
 
@@ -258,12 +207,6 @@ time
 ### External dependencies
 
 _none_
-
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/core
-github.com/dreego-stack/dreego/dreegotest
-github.com/dreego-stack/dreego/internal/dreefile
 
 ## github.com/dreego-stack/dreego/_tests/go
 
@@ -297,13 +240,6 @@ unicode
 
 github.com/wailsapp/wails/v3/pkg/application
 
-### Internal/workspace modules
-
-github.com/dreego-stack/dreego/adapter/ssr
-github.com/dreego-stack/dreego/adapter/wails
-github.com/dreego-stack/dreego/core
-github.com/dreego-stack/dreego/dreegotest
-
 ## demo
 
 ### Standard library
@@ -325,22 +261,6 @@ testing
 
 _none_
 
-### Internal/workspace modules
-
-demo/blog
-demo/blog/components
-demo/blog/layouts
-demo/blog/routes
-demo/lua
-demo/lua/routes
-demo/saas
-demo/saas/routes
-demo/www
-demo/www/layouts
-demo/www/routes
-github.com/dreego-stack/dreego/adapter/ssr
-github.com/dreego-stack/dreego/core
-
 ## demo-wailsv3
 
 ### Standard library
@@ -356,10 +276,3 @@ time
 ### External dependencies
 
 github.com/wailsapp/wails/v3/pkg/application
-
-### Internal/workspace modules
-
-demo-wailsv3/app
-demo-wailsv3/app/routes
-github.com/dreego-stack/dreego/adapter/wails
-github.com/dreego-stack/dreego/core
