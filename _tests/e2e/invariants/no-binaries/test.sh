@@ -13,6 +13,11 @@ cd "$REPO_DIR"
 ALLOWED_BIN_EXT="svg png jpg jpeg gif ico webp woff woff2 ttf eot pdf zip gz tar"
 
 fail=0
+files="$(mktemp)"
+trap 'rm -f "$files"' EXIT
+find . \
+    \( -path ./.git -o -path ./.kilo -o -path ./.tmp \) -prune -o \
+    -type f -print 2>/dev/null > "$files"
 
 while IFS= read -r file; do
     case "$file" in
@@ -41,9 +46,7 @@ while IFS= read -r file; do
         echo "-> FAIL -> Found binary $file"
         fail=1
     fi
-done < <(find . \
-    \( -path ./.git -o -path ./.kilo -o -path ./.tmp \) -prune -o \
-    -type f -print 2>/dev/null)
+done < "$files"
 
 if [ "$fail" -ne 0 ]; then
     echo "FAIL: binary files found in repo"

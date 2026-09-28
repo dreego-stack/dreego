@@ -58,16 +58,10 @@ run_suite() {
 
     printf '==> Run %s: %s tests, %s jobs (race=%s)\n' "$run" "$total" "$JOBS" "$RACE"
 
-    old_ifs="$IFS"
-    IFS='
-'
-    for name in $tests; do
-        [ -n "$name" ] || continue
-        sh "$DIR/run-one.sh" "$E2E_DIR/$name" "$name" "$RUN_DIR" &
-        while [ "$(jobs -p | wc -l)" -ge "$JOBS" ]; do wait -n 2>/dev/null || true; done
-    done
-    IFS="$old_ifs"
-    wait
+    if [ "$total" -gt 0 ]; then
+        printf '%s\n' "$tests" |
+            xargs -P "$JOBS" -I{} sh "$DIR/run-one.sh" "$E2E_DIR/{}" "{}" "$RUN_DIR"
+    fi
 
     pass=0
     fail=0
