@@ -44,7 +44,7 @@ Four principles:
 1. **SSR-First** — SSR is the production web foundation through v1. Future
    targets remain separate from the stable core until real applications prove
    their contracts.
-2. **File-Based** — `dreego/www/routes/+page.dreego` and `dreego/www/routes/index.dreego` map to `/`. Other filenames become URL segments, and method-specific sections select HTTP methods.
+2. **File-Based** — `dreego/routes/+page.dreego` or `dreego/www/routes/+page.dreego` map to `/`, and `index.dreego` does the same. Other filenames become URL segments, method-specific sections select HTTP methods, and root trees are global defaults an app overrides per file.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the scaffolded `web-minimal` template ships a skip link and a `<main>` landmark. Applications still verify their own content and conformance.
 
@@ -69,7 +69,8 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 
 ### Core
 - **Transpiler Pipeline** — Lexer → Parser → AST → CodeGen. `.dreego` → Go code.
-- **File-based Routing** — `dreego/www/routes/+page.dreego` → `GET /`, `dreego/www/routes/login/+page.dreego` → `GET /login` (method via `method="..."` sections)
+- **File-based Routing** — `dreego/routes/+page.dreego` (global) or `dreego/www/routes/+page.dreego` (app-local) → `GET /`; an app-local file shadows the global path
+- **Global Defaults** — root `routes/`, `static/`, `layouts/`, and `components/` are inherited by every app; a local file wins per relative path
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
@@ -184,39 +185,47 @@ reboot). Source: https://github.com/dreego-stack/vscode-dreego
 ## Architecture
 
 A website root is a directory marked by a `dreego.config.json` (its name is
-free; `dreego new` scaffolds it as `dreego/`). It holds the optional shared
-`layouts/` and `components/` plus one or more app subdirectories. An app is an
-immediate subdirectory with a `routes/` tree; each app is its own Go package
-whose generated `<app>/dree.go` exports `var App dreego.Registrar`. `dreego
-generate` produces one `dree.go` per directory with `.dreego` sources:
+free; `dreego new` scaffolds it as `dreego/`). It holds shared defaults
+`routes/`, `static/`, `layouts/`, and `components/` plus one or more app
+subdirectories. An app is an immediate subdirectory carrying any of those trees
+or its own `dreego.config.json`; each app is its own Go package whose generated
+`<app>/dree.go` exports `var App dreego.Registrar`. `dreego generate` produces
+one `dree.go` per directory with `.dreego` sources:
 
 ```
 dreego/                      # website root (name is free, marker: dreego.config.json)
 ├── dreego.config.json       # logging, redirects, rewrites (shared defaults)
+├── routes/                  # GLOBAL routes, inherited by every app
+│   ├── +page.dreego         #   → GET / for apps without their own +page
+│   └── about/+page.dreego   #   → GET /about for every app
+├── static/                  # GLOBAL static files (inlined into every app binary)
 ├── layouts/
 │   ├── default.dreego       # shared shell: {#slot} + {#head}
 │   └── dree.go              # GENERATED — package layouts
 ├── components/
 │   ├── Card.dreego          # shared component: <@Card title="x"/>
 │   └── dree.go              # GENERATED — package components
-└── www/                     # app (own Go package, own routes/)
+└── www/                     # app (own Go package)
     ├── dreego.config.json   # optional — overrides root defaults field by field
     ├── dree.go              # GENERATED — package www, var App dreego.Registrar
-    ├── routes/              # .dreego files → URL routes
-    │   ├── +page.dreego           → GET /
+    ├── routes/              # app routes; a local file shadows the same global path
+    │   ├── +page.dreego           → GET / (overrides the global +page)
     │   ├── login/
     │   │   └── +page.dreego       → GET /login (POST via method="post" section)
     │   ├── [id]/+page.dreego      → GET /{id}
     │   └── dree.go            # GENERATED — package routes, handlers + Register
-    ├── layouts/             # optional — overrides the shared layout for this app
-    ├── components/          # optional — overrides shared components for this app
-    └── static/              # optional — inlined into the binary
+    ├── layouts/             # optional — wins over the shared layout for this app
+    ├── components/          # optional — coexists with shared components
+    └── static/              # optional — a file shadows the same global static path
 ```
 
-An app may add its own `layouts/` and `components/`; those override the shared
-root ones for that app. Route-local layouts live under
-`<app>/routes/<sub>/layouts/`. The minimal app is `dreego.config.json` +
-`<app>/routes/+page.dreego` — no layouts or components required.
+An app inherits every global route and static file and overrides only the
+relative paths it redeclares; other global files stay available. An app-local
+default layout wins over the shared one. Route-local layouts live under
+`<app>/routes/<sub>/layouts/` (or `routes/<sub>/layouts/` for the shared tree). A
+route may select a layout by path with `LAYOUT "dreego/layouts/admin.dreego"`. A
+website root with a global `routes/` and no app of its own is a valid app, so the
+minimal project is `dreego.config.json` plus `dreego/routes/+page.dreego`.
 
 `main.go` wires hosts and ports explicitly; each app is one `dreego.New` call:
 

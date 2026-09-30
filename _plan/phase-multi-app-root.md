@@ -10,31 +10,37 @@ myproj/
 ├─ main.go
 └─ dreego/                     # website root (name free; templates use dreego/)
    ├─ dreego.config.json       # REQUIRED marker + root defaults
+   ├─ routes/                  # optional, GLOBAL defaults for every app
+   ├─ static/                  # optional, GLOBAL defaults
    ├─ layouts/                 # optional, shared
    ├─ components/              # optional, shared
    ├─ www/                     # app = own Go package
    │   ├─ dreego.config.json   # optional override
    │   ├─ dree.go              # GENERATED: var App dreego.Registrar
-   │   ├─ routes/
+   │   ├─ routes/              # local routes shadow the same global path
    │   └─ static/
    └─ blog/
        ├─ routes/
        └─ static/
 ```
 
-Minimal app: `dreego.config.json` + `www/routes/+page.dreego`.
+Minimal app: `dreego.config.json` + a global `routes/+page.dreego`, or an app
+`www/routes/+page.dreego`.
 
 ## Locked decisions
 
 - Root marker: `dreego.config.json` (required). Name free.
-- Apps: subdirectories with `routes/`; each its own Go package with an exported
-  `var App dreego.Registrar`.
-- Shared `layouts/`/`components/` in the root; app-local ones override.
+- Root `routes/`, `static/`, `layouts/`, and `components/` are global defaults
+  inherited by every app; an app-local file wins per relative path.
+- Apps: subdirectories carrying any shared tree or their own config; each its own
+  Go package with an exported `var App dreego.Registrar`.
+- Shared `layouts/`/`components/` in the root; app-local ones coexist by
+  explicit path import and win for that app.
 - Config: root defaults, app file overrides field-by-field. host/port in Go.
 - Serving: `dreego.New(www.App)` + `go ssr.Listen(app, ":8080")` — no required
   collective helper.
 - `core.New(...Registrar)` panics on registration error.
-- Hard break: old layout errors with a migration hint.
+- A `LAYOUT "path"` directive selects a layout explicitly.
 
 ## Tasks (one PR)
 

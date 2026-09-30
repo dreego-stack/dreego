@@ -208,7 +208,7 @@ Visiting `/users/42` shows "User: 42".
 | `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.27. Upgrade. |
 | `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
 | `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
-| `dreego generate: no routes found` | Create at least `dreego/www/routes/+page.dreego` in an app directory (the scaffold already does). |
+| `dreego generate: no routes found` | Create at least `dreego/www/routes/+page.dreego` in an app directory, or a shared `dreego/routes/+page.dreego` (the scaffold already does). |
 
 ## See Also
 

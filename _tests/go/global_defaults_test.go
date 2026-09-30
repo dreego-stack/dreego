@@ -98,6 +98,55 @@ func TestGlobalStaticInheritedAndLocalWins(t *testing.T) {
 	}
 }
 
+func TestAppWithoutRoutesInheritsGlobal(t *testing.T) {
+	t.Parallel()
+	m := dreegotest.ServeApps(t, map[string]string{
+		"site/dreego.config.json":      `{"logging":{"enabled":false}}`,
+		"site/routes/+page.dreego":     `<body><p>shared home</p></body>`,
+		"site/www/routes/+page.dreego": `<body><p>www home</p></body>`,
+		"site/blog/dreego.config.json": `{"logging":{"enabled":false}}`,
+		"site/blog/static/blog.css":    `.blog {}`,
+	}, "site/www", "site/blog")
+
+	_, body := m.App(t, "blog").Get(t, "/")
+	dreegotest.MustContainBody(t, body, "shared home")
+
+	code, _ := m.App(t, "blog").Get(t, "/blog.css")
+	if code != 200 {
+		t.Fatalf("app without routes must still serve its own static: %d", code)
+	}
+}
+
+func TestGlobalRouteLocalLayoutApplies(t *testing.T) {
+	t.Parallel()
+	c := dreegotest.Serve(t, map[string]string{
+		"www/dreego.config.json":                 `{"logging":{"enabled":false}}`,
+		"www/layouts/default.dreego":             `<body><html><body><nav id="root-nav">Root</nav>{#slot}</body></html></body>`,
+		"www/routes/blog/layouts/default.dreego": `<body><html><body><nav id="blog-nav">Blog</nav>{#slot}</body></html></body>`,
+		"www/routes/blog/+page.dreego":           `<body><p>blog index</p></body>`,
+		"www/routes/+page.dreego":                `<body><p>home</p></body>`,
+		"www/app/routes/blog/+page.dreego":       `<body><p>app blog index</p></body>`,
+	})
+
+	_, body := c.Get(t, "/blog")
+	dreegotest.MustContainBody(t, body, `id="blog-nav"`)
+	dreegotest.MustNotContainBody(t, body, `id="root-nav"`)
+
+	_, body = c.Get(t, "/")
+	dreegotest.MustContainBody(t, body, `id="root-nav"`)
+}
+
+func TestGlobalRouteLocalLayoutFromSharedTree(t *testing.T) {
+	t.Parallel()
+	dreegotest.MustBuild(t, map[string]string{
+		"www/dreego.config.json":                  `{"logging":{"enabled":false}}`,
+		"www/layouts/default.dreego":              `<body><html><body>{#slot}</body></html></body>`,
+		"www/routes/admin/layouts/default.dreego": `<body><html><body><nav id="admin-nav">Admin</nav>{#slot}</body></html></body>`,
+		"www/routes/admin/+page.dreego":           `<body><p>admin</p></body>`,
+		"www/app/routes/admin/+page.dreego":       `<body><p>app admin</p></body>`,
+	})
+}
+
 func TestGlobalRoutesAndLayoutsVisibleToEveryApp(t *testing.T) {
 	t.Parallel()
 	m := dreegotest.ServeApps(t, map[string]string{

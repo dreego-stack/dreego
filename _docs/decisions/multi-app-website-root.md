@@ -29,16 +29,22 @@ generated-file markers rather than replacing them.
 
 - **Website root** = a directory containing `dreego.config.json` (the marker).
   Its name is free; templates and examples use `dreego/`.
-- The root holds **optional, shared** `layouts/` and `components/`.
-- **Apps are subdirectories** that contain `routes/` (and optionally `static/`,
-  their own `dreego.config.json`, and app-local `layouts/`/`components/`). Each
-  app is its **own Go package**; `dreego generate` emits `<app>/dree.go` with
+- The root holds **optional, shared** `routes/`, `static/`, `layouts/`, and
+  `components/`. See
+  [Global defaults with local overrides](global-defaults-local-overrides.md):
+  the root trees are inherited by every app, and an app-local file shadows only
+  the same relative path.
+- **Apps are subdirectories** that carry any of `routes/`, `static/`,
+  `layouts/`, `components/`, or their own `dreego.config.json`. Each app is its
+  **own Go package**; `dreego generate` emits `<app>/dree.go` with
   `var App dreego.Registrar`.
-- The **minimal app** is `dreego.config.json` + `<app>/routes/+page.dreego`.
-  Nothing else is required — no layouts, no components.
+- The **minimal app** inherits the global shell: `dreego.config.json` at the
+  root plus a shared `<root>/routes/+page.dreego` is enough; an app may add
+  nothing at all. Nothing else is required — no layouts, no components.
 - **Shared** `layouts/`/`components/` generate into the root's `layouts` and
   `components` packages; **app-local** `layouts/`/`components/` generate into
-  their own uniquely named packages and take precedence for that app.
+  their own uniquely named packages and are imported explicitly by path. Global
+  `routes/`/`static/` are merged into each app with local-wins precedence.
 - **Config**: the root `dreego.config.json` provides defaults; an app's
   `dreego.config.json` overrides **field by field** (no deep merge). `host` and
   `port` are **not** config — they live in Go.
@@ -56,9 +62,10 @@ generated-file markers rather than replacing them.
   configuration conflicts (including invalid or looping redirect/rewrite rules)
   are already validated by `dreego generate`; a runtime registration failure
   cannot be produced by a correctly generated app.
-- **Breaking**: the old layout (root-level `routes/`, multiple roots, a `main.go`
-  that imports `<root>` and calls `Register`) is rejected with a clear error and
-  a migration hint. No silent behavior, no transition period.
+- **Breaking**: the old layout (multiple roots, a `main.go` that imports
+  `<root>` and calls `Register`) is rejected with a clear error and a migration
+  hint. No silent behavior, no transition period. A root-level `routes/` is now
+  a supported **global default**, not an error.
 
 ## Rationale
 
