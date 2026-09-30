@@ -3,8 +3,8 @@ module forms
 go 1.27
 
 require (
-	github.com/dreego-stack/dreego/adapter/ssr v0.10.10
-	github.com/dreego-stack/dreego/core v0.10.10
+	github.com/dreego-stack/dreego/adapter/ssr v0.11.0
+	github.com/dreego-stack/dreego/core v0.11.0
 )
 
 replace github.com/dreego-stack/dreego => ../../..
