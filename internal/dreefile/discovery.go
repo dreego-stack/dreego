@@ -175,7 +175,7 @@ func sanitizePkgName(name string) string {
 	var b strings.Builder
 	for _, r := range name {
 		switch {
-		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '_':
 			b.WriteRune(r)
 		case r == '-', r == '.', r == ' ':
 			b.WriteRune('_')
