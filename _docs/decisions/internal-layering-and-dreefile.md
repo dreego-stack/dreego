@@ -241,15 +241,18 @@ sections (explicit composition edges)
 dreefile root (generate.go, codegen_*.go, generate_*.go, parser_facade.go,
 lex_facade.go, i18n_export.go)
                          -> sections (incl. sections/body/md), front-end, codegen,
-                            dreecode, gogen, ir, jsoutput, i18n, internal/gomod
+                            dreecode, gogen, ir, jsoutput, i18n, internal/gomod,
+                            internal/urlrule
 ```
 
 The dreefile root orchestrates: it may import the sections, the front-end, the
-shared compiler packages, and the root shared implementation (`internal/gomod`),
-but nothing imports the root back. The only compiler package that imports
-`internal/md` is `sections/body/md`, which delegates its Markdown parsing and
-rendering there; `internal/md` never imports a compiler package, and the runtime
-string path (`core/markdown.go`) reaches it directly.
+shared compiler packages, and the root shared implementation (`internal/gomod`,
+`internal/urlrule`), but nothing imports the root back. `internal/urlrule` holds
+the redirect/rewrite validation shared by the generator and `core`; it uses only
+the standard library. The only compiler package that imports `internal/md` is
+`sections/body/md`, which delegates its Markdown parsing and rendering there;
+`internal/md` never imports a compiler package, and the runtime string path
+(`core/markdown.go`) reaches it directly.
 
 No section imports a sibling section **family**, with two verified exceptions:
 `body/html` composes the leaf processors `sections/head` and `sections/style`,
@@ -269,11 +272,11 @@ dependency of the sections.
 
 | Layer | Packages | May import | Must not import |
 |---|---|---|---|
-| Shared implementation | `internal/{render,context,i18n,server,middleware,session,validate,gomod,templates,md}` | standard library, `golang.org/x/*`, each other per direction | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/dreefile/...` as Go packages |
+| Shared implementation | `internal/{render,context,i18n,server,middleware,session,validate,gomod,templates,md,urlrule}` | standard library, `golang.org/x/*`, each other per direction | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/dreefile/...` as Go packages |
 | Compiler shared | `internal/dreefile/{ir,dreecode,gogen,codegen,jsoutput,i18n}` | standard library, `ir`; `jsoutput` may import `gogen` | other compiler packages outside the rule, shared implementation, `core`, `adapter/*` |
 | Compiler front-end | `internal/dreefile/{tokens,lexer,parser}` | `tokens`, `ir`, and `dreecode`; `parser` must not import `lexer` in non-test code | sections, `core`, `adapter/*` |
 | Compiler sections | `internal/dreefile/sections/...` | `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`; `body/html` also `head`, `style`, `sections/client` (orchestrator only); `client` also `client/{js,ts,lua}`; `body/md` also `internal/md` (the single Markdown implementation; its only legal compiler consumer) | other sibling sections, parents or siblings from `client/{js,ts,lua}`, `core`, `adapter/*` |
-| Compiler root | `internal/dreefile` | sections (incl. `sections/body/md`), front-end, `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`, `i18n`, `internal/gomod` | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/md` |
+| Compiler root | `internal/dreefile` | sections (incl. `sections/body/md`), front-end, `codegen`, `dreecode`, `gogen`, `ir`, `jsoutput`, `i18n`, `internal/gomod`, `internal/urlrule` | `core`, `adapter/*`, `cmd/*`, `dreegotest`, `internal/md` |
 | Facades and hosts | `core`, `adapter/ssr`, `adapter/wails`, `cmd/dreego`, `dreegotest` | shared implementation, public facades | — |
 
 The compiler dependency rule is a review invariant and is enforced by the
