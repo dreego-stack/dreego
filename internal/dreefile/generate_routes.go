@@ -10,7 +10,136 @@ import (
 
 type routeDir = routePkg
 
-func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[string]*layoutEntry) ([]*routePkg, map[string]bool, int, error) {
+type routeFileAt struct {
+	dirRel string
+	name   string
+	path   string
+}
+
+func relInRoutes(routesDir, path string) string {
+	rel := relToRoot(routesDir, path)
+	if rel == "." {
+		return ""
+	}
+	return rel
+}
+
+// collectRouteFiles merges an app's routes/ tree with the website root's shared
+// routes/ tree. A local file shadows a global file with the same relative path;
+// a global file without a local counterpart is inherited. Local files win.
+func collectRouteFiles(appRoot, websiteRoot string) ([]routeFileAt, error) {
+	localRoutes := filepath.Join(appRoot, "routes")
+	globalRoutes := ""
+	if websiteRoot != "" {
+		globalRoutes = filepath.Join(websiteRoot, "routes")
+	}
+	seen := map[string]bool{}
+	var out []routeFileAt
+	for _, src := range []string{localRoutes, globalRoutes} {
+		if !hasDir(src) {
+			continue
+		}
+		var found []routeFileAt
+		err := filepath.WalkDir(src, func(path string, d os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return fmt.Errorf("error walking %s: %w", path, walkErr)
+			}
+			if !d.IsDir() {
+				return nil
+			}
+			if isLayoutsDir(src, path) {
+				return filepath.SkipDir
+			}
+			entries, err := os.ReadDir(path)
+			if err != nil {
+				return fmt.Errorf("error reading directory %s: %w", path, err)
+			}
+			dirRel := relInRoutes(src, path)
+			for _, e := range entries {
+				if e.IsDir() || !strings.HasSuffix(e.Name(), ".dreego") {
+					continue
+				}
+				found = append(found, routeFileAt{dirRel: dirRel, name: e.Name(), path: filepath.Join(path, e.Name())})
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(found, func(i, j int) bool {
+			if found[i].dirRel != found[j].dirRel {
+				return found[i].dirRel < found[j].dirRel
+			}
+			return found[i].name < found[j].name
+		})
+		for _, f := range found {
+			key := f.dirRel + "\x00" + f.name
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			out = append(out, f)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].dirRel != out[j].dirRel {
+			return out[i].dirRel < out[j].dirRel
+		}
+		return out[i].name < out[j].name
+	})
+	return out, nil
+}
+
+// mergedRouteProfiles reads PROFILE directives from the shared root routes and
+// the app routes. The app value wins for a folder; a genuine mismatch fails.
+func mergedRouteProfiles(appRoot, websiteRoot string) (map[string]string, error) {
+	merged := map[string]string{}
+	for _, root := range []string{websiteRoot, appRoot} {
+		if root == "" || !hasDir(filepath.Join(root, "routes")) {
+			continue
+		}
+		profiles, err := discoverRouteProfiles(root)
+		if err != nil {
+			return nil, err
+		}
+		for rel, name := range profiles {
+			if prev, ok := merged[rel]; ok && prev != name {
+				return nil, fmt.Errorf("conflicting PROFILE in route folder %q: %q and %q", displayRouteFolder(rel), prev, name)
+			}
+			merged[rel] = name
+		}
+	}
+	return merged, nil
+}
+
+func routeFileRelFromDir(dirRel, name string) string {
+	base := strings.TrimSuffix(name, ".dreego")
+	if base == "+page" || base == "index" || base == "404" || base == "500" {
+		return dirRel
+	}
+	if dirRel == "" {
+		return base
+	}
+	return dirRel + "/" + base
+}
+
+// scanRoutes builds the app's route packages from its own routes/ tree plus the
+// website root's shared routes/, where a local file overrides the global file
+// with the same relative path.
+func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[string]*layoutEntry, websiteRoot ...string) ([]*routePkg, map[string]bool, int, error) {
+	shared := ""
+	if len(websiteRoot) > 0 {
+		shared = websiteRoot[0]
+	}
+	files, err := collectRouteFiles(root, shared)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	profiles, err := mergedRouteProfiles(root, shared)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
 	rootRoutes := filepath.Join(root, "routes")
 	pkgs := map[string]*routePkg{}
 	routePatterns := map[string]bool{}
@@ -18,8 +147,9 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 	routeSources := map[string]string{}
 	declSources := map[string]map[string]string{}
 
-	getPkg := func(dir string) *routePkg {
-		pkgDir := routePackageDir(root, dir)
+	getPkg := func(dirRel string) *routePkg {
+		logical := filepath.Join(rootRoutes, filepath.FromSlash(dirRel))
+		pkgDir := routePackageDir(root, logical)
 		rel := routeDirRel(root, pkgDir)
 		if p, ok := pkgs[rel]; ok {
 			return p
@@ -33,40 +163,17 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 		return p
 	}
 
-	profiles, err := discoverRouteProfiles(root)
-	if err != nil {
-		return nil, nil, 0, err
-	}
 	appliedProfiles := map[string]bool{}
-
-	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return fmt.Errorf("error walking %s: %w", path, walkErr)
-		}
-		if !d.IsDir() {
-			return nil
-		}
-		if isLayoutsDir(root, path) {
-			return filepath.SkipDir
-		}
-		if !isRoutesDir(root, path) {
-			return nil
-		}
-		entries, err := os.ReadDir(path)
-		if err != nil {
-			return fmt.Errorf("error reading directory %s: %w", path, err)
-		}
-		var dreegoFiles []string
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".dreego") {
-				dreegoFiles = append(dreegoFiles, filepath.Join(path, e.Name()))
-			}
-		}
-		if len(dreegoFiles) == 0 {
-			return nil
+	index := 0
+	for index < len(files) {
+		dirRel := files[index].dirRel
+		var group []routeFileAt
+		for index < len(files) && files[index].dirRel == dirRel {
+			group = append(group, files[index])
+			index++
 		}
 
-		p := getPkg(path)
+		p := getPkg(dirRel)
 		gen.Pkg = p.pkg
 		gen.ImportKey = p.key
 		gen.ImportKeySet = true
@@ -76,42 +183,42 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 			declSources[p.key] = decls
 		}
 
-		folder := routeDirRel(root, path)
-		folderProfile := resolveRouteProfile(profiles, folder)
+		folderProfile := resolveRouteProfile(profiles, dirRel)
 		var src strings.Builder
 		var regs []string
 		var profilePatterns []string
 
-		for _, fpath := range dreegoFiles {
-			rel := routeFileRel(root, path, filepath.Base(fpath))
+		for _, fpath := range group {
+			rel := routeFileRelFromDir(dirRel, fpath.name)
 			pattern := buildPattern(rel)
 			if seg := doubleBracketSegment(rel); seg != "" {
-				return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath)
+				return nil, nil, 0, fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath.path)
 			}
 			pageName := buildPageName(rel)
-			layout, err := resolveLayoutForRoute(appName, rel, layouts, layoutIndex)
+			data, err := os.ReadFile(fpath.path)
 			if err != nil {
-				return err
+				return nil, nil, 0, fmt.Errorf("error reading %s: %w", fpath.path, err)
 			}
-			data, err := os.ReadFile(fpath)
-			if err != nil {
-				return fmt.Errorf("error reading %s: %w", fpath, err)
-			}
-			baseName := strings.TrimSuffix(filepath.Base(fpath), ".dreego")
+			baseName := strings.TrimSuffix(fpath.name, ".dreego")
 			method := "GET"
 
-			file, raw, perr := parseRouteFile(gen, fpath, data)
+			file, raw, perr := parseRouteFile(gen, fpath.path, data)
 			if perr != nil {
-				return perr
+				return nil, nil, 0, perr
 			}
-			if err := registerGoImports(gen, p.key, fpath, file.GoImports); err != nil {
-				return err
+			if err := registerGoImports(gen, p.key, fpath.path, file.GoImports); err != nil {
+				return nil, nil, 0, err
 			}
 			for _, name := range hoistedDeclarationNames(file) {
 				if prev, dup := decls[name]; dup {
-					return serverDeclarationConflict(name, prev, fpath)
+					return nil, nil, 0, serverDeclarationConflict(name, prev, fpath.path)
 				}
-				decls[name] = fpath
+				decls[name] = fpath.path
+			}
+
+			layout, err := resolveRouteLayout(file, appName, rel, layouts, layoutIndex)
+			if err != nil {
+				return nil, nil, 0, err
 			}
 
 			if len(file.Server) == 0 {
@@ -140,13 +247,13 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 				if errCode == 404 {
 					catchKey := "GET" + " " + catchPattern
 					if prev, dup := routeSources[catchKey]; dup {
-						return fmt.Errorf("duplicate catch-all %s: %s and %s", catchPattern, prev, fpath)
+						return nil, nil, 0, fmt.Errorf("duplicate catch-all %s: %s and %s", catchPattern, prev, fpath.path)
 					}
-					routeSources[catchKey] = fpath
+					routeSources[catchKey] = fpath.path
 				}
 				s, reg, err := GenerateErrorHandler(gen, file, p.pkg, errCode, catchPattern, scopeHash)
 				if err != nil {
-					return fmt.Errorf("error generating error page %s: %w", fpath, err)
+					return nil, nil, 0, fmt.Errorf("error generating error page %s: %w", fpath.path, err)
 				}
 				src.WriteString(s)
 				regs = append(regs, reg)
@@ -160,15 +267,15 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 			for _, m := range fileRegisteredMethods(file) {
 				key := m + " " + pattern
 				if prev, dup := routeSources[key]; dup {
-					return fmt.Errorf("duplicate route %s %s: %s and %s", m, pattern, prev, fpath)
+					return nil, nil, 0, fmt.Errorf("duplicate route %s %s: %s and %s", m, pattern, prev, fpath.path)
 				}
-				routeSources[key] = fpath
+				routeSources[key] = fpath.path
 				routePatterns[key] = true
 			}
 
 			s, reg, err := GenerateMethodHandler(gen, file, layout, p.pkg, pageName, pattern, scopeHash)
 			if err != nil {
-				return fmt.Errorf("error generating %s: %w", fpath, err)
+				return nil, nil, 0, fmt.Errorf("error generating %s: %w", fpath.path, err)
 			}
 			src.WriteString(s)
 			regs = append(regs, reg)
@@ -187,10 +294,6 @@ func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[s
 		}
 		p.regs = append(p.regs, regs...)
 		found += len(regs)
-		return nil
-	})
-	if err != nil {
-		return nil, nil, 0, err
 	}
 
 	if found == 0 {

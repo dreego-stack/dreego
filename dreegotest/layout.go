@@ -11,8 +11,8 @@ const TestAppDir = "app"
 
 // websiteRootOf returns the website root implied by a test file path: for a
 // routes file it is the parent of the app directory; for a shared
-// components/layouts tree it is the containing directory (unless the path sits
-// under a routes/ tree, in which case it is route-local and has no root).
+// components/layouts/static tree it is the containing directory (unless the path
+// sits under a routes/ tree, in which case it is route-local and has no root).
 func websiteRootOf(path string) (string, bool) {
 	parts := strings.Split(path, "/")
 	seenRoutes := false
@@ -23,7 +23,7 @@ func websiteRootOf(path string) (string, bool) {
 				return strings.Join(parts[:i-1], "/"), true
 			}
 			seenRoutes = true
-		case "components", "layouts":
+		case "components", "layouts", "static":
 			if i >= 1 && !seenRoutes {
 				return strings.Join(parts[:i], "/"), true
 			}

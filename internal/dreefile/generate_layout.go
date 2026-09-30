@@ -50,7 +50,7 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 				continue
 			}
 			name := e.Name()
-			if name != "default.dreego" && name != "layout.dreego" {
+			if !strings.HasSuffix(name, ".dreego") {
 				continue
 			}
 			full := filepath.Join(path, name)
@@ -110,14 +110,25 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 }
 
 // layoutScopeKey classifies a layouts directory relative to the website root.
-// It returns "root" for the shared root layouts, "<app>" for an app layout, and
-// "<app>/<sub>" for a route-local layout.
+// It returns "root" for the shared root layouts, "<app>" for an app layout,
+// "<app>/<sub>" for an app route-local layout, and "root/<sub>" for a
+// route-local layout inside the shared root routes/ tree.
 func layoutScopeKey(root, dir string) (string, bool) {
 	rel := relToRoot(root, dir)
 	if rel == "layouts" {
 		return "root", true
 	}
 	parts := strings.Split(rel, "/")
+	if parts[0] == "routes" {
+		if len(parts) >= 2 && parts[len(parts)-1] == "layouts" {
+			sub := strings.Join(parts[1:len(parts)-1], "/")
+			if sub == "" {
+				return "root", true
+			}
+			return "root/" + sub, true
+		}
+		return "", false
+	}
 	if len(parts) == 2 && parts[1] == "layouts" {
 		return parts[0], true
 	}
@@ -128,11 +139,17 @@ func layoutScopeKey(root, dir string) (string, bool) {
 	return "", false
 }
 
+// detectAmbiguousLayouts rejects two default-ish layouts in one directory. A
+// directory may hold several explicitly named layouts alongside one default.
 func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
 	var ambiguous []string
 	byDir := map[string][]string{}
 	for _, e := range entries {
 		if e == nil {
+			continue
+		}
+		name := filepath.Base(e.source)
+		if name != "default.dreego" && name != "layout.dreego" {
 			continue
 		}
 		byDir[e.dir] = append(byDir[e.dir], e.source)
@@ -160,13 +177,20 @@ func layoutScopeRel(root, layoutsDir string) string {
 	return rel
 }
 
-// layoutFuncName names a layout renderer after its scope so several scopes can
-// coexist in the single generated layouts package. The shared root layout keeps
-// the plain name; every other scope is suffixed with its PascalCased key.
+// layoutFuncName names a layout renderer after its scope and file so several
+// layouts can coexist in the single generated layouts package. The default and
+// legacy files keep the plain scope-based name; a named layout file adds its
+// own PascalCased base name so an explicit LAYOUT path can select it.
 func layoutFuncName(scopeKey, fileName string) string {
 	base := "Layout"
-	if fileName == "default.dreego" {
+	switch fileName {
+	case "default.dreego":
 		base = "Default"
+	case "layout.dreego":
+		base = "Layout"
+	default:
+		stem := strings.TrimSuffix(fileName, ".dreego")
+		base = "Layout" + gogen.ToPascalCase(stem)
 	}
 	if scopeKey == "" || scopeKey == "root" {
 		return base
@@ -174,9 +198,27 @@ func layoutFuncName(scopeKey, fileName string) string {
 	return base + gogen.ToPascalCase(scopeKey)
 }
 
+// resolveRouteLayout picks the layout for a route. An explicit LAYOUT path wins
+// over the directory cascade; resolveLayoutForRoute then tries the route-local
+// scopes (deepest first), the app layout, and the shared root layout.
+func resolveRouteLayout(file *File, appName, routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
+	if file != nil && file.Layout != "" {
+		return resolveExplicitLayout(file, index)
+	}
+	return resolveLayoutForRoute(appName, routeRel, layouts, index)
+}
+
+func resolveExplicitLayout(file *File, index map[string]*layoutEntry) (*layoutEntry, error) {
+	entry, ok := index[normaliseLayoutPath(file.Layout)]
+	if !ok {
+		return nil, layoutChainMissingError(&layoutEntry{file: file, source: file.SourcePath}, file.Layout)
+	}
+	return resolveLayoutEntry(entry, index)
+}
+
 // resolveLayoutForRoute resolves the layout for one route of an app. It tries
-// route-local scopes (deepest first), then the app layout, then the shared root
-// layout.
+// the app's route-local scopes (deepest first), then a shared route-local scope
+// under the root routes/ tree, then the app layout, then the shared root layout.
 func resolveLayoutForRoute(appName, routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
 	routeRel = strings.TrimPrefix(routeRel, "/")
 	scopes := cascadeScopes(routeRel)
@@ -186,6 +228,14 @@ func resolveLayoutForRoute(appName, routeRel string, layouts, index map[string]*
 			key = appName + "/" + scope
 		}
 		if e := pickLayout(layouts, key); e != nil {
+			return resolveLayoutEntry(e, index)
+		}
+	}
+	for _, scope := range scopes {
+		if scope == "" {
+			continue
+		}
+		if e := pickLayout(layouts, "root/"+scope); e != nil {
 			return resolveLayoutEntry(e, index)
 		}
 	}
@@ -242,34 +292,28 @@ func cascadeScopes(routeRel string) []string {
 	return scopes
 }
 
-// generateLayouts emits the Go source for every layout scope. The caller writes
-// the surrounding package clause; all scopes share the single layouts package.
+// generateLayouts emits the Go source for every layout. The caller writes the
+// surrounding package clause; all scopes share the single layouts package.
 func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntry) ([]string, error) {
 	var srcs []string
 	gen.ImportKey = ""
 	gen.ImportKeySet = false
-	scopes := map[string]bool{}
-	for _, e := range layouts {
-		scopes[e.scopeKey] = true
-	}
-	scopeList := slices.Sorted(maps.Keys(scopes))
+	keys := slices.Sorted(maps.Keys(layouts))
 
-	for _, scope := range scopeList {
-		for _, name := range []string{"default.dreego", "layout.dreego"} {
-			e, ok := layouts[scope+":"+name]
-			if !ok {
-				continue
-			}
-			gen.Src = e.file.SourceContent
-			if err := registerGoImports(gen, "layouts", e.source, e.file.GoImports); err != nil {
-				return nil, err
-			}
-			src, err := GenerateLayout(gen, e.file, e.name)
-			if err != nil {
-				return nil, err
-			}
-			srcs = append(srcs, src)
+	for _, key := range keys {
+		e := layouts[key]
+		if e == nil {
+			continue
 		}
+		gen.Src = e.file.SourceContent
+		if err := registerGoImports(gen, "layouts", e.source, e.file.GoImports); err != nil {
+			return nil, err
+		}
+		src, err := GenerateLayout(gen, e.file, e.name)
+		if err != nil {
+			return nil, err
+		}
+		srcs = append(srcs, src)
 	}
 	return srcs, nil
 }

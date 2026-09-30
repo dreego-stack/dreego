@@ -17,6 +17,8 @@ func TestLayoutScopeKey(t *testing.T) {
 		{"app layouts", filepath.Join(root, "blog", "layouts"), "blog", true},
 		{"app routes layouts", filepath.Join(root, "www", "routes", "admin", "layouts"), "www/admin", true},
 		{"nested route layouts", filepath.Join(root, "www", "routes", "a", "b", "layouts"), "www/a/b", true},
+		{"shared routes layouts", filepath.Join(root, "routes", "admin", "layouts"), "root/admin", true},
+		{"shared routes root layouts", filepath.Join(root, "routes", "layouts"), "root", true},
 		{"unrelated dir", filepath.Join(root, "www", "components"), "", false},
 		{"layouts deeper", filepath.Join(root, "www", "x", "layouts", "y"), "", false},
 	}
@@ -42,6 +44,9 @@ func TestLayoutFuncName(t *testing.T) {
 		{"blog", "default.dreego", "DefaultBlog"},
 		{"www/admin", "default.dreego", "DefaultWwwAdmin"},
 		{"www/admin", "layout.dreego", "LayoutWwwAdmin"},
+		{"root", "admin.dreego", "LayoutAdmin"},
+		{"root/admin", "default.dreego", "DefaultRootAdmin"},
+		{"root/admin", "print.dreego", "LayoutPrintRootAdmin"},
 	}
 	for _, tc := range cases {
 		if got := layoutFuncName(tc.scopeKey, tc.file); got != tc.want {

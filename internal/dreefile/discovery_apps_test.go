@@ -97,13 +97,13 @@ func TestScanAppsSetsStaticAndConfigPaths(t *testing.T) {
 	}
 }
 
-func TestFindWebsiteRootsRejectsLegacyRoot(t *testing.T) {
+func TestFindWebsiteRootsAcceptsRootRoutesAsDefaults(t *testing.T) {
 	dir := t.TempDir()
 	mustWrite(t, filepath.Join(dir, configFileName), "{}")
 	mustWrite(t, filepath.Join(dir, "routes", "+page.dreego"), "<body>x</body>")
 	runFindRoots(t, dir, func(t *testing.T, err error) {
-		if err == nil {
-			t.Fatal("expected legacy layout error")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
 		}
 	})
 }
@@ -119,15 +119,26 @@ func TestFindWebsiteRootsAcceptsAppLayout(t *testing.T) {
 	})
 }
 
-func TestFindWebsiteRootsRejectsLegacyRootWithSecondRoot(t *testing.T) {
+func TestFindWebsiteRootsRootWithRoutesAndApp(t *testing.T) {
 	dir := t.TempDir()
 	mustWrite(t, filepath.Join(dir, configFileName), "{}")
-	mustWrite(t, filepath.Join(dir, "routes", "+page.dreego"), "<body>x</body>")
-	mustWrite(t, filepath.Join(dir, "other", configFileName), "{}")
-	mustWrite(t, filepath.Join(dir, "other", "www", "routes", "+page.dreego"), "<body>y</body>")
+	mustWrite(t, filepath.Join(dir, "routes", "+page.dreego"), "<body>shared</body>")
+	mustWrite(t, filepath.Join(dir, "www", "routes", "+page.dreego"), "<body>app</body>")
 	runFindRoots(t, dir, func(t *testing.T, err error) {
-		if err == nil {
-			t.Fatal("expected legacy layout error even with a second website root")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+}
+
+func TestFindWebsiteRootsNestedConfigIsAppNotRoot(t *testing.T) {
+	dir := t.TempDir()
+	mustWrite(t, filepath.Join(dir, configFileName), "{}")
+	mustWrite(t, filepath.Join(dir, "blog", configFileName), "{}")
+	mustWrite(t, filepath.Join(dir, "blog", "routes", "+page.dreego"), "<body>x</body>")
+	runFindRoots(t, dir, func(t *testing.T, err error) {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
 		}
 	})
 }
