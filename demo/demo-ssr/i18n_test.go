@@ -7,16 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"demo/www"
+	webapp "demo/dreego/www"
 	dreego "github.com/dreego-stack/dreego/core"
 )
 
 func TestPublicDemoSwitchesLanguageWithoutChangingRoute(t *testing.T) {
-	app := dreego.New()
+	app := dreego.New(webapp.App)
 	if err := configure(app); err != nil {
-		t.Fatal(err)
-	}
-	if err := www.Register(app); err != nil {
 		t.Fatal(err)
 	}
 	if err := registerLocaleSelection(app); err != nil {

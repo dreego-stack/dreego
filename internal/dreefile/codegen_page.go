@@ -13,7 +13,7 @@ import (
 func GenerateMethodHandler(gen *Generator, file *File, layout *layoutEntry, pkgName string, baseName string, pattern string, scopeHash string) (string, string, error) {
 	var l *codegen.Layout
 	if layout != nil {
-		l = &codegen.Layout{File: layout.file, Name: layout.name}
+		l = &codegen.Layout{File: layout.file, Name: layout.name, Pkg: layoutPkg(layout), ImportPath: layoutImportPath(gen.Module, ".", layout)}
 	}
 	if len(file.FormActions) > 0 {
 		return generateMethodHandler(gen, file, l, pkgName, baseName, pattern, scopeHash, map[string]bool{})

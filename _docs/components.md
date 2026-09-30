@@ -40,7 +40,7 @@ allowed outside the five root sections: `<server>`, `<head>`, `<body>`,
 `<style>`, and `<client>`. Free text, HTML, and root component calls fail.
 
 ```dreego
-COMPONENT "www/components" IMPORT { Card }
+COMPONENT "dreego/components" IMPORT { Card }
 
 <body><@Card title="Hello" /></body>
 ```
@@ -127,7 +127,7 @@ for the exact context rules and the `|raw` opt-in.
 
 1. **`DREEFILE component` line** — Header directive that declares the component; the name comes from the filename.
 2. **`<@Name>`** — Component call. `@` prefix distinguishes from HTML tags.
-3. **File-based Discovery** — `www/components/Card.dreego` → `<@Card>`.
+3. **File-based Discovery** — `dreego/components/Card.dreego` → `<@Card>`.
 4. **Scoped Styles** — `data-scope` per component. No leak to parent.
 5. **Self-closing** — `<@Icon name="star"/>` when no body.
 6. **Slots** — `{#slot}` in component template = child content.
@@ -241,7 +241,7 @@ DREEFILE component (title string)
 
 **Route:**
 ```html
-COMPONENT "www/components" IMPORT { Card }
+COMPONENT "dreego/components" IMPORT { Card }
 
 <body>
 <@Card title="Hi">

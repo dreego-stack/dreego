@@ -9,7 +9,7 @@ import (
 func TestBugExpressionCloseBraceInStringLiteral(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": "<server>\nname := \"}}\"\n</server>\n<body><p>{{ name == \"}}\" }}</p></body>",
+		"www/app/routes/+page.dreego": "<server>\nname := \"}}\"\n</server>\n<body><p>{{ name == \"}}\" }}</p></body>",
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], `name == "}}"`)
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], `name == "}}"`)
 }

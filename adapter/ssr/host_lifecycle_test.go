@@ -188,6 +188,67 @@ func TestHostSupportsRepeatedLifecycles(t *testing.T) {
 	}
 }
 
+// TestTwoAppsServeOnIndependentPorts mirrors the multi-app main.go shape: one
+// App and one Host per website app, each on its own address. This is the
+// deterministic counterpart to `go ssr.Listen(app, addr)` in generated mains.
+func TestTwoAppsServeOnIndependentPorts(t *testing.T) {
+	firstApp := dreego.New()
+	if err := firstApp.Register("GET", "/{$}", func(w http.ResponseWriter, _ *http.Request) {
+		io.WriteString(w, "first")
+	}); err != nil {
+		t.Fatal(err)
+	}
+	secondApp := dreego.New()
+	if err := secondApp.Register("GET", "/{$}", func(w http.ResponseWriter, _ *http.Request) {
+		io.WriteString(w, "second")
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	firstHost := New(firstApp)
+	secondHost := New(secondApp)
+	firstListener := listenLocal(t)
+	secondListener := listenLocal(t)
+	firstDone := make(chan error, 1)
+	secondDone := make(chan error, 1)
+	go func() { firstDone <- firstHost.Serve(firstListener) }()
+	go func() { secondDone <- secondHost.Serve(secondListener) }()
+	waitRunning(t, firstHost)
+	waitRunning(t, secondHost)
+
+	if body, err := http.Get("http://" + firstListener.Addr().String() + "/"); err != nil {
+		t.Fatal(err)
+	} else {
+		defer body.Body.Close()
+		data, _ := io.ReadAll(body.Body)
+		if string(data) != "first" {
+			t.Fatalf("first host body = %q, want %q", data, "first")
+		}
+	}
+	if body, err := http.Get("http://" + secondListener.Addr().String() + "/"); err != nil {
+		t.Fatal(err)
+	} else {
+		defer body.Body.Close()
+		data, _ := io.ReadAll(body.Body)
+		if string(data) != "second" {
+			t.Fatalf("second host body = %q, want %q", data, "second")
+		}
+	}
+
+	if err := firstHost.Shutdown(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := secondHost.Shutdown(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := <-firstDone; err != nil {
+		t.Fatal(err)
+	}
+	if err := <-secondDone; err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestSameAppCanUseIndependentHosts(t *testing.T) {
 	app := dreego.New()
 	first := New(app)

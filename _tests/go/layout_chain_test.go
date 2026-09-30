@@ -11,8 +11,8 @@ func TestLayoutChainMissingTargetFailsGenerate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/layouts/default.dreego":             "<body><html><body><nav>Base</nav>{#slot}</body></html></body>",
-		"www/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/missing.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
-		"www/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
+		"www/app/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/missing.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
+		"www/app/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -28,9 +28,9 @@ func TestLayoutChainMissingTargetFailsGenerate(t *testing.T) {
 func TestLayoutChainCycleFailsGenerate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/layouts/default.dreego":             "DREEFILE layout\n\nLAYOUT \"www/routes/admin/layouts/layout.dreego\"\n\n<body><html><body>{#slot}</body></html></body>",
-		"www/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
-		"www/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
+		"www/layouts/default.dreego":             "DREEFILE layout\n\nLAYOUT \"www/app/routes/admin/layouts/layout.dreego\"\n\n<body><html><body>{#slot}</body></html></body>",
+		"www/app/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
+		"www/app/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -47,15 +47,15 @@ func TestLayoutChainNestedFailsGenerate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/layouts/default.dreego":             "<body><html><body><nav>Base</nav>{#slot}</body></html></body>",
-		"www/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
-		"www/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
+		"www/app/routes/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><html><body><nav>Admin</nav>{#slot}</body></html></body>",
+		"www/app/routes/admin/+page.dreego":          "<body><p>Admin page</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("generate accepted a multi-level layout chain:\n%s", out)
 	}
 	for _, want := range []string{
-		"www/routes/admin/layouts/layout.dreego",
+		"www/app/routes/admin/layouts/layout.dreego",
 		"3:8",
 		"www/layouts/default.dreego",
 		"not implemented",
@@ -71,7 +71,7 @@ func TestLayoutWithoutDeclarationRenders(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
 		"www/layouts/default.dreego": "<body><html><body><nav>Base</nav>{#slot}</body></html></body>",
-		"www/routes/+page.dreego":    "<body><p>Home page</p></body>",
+		"www/app/routes/+page.dreego":    "<body><p>Home page</p></body>",
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

@@ -37,6 +37,7 @@ type PluginSettings struct {
 
 type Logging struct {
 	Enabled bool `json:"enabled"`
+	Present bool `json:"-"`
 }
 
 type I18n struct {
@@ -47,6 +48,35 @@ type I18n struct {
 	Detection     []string            `json:"detection"`
 	Domains       map[string]string   `json:"domains"`
 	Fallbacks     map[string][]string `json:"fallbacks"`
+	Present       bool                `json:"-"`
+}
+
+// UnmarshalJSON records which optional objects were present in the source so
+// MergeSettings can treat an omitted field as "inherit from the root" and an
+// explicit value as "override".
+func (s *Settings) UnmarshalJSON(data []byte) error {
+	type settingsAlias Settings
+	aux := struct {
+		*settingsAlias
+		Logging json.RawMessage `json:"logging"`
+		I18n    json.RawMessage `json:"i18n"`
+	}{settingsAlias: (*settingsAlias)(s)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if len(aux.Logging) > 0 {
+		if err := json.Unmarshal(aux.Logging, &s.Logging); err != nil {
+			return err
+		}
+		s.Logging.Present = true
+	}
+	if len(aux.I18n) > 0 {
+		if err := json.Unmarshal(aux.I18n, &s.I18n); err != nil {
+			return err
+		}
+		s.I18n.Present = true
+	}
+	return nil
 }
 
 func LoadConfig(path string) (*Settings, error) {
@@ -62,6 +92,36 @@ func LoadConfig(path string) (*Settings, error) {
 		return nil, fmt.Errorf("%w: %v", ErrInvalidI18n, err)
 	}
 	return &s, nil
+}
+
+// MergeSettings overlays an app's settings on the root defaults field by field.
+// A field that is present in the app config replaces the root value entirely;
+// there is no deep merge and no list concatenation. A nil app keeps the root
+// defaults; a nil root is replaced by the app.
+func MergeSettings(root, app *Settings) *Settings {
+	if root == nil {
+		return app
+	}
+	if app == nil {
+		return root
+	}
+	merged := *root
+	if app.Logging.Present {
+		merged.Logging = app.Logging
+	}
+	if app.Redirects != nil {
+		merged.Redirects = app.Redirects
+	}
+	if app.Rewrites != nil {
+		merged.Rewrites = app.Rewrites
+	}
+	if app.Plugins != nil {
+		merged.Plugins = app.Plugins
+	}
+	if app.I18n.Present {
+		merged.I18n = app.I18n
+	}
+	return &merged
 }
 
 func (i *I18n) validate() error {

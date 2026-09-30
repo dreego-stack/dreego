@@ -9,7 +9,7 @@ import (
 func TestContentTypeAcceptFallback(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     msg := "hello"
 </server>
 <server type="json">
@@ -25,7 +25,7 @@ func TestContentTypeAcceptFallback(t *testing.T) {
 func TestContentTypeAcceptJSON(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="json">
+		"www/app/routes/+page.dreego": `<server type="json">
     c.JSON(200, map[string]string{"ok": "true"})
 </server>`,
 	})
@@ -37,7 +37,7 @@ func TestContentTypeAcceptJSON(t *testing.T) {
 func TestContentTypeAcceptXML(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="xml">
+		"www/app/routes/+page.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
 </server>`,
@@ -50,7 +50,7 @@ func TestContentTypeAcceptXML(t *testing.T) {
 func TestContentTypeBindError(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server method="post" type="json">
+		"www/app/routes/+page.dreego": `<server method="post" type="json">
     var input map[string]any
     err := c.Bind(&input)
     if err != nil {
@@ -71,7 +71,7 @@ func TestContentTypeBindError(t *testing.T) {
 func TestContentTypeBindPost(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server method="post" type="json">
+		"www/app/routes/+page.dreego": `<server method="post" type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
@@ -90,58 +90,58 @@ func TestContentTypeBindPost(t *testing.T) {
 func TestContentTypeCustomBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="custom">
+		"www/app/routes/+page.dreego": `<server type="custom">
     msg := []byte("hello world")
     c.Write(200, "text/plain", msg)
 </server>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "text/plain")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.Write")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "text/plain")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.Write")
 }
 
 func TestContentTypeHTMLDefault(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     msg := "hello"
 </server>
 <body><h1>{{ msg }}</h1></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "text/html")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "b.WriteString")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "text/html")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "b.WriteString")
 }
 
 func TestContentTypeJSONAutoImports(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="json">
+		"www/app/routes/+page.dreego": `<server type="json">
     var input map[string]any
     c.Bind(&input)
     input["echo"] = true
     c.JSON(200, input)
 </server>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.Bind")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/json")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.JSON")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.Bind")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "application/json")
 }
 
 func TestContentTypeJSONBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="json">
+		"www/app/routes/+page.dreego": `<server type="json">
     user := map[string]string{"name": "Lukas"}
     c.JSON(200, user)
 </server>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/json")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "application/json")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.JSON")
 }
 
 func TestContentTypeJSONShared(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     msg := "Lukas"
 </server>
 
@@ -153,15 +153,15 @@ func TestContentTypeJSONShared(t *testing.T) {
     <h1>{{ msg }}</h1>
 </body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/json")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.JSON")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "Lukas")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "application/json")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.JSON")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "Lukas")
 }
 
 func TestContentTypeMultiTyped(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     name := "Lukas"
 </server>
 <server type="json">
@@ -184,11 +184,11 @@ func TestContentTypeMultiTyped(t *testing.T) {
 func TestContentTypeXMLBasic(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server type="xml">
+		"www/app/routes/+page.dreego": `<server type="xml">
     user := struct{XMLName struct{} ` + "`xml:\"user\"`" + `; Name string ` + "`xml:\"name\"`" + `}{Name: "Lukas"}
     c.XML(200, user)
 </server>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "application/xml")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "c.XML")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "application/xml")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "c.XML")
 }

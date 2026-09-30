@@ -15,7 +15,7 @@ func TestBugHeadDedupeCaseInsensitiveTitle(t *testing.T) {
     {#head}
 </head>
 <body><main>{#slot}</main></body>`,
-		"www/routes/+page.dreego": `<head><TITLE>Page</TITLE></head>
+		"www/app/routes/+page.dreego": `<head><TITLE>Page</TITLE></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -38,7 +38,7 @@ func TestBugHeadDedupeCaseInsensitiveMetaDescription(t *testing.T) {
     {#head}
 </head>
 <body><main>{#slot}</main></body>`,
-		"www/routes/+page.dreego": `<head><meta NAME="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><meta NAME="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -66,7 +66,7 @@ func TestBugBodyLevelHeadDedupeCaseInsensitive(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><TITLE>Page</TITLE><meta NAME="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><TITLE>Page</TITLE><meta NAME="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")

@@ -46,7 +46,10 @@ func serveSetup(t *testing.T, files map[string]string, setup string) *Client {
 		t.Fatalf("Serve: write go.mod: %v", err)
 	}
 	copyModuleSum(t, dir, repoRoot)
-	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/adapter/ssr\"\n)\nfunc main() { app := dreego.New(); %sif err := www.Register(app); err != nil { panic(err) }; if err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", setup)
+
+	appPkg := appPackagePath(files)
+	appName := appPackageName(files)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t\"os\"\n\t%q\n\tdreego \"github.com/dreego-stack/dreego/core\"\n\t\"github.com/dreego-stack/dreego/adapter/ssr\"\n)\nfunc main() { app := dreego.New(%s.App); %sif err := ssr.Listen(app, os.Getenv(\"DREEGO_TEST_ADDR\")); err != nil { panic(err) } }\n", "t/"+appPkg, appName, setup)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("Serve: write main.go: %v", err)
 	}

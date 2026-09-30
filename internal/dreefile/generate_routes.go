@@ -14,22 +14,20 @@ type routeDir struct {
 	regs []string
 }
 
-func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
-	rd := &routeDir{dir: filepath.Join(root, "routes"), pkg: "routes"}
+func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[string]*layoutEntry) ([]routeDir, map[string]bool, int, error) {
+	routesRoot := filepath.Join(root, "routes")
+	rd := &routeDir{dir: routesRoot, pkg: "routes"}
 	routePatterns := map[string]bool{}
 	found := 0
 	routeSources := map[string]string{}
 	declSources := map[string]string{}
 	needsHeadHelpers := false
 
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(routesRoot, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
 		if !d.IsDir() {
-			return nil
-		}
-		if !isRoutesDir(root, path) {
 			return nil
 		}
 		entries, err := os.ReadDir(path)
@@ -58,7 +56,7 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 				return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath)
 			}
 			pageName := buildPageName(rel)
-			layout, err := resolveLayoutForRoute(rel, layouts, layoutIndex)
+			layout, err := resolveLayoutForRoute(appName, rel, layouts, layoutIndex)
 			if err != nil {
 				return err
 			}
@@ -171,6 +169,14 @@ func routeFileRel(root, dir, name string) string {
 		return base
 	}
 	return filepath.ToSlash(filepath.Join(rel, base))
+}
+
+func routeDirRel(root, path string) string {
+	rel := relToRoot(root, path)
+	if rel == "routes" {
+		return ""
+	}
+	return strings.TrimPrefix(rel, "routes/")
 }
 
 func buildPageName(rel string) string {

@@ -36,8 +36,26 @@ func (f ComponentFunc) Render(ctx RenderContext) (Result, error) {
 type App = server.App
 type StaticAsset = server.StaticAsset
 
-func New() *App {
-	return server.New()
+// Registrar registers routes, static assets, and settings on an App. Generated
+// website packages export one Registrar per app (var App dreego.Registrar) so a
+// caller can build an App from it directly.
+type Registrar func(*App) error
+
+// New creates an App and applies every registrar in order. A registrar failure
+// panics: route, static, and configuration conflicts are already reported by
+// `dreego generate`, so a failing registrar cannot be produced by a correctly
+// generated app and indicates a programming error, not a runtime condition.
+func New(registrars ...Registrar) *App {
+	app := server.New()
+	for _, register := range registrars {
+		if register == nil {
+			continue
+		}
+		if err := register(app); err != nil {
+			panic(err)
+		}
+	}
+	return app
 }
 
 func NewSSR(w http.ResponseWriter, r *http.Request) *SSRContext {

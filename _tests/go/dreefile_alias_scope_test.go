@@ -12,9 +12,9 @@ func TestDreefileAliasResolvesAcrossFiles(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component (title string)
 <body><article><h2>{{ title }}</h2></article></body>`,
-		"www/routes/a.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
+		"www/app/routes/a.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
 <body><@ProductCard title="from a"/></body>`,
-		"www/routes/b.dreego": `<body><@ProductCard title="from b"/></body>`,
+		"www/app/routes/b.dreego": `<body><@ProductCard title="from b"/></body>`,
 	})
 	for _, tc := range []struct {
 		path string

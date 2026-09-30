@@ -6,15 +6,12 @@ import (
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
-	"importcheck/www"
+	webapp "importcheck/www/app"
 )
 
 func main() {
-	app := dreego.New()
+	app := dreego.New(webapp.App)
 	if err := app.SetCSP("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self'; base-uri 'self'; form-action 'self'"); err != nil {
-		log.Fatal(err)
-	}
-	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	addr := ":8080"

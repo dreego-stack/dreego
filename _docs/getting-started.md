@@ -40,8 +40,8 @@ cd myapp
 `dreego new` scaffolds a project from the `web-minimal` template:
 
 - writes `main.go`, `Taskfile.yml`, `.gitignore`
-- writes the `www/` tree: `routes/+page.dreego`, `layouts/default.dreego`,
-  and `dreego.config.json`
+- writes the `dreego/` tree: `www/routes/+page.dreego`,
+  `layouts/default.dreego`, and `dreego.config.json`
 - runs `go mod init` and `go mod tidy` against the published `dreego` module
   (resolved from the public Go proxy — no `replace` directive)
 
@@ -73,7 +73,7 @@ go run .            # builds and starts the server on :8080
 ```
 
 Open http://localhost:8080 in your browser. The page rendered is the one
-defined in `www/routes/+page.dreego`.
+defined in `dreego/www/routes/+page.dreego`.
 
 For day-to-day development:
 
@@ -102,16 +102,13 @@ import (
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
-	"myapp/www"
+	"myapp/dreego/www"
 )
 
 const port = "8080"
 
 func main() {
-	app := dreego.New()
-	if err := www.Register(app); err != nil {
-		log.Fatal(err)
-	}
+	app := dreego.New(www.App)
 	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
@@ -122,16 +119,27 @@ func main() {
 }
 ```
 
-`dreego.New()` returns an `*App` that owns route declarations, middleware, and
-session policy. `www.Register(app)` wires generated routes and components into
-the `App`. `ssr.Listen(app, addr)` creates the explicit HTTP host with secure
-timeout defaults. The listening port is a `const` in `main.go`, so there is one
-obvious place to change it; `DREEGO_PORT` overrides it at runtime for
-containers.
+`dreego.New(www.App)` returns an `*App` that owns route declarations,
+middleware, and session policy. `www.App` is the generated registrar of the
+`www` app package — `New` applies it and panics on a registration error, since
+route/static/config conflicts are already reported by `dreego generate`.
+`ssr.Listen(app, addr)` creates the explicit HTTP host with secure timeout
+defaults. The listening port is a `const` in `main.go`, so there is one obvious
+place to change it; `DREEGO_PORT` overrides it at runtime for containers.
+
+To serve several apps from one binary, register each registrar on its own App
+and listen on its own port:
+
+```go
+wwwApp := dreego.New(www.App)
+blogApp := dreego.New(blog.App)
+go ssr.Listen(wwwApp, ":8080")
+err := ssr.Listen(blogApp, ":8081")
+```
 
 ## Adding a Layout
 
-Create `www/layouts/default.dreego` — wraps all pages:
+Create `dreego/layouts/default.dreego` — shared by all apps, wraps all pages:
 
 ```html
 <head><title>My App</title></head>
@@ -149,7 +157,7 @@ Create `www/layouts/default.dreego` — wraps all pages:
 
 ## Creating a Component
 
-Create `www/components/Card.dreego`:
+Create `dreego/components/Card.dreego`:
 
 ```
 DREEFILE component (title string)
@@ -169,7 +177,7 @@ DREEFILE component (title string)
 Use it in any route or layout:
 
 ```html
-COMPONENT "www/components" IMPORT { Card }
+COMPONENT "dreego/components" IMPORT { Card }
 
 <body>
 <@Card title="Welcome">
@@ -184,7 +192,7 @@ before the root sections. The component name comes from its filename, so
 
 ## Dynamic Routes
 
-Create `www/routes/users/[id]/+page.dreego`:
+Create `dreego/www/routes/users/[id]/+page.dreego`:
 
 ```html
 <head><title>User {{ c.Param("id") }}</title></head>
@@ -209,7 +217,9 @@ Visiting `/users/42` shows "User: 42".
 | `go: go.mod requires ... but ...` | Your Go toolchain is older than 1.27. Upgrade. |
 | `dreego new: invalid project name "..."` | The name must be a valid Go module path segment (start with a letter; only letters, digits, `-`, `_`, `/`, `.`). |
 | `go mod tidy: ... unresolved dependency` | No network, or the CLI was built from an untagged checkout so the published tag is unknown. Set `DREEGO_LOCAL_REPO=/path/to/dreego` to point the scaffold at a local checkout. |
-| `dreego generate: no routes found` | Create at least `www/routes/+page.dreego` (the scaffold already does). |
+| `no website found: create a dreego.config.json file …` | The website root is missing. Scaffold with `dreego new` or add `dreego.config.json` plus an app (for example `dreego/www/routes/+page.dreego`). |
+| `website root … contains no apps: add an app directory with a routes/ tree` | The root has no app subdirectory with a `routes/` tree. Create at least `dreego/www/routes/+page.dreego`. |
+| `legacy website layout detected at …` | The root still has a top-level `routes/` tree from the old single-site layout. Move it under an app directory, for example `dreego/www/routes/`. |
 
 ## See Also
 

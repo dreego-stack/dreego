@@ -15,7 +15,7 @@ func TestBugComponentIfEach(t *testing.T) {
     <li>{{ item }}</li>
 {/each}
 </ul></body>`,
-		"www/routes/+page.dreego": `<server>items := []string{"a", "b"}</server>
+		"www/app/routes/+page.dreego": `<server>items := []string{"a", "b"}</server>
 <body><@List items={items}/></body>`,
 	})
 	dreegotest.MustNotContain(t, gen["www/components/dree.go"], "{#each")

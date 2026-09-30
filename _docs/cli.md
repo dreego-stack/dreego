@@ -8,7 +8,8 @@ dreego new <name> [-t <template>] [-l|--list]
 
 Scaffolds a new project from the `web-minimal` template in a new directory. It
 writes `main.go`, `Taskfile.yml`, `Dockerfile`, `docker-compose.yml`,
-`.gitignore`, and the `www/` tree, then runs `go mod init` and `go mod tidy`.
+`.gitignore`, and the `dreego/` tree — the website root with a `www` app, then
+runs `go mod init` and `go mod tidy`.
 
 - `-t <template>`, `--template <template>`: select a template; `web-minimal` is
   the default, and `web-app` is the other shipped template
@@ -34,7 +35,7 @@ to the Task installation page.
 dreego generate [--force] [--check]
 ```
 
-Transpiles `.dreego` files in the website root (any directory with a `dreego.config.json`) to Go code. Produces one `dree.go` per directory with sources, plus `dree.go` at the root (config + static assets + Register). Files are only written when content changes.
+Transpiles `.dreego` files in the website root (any directory with a `dreego.config.json`) to Go code. Shared `layouts/` and `components/` generate their own packages at the root; each app subdirectory with a `routes/` tree generates one `dree.go` per directory with sources, plus a `<app>/dree.go` exporting `var App dreego.Registrar`. Files are only written when content changes.
 
 - `--force`: Forces complete regeneration (ignores cache)
 - `--check`: CI mode — regenerates the expected output in memory and compares it byte-for-byte against the files on disk. No working-tree modification. Exits non-zero with a path-level diff (`missing:`, `extra:`, `stale:`) when any generated file (routes, components, layouts, static assets, config) is missing, extra, or stale. Timestamp manipulation cannot produce a false pass.

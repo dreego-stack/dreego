@@ -58,12 +58,13 @@ myapp/
 │   └── auth/
 │       └── auth.go  (exports Register and Options)
 └── dreego/
-    └── routes/
+    └── www/
+        └── routes/
 ```
 
 Then register the feature explicitly on the owning app:
 ```go
-app := dreego.New()
+app := dreego.New(www.App)
 if err := auth.Register(app, auth.Options{
 	LoginPath: "/login",
 }); err != nil {

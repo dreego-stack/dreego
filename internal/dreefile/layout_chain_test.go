@@ -8,10 +8,10 @@ import (
 
 func testLayoutEntry(source, declared string) *layoutEntry {
 	return &layoutEntry{
-		rel:    "",
-		source: source,
-		file:   &File{Layout: declared, SourcePath: source},
-		name:   "Layout",
+		scopeKey: "root",
+		source:   source,
+		file:     &File{Layout: declared, SourcePath: source},
+		name:     "Layout",
 	}
 }
 

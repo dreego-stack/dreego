@@ -7,19 +7,24 @@ writes in a real project. The integration tests in
 `_tests/go/reference_apps_test.go` copy a fixture into a temp dir, run the CLI,
 build the binary, start it, and assert on HTTP responses.
 
+Each fixture keeps the production shape: `www/` is the website root (it holds
+`dreego.config.json`) and `www/app/` is the app package the fixture's `main.go`
+imports.
+
 ## hello — Minimal usage
 
 `_tests/fixtures/hello/`
 
 Teaches the smallest possible Dreego app:
 
-- `www/routes/+page.dreego` — one route file per URL with method-specific sections
+- `www/app/routes/+page.dreego` — one route file per URL with method-specific sections
 - `<head>` with `<title>` and meta tags
 - `<server>` block with a local variable rendered via `{{ message }}`
-- `www/routes/about/+page.dreego` — nested directory route
-- `www/routes/users/[id]/+page.dreego` — dynamic segment with `c.Param("id")`
-- `www/routes/404.dreego` — custom not-found page
-- `main.go` — `dreego.New()` + `www.Register(app)` + `ssr.Listen(app, addr)`
+- `www/app/routes/about/+page.dreego` — nested directory route
+- `www/app/routes/users/[id]/+page.dreego` — dynamic segment with `c.Param("id")`
+- `www/app/routes/404.dreego` — custom not-found page
+- `main.go` — `dreego.New(www.App)` + `ssr.Listen(app, addr)`, importing the
+  generated app package `hello/www/app`
 
 Run it:
 
@@ -47,9 +52,10 @@ Teaches declarative form handling and session state:
 - hidden `csrf_token` field with `c.CSRFToken()` (CSRF is on by default)
 - `c.Redirect("/entries", 303)` Post-Redirect-Get
 - `{#if}` / `{#each}` template logic on the entries page
-- `c.SessionVal` / `c.SetSessionVal` in `www/routes/counter/` — a plain
+- `c.SessionVal` / `c.SetSessionVal` in `www/app/routes/counter/` — a plain
   POST route (no `g-action`) that increments a session counter
 - `main.go` — `dreego.NewCookieStore(secret)` + `app.SetSessionStore(store)`
+  on the App built with `dreego.New(www.App)`
 
 The guestbook stores entries in a package-level `entries` slice. This is demo
 state only — it is not a production pattern (no persistence, no locking).
@@ -74,14 +80,15 @@ go run .
 Teaches the component system:
 
 - `DREEFILE component (name string, price string, inStock bool)` in
-  `www/components/ProductCard.dreego` — typed props, `{#if inStock}` branch,
+  `www/components/ProductCard.dreego` (a shared, root-level component under the
+  `www/` website root) — typed props, `{#if inStock}` branch,
   scoped `<style>` (emits `data-scope=`)
 - `DREEFILE component (title string)` in `www/components/PageShell.dreego` —
   default slot `{#slot}` wrapping child content; the callable name comes from
   the filename
 - `<@ProductCard name={product.Name} .../>` — expression props from a Go struct
 - `{#each products as product}` — loop over a slice
-- `www/routes/products/[id]/+page.dreego` — dynamic route reusing the same
+- `www/app/routes/products/[id]/+page.dreego` — dynamic route reusing the same
   components
 
 Run it:
@@ -104,9 +111,9 @@ the owning App before the generated routes.
 
 - `plugin/plugin.go` — `Register(app *dreego.App, options Options) error` using
   `app.Register(http.MethodGet, ...)` with static and `{id}` patterns
-- `main.go` — `plugin.Register(app, plugin.Options{Prefix: "/plugin"})` before
-  `www.Register(app)`
-- `www/routes/+page.dreego` — the app's own home page
+- `main.go` — `app := dreego.New(www.App)` then
+  `plugin.Register(app, plugin.Options{Prefix: "/plugin"})`
+- `www/app/routes/+page.dreego` — the app's own home page
 
 Run it:
 

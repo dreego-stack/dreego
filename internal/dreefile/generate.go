@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"maps"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 
+	"github.com/dreego-stack/dreego/internal/dreefile/codegen"
 	transpileri18n "github.com/dreego-stack/dreego/internal/dreefile/i18n"
-	luainput "github.com/dreego-stack/dreego/internal/dreefile/sections/client/lua"
 )
 
 func Run(force bool) error {
@@ -63,7 +62,12 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 
 	files := map[string]string{}
 	var stats genStats
+	var rootDirs []string
 	for _, root := range roots {
+		if len(root.apps) == 0 {
+			return genPlan{}, genStats{}, fmt.Errorf("website root %s contains no apps: add an app directory with a routes/ tree (for example %s/www/routes/)", root.dir, root.dir)
+		}
+		rootDirs = append(rootDirs, root.dir)
 		rootFiles, rootStats, err := buildRootPlan(root, module)
 		if err != nil {
 			return genPlan{}, genStats{}, err
@@ -73,198 +77,144 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 		stats.components += rootStats.components
 		stats.static += rootStats.static
 	}
-	return genPlan{files: files, roots: roots}, stats, nil
+	return genPlan{files: files, roots: rootDirs}, stats, nil
 }
 
-func buildRootPlan(root, module string) (map[string]string, genStats, error) {
-	settings, err := loadSettings(root)
+// buildRootPlan generates the shared packages and every app package of one
+// website root. Shared layouts/ and components/ live directly in the root; each
+// app is a subdirectory with its own routes/ and static/ and becomes its own Go
+// package exporting `var App dreego.Registrar`.
+func buildRootPlan(root websiteRoot, module string) (map[string]string, genStats, error) {
+	gen := NewGenerator()
+	gen.Module = module
+	gen.RootRel = relToRoot(".", root.dir)
+	gen.Pkg = sanitizePkgName(root.name)
+
+	files := map[string]string{}
+
+	allLayouts, layoutIndex, err := discoverLayouts(root.dir)
 	if err != nil {
 		return nil, genStats{}, err
 	}
-	gen := NewGenerator()
-	gen.Module = module
-	gen.RootRel = relToRoot(".", root)
-	gen.Pkg = sanitizePkgName(filepath.Base(root))
-	var catalogs transpileri18n.Set
-	var generatedI18n string
-	if settings != nil && settings.I18n.Enabled {
-		catalogs, err = transpileri18n.Load(filepath.Join(root, "locales"), settings.I18n.Locales, settings.I18n.DefaultLocale)
+	gen.LayoutPkg = "layouts"
+	gen.LayoutImportPath = module + "/" + relToRoot(".", filepath.Join(root.dir, "layouts"))
+
+	rootSettings, err := loadSettings(root.dir)
+	if err != nil {
+		return nil, genStats{}, err
+	}
+	if err := validateUrlRules(rootSettings); err != nil {
+		return nil, genStats{}, err
+	}
+	if rootSettings != nil && rootSettings.I18n.Enabled {
+		rootCatalogs, err := transpileri18n.Load(filepath.Join(root.dir, "locales"), rootSettings.I18n.Locales, rootSettings.I18n.DefaultLocale)
 		if err != nil {
 			return nil, genStats{}, fmt.Errorf("i18n catalogs: %w", err)
 		}
-		gen.MessageArguments = transpileri18n.ArgumentKinds(catalogs)
-		generatedI18n = transpileri18n.GoConfig(catalogs, settings.I18n.Detection, settings.I18n.URLStrategy, settings.I18n.Domains, settings.I18n.Fallbacks)
+		gen.MessageArguments = transpileri18n.ArgumentKinds(rootCatalogs)
 	}
 
-	layouts, layoutIndex, err := discoverLayouts(root)
+	sharedComps, _, err := scanComponents(gen, root.dir)
 	if err != nil {
 		return nil, genStats{}, err
 	}
-
-	if err := collectComponentAliases(gen, root); err != nil {
+	moduleComps, err := loadModuleComponentsAcrossApps(gen, root.dir, root.apps)
+	if err != nil {
 		return nil, genStats{}, err
 	}
-
-	compSrcs, compPkgs, err := scanComponents(gen, root)
+	modulePkgs, err := generateComponentSources(gen, moduleComps)
 	if err != nil {
+		return nil, genStats{}, err
+	}
+	sharedComps = mergeComponentPackages(sharedComps, modulePkgs)
+	if err := collectComponentAliases(gen, root.dir, root.apps); err != nil {
 		return nil, genStats{}, err
 	}
 	if err := validateComponentAliases(gen); err != nil {
 		return nil, genStats{}, err
 	}
-
-	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, root, layouts, layoutIndex)
+	compCount, err := writeComponentPackages(files, gen, sharedComps)
 	if err != nil {
 		return nil, genStats{}, err
 	}
 
-	staticSrc, staticCount, err := generateStaticAssets(root, routePatterns)
-	if err != nil {
-		return nil, genStats{}, fmt.Errorf("static assets: %w", err)
+	rootLayoutPkg := layoutPackagesForScope(gen, allLayouts, "root")
+	if len(rootLayoutPkg.entries) > 0 {
+		layoutPkg := gen.Pkg
+		gen.Pkg = "layouts"
+		layoutSrcs, err := generateLayouts(gen, "layouts", rootLayoutPkg.entries)
+		if err != nil {
+			return nil, genStats{}, err
+		}
+		if len(layoutSrcs) > 0 {
+			imports := gen.Imports["layouts"]
+			importLine := buildImportLine(imports, "layouts")
+			stdImports := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
+			layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
+			layoutOut += strings.Join(layoutSrcs, "")
+			if layoutNeedsHeadHelpers(layoutSrcs) {
+				layoutOut += headMergeHelpers()
+			}
+			files[filepath.Join(root.dir, "layouts", "dree.go")] = layoutOut
+		}
+		gen.Pkg = layoutPkg
 	}
 
-	pluginSrc, pluginCount, err := generatePluginClientAssets(".", settings, routePatterns)
-	if err != nil {
+	var stats genStats
+	stats.components = compCount
+
+	if err := validateRootI18nUses(gen, root, rootSettings); err != nil {
 		return nil, genStats{}, err
 	}
-	staticSrc += pluginSrc
-	staticCount += pluginCount
-	files := map[string]string{}
 
-	for _, rd := range routeDirs {
-		imports := gen.Imports[rd.pkg]
-		importLine := buildImportLine(imports, rd.pkg)
-		stdImports := stdImportsFor(gen, rd.pkg, rd.src)
-		coreImport := "dreego \"github.com/dreego-stack/dreego/core\""
-		if strings.Contains(rd.src, "ssr.") {
-			coreImport += "\n\tssr \"github.com/dreego-stack/dreego/adapter/ssr\""
+	for _, app := range root.apps {
+		appGen := NewGenerator()
+		appGen.Module = module
+		appGen.RootRel = gen.RootRel
+		appGen.LayoutPkg = "layouts"
+		appGen.LayoutImportPath = gen.LayoutImportPath
+		appGen.Defs = maps.Clone(gen.Defs)
+		appGen.CompPkgs = maps.Clone(gen.CompPkgs)
+		appGen.CompPaths = maps.Clone(gen.CompPaths)
+		appGen.CompAliases = maps.Clone(gen.CompAliases)
+		appGen.Lua = maps.Clone(gen.Lua)
+		appGen.MessageArguments = gen.MessageArguments
+		appStats, err := buildAppPlan(files, appGen, root, app, allLayouts, layoutIndex)
+		if err != nil {
+			return nil, genStats{}, err
 		}
-		out := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\n\t%s\n)\n\n", rd.pkg, importLine, coreImport)
-		if stdImports != "" {
-			out = fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\t%s\n)\n\n", rd.pkg, stdImports, importLine, coreImport)
-		}
-		out += rd.src
-		out += "func Register(app *dreego.App) error {\n"
-		out += strings.Join(rd.regs, "")
-		out += "\treturn nil\n}\n"
-		files[filepath.Join(rd.dir, "dree.go")] = out
+		stats.routes += appStats.routes
+		stats.components += appStats.components
+		stats.static += appStats.static
 	}
 
-	if len(compSrcs) > 0 {
-		for pkgDir, srcs := range compSrcs {
-			rel := relToRoot(root, pkgDir)
-			pkg := sanitizePkgName(filepath.Base(pkgDir))
-			imports := gen.Imports[pkg]
-			importLine := buildImportLine(imports, pkg)
-			stdImports := stdImportsFor(gen, pkg, strings.Join(srcs, ""))
-			compOut := fmt.Sprintf("package %s\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", pkg, stdImports, importLine)
-			compOut += strings.Join(srcs, "")
-			files[filepath.Join(pkgDir, "dree.go")] = compOut
-			_ = rel
-		}
-	}
+	return files, stats, nil
+}
 
-	layoutPkg := gen.Pkg
-	gen.Pkg = "layouts"
-	layoutSrcs, err := generateLayouts(gen, root, layouts)
+// validateRootI18nUses checks message expressions collected from the shared
+// root components and layouts against the root i18n catalog.
+func validateRootI18nUses(gen *Generator, root websiteRoot, settings *Settings) error {
+	if len(gen.MessageUses) == 0 {
+		return nil
+	}
+	if settings == nil || !settings.I18n.Enabled {
+		return fmt.Errorf("i18n templates: enable i18n in %s before using message expressions", configFileName)
+	}
+	catalogs, err := transpileri18n.Load(filepath.Join(root.dir, "locales"), settings.I18n.Locales, settings.I18n.DefaultLocale)
 	if err != nil {
-		return nil, genStats{}, err
+		return fmt.Errorf("i18n catalogs: %w", err)
 	}
-	if len(layoutSrcs) > 0 {
-		layoutDir := filepath.Join(root, "layouts")
-		imports := gen.Imports["layouts"]
-		importLine := buildImportLine(imports, "layouts")
-		stdImports := stdImportsFor(gen, "layouts", strings.Join(layoutSrcs, ""))
-		layoutOut := fmt.Sprintf("package layouts\n\nimport (\n\t%s\n\t%s\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n", stdImports, importLine)
-		layoutOut += strings.Join(layoutSrcs, "")
-		if layoutNeedsHeadHelpers(layoutSrcs) {
-			layoutOut += headMergeHelpers()
-		}
-		files[filepath.Join(layoutDir, "dree.go")] = layoutOut
+	if err := transpileri18n.ValidateUses(catalogs, toI18nUses(gen.MessageUses)); err != nil {
+		return fmt.Errorf("i18n templates: %w", err)
 	}
-	gen.Pkg = layoutPkg
-
-	if settings != nil && settings.I18n.Enabled {
-		uses := make([]transpileri18n.Use, 0, len(gen.MessageUses))
-		for _, use := range gen.MessageUses {
-			uses = append(uses, transpileri18n.Use{Key: use.Key, Arguments: use.Arguments})
-		}
-		if err := transpileri18n.ValidateUses(catalogs, uses); err != nil {
-			return nil, genStats{}, fmt.Errorf("i18n templates: %w", err)
-		}
-	} else if len(gen.MessageUses) > 0 {
-		return nil, genStats{}, fmt.Errorf("i18n templates: enable i18n in %s before using message expressions", configFileName)
-	}
-
-	if runtime := luainput.BundleFeatures(gen.Lua); runtime != "" {
-		path := "/_dreego/lua.js"
-		if routePatterns["GET "+path] {
-			return nil, genStats{}, fmt.Errorf("generated Lua runtime conflicts with route %q", path)
-		}
-		staticSrc += registrationStatement(fmt.Sprintf("app.RegisterStatic(%q, %q, []byte(%q))", path, "text/javascript; charset=utf-8", runtime))
-		staticCount++
-	}
-
-	rootOut := buildRootFile(root, module, routeDirs, staticSrc, settings, generatedI18n)
-	files[filepath.Join(root, "dree.go")] = rootOut
-
-	return files, genStats{routes: routeCount, components: len(compPkgs), static: staticCount}, nil
+	return nil
 }
 
-func layoutNeedsHeadHelpers(srcs []string) bool {
-	return strings.Contains(strings.Join(srcs, ""), "dedupeLayoutHead(")
+func toI18nUses(uses []codegen.MessageUse) []transpileri18n.Use {
+	out := make([]transpileri18n.Use, 0, len(uses))
+	for _, use := range uses {
+		out = append(out, transpileri18n.Use{Key: use.Key, Arguments: use.Arguments})
+	}
+	return out
 }
 
-func buildImportLine(imports map[string]string, selfPkg string) string {
-	if len(imports) == 0 {
-		return ""
-	}
-	var lines []string
-	for alias, path := range imports {
-		if alias == selfPkg {
-			lines = append(lines, fmt.Sprintf("%q", path))
-		} else {
-			lines = append(lines, fmt.Sprintf("%s %q", alias, path))
-		}
-	}
-	sort.Strings(lines)
-	return strings.Join(lines, "\n\t")
-}
-
-func buildRootFile(root, module string, routeDirs []routeDir, staticSrc string, settings *Settings, i18nConfig ...string) string {
-	pkg := sanitizePkgName(filepath.Base(root))
-	var imports []string
-	var regCalls []string
-	for _, rd := range routeDirs {
-		imports = append(imports, fmt.Sprintf("%s %q", rd.pkg, module+"/"+relToRoot(".", root)+"/"+relToRoot(root, rd.dir)))
-		regCalls = append(regCalls, fmt.Sprintf("\tif err := %s.Register(app); err != nil {\n\t\treturn err\n\t}\n", rd.pkg))
-	}
-	importLine := strings.Join(imports, "\n\t")
-
-	var b strings.Builder
-	b.WriteString(fmt.Sprintf("package %s\n\n", pkg))
-	if len(imports) > 0 {
-		b.WriteString("import (\n\t" + importLine + "\n\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n")
-	} else {
-		b.WriteString("import (\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\n\n")
-	}
-	b.WriteString("func Register(app *dreego.App) error {\n")
-	if settings != nil {
-		b.WriteString(registrationStatement(fmt.Sprintf("app.SetLogging(%t)", settings.Logging.Enabled)))
-		for _, rd := range settings.Redirects {
-			b.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRedirect(%q, %q, %d)", rd.From, rd.To, rd.Status)))
-		}
-		for _, rw := range settings.Rewrites {
-			b.WriteString(registrationStatement(fmt.Sprintf("app.RegisterRewrite(%q, %q)", rw.From, rw.To)))
-		}
-		if len(i18nConfig) > 0 && i18nConfig[0] != "" {
-			b.WriteString(registrationStatement("app.SetI18n(" + i18nConfig[0] + ")"))
-		}
-	}
-	b.WriteString(staticSrc)
-	for _, call := range regCalls {
-		b.WriteString(call)
-	}
-	b.WriteString("\treturn nil\n}\n")
-	return b.String()
-}

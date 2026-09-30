@@ -26,9 +26,9 @@ func TestParityCLIAndDreegotestGenerate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			gen := dreegotest.Build(t, map[string]string{
-				"www/routes/+page.dreego": src,
+				"www/app/routes/+page.dreego": src,
 			})
-			cliOut := gen["www/routes/dree.go"]
+			cliOut := gen["www/app/routes/dree.go"]
 			dgtOut := dreegotest.Generate(t, src)
 			if dgtOut == "" {
 				t.Fatal("dreegotest.Generate returned empty output")
@@ -56,6 +56,7 @@ func TestParityCLIAndDreegotestGenerateComponent(t *testing.T) {
 			t.Parallel()
 			gen := dreegotest.Build(t, map[string]string{
 				"www/components/" + name + ".dreego": src,
+				"www/app/routes/+page.dreego":        `<body><p>parity</p></body>`,
 			})
 			cliOut := gen["www/components/dree.go"]
 			dgtOut := dreegotest.GenerateComponent(t, name, src)

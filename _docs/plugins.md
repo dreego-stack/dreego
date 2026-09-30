@@ -36,7 +36,7 @@ func Register(app *dreego.App, options Options) error {
 The application calls it before the App is built:
 
 ```go
-app := dreego.New()
+app := dreego.New(www.App)
 if err := auth.Register(app, auth.Options{
     LoginPath:  "/login",
     CookieName: "session",

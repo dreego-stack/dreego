@@ -54,17 +54,16 @@ contracts, routes, components, and shared context capabilities. An adapter is
 selected explicitly:
 
 ```go
-app := dreego.New()
-if err := www.Register(app); err != nil {
-    log.Fatal(err)
-}
-if err := ssr.Run(app, ssr.Options{Address: ":8080"}); err != nil {
-    log.Fatal(err)
+app := dreego.New(www.App)
+if err := ssr.Listen(app, ":8080"); err != nil {
+	log.Fatal(err)
 }
 ```
 
 The exact API is decided by the render-foundation implementation. This example
-must not be copied into released documentation before it compiles.
+must not be copied into released documentation before it compiles. `www.App` is
+the per-app registrar generated for a website root with an app named `www`; see
+[One website root with multiple apps](../_docs/decisions/multi-app-website-root.md).
 
 ## Adapter model
 

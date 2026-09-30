@@ -11,6 +11,6 @@ func TestBugStraySlotClose(t *testing.T) {
 	dreegotest.MustBuildFail(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component ()
 <body><article>{#slot header}</article></body>`,
-		"www/routes/+page.dreego": `<body><@Card>{/slot}</@Card></body>`,
+		"www/app/routes/+page.dreego": `<body><@Card>{/slot}</@Card></body>`,
 	})
 }

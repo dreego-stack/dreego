@@ -12,7 +12,7 @@ import (
 func TestBugFilterRawInAttributeContext(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>webcal := "webcal://example.com/feed.ics"</server>
+		"www/app/routes/+page.dreego": `<server>webcal := "webcal://example.com/feed.ics"</server>
 <body><a href="{{ webcal|raw }}">subscribe</a></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -24,7 +24,7 @@ func TestBugFilterRawInAttributeContext(t *testing.T) {
 func TestBugFilterContextParity(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>v := "MiXeD"</server>
+		"www/app/routes/+page.dreego": `<server>v := "MiXeD"</server>
 <body>
 <p id="t">{{ v|upper }}</p>
 <a id="a" title="{{ v|upper }}" href="{{ v|upper }}">x</a>
@@ -50,7 +50,7 @@ func TestBugFilterRawInComponentAttribute(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Subscribe.dreego": `DREEFILE component (feed string)
 <body><a href="{{ feed|raw }}">component subscribe</a></body>`,
-		"www/routes/+page.dreego": `<server>feed := "webcal://example.com/c.ics"</server>
+		"www/app/routes/+page.dreego": `<server>feed := "webcal://example.com/c.ics"</server>
 <body><@Subscribe feed={feed}/></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -64,7 +64,7 @@ func TestBugComponentFilterContextParity(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Badge.dreego": `DREEFILE component (label string, url string)
 <body><span title="{{ label|upper }}">{{ label|upper }}</span><a href="{{ url|raw }}">go</a></body>`,
-		"www/routes/+page.dreego": `<server>label := "ready"; url := "webcal://example.com/c.ics"</server>
+		"www/app/routes/+page.dreego": `<server>label := "ready"; url := "webcal://example.com/c.ics"</server>
 <body><@Badge label={label} url={url}/></body>`,
 	})
 	_, body := c.Get(t, "/")

@@ -11,7 +11,7 @@ func TestBugComponentScriptBodyLiteral(t *testing.T) {
 	gen := dreegotest.Build(t, map[string]string{
 		"www/components/Snippet.dreego": `DREEFILE component (x string)
 <body><script>const s = "literal {x}";</script></body>`,
-		"www/routes/+page.dreego": `<body><@Snippet x=42/></body>`,
+		"www/app/routes/+page.dreego": `<body><@Snippet x=42/></body>`,
 	})
 	dreegotest.MustContain(t, gen["www/components/dree.go"], "literal {x}")
 }

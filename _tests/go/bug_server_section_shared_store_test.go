@@ -12,7 +12,7 @@ import (
 func TestBugServerSectionSharedStoreCompiles(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { sync }
+		"www/app/routes/+page.dreego": `GOIMPORT { sync }
 
 <server>
 type Store struct {
@@ -29,7 +29,7 @@ func (s *Store) Add(item string) {
 }
 </server>
 <body><p>{{ len(store.items) }}</p></body>`,
-		"www/routes/add.dreego": `<server>
+		"www/app/routes/add.dreego": `<server>
 store.Add("x")
 </server>
 <body><p>{{ len(store.items) }}</p></body>`,
@@ -40,7 +40,7 @@ store.Add("x")
 func TestBugServerSectionRequestLocalVarStaysLocal(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 count := 3
 var product string
 product = "mug"

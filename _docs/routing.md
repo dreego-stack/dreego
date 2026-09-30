@@ -7,12 +7,13 @@
 > A route file may state its kind explicitly with the `DREEFILE page` header
 > directive; a missing `DREEFILE` line also means page.
 
-Route discovery is restricted to the website root's `routes/` tree. The
-website root is any directory containing `dreego.config.json`. Directories
-named `routes` outside a website root (e.g. `vendor/…/www/routes`,
-`node_modules/…/www/routes`, `subapp/www/routes`) are ignored.
+Route discovery is restricted to each app's `routes/` tree. A website root is
+any directory containing `dreego.config.json`; each immediate subdirectory with
+a `routes/` tree is an app. Directories named `routes` outside an app (e.g.
+`vendor/…/www/routes`, `node_modules/…/www/routes`, `subapp/www/routes`) are
+ignored.
 
-Directories below `www/routes/` define the URL path. `+page.dreego` and
+Directories below a `routes/` tree define the URL path. `+page.dreego` and
 `index.dreego` define the URL of the directory itself. A different `.dreego`
 filename defines the final static path segment. A directory containing both
 index filenames is rejected as a duplicate route.
@@ -20,22 +21,26 @@ index filenames is rejected as a duplicate route.
 ## Directory Structure
 
 ```
-www/routes/
-├── +page.dreego                 → GET /
-├── 404.dreego                  → GET /* (catch-all)
-├── 500.dreego                  → Panic → 500
-├── about/
-│   └── +page.dreego             → GET /about
-├── users/
-│   ├── 404.dreego              → GET /users/* (catch-all)
-│   └── [id]/
-│       └── +page.dreego         → GET /users/{id}
-├── blog/
-│   └── [...catchall]/
-│       └── +page.dreego         → GET /blog/{catchall...}
-└── (group)/
-    └── demo/
-        └── +page.dreego         → GET /demo  (group ignored)
+dreego/                     # website root (marker: dreego.config.json)
+├── layouts/               # optional, shared by all apps
+├── components/            # optional, shared by all apps
+└── www/                   # app "www"
+    └── routes/
+        ├── +page.dreego                 → GET /
+        ├── 404.dreego                  → GET /* (catch-all)
+        ├── 500.dreego                  → Panic → 500
+        ├── about/
+        │   └── +page.dreego             → GET /about
+        ├── users/
+        │   ├── 404.dreego              → GET /users/* (catch-all)
+        │   └── [id]/
+        │       └── +page.dreego         → GET /users/{id}
+        ├── blog/
+        │   └── [...catchall]/
+        │       └── +page.dreego         → GET /blog/{catchall...}
+        └── (group)/
+            └── demo/
+                └── +page.dreego         → GET /demo  (group ignored)
 ```
 
 ## Dynamic Segments

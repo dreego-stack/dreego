@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"demo/blog"
-	luaDemo "demo/lua"
-	"demo/saas"
-	"demo/www"
 	dreego "github.com/dreego-stack/dreego/core"
+	"demo/dreego/blog"
+	luaDemo "demo/dreego/lua"
+	"demo/dreego/saas"
+	"demo/dreego/www"
 )
 
 func main() {
@@ -21,38 +21,18 @@ func main() {
 }
 
 func run() error {
-	public := dreego.New()
-	if err := configure(public); err != nil {
-		return err
-	}
-	if err := www.Register(public); err != nil {
-		return err
-	}
-	if err := registerLocaleSelection(public); err != nil {
-		return err
-	}
+	public := dreego.New(www.App)
+	product := dreego.New(saas.App)
+	blogApp := dreego.New(blog.App)
+	luaApp := dreego.New(luaDemo.App)
 
-	product := dreego.New()
-	if err := configure(product); err != nil {
-		return err
-	}
-	if err := saas.Register(product); err != nil {
-		return err
-	}
-
-	blogApp := dreego.New()
-	if err := configure(blogApp); err != nil {
-		return err
-	}
-	if err := blog.Register(blogApp); err != nil {
-		return err
-	}
-
-	luaApp := dreego.New()
-	if err := configure(luaApp); err != nil {
-		return err
-	}
-	if err := luaDemo.Register(luaApp); err != nil {
+	if err := errors.Join(
+		configure(public),
+		configure(product),
+		configure(blogApp),
+		configure(luaApp),
+		registerLocaleSelection(public),
+	); err != nil {
 		return err
 	}
 
@@ -71,9 +51,7 @@ func registerLocaleSelection(app *dreego.App) error {
 }
 
 func configure(app *dreego.App) error {
-	return errors.Join(
-		app.SetCSP("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self'; base-uri 'self'; form-action 'self'"),
-	)
+	return app.SetCSP("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self'; base-uri 'self'; form-action 'self'")
 }
 
 func hostRouter(public, product, blog, lua http.Handler) http.Handler {

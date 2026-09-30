@@ -21,8 +21,9 @@ the matching head and body templates.
 
 ## Scope
 
-All route files under `www/routes` compile into **one Go package** (`routes`).
-A `<server>` section is split at generation time:
+All route files under one app's `routes/` tree (for example
+`dreego/www/routes/`) compile into **one Go package** (`routes`). A `<server>`
+section is split at generation time:
 
 - The **leading declaration block** — `type`, `func`, `var`, and `const`
   declarations at the top of the section, plus any top-level `func` — is emitted

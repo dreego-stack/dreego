@@ -111,8 +111,20 @@ func GenTempl(gen *codegen.State, file *ir.File, layout *codegen.Layout, scopeHa
 		buf.WriteString("\tb.Reset()\n")
 		buf.WriteString("\tc.Set(\"slot\", pageContent)\n")
 
-		layoutPkg := "layouts"
-		layoutPath := gen.Module + "/" + gen.RootRel + "/layouts"
+		layoutPkg := layout.Pkg
+		if layoutPkg == "" {
+			layoutPkg = gen.LayoutPkg
+		}
+		if layoutPkg == "" {
+			layoutPkg = "layouts"
+		}
+		layoutPath := layout.ImportPath
+		if layoutPath == "" {
+			layoutPath = gen.LayoutImportPath
+		}
+		if layoutPath == "" {
+			layoutPath = gen.Module + "/" + gen.RootRel + "/layouts"
+		}
 		gen.AddImport(gen.Pkg, layoutPkg, layoutPath)
 		buf.WriteString(fmt.Sprintf("\thtml, err := %s.%s(c, pageContent, head)\n", layoutPkg, layout.Name))
 		buf.WriteString("\tif err != nil { return \"\", err }\n")

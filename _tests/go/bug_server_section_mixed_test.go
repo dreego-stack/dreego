@@ -12,14 +12,14 @@ import (
 func TestBugServerSectionMixedDeclarationsAndStatements(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 type T struct{ V int }
 func (t T) Get() int { return t.V }
 x := T{V: 5}
 </server>
 <body>{{ x.Get() }}</body>`,
 	})
-	out := gen["www/routes/dree.go"]
+	out := gen["www/app/routes/dree.go"]
 	dreegotest.MustContain(t, out, "type T struct")
 	dreegotest.MustContain(t, out, "func (t T) Get() int")
 }
@@ -28,7 +28,7 @@ x := T{V: 5}
 func TestBugServerSectionFuncPlusStatements(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 func helperA() int { return 41 }
 n := helperA() + 1
 </server>
@@ -40,7 +40,7 @@ n := helperA() + 1
 func TestBugServerSectionFormActionMixed(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 type F struct { A string ` + "`form:\"a\" validate:\"required\"`" + ` }
 func Act(c dreego.Context, f F) error { return c.Redirect("/", 303) }
 derived := "computed"
@@ -57,16 +57,16 @@ derived := "computed"
 func TestBugServerSectionDeclarationsSharedAcrossRoutes(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 type Item struct{ Name string }
 </server>
 <body>{{ (Item{Name: "a"}).Name }}</body>`,
-		"www/routes/other.dreego": `<server>
+		"www/app/routes/other.dreego": `<server>
 item := Item{Name: "b"}
 </server>
 <body>{{ item.Name }}</body>`,
 	})
-	out := gen["www/routes/dree.go"]
+	out := gen["www/app/routes/dree.go"]
 	if strings.Count(out, "type Item struct") != 1 {
 		t.Fatalf("shared declaration must be emitted exactly once, got:\n%s", out)
 	}
@@ -77,11 +77,11 @@ item := Item{Name: "b"}
 func TestBugServerSectionDuplicateDeclarationDiagnostic(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 type Product struct{ Name string }
 </server>
 <body>{{ (Product{Name: "a"}).Name }}</body>`,
-		"www/routes/other.dreego": `<server>
+		"www/app/routes/other.dreego": `<server>
 type Product struct{ Name string }
 </server>
 <body>{{ (Product{Name: "b"}).Name }}</body>`,
@@ -101,7 +101,7 @@ type Product struct{ Name string }
 func TestBugServerSectionStatementsOnlyStillCompiles(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 msg := "hello"
 </server>
 <body>{{ msg }}</body>`,

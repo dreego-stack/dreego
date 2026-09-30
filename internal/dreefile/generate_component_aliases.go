@@ -8,12 +8,26 @@ import (
 	"strings"
 )
 
-func collectComponentAliases(gen *Generator, root string) error {
+// collectComponentAliases registers aliases for one scope. When apps is
+// non-nil, subdirectories that are apps are skipped, so the shared root pass
+// does not register aliases that point at app-local components (which live in
+// another scope and are only known to that app).
+func collectComponentAliases(gen *Generator, root string, apps []appEntry) error {
+	appDirs := map[string]bool{}
+	for _, app := range apps {
+		appDirs[filepath.Clean(app.dir)] = true
+	}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
-		if d.IsDir() || !strings.HasSuffix(path, ".dreego") {
+		if d.IsDir() {
+			if appDirs[filepath.Clean(path)] {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".dreego") {
 			return nil
 		}
 		data, readErr := os.ReadFile(path)

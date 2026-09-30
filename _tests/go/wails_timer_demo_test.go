@@ -13,21 +13,21 @@ func TestWailsTimerDemoGeneratesAccessibleDocument(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RepoRoot: %v", err)
 	}
-	source, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "routes", "+page.dreego"))
+	source, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "web", "routes", "+page.dreego"))
 	if err != nil {
 		t.Fatalf("read timer demo: %v", err)
 	}
-	about, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "routes", "about", "+page.dreego"))
+	about, err := os.ReadFile(filepath.Join(repoRoot, "demo", "demo-wailsv3", "app", "web", "routes", "about", "+page.dreego"))
 	if err != nil {
 		t.Fatalf("read timer about page: %v", err)
 	}
 	files := map[string]string{
-		"www/routes/+page.dreego":       string(source),
-		"www/routes/about/+page.dreego": string(about),
+		"www/app/routes/+page.dreego":       string(source),
+		"www/app/routes/about/+page.dreego": string(about),
 	}
 	generated := dreegotest.Build(t, files)
-	routes := generated["www/routes/dree.go"]
-	regenerated := dreegotest.Build(t, files)["www/routes/dree.go"]
+	routes := generated["www/app/routes/dree.go"]
+	regenerated := dreegotest.Build(t, files)["www/app/routes/dree.go"]
 	if routes != regenerated {
 		t.Fatal("restart-based generation produced different route output")
 	}

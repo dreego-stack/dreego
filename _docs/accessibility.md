@@ -27,14 +27,14 @@ Limits: the checker scans static markup in `.dreego` templates. Dynamically comp
 Two scaffolds ship today: `web-minimal` (the default) and `web-app`.
 
 `web-minimal` ships a minimal accessible layout in
-`www/layouts/default.dreego`:
+`dreego/layouts/default.dreego`:
 
 - `<html lang="en">`, a UTF-8 charset, and a viewport meta tag.
 - A skip link (`<a href="#main">skip to content</a>`) that is visually hidden
   until focused, and a `<main id="main">` landmark around `{#slot}`.
 - A visible focus style: `:focus-visible { outline: 3px solid #1d4ed8; }`.
 
-The route in `www/routes/+page.dreego` stays intentionally small: one `<h1>`,
+The route in `dreego/www/routes/+page.dreego` stays intentionally small: one `<h1>`,
 one paragraph, and a `:focus-visible` outline. It has no navigation, form
 controls, or images, so it is a starting point rather than a complete
 accessible application shell. Add the landmarks, labels, and alternatives your
@@ -54,7 +54,7 @@ applications still verify their own content.
 
 - Descriptive headings and links, short navigable sections, copyable commands.
 - Test counts are described by layout, not by unstable numbers.
-- Examples use the explicit `App` API (`app := dreego.New(); www.Register(app)`).
+- Examples use the explicit `App` API (`app := dreego.New(www.App)`).
 
 ## Manual Verification
 

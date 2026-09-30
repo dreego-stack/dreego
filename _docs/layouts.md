@@ -1,7 +1,7 @@
 # Layouts
 
 Layouts are shared shells rendered around route content. A layout lives in a
-`layouts` directory inside the project root and uses two special placeholders:
+`layouts` directory at the website root and uses two special placeholders:
 
 - `{#slot}` — where the route content is injected.
 - `{#head}` — where the route's `<head>` markup is merged.
@@ -15,9 +15,13 @@ and nested applications, are ignored.
 A layout file is named `default.dreego` (or the legacy `layout.dreego`). Layouts
 resolve per route by a route-local cascade:
 
-1. The route's own scope (e.g. `www/routes/blog/layouts/default.dreego` for
-   `www/routes/blog/…`).
-2. Each parent route scope up to the root (`www/layouts/default.dreego`).
+1. The route's own scope (e.g. `dreego/www/routes/blog/layouts/default.dreego`
+   for `dreego/www/routes/blog/…`).
+2. Each parent route scope up to the app root.
+3. The app's own `layouts/` directory (`dreego/www/layouts/default.dreego`),
+   which overrides the shared layout for that app.
+4. The shared website-root `layouts/` directory
+   (`dreego/layouts/default.dreego`).
 
 The first matching layout in the cascade wins. Only one layout file per scope
 is allowed: `default.dreego` and `layout.dreego` in the same `layouts`
@@ -28,10 +32,10 @@ diagnostic naming both files.
 
 A layout file may declare its kind explicitly with the `DREEFILE layout` header
 directive. The declaration is optional; layouts are still resolved by the
-directory cascade described above, and layout files keep living under
-`www/layouts`.
+directory cascade described above, and layout files keep living under the
+website root's `layouts/` (or an app's own `layouts/`).
 
-**`www/layouts/default.dreego`:**
+**`dreego/layouts/default.dreego`:**
 
 ```html
 DREEFILE layout

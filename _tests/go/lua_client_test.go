@@ -29,14 +29,14 @@ print(status.textContent)
 
 func TestLuaGenerateBuildsOneFeatureLinkedRuntimeAsset(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<body></body><client lang="lua">print("ready")</client>`,
-		"www/routes/about.dreego": `<body></body><client lang="lua">local title = "About"</client>`,
+		"www/app/routes/+page.dreego": `<body></body><client lang="lua">print("ready")</client>`,
+		"www/app/routes/about.dreego": `<body></body><client lang="lua">local title = "About"</client>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	root, err := os.ReadFile(filepath.Join(dir, "www", "dree.go"))
+	root, err := os.ReadFile(filepath.Join(dir, "www", "app", "dree.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestLuaStringCannotCloseGeneratedScript(t *testing.T) {
 
 func TestLuaApplicationBuilds(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<body><main>Lua</main></body>
+		"www/app/routes/+page.dreego": `<body><main>Lua</main></body>
 <client lang="lua">local ready = true
 if ready then print("ready") end</client>`,
 	})
@@ -136,7 +136,7 @@ func TestLuaUnsupportedGenericForFailsGeneration(t *testing.T) {
 
 func TestLuaDiagnosticUsesDreegoSourceLine(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<body><main>Ready</main></body>
+		"www/app/routes/+page.dreego": `<body><main>Ready</main></body>
 <client lang="lua">
 for key, value in pairs(values) do print(key) end
 </client>`,
@@ -145,14 +145,14 @@ for key, value in pairs(values) do print(key) end
 	if err == nil {
 		t.Fatalf("generate succeeded:\n%s", out)
 	}
-	if !regexp.MustCompile(`www/routes/\+page\.dreego\(3,\d+\): Lua: expected = after numeric for variable`).MatchString(out) {
+	if !regexp.MustCompile(`www/app/routes/\+page\.dreego\(3,\d+\): Lua: expected = after numeric for variable`).MatchString(out) {
 		t.Fatalf("diagnostic does not identify the Lua source line:\n%s", out)
 	}
 }
 
 func TestLuaRestrictedAPIDiagnosticUsesExactDreegoSourceLine(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/account.dreego": `<body><main>Ready</main></body>
+		"www/app/routes/account.dreego": `<body><main>Ready</main></body>
 <client lang="lua">
 local ready = true
 if ready then
@@ -164,7 +164,7 @@ end
 	if err == nil {
 		t.Fatalf("generate succeeded:\n%s", out)
 	}
-	if !strings.Contains(out, `www/routes/account.dreego(5,5): Lua: require is not available`) {
+	if !strings.Contains(out, `www/app/routes/account.dreego(5,5): Lua: require is not available`) {
 		t.Fatalf("diagnostic does not identify the restricted API source range:\n%s", out)
 	}
 }
@@ -235,7 +235,7 @@ print(#values, total)
 
 func TestLuaRuntimeSourceReferenceUsesDreegoPath(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/account.dreego": `<body></body>
+		"www/app/routes/account.dreego": `<body></body>
 <client lang="lua">
 local value = 1 + "invalid"
 </client>`,
@@ -244,11 +244,11 @@ local value = 1 + "invalid"
 	if err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	generated, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	generated, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "dree.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(generated), "sourceURL=dreego:///www/routes/account.dreego") {
+	if !strings.Contains(string(generated), "sourceURL=dreego:///www/app/routes/account.dreego") {
 		t.Fatalf("generated client has no original source reference:\n%s", generated)
 	}
 }

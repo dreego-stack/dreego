@@ -8,7 +8,7 @@ timestamp: 2026-08-21T00:00:00Z
 # Per-directory dree.go output
 
 **Date:** 2026-08-21
-**Status:** Accepted
+**Status:** Superseded by [One website root with multiple apps](multi-app-website-root.md)
 
 ## Context
 

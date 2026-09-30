@@ -22,8 +22,8 @@ func TestCLINew(t *testing.T) {
 		"testapp/Taskfile.yml",
 		"testapp/Dockerfile",
 		"testapp/docker-compose.yml",
-		"testapp/www/routes/+page.dreego",
-		"testapp/www/layouts/default.dreego",
+		"testapp/dreego/www/routes/+page.dreego",
+		"testapp/dreego/layouts/default.dreego",
 	} {
 		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
 			t.Fatalf("missing %s: %v", f, err)
@@ -112,7 +112,7 @@ func TestCLINewBlueprintValid(t *testing.T) {
 	}
 	sub := filepath.Join(dir, "testapp")
 	// no unreplaced placeholder
-	for _, f := range []string{"main.go", "www/layouts/default.dreego", "www/dreego.config.json"} {
+	for _, f := range []string{"main.go", "dreego/layouts/default.dreego", "dreego/dreego.config.json"} {
 		data, err := os.ReadFile(filepath.Join(sub, f))
 		if err != nil {
 			t.Fatalf("read %s: %v", f, err)
@@ -121,13 +121,13 @@ func TestCLINewBlueprintValid(t *testing.T) {
 			t.Fatalf("unreplaced placeholder in %s", f)
 		}
 	}
-	if !strings.Contains(string(readMust(t, filepath.Join(sub, "www/dreego.config.json"))), `"logging"`) {
+	if !strings.Contains(string(readMust(t, filepath.Join(sub, "dreego/dreego.config.json"))), `"logging"`) {
 		t.Fatal("config.json invalid/missing logging")
 	}
 	if out, err := dreegotest.RunCLI(t, sub, "generate"); err != nil {
 		t.Fatalf("generate failed in scaffold: %v\n%s", err, out)
 	}
-	if _, err := os.Stat(filepath.Join(sub, "www/dree.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(sub, "dreego/www/dree.go")); err != nil {
 		t.Fatalf("gen/routes.go not produced: %v", err)
 	}
 }
@@ -139,14 +139,14 @@ func TestCLINewLayoutExists(t *testing.T) {
 		t.Fatalf("new: %v\n%s", err, out)
 	}
 	sub := filepath.Join(dir, "testapp")
-	layouts, _ := filepath.Glob(filepath.Join(sub, "www/layouts/*.dreego"))
+	layouts, _ := filepath.Glob(filepath.Join(sub, "dreego/layouts/*.dreego"))
 	if len(layouts) == 0 {
 		t.Fatal("layouts/ directory exists but contains no .dreego layout file")
 	}
 	if out, err := dreegotest.RunCLI(t, sub, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	routes, _ := os.ReadFile(filepath.Join(sub, "www/layouts/dree.go"))
+	routes, _ := os.ReadFile(filepath.Join(sub, "dreego/layouts/dree.go"))
 	if !strings.Contains(string(routes), "<html") {
 		t.Fatal("layout exists but generated layout does not produce a complete HTML document (no <html> found)")
 	}
@@ -155,7 +155,7 @@ func TestCLINewLayoutExists(t *testing.T) {
 func TestCLIBuildTarget(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<body><p>hello</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>hello</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "build", "--target", "linux/amd64"); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)

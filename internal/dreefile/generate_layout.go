@@ -2,10 +2,8 @@ package dreefile
 
 import (
 	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 
@@ -13,12 +11,26 @@ import (
 )
 
 type layoutEntry struct {
-	rel    string
-	source string
-	file   *File
-	name   string
+	scopeKey string
+	appName  string
+	source   string
+	dir      string
+	file     *File
+	name     string
 }
 
+// layoutPackage is one generated Go package holding layouts of a single scope.
+type layoutPackage struct {
+	pkg        string
+	importPath string
+	dir        string
+	entries    []*layoutEntry
+}
+
+// discoverLayouts walks the website root and returns every layout keyed by
+// "<scopeKey>:<filename>". The scopeKey is "root" for <root>/layouts, the app
+// name for <root>/<app>/layouts, and "<app>/<sub>" for route-local layouts under
+// <root>/<app>/routes/<sub>/layouts.
 func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEntry, error) {
 	entries := map[string]*layoutEntry{}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
@@ -28,8 +40,16 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 		if !d.IsDir() {
 			return nil
 		}
-		if !isLayoutsDir(root, path) {
+		if filepath.Base(path) != "layouts" {
 			return nil
+		}
+		scopeKey, ok := layoutScopeKey(root, path)
+		if !ok {
+			return nil
+		}
+		appName := ""
+		if scopeKey != "root" {
+			appName = strings.SplitN(scopeKey, "/", 2)[0]
 		}
 		dirEntries, err := os.ReadDir(path)
 		if err != nil {
@@ -61,27 +81,34 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 			if parseErr != nil {
 				return fmt.Errorf("error parsing layout %s: %w", full, parseErr)
 			}
-			if f != nil {
-				f.Imports = header.Imports
-				f.Kind = header.Kind
-				f.Layout = header.Layout
-				f.GoImports = header.GoImports
-				f.SourceContent = raw
-				f.SourcePath = full
-				bodyOffset := len(raw) - len(body)
-				if f.Client != nil {
-					f.Client.Pos += bodyOffset
-				}
-				if f.Body != nil {
-					gogen.SetNodeSource(f.Body.Nodes, full, bodyOffset)
-					gogen.SetSourceText(f.Body.Nodes, raw)
-				}
-				rel := layoutScopeRel(root, path)
-				funcName := "Layout"
-				if name == "default.dreego" {
-					funcName = "Default"
-				}
-				entries[rel+":"+name] = &layoutEntry{rel: rel, source: full, file: f, name: funcName}
+			if f == nil {
+				continue
+			}
+			f.Imports = header.Imports
+			f.Kind = header.Kind
+			f.Layout = header.Layout
+			f.GoImports = header.GoImports
+			f.SourceContent = raw
+			f.SourcePath = full
+			bodyOffset := len(raw) - len(body)
+			if f.Client != nil {
+				f.Client.Pos += bodyOffset
+			}
+			if f.Body != nil {
+				gogen.SetNodeSource(f.Body.Nodes, full, bodyOffset)
+				gogen.SetSourceText(f.Body.Nodes, raw)
+			}
+			funcName := "Layout"
+			if name == "default.dreego" {
+				funcName = "Default"
+			}
+			entries[scopeKey+":"+name] = &layoutEntry{
+				scopeKey: scopeKey,
+				appName:  appName,
+				source:   full,
+				dir:      path,
+				file:     f,
+				name:     funcName,
 			}
 		}
 		return nil
@@ -95,20 +122,36 @@ func discoverLayouts(root string) (map[string]*layoutEntry, map[string]*layoutEn
 	return entries, buildLayoutIndex(root, entries), nil
 }
 
-func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
-	byScope := map[string][]*layoutEntry{}
-	for _, e := range entries {
-		byScope[e.rel] = append(byScope[e.rel], e)
+// layoutScopeKey classifies a layouts directory relative to the website root.
+func layoutScopeKey(root, dir string) (string, bool) {
+	rel := relToRoot(root, dir)
+	if rel == "layouts" {
+		return "root", true
 	}
+	parts := strings.Split(rel, "/")
+	if len(parts) == 2 && parts[1] == "layouts" {
+		return parts[0], true
+	}
+	if len(parts) >= 4 && parts[1] == "routes" && parts[len(parts)-1] == "layouts" {
+		sub := strings.Join(parts[2:len(parts)-1], "/")
+		return parts[0] + "/" + sub, true
+	}
+	return "", false
+}
+
+func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
 	var ambiguous []string
-	for scope, list := range byScope {
-		if len(list) > 1 {
-			var files []string
-			for _, e := range list {
-				files = append(files, e.source)
-			}
+	byDir := map[string][]string{}
+	for _, e := range entries {
+		if e == nil {
+			continue
+		}
+		byDir[e.dir] = append(byDir[e.dir], e.source)
+	}
+	for dir, files := range byDir {
+		if len(files) > 1 {
 			sort.Strings(files)
-			ambiguous = append(ambiguous, fmt.Sprintf("ambiguous layout in %s: %s", scope, strings.Join(files, ", ")))
+			ambiguous = append(ambiguous, fmt.Sprintf("ambiguous layout in %s: %s", dir, strings.Join(files, ", ")))
 		}
 	}
 	if len(ambiguous) == 0 {
@@ -118,39 +161,50 @@ func detectAmbiguousLayouts(entries map[string]*layoutEntry) error {
 	return fmt.Errorf("%s", strings.Join(ambiguous, "; "))
 }
 
-func layoutScopeRel(root, layoutsDir string) string {
-	rel := relToRoot(root, layoutsDir)
-	if rel == "layouts" {
-		return ""
-	}
-	rel = strings.TrimSuffix(rel, "/layouts")
-	rel = strings.TrimPrefix(rel, "routes/")
-	return rel
-}
-
-func resolveLayoutForRoute(routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
+// resolveLayoutForRoute resolves the layout for one route of an app. It tries
+// route-local scopes (deepest first), then the app scope, then the shared root
+// scope.
+func resolveLayoutForRoute(appName, routeRel string, layouts, index map[string]*layoutEntry) (*layoutEntry, error) {
 	routeRel = strings.TrimPrefix(routeRel, "/")
 	scopes := cascadeScopes(routeRel)
 	for _, scope := range scopes {
-		for _, name := range []string{"default.dreego", "layout.dreego"} {
-			e, ok := layouts[scope+":"+name]
-			if !ok {
-				continue
-			}
-			if e.file == nil || e.file.Layout == "" {
-				return e, nil
-			}
-			chain, err := resolveLayoutChain(e, index)
-			if err != nil {
-				return nil, err
-			}
-			if len(chain) > 1 {
-				return nil, layoutChainNestedError(e, chain)
-			}
-			return chain[len(chain)-1], nil
+		key := appName
+		if scope != "" {
+			key = appName + "/" + scope
+		}
+		if e := pickLayout(layouts, key); e != nil {
+			return resolveLayoutEntry(e, index)
+		}
+	}
+	if appName != "root" {
+		if e := pickLayout(layouts, "root"); e != nil {
+			return resolveLayoutEntry(e, index)
 		}
 	}
 	return nil, nil
+}
+
+func pickLayout(layouts map[string]*layoutEntry, scopeKey string) *layoutEntry {
+	for _, name := range []string{"default.dreego", "layout.dreego"} {
+		if e, ok := layouts[scopeKey+":"+name]; ok {
+			return e
+		}
+	}
+	return nil
+}
+
+func resolveLayoutEntry(e *layoutEntry, index map[string]*layoutEntry) (*layoutEntry, error) {
+	if e.file == nil || e.file.Layout == "" {
+		return e, nil
+	}
+	chain, err := resolveLayoutChain(e, index)
+	if err != nil {
+		return nil, err
+	}
+	if len(chain) > 1 {
+		return nil, layoutChainNestedError(e, chain)
+	}
+	return chain[len(chain)-1], nil
 }
 
 func cascadeScopes(routeRel string) []string {
@@ -175,36 +229,4 @@ func cascadeScopes(routeRel string) []string {
 		scopes[i], scopes[j] = scopes[j], scopes[i]
 	}
 	return scopes
-}
-
-func generateLayouts(gen *Generator, root string, layouts map[string]*layoutEntry) ([]string, error) {
-	var srcs []string
-	scopes := map[string]bool{}
-	for _, e := range layouts {
-		scopes[e.rel] = true
-	}
-	scopeList := slices.Sorted(maps.Keys(scopes))
-
-	for _, scope := range scopeList {
-		for _, name := range []string{"default.dreego", "layout.dreego"} {
-			e, ok := layouts[scope+":"+name]
-			if !ok {
-				continue
-			}
-			funcName := "Layout"
-			if name == "default.dreego" {
-				funcName = "Default"
-			}
-			gen.Src = e.file.SourceContent
-			if err := registerGoImports(gen, "layouts", e.source, e.file.GoImports); err != nil {
-				return nil, err
-			}
-			src, err := GenerateLayout(gen, e.file, funcName)
-			if err != nil {
-				return nil, err
-			}
-			srcs = append(srcs, src)
-		}
-	}
-	return srcs, nil
 }

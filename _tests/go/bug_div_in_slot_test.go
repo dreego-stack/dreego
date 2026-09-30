@@ -11,6 +11,6 @@ func TestBugDivInSlot(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component ()
 <body><article>{#slot}</article></body>`,
-		"www/routes/+page.dreego": `<body><@Card><div class="inner">hi</div></@Card></body>`,
+		"www/app/routes/+page.dreego": `<body><@Card><div class="inner">hi</div></@Card></body>`,
 	})
 }

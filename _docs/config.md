@@ -1,11 +1,52 @@
 # dreego.config.json
 
-The configuration file lives in the **website root** — the directory that
-contains the `routes/`, `layouts/`, `components/`, and `static/` trees. That
-directory is not necessarily the project root: `dreego new` scaffolds it as
-`www/`, so the file is `www/dreego.config.json` in a default project. Any
-directory containing `dreego.config.json` is treated as a website root; a repo
-may contain more than one.
+The configuration file lives in the **website root** — a directory that
+contains the shared `layouts/`/`components/` trees and one or more app
+subdirectories (each with its own `routes/`). That directory is not necessarily
+the project root: `dreego new` scaffolds it as `dreego/`, so the file is
+`dreego/dreego.config.json` in a default project. Any directory containing
+`dreego.config.json` is treated as a website root; a repo may contain more than
+one.
+
+`dreego.config.json` is the **root marker**. A directory is a website root when
+it contains this file; `dreego generate` then treats each immediate
+subdirectory that has a `routes/` tree as an app.
+
+## App overrides
+
+An app may ship its own `<app>/dreego.config.json`. It **overrides the root
+defaults field by field**: a field present in the app config replaces the root
+value entirely (no deep merge, no list concatenation). Omitted fields inherit
+from the root file. `host` and `port` are **not** part of the config — they live
+in `main.go` (see below).
+
+```json
+// dreego/dreego.config.json (root defaults)
+{
+  "logging": { "enabled": true },
+  "redirects": [ { "from": "/old", "to": "/new", "status": 301 } ]
+}
+```
+
+```json
+// dreego/blog/dreego.config.json (app override)
+{
+  "logging": { "enabled": false }
+}
+```
+
+## Hosts and ports are Go
+
+Each app is registered on an App in `main.go`; the listening address is explicit
+Go code, so one binary can serve several apps on several ports (or dispatch by
+host through an external proxy):
+
+```go
+wwwApp := dreego.New(www.App)
+blogApp := dreego.New(blog.App)
+go ssr.Listen(wwwApp, ":8080")
+err := ssr.Listen(blogApp, ":8081")
+```
 
 ## Schema
 

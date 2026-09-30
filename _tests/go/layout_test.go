@@ -10,7 +10,7 @@ import (
 func TestLayoutNoLayout(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<body><p>hello no layout</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>hello no layout</p></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {

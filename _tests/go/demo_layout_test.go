@@ -27,7 +27,8 @@ func TestDemoApplicationsUseOneDirectoryEach(t *testing.T) {
 		}
 	}
 	for _, path := range []string{
-		"demo-ssr/www/dreego.config.json",
+		"demo-ssr/dreego/dreego.config.json",
+		"demo-ssr/dreego/www/routes/+page.dreego",
 		"demo-wailsv3/app/dreego.config.json",
 	} {
 		if _, err := os.Stat(filepath.Join(repoRoot, "demo", path)); err != nil {

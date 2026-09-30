@@ -10,7 +10,7 @@ import (
 func TestServerStdlibImportSyncMutexCompiles(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { sync }
+		"www/app/routes/+page.dreego": `GOIMPORT { sync }
 <server>
 var mu sync.Mutex
 mu.Lock()
@@ -19,7 +19,7 @@ mu.Unlock()
 </server>
 <body><p>{{ value }}</p></body>`,
 	})
-	routes := gen["www/routes/dree.go"]
+	routes := gen["www/app/routes/dree.go"]
 	if !strings.Contains(routes, `"sync"`) {
 		t.Fatalf("generated import block must contain \"sync\", got:\n%s", routes)
 	}
@@ -31,7 +31,7 @@ mu.Unlock()
 func TestServerStdlibImportMultiplePackages(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { sync, encoding/json }
+		"www/app/routes/+page.dreego": `GOIMPORT { sync, encoding/json }
 <server>
 var mu sync.Mutex
 mu.Lock()
@@ -41,7 +41,7 @@ value := string(payload)
 </server>
 <body><p>{{ value }}</p></body>`,
 	})
-	routes := gen["www/routes/dree.go"]
+	routes := gen["www/app/routes/dree.go"]
 	for _, want := range []string{`"sync"`, `"encoding/json"`} {
 		if !strings.Contains(routes, want) {
 			t.Fatalf("generated import block missing %s, got:\n%s", want, routes)
@@ -61,7 +61,7 @@ label := "counter"
 mu.Unlock()
 </server>
 <body><span>{{ label }}</span></body>`,
-		"www/routes/+page.dreego": `<body><@Counter/></body>`,
+		"www/app/routes/+page.dreego": `<body><@Counter/></body>`,
 	})
 	components := gen["www/components/dree.go"]
 	if !strings.Contains(components, `"sync"`) {
@@ -72,7 +72,7 @@ mu.Unlock()
 func TestStdlibImportRejectsUnknownPackage(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { os }
+		"www/app/routes/+page.dreego": `GOIMPORT { os }
 <server>
 value := os.Getenv("HOME")
 </server>

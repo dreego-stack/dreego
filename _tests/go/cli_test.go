@@ -115,7 +115,7 @@ func TestCLINewScaffoldsProject(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "main.go")); err != nil {
 		t.Fatalf("missing main.go: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "www/routes/+page.dreego")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "dreego/www/routes/+page.dreego")); err != nil {
 		t.Fatalf("missing +page.dreego: %v", err)
 	}
 }
@@ -136,11 +136,11 @@ func TestCLINewImportBuilds(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.NewProject(t, "app", "")
 	mainGo, _ := os.ReadFile(filepath.Join(dir, "main.go"))
-	if !strings.Contains(string(mainGo), `"app/www"`) {
-		t.Fatalf("main.go does not import \"app/www\": %s", mainGo)
+	if !strings.Contains(string(mainGo), `"app/dreego/www"`) {
+		t.Fatalf("main.go does not import \"app/dreego/www\": %s", mainGo)
 	}
-	if !strings.Contains(string(mainGo), "www.Register(app)") {
-		t.Fatalf("main.go does not call www.Register(app): %s", mainGo)
+	if !strings.Contains(string(mainGo), "dreego.New(www.App)") {
+		t.Fatalf("main.go does not call dreego.New(www.App): %s", mainGo)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -168,7 +168,7 @@ func TestCLICheck(t *testing.T) {
 func TestCLICheckStale(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<head><title>T</title></head>
+		"www/app/routes/+page.dreego": `<head><title>T</title></head>
 <body><p>check me</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
@@ -181,7 +181,7 @@ func TestCLICheckStale(t *testing.T) {
 	if !strings.Contains(out, "up-to-date") {
 		t.Fatalf("initial check failed, got: %s", out)
 	}
-	src := filepath.Join(dir, "www/routes/+page.dreego")
+	src := filepath.Join(dir, "www/app/routes/+page.dreego")
 	if err := os.WriteFile(src, []byte(`<head><title>T2</title></head>
 <body><p>changed</p></body>`), 0644); err != nil {
 		t.Fatalf("edit source: %v", err)
@@ -195,7 +195,7 @@ func TestCLICheckNoGen(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":  `{}`,
-		"www/routes/+page.dreego": `<body><p>hi</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>hi</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate", "--check")
 	if err == nil {

@@ -9,7 +9,7 @@ import (
 func TestBugUnindentSpaces(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     type UserForm struct {
     }
     func Save(c *dreego.SSRContext, form UserForm) error {
@@ -23,6 +23,6 @@ func TestBugUnindentSpaces(t *testing.T) {
   </form>
 </body>`,
 	})
-	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "    type UserForm struct")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "type UserForm struct")
+	dreegotest.MustNotContain(t, gen["www/app/routes/dree.go"], "    type UserForm struct")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "type UserForm struct")
 }

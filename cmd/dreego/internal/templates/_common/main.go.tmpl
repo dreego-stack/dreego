@@ -6,16 +6,13 @@ import (
 
 	dreego "github.com/dreego-stack/dreego/core"
 	ssr "github.com/dreego-stack/dreego/adapter/ssr"
-	"§$name$§/www"
+	"§$name$§/dreego/www"
 )
 
 const port = "8080"
 
 func main() {
-	app := dreego.New()
-	if err := www.Register(app); err != nil {
-		log.Fatal(err)
-	}
+	app := dreego.New(www.App)
 	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/dreego-stack/dreego/internal/dreefile/gogen"
-	"github.com/dreego-stack/dreego/internal/gomod"
 )
 
 type componentSource struct {
@@ -17,10 +17,39 @@ type componentSource struct {
 	def       *ComponentDef
 	scopeHash string
 	pkgDir    string
+	pkg       string
 }
 
-func scanComponents(gen *Generator, root string) (map[string][]string, map[string]string, error) {
-	components, err := loadComponents(gen, root)
+// componentPackage is one generated Go package holding component sources.
+type componentPackage struct {
+	dir  string
+	pkg  string
+	srcs []string
+}
+
+// componentPkgName returns a unique Go package name for a component directory
+// relative to the website root. The shared root components/ keeps the plain
+// name "components"; an app-local or nested directory is prefixed with its path
+// so two component packages never collide in one generated file.
+func componentPkgName(baseRoot, pkgDir string) string {
+	rel := relToRoot(baseRoot, pkgDir)
+	if rel == "components" {
+		return "components"
+	}
+	return sanitizePkgName(strings.ReplaceAll(rel, "/", "_"))
+}
+
+func scanComponents(gen *Generator, root string) ([]componentPackage, map[string]string, error) {
+	return scanComponentsWithBase(gen, root, root, true)
+}
+
+// scanComponentsWithBase scans component sources under `root`. When
+// includeModuleComponents is true it also loads components imported from other Go
+// modules and places them in the components package of `baseRoot`, so the whole
+// website shares one generated location for a module component. App passes set
+// it false so the shared root package is not overwritten.
+func scanComponentsWithBase(gen *Generator, root, baseRoot string, includeModuleComponents bool) ([]componentPackage, map[string]string, error) {
+	components, err := loadComponents(gen, root, baseRoot, includeModuleComponents)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -33,23 +62,61 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 		gen.RegisterDef(component.def.Name, component.def)
 	}
 
-	sourcesByPkg := map[string][]string{}
-	gen.Pkg = "components"
+	byDir := map[string]*componentPackage{}
+	var order []string
 	for _, component := range components {
 		gen.Src = component.raw
-		if err := registerGoImports(gen, sanitizePkgName(filepath.Base(component.pkgDir)), component.path, component.file.GoImports); err != nil {
+		gen.Pkg = component.pkg
+		if err := registerGoImports(gen, component.pkg, component.path, component.file.GoImports); err != nil {
 			return nil, nil, err
 		}
 		src, err := GenerateComponent(gen, component.file, component.scopeHash)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error generating component %s: %w", component.path, err)
 		}
-		sourcesByPkg[component.pkgDir] = append(sourcesByPkg[component.pkgDir], src)
+		if byDir[component.pkgDir] == nil {
+			byDir[component.pkgDir] = &componentPackage{dir: component.pkgDir, pkg: component.pkg}
+			order = append(order, component.pkgDir)
+		}
+		byDir[component.pkgDir].srcs = append(byDir[component.pkgDir].srcs, src)
 	}
-	return sourcesByPkg, pathsByName, nil
+	sort.Strings(order)
+	pkgs := make([]componentPackage, 0, len(order))
+	for _, dir := range order {
+		pkgs = append(pkgs, *byDir[dir])
+	}
+	return pkgs, pathsByName, nil
 }
 
-func loadComponents(gen *Generator, root string) ([]componentSource, error) {
+// generateComponentSources emits the Go source for pre-loaded component sources
+// and groups them into their output packages.
+func generateComponentSources(gen *Generator, components []componentSource) ([]componentPackage, error) {
+	byDir := map[string]*componentPackage{}
+	var order []string
+	for _, component := range components {
+		gen.Src = component.raw
+		gen.Pkg = component.pkg
+		if err := registerGoImports(gen, component.pkg, component.path, component.file.GoImports); err != nil {
+			return nil, err
+		}
+		src, err := GenerateComponent(gen, component.file, component.scopeHash)
+		if err != nil {
+			return nil, fmt.Errorf("error generating component %s: %w", component.path, err)
+		}
+		if byDir[component.pkgDir] == nil {
+			byDir[component.pkgDir] = &componentPackage{dir: component.pkgDir, pkg: component.pkg}
+			order = append(order, component.pkgDir)
+		}
+		byDir[component.pkgDir].srcs = append(byDir[component.pkgDir].srcs, src)
+	}
+	sort.Strings(order)
+	pkgs := make([]componentPackage, 0, len(order))
+	for _, dir := range order {
+		pkgs = append(pkgs, *byDir[dir])
+	}
+	return pkgs, nil
+}
+func loadComponents(gen *Generator, root, baseRoot string, includeModuleComponents bool) ([]componentSource, error) {
 	var components []componentSource
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -71,7 +138,6 @@ func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 		}
 		rel := relToRoot(root, dir)
 		pkgDir := dir
-		pkg := "components"
 		if rel != "components" {
 			segments := strings.Split(strings.TrimPrefix(rel, "components/"), "/")
 			valid := []string{}
@@ -86,113 +152,51 @@ func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 			}
 			if len(valid) > 0 {
 				pkgDir = filepath.Join(append([]string{root, "components"}, valid...)...)
-				pkg = sanitizePkgName(valid[len(valid)-1])
 			}
 		}
 		component.pkgDir = pkgDir
-		gen.RegisterCompPkg(component.def.Name, pkg, relToRoot(root, pkgDir))
+		component.pkg = componentPkgName(baseRoot, pkgDir)
+		gen.RegisterCompPkg(component.def.Name, component.pkg, gen.Module+"/"+relToRoot(".", pkgDir))
 		components = append(components, component)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	moduleComponents, err := loadModuleComponents(gen, root)
+	if !includeModuleComponents {
+		return components, nil
+	}
+	moduleComponents, err := loadModuleComponents(gen, root, baseRoot)
 	if err != nil {
 		return nil, err
 	}
 	return append(components, moduleComponents...), nil
 }
 
-func loadModuleComponents(gen *Generator, root string) ([]componentSource, error) {
-	paths, err := importedComponentPaths(root)
-	if err != nil {
-		return nil, err
-	}
+// loadModuleComponentsAcrossApps loads components imported from other Go modules
+// for every app route tree under the website root, placing them in the shared
+// root components package so the root pass owns them exactly once.
+func loadModuleComponentsAcrossApps(gen *Generator, root string, apps []appEntry) ([]componentSource, error) {
+	seen := map[string]bool{}
 	var components []componentSource
-	for _, importPath := range paths {
-		sourceDir, packageName, err := resolveComponentImport(importPath)
+	for _, app := range apps {
+		paths, err := importedComponentPaths(app.dir)
 		if err != nil {
 			return nil, err
 		}
-		entries, err := os.ReadDir(sourceDir)
-		if err != nil {
-			return nil, fmt.Errorf("read imported components %s: %w", importPath, err)
-		}
-		pkgDir := filepath.Join(root, "components")
-		if packageName != "components" {
-			pkgDir = filepath.Join(pkgDir, packageName)
-		}
-		for _, entry := range entries {
-			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".dreego") {
+		for _, importPath := range paths {
+			if seen[importPath] {
 				continue
 			}
-			component, err := loadComponent(filepath.Join(sourceDir, entry.Name()))
+			seen[importPath] = true
+			loaded, err := loadModuleComponent(gen, root, importPath)
 			if err != nil {
 				return nil, err
 			}
-			if component.def == nil {
-				continue
-			}
-			component.pkgDir = pkgDir
-			gen.RegisterCompPkg(component.def.Name, packageName, relToRoot(root, pkgDir))
-			components = append(components, component)
+			components = append(components, loaded...)
 		}
 	}
 	return components, nil
-}
-
-func importedComponentPaths(root string) ([]string, error) {
-	seen := map[string]bool{}
-	var paths []string
-	routesDir := filepath.Join(root, "routes")
-	if _, err := os.Stat(routesDir); os.IsNotExist(err) {
-		return paths, nil
-	}
-	err := filepath.WalkDir(routesDir, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if d.IsDir() || !strings.HasSuffix(path, ".dreego") {
-			return nil
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		_, imports, _ := ParseHeader(string(data))
-		for _, imp := range imports {
-			if !strings.HasSuffix(imp.Path, ".dreego") && strings.Contains(imp.Path, ".") && !seen[imp.Path] {
-				seen[imp.Path] = true
-				paths = append(paths, imp.Path)
-			}
-		}
-		return nil
-	})
-	return paths, err
-}
-
-func resolveComponentImport(importPath string) (string, string, error) {
-	mod, err := gomod.Read("go.mod")
-	if err != nil {
-		return "", "", fmt.Errorf("read go.mod for component import %q: %w", importPath, err)
-	}
-	best := ""
-	for modulePath := range mod.Requires {
-		if strings.HasPrefix(importPath, modulePath+"/") && len(modulePath) > len(best) {
-			best = modulePath
-		}
-	}
-	if best == "" {
-		return "", "", fmt.Errorf("component import %q is not provided by a required Go module", importPath)
-	}
-	moduleDir, err := moduleDirectory(best)
-	if err != nil {
-		return "", "", err
-	}
-	relative := strings.TrimPrefix(importPath, best+"/")
-	packageName := sanitizePkgName(filepath.Base(relative))
-	return filepath.Join(moduleDir, filepath.FromSlash(relative)), packageName, nil
 }
 
 func loadComponent(path string) (componentSource, error) {
