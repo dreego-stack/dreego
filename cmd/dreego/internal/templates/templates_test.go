@@ -132,7 +132,7 @@ func TestInstallRealTemplate(t *testing.T) {
 	if err := Install(target, "example.com/acme/app", DefaultName); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"main.go", "Taskfile.yml", "Dockerfile", "docker-compose.yml", ".gitignore", filepath.Join("www", "dreego.config.json")} {
+	for _, name := range []string{"main.go", "Taskfile.yml", "Dockerfile", "docker-compose.yml", ".gitignore", filepath.Join("dreego", "dreego.config.json")} {
 		if _, err := os.Stat(filepath.Join(target, name)); err != nil {
 			t.Errorf("expected %s in target: %v", name, err)
 		}
@@ -179,12 +179,12 @@ func TestInstallWebApp(t *testing.T) {
 	for _, name := range []string{
 		"main.go",
 		"Taskfile.yml",
-		filepath.Join("www", "dreego.config.json"),
-		filepath.Join("www", "layouts", "default.dreego"),
-		filepath.Join("www", "components", "Nav.dreego"),
-		filepath.Join("www", "components", "Card.dreego"),
-		filepath.Join("www", "routes", "+page.dreego"),
-		filepath.Join("www", "routes", "dashboard", "+page.dreego"),
+		filepath.Join("dreego", "dreego.config.json"),
+		filepath.Join("dreego", "layouts", "default.dreego"),
+		filepath.Join("dreego", "components", "Nav.dreego"),
+		filepath.Join("dreego", "components", "Card.dreego"),
+		filepath.Join("dreego", "www", "routes", "+page.dreego"),
+		filepath.Join("dreego", "www", "routes", "dashboard", "+page.dreego"),
 	} {
 		if _, err := os.Stat(filepath.Join(target, name)); err != nil {
 			t.Errorf("expected %s in target: %v", name, err)

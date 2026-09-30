@@ -10,7 +10,7 @@ import (
 func TestDreefileGrammarRejectsEmptyGoImportList(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "GOIMPORT {  }\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "GOIMPORT {  }\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -26,7 +26,7 @@ func TestDreefileGrammarRejectsEmptyGoImportList(t *testing.T) {
 func TestDreefileGrammarRejectsUnquotedGoImportPath(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "GOIMPORT { encoding json }\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "GOIMPORT { encoding json }\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -42,7 +42,7 @@ func TestDreefileGrammarRejectsUnquotedGoImportPath(t *testing.T) {
 func TestDreefileGrammarRejectsUnquotedLayout(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "LAYOUT www/layouts/x.dreego\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "LAYOUT www/layouts/x.dreego\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -58,7 +58,7 @@ func TestDreefileGrammarRejectsUnquotedLayout(t *testing.T) {
 func TestDreefileGrammarRejectsEmptyLayout(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "LAYOUT \"\"\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "LAYOUT \"\"\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -74,7 +74,7 @@ func TestDreefileGrammarRejectsEmptyLayout(t *testing.T) {
 func TestDreefileGrammarRejectsNestedBraceList(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "GOIMPORT { a, { b } }\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "GOIMPORT { a, { b } }\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -91,7 +91,7 @@ func TestDreefileGrammarRejectsTrailingContentAfterBraceList(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/Card.dreego": "DREEFILE component ()\n<body><p>x</p></body>",
-		"www/routes/+page.dreego":    "COMPONENT \"www/components\" IMPORT { Card } extra\n<body><@Card/></body>",
+		"www/app/routes/+page.dreego":    "COMPONENT \"www/components\" IMPORT { Card } extra\n<body><@Card/></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -107,7 +107,7 @@ func TestDreefileGrammarRejectsTrailingContentAfterBraceList(t *testing.T) {
 func TestDreefileGrammarRejectsDuplicateDreefile(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "DREEFILE page\nDREEFILE layout\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "DREEFILE page\nDREEFILE layout\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -123,7 +123,7 @@ func TestDreefileGrammarRejectsDuplicateDreefile(t *testing.T) {
 func TestDreefileGrammarRejectsDuplicateLayout(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "LAYOUT \"a.dreego\"\nLAYOUT \"b.dreego\"\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "LAYOUT \"a.dreego\"\nLAYOUT \"b.dreego\"\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {

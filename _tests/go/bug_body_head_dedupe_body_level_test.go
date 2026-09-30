@@ -21,7 +21,7 @@ func TestBugBodyLevelLayoutHeadDedupe(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -71,7 +71,7 @@ func TestBugBodyLevelLayoutHeadDedupePlaceholderFirst(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -120,7 +120,7 @@ func TestBugBodyLevelLayoutKeepsTailTitleWithoutRouteTitle(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><meta name="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><meta name="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -151,7 +151,7 @@ func TestBugBodyLevelLayoutHeadDedupeBothSides(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><title>Page</title><meta name="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")
@@ -190,7 +190,7 @@ func TestBugBodyLevelLayoutKeepsLayoutTitleWithoutRouteTitle(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><meta name="description" content="route desc"></head>
+		"www/app/routes/+page.dreego": `<head><meta name="description" content="route desc"></head>
 <body><h1>Page</h1></body>`,
 	})
 	_, body := c.Get(t, "/")

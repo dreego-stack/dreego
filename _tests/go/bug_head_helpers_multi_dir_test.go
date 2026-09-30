@@ -21,8 +21,8 @@ func TestBugHeadHelpersEmittedOnceAndLayoutStyleKept(t *testing.T) {
 <style>
 .layout-style-marker { color: #123456; }
 </style>`,
-		"www/routes/+page.dreego":       "<head><title>Home</title></head>\n<body><h1>Home</h1></body>",
-		"www/routes/posts/+page.dreego": "<head><title>Post</title><meta name=\"description\" content=\"post\"></head>\n<body><h1>Post</h1></body>",
+		"www/app/routes/+page.dreego":       "<head><title>Home</title></head>\n<body><h1>Home</h1></body>",
+		"www/app/routes/posts/+page.dreego": "<head><title>Post</title><meta name=\"description\" content=\"post\"></head>\n<body><h1>Post</h1></body>",
 	}
 
 	generated := dreegotest.Build(t, files)
@@ -57,11 +57,14 @@ func TestBugHeadHelpersEmittedOnceAndLayoutStyleKept(t *testing.T) {
 	}
 
 	layoutStart := strings.Index(out, "func Default(")
-	layoutEnd := strings.Index(out, "package routes\n")
-	if layoutStart < 0 || layoutEnd < 0 || layoutEnd <= layoutStart {
+	if layoutStart < 0 {
 		t.Fatalf("could not locate generated layout function in output:\n%s", out)
 	}
-	layout := out[layoutStart:layoutEnd]
+	layoutEnd := strings.Index(out[layoutStart:], "\npackage ")
+	if layoutEnd < 0 {
+		layoutEnd = len(out) - layoutStart
+	}
+	layout := out[layoutStart : layoutStart+layoutEnd]
 	if !strings.Contains(layout, ".layout-style-marker { color: #123456; }") {
 		t.Fatalf("layout <style> content must be emitted raw without a scope prefix:\n%s", layout)
 	}

@@ -20,7 +20,7 @@ func TestBugHeadDedupeNonLiteralPrefixDiagnostic(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><title>Page</title></head>
+		"www/app/routes/+page.dreego": `<head><title>Page</title></head>
 <body><h1>Page</h1></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
@@ -53,7 +53,7 @@ func TestBugHeadDedupeLiteralPrefixNoDiagnostic(t *testing.T) {
 <body><main>{#slot}</main></body>
 </html>
 </body>`,
-		"www/routes/+page.dreego": `<head><title>Page</title></head>
+		"www/app/routes/+page.dreego": `<head><title>Page</title></head>
 <body><h1>Page</h1></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")

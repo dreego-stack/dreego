@@ -10,7 +10,7 @@ import (
 func TestBugErrorPageDoctype(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/404.dreego": `<head>
+		"www/app/routes/404.dreego": `<head>
     <meta charset="utf-8">
     <title>Not Found</title>
 </head>

@@ -9,8 +9,8 @@ import (
 func TestBugScopedStyleCommaParens(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<style>a, b { color: rgb(1, 2, 3); }</style>
+		"www/app/routes/+page.dreego": `<style>a, b { color: rgb(1, 2, 3); }</style>
 <body><p>hi</p></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "rgb(1, 2, 3)")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "rgb(1, 2, 3)")
 }

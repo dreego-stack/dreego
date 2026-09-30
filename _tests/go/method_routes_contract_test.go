@@ -10,7 +10,7 @@ import (
 func TestMethodRoutesAllVerbsRemainIsolated(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/items.dreego": `<server>value := "get"</server><body><p>{{ value }}</p></body>
+		"www/app/routes/items.dreego": `<server>value := "get"</server><body><p>{{ value }}</p></body>
 <server method="post">value := "post"</server><body method="post"><p>{{ value }}</p></body>
 <server method="put">value := "put"</server><body method="put"><p>{{ value }}</p></body>
 <server method="delete">value := "delete"</server><body method="delete"><p>{{ value }}</p></body>`,
@@ -31,7 +31,7 @@ func TestMethodRoutesAllVerbsRemainIsolated(t *testing.T) {
 func TestMethodRouteOnlyPostDoesNotRegisterGet(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/submit.dreego": `<server method="post">message := "accepted"</server><body method="post"><p>{{ message }}</p></body>`,
+		"www/app/routes/submit.dreego": `<server method="post">message := "accepted"</server><body method="post"><p>{{ message }}</p></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/submit", "", nil)
 	dreegotest.MustStatus(t, code, 200)
@@ -48,7 +48,7 @@ func TestMethodRouteCanRenderComponentAndLayout(t *testing.T) {
 		"www/layouts/default.dreego": `<body><html><body>{#slot}</body></html></body>`,
 		"www/components/Badge.dreego": `DREEFILE component ()
 <body class="badge">badge</body>`,
-		"www/routes/profile.dreego": `<server method="post">name := "Ada"</server><body method="post"><@Badge/> <span>{{ name }}</span></body>`,
+		"www/app/routes/profile.dreego": `<server method="post">name := "Ada"</server><body method="post"><@Badge/> <span>{{ name }}</span></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/profile", "", nil)
 	dreegotest.MustStatus(t, code, 200)
@@ -59,7 +59,7 @@ func TestMethodRouteCanRenderComponentAndLayout(t *testing.T) {
 func TestMethodRouteDynamicParameter(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/users/[id].dreego": `<server method="post">id := c.Param("id")</server><body method="post"><p>saved {{ id }}</p></body>`,
+		"www/app/routes/users/[id].dreego": `<server method="post">id := c.Param("id")</server><body method="post"><p>saved {{ id }}</p></body>`,
 	})
 	code, body, _ := c.Request(t, "POST", "/users/42", "", nil)
 	dreegotest.MustStatus(t, code, 200)

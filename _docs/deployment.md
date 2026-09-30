@@ -59,8 +59,8 @@ EXPOSE 8080
 ENTRYPOINT ["/app"]
 ```
 
-Generated static assets are embedded in the binary. No separate
-`dreego/static` directory is copied into the runtime image.
+Generated static assets are embedded in the binary. No per-app `static`
+directory (for example `dreego/www/static`) is copied into the runtime image.
 
 ## Runtime
 

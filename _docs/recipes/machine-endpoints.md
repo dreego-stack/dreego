@@ -46,7 +46,7 @@ app.Use(func(next http.Handler) http.Handler {
 })
 ```
 
-The route is then **not** declared in `www/routes`; the middleware owns it.
+The route is then **not** declared in `dreego/www/routes`; the middleware owns it.
 This works, but it splits the endpoint away from the route tree: there is no
 `+page.dreego`, no generated handler, and the path is matched by hand.
 
@@ -64,7 +64,7 @@ nil and a global store exists, the profile's CSRF setting still applies but the
 global store is used.
 
 ```go
-app := dreego.New()
+app := dreego.New(www.App)
 
 disabled := false
 if err := app.Profile("hooks", dreego.Profile{CSRF: &disabled}); err != nil {
@@ -92,7 +92,7 @@ PROFILE "hooks"
 ```
 
 Place the file in its own folder, for example
-`www/routes/(hooks)/github/+page.dreego`. The `(hooks)` group directory does not
+`dreego/www/routes/(hooks)/github/+page.dreego`. The `(hooks)` group directory does not
 appear in the URL but carries the `PROFILE` for every descendant route folder.
 `dreego generate` emits `app.ApplyProfile("/github", "hooks")`, and the
 compiler's profile resolution finds the nearest ancestor `PROFILE`.

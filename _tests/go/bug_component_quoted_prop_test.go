@@ -11,9 +11,9 @@ func TestBugComponentQuotedProp(t *testing.T) {
 	gen := dreegotest.Build(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component (title string, active bool)
 <body><h1>{{ title }}</h1><span>{{ active }}</span></body>`,
-		"www/routes/+page.dreego": `<server>myTitle := "Hello"</server>
+		"www/app/routes/+page.dreego": `<server>myTitle := "Hello"</server>
 <body><@Card title={myTitle} active={true}/></body>`,
 	})
-	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "{myTitle}")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "Card(myTitle, true)")
+	dreegotest.MustNotContain(t, gen["www/app/routes/dree.go"], "{myTitle}")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "Card(myTitle, true)")
 }

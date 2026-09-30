@@ -14,7 +14,7 @@ import (
 func TestBugCustomRouteContentTypeNotClobbered(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/calendar/de.ics.dreego": `<server type="custom">
+		"www/app/routes/calendar/de.ics.dreego": `<server type="custom">
     c.W.Header().Set("Content-Type", "text/calendar; charset=utf-8")
     c.W.WriteHeader(200)
 </server>
@@ -35,7 +35,7 @@ END:VCALENDAR</body>`,
 func TestBugCustomRouteWriteContentTypeNotClobbered(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/calendar/ru.ics.dreego": `<server type="custom">
+		"www/app/routes/calendar/ru.ics.dreego": `<server type="custom">
     c.Write(200, "text/calendar", []byte("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n"))
 </server>`,
 	})
@@ -55,7 +55,7 @@ func TestBugCustomRouteWriteContentTypeNotClobbered(t *testing.T) {
 func TestBugHTMLRouteContentTypeDefault(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     msg := "hello"
 </server>
 <body><h1>{{ msg }}</h1></body>`,

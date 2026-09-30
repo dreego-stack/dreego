@@ -10,22 +10,22 @@ import (
 func TestParseRouteFileExposesDreefileHeader(t *testing.T) {
 	src := `DREEFILE layout
 
-LAYOUT "www/layouts/admin.dreego"
+LAYOUT "www/app/layouts/admin.dreego"
 
 GOIMPORT { sync, encoding/json }
 
-COMPONENT "www/components" IMPORT { Card, Button, Card as ProductCard }
+COMPONENT "www/app/components" IMPORT { Card, Button, Card as ProductCard }
 
 <body><@ProductCard/></body>`
 
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/index.dreego", []byte(src))
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/index.dreego", []byte(src))
 	if err != nil {
 		t.Fatalf("parseRouteFile: %v", err)
 	}
 	if file.Kind != FileKindLayout {
 		t.Errorf("expected layout kind, got %v", file.Kind)
 	}
-	if file.Layout != "www/layouts/admin.dreego" {
+	if file.Layout != "www/app/layouts/admin.dreego" {
 		t.Errorf("expected layout path, got %q", file.Layout)
 	}
 	if len(file.GoImports) != 2 || file.GoImports[0].Path != "sync" {
@@ -37,7 +37,7 @@ COMPONENT "www/components" IMPORT { Card, Button, Card as ProductCard }
 }
 
 func TestParseRouteFileDefaultsToPageKind(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/index.dreego", []byte("<body>hi</body>"))
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/index.dreego", []byte("<body>hi</body>"))
 	if err != nil {
 		t.Fatalf("parseRouteFile: %v", err)
 	}

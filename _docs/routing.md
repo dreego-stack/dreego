@@ -7,20 +7,27 @@
 > A route file may state its kind explicitly with the `DREEFILE page` header
 > directive; a missing `DREEFILE` line also means page.
 
-Route discovery is restricted to the website root's `routes/` tree. The
-website root is any directory containing `dreego.config.json`. Directories
-named `routes` outside a website root (e.g. `vendor/…/www/routes`,
-`node_modules/…/www/routes`, `subapp/www/routes`) are ignored.
+Route discovery is restricted to the `routes/` tree of each **app**, an
+immediate subdirectory of a website root. The website root is any directory
+containing `dreego.config.json`; an app is a direct child with its own
+`routes/`. Directories named `routes` outside an app (e.g.
+`vendor/…/www/routes`, `node_modules/…/www/routes`, `subapp/www/routes`) are
+ignored.
 
-Directories below `www/routes/` define the URL path. `+page.dreego` and
+Directories below `<app>/routes/` define the URL path. `+page.dreego` and
 `index.dreego` define the URL of the directory itself. A different `.dreego`
 filename defines the final static path segment. A directory containing both
 index filenames is rejected as a duplicate route.
 
+A route declared directly in the website root (`dreego/routes/`) is a hard
+error: the root no longer owns routes directly. Move it into an app
+subdirectory, for example `dreego/www/routes/`. `dreego generate` reports the
+legacy layout with that migration hint.
+
 ## Directory Structure
 
 ```
-www/routes/
+dreego/www/routes/
 ├── +page.dreego                 → GET /
 ├── 404.dreego                  → GET /* (catch-all)
 ├── 500.dreego                  → Panic → 500

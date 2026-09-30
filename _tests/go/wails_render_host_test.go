@@ -69,16 +69,16 @@ func TestWailsRejectsHTTPOnlyRoute(t *testing.T) {
 
 func TestGeneratedPureGetPageRegistersRenderComponent(t *testing.T) {
 	generated := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<body><main><h1>Timer</h1></main></body>`,
+		"www/app/routes/+page.dreego": `<body><main><h1>Timer</h1></main></body>`,
 	})
-	routes := generated["www/routes/dree.go"]
+	routes := generated["www/app/routes/dree.go"]
 	dreegotest.MustContain(t, routes, `app.RegisterRender("/", PageIndex())`)
 }
 
 func TestGeneratedHTTPPageDoesNotRegisterRenderComponent(t *testing.T) {
 	generated := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>message := "HTTP only"</server><body>{{ message }}</body>`,
+		"www/app/routes/+page.dreego": `<server>message := "HTTP only"</server><body>{{ message }}</body>`,
 	})
-	routes := generated["www/routes/dree.go"]
+	routes := generated["www/app/routes/dree.go"]
 	dreegotest.MustNotContain(t, routes, "app.RegisterRender(")
 }

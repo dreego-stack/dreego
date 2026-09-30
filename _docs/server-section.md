@@ -21,10 +21,11 @@ the matching head and body templates.
 
 ## Scope
 
-Each route directory under `www/routes` compiles into **its own Go package**
-(named after the folder, sanitized to a valid Go identifier). The top-level
-`www/routes/dree.go` collects the `Register(app)` call of every sub-package, so
-the website entry point still calls one `routes.Register`. A `<server>` section
+Each route directory under `<app>/routes` (for example `dreego/www/routes`)
+compiles into **its own Go package** (named after the folder, sanitized to a
+valid Go identifier). The app's top-level `<app>/routes/dree.go` collects the
+`Register(app)` call of every sub-package, and the generated app registrar
+`<app>/dree.go` exposes that as `var App dreego.Registrar`. A `<server>` section
 is split at generation time:
 
 - The **leading declaration block** — `type`, `func`, `var`, and `const`

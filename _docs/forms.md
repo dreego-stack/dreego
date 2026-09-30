@@ -5,7 +5,7 @@ Declarative server-side form handling. One struct, one function — Dreego gener
 ## Quick Example
 
 ```html
-<!-- www/routes/login/+page.dreego -->
+<!-- dreego/www/routes/login/+page.dreego -->
 <server>
     type LoginForm struct {
         Email    string `form:"email" validate:"required,email"`

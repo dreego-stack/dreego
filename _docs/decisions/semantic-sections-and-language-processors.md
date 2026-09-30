@@ -80,8 +80,8 @@ small (three planned), the VS Code extension can ship the same grammars, and
 the processors work out of the box. Raw Go, HTML, CSS, and JavaScript remain
 built in.
 
-Runtime plugins (SSE, WebSockets, Tailwind) and provider integrations remain
-external plugin repositories using the explicit `Register(app)` model. Managed
+runtime plugins (SSE, WebSockets, Tailwind) and provider integrations remain
+external plugin repositories using the explicit App-registrar model. Managed
 tools such as the TypeScript compiler require explicit installation, pinned
 versions, and verified release checksums.
 

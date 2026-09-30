@@ -33,17 +33,23 @@ func Register(app *dreego.App, options Options) error {
 }
 ```
 
-The application calls it before the App is built:
+The application passes the plugin registrar together with the generated app
+registrar to `dreego.New`, before the App is built:
 
 ```go
-app := dreego.New()
-if err := auth.Register(app, auth.Options{
-    LoginPath:  "/login",
-    CookieName: "session",
-}); err != nil {
-    log.Fatal(err)
-}
+app := dreego.New(
+    func(a *dreego.App) error {
+        return auth.Register(a, auth.Options{
+            LoginPath:  "/login",
+            CookieName: "session",
+        })
+    },
+    www.App,
+)
 ```
+
+`dreego.New` calls its registrars in argument order; `www.App` is the generated
+registrar for the website's app package.
 
 Registration order is source order. Duplicate routes fail instead of silently
 overriding another handler. Registration after `Build`, `Handler`, `ServeHTTP`,

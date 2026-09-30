@@ -9,7 +9,7 @@ import (
 func TestFrontmatterIsRejected(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuildFail(t, map[string]string{
-		"www/routes/+page.dreego": `---
+		"www/app/routes/+page.dreego": `---
 title: About
 ---
 <body><h1>About</h1></body>`,

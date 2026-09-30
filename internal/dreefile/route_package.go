@@ -74,7 +74,11 @@ func validRoutePackageSegment(seg string) bool {
 }
 
 func routeImportPath(gen *Generator, rel string) string {
-	path := gen.Module + "/" + gen.RootRel + "/routes"
+	base := gen.AppRel
+	if base == "" {
+		base = gen.RootRel
+	}
+	path := gen.Module + "/" + base + "/routes"
 	if rel != "" {
 		path += "/" + rel
 	}

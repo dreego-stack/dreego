@@ -76,7 +76,7 @@ directory (sanitized). The generated `dree.go` and the glue file therefore share
 one package, and `<server>` can call the glue function without an import:
 
 ```go
-// www/routes/register/glue.go
+// dreego/www/routes/register/glue.go
 package register
 
 import (
@@ -91,7 +91,7 @@ func CreateUser(c dreego.Context, email, password string) error {
 ```
 
 ```dreego
-<!-- www/routes/register/+page.dreego -->
+<!-- dreego/www/routes/register/+page.dreego -->
 <server>
 	type RegisterForm struct {
 		Email    string `form:"email" validate:"required,email"`
@@ -120,7 +120,7 @@ func CreateUser(c dreego.Context, email, password string) error {
 ```
 
 In releases before v0.10.9 all route files compiled into one `routes` package,
-so the glue file was `www/routes/glue.go`. With per-folder packages the glue
+so the glue file was `dreego/www/routes/glue.go`. With per-folder packages the glue
 file lives in the route folder itself.
 
 Use glue when you need behavior that is awkward to inline: wrapping a function

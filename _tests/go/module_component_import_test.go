@@ -20,12 +20,12 @@ func TestModuleComponentImport(t *testing.T) {
 
 func testModuleComponentImport(t *testing.T, root string) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		root + "/routes/+page.dreego": `COMPONENT "example.com/ui/components" IMPORT {
+		root + "/app/routes/+page.dreego": `COMPONENT "example.com/ui/components" IMPORT {
     Button,
 }
 <body><@Button label="From module"/></body>`,
 	})
-	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte("package main\nimport (\n\tsite \"t/"+root+"\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := site.Register(app); err != nil { panic(err) } }\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte("package main\nimport (\n\tsite \"t/"+root+"/app\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { _ = dreego.New(site.App) }\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 

@@ -26,7 +26,7 @@ Place this file at the root of the plugin module:
   "build": {
     "steps": [
       {
-        "cmd": "npx tailwindcss -i input.css -o www/static/tailwind.css --minify",
+        "cmd": "npx tailwindcss -i input.css -o dreego/www/static/tailwind.css --minify",
         "when": "pre-build"
       }
     ]
@@ -42,7 +42,7 @@ Place this file at the root of the plugin module:
 
 The `cmd` runs in the **project root** (where `go.mod` lives), not in the
 plugin directory. This lets plugins reference project-relative paths like
-`www/static/tailwind.css`.
+`dreego/www/static/tailwind.css`.
 
 ## When Steps Run
 
@@ -74,7 +74,7 @@ When `dreego build` finds a `pre-build` step that has not been approved yet and
 stdin is a terminal, it prints:
 
 ```
-plugin "github.com/dreego-stack/plugin-tailwind" wants to run "npx tailwindcss -i input.css -o www/static/tailwind.css --minify" in this repo. Approve? y/N:
+plugin "github.com/dreego-stack/plugin-tailwind" wants to run "npx tailwindcss -i input.css -o dreego/www/static/tailwind.css --minify" in this repo. Approve? y/N:
 ```
 
 Type `y` (or `yes`, case-insensitive) to approve and run the command. Type `N`,
@@ -91,7 +91,7 @@ Approved commands are recorded in `dreego-build.json` at the project root:
 ```json
 {
   "approvedHooks": {
-    "github.com/dreego-stack/plugin-tailwind:npx tailwindcss -i input.css -o www/static/tailwind.css --minify": true
+    "github.com/dreego-stack/plugin-tailwind:npx tailwindcss -i input.css -o dreego/www/static/tailwind.css --minify": true
   }
 }
 ```
@@ -135,5 +135,6 @@ go get github.com/dreego-stack/plugin-tailwind
 ```
 
 The plugin's `dreego-plugin.json` runs `npx tailwindcss` during `dreego build`
-and writes the compiled CSS to `www/static/tailwind.css`. The Go binary embeds
-this file via the Dreego static-asset system. No Node.js needed at runtime.
+and writes the compiled CSS to `dreego/www/static/tailwind.css`. The Go binary
+embeds this file via the Dreego static-asset system. No Node.js needed at
+runtime.

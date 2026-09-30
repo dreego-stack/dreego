@@ -85,6 +85,7 @@ in one place instead of across module directories.
 ## Decisions
 
 - [Architecture Decisions](https://github.com/dreego-stack/dreego/tree/main/_docs/decisions) — ADRs (context design, routing, middleware, forms, session, transpiler, ...)
+- [One website root with multiple apps](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/multi-app-website-root.md) — Root config plus multiple app packages, hosts/ports in `main.go`
 - [Explicit Dreefile header grammar](https://github.com/dreego-stack/dreego/blob/main/_docs/decisions/explicit-dreefile-header-grammar.md) — `DREEFILE`/`LAYOUT`/`COMPONENT`/`GOIMPORT` replace `Component`/`import`/`from`
 
 ## Meta

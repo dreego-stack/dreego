@@ -8,14 +8,14 @@ import (
 func TestFormatKeepsDreefileDirectivesInHeader(t *testing.T) {
 	in := `DREEFILE component (title string)
 
-COMPONENT "www/components" IMPORT {
+COMPONENT "www/app/components" IMPORT {
     Card,
     Button,
 }
 
 GOIMPORT { sync, encoding/json }
 
-LAYOUT "www/layouts/admin.dreego"
+LAYOUT "www/app/layouts/admin.dreego"
 
 <body>
   <p>{{  title  }}</p>
@@ -27,9 +27,9 @@ LAYOUT "www/layouts/admin.dreego"
 		t.Fatalf("DREEFILE line must stay in the header, got:\n%s", out)
 	}
 	for _, want := range []string{
-		`COMPONENT "www/components" IMPORT {`,
+		`COMPONENT "www/app/components" IMPORT {`,
 		`GOIMPORT { sync, encoding/json }`,
-		`LAYOUT "www/layouts/admin.dreego"`,
+		`LAYOUT "www/app/layouts/admin.dreego"`,
 		"    Card,",
 		"    Button,",
 		"{{ title }}",
@@ -50,11 +50,11 @@ LAYOUT "www/layouts/admin.dreego"
 func TestFormatDreefileDirectivesIdempotent(t *testing.T) {
 	in := `DREEFILE layout
 
-LAYOUT "www/layouts/base.dreego"
+LAYOUT "www/app/layouts/base.dreego"
 
 GOIMPORT { strings }
 
-COMPONENT "www/components" IMPORT { Nav }
+COMPONENT "www/app/components" IMPORT { Nav }
 `
 	once := Format(in)
 	twice := Format(once)
@@ -67,8 +67,8 @@ COMPONENT "www/components" IMPORT { Nav }
 }
 
 func TestFormatLayoutLineNormalizesSpacing(t *testing.T) {
-	out := formatLayoutLine(`LAYOUT   "www/layouts/admin.dreego"`)
-	if out != `LAYOUT "www/layouts/admin.dreego"` {
+	out := formatLayoutLine(`LAYOUT   "www/app/layouts/admin.dreego"`)
+	if out != `LAYOUT "www/app/layouts/admin.dreego"` {
 		t.Fatalf("expected normalized LAYOUT line, got %q", out)
 	}
 }
@@ -76,7 +76,7 @@ func TestFormatLayoutLineNormalizesSpacing(t *testing.T) {
 func TestFormatUnbalancedDirectiveKeepsBody(t *testing.T) {
 	in := `DREEFILE component (title string)
 
-COMPONENT "www/components" IMPORT { Card
+COMPONENT "www/app/components" IMPORT { Card
 
 <body>
   <p>{{ title }}</p>
@@ -100,7 +100,7 @@ COMPONENT "www/components" IMPORT { Card
 }
 
 func TestFormatUnbalancedDirectiveDoesNotHoistBodySection(t *testing.T) {
-	in := `COMPONENT "www/components" IMPORT { Card
+	in := `COMPONENT "www/app/components" IMPORT { Card
 <server>msg := "hi"</server>
 <body><p>{{ msg }}</p></body>
 `
@@ -118,7 +118,7 @@ func TestFormatUnbalancedDirectiveDoesNotHoistBodySection(t *testing.T) {
 }
 
 func TestFormatBalancedDirectiveStillGroupsMultilineBlock(t *testing.T) {
-	in := `COMPONENT "www/components" IMPORT {
+	in := `COMPONENT "www/app/components" IMPORT {
     Card,
     Button,
 }
@@ -159,7 +159,7 @@ func TestFormatBareDreefileRoundTripStillRejected(t *testing.T) {
 }
 
 func TestFormatCollapsesDuplicateHeaderBlankLines(t *testing.T) {
-	in := "DREEFILE component (title string)\n\n\nLAYOUT \"www/layouts/admin.dreego\"\n\n\n<body><p>x</p></body>\n"
+	in := "DREEFILE component (title string)\n\n\nLAYOUT \"www/app/layouts/admin.dreego\"\n\n\n<body><p>x</p></body>\n"
 	out := Format(in)
 	if strings.Contains(out, "\n\n\n") {
 		t.Fatalf("Format must collapse duplicate header blank lines, got:\n%q", out)

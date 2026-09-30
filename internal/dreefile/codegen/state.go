@@ -14,6 +14,7 @@ type State struct {
 	ImportKeySet     bool
 	Module           string
 	RootRel          string
+	AppRel           string
 	Requires         map[string]string
 	CompPkgs         map[string]string
 	CompPaths        map[string]string
@@ -69,9 +70,13 @@ func (g *State) LookupDef(name string) *ir.ComponentDef {
 	return g.Defs[name]
 }
 
-func (g *State) RegisterCompPkg(name, pkg, relDir string) {
+// RegisterCompPkg records the Go package that owns a component and the full
+// import path of that package (module-qualified). Both maps are keyed by
+// component name, which is unique per scan; two directories may produce the
+// same Go package name, so the import path cannot be keyed by package name.
+func (g *State) RegisterCompPkg(name, pkg, importPath string) {
 	g.CompPkgs[name] = pkg
-	g.CompPaths[pkg] = relDir
+	g.CompPaths[name] = importPath
 }
 
 func (g *State) RegisterCompAlias(alias, target string) error {
@@ -123,8 +128,7 @@ func (g *State) Qualify(funcName string) string {
 	if pkg == "" || pkg == g.Pkg {
 		return funcName
 	}
-	rel := g.CompPaths[pkg]
-	path := g.Module + "/" + g.RootRel + "/" + rel
+	path := g.CompPaths[funcName]
 	g.AddImport(g.importKey(), pkg, path)
 	return pkg + "." + funcName
 }

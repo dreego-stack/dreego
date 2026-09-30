@@ -10,9 +10,9 @@ import (
 func routeLocalLayoutFixture() map[string]string {
 	return map[string]string{
 		"www/layouts/default.dreego":                      "<body><html lang=\"en\"><body><nav>Root nav</nav>{#slot}</body></html></body>",
-		"www/routes/registrierung/layouts/default.dreego": "<body><html lang=\"de\"><body class=\"auth\"><nav>Registrierung nav</nav>{#slot}</body></html></body>",
-		"www/routes/+page.dreego":                         "<body><p>Home page</p></body>",
-		"www/routes/registrierung/+page.dreego":           "<body><p>Registrierung page</p></body>",
+		"www/app/routes/registrierung/layouts/default.dreego": "<body><html lang=\"de\"><body class=\"auth\"><nav>Registrierung nav</nav>{#slot}</body></html></body>",
+		"www/app/routes/+page.dreego":                         "<body><p>Home page</p></body>",
+		"www/app/routes/registrierung/+page.dreego":           "<body><p>Registrierung page</p></body>",
 	}
 }
 
@@ -29,13 +29,13 @@ func TestBugRouteLocalLayoutGeneratedNames(t *testing.T) {
 	if strings.Count(layouts, "func Default(") != 1 {
 		t.Fatalf("root layout must emit exactly one func Default, got:\n%s", layouts)
 	}
-	dreegotest.MustContain(t, layouts, "func DefaultRegistrierung(")
+	dreegotest.MustContain(t, layouts, "func DefaultAppRegistrierung(")
 
-	routes := gen["www/routes/dree.go"]
+	routes := gen["www/app/routes/dree.go"]
 	dreegotest.MustContain(t, routes, "layouts.Default(c, pageContent, head)")
 
-	routeLocal := gen["www/routes/registrierung/dree.go"]
-	dreegotest.MustContain(t, routeLocal, "layouts.DefaultRegistrierung(c, pageContent, head)")
+	routeLocal := gen["www/app/routes/registrierung/dree.go"]
+	dreegotest.MustContain(t, routeLocal, "layouts.DefaultAppRegistrierung(c, pageContent, head)")
 	dreegotest.MustNotContain(t, routes, "/registrierung/layouts")
 	dreegotest.MustNotContain(t, routeLocal, "/registrierung/layouts")
 }

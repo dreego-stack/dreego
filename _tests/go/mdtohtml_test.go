@@ -11,13 +11,13 @@ import (
 func TestMdtohtmlTrustedGenerated(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>post := "# Hi"
+		"www/app/routes/+page.dreego": `<server>post := "# Hi"
 html, err := dreego.mdtohtml(post, trusted: true)
 if err != nil { return "", err }</server>
 <body><p>{{ html|raw }}</p></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "dreego.MarkdownToHTMLTrusted(post)")
-	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "dreego.mdtohtml(")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "dreego.MarkdownToHTMLTrusted(post)")
+	dreegotest.MustNotContain(t, gen["www/app/routes/dree.go"], "dreego.mdtohtml(")
 }
 
 // TestMdtohtmlSafeGenerated asserts the default dreego.mdtohtml(x) syntax is
@@ -25,13 +25,13 @@ if err != nil { return "", err }</server>
 func TestMdtohtmlSafeGenerated(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>post := "# Hi"
+		"www/app/routes/+page.dreego": `<server>post := "# Hi"
 html, err := dreego.mdtohtml(post)
 if err != nil { return "", err }</server>
 <body><p>{{ html|raw }}</p></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "dreego.MarkdownToHTML(post)")
-	dreegotest.MustNotContain(t, gen["www/routes/dree.go"], "dreego.mdtohtml(")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "dreego.MarkdownToHTML(post)")
+	dreegotest.MustNotContain(t, gen["www/app/routes/dree.go"], "dreego.mdtohtml(")
 }
 
 // TestMdtohtmlServes asserts a route using dreego.mdtohtml renders the Markdown
@@ -39,7 +39,7 @@ if err != nil { return "", err }</server>
 func TestMdtohtmlServes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>html, err := dreego.mdtohtml("# Hello")
+		"www/app/routes/+page.dreego": `<server>html, err := dreego.mdtohtml("# Hello")
 if err != nil { return "", err }</server>
 <body><div>{{ html|raw }}</div></body>`,
 	})

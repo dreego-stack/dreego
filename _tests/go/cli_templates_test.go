@@ -13,7 +13,7 @@ import (
 func TestCLINewSelectedTemplate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.NewProject(t, "app", "web-minimal")
-	for _, f := range []string{"main.go", "www/routes/+page.dreego"} {
+	for _, f := range []string{"main.go", "dreego/www/routes/+page.dreego"} {
 		if _, statErr := os.Stat(filepath.Join(dir, f)); statErr != nil {
 			t.Fatalf("missing %s after new: %v", f, statErr)
 		}
@@ -25,11 +25,11 @@ func TestCLINewWebAppTemplate(t *testing.T) {
 	dir := dreegotest.NewProject(t, "app", "web-app")
 	for _, f := range []string{
 		"main.go",
-		"www/layouts/default.dreego",
-		"www/components/Nav.dreego",
-		"www/components/Card.dreego",
-		"www/routes/+page.dreego",
-		"www/routes/dashboard/+page.dreego",
+		"dreego/layouts/default.dreego",
+		"dreego/components/Nav.dreego",
+		"dreego/components/Card.dreego",
+		"dreego/www/routes/+page.dreego",
+		"dreego/www/routes/dashboard/+page.dreego",
 	} {
 		if _, statErr := os.Stat(filepath.Join(dir, f)); statErr != nil {
 			t.Fatalf("missing %s after new -t web-app: %v", f, statErr)

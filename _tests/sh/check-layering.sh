@@ -21,7 +21,7 @@ function in_list(x, list,   n, a, i) {
 function allowed(pkg, imp,   g) {
   g = "internal/dreefile/codegen internal/dreefile/dreecode internal/dreefile/gogen internal/dreefile/ir internal/dreefile/jsoutput"
   if (pkg == "internal/dreefile")
-    return in_list(imp, "internal/dreefile/sections/head internal/dreefile/sections/style internal/dreefile/sections/body/html internal/dreefile/sections/body/md internal/dreefile/sections/client internal/dreefile/sections/client/js internal/dreefile/sections/client/ts internal/dreefile/sections/client/lua internal/dreefile/tokens internal/dreefile/lexer internal/dreefile/parser internal/dreefile/i18n internal/gomod " g)
+    return in_list(imp, "internal/dreefile/sections/head internal/dreefile/sections/style internal/dreefile/sections/body/html internal/dreefile/sections/body/md internal/dreefile/sections/client internal/dreefile/sections/client/js internal/dreefile/sections/client/ts internal/dreefile/sections/client/lua internal/dreefile/tokens internal/dreefile/lexer internal/dreefile/parser internal/dreefile/i18n internal/gomod internal/urlrule " g)
   if (pkg == "internal/dreefile/ir" || pkg == "internal/dreefile/tokens" || pkg == "internal/dreefile/i18n") return 0
   if (pkg == "internal/dreefile/dreecode" || pkg == "internal/dreefile/gogen" || pkg == "internal/dreefile/codegen") return in_list(imp, "internal/dreefile/ir")
   if (pkg == "internal/dreefile/jsoutput") return in_list(imp, "internal/dreefile/gogen")

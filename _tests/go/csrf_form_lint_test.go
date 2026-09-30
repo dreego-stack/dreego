@@ -14,7 +14,7 @@ func csrfFormRoute(form string) string {
 func TestCSRFFormLintWarnsWithoutToken(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": csrfFormRoute(`<form g-action="Save" method="post">
+		"www/app/routes/+page.dreego": csrfFormRoute(`<form g-action="Save" method="post">
     <input name="name">
     <button>OK</button>
 </form>`),
@@ -29,7 +29,7 @@ func TestCSRFFormLintWarnsWithoutToken(t *testing.T) {
 	if !strings.Contains(out, "403") {
 		t.Fatalf("warning must state the 403 outcome, got:\n%s", out)
 	}
-	if !strings.Contains(out, "www/routes/+page.dreego") || !strings.Contains(out, "Fix:") {
+	if !strings.Contains(out, "www/app/routes/+page.dreego") || !strings.Contains(out, "Fix:") {
 		t.Fatalf("warning must carry the source location and fix, got:\n%s", out)
 	}
 }
@@ -37,7 +37,7 @@ func TestCSRFFormLintWarnsWithoutToken(t *testing.T) {
 func TestCSRFFormLintSilentWithToken(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": csrfFormRoute(`<form g-action="Save" method="post">
+		"www/app/routes/+page.dreego": csrfFormRoute(`<form g-action="Save" method="post">
     <input type="hidden" name="csrf_token" value="{{ c.CSRFToken() }}">
     <input name="name">
     <button>OK</button>

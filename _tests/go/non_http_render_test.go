@@ -16,7 +16,7 @@ func TestGeneratedComponentRendersWithoutHTTP(t *testing.T) {
 		"www/components/Badge.dreego": `DREEFILE component (label string)
 <body><span class="badge">{{ label }}</span></body>
 <style>.badge { font-weight: bold; }</style>`,
-		"www/routes/+page.dreego": `<head><title>Shop</title></head>
+		"www/app/routes/+page.dreego": `<head><title>Shop</title></head>
 
 <body><@Badge label={"<b>hot</b>"}/></body>`,
 	}
@@ -72,7 +72,7 @@ import (
 	"testing"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"t/www/routes"
+	"t/www/app/routes"
 )
 
 func TestGeneratedPageRendersWithoutHTTP(t *testing.T) {
@@ -89,11 +89,11 @@ func TestGeneratedPageRendersWithoutHTTP(t *testing.T) {
 	}
 }
 `
-	pageTestFile := filepath.Join(dir, "www", "routes", "render_non_http_test.go")
+	pageTestFile := filepath.Join(dir, "www", "app", "routes", "render_non_http_test.go")
 	if err := os.WriteFile(pageTestFile, []byte(pageTest), 0644); err != nil {
 		t.Fatal(err)
 	}
-	command = exec.Command("go", "test", "./www/routes", "-run", "TestGeneratedPageRendersWithoutHTTP")
+	command = exec.Command("go", "test", "./www/app/routes", "-run", "TestGeneratedPageRendersWithoutHTTP")
 	command.Dir = dir
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("generated page non-HTTP render test failed: %v\n%s", err, output)

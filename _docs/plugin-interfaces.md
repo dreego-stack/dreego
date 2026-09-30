@@ -53,22 +53,23 @@ Or in your own project repo:
 ```
 myapp/
 ├── go.mod           (module myapp)
-├── main.go          (calls auth.Register)
+├── main.go          (calls auth.Register through dreego.New)
 ├── plugins/
 │   └── auth/
 │       └── auth.go  (exports Register and Options)
 └── dreego/
-    └── routes/
+    └── www/
+        └── routes/
 ```
 
 Then register the feature explicitly on the owning app:
 ```go
-app := dreego.New()
-if err := auth.Register(app, auth.Options{
-	LoginPath: "/login",
-}); err != nil {
-	log.Fatal(err)
-}
+app := dreego.New(
+    func(a *dreego.App) error {
+        return auth.Register(a, auth.Options{LoginPath: "/login"})
+    },
+    www.App,
+)
 ```
 
 ## Cluster Plugin (planned)

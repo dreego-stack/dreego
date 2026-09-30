@@ -89,7 +89,9 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 	if err := os.WriteFile(filepath.Join(dir, "go.sum"), data, 0o644); err != nil {
 		return "", err
 	}
-	mainGo := "package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := www.Register(app); err != nil { panic(err) } }\n"
+	appPkg := appPackagePath(files)
+	appName := appPackageName(files)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t%q\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { _ = dreego.New(%s.App) }\n", "t/"+appPkg, appName)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		return "", err
 	}
@@ -129,17 +131,21 @@ func ensureConfig(t *testing.T, dir string, files map[string]string) {
 	t.Helper()
 	roots := map[string]bool{}
 	for path := range files {
-		parts := strings.Split(filepath.ToSlash(path), "/")
-		for i, p := range parts {
-			if p == "routes" || p == "components" || p == "layouts" {
-				root := filepath.Join(append([]string{dir}, parts[:i]...)...)
-				roots[root] = true
-			}
+		root, ok := websiteRootOf(path)
+		if !ok {
+			continue
 		}
+		if root == "" {
+			root = "."
+		}
+		roots[root] = true
 	}
 	for root := range roots {
-		cfg := filepath.Join(root, "dreego.config.json")
+		cfg := filepath.Join(dir, root, "dreego.config.json")
 		if _, err := os.Stat(cfg); os.IsNotExist(err) {
+			if err := os.MkdirAll(filepath.Dir(cfg), 0755); err != nil {
+				t.Fatalf("ensureConfig: %v", err)
+			}
 			if err := os.WriteFile(cfg, []byte("{}"), 0644); err != nil {
 				t.Fatalf("ensureConfig: %v", err)
 			}

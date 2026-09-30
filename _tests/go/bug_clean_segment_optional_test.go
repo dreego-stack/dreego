@@ -10,7 +10,7 @@ import (
 func TestBugCleanSegmentOptional(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/[[opt]]/+page.dreego": `<body>optional</body>`,
+		"www/app/routes/[[opt]]/+page.dreego": `<body>optional</body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -19,7 +19,7 @@ func TestBugCleanSegmentOptional(t *testing.T) {
 	if !strings.Contains(out, "[[opt]]") {
 		t.Fatalf("error must name the optional segment, got: %s", out)
 	}
-	if !strings.Contains(out, "www/routes/[[opt]]") {
+	if !strings.Contains(out, "www/app/routes/[[opt]]") {
 		t.Fatalf("error must include the source path, got: %s", out)
 	}
 }

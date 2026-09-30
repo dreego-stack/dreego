@@ -20,7 +20,7 @@ func TestFmtScaffoldLayoutsRoundTrip(t *testing.T) {
 			if err := templates.Install(dir, "example.com/app", meta.Name); err != nil {
 				t.Fatalf("install %q: %v", meta.Name, err)
 			}
-			layouts, err := filepath.Glob(filepath.Join(dir, "www", "layouts", "*.dreego"))
+			layouts, err := filepath.Glob(filepath.Join(dir, "dreego", "layouts", "*.dreego"))
 			if err != nil || len(layouts) == 0 {
 				t.Fatalf("no scaffold layouts for %q: %v", meta.Name, err)
 			}

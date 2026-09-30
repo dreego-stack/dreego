@@ -9,8 +9,8 @@ import (
 func TestBugHeadWithoutLayout(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<head><script src="script.js"></script></head>
+		"www/app/routes/+page.dreego": `<head><script src="script.js"></script></head>
 <body><p>hi</p></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "script.js")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "script.js")
 }

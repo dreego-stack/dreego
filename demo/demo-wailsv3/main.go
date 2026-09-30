@@ -4,16 +4,14 @@ import (
 	"log"
 
 	"demo-wailsv3/app"
+	webapp "demo-wailsv3/app/web"
 	wailsadapter "github.com/dreego-stack/dreego/adapter/wails"
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func main() {
-	dreegoApp := dreego.New()
-	if err := app.Register(dreegoApp); err != nil {
-		log.Fatal(err)
-	}
+	dreegoApp := dreego.New(webapp.App)
 	handler, err := wailsadapter.New(dreegoApp)
 	if err != nil {
 		log.Fatal(err)
