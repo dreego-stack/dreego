@@ -34,13 +34,17 @@ func websiteRootOf(path string) (string, bool) {
 
 // appPackagePath returns the module-relative import path of the app package for
 // the files ("www/app" for a root named www with an app dir named app). It
-// prefers a path that contains routes/ and falls back to any website root. When
-// several apps exist, the lexicographically smallest route-bearing app wins so
-// the choice is deterministic.
+// prefers a path that contains routes/, then a nested app config directory, and
+// falls back to any website root. When several apps exist, the lexicographically
+// smallest wins so the choice is deterministic.
 func appPackagePath(files map[string]string) string {
 	paths := make([]string, 0, len(files))
 	fallback := ""
 	for path := range files {
+		if dir, ok := nestedAppConfigDir(path); ok {
+			paths = append(paths, dir)
+			continue
+		}
 		if _, ok := websiteRootOf(path); !ok {
 			continue
 		}
@@ -65,6 +69,20 @@ func appPackagePath(files map[string]string) string {
 		return paths[0]
 	}
 	return fallback
+}
+
+// nestedAppConfigDir returns the app directory for a nested dreego.config.json
+// (a config file below the website root), or false for the root config.
+func nestedAppConfigDir(path string) (string, bool) {
+	const configFile = "dreego.config.json"
+	if !strings.HasSuffix(path, "/"+configFile) {
+		return "", false
+	}
+	dir := strings.TrimSuffix(path, "/"+configFile)
+	if !strings.Contains(dir, "/") {
+		return "", false
+	}
+	return dir, true
 }
 
 // appPackageName returns the Go package identifier generated for the app

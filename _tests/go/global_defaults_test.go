@@ -98,6 +98,30 @@ func TestGlobalStaticInheritedAndLocalWins(t *testing.T) {
 	}
 }
 
+func TestMinimalAppInheritsAllGlobalTrees(t *testing.T) {
+	t.Parallel()
+	// The smallest app carries only its own dreego.config.json and inherits the
+	// global routes, static and layouts.
+	c := dreegotest.ServeSetup(t, map[string]string{
+		"www/dreego.config.json":     `{"logging":{"enabled":false}}`,
+		"www/routes/+page.dreego":    `<body><p>shared home</p></body>`,
+		"www/static/global.css":      `.global {}`,
+		"www/layouts/default.dreego": `<body><html><body><nav id="root-nav">Root</nav>{#slot}</body></html></body>`,
+		"www/www/dreego.config.json": `{}`,
+	}, "")
+
+	code, body := c.Get(t, "/")
+	if code != 200 || !strings.Contains(body, "shared home") {
+		t.Fatalf("minimal app must serve the global route: %d %s", code, body)
+	}
+	dreegotest.MustContainBody(t, body, `id="root-nav"`)
+
+	code, body = c.Get(t, "/global.css")
+	if code != 200 || !strings.Contains(body, ".global") {
+		t.Fatalf("minimal app must serve the global static: %d %s", code, body)
+	}
+}
+
 func TestAppWithoutRoutesInheritsGlobal(t *testing.T) {
 	t.Parallel()
 	m := dreegotest.ServeApps(t, map[string]string{

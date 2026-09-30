@@ -224,8 +224,10 @@ relative paths it redeclares; other global files stay available. An app-local
 default layout wins over the shared one. Route-local layouts live under
 `<app>/routes/<sub>/layouts/` (or `routes/<sub>/layouts/` for the shared tree). A
 route may select a layout by path with `LAYOUT "dreego/layouts/admin.dreego"`. A
-website root with a global `routes/` and no app of its own is a valid app, so the
-minimal project is `dreego.config.json` plus `dreego/routes/+page.dreego`.
+website root still needs at least one app subdirectory; the smallest app may
+carry only `dreego.config.json` and inherit the global trees, so a minimal
+project is `dreego.config.json` plus `dreego/routes/+page.dreego` plus an app
+directory such as `dreego/www/`.
 
 `main.go` wires hosts and ports explicitly; each app is one `dreego.New` call:
 
