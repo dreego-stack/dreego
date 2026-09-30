@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/dreego-stack/dreego/internal/gomod"
+	"github.com/dreego-stack/dreego/internal/urlrule"
 )
 
 func modulePath() string {
@@ -42,6 +43,47 @@ func loadSettings(root string) (*Settings, error) {
 		return nil, nil
 	}
 	return settings, nil
+}
+
+// loadAppSettings merges an app's dreego.config.json on top of the website
+// root's config. Both are optional; a missing or invalid file falls back to the
+// other layer.
+func loadAppSettings(rootDir, appDir string) (*Settings, error) {
+	root, err := loadSettings(rootDir)
+	if err != nil {
+		return nil, err
+	}
+	if appDir == "" {
+		return root, nil
+	}
+	app, err := loadSettings(appDir)
+	if err != nil {
+		return nil, err
+	}
+	return MergeSettings(root, app), nil
+}
+
+// validateUrlRules checks every redirect and rewrite rule at generation time so
+// an invalid rule fails `dreego generate` instead of panicking when the
+// generated app calls dreego.New.
+func validateUrlRules(settings *Settings) error {
+	if settings == nil {
+		return nil
+	}
+	var redirects, rewrites [][2]string
+	for _, rd := range settings.Redirects {
+		if err := urlrule.Redirect(rd.From, rd.To, rd.Status); err != nil {
+			return err
+		}
+		redirects = append(redirects, [2]string{rd.From, rd.To})
+	}
+	for _, rw := range settings.Rewrites {
+		if err := urlrule.Rewrite(rw.From, rw.To); err != nil {
+			return err
+		}
+		rewrites = append(rewrites, [2]string{rw.From, rw.To})
+	}
+	return urlrule.Cycle(redirects, rewrites)
 }
 
 func isUpToDate(path, content string) bool {

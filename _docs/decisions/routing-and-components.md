@@ -24,10 +24,13 @@ This decision defines the implemented migration target.
 Generated code registers explicitly with its owning App:
 
 ```go
-app := dreego.New()
-gen.Register(app)
+app := dreego.New(www.App)
 ssr.Listen(app, ":8080")
 ```
+
+`www.App` is the generated registrar of the website's `www` app package. See
+[One website root with multiple apps](multi-app-website-root.md) for the app
+model that superseded a single root-level `Register`.
 
 Generated packages do not register routes through `init`, blank imports, or
 package-global state. Two App instances can therefore own independent routes,
@@ -61,7 +64,7 @@ without adding a URL segment.
 section to another HTTP method:
 
 ```dreego
-COMPONENT "www/components" IMPORT { UserResult }
+COMPONENT "dreego/www/components" IMPORT { UserResult }
 
 <server method="post">
 result, err := createUser(c)
@@ -91,7 +94,7 @@ the five root sections: `<server>`, `<head>`, `<body>`, `<style>`, and
 `<client>`.
 
 ```dreego
-COMPONENT "www/components" IMPORT { Button }
+COMPONENT "dreego/www/components" IMPORT { Button }
 
 <body>
     <@Button class="primary" disabled={isLoading}>

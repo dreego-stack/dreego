@@ -38,10 +38,10 @@ func runInDir(t *testing.T, dir string) error {
 func TestRunAbortsOnSourceReadFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json":   "{}",
-		"www/routes/+page.dreego":  "<body><p>ok</p></body>",
-		"www/routes/broken.dreego": "",
+		"www/app/routes/+page.dreego":  "<body><p>ok</p></body>",
+		"www/app/routes/broken.dreego": "",
 	})
-	target := filepath.Join(dir, "www", "routes", "broken.dreego")
+	target := filepath.Join(dir, "www", "app", "routes", "broken.dreego")
 	os.Remove(target)
 	if err := os.Symlink(filepath.Join(dir, "missing-target"), target); err != nil {
 		t.Skipf("cannot create broken symlink: %v", err)
@@ -59,9 +59,9 @@ func TestRunAbortsOnSourceReadFailure(t *testing.T) {
 func TestRunAbortsOnReadDirFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json":  "{}",
-		"www/routes/+page.dreego": "<body><p>ok</p></body>",
+		"www/app/routes/+page.dreego": "<body><p>ok</p></body>",
 	})
-	secretDir := filepath.Join(dir, "www", "routes", "secret")
+	secretDir := filepath.Join(dir, "www", "app", "routes", "secret")
 	if err := os.MkdirAll(secretDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -81,9 +81,9 @@ func TestRunAbortsOnReadDirFailure(t *testing.T) {
 func TestRunAbortsOnLayoutReadFailure(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json":  "{}",
-		"www/routes/+page.dreego": "<body><p>ok</p></body>",
+		"www/app/routes/+page.dreego": "<body><p>ok</p></body>",
 	})
-	layoutDir := filepath.Join(dir, "www", "layouts")
+	layoutDir := filepath.Join(dir, "www", "app", "layouts")
 	if err := os.MkdirAll(layoutDir, 0755); err != nil {
 		t.Fatal(err)
 	}

@@ -12,7 +12,7 @@ import (
 func TestBugIfStringConditionCompiles(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/login/+page.dreego": `<server>
+		"www/app/routes/login/+page.dreego": `<server>
     type LoginForm struct {
         Email string ` + "`form:\"email\" validate:\"required,email\"`" + `
     }
@@ -38,7 +38,7 @@ func TestBugIfStringConditionCompiles(t *testing.T) {
 func TestBugIfTruthinessMatrixCompiles(t *testing.T) {
 	t.Parallel()
 	dreegotest.MustBuild(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     title := ""
     count := 0
     items := []string{}
@@ -60,7 +60,7 @@ func TestBugIfTruthinessMatrixCompiles(t *testing.T) {
 func TestBugIfStringTruthinessRuntime(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
     title := ""
     count := 0
     items := []string{}

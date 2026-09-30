@@ -57,14 +57,14 @@ func TestUnknownSectionLanguageExplainsProcessorRequirement(t *testing.T) {
 func TestUnknownSectionLanguageDiagnosticHasSourceLocation(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<body lang="markdown"># Hello</body>`,
+		"www/app/routes/+page.dreego": `<body lang="markdown"># Hello</body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("generate succeeded, want unsupported-language error: %s", out)
 	}
 	for _, want := range []string{
-		"www/routes/+page.dreego:1:1",
+		"www/app/routes/+page.dreego:1:1",
 		`unsupported language "markdown" for <body>`,
 		"install a processor",
 	} {

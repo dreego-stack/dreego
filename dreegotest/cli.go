@@ -36,7 +36,9 @@ func ProjectDir(t *testing.T, files map[string]string) string {
 		t.Fatalf("ProjectDir: write go.mod: %v", err)
 	}
 	copyModuleSum(t, dir, repoRoot)
-	mainGo := "package main\nimport (\n\t\"t/www\"\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { app := dreego.New(); if err := www.Register(app); err != nil { panic(err) } }\n"
+	appPkg := appPackagePath(files)
+	appName := appPackageName(files)
+	mainGo := fmt.Sprintf("package main\nimport (\n\t%q\n\tdreego \"github.com/dreego-stack/dreego/core\"\n)\nfunc main() { _ = dreego.New(%s.App) }\n", "t/"+appPkg, appName)
 	if err := os.WriteFile(filepath.Join(dir, "main.go"), []byte(mainGo), 0644); err != nil {
 		t.Fatalf("ProjectDir: write main.go: %v", err)
 	}

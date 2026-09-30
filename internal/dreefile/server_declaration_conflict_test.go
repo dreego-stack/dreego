@@ -29,7 +29,7 @@ type T struct{ V int }
 // Two route files that hoist the same package-level name must fail generation
 // with a dreego diagnostic instead of a raw compiler redeclaration error.
 func TestServerDeclarationConflictIsDiagnostic(t *testing.T) {
-	err := serverDeclarationConflict("Product", "www/routes/a.dreego", "www/routes/b.dreego")
+	err := serverDeclarationConflict("Product", "www/app/routes/a.dreego", "www/app/routes/b.dreego")
 	if err == nil {
 		t.Fatal("expected a conflict error")
 	}

@@ -10,7 +10,7 @@ import (
 func TestBugPageStyleScopeStaysOnDocumentBody(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<head><title>Scoped page</title></head>
+		"www/app/routes/+page.dreego": `<head><title>Scoped page</title></head>
 <body><main class="card">Styled</main></body>
 <style>.card { color: red; }</style>`,
 	})

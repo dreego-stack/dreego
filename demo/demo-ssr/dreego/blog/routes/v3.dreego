@@ -1,4 +1,4 @@
-GOIMPORT { blogdata "demo/blog/blogdata" }
+GOIMPORT { blogdata "demo/dreego/blog/blogdata" }
 
 <head>
     <title>Dreego Blog · v3 body md</title>

@@ -14,7 +14,7 @@ func TestDreefileGrammarComponentFilenameAndImport(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Greeting.dreego": `DREEFILE component (name string)
 <body><p>Hello {{ name }}</p></body>`,
-		"www/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Greeting }
+		"www/app/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Greeting }
 <body><@Greeting name="grammar"/></body>`,
 	})
 	code, body := c.Get(t, "/")
@@ -31,7 +31,7 @@ func TestDreefileGrammarComponentAlias(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component (title string)
 <body><article><h2>{{ title }}</h2></article></body>`,
-		"www/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
+		"www/app/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
 <body><@ProductCard title="Aliased"/></body>`,
 	})
 	code, body := c.Get(t, "/")
@@ -48,7 +48,7 @@ func TestDreefileGrammarLayout(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/layouts/default.dreego": `DREEFILE layout
 <body><html><body><nav>Nav</nav>{#slot}<footer>Foot</footer></body></html></body>`,
-		"www/routes/+page.dreego": `<body><p>page body</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>page body</p></body>`,
 	})
 	code, body := c.Get(t, "/")
 	if code != 200 {
@@ -64,7 +64,7 @@ func TestDreefileGrammarLayout(t *testing.T) {
 func TestDreefileGrammarGoImportGenerates(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `GOIMPORT { strings }
+		"www/app/routes/+page.dreego": `GOIMPORT { strings }
 <body><p>goimport route</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
@@ -80,7 +80,7 @@ func TestDreefileGrammarComponentAliasShadowsRealComponent(t *testing.T) {
 <body><article><h2>{{ title }}</h2></article></body>`,
 		"www/components/ProductCard.dreego": `DREEFILE component (title string)
 <body><p>{{ title }}</p></body>`,
-		"www/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
+		"www/app/routes/+page.dreego": `COMPONENT "www/components" IMPORT { Card as ProductCard }
 <body><@ProductCard title="clash"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
@@ -99,9 +99,9 @@ func TestDreefileGrammarComponentAliasConflictFails(t *testing.T) {
 <body><article><h2>{{ title }}</h2></article></body>`,
 		"www/components/Other.dreego": `DREEFILE component (title string)
 <body><p>{{ title }}</p></body>`,
-		"www/routes/a.dreego": `COMPONENT "www/components" IMPORT { Card as Widget }
+		"www/app/routes/a.dreego": `COMPONENT "www/components" IMPORT { Card as Widget }
 <body><@Widget title="a"/></body>`,
-		"www/routes/b.dreego": `COMPONENT "www/components" IMPORT { Other as Widget }
+		"www/app/routes/b.dreego": `COMPONENT "www/components" IMPORT { Other as Widget }
 <body><@Widget title="b"/></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
@@ -116,13 +116,13 @@ func TestDreefileGrammarComponentAliasConflictFails(t *testing.T) {
 func TestDreefileGrammarRejectsUnknownDreefileValue(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "DREEFILE Component\n<body><p>x</p></body>",
+		"www/app/routes/+page.dreego": "DREEFILE Component\n<body><p>x</p></body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
 		t.Fatalf("generate accepted an unknown DREEFILE value:\n%s", out)
 	}
-	for _, want := range []string{"www/routes/+page.dreego", "1:", "page, component, layout"} {
+	for _, want := range []string{"www/app/routes/+page.dreego", "1:", "page, component, layout"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("diagnostic must contain %q, got:\n%s", want, out)
 		}
@@ -134,7 +134,7 @@ func TestDreefileGrammarImportPathContainingImport(t *testing.T) {
 	c := dreegotest.Serve(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component (title string)
 <body><article><h2>{{ title }}</h2></article></body>`,
-		"www/routes/+page.dreego": `COMPONENT "www/IMPORTant/components" IMPORT { Card }
+		"www/app/routes/+page.dreego": `COMPONENT "www/IMPORTant/components" IMPORT { Card }
 <body><@Card title="import path"/></body>`,
 	})
 	code, body := c.Get(t, "/")
@@ -150,7 +150,7 @@ func TestDreefileGrammarRejectsInvalidComponentFilename(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/components/product-card.dreego": "DREEFILE component ()\n<body><p>x</p></body>",
-		"www/routes/+page.dreego":            `<body><p>page</p></body>`,
+		"www/app/routes/+page.dreego":            `<body><p>page</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -166,9 +166,9 @@ func TestDreefileGrammarRejectsInvalidComponentFilename(t *testing.T) {
 func TestDreefileGrammarFmtUnbalancedDirectiveKeepsBody(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "DREEFILE component (title string)\n\nCOMPONENT \"www/components\" IMPORT { Card\n\n<body><p>{{ title }}</p></body>\n",
+		"www/app/routes/+page.dreego": "DREEFILE component (title string)\n\nCOMPONENT \"www/components\" IMPORT { Card\n\n<body><p>{{ title }}</p></body>\n",
 	})
-	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/routes/+page.dreego")
+	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/app/routes/+page.dreego")
 	if err != nil {
 		t.Fatalf("fmt: %v\n%s", err, out)
 	}
@@ -185,16 +185,16 @@ func TestDreefileGrammarFmtCheckStaysLenientOnLegacyHeader(t *testing.T) {
 	t.Parallel()
 	src := "Component Legacy (name string)\n\nimport dreego github.com/dreego-stack/dreego\n\n<body><p>x</p></body>\n"
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": src,
+		"www/app/routes/+page.dreego": src,
 	})
-	formatted, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/routes/+page.dreego")
+	formatted, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/app/routes/+page.dreego")
 	if err != nil {
 		t.Fatalf("fmt: %v\n%s", err, formatted)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "www/routes/+page.dreego"), []byte(formatted), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "www/app/routes/+page.dreego"), []byte(formatted), 0644); err != nil {
 		t.Fatalf("write formatted file: %v", err)
 	}
-	if out, err := dreegotest.RunCLI(t, dir, "fmt", "--check", "www/routes/+page.dreego"); err != nil {
+	if out, err := dreegotest.RunCLI(t, dir, "fmt", "--check", "www/app/routes/+page.dreego"); err != nil {
 		t.Fatalf("fmt --check must stay lenient on a legacy header: %v\n%s", err, out)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err == nil {
@@ -205,9 +205,9 @@ func TestDreefileGrammarFmtCheckStaysLenientOnLegacyHeader(t *testing.T) {
 func TestDreefileGrammarFmtBareKeywordMatchesGenerate(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": "DREEFILE\n<body><p>x</p></body>\n",
+		"www/app/routes/+page.dreego": "DREEFILE\n<body><p>x</p></body>\n",
 	})
-	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/routes/+page.dreego")
+	out, err := dreegotest.RunCLI(t, dir, "fmt", "--stdout", "www/app/routes/+page.dreego")
 	if err != nil {
 		t.Fatalf("fmt: %v\n%s", err, out)
 	}
@@ -244,7 +244,7 @@ func TestDreefileGrammarLegacyFormsRejected(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			dir := dreegotest.ProjectDir(t, map[string]string{
-				"www/routes/+page.dreego": tc.src,
+				"www/app/routes/+page.dreego": tc.src,
 			})
 			out, err := dreegotest.RunCLI(t, dir, "generate")
 			if err == nil {

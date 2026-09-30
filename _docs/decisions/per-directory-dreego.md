@@ -8,7 +8,7 @@ timestamp: 2026-08-21T00:00:00Z
 # Per-directory dree.go output
 
 **Date:** 2026-08-21
-**Status:** Accepted
+**Status:** Accepted (superseded in part by [One website root with multiple apps](multi-app-website-root.md): the website root now holds one or more app subdirectories, and each app emits `<app>/dree.go` with `var App dreego.Registrar` instead of a root-level `Register(app)`)
 
 ## Context
 
@@ -26,17 +26,19 @@ a `config.json`. The user wants:
 ## Decision
 
 - The website root is any directory containing `dreego.config.json`
-  (renamed from `config.json`).
-- `dreego generate` walks all website roots and writes:
-  - `www/dree.go` — package www, `Register(app)` wiring config, static
-    assets and every route-package `Register`
-  - `www/routes/dree.go` — package routes: the root collector that imports
+  (renamed from `config.json`). A root holds apps as immediate subdirectories,
+  each with its own `routes/`.
+- `dreego generate` walks all website roots and, per app, writes (shown for the
+  scaffolded `www` app under `dreego/`):
+  - `dreego/www/dree.go` — package www, `var App dreego.Registrar` wiring
+    config, static assets and every route-package `Register`
+  - `dreego/www/routes/dree.go` — package routes: the root collector that imports
     every sub-route package and calls its `Register`
-  - `www/routes/<folder>/dree.go` — one package per route folder, holding that
-    folder's route handlers, layouts are called via
+  - `dreego/www/routes/<folder>/dree.go` — one package per route folder, holding
+    that folder's route handlers, layouts are called via
     `layouts.Default(c, pageContent, head)`
-  - `www/components/dree.go` — package components: all component functions
-  - `www/layouts/dree.go` — package layouts: `Default`/`Layout` functions
+  - `dreego/components/dree.go` — shared components package: all component functions
+  - `dreego/layouts/dree.go` — shared layouts package: `Default`/`Layout` functions
 - Each route folder is its own Go package, so a package-level declaration is
   visible only to the route files in the same folder and must be unique there.
   Shared state that must cross folders lives in a package imported via
@@ -48,7 +50,8 @@ a `config.json`. The user wants:
 
 ## Consequences
 
-- User code imports `myapp/www` and calls `www.Register(app)`; no `gen`
+- User code imports the app package (`myapp/dreego/www` in the scaffolded
+  layout) and passes its `App` registrar to `dreego.New(www.App)`; no `gen`
   import exists anymore
 - The generated `dree.go` files are gitignored (`dree.go`)
 - Multiple websites per repo: each root with `dreego.config.json`

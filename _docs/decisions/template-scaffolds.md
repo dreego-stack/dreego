@@ -14,7 +14,7 @@ timestamp: 2026-09-15T00:00:00Z
 
 `dreego new` previously copied one of two fixed blueprints from
 `cmd/dreego/blueprints/{default,landing}`. Both blueprints carried their own
-`main.go.tmpl`, `Taskfile.yml`, `.gitignore`, and `www/dreego.config.json`, so
+`main.go.tmpl`, `Taskfile.yml`, `.gitignore`, and site config, so
 the files were duplicated and drifted independently. The blueprint name was
 also hardcoded in the command implementations, so an additional scaffold would
 have meant another full copy of every common file.
@@ -36,19 +36,23 @@ cmd/dreego/internal/templates/
 │   ├── Dockerfile            ← CLI install + generate + static runtime build
 │   ├── docker-compose.yml
 │   ├── .gitignore.tmpl
-│   └── www/dreego.config.json
+│   └── dreego/dreego.config.json
 ├── web-minimal/
 │   ├── template.json
-│   └── www/
+│   └── dreego/
 │       ├── layouts/default.dreego
-│       └── routes/+page.dreego
+│       └── www/routes/+page.dreego
 └── web-app/
     ├── template.json
-    └── www/
+    └── dreego/
         ├── components/{Nav,Card}.dreego
         ├── layouts/default.dreego
-        └── routes/{+page.dreego,dashboard/+page.dreego}
+        └── www/routes/{+page.dreego,dashboard/+page.dreego}
 ```
+
+The `dreego/` directory is the website root; `www` is the scaffolded app
+subdirectory (see
+[One website root with multiple apps](multi-app-website-root.md)).
 
 `cmd/dreego/blueprints/` is deleted.
 

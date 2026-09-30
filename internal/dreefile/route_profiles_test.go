@@ -101,7 +101,7 @@ func TestScanRoutesEmitsApplyProfileForGroupFolder(t *testing.T) {
 		"routes/(hooks)/gitlab/+page.dreego": "<body>descendant inherits the group profile</body>",
 		"routes/marketing/+page.dreego":      "<body>plain</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestScanRoutesNearestProfileWins(t *testing.T) {
 		"routes/admin/secret/+page.dreego":      "PROFILE \"inner\"\n\n<body>secret</body>",
 		"routes/admin/secret/deep/+page.dreego": "<body>deep inherits inner</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
@@ -150,7 +150,7 @@ func TestScanRoutesNoProfileEmitsNothing(t *testing.T) {
 		"routes/+page.dreego":       "<body>home</body>",
 		"routes/about/+page.dreego": "<body>about</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestScanRoutesRootProfileAppliesToDescendants(t *testing.T) {
 		"routes/about/+page.dreego": "<body>about</body>",
 		"routes/admin/+page.dreego": "<body>admin inherits root</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatalf("scanRoutes: %v", err)
 	}
@@ -182,7 +182,7 @@ func TestScanRoutesRootProfileAppliesToDescendants(t *testing.T) {
 }
 
 func TestParseRouteFileExposesProfile(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/hooks/+page.dreego", []byte("PROFILE \"hooks\"\n\n<body>x</body>"))
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/hooks/+page.dreego", []byte("PROFILE \"hooks\"\n\n<body>x</body>"))
 	if err != nil {
 		t.Fatalf("parseRouteFile: %v", err)
 	}
@@ -195,9 +195,9 @@ func TestRunGeneratesApplyProfileRegistrations(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"go.mod":                                 "module example.com/site\n\ngo 1.27\n",
 		"www/dreego.config.json":                 "{}",
-		"www/routes/(hooks)/hooks.dreego":        "PROFILE \"hooks\"\n\n<body>webhook</body>",
-		"www/routes/(hooks)/github/+page.dreego": "<body>github</body>",
-		"www/routes/marketing/+page.dreego":      "<body>marketing</body>",
+		"www/app/routes/(hooks)/hooks.dreego":        "PROFILE \"hooks\"\n\n<body>webhook</body>",
+		"www/app/routes/(hooks)/github/+page.dreego": "<body>github</body>",
+		"www/app/routes/marketing/+page.dreego":      "<body>marketing</body>",
 	})
 	old, err := os.Getwd()
 	if err != nil {
@@ -210,7 +210,7 @@ func TestRunGeneratesApplyProfileRegistrations(t *testing.T) {
 	if err := Run(false); err != nil {
 		t.Fatalf("Run: %v", err)
 	}
-	root := filepath.Join(dir, "www", "routes", "dree.go")
+	root := filepath.Join(dir, "www", "app", "routes", "dree.go")
 	data, err := os.ReadFile(root)
 	if err != nil {
 		t.Fatal(err)

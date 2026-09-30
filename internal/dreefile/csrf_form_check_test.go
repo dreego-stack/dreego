@@ -16,7 +16,7 @@ func TestParseRouteFileEmitsCSRFWarningToStderr(t *testing.T) {
 	os.Stderr = w
 	defer func() { os.Stderr = orig }()
 
-	_, _, perr := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	_, _, perr := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<server>\n    type F struct{}\n    func Save(c dreego.Context, f F) error { return nil }\n</server>\n<body>\n<form g-action=\"Save\" method=\"post\">\n    <input name=\"name\">\n</form>\n</body>\n"))
 	_ = w.Close()
 	os.Stderr = orig
@@ -30,12 +30,12 @@ func TestParseRouteFileEmitsCSRFWarningToStderr(t *testing.T) {
 }
 
 func TestCSRFFormDiagnosticWarnsWithoutToken(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<server>\n    type F struct{}\n    func Save(c dreego.Context, f F) error { return nil }\n</server>\n<body>\n<form g-action=\"Save\" method=\"post\">\n    <input name=\"name\">\n</form>\n</body>\n"))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	diags := csrfFormDiagnostics(file.Body.Nodes, "www/routes/+page.dreego")
+	diags := csrfFormDiagnostics(file.Body.Nodes, "www/app/routes/+page.dreego")
 	if len(diags) != 1 {
 		t.Fatalf("expected one csrf diagnostic, got %d: %q", len(diags), diags)
 	}
@@ -45,7 +45,7 @@ func TestCSRFFormDiagnosticWarnsWithoutToken(t *testing.T) {
 	if !strings.Contains(diags[0], "403") {
 		t.Fatalf("diagnostic must state the 403 rejection, got: %s", diags[0])
 	}
-	if !strings.Contains(diags[0], "www/routes/+page.dreego:") {
+	if !strings.Contains(diags[0], "www/app/routes/+page.dreego:") {
 		t.Fatalf("diagnostic must carry the file location, got: %s", diags[0])
 	}
 	if !strings.Contains(diags[0], "Fix:") {
@@ -54,45 +54,45 @@ func TestCSRFFormDiagnosticWarnsWithoutToken(t *testing.T) {
 }
 
 func TestCSRFFormDiagnosticSilentWithHiddenInput(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<body>\n<form g-action=\"Save\" method=\"post\">\n    <input type=\"hidden\" name=\"csrf_token\" value=\"{{ c.CSRFToken() }}\">\n    <input name=\"name\">\n</form>\n</body>\n"))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/routes/+page.dreego"); len(diags) != 0 {
+	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/app/routes/+page.dreego"); len(diags) != 0 {
 		t.Fatalf("a form with csrf_token must not warn, got: %q", diags)
 	}
 }
 
 func TestCSRFFormDiagnosticAcceptsCSRFInput(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<body>\n<form g-action=\"Save\" method=\"post\">\n    {{ c.CSRFInput() }}\n    <input name=\"name\">\n</form>\n</body>\n"))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/routes/+page.dreego"); len(diags) != 0 {
+	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/app/routes/+page.dreego"); len(diags) != 0 {
 		t.Fatalf("c.CSRFInput() must satisfy the lint, got: %q", diags)
 	}
 }
 
 func TestCSRFFormDiagnosticSilentWithoutGAction(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<body>\n<form method=\"post\" action=\"/x\">\n    <input name=\"name\">\n</form>\n</body>\n"))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/routes/+page.dreego"); len(diags) != 0 {
+	if diags := csrfFormDiagnostics(file.Body.Nodes, "www/app/routes/+page.dreego"); len(diags) != 0 {
 		t.Fatalf("a form without g-action must not warn, got: %q", diags)
 	}
 }
 
 func TestCSRFFormDiagnosticReportsOnlyMissingForm(t *testing.T) {
-	file, _, err := parseRouteFile(NewGenerator(), "www/routes/+page.dreego",
+	file, _, err := parseRouteFile(NewGenerator(), "www/app/routes/+page.dreego",
 		[]byte("<body>\n<form g-action=\"First\" method=\"post\">\n    <input name=\"a\">\n</form>\n<form g-action=\"Second\" method=\"post\">\n    <input type=\"hidden\" name=\"csrf_token\" value=\"{{ c.CSRFToken() }}\">\n</form>\n</body>\n"))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
-	diags := csrfFormDiagnostics(file.Body.Nodes, "www/routes/+page.dreego")
+	diags := csrfFormDiagnostics(file.Body.Nodes, "www/app/routes/+page.dreego")
 	if len(diags) != 1 {
 		t.Fatalf("expected exactly one diagnostic for the missing form, got %d: %q", len(diags), diags)
 	}

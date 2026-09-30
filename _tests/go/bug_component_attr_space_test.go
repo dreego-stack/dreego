@@ -11,7 +11,7 @@ func TestBugComponentAttrSpace(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Greet.dreego": `DREEFILE component (name string)
 <body>Hello {{ name }}</body>`,
-		"www/routes/+page.dreego": `<server>name := "Ada"</server>
+		"www/app/routes/+page.dreego": `<server>name := "Ada"</server>
 <body><@Greet name={ name }/></body>`,
 	})
 }

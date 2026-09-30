@@ -16,24 +16,24 @@ import (
 func TestPackagePerRouteFolderSeparatesDeclarations(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<body><h1>Home</h1></body>`,
-		"www/routes/registrierung/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<body><h1>Home</h1></body>`,
+		"www/app/routes/registrierung/+page.dreego": `<server>
 type Form struct{ Email string }
 </server>
 <body><form g-action="Register" method="post">{{ (Form{Email: "a"}).Email }}</form></body>`,
-		"www/routes/anmeldung/+page.dreego": `<server>
+		"www/app/routes/anmeldung/+page.dreego": `<server>
 type Form struct{ Email string }
 </server>
 <body><form g-action="Login" method="post">{{ (Form{Email: "b"}).Email }}</form></body>`,
 	})
 
-	rootRoutes := gen["www/routes/dree.go"]
+	rootRoutes := gen["www/app/routes/dree.go"]
 	if !strings.Contains(rootRoutes, "\npackage routes\n") {
 		t.Fatalf("root routes file must be package routes:\n%s", rootRoutes)
 	}
 	for _, want := range []string{
-		"registrierung \"t/www/routes/registrierung\"",
-		"anmeldung \"t/www/routes/anmeldung\"",
+		"registrierung \"t/www/app/routes/registrierung\"",
+		"anmeldung \"t/www/app/routes/anmeldung\"",
 		"registrierung.Register(app)",
 		"anmeldung.Register(app)",
 	} {
@@ -45,14 +45,14 @@ type Form struct{ Email string }
 		t.Fatalf("sub-folder declarations must not leak into the root routes package:\n%s", rootRoutes)
 	}
 
-	registrierung := gen["www/routes/registrierung/dree.go"]
+	registrierung := gen["www/app/routes/registrierung/dree.go"]
 	if !strings.Contains(registrierung, "\npackage registrierung\n") {
 		t.Fatalf("sub-folder must be its own package named after the folder:\n%s", registrierung)
 	}
 	if !strings.Contains(registrierung, "type Form struct") {
 		t.Fatalf("sub-folder dree.go must contain its own package-level declaration:\n%s", registrierung)
 	}
-	anmeldung := gen["www/routes/anmeldung/dree.go"]
+	anmeldung := gen["www/app/routes/anmeldung/dree.go"]
 	if !strings.Contains(anmeldung, "package anmeldung\n") {
 		t.Fatalf("second sub-folder must be its own package:\n%s", anmeldung)
 	}
@@ -67,15 +67,15 @@ type Form struct{ Email string }
 func TestPackagePerRouteFolderDynamicFoldersFoldIntoAncestor(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/my-site/+page.dreego":      `<body>site</body>`,
-		"www/routes/blog/[id]/+page.dreego":    `<body>post</body>`,
-		"www/routes/(auth)/login/+page.dreego": `<body>login</body>`,
+		"www/app/routes/my-site/+page.dreego":      `<body>site</body>`,
+		"www/app/routes/blog/[id]/+page.dreego":    `<body>post</body>`,
+		"www/app/routes/(auth)/login/+page.dreego": `<body>login</body>`,
 	})
 
-	if _, ok := gen["www/routes/my-site/dree.go"]; !ok {
+	if _, ok := gen["www/app/routes/my-site/dree.go"]; !ok {
 		t.Fatalf("my-site folder must get its own package file; got files %v", keys(gen))
 	}
-	mySite := gen["www/routes/my-site/dree.go"]
+	mySite := gen["www/app/routes/my-site/dree.go"]
 	if !strings.Contains(mySite, "package my_site\n") {
 		t.Fatalf("my-site must sanitize to package my_site:\n%s", mySite)
 	}
@@ -83,15 +83,15 @@ func TestPackagePerRouteFolderDynamicFoldersFoldIntoAncestor(t *testing.T) {
 	// "[id]" and "(auth)/login" are not importable directories, so their
 	// handlers live in the closest valid ancestor (blog and the root routes
 	// package respectively).
-	blog := gen["www/routes/blog/dree.go"]
+	blog := gen["www/app/routes/blog/dree.go"]
 	if !strings.Contains(blog, "HandleBlogId") {
 		t.Fatalf("dynamic folder must fold into ancestor blog package:\n%s", blog)
 	}
-	root := gen["www/routes/dree.go"]
+	root := gen["www/app/routes/dree.go"]
 	if !strings.Contains(root, "HandleAuthLogin") {
 		t.Fatalf("group folder must fold into the root routes package:\n%s", root)
 	}
-	for _, path := range []string{"www/routes/blog/[id]/dree.go", "www/routes/(auth)/login/dree.go"} {
+	for _, path := range []string{"www/app/routes/blog/[id]/dree.go", "www/app/routes/(auth)/login/dree.go"} {
 		if _, ok := gen[path]; ok {
 			t.Fatalf("dynamic/group folders must not get their own Go package file: %s", path)
 		}
@@ -103,8 +103,8 @@ func TestPackagePerRouteFolderDynamicFoldersFoldIntoAncestor(t *testing.T) {
 func TestPackagePerRouteFolderSameFolderCollisionFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/a.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body>{{ (Form{Email: \"a\"}).Email }}</body>",
-		"www/routes/b.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body>{{ (Form{Email: \"b\"}).Email }}</body>",
+		"www/app/routes/a.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body>{{ (Form{Email: \"a\"}).Email }}</body>",
+		"www/app/routes/b.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body>{{ (Form{Email: \"b\"}).Email }}</body>",
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -118,12 +118,12 @@ func TestPackagePerRouteFolderSameFolderCollisionFails(t *testing.T) {
 func TestPackagePerRouteFolderGeneratedTreeBuilds(t *testing.T) {
 	t.Parallel()
 	files := map[string]string{
-		"www/routes/+page.dreego":               `<body><h1>Home</h1></body>`,
-		"www/routes/registrierung/+page.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body><form g-action=\"Register\" method=\"post\">{{ (Form{Email: \"a\"}).Email }}</form></body>",
-		"www/routes/[id]/+page.dreego":          `<server>id := c.Param("id")</server><body><p>user:{{ id }}</p></body>`,
+		"www/app/routes/+page.dreego":               `<body><h1>Home</h1></body>`,
+		"www/app/routes/registrierung/+page.dreego": "<server>\ntype Form struct{ Email string }\n</server>\n<body><form g-action=\"Register\" method=\"post\">{{ (Form{Email: \"a\"}).Email }}</form></body>",
+		"www/app/routes/[id]/+page.dreego":          `<server>id := c.Param("id")</server><body><p>user:{{ id }}</p></body>`,
 	}
 	dir := dreegotest.BuildDir(t, files)
-	if _, err := os.Stat(filepath.Join(dir, "www", "routes", "registrierung", "dree.go")); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, "www", "app", "routes", "registrierung", "dree.go")); err != nil {
 		t.Fatalf("expected sub-package file on disk: %v", err)
 	}
 	if _, err := dreegotest.RunCLI(t, dir, "generate", "--check"); err != nil {

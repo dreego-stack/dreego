@@ -13,14 +13,14 @@ func TestDiscoveryIgnoresRoutesOutsideProjectRoot(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                      `{}`,
-		"www/routes/+page.dreego":                     `<body><p>real</p></body>`,
+		"www/app/routes/+page.dreego":                     `<body><p>real</p></body>`,
 		"vendor/somepkg/dreego/routes/+page.dreego":   `<body><p>vendor</p></body>`,
 		"node_modules/foo/dreego/routes/+page.dreego": `<body><p>nm</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	gen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	gen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "dree.go"))
 	if err != nil {
 		t.Fatalf("read routes dree.go: %v", err)
 	}
@@ -36,13 +36,13 @@ func TestDiscoveryIgnoresNestedDreegoProjectRoots(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":            `{}`,
-		"www/routes/+page.dreego":           `<body><p>outer</p></body>`,
+		"www/app/routes/+page.dreego":           `<body><p>outer</p></body>`,
 		"subapp/dreego/routes/+page.dreego": `<body><p>inner</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	gen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	gen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "dree.go"))
 	if err != nil {
 		t.Fatalf("read routes dree.go: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestDiscoveryIgnoresComponentsOutsideProjectRoot(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                    `{}`,
 		"www/components/Inner.dreego":               "DREEFILE component ()\n<body><p>inner</p></body>",
-		"www/routes/+page.dreego":                   `<body><@Inner/></body>`,
+		"www/app/routes/+page.dreego":                   `<body><@Inner/></body>`,
 		"vendor/lib/dreego/components/Outer.dreego": "DREEFILE component ()\n<body><p>outer</p></body>",
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
@@ -82,9 +82,9 @@ func TestDiscoveryLayoutLocalCascades(t *testing.T) {
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":                 `{}`,
 		"www/layouts/default.dreego":             `<body><html><body><nav>Root</nav>{#slot}</body></html></body>`,
-		"www/routes/+page.dreego":                `<body><p>home</p></body>`,
-		"www/routes/blog/+page.dreego":           `<body><p>blog</p></body>`,
-		"www/routes/blog/layouts/default.dreego": `<body><html><body><nav>Blog</nav>{#slot}</body></html></body>`,
+		"www/app/routes/+page.dreego":                `<body><p>home</p></body>`,
+		"www/app/routes/blog/+page.dreego":           `<body><p>blog</p></body>`,
+		"www/app/routes/blog/layouts/default.dreego": `<body><html><body><nav>Blog</nav>{#slot}</body></html></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -107,7 +107,7 @@ func TestDiscoveryAmbiguousLayoutsFails(t *testing.T) {
 		"www/dreego.config.json":     `{}`,
 		"www/layouts/default.dreego": `<body><html><body>{#slot}</body></html></body>`,
 		"www/layouts/layout.dreego":  `<body><html><body><nav>X</nav>{#slot}</body></html></body>`,
-		"www/routes/+page.dreego":    `<body><p>home</p></body>`,
+		"www/app/routes/+page.dreego":    `<body><p>home</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -122,9 +122,9 @@ func TestDiscoveryAmbiguousErrorPagesFails(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":        `{}`,
-		"www/routes/404.dreego":         `<body><p>root 404</p></body>`,
-		"www/routes/(group)/404.dreego": `<body><p>group 404</p></body>`,
-		"www/routes/+page.dreego":       `<body><p>home</p></body>`,
+		"www/app/routes/404.dreego":         `<body><p>root 404</p></body>`,
+		"www/app/routes/(group)/404.dreego": `<body><p>group 404</p></body>`,
+		"www/app/routes/+page.dreego":       `<body><p>home</p></body>`,
 	})
 	out, err := dreegotest.RunCLI(t, dir, "generate")
 	if err == nil {
@@ -139,14 +139,14 @@ func TestDiscovery404And500SameDirGenerateAndCheck(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":  `{}`,
-		"www/routes/404.dreego":   `<body><p>not found</p></body>`,
-		"www/routes/500.dreego":   `<body><p>server error</p></body>`,
-		"www/routes/+page.dreego": `<body><p>home</p></body>`,
+		"www/app/routes/404.dreego":   `<body><p>not found</p></body>`,
+		"www/app/routes/500.dreego":   `<body><p>server error</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>home</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate with 404+500 in same dir: %v\n%s", err, out)
 	}
-	gen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	gen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "dree.go"))
 	if err != nil {
 		t.Fatalf("read routes dree.go: %v", err)
 	}
@@ -162,44 +162,44 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":  `{}`,
-		"www/routes/+page.dreego": `<body><p>home</p></body>`,
+		"www/app/routes/+page.dreego": `<body><p>home</p></body>`,
 	})
 	gen1 := dreegotest.Build(t, map[string]string{
 		"www/dreego.config.json":        `{}`,
-		"www/routes/+page.dreego":       `<body><p>home</p></body>`,
-		"www/routes/about/+page.dreego": `<body><p>about</p></body>`,
+		"www/app/routes/+page.dreego":       `<body><p>home</p></body>`,
+		"www/app/routes/about/+page.dreego": `<body><p>about</p></body>`,
 	})
-	if err := os.MkdirAll(filepath.Join(dir, "www", "routes", "about"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "www", "app", "routes", "about"), 0755); err != nil {
 		t.Fatalf("mkdir about: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "www", "routes", "about", "+page.dreego"), []byte(`<body><p>about</p></body>`), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "www", "app", "routes", "about", "+page.dreego"), []byte(`<body><p>about</p></body>`), 0644); err != nil {
 		t.Fatalf("write about/+page.dreego: %v", err)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after add: %v\n%s", err, out)
 	}
-	aboutGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "about", "dree.go"))
+	aboutGen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "about", "dree.go"))
 	if err != nil {
 		t.Fatalf("read about/dree.go: %v", err)
 	}
 	if !strings.Contains(string(aboutGen), "about") {
 		t.Fatalf("added route not discovered: %s", aboutGen)
 	}
-	if !strings.Contains(string(gen1["www/routes/dree.go"]), "home") {
-		t.Fatalf("baseline missing home: %s", gen1["www/routes/dree.go"])
+	if !strings.Contains(string(gen1["www/app/routes/dree.go"]), "home") {
+		t.Fatalf("baseline missing home: %s", gen1["www/app/routes/dree.go"])
 	}
-	for _, want := range []string{"about \"t/www/routes/about\"", "about.Register(app)"} {
-		if !strings.Contains(string(gen1["www/routes/dree.go"]), want) {
-			t.Fatalf("root routes collector missing %q: %s", want, gen1["www/routes/dree.go"])
+	for _, want := range []string{"about \"t/www/app/routes/about\"", "about.Register(app)"} {
+		if !strings.Contains(string(gen1["www/app/routes/dree.go"]), want) {
+			t.Fatalf("root routes collector missing %q: %s", want, gen1["www/app/routes/dree.go"])
 		}
 	}
-	if err := os.Rename(filepath.Join(dir, "www", "routes", "about"), filepath.Join(dir, "www", "routes", "info")); err != nil {
+	if err := os.Rename(filepath.Join(dir, "www", "app", "routes", "about"), filepath.Join(dir, "www", "app", "routes", "info")); err != nil {
 		t.Fatalf("move about -> info: %v", err)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after move: %v\n%s", err, out)
 	}
-	infoGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "info", "dree.go"))
+	infoGen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "info", "dree.go"))
 	if err != nil {
 		t.Fatalf("read info/dree.go after move: %v", err)
 	}
@@ -209,23 +209,23 @@ func TestDiscoveryDeterministicAddMoveDelete(t *testing.T) {
 	if !strings.Contains(string(infoGen), "HandleInfo") {
 		t.Fatalf("moved route not discovered as Info: %s", infoGen)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "www", "routes", "about")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, "www", "app", "routes", "about")); !os.IsNotExist(err) {
 		t.Fatalf("stale about package directory remained after move: %v", err)
 	}
-	if err := os.RemoveAll(filepath.Join(dir, "www", "routes", "info")); err != nil {
+	if err := os.RemoveAll(filepath.Join(dir, "www", "app", "routes", "info")); err != nil {
 		t.Fatalf("remove info: %v", err)
 	}
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate after delete: %v\n%s", err, out)
 	}
-	rootGen, err := os.ReadFile(filepath.Join(dir, "www", "routes", "dree.go"))
+	rootGen, err := os.ReadFile(filepath.Join(dir, "www", "app", "routes", "dree.go"))
 	if err != nil {
 		t.Fatalf("read routes/dree.go after delete: %v", err)
 	}
 	if strings.Contains(string(rootGen), "Info") || strings.Contains(string(rootGen), "About") {
 		t.Fatalf("deleted route package still registered: %s", rootGen)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "www", "routes", "info")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, "www", "app", "routes", "info")); !os.IsNotExist(err) {
 		t.Fatalf("stale info package directory remained after delete: %v", err)
 	}
 }
@@ -234,18 +234,18 @@ func TestDiscoveryGeneratesRoutesNamedStaticAndGen(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
 		"www/dreego.config.json":              `{}`,
-		"www/routes/+page.dreego":             `<body><p>home</p></body>`,
-		"www/routes/static/+page.dreego":      `<body><p>static route</p></body>`,
-		"www/routes/gen/+page.dreego":         `<body><p>gen route</p></body>`,
-		"www/routes/blog/static/+page.dreego": `<body><p>blog static</p></body>`,
+		"www/app/routes/+page.dreego":             `<body><p>home</p></body>`,
+		"www/app/routes/static/+page.dreego":      `<body><p>static route</p></body>`,
+		"www/app/routes/gen/+page.dreego":         `<body><p>gen route</p></body>`,
+		"www/app/routes/blog/static/+page.dreego": `<body><p>blog static</p></body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
 	cases := map[string]string{
-		"www/routes/static/dree.go":      "HandleStatic",
-		"www/routes/gen/dree.go":         "HandleGen",
-		"www/routes/blog/static/dree.go": "HandleBlogStatic",
+		"www/app/routes/static/dree.go":      "HandleStatic",
+		"www/app/routes/gen/dree.go":         "HandleGen",
+		"www/app/routes/blog/static/dree.go": "HandleBlogStatic",
 	}
 	for rel, want := range cases {
 		gen, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))

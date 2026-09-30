@@ -17,7 +17,7 @@ secret must be at least 32 bytes; `NewCookieStore` panics on a shorter one and
 `App.Build` rejects an unsafe store with an error.
 
 ```go
-app := dreego.New()
+app := dreego.New(www.App)
 
 store := dreego.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 if err := app.SetSessionStore(store); err != nil {
@@ -45,7 +45,7 @@ Never store a raw password in the session. Store an opaque identifier and look
 up the user on each request.
 
 ```dreego
-<!-- www/routes/login/+page.dreego -->
+<!-- dreego/www/routes/login/+page.dreego -->
 <server>
 	type LoginForm struct {
 		Email    string `form:"email" validate:"required,email"`
@@ -136,7 +136,7 @@ key and sends one expired cookie that preserves `Secure`, `HttpOnly`,
 CSRF-protected and cannot be triggered by a link:
 
 ```dreego
-<!-- www/routes/logout/+page.dreego -->
+<!-- dreego/www/routes/logout/+page.dreego -->
 <server>
 	type LogoutForm struct{}
 

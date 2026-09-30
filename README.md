@@ -6,7 +6,7 @@ single binary. File-based routing, built-in form handling, and compile-time
 validation work without runtime template parsing.
 
 ```html
-<!-- www/routes/login/+page.dreego -->
+<!-- dreego/www/routes/login/+page.dreego -->
 <head><title>Dreego</title></head>
 
 <server>
@@ -44,7 +44,7 @@ Four principles:
 1. **SSR-First** — SSR is the production web foundation through v1. Future
    targets remain separate from the stable core until real applications prove
    their contracts.
-2. **File-Based** — `www/routes/+page.dreego` and `www/routes/index.dreego` map to `/`. Other filenames become URL segments, and method-specific sections select HTTP methods.
+2. **File-Based** — `dreego/www/routes/+page.dreego` and `dreego/www/routes/index.dreego` map to `/`. Other filenames become URL segments, and method-specific sections select HTTP methods.
 3. **Type-Safe** — Generated handlers and components use typed Go contracts; dynamic HTTP boundary data stays explicit.
 4. **Accessibility-Aware Tooling** — CLI output and diagnostics are designed for screen readers, and the scaffolded `web-minimal` template ships a skip link and a `<main>` landmark. Applications still verify their own content and conformance.
 
@@ -69,15 +69,15 @@ See the public [Roadmap](_docs/roadmap.md) and detailed
 
 ### Core
 - **Transpiler Pipeline** — Lexer → Parser → AST → CodeGen. `.dreego` → Go code.
-- **File-based Routing** — `www/routes/+page.dreego` → `GET /`, `www/routes/login/+page.dreego` → `GET /login` (method via `method="..."` sections)
+- **File-based Routing** — `dreego/www/routes/+page.dreego` → `GET /`, `dreego/www/routes/login/+page.dreego` → `GET /login` (method via `method="..."` sections)
 - **Dynamic Segments** — `[id]` brackets for URL params, `(group)/` for layout groups
 - **Single Binary** — `go build` → deploy one file. Zero runtime dependencies beyond `net/http`.
 
 ### Template & Components
 - **Template Logic** — `{{ value }}`, `{#if}...{#else}...{/if}`, `{#each items as item}...{#each else}...{/each}`
 - **Template Helpers** — `{{ $loop.Index }}`, `{{ value|raw }}`, `{{ value|upper }}`, `{#verbatim}`
-- **Component System** — `www/components/`, `<@Card title="x">...<\@Card>`, named slots, scoped CSS
-- **Layout System** — `www/layouts/default.dreego` with `{#slot}` + `{#head}`
+- **Component System** — `dreego/components/`, `<@Card title="x">...<\@Card>`, named slots, scoped CSS
+- **Layout System** — `dreego/layouts/default.dreego` with `{#slot}` + `{#head}`
 - **CSS Scoping** — `data-scope` via source hash, automatically applied
 
 ### Form Handling (v0.0.16)
@@ -119,7 +119,7 @@ repository-local `replace` directive is needed for a release-installed CLI.
 # 1. Install the Dreego CLI
 go install github.com/dreego-stack/dreego/cmd/dreego@latest
 
-# 2. Scaffold a new project (writes go.mod, main.go, www/ tree, runs go mod tidy)
+# 2. Scaffold a new project (writes go.mod, main.go, dreego/ tree, runs go mod tidy)
 dreego new myapp
 
 # 3. Generate Go code from .dreego files and run the server
@@ -143,16 +143,13 @@ import (
 
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
-	"myapp/www"
+	"myapp/dreego/www"
 )
 
 const port = "8080"
 
 func main() {
-	app := dreego.New()
-	if err := www.Register(app); err != nil {
-		log.Fatal(err)
-	}
+	app := dreego.New(www.App)
 	addr := ":" + port
 	if p := os.Getenv("DREEGO_PORT"); p != "" {
 		addr = ":" + p
@@ -186,32 +183,51 @@ reboot). Source: https://github.com/dreego-stack/vscode-dreego
 
 ## Architecture
 
-A website lives in its own directory — any name, marked by a
-`dreego.config.json`. `dreego generate` produces one `dree.go` per directory
-with `.dreego` sources; the website root gets a `Register(app)` entry point:
+A website root is a directory marked by a `dreego.config.json` (its name is
+free; `dreego new` scaffolds it as `dreego/`). It holds the optional shared
+`layouts/` and `components/` plus one or more app subdirectories. An app is an
+immediate subdirectory with a `routes/` tree; each app is its own Go package
+whose generated `<app>/dree.go` exports `var App dreego.Registrar`. `dreego
+generate` produces one `dree.go` per directory with `.dreego` sources:
 
 ```
-www/                       # website root (name is free, marker: dreego.config.json)
-├── dreego.config.json     # logging, redirects, rewrites
-├── dree.go                # GENERATED — package www, Register(app)
-├── routes/                # .dreego files → URL routes
-│   ├── +page.dreego             → GET /
-│   ├── login/
-│   │   └── +page.dreego         → GET /login (POST via method="post" section)
-│   ├── [id]/+page.dreego        → GET /{id}
-│   └── dree.go             # GENERATED — package routes, handlers + Register
+dreego/                      # website root (name is free, marker: dreego.config.json)
+├── dreego.config.json       # logging, redirects, rewrites (shared defaults)
 ├── layouts/
-│   ├── default.dreego      # {#slot} + {#head} wrapper
-│   └── dree.go             # GENERATED — package layouts
+│   ├── default.dreego       # shared shell: {#slot} + {#head}
+│   └── dree.go              # GENERATED — package layouts
 ├── components/
-│   ├── Card.dreego         # <@Card title="x"/>
-│   └── dree.go             # GENERATED — package components
-├── static/
-│   └── style.css           # inlined into binary
-└── main.go                 # imports "myapp/www", calls www.Register(app)
+│   ├── Card.dreego          # shared component: <@Card title="x"/>
+│   └── dree.go              # GENERATED — package components
+└── www/                     # app (own Go package, own routes/)
+    ├── dreego.config.json   # optional — overrides root defaults field by field
+    ├── dree.go              # GENERATED — package www, var App dreego.Registrar
+    ├── routes/              # .dreego files → URL routes
+    │   ├── +page.dreego           → GET /
+    │   ├── login/
+    │   │   └── +page.dreego       → GET /login (POST via method="post" section)
+    │   ├── [id]/+page.dreego      → GET /{id}
+    │   └── dree.go            # GENERATED — package routes, handlers + Register
+    ├── layouts/             # optional — overrides the shared layout for this app
+    ├── components/          # optional — overrides shared components for this app
+    └── static/              # optional — inlined into the binary
 ```
 
-Multiple websites can share one module — each directory with a
+An app may add its own `layouts/` and `components/`; those override the shared
+root ones for that app. Route-local layouts live under
+`<app>/routes/<sub>/layouts/`. The minimal app is `dreego.config.json` +
+`<app>/routes/+page.dreego` — no layouts or components required.
+
+`main.go` wires hosts and ports explicitly; each app is one `dreego.New` call:
+
+```go
+wwwApp := dreego.New(www.App)
+blogApp := dreego.New(blog.App)
+go ssr.Listen(wwwApp, ":8080")
+err := ssr.Listen(blogApp, ":8081")
+```
+
+Several website roots can share one module — each directory with a
 `dreego.config.json` is an independent website.
 
 ## Plugins

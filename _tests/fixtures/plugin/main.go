@@ -7,17 +7,14 @@ import (
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
 	"pluginapp/plugin"
-	"pluginapp/www"
+	webapp "pluginapp/www/app"
 )
 
 func main() {
-	app := dreego.New()
-	if err := plugin.Register(app, plugin.Options{Prefix: "/plugin"}); err != nil {
-		log.Fatal(err)
-	}
-	if err := www.Register(app); err != nil {
-		log.Fatal(err)
-	}
+	app := dreego.New(
+		func(a *dreego.App) error { return plugin.Register(a, plugin.Options{Prefix: "/plugin"}) },
+		webapp.App,
+	)
 	addr := ":8080"
 	if port := os.Getenv("PORT"); port != "" {
 		addr = ":" + port

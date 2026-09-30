@@ -30,8 +30,8 @@ value.**
 DREEFILE component (title string)     component kind; props on the DREEFILE line
 DREEFILE layout                       layout kind
 DREEFILE page                         page kind (a missing DREEFILE is also a page)
-LAYOUT "www/layouts/admin.dreego"     explicit layout path
-COMPONENT "www/components" IMPORT { Card, Card as ProductCard }
+LAYOUT "dreego/layouts/admin.dreego"     explicit layout path
+COMPONENT "dreego/components" IMPORT { Card, Card as ProductCard }
 GOIMPORT { sync, encoding/json }      Go import channel
 ```
 

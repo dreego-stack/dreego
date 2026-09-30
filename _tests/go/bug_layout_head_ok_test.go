@@ -11,10 +11,10 @@ func TestBugLayoutHeadOk(t *testing.T) {
 	gen := dreegotest.Build(t, map[string]string{
 		"www/layouts/default.dreego": `<head><title>Layout Title</title><link rel="stylesheet" href="cdn.tailwindcss.com"></head>
 <body>{#slot}</body>`,
-		"www/routes/+page.dreego": `<head><meta name="description" content="route meta"></head>
+		"www/app/routes/+page.dreego": `<head><meta name="description" content="route meta"></head>
 <body><p>hi</p></body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "cdn.tailwindcss.com")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "Layout Title")
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "route meta")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "cdn.tailwindcss.com")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "Layout Title")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "route meta")
 }

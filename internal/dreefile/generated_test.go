@@ -26,7 +26,7 @@ func TestGeneratedMarkerUsesSlashes(t *testing.T) {
 }
 
 func TestIsGeneratedFile(t *testing.T) {
-	marked := withGeneratedMarker("www/routes", "package routes\n")
+	marked := withGeneratedMarker("www/app/routes", "package routes\n")
 	if !isGeneratedFile(marked) {
 		t.Fatal("a marked file must be recognized")
 	}

@@ -9,7 +9,7 @@ import (
 func TestBugFormTagStructName(t *testing.T) {
 	t.Parallel()
 	gen := dreegotest.Build(t, map[string]string{
-		"www/routes/+page.dreego": `<server>
+		"www/app/routes/+page.dreego": `<server>
 type LoginForm struct {
 }
 type SearchQuery struct {
@@ -26,5 +26,5 @@ func Search(c *dreego.SSRContext, form SearchQuery) error {
   </form>
 </body>`,
 	})
-	dreegotest.MustContain(t, gen["www/routes/dree.go"], "SearchQuery")
+	dreegotest.MustContain(t, gen["www/app/routes/dree.go"], "SearchQuery")
 }

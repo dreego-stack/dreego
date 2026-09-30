@@ -18,7 +18,7 @@ func TestRegisterGoImportsAcceptsStdlibAndModule(t *testing.T) {
 		{Path: "example.com/app/internal/foo"},
 		{Path: "github.com/dreego-stack/dreego-ui/components"},
 	}
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", imports); err != nil {
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", imports); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
 	if len(gen.GoImports["routes"]) != len(imports) {
@@ -30,7 +30,7 @@ func TestRegisterGoImportsRejectsMissingModule(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
-	err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "statuna/missing"}})
+	err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{{Path: "statuna/missing"}})
 	if err == nil {
 		t.Fatal("expected an error for an unresolvable import")
 	}
@@ -45,7 +45,7 @@ func TestStdImportsForEmitsAlias(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Alias: "myauth", Path: "statuna/auth"}}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{{Alias: "myauth", Path: "statuna/auth"}}); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
 	out, err := stdImportsFor(gen, "routes", "")
@@ -61,7 +61,7 @@ func TestStdImportsForBarePathUsesBaseName(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.Requires = map[string]string{"statuna/auth": "v1.2.3"}
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "statuna/auth"}}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{{Path: "statuna/auth"}}); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
 	out, err := stdImportsFor(gen, "routes", "")
@@ -77,7 +77,7 @@ func TestStdImportsForRejectsBaseNameCollision(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.Requires = map[string]string{"a/auth": "v1", "b/auth": "v1"}
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "a/auth"}, {Path: "b/auth"}}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{{Path: "a/auth"}, {Path: "b/auth"}}); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
 	_, err := stdImportsFor(gen, "routes", "")
@@ -95,7 +95,7 @@ func TestStdImportsForVersionSuffixUsesParentName(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.Requires = map[string]string{"github.com/a/auth/v2": "v2", "github.com/b/storage/v3": "v3"}
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{
 		{Path: "github.com/a/auth/v2"},
 		{Path: "github.com/b/storage/v3"},
 	}); err != nil {
@@ -138,7 +138,7 @@ func TestStdImportsForDetectsOnlyWholeIdentifiers(t *testing.T) {
 
 func TestStdImportsForDeduplicatesDeclaredAndDetected(t *testing.T) {
 	gen := NewGenerator()
-	if err := registerGoImports(gen, "routes", "www/routes/+page.dreego", []ir.GoImport{{Path: "strings"}}); err != nil {
+	if err := registerGoImports(gen, "routes", "www/app/routes/+page.dreego", []ir.GoImport{{Path: "strings"}}); err != nil {
 		t.Fatalf("registerGoImports: %v", err)
 	}
 	out, err := stdImportsFor(gen, "routes", `v := strings.ToUpper("x")`)

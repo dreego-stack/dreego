@@ -1,8 +1,8 @@
-GOIMPORT { blogdata "demo/blog/blogdata" }
+GOIMPORT { blogdata "demo/dreego/blog/blogdata" }
 
 <head>
-    <title>Dreego Blog · v2 md tag</title>
-    <meta name="description" content="Version 2 of the blog index: hero written with the inline <md> tag.">
+    <title>Dreego Blog</title>
+    <meta name="description" content="Notes on building Dreego, the compile-time Go web framework.">
 </head>
 
 <server>
@@ -11,18 +11,14 @@ GOIMPORT { blogdata "demo/blog/blogdata" }
 
 <body>
     <nav class="mb-10 flex items-center gap-2" aria-label="Version switcher">
-        <a href="/blog/" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">v1 · HTML</a>
-        <a href="/blog/v2" class="rounded-full bg-slate-950 px-4 py-1.5 text-sm font-medium text-white">v2 · md tag</a>
+        <a href="/blog/" class="rounded-full bg-slate-950 px-4 py-1.5 text-sm font-medium text-white">v1 · HTML</a>
+        <a href="/blog/v2" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">v2 · md tag</a>
         <a href="/blog/v3" class="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100">v3 · body md</a>
     </nav>
 
-    <md class="hero-md">
-Field notes
-
-## Building Dreego, in the open.
-
-Short posts about the framework, its design constraints, and the decisions behind each release.
-    </md>
+    <p class="mb-6 font-mono text-xs uppercase tracking-[0.24em] text-emerald-700">Field notes</p>
+    <h1>Building Dreego, in the open.</h1>
+    <p class="mb-14">Short posts about the framework, its design constraints, and the decisions behind each release.</p>
 
     <p class="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-slate-400">01 / posts</p>
     <h2>Latest writing.</h2>

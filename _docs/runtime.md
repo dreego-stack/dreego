@@ -171,7 +171,9 @@ if err := app.RegisterStatic("/style.css", "text/css", []byte("body{color:red}")
 }
 ```
 
-Generated automatically from `dreego/static/` by `dreego generate`. MIME type detected from file extension.
+Generated automatically from the app's `<app>/static/` (for example
+`dreego/www/static/`) by `dreego generate`. MIME type detected from file
+extension.
 
 ## main.go Pattern
 
@@ -181,18 +183,15 @@ package main
 import (
 	"log"
 
-	"myapp/www"
 	dreego "github.com/dreego-stack/dreego/core"
 	"github.com/dreego-stack/dreego/adapter/ssr"
+	"myapp/dreego/www"
 )
 
 func main() {
-	app := dreego.New()
+	app := dreego.New(www.App)
 	store := dreego.NewCookieStore([]byte("01234567890123456789012345678902"))
 	if err := app.SetSessionStore(store); err != nil {
-		log.Fatal(err)
-	}
-	if err := www.Register(app); err != nil {
 		log.Fatal(err)
 	}
 	if err := ssr.Listen(app, ":8080"); err != nil {

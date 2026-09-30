@@ -1,4 +1,4 @@
-GOIMPORT { newstore "demo/blog/newstore" }
+GOIMPORT { newstore "demo/dreego/blog/newstore" }
 
 <head>
     <title>News — Dreego</title>

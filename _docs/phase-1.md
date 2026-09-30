@@ -10,10 +10,7 @@ lifecycle hook. It has no `Run` function and no Wails dependency. Application
 code owns every Wails decision explicitly.
 
 ```go
-dreegoApp := dreego.New()
-if err := www.Register(dreegoApp); err != nil {
-	log.Fatal(err)
-}
+dreegoApp := dreego.New(www.App)
 handler, err := wailsadapter.New(dreegoApp)
 if err != nil {
 	log.Fatal(err)

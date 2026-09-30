@@ -17,10 +17,19 @@ type componentSource struct {
 	def       *ComponentDef
 	scopeHash string
 	pkgDir    string
+	pkg       string
 }
 
 func scanComponents(gen *Generator, root string) (map[string][]string, map[string]string, error) {
-	components, err := loadComponents(gen, root)
+	return scanComponentsAt(gen, root, root, true)
+}
+
+// scanComponentsAt scans components under scopeRoot and writes generated files
+// under baseRoot's component packages. When includeModule is true it also loads
+// components imported from other Go modules (placed at baseRoot); app passes set
+// it false so a root-owned package is never overwritten.
+func scanComponentsAt(gen *Generator, scopeRoot, baseRoot string, includeModule bool) (map[string][]string, map[string]string, error) {
+	components, err := loadComponents(gen, scopeRoot, baseRoot, includeModule)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -34,12 +43,10 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 	}
 
 	sourcesByPkg := map[string][]string{}
-	gen.Pkg = "components"
-	gen.ImportKey = ""
-	gen.ImportKeySet = false
 	for _, component := range components {
 		gen.Src = component.raw
-		if err := registerGoImports(gen, sanitizePkgName(filepath.Base(component.pkgDir)), component.path, component.file.GoImports); err != nil {
+		gen.Pkg = component.pkg
+		if err := registerGoImports(gen, component.pkg, component.path, component.file.GoImports); err != nil {
 			return nil, nil, err
 		}
 		src, err := GenerateComponent(gen, component.file, component.scopeHash)
@@ -51,9 +58,52 @@ func scanComponents(gen *Generator, root string) (map[string][]string, map[strin
 	return sourcesByPkg, pathsByName, nil
 }
 
-func loadComponents(gen *Generator, root string) ([]componentSource, error) {
-	var components []componentSource
-	err := filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+// loadModuleComponentsAcrossApps loads components imported from other Go modules
+// for every app route tree and generates their Go source, placing them in the
+// shared root components package so the root pass owns them exactly once.
+func loadModuleComponentsAcrossApps(gen *Generator, root string, apps []appEntry) (map[string][]string, error) {
+	seen := map[string]bool{}
+	var all []componentSource
+	for _, app := range apps {
+		paths, err := importedComponentPaths(app.dir)
+		if err != nil {
+			return nil, err
+		}
+		var fresh []string
+		for _, importPath := range paths {
+			if seen[importPath] {
+				continue
+			}
+			seen[importPath] = true
+			fresh = append(fresh, importPath)
+		}
+		if len(fresh) == 0 {
+			continue
+		}
+		loaded, err := loadModuleComponents(gen, root, root, fresh)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, loaded...)
+	}
+	byDir := map[string][]string{}
+	for _, component := range all {
+		gen.Src = component.raw
+		gen.Pkg = component.pkg
+		if err := registerGoImports(gen, component.pkg, component.path, component.file.GoImports); err != nil {
+			return nil, err
+		}
+		src, err := GenerateComponent(gen, component.file, component.scopeHash)
+		if err != nil {
+			return nil, fmt.Errorf("error generating component %s: %w", component.path, err)
+		}
+		byDir[component.pkgDir] = append(byDir[component.pkgDir], src)
+	}
+	return byDir, nil
+}
+
+func loadComponents(gen *Generator, scopeRoot, baseRoot string, includeModule bool) ([]componentSource, error) {	var components []componentSource
+	err := filepath.WalkDir(scopeRoot, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return fmt.Errorf("error walking %s: %w", path, walkErr)
 		}
@@ -61,7 +111,7 @@ func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 			return nil
 		}
 		dir := filepath.Dir(path)
-		if !isComponentsDir(root, dir) {
+		if !isComponentsDir(scopeRoot, dir) {
 			return nil
 		}
 		component, err := loadComponent(path)
@@ -71,45 +121,44 @@ func loadComponents(gen *Generator, root string) ([]componentSource, error) {
 		if component.def == nil {
 			return nil
 		}
-		rel := relToRoot(root, dir)
 		pkgDir := dir
-		pkg := "components"
-		if rel != "components" {
-			segments := strings.Split(strings.TrimPrefix(rel, "components/"), "/")
-			valid := []string{}
-			for _, seg := range segments {
-				if seg == "" {
-					continue
-				}
-				if sanitizePkgName(seg) != seg {
-					break
-				}
-				valid = append(valid, seg)
-			}
-			if len(valid) > 0 {
-				pkgDir = filepath.Join(append([]string{root, "components"}, valid...)...)
-				pkg = sanitizePkgName(valid[len(valid)-1])
-			}
-		}
 		component.pkgDir = pkgDir
-		gen.RegisterCompPkg(component.def.Name, pkg, relToRoot(root, pkgDir))
+		component.pkg = componentPkgName(baseRoot, pkgDir)
+		gen.RegisterCompPkg(component.def.Name, component.pkg, gen.Module+"/"+relToRoot(".", pkgDir))
 		components = append(components, component)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	moduleComponents, err := loadModuleComponents(gen, root)
+	if !includeModule {
+		return components, nil
+	}
+	moduleComponents, err := loadModuleComponents(gen, scopeRoot, baseRoot, nil)
 	if err != nil {
 		return nil, err
 	}
 	return append(components, moduleComponents...), nil
 }
 
-func loadModuleComponents(gen *Generator, root string) ([]componentSource, error) {
-	paths, err := importedComponentPaths(root)
-	if err != nil {
-		return nil, err
+// componentPkgName returns a unique Go package name for a component directory.
+// The shared root components/ keeps "components"; an app-local or nested
+// directory is prefixed with its path so package names never collide.
+func componentPkgName(baseRoot, pkgDir string) string {
+	rel := relToRoot(baseRoot, pkgDir)
+	if rel == "components" {
+		return "components"
+	}
+	return sanitizePkgName(strings.ReplaceAll(rel, "/", "_"))
+}
+
+func loadModuleComponents(gen *Generator, routeRoot, baseRoot string, paths []string) ([]componentSource, error) {
+	if paths == nil {
+		var err error
+		paths, err = importedComponentPaths(routeRoot)
+		if err != nil {
+			return nil, err
+		}
 	}
 	var components []componentSource
 	for _, importPath := range paths {
@@ -121,7 +170,7 @@ func loadModuleComponents(gen *Generator, root string) ([]componentSource, error
 		if err != nil {
 			return nil, fmt.Errorf("read imported components %s: %w", importPath, err)
 		}
-		pkgDir := filepath.Join(root, "components")
+		pkgDir := filepath.Join(baseRoot, "components")
 		if packageName != "components" {
 			pkgDir = filepath.Join(pkgDir, packageName)
 		}
@@ -137,7 +186,9 @@ func loadModuleComponents(gen *Generator, root string) ([]componentSource, error
 				continue
 			}
 			component.pkgDir = pkgDir
-			gen.RegisterCompPkg(component.def.Name, packageName, relToRoot(root, pkgDir))
+			component.pkg = componentPkgName(baseRoot, pkgDir)
+			gen.RegisterDef(component.def.Name, component.def)
+			gen.RegisterCompPkg(component.def.Name, component.pkg, gen.Module+"/"+relToRoot(".", pkgDir))
 			components = append(components, component)
 		}
 	}

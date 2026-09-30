@@ -11,6 +11,6 @@ func TestBugComponentCloseTag(t *testing.T) {
 	dreegotest.MustBuild(t, map[string]string{
 		"www/components/Card.dreego": `DREEFILE component (title string)
 <body><article><h2>{{ title }}</h2><div>{#slot}</div></article></body>`,
-		"www/routes/+page.dreego": `<body><@Card title="Hi">text</@Card></body>`,
+		"www/app/routes/+page.dreego": `<body><@Card title="Hi">text</@Card></body>`,
 	})
 }

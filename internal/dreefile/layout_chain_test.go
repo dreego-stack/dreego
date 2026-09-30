@@ -145,8 +145,8 @@ func TestNormaliseLayoutPath(t *testing.T) {
 
 func TestDiscoverLayoutsBuildsIndex(t *testing.T) {
 	root := writeTestProject(t, map[string]string{
-		"www/layouts/default.dreego":      "DREEFILE layout\n\n<body><p>base</p></body>",
-		"www/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/layouts/default.dreego\"\n\n<body><p>admin</p></body>",
+		"www/app/layouts/default.dreego":  "DREEFILE layout\n\n<body><p>base</p></body>",
+		"www/admin/layouts/layout.dreego": "DREEFILE layout\n\nLAYOUT \"www/app/layouts/default.dreego\"\n\n<body><p>admin</p></body>",
 	})
 	siteRoot := filepath.Join(root, "www")
 	entries, index, err := discoverLayouts(siteRoot)
@@ -164,7 +164,7 @@ func TestDiscoverLayoutsBuildsIndex(t *testing.T) {
 	if err != nil {
 		t.Fatalf("resolveLayoutChain: %v", err)
 	}
-	if len(chain) != 2 || chain[1] != index["layouts/default.dreego"] {
+	if len(chain) != 2 || chain[1] != index["app/layouts/default.dreego"] {
 		t.Fatalf("chain = %#v, want admin then base", chain)
 	}
 }

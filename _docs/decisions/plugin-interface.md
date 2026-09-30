@@ -41,17 +41,19 @@ func Register(app *dreego.App, options Options) error {
 }
 ```
 
-Applications call registration explicitly and handle errors locally:
+Applications pass the plugin registrar to `dreego.New`, alongside the generated
+app registrar, and handle registration errors centrally:
 
 ```go
-app := dreego.New()
-
-if err := auth.Register(app, auth.Options{
-    LoginPath:  "/login",
-    CookieName: "session",
-}); err != nil {
-    log.Fatal(err)
-}
+app := dreego.New(
+    func(a *dreego.App) error {
+        return auth.Register(a, auth.Options{
+            LoginPath:  "/login",
+            CookieName: "session",
+        })
+    },
+    www.App,
+)
 ```
 
 There is no stable central `Plugin` interface before v1. Registration order is

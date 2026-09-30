@@ -12,7 +12,7 @@ import (
 func TestCLIGenerateCheckTracksMethodRouteChanges(t *testing.T) {
 	t.Parallel()
 	dir := dreegotest.ProjectDir(t, map[string]string{
-		"www/routes/+page.dreego": `<server>message := "get"</server><body>{{ message }}</body><server method="post">message := "post"</server><body method="post">{{ message }}</body>`,
+		"www/app/routes/+page.dreego": `<server>message := "get"</server><body>{{ message }}</body><server method="post">message := "post"</server><body method="post">{{ message }}</body>`,
 	})
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
@@ -20,7 +20,7 @@ func TestCLIGenerateCheckTracksMethodRouteChanges(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate", "--check"); err != nil || !strings.Contains(out, "up-to-date") {
 		t.Fatalf("initial check: %v\n%s", err, out)
 	}
-	path := filepath.Join(dir, "www/routes/+page.dreego")
+	path := filepath.Join(dir, "www/app/routes/+page.dreego")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)

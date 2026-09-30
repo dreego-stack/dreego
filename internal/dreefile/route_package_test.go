@@ -37,7 +37,7 @@ func TestRoutePackageNamesComeFromFolder(t *testing.T) {
 		"routes/blog/[id]/+page.dreego":    "<body>post</body>",
 		"routes/(auth)/login/+page.dreego": "<body>login</body>",
 	})
-	dirs, _, count, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, count, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestRootRoutePackageCollectsSubPackages(t *testing.T) {
 	gen := NewGenerator()
 	gen.Module = "example.com/app"
 	gen.RootRel = "www"
-	dirs, _, _, err := scanRoutes(gen, root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(gen, root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestRoutePackagesAllowDuplicateDeclarationsAcrossFolders(t *testing.T) {
 		"routes/registrierung/+page.dreego": "<server>\ntype Form struct{ Name string }\n</server>\n<body>{{ (Form{Name: \"a\"}).Name }}</body>",
 		"routes/anmeldung/+page.dreego":     "<server>\ntype Form struct{ Name string }\n</server>\n<body>{{ (Form{Name: \"b\"}).Name }}</body>",
 	})
-	dirs, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	dirs, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err != nil {
 		t.Fatalf("same-named declarations in different route folders must not conflict: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestRoutePackagesConflictWithinSameFolder(t *testing.T) {
 		"routes/a.dreego": "<server>\ntype Form struct{ Name string }\n</server>\n<body>{{ (Form{Name: \"a\"}).Name }}</body>",
 		"routes/b.dreego": "<server>\ntype Form struct{ Name string }\n</server>\n<body>{{ (Form{Name: \"b\"}).Name }}</body>",
 	})
-	_, _, _, err := scanRoutes(NewGenerator(), root, map[string]*layoutEntry{}, map[string]*layoutEntry{})
+	_, _, _, err := scanRoutes(NewGenerator(), root, "app", map[string]*layoutEntry{}, map[string]*layoutEntry{})
 	if err == nil || !strings.Contains(err.Error(), "Form") {
 		t.Fatalf("same-folder duplicate declaration must conflict with a diagnostic naming it, got %v", err)
 	}
@@ -135,9 +135,9 @@ func TestRoutePackagesConflictWithinSameFolder(t *testing.T) {
 func TestRunSplitsRouteFoldersIntoPackages(t *testing.T) {
 	dir := writeTestProject(t, map[string]string{
 		"www/dreego.config.json":                "{}",
-		"www/routes/+page.dreego":               "<body>home</body>",
-		"www/routes/registrierung/+page.dreego": "<server>\ntype Form struct{ Email string }\nfunc label() string { return \"register\" }\n</server>\n<body>{{ label() }}{{ (Form{Email: \"a\"}).Email }}</body>",
-		"www/routes/anmeldung/+page.dreego":     "<server>\ntype Form struct{ Email string }\nfunc label() string { return \"login\" }\n</server>\n<body>{{ label() }}{{ (Form{Email: \"b\"}).Email }}</body>",
+		"www/app/routes/+page.dreego":               "<body>home</body>",
+		"www/app/routes/registrierung/+page.dreego": "<server>\ntype Form struct{ Email string }\nfunc label() string { return \"register\" }\n</server>\n<body>{{ label() }}{{ (Form{Email: \"a\"}).Email }}</body>",
+		"www/app/routes/anmeldung/+page.dreego":     "<server>\ntype Form struct{ Email string }\nfunc label() string { return \"login\" }\n</server>\n<body>{{ label() }}{{ (Form{Email: \"b\"}).Email }}</body>",
 	})
 	if err := runInDir(t, dir); err != nil {
 		t.Fatalf("generation failed: %v", err)
@@ -152,7 +152,7 @@ func TestRunSplitsRouteFoldersIntoPackages(t *testing.T) {
 		return string(data)
 	}
 
-	root := read("www/routes/dree.go")
+	root := read("www/app/routes/dree.go")
 	if !isGeneratedFile(root) {
 		t.Fatalf("root routes file must carry a generated marker:\n%s", root)
 	}
@@ -169,7 +169,7 @@ func TestRunSplitsRouteFoldersIntoPackages(t *testing.T) {
 	}
 
 	for folder, pkg := range map[string]string{"registrierung": "registrierung", "anmeldung": "anmeldung"} {
-		src := read("www/routes/" + folder + "/dree.go")
+		src := read("www/app/routes/" + folder + "/dree.go")
 		if !strings.Contains(src, "\npackage "+pkg+"\n") {
 			t.Errorf("%s/dree.go must be package %s:\n%s", folder, pkg, src)
 		}

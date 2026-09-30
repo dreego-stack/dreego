@@ -15,7 +15,7 @@ func TestBugErrorPageLayout(t *testing.T) {
     {#head}
 </head>
 <body><main>{#slot}</main></body>`,
-		"www/routes/404.dreego": `<head>
+		"www/app/routes/404.dreego": `<head>
     <meta charset="utf-8">
     <title>Not Found</title>
     <link rel="stylesheet" href="/err.css">

@@ -10,7 +10,7 @@ import (
 
 type routeDir = routePkg
 
-func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*layoutEntry) ([]*routePkg, map[string]bool, int, error) {
+func scanRoutes(gen *Generator, root, appName string, layouts, layoutIndex map[string]*layoutEntry) ([]*routePkg, map[string]bool, int, error) {
 	rootRoutes := filepath.Join(root, "routes")
 	pkgs := map[string]*routePkg{}
 	routePatterns := map[string]bool{}
@@ -89,7 +89,7 @@ func scanRoutes(gen *Generator, root string, layouts, layoutIndex map[string]*la
 				return fmt.Errorf("optional segment %q in %s is not supported; define each route explicitly", seg, fpath)
 			}
 			pageName := buildPageName(rel)
-			layout, err := resolveLayoutForRoute(rel, layouts, layoutIndex)
+			layout, err := resolveLayoutForRoute(appName, rel, layouts, layoutIndex)
 			if err != nil {
 				return err
 			}

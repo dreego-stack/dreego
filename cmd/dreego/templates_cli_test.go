@@ -38,11 +38,11 @@ func TestCommonMainEntrypointSSRHost(t *testing.T) {
 	}
 	content := string(data)
 
-	if !strings.Contains(content, `"§$name$§/www"`) {
+	if !strings.Contains(content, `"§$name$§/dreego/www"`) {
 		t.Errorf("_common/main.go.tmpl must import \"§$name$§/www\" (module-qualified, placeholder), got:\n%s", content)
 	}
-	if !strings.Contains(content, "www.Register(app)") {
-		t.Errorf("_common/main.go.tmpl must call www.Register(app), got:\n%s", content)
+	if !strings.Contains(content, "dreego.New(www.App)") {
+		t.Errorf("_common/main.go.tmpl must call dreego.New(www.App), got:\n%s", content)
 	}
 	if !strings.Contains(content, `ssr "github.com/dreego-stack/dreego/adapter/ssr"`) {
 		t.Errorf("_common/main.go.tmpl must import \"github.com/dreego-stack/dreego/adapter/ssr\", got:\n%s", content)

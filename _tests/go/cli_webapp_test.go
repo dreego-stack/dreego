@@ -14,7 +14,7 @@ import (
 func webAppTemplateFiles(t *testing.T) map[string]string {
 	t.Helper()
 	dir := dreegotest.NewProject(t, "webapp", "web-app")
-	root := filepath.Join(dir, "www")
+	root := filepath.Join(dir, "dreego")
 	files := map[string]string{}
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil || d.IsDir() {
@@ -115,7 +115,7 @@ import (
 	"testing"
 
 	dreego "github.com/dreego-stack/dreego/core"
-	"t/www/routes"
+	"t/dreego/www/routes"
 )
 
 func TestGeneratedNotesConcurrent(t *testing.T) {
@@ -160,11 +160,11 @@ func TestCLIWebAppNotesConcurrentRace(t *testing.T) {
 	if out, err := dreegotest.RunCLI(t, dir, "generate"); err != nil {
 		t.Fatalf("generate: %v\n%s", err, out)
 	}
-	testFile := filepath.Join(dir, "www", "routes", "notes_race_test.go")
+	testFile := filepath.Join(dir, "dreego", "www", "routes", "notes_race_test.go")
 	if err := os.WriteFile(testFile, []byte(webAppRaceTest), 0644); err != nil {
 		t.Fatal(err)
 	}
-	command := exec.Command("go", "test", "-mod=mod", "-race", "./www/routes", "-run", "TestGeneratedNotesConcurrent", "-count=1")
+	command := exec.Command("go", "test", "-mod=mod", "-race", "./dreego/www/routes", "-run", "TestGeneratedNotesConcurrent", "-count=1")
 	command.Dir = dir
 	command.Env = append(os.Environ(), "CGO_ENABLED=1")
 	if output, err := command.CombinedOutput(); err != nil {

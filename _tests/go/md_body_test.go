@@ -13,7 +13,7 @@ import (
 func TestMdBodyServes(t *testing.T) {
 	t.Parallel()
 	c := dreegotest.Serve(t, map[string]string{
-		"www/routes/+page.dreego": `<server>name := "Ada"</server>
+		"www/app/routes/+page.dreego": `<server>name := "Ada"</server>
 <body lang="md">
 # Account
 
