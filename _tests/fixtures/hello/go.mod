@@ -3,8 +3,8 @@ module hello
 go 1.27
 
 require (
-	github.com/dreego-stack/dreego/adapter/ssr v0.11.0
-	github.com/dreego-stack/dreego/core v0.11.0
+	github.com/dreego-stack/dreego/adapter/ssr v0.11.1
+	github.com/dreego-stack/dreego/core v0.11.1
 )
 
 replace github.com/dreego-stack/dreego => ../../..
