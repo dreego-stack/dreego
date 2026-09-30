@@ -13,9 +13,9 @@ surface rule is: **uppercase is a keyword, lowercase is a value.**
 - `DREEFILE layout` declares a layout file.
 - `DREEFILE page` declares a page explicitly; omitting the `DREEFILE` line also
   means page.
-- `LAYOUT "dreego/layouts/admin.dreego"` records an explicit layout path. It is
-  parsed and reserved for the upcoming layout-chaining slice; layout selection
-  is still the directory cascade described in [Layouts](layouts.md).
+- `LAYOUT "dreego/layouts/admin.dreego"` selects an explicit layout by path
+  instead of the directory cascade described in [Layouts](layouts.md). A path
+  that does not resolve fails `dreego generate`.
 - `COMPONENT "dreego/components" IMPORT { Card, Card as ProductCard }` imports
   components from a path; `as` creates an alias.
 - `GOIMPORT { path1, alias "path2" }` declares Go imports for the file's
@@ -81,8 +81,10 @@ TypeScript and Lua become JavaScript.
 
 ## Routes, layouts, and components
 
-Route files live below an app's `routes/` directory
-(`<website-root>/<app>/routes/`, for example `dreego/www/routes/`).
+Route files live below a `routes/` directory: the shared
+`<website-root>/routes/` (inherited by every app) or an app-local
+`<website-root>/<app>/routes/` (for example `dreego/www/routes/`). A local route
+file shadows the global file with the same relative path.
 Directories define URL segments, while `+page.dreego` or `index.dreego` owns
 the directory URL. Any other route filename adds a literal URL segment.
 Layouts and components use the same semantic sections but have different

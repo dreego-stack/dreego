@@ -70,7 +70,7 @@ func buildPlan(force bool) (genPlan, genStats, error) {
 	var rootsList []string
 	for _, root := range roots {
 		if len(root.apps) == 0 {
-			return genPlan{}, genStats{}, fmt.Errorf("website root %s contains no apps: add an app directory with a routes/ tree (for example %s/www/routes/)", root.dir, root.dir)
+			return genPlan{}, genStats{}, fmt.Errorf("website root %s contains no apps: add an app directory with a routes/, static/, layouts/, components/ tree or a dreego.config.json (for example %s/www/routes/)", root.dir, root.dir)
 		}
 		rootFiles, rootStats, err := buildRootPlan(root, module)
 		if err != nil {
@@ -261,7 +261,7 @@ func buildAppPlan(files map[string]string, gen *Generator, root websiteRoot, app
 		appCompCount++
 	}
 
-	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, app.dir, app.name, allLayouts, layoutIndex)
+	routeDirs, routePatterns, routeCount, err := scanRoutes(gen, app.dir, app.name, allLayouts, layoutIndex, root.dir)
 	if err != nil {
 		return genStats{}, err
 	}
@@ -275,7 +275,7 @@ func buildAppPlan(files map[string]string, gen *Generator, root websiteRoot, app
 		return genStats{}, fmt.Errorf("i18n templates: enable i18n in %s before using message expressions", configFileName)
 	}
 
-	staticSrc, staticCount, err := generateStaticAssets(app.dir, routePatterns)
+	staticSrc, staticCount, err := generateStaticAssets(app.dir, root.dir, routePatterns)
 	if err != nil {
 		return genStats{}, fmt.Errorf("static assets: %w", err)
 	}

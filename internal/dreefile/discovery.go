@@ -47,12 +47,29 @@ type websiteRoot struct {
 	apps   []appEntry
 }
 
+// rootOwnedDirs are the directories a website root owns itself. A root's
+// routes/, static/, layouts/, and components/ are shared defaults for every app;
+// a reserved child name is never treated as an app directory. locales/ holds
+// i18n catalogs and is likewise not an app.
+func rootOwnedDirs(name string) bool {
+	switch name {
+	case "routes", "static", "layouts", "components", "locales":
+		return true
+	}
+	return false
+}
+
 // findWebsiteRoots locates every website root in the current tree. A website
-// root is a directory with dreego.config.json that does not itself contain a
-// routes/ directory (a root-level routes/ is the legacy single-site layout and
-// is rejected). Apps are the immediate subdirectories containing routes/.
+// root is a directory with dreego.config.json; it may itself hold shared
+// routes/, static/, layouts/, and components/ as defaults for its apps. An app
+// is an immediate subdirectory that carries any of those trees or its own
+// dreego.config.json; a config directory that is an immediate child of another
+// website root is an app, not a new root.
 func findWebsiteRoots() ([]websiteRoot, error) {
 	var configDirs []string
+	if isWebsiteRoot(".") {
+		configDirs = append(configDirs, ".")
+	}
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -80,9 +97,16 @@ func findWebsiteRoots() ([]websiteRoot, error) {
 	}
 	sort.Strings(configDirs)
 
+	isConfigDir := map[string]bool{}
+	for _, dir := range configDirs {
+		isConfigDir[filepath.Clean(dir)] = true
+	}
+
 	var roots []websiteRoot
 	for _, dir := range configDirs {
-		if hasDir(filepath.Join(dir, "routes")) {
+		clean := filepath.Clean(dir)
+		parent := filepath.Clean(filepath.Dir(clean))
+		if parent != clean && isConfigDir[parent] {
 			continue
 		}
 		apps, err := scanApps(dir)
@@ -96,41 +120,12 @@ func findWebsiteRoots() ([]websiteRoot, error) {
 			apps:   apps,
 		})
 	}
-
-	for _, dir := range configDirs {
-		if !hasDir(filepath.Join(dir, "routes")) {
-			continue
-		}
-		if !isAppOfAnyRoot(dir, roots) {
-			return nil, legacyLayoutError(dir)
-		}
-	}
-	if isWebsiteRoot(".") && hasDir("routes") && !isAppOfAnyRoot(".", roots) {
-		return nil, legacyLayoutError(".")
-	}
 	return roots, nil
 }
 
-func legacyLayoutError(dir string) error {
-	example := filepath.Join(dir, "www", "routes")
-	if filepath.Clean(dir) == "." {
-		example = filepath.Join("www", "routes")
-	}
-	return fmt.Errorf("legacy website layout detected at %s: a website root no longer contains routes/ directly; create an app subdirectory (for example %s) instead", dir, example)
-}
-
-func isAppOfAnyRoot(dir string, roots []websiteRoot) bool {
-	parent := filepath.Dir(dir)
-	for _, root := range roots {
-		if filepath.Clean(root.dir) == filepath.Clean(parent) {
-			return true
-		}
-	}
-	return false
-}
-
 // scanApps returns the app subdirectories of a website root, sorted by name. An
-// app requires a routes/ directory; static/ is optional.
+// app carries a routes/, static/, layouts/, or components/ tree, or its own
+// dreego.config.json; everything else is a root-owned directory.
 func scanApps(root string) ([]appEntry, error) {
 	entries, err := os.ReadDir(root)
 	if err != nil {
@@ -138,11 +133,11 @@ func scanApps(root string) ([]appEntry, error) {
 	}
 	var apps []appEntry
 	for _, e := range entries {
-		if !e.IsDir() || strings.HasPrefix(e.Name(), ".") || isSkippedDir(e.Name()) {
+		if !e.IsDir() || strings.HasPrefix(e.Name(), ".") || isSkippedDir(e.Name()) || rootOwnedDirs(e.Name()) {
 			continue
 		}
 		dir := filepath.Join(root, e.Name())
-		if !hasDir(filepath.Join(dir, "routes")) {
+		if !isAppDir(dir) {
 			continue
 		}
 		apps = append(apps, appEntry{
@@ -156,6 +151,17 @@ func scanApps(root string) ([]appEntry, error) {
 	}
 	sort.Slice(apps, func(i, j int) bool { return apps[i].name < apps[j].name })
 	return apps, nil
+}
+
+// isAppDir reports whether dir is an app of a website root: it carries at least
+// one of the app-owned trees, or its own dreego.config.json override.
+func isAppDir(dir string) bool {
+	for _, sub := range []string{"routes", "static", "layouts", "components"} {
+		if hasDir(filepath.Join(dir, sub)) {
+			return true
+		}
+	}
+	return isWebsiteRoot(dir)
 }
 
 func isRoutesDir(root, path string) bool {

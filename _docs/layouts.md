@@ -8,29 +8,50 @@ Layouts are shared shells rendered around route content. A layout lives in a
 
 The shared layout lives at the website root (`dreego/layouts/`); an app may add
 its own `layouts/` (`dreego/www/layouts/`) to override the shared one for that
-app, and a route may add a route-local scope under
-`<app>/routes/<sub>/layouts/`.
+app, and a route may add a route-local scope under `<app>/routes/<sub>/layouts/`
+or under the shared `dreego/routes/<sub>/layouts/`. Each `layouts/` directory
+may hold a `default.dreego`, a legacy `layout.dreego`, and any number of
+explicitly named layouts (for example `admin.dreego`) that a route selects by
+path.
 
 ## Layout Discovery
 
 Layout discovery is restricted to a website root identified by
 `dreego.config.json`. Layout files outside that root, including vendored modules
-and nested applications, are ignored. The website root itself no longer owns
-routes directly; layouts are found at the root, on an app, and inside an app's
-`routes/` tree.
+and nested applications, are ignored. Layouts are found at the root, on an app,
+and inside a `routes/` tree (shared or app-local).
 
-A layout file is named `default.dreego` (or the legacy `layout.dreego`). Layouts
-resolve per route by a cascade:
+A layout file is named `default.dreego` (or the legacy `layout.dreego`) and is
+selected by a cascade:
 
 1. The route's own scope, deepest first (e.g.
    `dreego/www/routes/blog/layouts/default.dreego` for `dreego/www/routes/blog/…`).
-2. The app's layout (`dreego/www/layouts/default.dreego`).
-3. The shared website-root layout (`dreego/layouts/default.dreego`).
+2. A shared route-local scope under the root routes tree
+   (`dreego/routes/blog/layouts/default.dreego`).
+3. The app's layout (`dreego/www/layouts/default.dreego`).
+4. The shared website-root layout (`dreego/layouts/default.dreego`).
 
-The first matching layout in the cascade wins. Only one layout file per scope
-is allowed: `default.dreego` and `layout.dreego` in the same `layouts`
-directory is an ambiguous-layout error and fails `dreego generate` with a
-diagnostic naming both files.
+The first matching layout in the cascade wins; the app-local layout therefore
+always beats the shared root layout. Only one default layout file per scope is
+allowed: `default.dreego` and `layout.dreego` in the same `layouts` directory is
+an ambiguous-layout error and fails `dreego generate` with a diagnostic naming
+both files. Explicitly named layout files may sit beside a default one.
+
+## Explicit Layout Selection
+
+A route may select a layout by path with the `LAYOUT` header directive instead
+of relying on the cascade:
+
+```dreego
+LAYOUT "dreego/layouts/admin.dreego"
+
+<body><p>Admin</p></body>
+```
+
+The path is resolved relative to the website root (or the working directory);
+a missing target fails `dreego generate` with a `file:line:col` diagnostic
+naming the path.
+
 
 ## Syntax
 
@@ -96,7 +117,10 @@ scope so several scopes can coexist: the shared root layout is `Default` (or
 `Layout` for a root `layout.dreego`), and an app or route-local layout is
 suffixed with its PascalCased scope, e.g.
 `dreego/www/routes/registrierung/layouts/default.dreego` becomes
-`DefaultWwwRegistrierung`. The generated
+`DefaultWwwRegistrierung` and a shared
+`dreego/routes/registrierung/layouts/default.dreego` becomes
+`DefaultRootRegistrierung`. A named layout file adds its own base name, e.g.
+`dreego/layouts/admin.dreego` becomes `LayoutAdmin`. The generated
 `<app>/routes/<route>/layouts/` directory is not treated as a route, so
 route-local layouts do not create routes.
 
@@ -105,5 +129,6 @@ route-local layouts do not create routes.
 1. `{#slot}` — required to render route content; always available.
 2. `{#head}` — optional; collects the route's `<head>` sections.
 3. Route `<head>` works with or without a layout.
-4. One layout file per `layouts` directory; `default.dreego` and `layout.dreego` together is an error.
-5. Layout lookup is route-local and cascades through documented parent directories.
+4. One default layout per `layouts` directory; `default.dreego` and `layout.dreego` together is an error. Explicitly named layouts may sit beside them.
+5. Layout lookup is route-local and cascades through documented parent directories; a `LAYOUT "path"` directive selects explicitly.
+6. An app-local layout wins over the shared root layout.

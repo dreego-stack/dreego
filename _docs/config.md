@@ -1,11 +1,17 @@
 # dreego.config.json
 
 The configuration file lives in the **website root** — the directory marked by
-`dreego.config.json` that holds the shared `layouts/` and `components/` plus one
-or more app subdirectories. Its name is free; `dreego new` scaffolds it as
-`dreego/`, so the root file is `dreego/dreego.config.json` in a default project.
-Any directory containing `dreego.config.json` is treated as a website root; a
-repo may contain more than one.
+`dreego.config.json` that holds the shared `routes/`, `static/`, `layouts/`, and
+`components/` plus one or more app subdirectories. Its name is free; `dreego new`
+scaffolds it as `dreego/`, so the root file is `dreego/dreego.config.json` in a
+default project. Any directory containing `dreego.config.json` is treated as a
+website root; a repo may contain more than one.
+
+The root `routes/`, `static/`, `layouts/`, and `components/` are **global
+defaults**: every app inherits them. An app-local file with the same relative
+path shadows the global one (a local `static/favicon.ico` wins; other global
+static files stay available), and an app-local default layout wins over the
+shared root layout. See [Routing](routing.md) and [Layouts](layouts.md).
 
 An app may carry its own `dreego.config.json` (for example
 `dreego/www/dreego.config.json`). The app file **overrides the root file field

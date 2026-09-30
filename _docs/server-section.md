@@ -21,7 +21,7 @@ the matching head and body templates.
 
 ## Scope
 
-Each route directory under `<app>/routes` (for example `dreego/www/routes`)
+Each route directory under a `routes/` tree (for example `dreego/www/routes` or the shared `dreego/routes`)
 compiles into **its own Go package** (named after the folder, sanitized to a
 valid Go identifier). The app's top-level `<app>/routes/dree.go` collects the
 `Register(app)` call of every sub-package, and the generated app registrar

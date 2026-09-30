@@ -124,13 +124,17 @@ func build(t *testing.T, files map[string]string, expectFail bool) (string, erro
 }
 
 // ensureConfig writes a dreego.config.json into every website root implied by
-// the given files (a directory containing routes/, components/, or layouts/)
-// unless the test already provided one. This keeps the new root-marker model
-// transparent for tests that only care about routes/components.
+// the given files (a directory containing routes/, static/, components/, or
+// layouts/) unless the test already provided one. This keeps the new root-marker
+// model transparent for tests that only care about routes/components.
 func ensureConfig(t *testing.T, dir string, files map[string]string) {
 	t.Helper()
 	roots := map[string]bool{}
 	for path := range files {
+		if path == "dreego.config.json" {
+			roots["."] = true
+			continue
+		}
 		root, ok := websiteRootOf(path)
 		if !ok {
 			continue

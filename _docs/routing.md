@@ -7,22 +7,42 @@
 > A route file may state its kind explicitly with the `DREEFILE page` header
 > directive; a missing `DREEFILE` line also means page.
 
-Route discovery is restricted to the `routes/` tree of each **app**, an
-immediate subdirectory of a website root. The website root is any directory
-containing `dreego.config.json`; an app is a direct child with its own
-`routes/`. Directories named `routes` outside an app (e.g.
+Route discovery is restricted to the `routes/` tree of an **app** plus the
+website root's shared `routes/`. The website root is any directory containing
+`dreego.config.json`. It may itself own `routes/`, `static/`, `layouts/`, and
+`components/` as **global defaults**: an app inherits every global route and
+overrides only the files it redeclares with the same relative path. An app is an
+immediate subdirectory carrying any of those trees or its own
+`dreego.config.json`. Directories named `routes` outside a website root (e.g.
 `vendor/…/www/routes`, `node_modules/…/www/routes`, `subapp/www/routes`) are
 ignored.
 
-Directories below `<app>/routes/` define the URL path. `+page.dreego` and
-`index.dreego` define the URL of the directory itself. A different `.dreego`
-filename defines the final static path segment. A directory containing both
-index filenames is rejected as a duplicate route.
+Directories define the URL path. `+page.dreego` and `index.dreego` define the
+URL of the directory itself. A different `.dreego` filename defines the final
+static path segment. A directory containing both index filenames is rejected as
+a duplicate route.
 
-A route declared directly in the website root (`dreego/routes/`) is a hard
-error: the root no longer owns routes directly. Move it into an app
-subdirectory, for example `dreego/www/routes/`. `dreego generate` reports the
-legacy layout with that migration hint.
+A route file may live under `dreego/routes/` (global, inherited by every app) or
+under `<app>/routes/` (local to that app). When the same relative path exists in
+both, the **local file wins** and the global one is skipped; other global routes
+stay available. An app with no `routes/` tree at all serves the global routes
+unchanged.
+
+## Global Routes and Local Overrides
+
+```
+dreego/
+├── routes/
+│   ├── +page.dreego          → GET /       (default for every app)
+│   └── about/+page.dreego    → GET /about  (default for every app)
+├── www/routes/
+│   └── +page.dreego          → GET /       (www only: overrides the global +page)
+└── blog/                     (no routes/ — serves the global routes as-is)
+```
+
+- `www` serves its own `/` and the inherited `/about`.
+- `blog` serves the global `/` and `/about`.
+
 
 ## Directory Structure
 
