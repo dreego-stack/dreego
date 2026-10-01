@@ -236,6 +236,27 @@ func TestCmdList(t *testing.T) {
 	}
 }
 
+func TestCmdDocsSkill(t *testing.T) {
+	root := writeTestTree(t, map[string]string{
+		"go.mod":         "",
+		"_docs/skill.md": "# Dreego Agent Skill\n\nUse `dreego docs`.\n",
+		"_docs/index.md": "# Index\n",
+	})
+	writeGoMod(t, root, coreModule, nil)
+
+	oldWd := wdFunc
+	wdFunc = func() string { return root }
+	defer func() { wdFunc = oldWd }()
+
+	got := captureStdout(t, func() { cmdDocs([]string{"skill"}) })
+	if !strings.Contains(got, "# Dreego Agent Skill") {
+		t.Fatalf("docs skill must print _docs/skill.md, got:\n%s", got)
+	}
+	if !strings.Contains(got, "dreego docs") {
+		t.Fatalf("docs skill output missing content, got:\n%s", got)
+	}
+}
+
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 	old := os.Stdout

@@ -74,6 +74,7 @@ commands:
   run [-d] build + start server (dev only)
   dev                    watch .dreego files, rebuild + restart on change
   docs [-p <name>] [--web] [--json] [--dump] [--list] [path]  local docs (default: /_docs/index.md)
+  docs skill             print the Dreego agent skill for coding agents
   feedback               open browser to submit feedback/issue
   version, --version, -v  show the dreego CLI version
   help                   show this help
@@ -108,6 +109,7 @@ examples:
   dreego docs --web           open docs index in browser
   dreego docs --json          structured JSON for AI agents
   dreego docs --dump          all docs for LLM context
+  dreego docs skill           print the Dreego agent skill
   dreego feedback             submit issue / feedback
 `)
 }
