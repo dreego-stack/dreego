@@ -7,6 +7,8 @@ contents or `dreego docs <path>` for a chapter.
 All documentation lives in this single `_docs` tree, so a feature is documented
 in one place instead of across module directories.
 
+- [Agent Skill](https://github.com/dreego-stack/dreego/blob/main/_docs/skill.md) — how coding agents should work in a Dreego repo (`dreego docs skill`)
+
 ## Module guides
 
 - [Core Documentation](https://github.com/dreego-stack/dreego/blob/main/_docs/core-index.md) — target-neutral application and render runtime

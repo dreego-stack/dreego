@@ -47,6 +47,38 @@ Every generated `dree.go` starts with a marker line
 instead of being deleted silently. Remove the marker only if you really intend
 to own that file.
 
+## dreego fmt
+
+```bash
+dreego fmt [--check] [--stdout] [path]
+```
+
+Formats `.dreego` files, like `gofmt` for Dreego sources.
+
+- `--check`: report files that would change and exit non-zero without writing.
+- `--stdout`: print the formatted result instead of writing.
+- `path`: a file or directory; defaults to `.`, walking for `*.dreego`.
+
+Formatting normalizes structure without changing behavior:
+
+- Root section tags (`<server>`, `<head>`, `<body>`, `<style>`, `<client>`) and
+  header directives (`DREEFILE`, `LAYOUT`, `COMPONENT`, `GOIMPORT`, `PROFILE`)
+  stay at column zero.
+- Markup is indented by element nesting depth with four spaces per level, so a
+  closing tag aligns with its opening tag. `{#if}`/`{#each}` blocks indent their
+  children one level.
+- Code sections (`server`, `style`, `client`) are shifted one level under their
+  root tag while the code's own relative indentation is preserved. A section
+  containing a multi-line string literal is left untouched.
+- Content inside `<pre>` and `{#verbatim}` is preserved verbatim, and a
+  `lang="md"` body is left unindented so Markdown is never turned into code
+  blocks.
+- Expressions use `{{ value }}` and `{{ value|filter }}` spacing; CRLF line
+  endings and duplicate blank lines are collapsed.
+
+`dreego fmt` is idempotent and is a formatter, not a validator: `dreego
+generate` remains the single gate that rejects an invalid file.
+
 ## dreego i18n extract
 
 ```bash
@@ -133,11 +165,17 @@ Without arguments, `dreego docs` shows the documentation index `/_docs/index.md`
 - `--json`: structured JSON (headings, code blocks, links) for AI agents
 - `--web`: open the docs page in a browser
 
+`dreego docs skill` prints the [Agent Skill](skill.md) (`/_docs/skill.md`), a
+self-contained instruction page for coding agents that explains what Dreego is,
+how a `.dreego` file is structured, and to read the bundled docs instead of the
+framework source.
+
 Examples:
 ```bash
 dreego docs                    show the documentation index
 dreego docs /README.md         show the readme
 dreego docs /_docs/cli.md      show the CLI reference
+dreego docs skill              print the agent skill
 dreego docs -p plugin-sse /_docs/index.md   show a plugin's docs
 dreego docs --list             list the index and plugin pages
 ```

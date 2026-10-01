@@ -193,24 +193,72 @@ func TestFormatRoundTripPreservesSemantics(t *testing.T) {
 					t.Fatalf("Format changed the number of %q\ngot:\n%s", tag, out)
 				}
 			}
-			assertCodeSectionsVerbatim(t, tc.src, out)
+			assertCodeSectionsPreserved(t, tc.src, out)
 		})
 	}
 }
 
-// assertCodeSectionsVerbatim requires every server, client, and style section to
-// survive formatting byte for byte: the formatter must never rewrite Go, JS, or
-// CSS, including string literals and blank lines inside them.
-func assertCodeSectionsVerbatim(t *testing.T, src, out string) {
+// assertCodeSectionsPreserved requires every server, client, and style section
+// to survive formatting modulo the uniform base indent the formatter adds. The
+// code's own relative indentation, string literals, and blank lines must be
+// preserved: only the common leading whitespace may change.
+func assertCodeSectionsPreserved(t *testing.T, src, out string) {
 	t.Helper()
+	outSections := collectFmtSections(out)
 	for _, s := range collectFmtSections(src) {
 		if !isCodeSection(s.tag) {
 			continue
 		}
-		if !strings.Contains(out, s.text) {
-			t.Fatalf("Format rewrote a <%s> section\nwant exact:\n%s\ngot:\n%s", s.tag, s.text, out)
+		var got string
+		found := false
+		for _, o := range outSections {
+			if o.tag == s.tag {
+				got = o.text
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("Format dropped the <%s> section\noutput:\n%s", s.tag, out)
+		}
+		if dedentSection(got) != dedentSection(s.text) {
+			t.Fatalf("Format rewrote a <%s> section beyond base indent\nwant:\n%s\ngot:\n%s", s.tag, s.text, got)
 		}
 	}
+}
+
+// dedentSection removes the common leading whitespace from the non-blank body
+// lines of a section (the root tags stay at column zero), so two sections can
+// be compared regardless of their base indent level.
+func dedentSection(section string) string {
+	lines := strings.Split(section, "\n")
+	start, end := 0, len(lines)
+	if len(lines) >= 2 && strings.HasPrefix(strings.TrimSpace(lines[len(lines)-1]), "</") {
+		end = len(lines) - 1
+	}
+	if start < end && strings.IndexByte(lines[start], '>') >= 0 && !strings.HasPrefix(strings.TrimSpace(lines[start]), "</") {
+		start++
+	}
+	min := -1
+	for _, line := range lines[start:end] {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		if w := leadingWS(line); min < 0 || w < min {
+			min = w
+		}
+	}
+	if min <= 0 {
+		return section
+	}
+	for i := start; i < end; i++ {
+		if len(lines[i]) >= min {
+			lines[i] = lines[i][min:]
+		} else {
+			lines[i] = strings.TrimLeft(lines[i], " \t")
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func TestFormatBodyLevelLayoutKeepsDocumentSkeleton(t *testing.T) {
@@ -251,12 +299,12 @@ func TestFormatBodyLevelLayoutKeepsDocumentSkeleton(t *testing.T) {
 	}
 }
 
-func TestFormatPreservesServerCodeExact(t *testing.T) {
+func TestFormatPreservesServerCodeRelative(t *testing.T) {
 	src := "<server>\nmsg   :=   compute()\n\nif  msg != \"\"  {\n    log(msg)\n}\n</server>\n\n<body><p>{{ msg }}</p></body>\n"
 	out := Format(src)
-	want := "msg   :=   compute()\n\nif  msg != \"\"  {\n    log(msg)\n}"
+	want := "    msg   :=   compute()\n\n    if  msg != \"\"  {\n        log(msg)\n    }"
 	if !strings.Contains(out, want) {
-		t.Fatalf("server section content must not be rewritten\nwant substring: %q\ngot:\n%s", want, out)
+		t.Fatalf("server code must be shifted by one base indent without rewriting it\nwant substring: %q\ngot:\n%s", want, out)
 	}
 }
 

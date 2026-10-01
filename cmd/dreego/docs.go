@@ -94,6 +94,8 @@ func cmdDocs(args []string) {
 			jsonOut = true
 		case a == "--list":
 			list = true
+		case a == "skill":
+			remaining = append(remaining, "/_docs/skill.md")
 		case a == "-p" && i+1 < len(args):
 			plugin = args[i+1]
 			i++

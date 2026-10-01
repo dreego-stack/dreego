@@ -132,6 +132,12 @@ repo-root/
 
 ## Skills
 
+`dreego docs skill` prints the bundled agent skill (`_docs/skill.md`): what
+Dreego is, the `.dreego` section model, and how agents should work here. When
+you need Dreego behavior, read the bundled docs (`dreego docs`, `dreego docs
+--dump`) — never the framework source under `go/pkg`, `$GOMODCACHE`, or
+`vendor/github.com/dreego-stack/...`.
+
 ## Commit Convention
 
 Every change lands via a pull request. The PR must contain exactly one uniquely named `.changes/*.md` file with YAML frontmatter:

@@ -207,11 +207,15 @@ func formatSections(input string) string {
 		}
 		var text string
 		if isCodeSection(s.tag) {
-			text = s.text
+			text = formatCodeSection(s.text)
 		} else {
-			text = formatSectionBody(s.tag, s.text)
-			if s.tag == "body" {
-				text = formatControlFlow(formatExpressions(text))
+			if s.tag == "body" && sectionLanguageFromTag(s.text) == "md" {
+				text = formatControlFlow(formatExpressions(s.text))
+			} else {
+				text = formatSectionBody(s.tag, s.text)
+				if s.tag == "body" {
+					text = formatControlFlow(formatExpressions(text))
+				}
 			}
 			text = multiBlank.ReplaceAllString(text, "\n\n")
 		}
@@ -263,8 +267,10 @@ func formatSectionBody(tag, raw string) string {
 	}
 	prefix := raw[:openEnd+1]
 	suffix := "</" + tag + ">"
-	raw = strings.TrimPrefix(raw, prefix)
-	raw = strings.TrimSuffix(raw, suffix)
+	raw = strings.TrimSuffix(strings.TrimPrefix(raw, prefix), suffix)
+	if !strings.Contains(raw, "\n") {
+		return prefix + raw + suffix
+	}
 
 	lines := strings.Split(raw, "\n")
 	start := 0
@@ -276,18 +282,18 @@ func formatSectionBody(tag, raw string) string {
 		end--
 	}
 
+	var body strings.Builder
+	for i := start; i <= end; i++ {
+		body.WriteString(strings.TrimRight(lines[i], " \t"))
+		body.WriteString("\n")
+	}
+	inner := strings.TrimRight(indentHTMLLines(body.String(), 1), "\n")
+
 	var sb strings.Builder
 	sb.WriteString(prefix)
 	sb.WriteString("\n")
-	for i := start; i <= end; i++ {
-		line := strings.TrimRight(lines[i], " \t")
-		if strings.TrimSpace(line) == "" {
-			sb.WriteString("\n")
-			continue
-		}
-		sb.WriteString(line)
-		sb.WriteString("\n")
-	}
+	sb.WriteString(inner)
+	sb.WriteString("\n")
 	sb.WriteString(suffix)
 	return sb.String()
 }
