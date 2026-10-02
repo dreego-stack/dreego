@@ -1,4 +1,8 @@
 
+## v0.11.2 - 2026-10-02
+
+- Fix: serve static files with their standard MIME type from `mime.TypeByExtension` instead of `application/octet-stream`
+
 ## v0.11.1 - 2026-09-30
 
 - Feat: a website root's `routes/`, `static/`, `layouts/`, and `components/` are now global defaults inherited by every app; an app-local file with the same relative path shadows only that file
