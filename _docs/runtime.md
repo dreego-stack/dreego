@@ -172,8 +172,10 @@ if err := app.RegisterStatic("/style.css", "text/css", []byte("body{color:red}")
 ```
 
 Generated automatically from the app's `<app>/static/` (for example
-`dreego/www/static/`) by `dreego generate`. MIME type detected from file
-extension.
+`dreego/www/static/`) by `dreego generate`. The MIME type comes from the Go
+standard library (`mime.TypeByExtension`); a small pinned set (fonts, icons,
+`css`/`js`/`svg`) overrides it, and an unknown extension falls back to
+`application/octet-stream`.
 
 ## main.go Pattern
 

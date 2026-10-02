@@ -15,6 +15,8 @@ func TestMimeByExt(t *testing.T) {
 		".json":  "application/json; charset=utf-8",
 		".woff2": "font/woff2",
 		".woff":  "font/woff",
+		".txt":   "text/plain; charset=utf-8",
+		".xml":   "text/xml; charset=utf-8",
 	}
 	for ext, want := range cases {
 		if got := MimeByExt(ext); got != want {
@@ -24,7 +26,7 @@ func TestMimeByExt(t *testing.T) {
 }
 
 func TestMimeByExtDefault(t *testing.T) {
-	for _, ext := range []string{".txt", ".md", ".bin", "", ".unknown"} {
+	for _, ext := range []string{"", ".unknown", ".not-a-real-extension"} {
 		if got := MimeByExt(ext); got != "application/octet-stream" {
 			t.Errorf("MimeByExt(%q) = %q, want application/octet-stream", ext, got)
 		}
@@ -32,7 +34,7 @@ func TestMimeByExtDefault(t *testing.T) {
 }
 
 func TestMimeByExtCaseInsensitive(t *testing.T) {
-	for _, ext := range []string{".CSS", ".Js", ".PNG", ".HTML", ".Woff2"} {
+	for _, ext := range []string{".CSS", ".Js", ".PNG", ".HTML", ".Woff2", ".TXT"} {
 		if got := MimeByExt(ext); got == "application/octet-stream" {
 			t.Errorf("MimeByExt(%q) returned default, expected case-insensitive match", ext)
 		}
