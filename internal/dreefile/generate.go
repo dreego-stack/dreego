@@ -146,6 +146,15 @@ func buildRootPlan(root websiteRoot, module string) (map[string]string, genStats
 		files[filepath.Join(pkgDir, "dree.go")] = withGeneratedMarker(relToRoot(".", pkgDir), compOut)
 	}
 
+	// A layout may reference a component that lives in the app-local
+	// components/ tree of the app using it. Layouts are generated here in the
+	// root pass, before the per-app component scan, so register every app's
+	// local components now. Each app pass still rescans its own tree to emit
+	// the component files.
+	if err := registerAppComponents(gen, root.dir, root.apps); err != nil {
+		return nil, genStats{}, err
+	}
+
 	layoutPkg := gen.Pkg
 	gen.Pkg = "layouts"
 	layoutSrcs, err := generateLayouts(gen, root.dir, allLayouts)
@@ -201,6 +210,18 @@ func buildRootPlan(root websiteRoot, module string) (map[string]string, genStats
 	}
 
 	return files, stats, nil
+}
+
+// registerAppComponents registers the app-local components of every app into
+// the shared generator so layout generation can resolve them. The returned
+// sources are discarded: each app pass regenerates its own component files.
+func registerAppComponents(gen *Generator, rootDir string, apps []appEntry) error {
+	for _, app := range apps {
+		if _, _, err := scanComponentsAt(gen, app.dir, rootDir, false); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // mergeComponentsByPkg merges extra package sources into a base map that is

@@ -14,6 +14,9 @@ may hold a `default.dreego`, a legacy `layout.dreego`, and any number of
 explicitly named layouts (for example `admin.dreego`) that a route selects by
 path.
 
+A layout may reference components from the shared root `components/` tree and
+from the app-local `components/` tree of the app that uses it.
+
 ## Layout Discovery
 
 Layout discovery is restricted to a website root identified by
