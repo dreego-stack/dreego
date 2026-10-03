@@ -3,6 +3,6 @@ module github.com/dreego-stack/dreego/core
 go 1.27
 
 require (
-	github.com/dreego-stack/dreego v0.11.2
+	github.com/dreego-stack/dreego v0.11.3
 	golang.org/x/text v0.22.0
 )

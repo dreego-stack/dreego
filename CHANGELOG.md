@@ -1,4 +1,8 @@
 
+## v0.11.3 - 2026-10-03
+
+- Fix: a layout can reference a component from its app's local `components/` tree instead of failing with `unknown component`
+
 ## v0.11.2 - 2026-10-02
 
 - Fix: serve static files with their standard MIME type from `mime.TypeByExtension` instead of `application/octet-stream`
