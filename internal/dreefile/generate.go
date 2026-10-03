@@ -149,8 +149,12 @@ func buildRootPlan(root websiteRoot, module string) (map[string]string, genStats
 	// A layout may reference a component that lives in the app-local
 	// components/ tree of the app using it. Layouts are generated here in the
 	// root pass, before the per-app component scan, so register every app's
-	// local components now. Each app pass still rescans its own tree to emit
-	// the component files.
+	// local components for layout resolution. The root-only set is restored
+	// afterwards so each app pass stays isolated (an app must not see a
+	// sibling's components).
+	rootDefs := maps.Clone(gen.Defs)
+	rootCompPkgs := maps.Clone(gen.CompPkgs)
+	rootCompPaths := maps.Clone(gen.CompPaths)
 	if err := registerAppComponents(gen, root.dir, root.apps); err != nil {
 		return nil, genStats{}, err
 	}
@@ -161,6 +165,9 @@ func buildRootPlan(root websiteRoot, module string) (map[string]string, genStats
 	if err != nil {
 		return nil, genStats{}, err
 	}
+	gen.Defs = rootDefs
+	gen.CompPkgs = rootCompPkgs
+	gen.CompPaths = rootCompPaths
 	if len(layoutSrcs) > 0 {
 		layoutDir := filepath.Join(root.dir, "layouts")
 		imports := gen.Imports["layouts"]

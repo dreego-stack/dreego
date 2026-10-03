@@ -39,3 +39,18 @@ func TestLayoutUsesAppLocalComponent(t *testing.T) {
 		t.Fatalf("app-local Header must be generated:\n%s", component)
 	}
 }
+
+// Registering app-local components for layout resolution must not leak them
+// across apps: a sibling app still cannot reference another app's component.
+func TestSiblingAppComponentStaysIsolated(t *testing.T) {
+	dir := writeTestProject(t, map[string]string{
+		"www/dreego.config.json":        "{}",
+		"www/a/components/OnlyA.dreego": "DREEFILE component ()\n<body><b>a</b></body>",
+		"www/a/routes/+page.dreego":     "<body><p>a</p></body>",
+		"www/b/routes/+page.dreego":     "<body><@OnlyA/></body>",
+	})
+
+	if err := runInDir(t, dir); err == nil {
+		t.Fatal("expected generation to fail: app b must not see app a's component")
+	}
+}
